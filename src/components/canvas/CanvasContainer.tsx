@@ -2,16 +2,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Block from './Block';
 import FloatingToolbar from './FloatingToolbar';
-import AIPanel from './AIPanel';
 import { createBlock, BlockType, Block as BlockModel, snapToGrid } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
-import { gsap } from 'gsap';
-import { Sparkles } from 'lucide-react';
 
 const CanvasContainer: React.FC = () => {
   const [blocks, setBlocks] = useState<BlockModel[]>([]);
   const [selectedBlockIds, setSelectedBlockIds] = useState<string[]>([]);
-  const [isAIPanelOpen, setIsAIPanelOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
@@ -203,69 +199,6 @@ const CanvasContainer: React.FC = () => {
     document.removeEventListener('mouseup', handleEndDrag);
   };
   
-  // Handle AI panel content insertion
-  const handleInsertContent = (content: string, type: 'text' | 'code' | 'image') => {
-    const canvasRect = canvasRef.current?.getBoundingClientRect();
-    const centerPos = {
-      x: ((canvasRect?.width ?? 600) / 2) - 150,
-      y: ((canvasRect?.height ?? 400) / 2) - 50
-    };
-    
-    const newBlock = createBlock(type, content, {
-      x: snapToGrid(centerPos.x),
-      y: snapToGrid(centerPos.y)
-    });
-    
-    setBlocks([...blocks, newBlock]);
-    setSelectedBlockIds([newBlock.id]);
-    
-    toast({
-      title: "Content Added",
-      description: "AI generated content has been added to the canvas.",
-      duration: 2000,
-    });
-  };
-  
-  // Simulate AI generation
-  const handleAIGenerate = () => {
-    // Show a loading effect
-    const loadingToast = toast({
-      title: "Generating Content",
-      description: (
-        <div className="flex items-center">
-          <Sparkles className="text-primary mr-2" size={16} />
-          <span>AI is analyzing your canvas...</span>
-        </div>
-      ),
-    });
-    
-    // Simulate AI thinking
-    setTimeout(() => {
-      // Add a suggestion/AI generated content
-      const aiSuggestions = [
-        "Here's a summary of your canvas content.",
-        "Based on your diagram, consider these next steps.",
-        "I've analyzed your flowchart and have some suggested improvements.",
-        "Your project plan looks good. Here are some additional considerations.",
-      ];
-      
-      // Create a new AI block
-      const newBlock = createBlock('text', aiSuggestions[Math.floor(Math.random() * aiSuggestions.length)], {
-        x: snapToGrid(Math.random() * 300 + 100),
-        y: snapToGrid(Math.random() * 200 + 100)
-      });
-      
-      setBlocks([...blocks, newBlock]);
-      
-      // Dismiss the loading toast
-      toast({
-        title: "Generation Complete",
-        description: "AI has added content to your canvas.",
-        duration: 2000,
-      });
-    }, 2000);
-  };
-  
   // Handle export
   const handleExport = () => {
     toast({
@@ -305,24 +238,8 @@ const CanvasContainer: React.FC = () => {
       {/* Floating toolbar */}
       <FloatingToolbar
         onAddBlock={addBlock}
-        onAIGenerate={handleAIGenerate}
         onExport={handleExport}
       />
-      
-      {/* AI assistant panel */}
-      <AIPanel
-        isOpen={isAIPanelOpen}
-        onClose={() => setIsAIPanelOpen(false)}
-        onInsertContent={handleInsertContent}
-      />
-      
-      {/* AI Toggle Button */}
-      <button
-        className="fixed bottom-6 right-6 glass-toolbar p-3 rounded-full shadow-lg z-30 flex items-center justify-center hover:bg-primary/10 transition-colors"
-        onClick={() => setIsAIPanelOpen(!isAIPanelOpen)}
-      >
-        <Sparkles size={24} className={`${isAIPanelOpen ? 'text-primary' : 'text-foreground/80'}`} />
-      </button>
     </div>
   );
 };
