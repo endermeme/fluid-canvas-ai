@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, BrainCircuit, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +21,6 @@ const ChatInterface = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
-  // Scroll to bottom when conversation updates
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation]);
@@ -30,17 +28,11 @@ const ChatInterface = () => {
   const handleSendMessage = () => {
     if (!message.trim()) return;
     
-    // Add user message to conversation
     const userMessage = { role: 'user' as const, message: message.trim(), timestamp: new Date() };
     setConversation(prev => [...prev, userMessage]);
-    
-    // Clear input field
     setMessage('');
-    
-    // Simulate AI response
     setIsLoading(true);
     
-    // Simulate response delay
     setTimeout(() => {
       const responses = [
         "I've analyzed your canvas. Would you like me to suggest connections between your ideas?",
@@ -59,7 +51,6 @@ const ChatInterface = () => {
       setConversation(prev => [...prev, aiMessage]);
       setIsLoading(false);
       
-      // Show a toast notification for new message
       toast({
         title: "New Message",
         description: "The AI assistant has responded to your query.",
@@ -68,7 +59,6 @@ const ChatInterface = () => {
     }, 1500);
   };
   
-  // Handle enter key to send message
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -81,8 +71,7 @@ const ChatInterface = () => {
   };
   
   return (
-    <div className="flex flex-col h-full">
-      {/* Chat header */}
+    <div className="flex flex-col h-full mt-12">
       <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/20">
         <div className="flex items-center">
           <BrainCircuit size={20} className="text-primary mr-2" />
@@ -90,7 +79,6 @@ const ChatInterface = () => {
         </div>
       </div>
       
-      {/* Conversation area */}
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {conversation.map((item, index) => (
           <div 
@@ -127,7 +115,6 @@ const ChatInterface = () => {
         <div ref={messagesEndRef} />
       </div>
       
-      {/* Message input */}
       <div className="p-3 border-t border-border">
         <div className="relative">
           <textarea
