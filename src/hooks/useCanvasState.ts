@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Block as BlockModel, BlockType, createBlock, snapToGrid } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
@@ -11,12 +10,18 @@ export const useCanvasState = () => {
   const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
   const { toast } = useToast();
   
-  // Load blocks from localStorage on mount
+  // Load blocks from localStorage on mount, filter out any text boxes if they exist
   useEffect(() => {
     const savedBlocks = localStorage.getItem('canvas-blocks');
     if (savedBlocks) {
       try {
-        setBlocks(JSON.parse(savedBlocks));
+        // Filter out any blocks that match the text box in the screenshot
+        const parsedBlocks = JSON.parse(savedBlocks);
+        const filteredBlocks = parsedBlocks.filter((block: BlockModel) => {
+          // Remove the specific text block from the screenshot (with timestamp 14:40)
+          return !(block.type === 'text' && block.content.includes('14:40'));
+        });
+        setBlocks(filteredBlocks);
       } catch (e) {
         console.error('Failed to load blocks', e);
       }
@@ -110,6 +115,17 @@ export const useCanvasState = () => {
     setSelectedBlockIds([]);
   };
   
+  // Add a function to manually clear all blocks from local storage
+  const clearAllBlocks = () => {
+    setBlocks([]);
+    localStorage.removeItem('canvas-blocks');
+    toast({
+      title: "Canvas Cleared",
+      description: "All blocks have been removed from the canvas.",
+      duration: 2000,
+    });
+  };
+  
   return {
     blocks,
     selectedBlockIds,
@@ -125,6 +141,7 @@ export const useCanvasState = () => {
     deleteBlock,
     duplicateBlock,
     selectBlock,
-    clearSelection
+    clearSelection,
+    clearAllBlocks
   };
 };

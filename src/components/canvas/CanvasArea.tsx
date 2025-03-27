@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import Block from './Block';
 import { Block as BlockModel } from '@/lib/block-utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
