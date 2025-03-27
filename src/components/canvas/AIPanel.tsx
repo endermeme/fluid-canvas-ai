@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, X, Sparkles, BrainCircuit } from 'lucide-react';
 import { animateAIPanelSlideIn, animateAIPanelSlideOut } from '@/lib/animations';
-import { Block } from '@/lib/block-utils';
+import { Block, BlockType } from '@/lib/block-utils';
 
 interface AIPanelProps {
   isOpen: boolean;
@@ -51,21 +51,56 @@ const AIPanel: React.FC<AIPanelProps> = ({
     // Clear input field
     setMessage('');
     
+    // Check if the message is a creation request
+    const lowerMessage = message.toLowerCase().trim();
+    const isCreationRequest = 
+      lowerMessage.includes('create') || 
+      lowerMessage.includes('add') || 
+      lowerMessage.includes('make') ||
+      lowerMessage.includes('generate');
+    
     // Simulate response delay
     setTimeout(() => {
-      const responses = [
-        "I've analyzed your canvas. Would you like me to suggest connections between your ideas?",
-        "Based on your content, you might want to consider adding a section about implementation details.",
-        "Your diagram looks great! I can help generate content for any of these blocks if you'd like.",
-        "I notice you're working on a flow chart. Would you like me to suggest any missing steps?",
-        "I can generate a code snippet based on the concepts you've outlined. Would that be helpful?",
-      ];
+      let aiResponse;
+      
+      if (isCreationRequest) {
+        // Determine what type of content to insert based on the message
+        let contentType: 'text' | 'code' | 'image' = 'text';
+        let content = '';
+        
+        if (lowerMessage.includes('code') || lowerMessage.includes('script')) {
+          contentType = 'code';
+          content = `// Generated from: "${message}"\n\nfunction example() {\n  console.log("Hello from AI!");\n}`;
+          aiResponse = "I've created a code block based on your request.";
+        } else if (lowerMessage.includes('image') || lowerMessage.includes('picture')) {
+          contentType = 'image';
+          content = 'https://source.unsplash.com/random/300x200';
+          aiResponse = "I've added an image for you.";
+        } else {
+          contentType = 'text';
+          content = `Content generated from: "${message}"`;
+          aiResponse = "I've created a text block for you.";
+        }
+        
+        // Insert the content into the canvas
+        onInsertContent(content, contentType);
+      } else {
+        const responses = [
+          "I've analyzed your canvas. Would you like me to suggest connections between your ideas?",
+          "Based on your content, you might want to consider adding a section about implementation details.",
+          "Your diagram looks great! I can help generate content for any of these blocks if you'd like.",
+          "I notice you're working on a flow chart. Would you like me to suggest any missing steps?",
+          "I can generate a code snippet based on the concepts you've outlined. Would that be helpful?",
+        ];
+        
+        aiResponse = responses[Math.floor(Math.random() * responses.length)];
+      }
       
       setConversation(prev => [
         ...prev, 
         { 
           role: 'ai', 
-          message: responses[Math.floor(Math.random() * responses.length)] 
+          message: aiResponse
         }
       ]);
       setIsLoading(false);

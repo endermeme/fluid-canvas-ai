@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Block as BlockModel, BlockType, createBlock, snapToGrid } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
@@ -35,7 +36,7 @@ export const useCanvasState = () => {
     }
   }, [blocks]);
   
-  const addBlock = (type: BlockType, position?: { x: number; y: number }, canvasRect?: DOMRect) => {
+  const addBlock = (type: BlockType, position?: { x: number; y: number }, canvasRect?: DOMRect, content?: string) => {
     const defaultPos = {
       x: (canvasRect?.width ?? 600) / 2 - 150,
       y: (canvasRect?.height ?? 400) / 2 - 50
@@ -43,7 +44,7 @@ export const useCanvasState = () => {
     
     const newPos = position || defaultPos;
     
-    const newBlock = createBlock(type, '', {
+    const newBlock = createBlock(type, content || '', {
       x: snapToGrid(newPos.x),
       y: snapToGrid(newPos.y)
     });
@@ -56,6 +57,8 @@ export const useCanvasState = () => {
       description: `New ${type} block created.`,
       duration: 2000,
     });
+
+    return newBlock.id; // Return the ID so we can reference it later if needed
   };
   
   const updateBlock = (id: string, updates: Partial<BlockModel>) => {

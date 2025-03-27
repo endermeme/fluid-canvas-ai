@@ -1,7 +1,9 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, BrainCircuit, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { BlockType } from '@/lib/block-utils';
 
 interface Message {
   role: 'user' | 'ai';
@@ -9,7 +11,11 @@ interface Message {
   timestamp: Date;
 }
 
-const ChatInterface = () => {
+interface ChatInterfaceProps {
+  onCreateBlock?: (type: BlockType, content: string) => void;
+}
+
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock }) => {
   const [message, setMessage] = useState('');
   const [conversation, setConversation] = useState<Message[]>([
     { 
@@ -34,18 +40,60 @@ const ChatInterface = () => {
     setMessage('');
     setIsLoading(true);
     
+    // Process the message for AI commands
+    const lowerMessage = message.toLowerCase().trim();
+    const isCreationRequest = 
+      lowerMessage.includes('create') || 
+      lowerMessage.includes('add') || 
+      lowerMessage.includes('make') ||
+      lowerMessage.includes('generate');
+      
     setTimeout(() => {
-      const responses = [
-        "I've analyzed your canvas. Would you like me to suggest connections between your ideas?",
-        "Based on your content, you might want to consider adding a section about implementation details.",
-        "Your diagram looks great! I can help generate content for any of these blocks if you'd like.",
-        "I notice you're working on a flow chart. Would you like me to suggest any missing steps?",
-        "I can generate a code snippet based on the concepts you've outlined. Would that be helpful?",
-      ];
+      let aiResponse = '';
+      
+      if (isCreationRequest) {
+        // Determine what type of block to create based on the message
+        let blockType: BlockType = 'text';
+        let content = '';
+        
+        if (lowerMessage.includes('code') || lowerMessage.includes('script') || lowerMessage.includes('programming')) {
+          blockType = 'code';
+          content = generateCodeContent(message);
+          aiResponse = "I've created a code block for you based on your request.";
+        } else if (lowerMessage.includes('image') || lowerMessage.includes('picture') || lowerMessage.includes('photo')) {
+          blockType = 'image';
+          content = 'https://source.unsplash.com/random/300x200';
+          aiResponse = "I've added an image placeholder. In a real implementation, this would generate an actual image.";
+        } else if (lowerMessage.includes('note') || lowerMessage.includes('sticky')) {
+          blockType = 'sticky';
+          content = extractContentFromMessage(message);
+          aiResponse = "I've created a sticky note with your content.";
+        } else {
+          // Default to text
+          content = extractContentFromMessage(message);
+          aiResponse = "I've created a text block with your content.";
+        }
+        
+        // Call the block creation function if provided
+        if (onCreateBlock) {
+          onCreateBlock(blockType, content);
+        }
+      } else {
+        // Standard responses for non-creation requests
+        const responses = [
+          "I've analyzed your canvas. Would you like me to suggest connections between your ideas?",
+          "Based on your content, you might want to consider adding a section about implementation details.",
+          "Your diagram looks great! I can help generate content for any of these blocks if you'd like.",
+          "I notice you're working on a flow chart. Would you like me to suggest any missing steps?",
+          "I can generate a code snippet based on the concepts you've outlined. Would that be helpful?",
+        ];
+        
+        aiResponse = responses[Math.floor(Math.random() * responses.length)];
+      }
       
       const aiMessage = {
         role: 'ai' as const, 
-        message: responses[Math.floor(Math.random() * responses.length)],
+        message: aiResponse,
         timestamp: new Date()
       };
       
@@ -58,6 +106,52 @@ const ChatInterface = () => {
         duration: 3000,
       });
     }, 1500);
+  };
+  
+  // Helper function to extract content from the message
+  const extractContentFromMessage = (message: string): string => {
+    // Basic content extraction - in a real implementation this would be more sophisticated
+    const contentParts = message.split('with content');
+    if (contentParts.length > 1) {
+      return contentParts[1].trim().replace(/^['":]/, '').trim();
+    }
+    
+    // If no explicit content marker, just use the message without the command words
+    return message.replace(/create|add|make|generate|text|block|note|sticky/gi, '').trim();
+  };
+  
+  // Helper function to generate code content
+  const generateCodeContent = (message: string): string => {
+    // Simple code generation based on keywords in the message
+    if (message.toLowerCase().includes('javascript') || message.toLowerCase().includes('js')) {
+      return `// JavaScript example
+function greet(name) {
+  return \`Hello, \${name}!\`;
+}
+
+console.log(greet('World'));`;
+    } else if (message.toLowerCase().includes('react')) {
+      return `// React component example
+import React from 'react';
+
+const ExampleComponent = ({ title }) => {
+  return (
+    <div className="example">
+      <h2>{title}</h2>
+      <p>This is an example React component.</p>
+    </div>
+  );
+};
+
+export default ExampleComponent;`;
+    } else {
+      return `// Code example
+function example() {
+  // This is a placeholder code block
+  // Replace with your actual code
+  return "Hello from the AI assistant!";
+}`;
+    }
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
