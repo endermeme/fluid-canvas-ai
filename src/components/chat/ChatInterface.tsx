@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, BrainCircuit, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Message {
   role: 'user' | 'ai';
@@ -79,41 +80,43 @@ const ChatInterface = () => {
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-3 space-y-3">
-        {conversation.map((item, index) => (
-          <div 
-            key={index} 
-            className={`flex flex-col ${item.role === 'user' ? 'items-end' : 'items-start'}`}
-          >
+      <ScrollArea className="flex-1">
+        <div className="p-3 space-y-3">
+          {conversation.map((item, index) => (
             <div 
-              className={`p-3 max-w-[85%] rounded-lg ${
-                item.role === 'user' 
-                  ? 'bg-primary/10 rounded-tr-none' 
-                  : 'bg-secondary/70 rounded-tl-none'
-              }`}
+              key={index} 
+              className={`flex flex-col ${item.role === 'user' ? 'items-end' : 'items-start'}`}
             >
-              <p className="text-sm">{item.message}</p>
+              <div 
+                className={`p-3 max-w-[85%] rounded-lg ${
+                  item.role === 'user' 
+                    ? 'bg-primary/10 rounded-tr-none' 
+                    : 'bg-secondary/70 rounded-tl-none'
+                }`}
+              >
+                <p className="text-sm">{item.message}</p>
+              </div>
+              <span className="text-xs text-muted-foreground mt-1">
+                {formatTime(item.timestamp)}
+              </span>
             </div>
-            <span className="text-xs text-muted-foreground mt-1">
-              {formatTime(item.timestamp)}
-            </span>
-          </div>
-        ))}
-        
-        {isLoading && (
-          <div className="flex items-start">
-            <div className="p-3 bg-secondary/70 rounded-lg rounded-tl-none flex items-center">
-              <div className="typing-indicator">
-                <span style={{ '--dot-index': '0' } as React.CSSProperties}></span>
-                <span style={{ '--dot-index': '1' } as React.CSSProperties}></span>
-                <span style={{ '--dot-index': '2' } as React.CSSProperties}></span>
+          ))}
+          
+          {isLoading && (
+            <div className="flex items-start">
+              <div className="p-3 bg-secondary/70 rounded-lg rounded-tl-none flex items-center">
+                <div className="typing-indicator">
+                  <span style={{ '--dot-index': '0' } as React.CSSProperties}></span>
+                  <span style={{ '--dot-index': '1' } as React.CSSProperties}></span>
+                  <span style={{ '--dot-index': '2' } as React.CSSProperties}></span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-        
-        <div ref={messagesEndRef} />
-      </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+      </ScrollArea>
       
       <div className="p-3 border-t border-border">
         <div className="relative">

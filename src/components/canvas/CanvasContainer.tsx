@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import Block from './Block';
 import FloatingToolbar from './FloatingToolbar';
 import { createBlock, BlockType, Block as BlockModel, snapToGrid } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const CanvasContainer: React.FC = () => {
   const [blocks, setBlocks] = useState<BlockModel[]>([]);
@@ -14,7 +14,6 @@ const CanvasContainer: React.FC = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
-  // Load saved blocks from localStorage (in a real app, this would be from a database)
   useEffect(() => {
     const savedBlocks = localStorage.getItem('canvas-blocks');
     if (savedBlocks) {
@@ -26,16 +25,13 @@ const CanvasContainer: React.FC = () => {
     }
   }, []);
   
-  // Save blocks to localStorage when they change
   useEffect(() => {
     if (blocks.length > 0) {
       localStorage.setItem('canvas-blocks', JSON.stringify(blocks));
     }
   }, [blocks]);
   
-  // Add a new block to the canvas
   const addBlock = (type: BlockType, position?: { x: number; y: number }) => {
-    // Center the new block in the viewport if no position provided
     const canvasRect = canvasRef.current?.getBoundingClientRect();
     const defaultPos = {
       x: (canvasRect?.width ?? 600) / 2 - 150,
@@ -44,19 +40,14 @@ const CanvasContainer: React.FC = () => {
     
     const newPos = position || defaultPos;
     
-    // Create the new block
     const newBlock = createBlock(type, '', {
       x: snapToGrid(newPos.x),
       y: snapToGrid(newPos.y)
     });
     
-    // Add it to the blocks array
     setBlocks([...blocks, newBlock]);
-    
-    // Select the new block
     setSelectedBlockIds([newBlock.id]);
     
-    // Show a toast notification
     toast({
       title: "Block Added",
       description: `New ${type} block created.`,
@@ -64,14 +55,12 @@ const CanvasContainer: React.FC = () => {
     });
   };
   
-  // Update a block
   const updateBlock = (id: string, updates: Partial<BlockModel>) => {
     setBlocks(blocks.map(block => 
       block.id === id ? { ...block, ...updates } : block
     ));
   };
   
-  // Delete a block
   const deleteBlock = (id: string) => {
     setBlocks(blocks.filter(block => block.id !== id));
     setSelectedBlockIds(selectedBlockIds.filter(blockId => blockId !== id));
@@ -83,7 +72,6 @@ const CanvasContainer: React.FC = () => {
     });
   };
   
-  // Duplicate a block
   const duplicateBlock = (id: string) => {
     const blockToDuplicate = blocks.find(block => block.id === id);
     if (!blockToDuplicate) return;
@@ -108,28 +96,22 @@ const CanvasContainer: React.FC = () => {
     });
   };
   
-  // Select a block
   const selectBlock = (id: string, multiSelect = false) => {
     if (multiSelect) {
-      // If already selected, deselect it
       if (selectedBlockIds.includes(id)) {
         setSelectedBlockIds(selectedBlockIds.filter(blockId => blockId !== id));
       } else {
-        // Add to selection
         setSelectedBlockIds([...selectedBlockIds, id]);
       }
     } else {
-      // Select only this block
       setSelectedBlockIds([id]);
     }
   };
   
-  // Clear selection when clicking on the canvas
   const handleCanvasClick = () => {
     setSelectedBlockIds([]);
   };
   
-  // Start dragging a block
   const handleStartDrag = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
@@ -138,24 +120,20 @@ const CanvasContainer: React.FC = () => {
     setDraggedBlockId(id);
     setDragStartPos({ x: e.clientX, y: e.clientY });
     
-    // Also select the block if it's not already selected
     if (!selectedBlockIds.includes(id)) {
       selectBlock(id, e.shiftKey);
     }
     
-    // Add event listeners for mouse move and up
     document.addEventListener('mousemove', handleDrag);
     document.addEventListener('mouseup', handleEndDrag);
   };
   
-  // Handle dragging
   const handleDrag = (e: MouseEvent) => {
     if (!isDragging || !draggedBlockId) return;
     
     const dx = e.clientX - dragStartPos.x;
     const dy = e.clientY - dragStartPos.y;
     
-    // Move all selected blocks
     setBlocks(blocks.map(block => {
       if (selectedBlockIds.includes(block.id)) {
         return {
@@ -170,16 +148,13 @@ const CanvasContainer: React.FC = () => {
       return block;
     }));
     
-    // Update drag start position
     setDragStartPos({ x: e.clientX, y: e.clientY });
   };
   
-  // End dragging
   const handleEndDrag = () => {
     setIsDragging(false);
     setDraggedBlockId(null);
     
-    // Snap all selected blocks to grid
     setBlocks(blocks.map(block => {
       if (selectedBlockIds.includes(block.id)) {
         return {
@@ -194,12 +169,10 @@ const CanvasContainer: React.FC = () => {
       return block;
     }));
     
-    // Remove event listeners
     document.removeEventListener('mousemove', handleDrag);
     document.removeEventListener('mouseup', handleEndDrag);
   };
   
-  // Handle export
   const handleExport = () => {
     toast({
       title: "Canvas Exported",
@@ -212,30 +185,29 @@ const CanvasContainer: React.FC = () => {
   
   return (
     <div className="relative w-full h-full flex flex-col overflow-hidden">
-      {/* Main canvas */}
-      <div
-        ref={canvasRef}
-        className="flex-1 overflow-auto canvas-grid bg-gradient-canvas"
-        onClick={handleCanvasClick}
-      >
-        <div className="relative w-[3000px] h-[2000px]">
-          {/* Render all blocks */}
-          {blocks.map(block => (
-            <Block
-              key={block.id}
-              block={block}
-              isSelected={selectedBlockIds.includes(block.id)}
-              onSelect={selectBlock}
-              onUpdate={updateBlock}
-              onDelete={deleteBlock}
-              onDuplicate={duplicateBlock}
-              onStartDrag={handleStartDrag}
-            />
-          ))}
+      <ScrollArea className="flex-1 w-full h-full">
+        <div
+          ref={canvasRef}
+          className="canvas-grid bg-gradient-canvas"
+          onClick={handleCanvasClick}
+        >
+          <div className="relative w-[3000px] h-[2000px]">
+            {blocks.map(block => (
+              <Block
+                key={block.id}
+                block={block}
+                isSelected={selectedBlockIds.includes(block.id)}
+                onSelect={selectBlock}
+                onUpdate={updateBlock}
+                onDelete={deleteBlock}
+                onDuplicate={duplicateBlock}
+                onStartDrag={handleStartDrag}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      </ScrollArea>
       
-      {/* Floating toolbar */}
       <FloatingToolbar
         onAddBlock={addBlock}
         onExport={handleExport}
