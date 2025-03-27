@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, BrainCircuit, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -40,7 +39,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock }) => {
     setMessage('');
     setIsLoading(true);
     
-    // Process the message for AI commands
     const lowerMessage = message.toLowerCase().trim();
     const isCreationRequest = 
       lowerMessage.includes('create') || 
@@ -52,7 +50,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock }) => {
       let aiResponse = '';
       
       if (isCreationRequest) {
-        // Determine what type of block to create based on the message
         let blockType: BlockType = 'text';
         let content = '';
         
@@ -69,17 +66,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock }) => {
           content = extractContentFromMessage(message);
           aiResponse = "I've created a sticky note with your content.";
         } else {
-          // Default to text
           content = extractContentFromMessage(message);
           aiResponse = "I've created a text block with your content.";
         }
         
-        // Call the block creation function if provided
         if (onCreateBlock) {
           onCreateBlock(blockType, content);
         }
       } else {
-        // Standard responses for non-creation requests
         const responses = [
           "I've analyzed your canvas. Would you like me to suggest connections between your ideas?",
           "Based on your content, you might want to consider adding a section about implementation details.",
@@ -108,21 +102,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock }) => {
     }, 1500);
   };
   
-  // Helper function to extract content from the message
   const extractContentFromMessage = (message: string): string => {
-    // Basic content extraction - in a real implementation this would be more sophisticated
     const contentParts = message.split('with content');
     if (contentParts.length > 1) {
       return contentParts[1].trim().replace(/^['":]/, '').trim();
     }
     
-    // If no explicit content marker, just use the message without the command words
     return message.replace(/create|add|make|generate|text|block|note|sticky/gi, '').trim();
   };
   
-  // Helper function to generate code content
   const generateCodeContent = (message: string): string => {
-    // Simple code generation based on keywords in the message
     if (message.toLowerCase().includes('javascript') || message.toLowerCase().includes('js')) {
       return `// JavaScript example
 function greet(name) {
@@ -166,7 +155,7 @@ function example() {
   };
   
   return (
-    <div className="flex flex-col h-full mt-12">
+    <div className="flex flex-col h-full">
       <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/20">
         <div className="flex items-center">
           <BrainCircuit size={20} className="text-primary mr-2" />
