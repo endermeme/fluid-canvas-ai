@@ -11,8 +11,8 @@ const Index = () => {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex flex-col w-full">
-        {/* Header */}
-        <header className="flex items-center justify-between p-4 border-b border-border glass-morphism z-10">
+        {/* Header - increased z-index to ensure it stays on top */}
+        <header className="flex items-center justify-between p-4 border-b border-border glass-morphism z-50">
           <div className="flex items-center">
             <h1 className="text-2xl font-light tracking-tight flex items-center">
               <span className="text-primary font-medium mr-1">CES</span>
