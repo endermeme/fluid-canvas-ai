@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, BrainCircuit, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +21,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   const [conversation, setConversation] = useState<Message[]>([
     { 
       role: 'ai', 
-      message: 'Hi there! I\'m your AI assistant. How can I help with your canvas today?', 
+      message: 'Hi there! I\'m your AI assistant. How can I help with your quiz today?', 
       timestamp: new Date() 
     }
   ]);
@@ -44,21 +43,25 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     
     const lowerMessage = message.toLowerCase().trim();
     
-    // Check if this is a quiz request
+    // Check if this is a quiz request - improved detection
     const isQuizRequest = 
       lowerMessage.includes('quiz') || 
       lowerMessage.includes('test') || 
       lowerMessage.includes('questions') ||
-      lowerMessage.includes('trivia');
+      lowerMessage.includes('trivia') ||
+      lowerMessage.includes('trắc nghiệm') ||
+      lowerMessage.includes('câu hỏi') ||
+      lowerMessage.includes('tạo') ||
+      lowerMessage.includes('generate');
       
     setTimeout(() => {
       let aiResponse = '';
       
-      if (isQuizRequest) {
+      if (isQuizRequest || lowerMessage.length > 15) {
         aiResponse = "I'm generating a quiz based on your request. Please wait a moment...";
         
-        // Extract topic from the message
-        const topic = extractTopicFromMessage(message);
+        // Extract topic from the message - use the entire message as topic
+        const topic = message.trim();
         
         // Trigger quiz generation
         if (onQuizRequest) {
@@ -66,8 +69,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
         }
       } else if (lowerMessage.includes('create') || 
                 lowerMessage.includes('add') || 
-                lowerMessage.includes('make') ||
-                lowerMessage.includes('generate')) {
+                lowerMessage.includes('make')) {
         // Handle other creation requests
         let blockType: BlockType = 'text';
         let content = '';
@@ -93,15 +95,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
           onCreateBlock(blockType, content);
         }
       } else {
-        const responses = [
-          "I've analyzed your canvas. Would you like me to suggest connections between your ideas?",
-          "Based on your content, you might want to consider adding a section about implementation details.",
-          "Your diagram looks great! I can help generate content for any of these blocks if you'd like.",
-          "I notice you're working on a flow chart. Would you like me to suggest any missing steps?",
-          "I can generate a code snippet based on the concepts you've outlined. Would that be helpful?",
-        ];
-        
-        aiResponse = responses[Math.floor(Math.random() * responses.length)];
+        aiResponse = "Type any topic or content to generate a quiz about it. For example, 'Create a quiz about World War II' or 'Generate questions about renewable energy'.";
       }
       
       const aiMessage = {
@@ -112,13 +106,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
       
       setConversation(prev => [...prev, aiMessage]);
       setIsLoading(false);
-      
-      toast({
-        title: "New Message",
-        description: "The AI assistant has responded to your query.",
-        duration: 3000,
-      });
-    }, 1500);
+    }, 500);
   };
   
   const extractTopicFromMessage = (message: string): string => {
@@ -239,7 +227,7 @@ function example() {
         <div className="relative">
           <textarea
             className="w-full p-2 pr-10 bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-sm"
-            placeholder="Ask the AI assistant..."
+            placeholder="Ask about any topic to generate a quiz..."
             rows={2}
             value={message}
             onChange={(e) => setMessage(e.target.value)}

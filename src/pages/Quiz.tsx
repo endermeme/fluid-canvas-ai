@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,11 +9,18 @@ import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { Link } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
   const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
   const { addBlock } = useCanvasState();
+  const { toast } = useToast();
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    document.title = 'AI Quiz Generator';
+  }, []);
 
   const handleCreateFromPrompt = (type: BlockType, content: string) => {
     const canvasElement = document.querySelector('.canvas-grid');
@@ -32,20 +39,44 @@ const Quiz = () => {
   };
 
   const handleStartQuiz = () => {
-    if (quizGeneratorRef.current && topic.trim()) {
-      quizGeneratorRef.current.generateQuiz(topic);
+    if (!topic.trim()) {
+      toast({
+        title: "Topic Required",
+        description: "Please enter a topic to generate quiz questions",
+        variant: "destructive",
+      });
+      return;
     }
+    
+    setIsGenerating(true);
+    
+    setTimeout(() => {
+      if (quizGeneratorRef.current) {
+        quizGeneratorRef.current.generateQuiz(topic);
+      }
+      setIsGenerating(false);
+    }, 100);
   };
 
   const handleQuizRequest = (requestedTopic: string) => {
-    const topicToUse = requestedTopic || 'General Knowledge';
-    setTopic(topicToUse);
+    if (!requestedTopic.trim()) {
+      toast({
+        title: "Topic Required",
+        description: "Please provide a topic for the quiz",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setTopic(requestedTopic);
+    setIsGenerating(true);
     
     // Short delay to ensure the ref is ready
     setTimeout(() => {
       if (quizGeneratorRef.current) {
-        quizGeneratorRef.current.generateQuiz(topicToUse);
+        quizGeneratorRef.current.generateQuiz(requestedTopic);
       }
+      setIsGenerating(false);
     }, 100);
   };
 
@@ -87,7 +118,12 @@ const Quiz = () => {
                         placeholder="Enter a topic or context for quiz generation..."
                         className="flex-1"
                       />
-                      <Button onClick={handleStartQuiz}>Generate Quiz</Button>
+                      <Button 
+                        onClick={handleStartQuiz} 
+                        disabled={isGenerating}
+                      >
+                        {isGenerating ? 'Generating...' : 'Generate Quiz'}
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>

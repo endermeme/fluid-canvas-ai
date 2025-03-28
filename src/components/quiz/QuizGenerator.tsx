@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Check, X, ArrowRight } from 'lucide-react';
+import { Check, X, ArrowRight, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 
@@ -30,6 +30,7 @@ class GeminiQuizGenerator {
 
   async generateQuizFromContext(userMessage: string): Promise<QuizQuestion[] | null> {
     try {
+      console.log("Generating quiz for topic:", userMessage);
       const response = await axios.post(`${this.GEMINI_API_URL}?key=${this.apiKey}`, {
         contents: [{
           parts: [{
@@ -54,6 +55,13 @@ Correct Answer: [A/B/C/D]`
         }]
       });
 
+      if (!response.data || !response.data.candidates || !response.data.candidates[0] || 
+          !response.data.candidates[0].content || !response.data.candidates[0].content.parts || 
+          !response.data.candidates[0].content.parts[0].text) {
+        console.error("Invalid response structure:", response.data);
+        return null;
+      }
+
       return this.parseQuizResponse(response.data);
     } catch (error) {
       console.error('Quiz Generation Error:', error);
@@ -62,24 +70,52 @@ Correct Answer: [A/B/C/D]`
   }
 
   parseQuizResponse(response: any): QuizQuestion[] {
-    const rawText = response.candidates[0].content.parts[0].text;
-    
-    // Parse questions from the response
-    const questions = rawText.split('Question:').slice(1).map(questionBlock => {
-      const lines = questionBlock.trim().split('\n');
-      return {
-        question: lines[0].trim(),
-        options: [
-          lines[1].replace('A. ', '').trim(),
-          lines[2].replace('B. ', '').trim(),
-          lines[3].replace('C. ', '').trim(),
-          lines[4].replace('D. ', '').trim()
-        ],
-        correctAnswer: lines[5].replace('Correct Answer: ', '').trim()
-      };
-    });
-
-    return questions;
+    try {
+      const rawText = response.candidates[0].content.parts[0].text;
+      console.log("Raw quiz response:", rawText);
+      
+      // Parse questions from the response
+      const questions: QuizQuestion[] = [];
+      const questionBlocks = rawText.split('Question:').filter(block => block.trim().length > 0);
+      
+      for (const questionBlock of questionBlocks) {
+        const lines = questionBlock.trim().split('\n').filter(line => line.trim().length > 0);
+        
+        if (lines.length < 6) {
+          console.warn("Skipping malformed question block:", questionBlock);
+          continue;
+        }
+        
+        const optionLines = lines.slice(1, 5);
+        const options = optionLines.map(line => {
+          const optionText = line.replace(/^[A-D]\.\s*/, '').trim();
+          return optionText;
+        });
+        
+        // Find correct answer line
+        const correctAnswerLine = lines.find(line => line.includes('Correct Answer:'));
+        let correctAnswer = 'A'; // Default to A if not found
+        
+        if (correctAnswerLine) {
+          const match = correctAnswerLine.match(/Correct Answer:\s*([A-D])/);
+          if (match && match[1]) {
+            correctAnswer = match[1];
+          }
+        }
+        
+        questions.push({
+          question: lines[0].trim(),
+          options,
+          correctAnswer
+        });
+      }
+      
+      console.log("Parsed questions:", questions);
+      return questions;
+    } catch (error) {
+      console.error("Error parsing quiz response:", error);
+      return [];
+    }
   }
 }
 
@@ -114,6 +150,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     setIsAnswered(false);
     setSelectedAnswer(null);
     setCurrentQuestionIndex(0);
+    setQuizQuestions([]);
 
     try {      
       const questions = await quizGenerator.generateQuizFromContext(context);
@@ -129,10 +166,10 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
       }
     } catch (error) {
       console.error('Quiz Generation Error:', error);
-      setErrorMessage('Failed to generate quiz. Please try again later.');
+      setErrorMessage('Failed to generate quiz. Please try again or use a different topic.');
       toast({
         title: "Quiz Error",
-        description: "There was a problem generating the quiz.",
+        description: "There was a problem generating the quiz. Please try again with a different topic.",
         variant: "destructive",
       });
     } finally {
@@ -190,13 +227,18 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     generateQuiz(userInput);
   };
 
+  const handleTryAgain = () => {
+    setErrorMessage(null);
+    generateQuiz(userInput);
+  };
+
   // Current question
   const currentQuestion = quizQuestions[currentQuestionIndex];
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
-        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
         <p>Generating quiz based on your input...</p>
       </div>
     );
@@ -209,7 +251,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
           <X size={36} />
         </div>
         <p>{errorMessage}</p>
-        <Button onClick={handleGenerateQuiz}>Try Again</Button>
+        <Button onClick={handleTryAgain}>Try Again</Button>
       </div>
     );
   }
