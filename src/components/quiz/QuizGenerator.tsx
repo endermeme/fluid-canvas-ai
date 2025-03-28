@@ -1,12 +1,11 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Check, X, ArrowRight, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const GEMINI_API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
+const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
 interface QuizQuestion {
   question: string;
@@ -19,22 +18,20 @@ interface QuizGeneratorProps {
   onQuizComplete?: () => void;
 }
 
-class GeminiQuizGenerator {
-  private apiKey: string;
-  private GEMINI_API_URL: string;
+class AIQuizGenerator {
+  private genAI: GoogleGenerativeAI;
+  private model: any;
 
   constructor(apiKey: string) {
-    this.apiKey = apiKey;
-    this.GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+    this.genAI = new GoogleGenerativeAI(apiKey);
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   }
 
   async generateQuizFromContext(userMessage: string): Promise<QuizQuestion[] | null> {
     try {
       console.log("Generating quiz for topic:", userMessage);
-      const response = await axios.post(`${this.GEMINI_API_URL}?key=${this.apiKey}`, {
-        contents: [{
-          parts: [{
-            text: `Based on the following context, create an interactive multiple-choice quiz:
+      
+      const prompt = `Based on the following context, create an interactive multiple-choice quiz:
 
 Context: ${userMessage}
 
@@ -50,29 +47,23 @@ A. [Option 1]
 B. [Option 2]
 C. [Option 3]
 D. [Option 4]
-Correct Answer: [A/B/C/D]`
-          }]
-        }]
-      });
+Correct Answer: [A/B/C/D]`;
 
-      if (!response.data || !response.data.candidates || !response.data.candidates[0] || 
-          !response.data.candidates[0].content || !response.data.candidates[0].content.parts || 
-          !response.data.candidates[0].content.parts[0].text) {
-        console.error("Invalid response structure:", response.data);
-        return null;
-      }
-
-      return this.parseQuizResponse(response.data);
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      console.log("Raw quiz response:", text);
+      return this.parseQuizResponse(text);
     } catch (error) {
       console.error('Quiz Generation Error:', error);
       return null;
     }
   }
 
-  parseQuizResponse(response: any): QuizQuestion[] {
+  parseQuizResponse(rawText: string): QuizQuestion[] {
     try {
-      const rawText = response.candidates[0].content.parts[0].text;
-      console.log("Raw quiz response:", rawText);
+      console.log("Parsing quiz response:", rawText);
       
       // Parse questions from the response
       const questions: QuizQuestion[] = [];
@@ -131,9 +122,8 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [userInput, setUserInput] = useState(topic);
   const { toast } = useToast();
-  const [quizGenerator] = useState<GeminiQuizGenerator>(new GeminiQuizGenerator(GEMINI_API_KEY));
+  const [quizGenerator] = useState<AIQuizGenerator>(new AIQuizGenerator(API_KEY));
 
-  // Expose the generateQuiz method to parent components via ref
   useImperativeHandle(ref, () => ({
     generateQuiz: (topic: string) => {
       generateQuiz(topic);
@@ -180,7 +170,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
   const handleOptionSelect = (optionIndex: number) => {
     if (isAnswered) return;
     
-    // Convert index to letter (0 -> 'A', 1 -> 'B', etc.)
     const optionLetter = String.fromCharCode(65 + optionIndex);
     setSelectedAnswer(optionLetter);
   };
@@ -212,7 +201,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
       setSelectedAnswer(null);
       setIsAnswered(false);
     } else {
-      // Quiz is complete
       if (onQuizComplete) {
         onQuizComplete();
       }
@@ -232,7 +220,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     generateQuiz(userInput);
   };
 
-  // Current question
   const currentQuestion = quizQuestions[currentQuestionIndex];
 
   if (isLoading) {
