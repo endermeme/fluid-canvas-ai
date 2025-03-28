@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, X, ArrowRight, Loader2 } from 'lucide-react';
@@ -59,6 +60,16 @@ Chỉ trả về một file HTML hoàn chỉnh bao gồm tất cả HTML, CSS v�
     <title>Trang Web Tương Tác</title>
     <style>
         /* CSS ở đây */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+        /* Thêm CSS của bạn ở đây */
     </style>
 </head>
 <body>
@@ -185,6 +196,16 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     }
   };
 
+  // Reset state cho các câu hỏi mới
+  useEffect(() => {
+    if (quizQuestions.length > 0) {
+      setCurrentQuestionIndex(0);
+      setSelectedAnswer(null);
+      setIsAnswered(false);
+    }
+  }, [quizQuestions]);
+
+  // Handle option selection
   const handleOptionSelect = (optionIndex: number) => {
     if (isAnswered) return;
     
@@ -192,6 +213,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     setSelectedAnswer(optionLetter);
   };
 
+  // Check answer
   const checkAnswer = () => {
     if (!selectedAnswer || currentQuestionIndex >= quizQuestions.length) return;
     
@@ -200,20 +222,10 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     
     if (selectedAnswer === currentQuestion.correctAnswer) {
       setScore(score + 1);
-      toast({
-        title: "Chính xác!",
-        description: currentQuestion.explanation || "Bạn đã trả lời đúng!",
-        className: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900",
-      });
-    } else {
-      toast({
-        title: "Chưa chính xác",
-        description: `Đáp án đúng là ${currentQuestion.correctAnswer}. ${currentQuestion.explanation || ''}`,
-        variant: "destructive",
-      });
     }
   };
 
+  // Handle next question
   const handleNextQuestion = () => {
     if (currentQuestionIndex < quizQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -224,13 +236,10 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
       if (onQuizComplete) {
         onQuizComplete();
       }
-      toast({
-        title: "Hoàn thành Quiz!",
-        description: `Điểm số của bạn: ${score + (selectedAnswer === quizQuestions[currentQuestionIndex].correctAnswer ? 1 : 0)}/${quizQuestions.length}`,
-      });
     }
   };
 
+  // Restart quiz
   const handleRestartQuiz = () => {
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
@@ -243,70 +252,61 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p>Đang tạo trang web tương tác từ chủ đề của bạn...</p>
+      <div className="flex flex-col items-center justify-center h-full w-full space-y-4">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+        <p className="text-lg">Đang tạo trang web tương tác từ chủ đề của bạn...</p>
       </div>
     );
   }
 
   if (errorMessage) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
-        <div className="text-red-500 mb-2">
-          <X size={36} />
+      <div className="flex flex-col items-center justify-center h-full w-full space-y-6">
+        <div className="text-red-500">
+          <X size={48} />
         </div>
-        <p>{errorMessage}</p>
-        <Button onClick={() => generateQuiz(topic)}>Thử Lại</Button>
+        <p className="text-lg text-center">{errorMessage}</p>
+        <Button onClick={() => generateQuiz(topic)} size="lg">Thử Lại</Button>
       </div>
     );
   }
 
-  if (quizCompleted) {
+  if (quizQuestions.length === 0) {
     return (
-      <div className="flex flex-col space-y-6 p-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Trang Web Đã Hoàn Thành</h2>
-          
-          <div className="flex justify-center">
-            <Button onClick={() => generateQuiz(topic)} className="mr-2">
-              Tạo Trang Web Mới
-            </Button>
-          </div>
-        </div>
+      <div className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10">
+        <h2 className="text-2xl font-bold text-center">Chào mừng đến với Tạo Web Tương Tác</h2>
+        <p className="text-center max-w-md">
+          Nhập chủ đề vào thanh chat bên trái để tạo một trang web tương tác.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="h-full w-full">
       {quizQuestions.length > 0 && currentQuestion && (
-        <div className="flex flex-col space-y-6">
-          <div className="flex justify-between items-center">
+        <div className="flex flex-col h-full">
+          <div className="flex justify-between items-center p-4 bg-background shadow-sm">
             <h3 className="text-lg font-medium">Trang Web Tương Tác</h3>
-          </div>
-
-          {currentQuestion.interactiveDemo && (
-            <div className="w-full h-full">
-              <iframe
-                srcDoc={currentQuestion.interactiveDemo}
-                title="Interactive Web"
-                className="w-full border-none"
-                sandbox="allow-scripts allow-same-origin"
-                style={{ width: '100%', height: 'calc(100vh - 200px)', minHeight: '600px' }}
-              />
-            </div>
-          )}
-          
-          <div className="flex justify-center space-x-3 pt-3">
             <Button 
-              className="flex items-center"
               variant="outline"
               onClick={() => generateQuiz(topic)}
             >
               Tạo Trang Web Mới
             </Button>
           </div>
+
+          {currentQuestion.interactiveDemo && (
+            <div className="flex-1 w-full overflow-auto">
+              <iframe
+                srcDoc={currentQuestion.interactiveDemo}
+                title="Interactive Web"
+                sandbox="allow-scripts allow-same-origin"
+                className="w-full h-full border-none"
+                style={{ height: 'calc(100vh - 120px)' }}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

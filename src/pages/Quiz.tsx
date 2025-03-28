@@ -43,10 +43,16 @@ const Quiz = () => {
     setTopic(requestedTopic);
     setIsGenerating(true);
     
-    // Short delay to ensure the ref is ready
+    // Ensure the ref is ready before calling the method
     setTimeout(() => {
       if (quizGeneratorRef.current) {
         quizGeneratorRef.current.generateQuiz(requestedTopic);
+      } else {
+        toast({
+          title: "Lỗi Hệ Thống",
+          description: "Không thể kết nối với trình tạo web. Vui lòng thử lại.",
+          variant: "destructive",
+        });
       }
       setIsGenerating(false);
     }, 100);
@@ -65,9 +71,12 @@ const Quiz = () => {
             </SidebarContent>
           </Sidebar>
           
-          <SidebarInset className="flex-1">
-            <div className="flex-1 overflow-hidden">
-              <QuizGenerator ref={quizGeneratorRef} />
+          <SidebarInset className="flex-1 bg-background">
+            <div className="flex-1 h-full overflow-hidden">
+              <QuizGenerator 
+                ref={quizGeneratorRef} 
+                topic={topic}
+              />
             </div>
           </SidebarInset>
         </div>
