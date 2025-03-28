@@ -10,7 +10,7 @@ import NotFound from './pages/NotFound';
 
 const App = () => {
   return (
-    <ThemeProvider>
+    <ThemeProvider defaultTheme="system" enableSystem>
       <Router>
         <Routes>
           <Route path="/" element={<Index />} />
