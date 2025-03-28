@@ -1,9 +1,9 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, BrainCircuit, X } from 'lucide-react';
+import { Send, Sparkles, BrainCircuit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
-import axios from 'axios';
 
 interface Message {
   role: 'user' | 'ai';
@@ -21,7 +21,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   const [conversation, setConversation] = useState<Message[]>([
     { 
       role: 'ai', 
-      message: 'Hi there! I\'m your AI assistant. How can I help with your quiz today?', 
+      message: 'Xin chào! Tôi là trợ lý AI. Bạn muốn tạo quiz về chủ đề gì? Bạn có thể nhập chủ đề như "JavaScript", "ReactJS", "CSS Animation" hoặc bất kỳ chủ đề lập trình nào khác.', 
       timestamp: new Date() 
     }
   ]);
@@ -43,59 +43,24 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     
     const lowerMessage = message.toLowerCase().trim();
     
-    // Check if this is a quiz request - improved detection
-    const isQuizRequest = 
-      lowerMessage.includes('quiz') || 
-      lowerMessage.includes('test') || 
-      lowerMessage.includes('questions') ||
-      lowerMessage.includes('trivia') ||
-      lowerMessage.includes('trắc nghiệm') ||
-      lowerMessage.includes('câu hỏi') ||
-      lowerMessage.includes('tạo') ||
-      lowerMessage.includes('generate');
+    // Cải tiến khả năng phát hiện yêu cầu quiz
+    const isQuizRequest = true; // Luôn xử lý như yêu cầu quiz
       
     setTimeout(() => {
       let aiResponse = '';
       
-      if (isQuizRequest || lowerMessage.length > 15) {
-        aiResponse = "I'm generating a quiz based on your request. Please wait a moment...";
+      if (isQuizRequest) {
+        aiResponse = "Tôi đang tạo bài quiz dựa trên yêu cầu của bạn. Vui lòng đợi trong giây lát...";
         
-        // Extract topic from the message - use the entire message as topic
+        // Sử dụng toàn bộ nội dung tin nhắn làm chủ đề
         const topic = message.trim();
         
-        // Trigger quiz generation
+        // Kích hoạt tạo quiz
         if (onQuizRequest) {
           onQuizRequest(topic);
         }
-      } else if (lowerMessage.includes('create') || 
-                lowerMessage.includes('add') || 
-                lowerMessage.includes('make')) {
-        // Handle other creation requests
-        let blockType: BlockType = 'text';
-        let content = '';
-        
-        if (lowerMessage.includes('code') || lowerMessage.includes('script') || lowerMessage.includes('programming')) {
-          blockType = 'code';
-          content = generateCodeContent(message);
-          aiResponse = "I've created a code block for you based on your request.";
-        } else if (lowerMessage.includes('image') || lowerMessage.includes('picture') || lowerMessage.includes('photo')) {
-          blockType = 'image';
-          content = 'https://source.unsplash.com/random/300x200';
-          aiResponse = "I've added an image placeholder. In a real implementation, this would generate an actual image.";
-        } else if (lowerMessage.includes('note') || lowerMessage.includes('sticky')) {
-          blockType = 'sticky';
-          content = extractContentFromMessage(message);
-          aiResponse = "I've created a sticky note with your content.";
-        } else {
-          content = extractContentFromMessage(message);
-          aiResponse = "I've created a text block with your content.";
-        }
-        
-        if (onCreateBlock) {
-          onCreateBlock(blockType, content);
-        }
       } else {
-        aiResponse = "Type any topic or content to generate a quiz about it. For example, 'Create a quiz about World War II' or 'Generate questions about renewable energy'.";
+        aiResponse = "Vui lòng nhập chủ đề bạn muốn tạo quiz. Ví dụ: 'JavaScript', 'ReactJS', 'HTML & CSS' hoặc bất kỳ chủ đề lập trình nào khác.";
       }
       
       const aiMessage = {
@@ -107,62 +72,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
       setConversation(prev => [...prev, aiMessage]);
       setIsLoading(false);
     }, 500);
-  };
-  
-  const extractTopicFromMessage = (message: string): string => {
-    const lowerMessage = message.toLowerCase();
-    
-    // Try to extract the topic after keywords like "about", "on", "for"
-    const topicMarkers = [' about ', ' on ', ' for ', ' regarding '];
-    for (const marker of topicMarkers) {
-      if (lowerMessage.includes(marker)) {
-        return message.split(marker)[1].trim();
-      }
-    }
-    
-    // Remove quiz-related words to get the topic
-    return message.replace(/quiz|create|make|generate|questions|test|trivia/gi, '').trim();
-  };
-  
-  const extractContentFromMessage = (message: string): string => {
-    const contentParts = message.split('with content');
-    if (contentParts.length > 1) {
-      return contentParts[1].trim().replace(/^['":]/, '').trim();
-    }
-    
-    return message.replace(/create|add|make|generate|text|block|note|sticky/gi, '').trim();
-  };
-  
-  const generateCodeContent = (message: string): string => {
-    if (message.toLowerCase().includes('javascript') || message.toLowerCase().includes('js')) {
-      return `// JavaScript example
-function greet(name) {
-  return \`Hello, \${name}!\`;
-}
-
-console.log(greet('World'));`;
-    } else if (message.toLowerCase().includes('react')) {
-      return `// React component example
-import React from 'react';
-
-const ExampleComponent = ({ title }) => {
-  return (
-    <div className="example">
-      <h2>{title}</h2>
-      <p>This is an example React component.</p>
-    </div>
-  );
-};
-
-export default ExampleComponent;`;
-    } else {
-      return `// Code example
-function example() {
-  // This is a placeholder code block
-  // Replace with your actual code
-  return "Hello from the AI assistant!";
-}`;
-    }
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -181,7 +90,7 @@ function example() {
       <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/20">
         <div className="flex items-center">
           <BrainCircuit size={20} className="text-primary mr-2" />
-          <h3 className="font-medium">AI Assistant</h3>
+          <h3 className="font-medium">Trợ Lý Quiz Code</h3>
         </div>
       </div>
       
@@ -227,7 +136,7 @@ function example() {
         <div className="relative">
           <textarea
             className="w-full p-2 pr-10 bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-sm"
-            placeholder="Ask about any topic to generate a quiz..."
+            placeholder="Nhập chủ đề lập trình để tạo quiz..."
             rows={2}
             value={message}
             onChange={(e) => setMessage(e.target.value)}

@@ -1,6 +1,6 @@
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Check, X, ArrowRight, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -11,6 +11,8 @@ interface QuizQuestion {
   question: string;
   options: string[];
   correctAnswer: string;
+  codeSnippet?: string;
+  explanation?: string;
 }
 
 interface QuizGeneratorProps {
@@ -29,89 +31,155 @@ class AIQuizGenerator {
 
   async generateQuizFromContext(userMessage: string): Promise<QuizQuestion[] | null> {
     try {
-      console.log("Generating quiz for topic:", userMessage);
+      console.log("Đang tạo quiz cho chủ đề:", userMessage);
       
-      const prompt = `Based on the following context, create an interactive multiple-choice quiz:
+      const prompt = `Tạo một bài kiểm tra trắc nghiệm tương tác về lập trình dựa trên chủ đề sau:
 
-Context: ${userMessage}
+Chủ đề: ${userMessage}
 
-Quiz Requirements:
-- Generate 4 multiple-choice questions
-- Each question should test understanding of key details
-- Provide 4 options (A, B, C, D) for each question
-- Include the correct answer
+Yêu cầu chi tiết:
+- Tạo 4 câu hỏi trắc nghiệm về lập trình web với HTML, CSS, JavaScript hoặc React (tùy vào chủ đề người dùng yêu cầu)
+- Mỗi câu hỏi nên có một đoạn code minh họa hoặc phân tích code
+- Cung cấp 4 lựa chọn (A, B, C, D) cho mỗi câu hỏi
+- Đánh dấu đáp án đúng
+- Thêm phần giải thích ngắn gọn cho đáp án
 
-Format for each question:
-Question: [Question Text]
-A. [Option 1]
-B. [Option 2]
-C. [Option 3]
-D. [Option 4]
-Correct Answer: [A/B/C/D]`;
+Định dạng cho mỗi câu hỏi:
+Câu hỏi: [Nội dung câu hỏi]
+
+Code:
+\`\`\`[ngôn ngữ]
+[đoạn code minh họa]
+\`\`\`
+
+A. [Lựa chọn 1]
+B. [Lựa chọn 2]
+C. [Lựa chọn 3]
+D. [Lựa chọn 4]
+Đáp án đúng: [A/B/C/D]
+
+Giải thích: [Giải thích ngắn gọn]
+
+LƯU Ý QUAN TRỌNG: Đảm bảo đoạn code được hỗ trợ đầy đủ và có thể chạy được để minh họa. Tập trung vào khía cạnh thực hành và ứng dụng thực tế của code. HÃY VIẾT HOÀN TOÀN BẰNG TIẾNG VIỆT.`;
 
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
       
-      console.log("Raw quiz response:", text);
+      console.log("Kết quả quiz thô:", text);
       return this.parseQuizResponse(text);
     } catch (error) {
-      console.error('Quiz Generation Error:', error);
+      console.error('Lỗi tạo Quiz:', error);
       return null;
     }
   }
 
   parseQuizResponse(rawText: string): QuizQuestion[] {
     try {
-      console.log("Parsing quiz response:", rawText);
+      console.log("Đang phân tích kết quả quiz:", rawText);
       
-      // Parse questions from the response
+      // Phân tích câu hỏi từ phản hồi
       const questions: QuizQuestion[] = [];
-      const questionBlocks = rawText.split('Question:').filter(block => block.trim().length > 0);
+      const questionBlocks = rawText.split('Câu hỏi:').filter(block => block.trim().length > 0);
       
       for (const questionBlock of questionBlocks) {
         const lines = questionBlock.trim().split('\n').filter(line => line.trim().length > 0);
         
         if (lines.length < 6) {
-          console.warn("Skipping malformed question block:", questionBlock);
+          console.warn("Bỏ qua khối câu hỏi không đúng định dạng:", questionBlock);
           continue;
         }
         
-        const optionLines = lines.slice(1, 5);
-        const options = optionLines.map(line => {
-          const optionText = line.replace(/^[A-D]\.\s*/, '').trim();
-          return optionText;
-        });
+        // Tìm đoạn code
+        let codeSnippet = '';
+        let codeStartIndex = -1;
+        let codeEndIndex = -1;
         
-        // Find correct answer line
-        const correctAnswerLine = lines.find(line => line.includes('Correct Answer:'));
-        let correctAnswer = 'A'; // Default to A if not found
-        
-        if (correctAnswerLine) {
-          const match = correctAnswerLine.match(/Correct Answer:\s*([A-D])/);
-          if (match && match[1]) {
-            correctAnswer = match[1];
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].includes('```')) {
+            if (codeStartIndex === -1) {
+              codeStartIndex = i;
+            } else {
+              codeEndIndex = i;
+              break;
+            }
           }
         }
         
+        if (codeStartIndex !== -1 && codeEndIndex !== -1) {
+          codeSnippet = lines.slice(codeStartIndex + 1, codeEndIndex).join('\n');
+        }
+        
+        // Tìm các lựa chọn
+        const optionIndices: number[] = [];
+        for (let i = 0; i < lines.length; i++) {
+          if (/^[A-D]\.\s/.test(lines[i])) {
+            optionIndices.push(i);
+          }
+        }
+        
+        if (optionIndices.length < 4) {
+          console.warn("Không đủ lựa chọn cho câu hỏi:", questionBlock);
+          continue;
+        }
+        
+        const options = optionIndices.map(idx => {
+          return lines[idx].replace(/^[A-D]\.\s*/, '').trim();
+        });
+        
+        // Tìm đáp án đúng
+        let correctAnswer = 'A'; // Mặc định nếu không tìm thấy
+        const correctAnswerLine = lines.find(line => 
+          line.includes('Đáp án đúng:') || 
+          line.includes('Đáp án:') || 
+          line.includes('Câu trả lời đúng:')
+        );
+        
+        if (correctAnswerLine) {
+          const match = correctAnswerLine.match(/[A-D]$/);
+          if (match && match[0]) {
+            correctAnswer = match[0];
+          }
+        }
+        
+        // Tìm giải thích
+        let explanation = '';
+        const explanationIndex = lines.findIndex(line => 
+          line.includes('Giải thích:') || 
+          line.includes('Lý giải:') || 
+          line.includes('Giải thích đáp án:')
+        );
+        
+        if (explanationIndex !== -1 && explanationIndex < lines.length - 1) {
+          explanation = lines[explanationIndex + 1];
+        }
+        
+        let questionText = lines[0].trim();
+        if (codeStartIndex > 1) {
+          // Nếu có nhiều dòng trước đoạn code, kết hợp chúng thành câu hỏi
+          questionText = lines.slice(0, codeStartIndex).join(' ').trim();
+        }
+        
         questions.push({
-          question: lines[0].trim(),
+          question: questionText,
           options,
-          correctAnswer
+          correctAnswer,
+          codeSnippet,
+          explanation
         });
       }
       
-      console.log("Parsed questions:", questions);
+      console.log("Câu hỏi đã phân tích:", questions);
       return questions;
     } catch (error) {
-      console.error("Error parsing quiz response:", error);
+      console.error("Lỗi phân tích kết quả quiz:", error);
       return [];
     }
   }
 }
 
 const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, QuizGeneratorProps>(({ 
-  topic = "General Knowledge",
+  topic = "Kiến thức cơ bản",
   onQuizComplete
 }, ref) => {
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
@@ -123,6 +191,8 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
   const [userInput, setUserInput] = useState(topic);
   const { toast } = useToast();
   const [quizGenerator] = useState<AIQuizGenerator>(new AIQuizGenerator(API_KEY));
+  const [score, setScore] = useState(0);
+  const [quizCompleted, setQuizCompleted] = useState(false);
 
   useImperativeHandle(ref, () => ({
     generateQuiz: (topic: string) => {
@@ -141,6 +211,8 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     setSelectedAnswer(null);
     setCurrentQuestionIndex(0);
     setQuizQuestions([]);
+    setScore(0);
+    setQuizCompleted(false);
 
     try {      
       const questions = await quizGenerator.generateQuizFromContext(context);
@@ -148,18 +220,18 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
       if (questions && questions.length > 0) {
         setQuizQuestions(questions);
         toast({
-          title: "Quiz Generated",
-          description: `Created ${questions.length} questions about "${context}"`,
+          title: "Bài Quiz Đã Sẵn Sàng",
+          description: `Đã tạo ${questions.length} câu hỏi về "${context}"`,
         });
       } else {
-        throw new Error('No questions generated');
+        throw new Error('Không thể tạo câu hỏi');
       }
     } catch (error) {
-      console.error('Quiz Generation Error:', error);
-      setErrorMessage('Failed to generate quiz. Please try again or use a different topic.');
+      console.error('Lỗi Tạo Quiz:', error);
+      setErrorMessage('Không thể tạo quiz. Vui lòng thử lại hoặc chọn chủ đề khác.');
       toast({
-        title: "Quiz Error",
-        description: "There was a problem generating the quiz. Please try again with a different topic.",
+        title: "Lỗi Tạo Quiz",
+        description: "Có vấn đề khi tạo bài quiz. Vui lòng thử lại với chủ đề khác.",
         variant: "destructive",
       });
     } finally {
@@ -181,15 +253,16 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     const currentQuestion = quizQuestions[currentQuestionIndex];
     
     if (selectedAnswer === currentQuestion.correctAnswer) {
+      setScore(score + 1);
       toast({
-        title: "Correct!",
-        description: "You got the right answer!",
+        title: "Chính xác!",
+        description: currentQuestion.explanation || "Bạn đã trả lời đúng!",
         className: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900",
       });
     } else {
       toast({
-        title: "Incorrect",
-        description: `The correct answer was ${currentQuestion.correctAnswer}.`,
+        title: "Chưa chính xác",
+        description: `Đáp án đúng là ${currentQuestion.correctAnswer}. ${currentQuestion.explanation || ''}`,
         variant: "destructive",
       });
     }
@@ -201,23 +274,23 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
       setSelectedAnswer(null);
       setIsAnswered(false);
     } else {
+      setQuizCompleted(true);
       if (onQuizComplete) {
         onQuizComplete();
       }
       toast({
-        title: "Quiz Complete!",
-        description: "You've completed all questions.",
+        title: "Hoàn thành Quiz!",
+        description: `Điểm số của bạn: ${score + (selectedAnswer === quizQuestions[currentQuestionIndex].correctAnswer ? 1 : 0)}/${quizQuestions.length}`,
       });
     }
   };
 
-  const handleGenerateQuiz = () => {
-    generateQuiz(userInput);
-  };
-
-  const handleTryAgain = () => {
-    setErrorMessage(null);
-    generateQuiz(userInput);
+  const handleRestartQuiz = () => {
+    setCurrentQuestionIndex(0);
+    setSelectedAnswer(null);
+    setIsAnswered(false);
+    setScore(0);
+    setQuizCompleted(false);
   };
 
   const currentQuestion = quizQuestions[currentQuestionIndex];
@@ -226,7 +299,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p>Generating quiz based on your input...</p>
+        <p>Đang tạo bài quiz từ chủ đề của bạn...</p>
       </div>
     );
   }
@@ -238,7 +311,30 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
           <X size={36} />
         </div>
         <p>{errorMessage}</p>
-        <Button onClick={handleTryAgain}>Try Again</Button>
+        <Button onClick={() => generateQuiz(userInput)}>Thử Lại</Button>
+      </div>
+    );
+  }
+
+  if (quizCompleted) {
+    return (
+      <div className="flex flex-col space-y-6 p-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Kết Quả Bài Quiz</h2>
+          <p className="text-xl mb-4">
+            Điểm số của bạn: {score}/{quizQuestions.length}
+          </p>
+          
+          <div className="flex justify-center">
+            <Button onClick={handleRestartQuiz} className="mr-2">Làm Lại Quiz</Button>
+            <Button 
+              onClick={() => generateQuiz(userInput)}
+              variant="outline"
+            >
+              Tạo Quiz Mới
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -248,12 +344,19 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
       {quizQuestions.length > 0 && currentQuestion && (
         <div className="flex flex-col space-y-6 p-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium">Question {currentQuestionIndex + 1} of {quizQuestions.length}</h3>
+            <h3 className="text-lg font-medium">Câu hỏi {currentQuestionIndex + 1}/{quizQuestions.length}</h3>
+            <div className="text-muted-foreground">Điểm: {score}/{currentQuestionIndex}</div>
           </div>
           
           <div className="text-xl font-medium">
             {currentQuestion.question}
           </div>
+
+          {currentQuestion.codeSnippet && (
+            <div className="bg-slate-900 text-white p-4 rounded-md overflow-auto font-mono text-sm">
+              <pre>{currentQuestion.codeSnippet}</pre>
+            </div>
+          )}
           
           <div className="space-y-3">
             {currentQuestion.options.map((option, index) => (
@@ -293,7 +396,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
                 variant="default"
                 onClick={handleNextQuestion}
               >
-                {currentQuestionIndex < quizQuestions.length - 1 ? 'Next Question' : 'Finish Quiz'} 
+                {currentQuestionIndex < quizQuestions.length - 1 ? 'Câu Hỏi Tiếp Theo' : 'Hoàn Thành Quiz'} 
                 <ArrowRight size={16} className="ml-2" />
               </Button>
             ) : (
@@ -303,7 +406,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
                 onClick={checkAnswer}
                 disabled={!selectedAnswer}
               >
-                Check Answer
+                Kiểm Tra Đáp Án
               </Button>
             )}
           </div>

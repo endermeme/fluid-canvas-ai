@@ -5,8 +5,6 @@ import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/compon
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
 const Quiz = () => {
@@ -17,7 +15,7 @@ const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-    document.title = 'AI Quiz Generator';
+    document.title = 'Tạo Quiz Code Tương Tác';
   }, []);
 
   const handleCreateFromPrompt = (type: BlockType, content: string) => {
@@ -35,8 +33,8 @@ const Quiz = () => {
   const handleQuizRequest = (requestedTopic: string) => {
     if (!requestedTopic.trim()) {
       toast({
-        title: "Topic Required",
-        description: "Please provide a topic for the quiz",
+        title: "Chủ Đề Trống",
+        description: "Vui lòng cung cấp chủ đề cho bài quiz",
         variant: "destructive",
       });
       return;
@@ -64,13 +62,6 @@ const Quiz = () => {
                 onCreateBlock={handleCreateFromPrompt} 
                 onQuizRequest={handleQuizRequest}
               />
-              <div className="p-3 border-t border-border mt-auto">
-                <Link to="/">
-                  <Button variant="outline" className="w-full">
-                    Back to Canvas
-                  </Button>
-                </Link>
-              </div>
             </SidebarContent>
           </Sidebar>
           
