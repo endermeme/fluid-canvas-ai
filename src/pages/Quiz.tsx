@@ -1,14 +1,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
 const Quiz = () => {
@@ -32,30 +30,6 @@ const Quiz = () => {
     };
     
     addBlock(type, position, canvasRect as DOMRect);
-  };
-
-  const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTopic(e.target.value);
-  };
-
-  const handleStartQuiz = () => {
-    if (!topic.trim()) {
-      toast({
-        title: "Topic Required",
-        description: "Please enter a topic to generate quiz questions",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsGenerating(true);
-    
-    setTimeout(() => {
-      if (quizGeneratorRef.current) {
-        quizGeneratorRef.current.generateQuiz(topic);
-      }
-      setIsGenerating(false);
-    }, 100);
   };
 
   const handleQuizRequest = (requestedTopic: string) => {
@@ -103,31 +77,6 @@ const Quiz = () => {
           <SidebarInset className="flex-1">
             <div className="flex-1 p-6 overflow-auto">
               <div className="max-w-3xl mx-auto">
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle>AI Quiz Generator</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground mb-4">
-                      Enter a topic or paste content to generate quiz questions. The AI will create multiple-choice questions based on your input.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <Input 
-                        value={topic}
-                        onChange={handleTopicChange}
-                        placeholder="Enter a topic or context for quiz generation..."
-                        className="flex-1"
-                      />
-                      <Button 
-                        onClick={handleStartQuiz} 
-                        disabled={isGenerating}
-                      >
-                        {isGenerating ? 'Generating...' : 'Generate Quiz'}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-                
                 <QuizGenerator ref={quizGeneratorRef} />
               </div>
             </div>
