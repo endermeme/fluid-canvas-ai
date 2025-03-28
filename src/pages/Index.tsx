@@ -1,10 +1,12 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import CanvasContainer from '@/components/canvas/CanvasContainer';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const [isChatOpen, setIsChatOpen] = useState(true);
@@ -37,6 +39,13 @@ const Index = () => {
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent>
               <ChatInterface onCreateBlock={handleCreateFromPrompt} />
+              <div className="p-3 border-t border-border mt-auto">
+                <Link to="/quiz">
+                  <Button variant="outline" className="w-full">
+                    Go to Interactive Quiz
+                  </Button>
+                </Link>
+              </div>
             </SidebarContent>
           </Sidebar>
           
