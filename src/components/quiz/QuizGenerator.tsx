@@ -1,19 +1,16 @@
 
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, X, ArrowRight, Loader2 } from 'lucide-react';
+import { Check, X, ArrowRight, Loader2, Gamepad } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
-interface QuizQuestion {
-  question: string;
-  options: string[];
-  correctAnswer: string;
-  codeSnippet?: string;
-  explanation?: string;
-  interactiveDemo?: string; // HTML/CSS/JS to render an interactive demo
+interface MiniGame {
+  title: string;
+  description: string;
+  htmlContent: string;
 }
 
 interface QuizGeneratorProps {
@@ -21,7 +18,7 @@ interface QuizGeneratorProps {
   onQuizComplete?: () => void;
 }
 
-class AIQuizGenerator {
+class AIGameGenerator {
   private genAI: GoogleGenerativeAI;
   private model: any;
 
@@ -30,23 +27,31 @@ class AIQuizGenerator {
     this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
   }
 
-  async generateQuizFromContext(userMessage: string): Promise<QuizQuestion[] | null> {
+  async generateMiniGame(userMessage: string): Promise<MiniGame | null> {
     try {
-      console.log("Đang tạo web cho chủ đề:", userMessage);
+      console.log("Đang tạo minigame cho chủ đề:", userMessage);
       
-      const prompt = `Tạo một trang web tương tác hoàn chỉnh về chủ đề ${userMessage}. Trang web cần bao gồm toàn bộ HTML, CSS và JavaScript trong một file duy nhất, và không được sử dụng liên kết tới các tài nguyên bên ngoài.
+      const prompt = `Tạo một minigame đơn giản và vui nhộn về chủ đề "${userMessage}". Minigame phải gọn nhẹ, dễ chơi và có tính tương tác cao.
 
 Yêu cầu chi tiết:
-- Tạo một trang web hoàn chỉnh và đẹp mắt về chủ đề ${userMessage}.
-- Toàn bộ HTML, CSS và JavaScript phải nằm trong một file HTML duy nhất.
-- Trang web phải có tính tương tác cao và trải nghiệm người dùng tốt.
-- Thiết kế phải đẹp mắt, hiện đại, màu sắc hài hòa và responsive.
-- Sử dụng giao diện màu mè, sinh động với nhiều màu sắc hài hòa.
-- Đảm bảo menu hiển thị đầy đủ và không bị giới hạn trong một góc.
-- Bố cục phải cân đối, sử dụng đủ chiều rộng của trang.
-- Sử dụng CSS hiện đại, có thể sử dụng Flexbox hoặc Grid.
-- Phải tương thích với các trình duyệt hiện đại.
-- VIẾT HOÀN TOÀN BẰNG TIẾNG VIỆT nếu có nội dung hiển thị.
+- Tạo một minigame đơn giản, vui nhộn về chủ đề ${userMessage}
+- Toàn bộ HTML, CSS và JavaScript phải nằm trong một file HTML duy nhất
+- Minigame phải có tính tương tác cao, dễ chơi và thú vị
+- Thiết kế phải màu sắc, bắt mắt, sinh động với nhiều màu sắc hài hòa
+- Có điểm số hoặc thông báo kết quả cho người chơi
+- Có hướng dẫn rõ ràng và dễ hiểu
+- Đảm bảo trò chơi đơn giản, không phức tạp, phù hợp để chơi trong vài phút
+- Phải tương thích với các trình duyệt hiện đại
+- VIẾT HOÀN TOÀN BẰNG TIẾNG VIỆT (nếu có nội dung hiển thị)
+
+Một số ý tưởng minigame phù hợp:
+- Trò chơi câu hỏi/đố vui
+- Trò chơi phản xạ/nhấp chuột
+- Trò chơi ghép cặp/nhớ hình
+- Trò chơi né vật thể
+- Trò chơi xếp hình đơn giản
+- Trò chơi sắp xếp/phân loại
+- Trò chơi vẽ và đoán
 
 Định dạng trả về:
 Chỉ trả về một file HTML hoàn chỉnh bao gồm tất cả HTML, CSS và JavaScript.
@@ -57,17 +62,24 @@ Chỉ trả về một file HTML hoàn chỉnh bao gồm tất cả HTML, CSS v�
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Web Tương Tác</title>
+    <title>Minigame: ${userMessage}</title>
     <style>
         /* CSS ở đây */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
         /* Thêm CSS của bạn ở đây */
     </style>
@@ -85,25 +97,26 @@ Chỉ trả về một file HTML hoàn chỉnh bao gồm tất cả HTML, CSS v�
 LƯU Ý QUAN TRỌNG: 
 - KHÔNG trả về bất kỳ giải thích nào, chỉ trả về một file HTML hoàn chỉnh.
 - Đảm bảo code chạy được ngay mà không cần sửa đổi thêm.
-- Không sử dụng các framework bên ngoài như React, Vue, Bootstrap, v.v... mà không đưa vào file.
+- Không sử dụng các framework bên ngoài.
 - Tất cả mã JavaScript phải nằm trong thẻ <script> của file HTML.
-- Tất cả CSS phải nằm trong thẻ <style> của file HTML.`;
+- Tất cả CSS phải nằm trong thẻ <style> của file HTML.
+- Minigame phải đủ đơn giản để người chơi hiểu ngay và chơi được trong vài phút.`;
 
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
       
-      console.log("Kết quả web thô:", text);
-      return this.parseQuizResponse(text);
+      console.log("Kết quả minigame thô:", text);
+      return this.parseMiniGameResponse(text, userMessage);
     } catch (error) {
-      console.error('Lỗi tạo Web:', error);
+      console.error('Lỗi tạo Minigame:', error);
       return null;
     }
   }
 
-  parseQuizResponse(rawText: string): QuizQuestion[] {
+  parseMiniGameResponse(rawText: string, topic: string): MiniGame | null {
     try {
-      console.log("Đang phân tích kết quả web:", rawText);
+      console.log("Đang phân tích kết quả minigame:", rawText);
       
       // Tìm nội dung HTML
       let htmlContent = '';
@@ -118,77 +131,61 @@ LƯU Ý QUAN TRỌNG:
       
       if (!htmlContent) {
         console.error('Không tìm thấy nội dung HTML hợp lệ');
-        return [];
+        return null;
       }
 
-      // Tạo một quiz duy nhất chứa toàn bộ nội dung web
-      const questions: QuizQuestion[] = [
-        {
-          question: 'Trang Web Tương Tác',
-          options: ['Xem Trang Web', 'Tùy Chọn B', 'Tùy Chọn C', 'Tùy Chọn D'],
-          correctAnswer: 'A',
-          interactiveDemo: htmlContent
-        }
-      ];
-      
-      console.log("Web đã phân tích:", questions);
-      return questions;
+      // Tạo đối tượng MiniGame
+      return {
+        title: `Minigame: ${topic}`,
+        description: `Minigame tương tác về chủ đề ${topic}`,
+        htmlContent: htmlContent
+      };
     } catch (error) {
-      console.error("Lỗi phân tích kết quả web:", error);
-      return [];
+      console.error("Lỗi phân tích kết quả minigame:", error);
+      return null;
     }
   }
 }
 
 const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, QuizGeneratorProps>(({ 
-  topic = "Web tương tác",
+  topic = "Minigame tương tác",
   onQuizComplete
 }, ref) => {
-  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [isAnswered, setIsAnswered] = useState(false);
+  const [miniGame, setMiniGame] = useState<MiniGame | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
-  const [quizGenerator] = useState<AIQuizGenerator>(new AIQuizGenerator(API_KEY));
-  const [score, setScore] = useState(0);
-  const [quizCompleted, setQuizCompleted] = useState(false);
+  const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
 
   useImperativeHandle(ref, () => ({
     generateQuiz: (topic: string) => {
-      generateQuiz(topic);
+      generateMiniGame(topic);
     }
   }));
 
-  const generateQuiz = async (context: string) => {
+  const generateMiniGame = async (topic: string) => {
     setIsLoading(true);
     setErrorMessage(null);
-    setIsAnswered(false);
-    setSelectedAnswer(null);
-    setCurrentQuestionIndex(0);
-    setQuizQuestions([]);
-    setScore(0);
-    setQuizCompleted(false);
+    setMiniGame(null);
 
     try {      
-      const questions = await quizGenerator.generateQuizFromContext(context);
+      const game = await gameGenerator.generateMiniGame(topic);
       
-      if (questions && questions.length > 0) {
-        setQuizQuestions(questions);
+      if (game) {
+        setMiniGame(game);
         toast({
-          title: "Trang Web Đã Sẵn Sàng",
-          description: `Đã tạo trang web tương tác về "${context}"`,
+          title: "Minigame Đã Sẵn Sàng",
+          description: `Đã tạo minigame về "${topic}"`,
         });
       } else {
-        throw new Error('Không thể tạo trang web');
+        throw new Error('Không thể tạo minigame');
       }
     } catch (error) {
-      console.error('Lỗi Tạo Web:', error);
-      setErrorMessage('Không thể tạo trang web. Vui lòng thử lại hoặc chọn chủ đề khác.');
+      console.error('Lỗi Tạo Minigame:', error);
+      setErrorMessage('Không thể tạo minigame. Vui lòng thử lại hoặc chọn chủ đề khác.');
       toast({
-        title: "Lỗi Tạo Web",
-        description: "Có vấn đề khi tạo trang web. Vui lòng thử lại với chủ đề khác.",
+        title: "Lỗi Tạo Minigame",
+        description: "Có vấn đề khi tạo minigame. Vui lòng thử lại với chủ đề khác.",
         variant: "destructive",
       });
     } finally {
@@ -196,65 +193,11 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     }
   };
 
-  // Reset state cho các câu hỏi mới
-  useEffect(() => {
-    if (quizQuestions.length > 0) {
-      setCurrentQuestionIndex(0);
-      setSelectedAnswer(null);
-      setIsAnswered(false);
-    }
-  }, [quizQuestions]);
-
-  // Handle option selection
-  const handleOptionSelect = (optionIndex: number) => {
-    if (isAnswered) return;
-    
-    const optionLetter = String.fromCharCode(65 + optionIndex);
-    setSelectedAnswer(optionLetter);
-  };
-
-  // Check answer
-  const checkAnswer = () => {
-    if (!selectedAnswer || currentQuestionIndex >= quizQuestions.length) return;
-    
-    setIsAnswered(true);
-    const currentQuestion = quizQuestions[currentQuestionIndex];
-    
-    if (selectedAnswer === currentQuestion.correctAnswer) {
-      setScore(score + 1);
-    }
-  };
-
-  // Handle next question
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < quizQuestions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setSelectedAnswer(null);
-      setIsAnswered(false);
-    } else {
-      setQuizCompleted(true);
-      if (onQuizComplete) {
-        onQuizComplete();
-      }
-    }
-  };
-
-  // Restart quiz
-  const handleRestartQuiz = () => {
-    setCurrentQuestionIndex(0);
-    setSelectedAnswer(null);
-    setIsAnswered(false);
-    setScore(0);
-    setQuizCompleted(false);
-  };
-
-  const currentQuestion = quizQuestions[currentQuestionIndex];
-
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full w-full space-y-4">
         <Loader2 className="w-12 h-12 animate-spin text-primary" />
-        <p className="text-lg">Đang tạo trang web tương tác từ chủ đề của bạn...</p>
+        <p className="text-lg">Đang tạo minigame từ chủ đề của bạn...</p>
       </div>
     );
   }
@@ -266,47 +209,48 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
           <X size={48} />
         </div>
         <p className="text-lg text-center">{errorMessage}</p>
-        <Button onClick={() => generateQuiz(topic)} size="lg">Thử Lại</Button>
+        <Button onClick={() => generateMiniGame(topic || "minigame vui")} size="lg">Thử Lại</Button>
       </div>
     );
   }
 
-  if (quizQuestions.length === 0) {
+  if (!miniGame) {
     return (
       <div className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10">
-        <h2 className="text-2xl font-bold text-center">Chào mừng đến với Tạo Web Tương Tác</h2>
+        <div className="text-primary mb-4">
+          <Gamepad size={64} />
+        </div>
+        <h2 className="text-2xl font-bold text-center">Chào mừng đến với Trò Chơi Mini</h2>
         <p className="text-center max-w-md">
-          Nhập chủ đề vào thanh chat bên trái để tạo một trang web tương tác.
+          Nhập chủ đề vào thanh chat bên trái để tạo một minigame vui nhộn và tương tác.
         </p>
+        <div className="flex flex-wrap justify-center gap-3 max-w-lg mt-4">
+          {["Đố vui", "Xếp hình", "Nhớ hình", "Phản xạ", "Truy tìm", "Câu đố", "Vẽ tranh"].map((idea) => (
+            <Button 
+              key={idea}
+              variant="outline" 
+              className="rounded-full"
+              onClick={() => generateMiniGame(idea)}
+            >
+              {idea}
+            </Button>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full w-full">
-      {quizQuestions.length > 0 && currentQuestion && (
+    <div className="h-full w-full overflow-hidden">
+      {miniGame && (
         <div className="flex flex-col h-full">
-          <div className="flex justify-between items-center p-4 bg-background shadow-sm">
-            <h3 className="text-lg font-medium">Trang Web Tương Tác</h3>
-            <Button 
-              variant="outline"
-              onClick={() => generateQuiz(topic)}
-            >
-              Tạo Trang Web Mới
-            </Button>
-          </div>
-
-          {currentQuestion.interactiveDemo && (
-            <div className="flex-1 w-full overflow-auto">
-              <iframe
-                srcDoc={currentQuestion.interactiveDemo}
-                title="Interactive Web"
-                sandbox="allow-scripts allow-same-origin"
-                className="w-full h-full border-none"
-                style={{ height: 'calc(100vh - 120px)' }}
-              />
-            </div>
-          )}
+          <iframe
+            srcDoc={miniGame.htmlContent}
+            title={miniGame.title}
+            sandbox="allow-scripts allow-same-origin"
+            className="w-full h-full border-none"
+            style={{ height: '100%', width: '100%' }}
+          />
         </div>
       )}
     </div>

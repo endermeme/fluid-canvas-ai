@@ -15,7 +15,7 @@ const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-    document.title = 'Tạo Web Tương Tác';
+    document.title = 'Minigame Tương Tác';
   }, []);
 
   const handleCreateFromPrompt = (type: BlockType, content: string) => {
@@ -30,11 +30,11 @@ const Quiz = () => {
     addBlock(type, position, canvasRect as DOMRect);
   };
 
-  const handleQuizRequest = (requestedTopic: string) => {
+  const handleGameRequest = (requestedTopic: string) => {
     if (!requestedTopic.trim()) {
       toast({
         title: "Chủ Đề Trống",
-        description: "Vui lòng cung cấp chủ đề cho trang web",
+        description: "Vui lòng cung cấp chủ đề cho minigame",
         variant: "destructive",
       });
       return;
@@ -43,14 +43,13 @@ const Quiz = () => {
     setTopic(requestedTopic);
     setIsGenerating(true);
     
-    // Ensure the ref is ready before calling the method
     setTimeout(() => {
       if (quizGeneratorRef.current) {
         quizGeneratorRef.current.generateQuiz(requestedTopic);
       } else {
         toast({
           title: "Lỗi Hệ Thống",
-          description: "Không thể kết nối với trình tạo web. Vui lòng thử lại.",
+          description: "Không thể kết nối với trình tạo minigame. Vui lòng thử lại.",
           variant: "destructive",
         });
       }
@@ -66,13 +65,13 @@ const Quiz = () => {
             <SidebarContent>
               <ChatInterface 
                 onCreateBlock={handleCreateFromPrompt} 
-                onQuizRequest={handleQuizRequest}
+                onQuizRequest={handleGameRequest}
               />
             </SidebarContent>
           </Sidebar>
           
-          <SidebarInset className="flex-1 bg-background">
-            <div className="flex-1 h-full overflow-hidden">
+          <SidebarInset className="flex-1 bg-background overflow-hidden p-0">
+            <div className="h-full">
               <QuizGenerator 
                 ref={quizGeneratorRef} 
                 topic={topic}
