@@ -8,10 +8,11 @@ import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/compon
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
+import { Link } from 'react-router-dom';
 
 const Quiz = () => {
-  const [topic, setTopic] = useState('History');
-  const [currentTopic, setCurrentTopic] = useState('History');
+  const [topic, setTopic] = useState('');
+  const [currentTopic, setCurrentTopic] = useState('');
   const { addBlock } = useCanvasState();
 
   const handleCreateFromPrompt = (type: BlockType, content: string) => {
@@ -41,6 +42,13 @@ const Quiz = () => {
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent>
               <ChatInterface onCreateBlock={handleCreateFromPrompt} />
+              <div className="p-3 border-t border-border mt-auto">
+                <Link to="/">
+                  <Button variant="outline" className="w-full">
+                    Back to Canvas
+                  </Button>
+                </Link>
+              </div>
             </SidebarContent>
           </Sidebar>
           
@@ -49,22 +57,16 @@ const Quiz = () => {
               <div className="max-w-3xl mx-auto">
                 <Card className="mb-6">
                   <CardHeader>
-                    <CardTitle>Interactive Quiz Generator</CardTitle>
+                    <CardTitle>AI Quiz Generator</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <Input 
-                        value={topic}
-                        onChange={handleTopicChange}
-                        placeholder="Enter quiz topic"
-                        className="flex-1"
-                      />
-                      <Button onClick={handleStartQuiz}>Generate Quiz</Button>
-                    </div>
+                    <p className="text-muted-foreground mb-4">
+                      Enter a topic or paste content to generate quiz questions. The AI will create multiple-choice questions based on your input.
+                    </p>
                   </CardContent>
                 </Card>
                 
-                <QuizGenerator topic={currentTopic} />
+                <QuizGenerator />
               </div>
             </div>
           </SidebarInset>
