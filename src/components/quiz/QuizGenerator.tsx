@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, X, ArrowRight, Loader2 } from 'lucide-react';
@@ -39,7 +40,10 @@ Yêu cầu chi tiết:
 - Tạo một trang web hoàn chỉnh và đẹp mắt về chủ đề ${userMessage}.
 - Toàn bộ HTML, CSS và JavaScript phải nằm trong một file HTML duy nhất.
 - Trang web phải có tính tương tác cao và trải nghiệm người dùng tốt.
-- Thiết kế phải đẹp mắt, hiện đại và responsive.
+- Thiết kế phải đẹp mắt, hiện đại, màu sắc hài hòa và responsive.
+- Sử dụng giao diện màu mè, sinh động với nhiều màu sắc hài hòa.
+- Đảm bảo menu hiển thị đầy đủ và không bị giới hạn trong một góc.
+- Bố cục phải cân đối, sử dụng đủ chiều rộng của trang.
 - Sử dụng CSS hiện đại, có thể sử dụng Flexbox hoặc Grid.
 - Phải tương thích với các trình duyệt hiện đại.
 - VIẾT HOÀN TOÀN BẰNG TIẾNG VIỆT nếu có nội dung hiển thị.
@@ -284,13 +288,14 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
           </div>
 
           {currentQuestion.interactiveDemo && (
-            <div className="border rounded-md">
+            <div className="border rounded-md w-full">
               <div className="bg-white rounded-md overflow-hidden">
                 <iframe
                   srcDoc={currentQuestion.interactiveDemo}
                   title="Interactive Web"
                   className="w-full h-[600px] border-none"
                   sandbox="allow-scripts allow-same-origin"
+                  style={{ width: '100%', minHeight: '600px' }}
                 />
               </div>
             </div>
@@ -314,3 +319,4 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
 QuizGenerator.displayName = "QuizGenerator";
 
 export default QuizGenerator;
+
