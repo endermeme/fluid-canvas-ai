@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Check, X, ArrowRight } from 'lucide-react';
@@ -83,10 +83,10 @@ Correct Answer: [A/B/C/D]`
   }
 }
 
-const QuizGenerator: React.FC<QuizGeneratorProps> = ({ 
+const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, QuizGeneratorProps>(({ 
   topic = "General Knowledge",
   onQuizComplete
-}) => {
+}, ref) => {
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -95,17 +95,18 @@ const QuizGenerator: React.FC<QuizGeneratorProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [userInput, setUserInput] = useState(topic);
   const { toast } = useToast();
-  const quizGeneratorRef = useRef<GeminiQuizGenerator | null>(null);
+  const [quizGenerator] = useState<GeminiQuizGenerator>(new GeminiQuizGenerator(GEMINI_API_KEY));
 
-  useEffect(() => {
-    // Initialize the quiz generator
-    quizGeneratorRef.current = new GeminiQuizGenerator(GEMINI_API_KEY);
-    
-    // Generate quiz on mount with the default topic
-    if (topic) {
+  // Expose the generateQuiz method to parent components via ref
+  useImperativeHandle(ref, () => ({
+    generateQuiz: (topic: string) => {
       generateQuiz(topic);
     }
-  }, []);
+  }));
+
+  useEffect(() => {
+    setUserInput(topic);
+  }, [topic]);
 
   const generateQuiz = async (context: string) => {
     setIsLoading(true);
@@ -114,15 +115,15 @@ const QuizGenerator: React.FC<QuizGeneratorProps> = ({
     setSelectedAnswer(null);
     setCurrentQuestionIndex(0);
 
-    try {
-      if (!quizGeneratorRef.current) {
-        quizGeneratorRef.current = new GeminiQuizGenerator(GEMINI_API_KEY);
-      }
-      
-      const questions = await quizGeneratorRef.current.generateQuizFromContext(context);
+    try {      
+      const questions = await quizGenerator.generateQuizFromContext(context);
       
       if (questions && questions.length > 0) {
         setQuizQuestions(questions);
+        toast({
+          title: "Quiz Generated",
+          description: `Created ${questions.length} questions about "${context}"`,
+        });
       } else {
         throw new Error('No questions generated');
       }
@@ -215,18 +216,6 @@ const QuizGenerator: React.FC<QuizGeneratorProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="p-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
-        <div className="flex flex-col sm:flex-row gap-3 mb-4">
-          <Input 
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            placeholder="Enter a topic or context for quiz generation..."
-            className="flex-1"
-          />
-          <Button onClick={handleGenerateQuiz}>Generate Quiz</Button>
-        </div>
-      </div>
-
       {quizQuestions.length > 0 && currentQuestion && (
         <div className="flex flex-col space-y-6 p-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
           <div className="flex justify-between items-center">
@@ -293,6 +282,8 @@ const QuizGenerator: React.FC<QuizGeneratorProps> = ({
       )}
     </div>
   );
-};
+});
+
+QuizGenerator.displayName = "QuizGenerator";
 
 export default QuizGenerator;

@@ -1,8 +1,10 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, BrainCircuit, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
+import axios from 'axios';
 
 interface Message {
   role: 'user' | 'ai';
@@ -12,9 +14,10 @@ interface Message {
 
 interface ChatInterfaceProps {
   onCreateBlock?: (type: BlockType, content: string) => void;
+  onQuizRequest?: (topic: string) => void;
 }
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock }) => {
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequest }) => {
   const [message, setMessage] = useState('');
   const [conversation, setConversation] = useState<Message[]>([
     { 
@@ -40,16 +43,32 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock }) => {
     setIsLoading(true);
     
     const lowerMessage = message.toLowerCase().trim();
-    const isCreationRequest = 
-      lowerMessage.includes('create') || 
-      lowerMessage.includes('add') || 
-      lowerMessage.includes('make') ||
-      lowerMessage.includes('generate');
+    
+    // Check if this is a quiz request
+    const isQuizRequest = 
+      lowerMessage.includes('quiz') || 
+      lowerMessage.includes('test') || 
+      lowerMessage.includes('questions') ||
+      lowerMessage.includes('trivia');
       
     setTimeout(() => {
       let aiResponse = '';
       
-      if (isCreationRequest) {
+      if (isQuizRequest) {
+        aiResponse = "I'm generating a quiz based on your request. Please wait a moment...";
+        
+        // Extract topic from the message
+        const topic = extractTopicFromMessage(message);
+        
+        // Trigger quiz generation
+        if (onQuizRequest) {
+          onQuizRequest(topic);
+        }
+      } else if (lowerMessage.includes('create') || 
+                lowerMessage.includes('add') || 
+                lowerMessage.includes('make') ||
+                lowerMessage.includes('generate')) {
+        // Handle other creation requests
         let blockType: BlockType = 'text';
         let content = '';
         
@@ -100,6 +119,21 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock }) => {
         duration: 3000,
       });
     }, 1500);
+  };
+  
+  const extractTopicFromMessage = (message: string): string => {
+    const lowerMessage = message.toLowerCase();
+    
+    // Try to extract the topic after keywords like "about", "on", "for"
+    const topicMarkers = [' about ', ' on ', ' for ', ' regarding '];
+    for (const marker of topicMarkers) {
+      if (lowerMessage.includes(marker)) {
+        return message.split(marker)[1].trim();
+      }
+    }
+    
+    // Remove quiz-related words to get the topic
+    return message.replace(/quiz|create|make|generate|questions|test|trivia/gi, '').trim();
   };
   
   const extractContentFromMessage = (message: string): string => {

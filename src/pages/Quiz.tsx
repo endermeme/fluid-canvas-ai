@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
-  const [currentTopic, setCurrentTopic] = useState('');
+  const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
   const { addBlock } = useCanvasState();
 
   const handleCreateFromPrompt = (type: BlockType, content: string) => {
@@ -32,7 +32,21 @@ const Quiz = () => {
   };
 
   const handleStartQuiz = () => {
-    setCurrentTopic(topic);
+    if (quizGeneratorRef.current && topic.trim()) {
+      quizGeneratorRef.current.generateQuiz(topic);
+    }
+  };
+
+  const handleQuizRequest = (requestedTopic: string) => {
+    const topicToUse = requestedTopic || 'General Knowledge';
+    setTopic(topicToUse);
+    
+    // Short delay to ensure the ref is ready
+    setTimeout(() => {
+      if (quizGeneratorRef.current) {
+        quizGeneratorRef.current.generateQuiz(topicToUse);
+      }
+    }, 100);
   };
 
   return (
@@ -41,7 +55,10 @@ const Quiz = () => {
         <div className="flex-1 flex overflow-hidden">
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent>
-              <ChatInterface onCreateBlock={handleCreateFromPrompt} />
+              <ChatInterface 
+                onCreateBlock={handleCreateFromPrompt} 
+                onQuizRequest={handleQuizRequest}
+              />
               <div className="p-3 border-t border-border mt-auto">
                 <Link to="/">
                   <Button variant="outline" className="w-full">
@@ -63,10 +80,19 @@ const Quiz = () => {
                     <p className="text-muted-foreground mb-4">
                       Enter a topic or paste content to generate quiz questions. The AI will create multiple-choice questions based on your input.
                     </p>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Input 
+                        value={topic}
+                        onChange={handleTopicChange}
+                        placeholder="Enter a topic or context for quiz generation..."
+                        className="flex-1"
+                      />
+                      <Button onClick={handleStartQuiz}>Generate Quiz</Button>
+                    </div>
                   </CardContent>
                 </Card>
                 
-                <QuizGenerator />
+                <QuizGenerator ref={quizGeneratorRef} />
               </div>
             </div>
           </SidebarInset>
