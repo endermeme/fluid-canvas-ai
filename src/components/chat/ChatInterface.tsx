@@ -21,7 +21,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   const [conversation, setConversation] = useState<Message[]>([
     { 
       role: 'ai', 
-      message: 'Xin chào! Tôi là trợ lý AI. Bạn muốn tạo quiz tương tác về chủ đề gì? Có thể nhập chủ đề như "JavaScript Arrays", "CSS Flexbox", "React Hooks" hoặc bất kỳ chủ đề lập trình nào khác. Tôi sẽ tạo các quiz có demo code tương tác!', 
+      message: 'Xin chào! Tôi là trợ lý AI. Hãy nhập chủ đề bạn muốn, tôi sẽ tạo trang web tương tác hoàn chỉnh bằng HTML, CSS, JavaScript hoặc React. Bạn có thể yêu cầu bất kỳ loại web nào: trò chơi, quiz tương tác, ứng dụng, portfolio, landing page... Hãy để trí tưởng tượng của bạn bay cao!', 
       timestamp: new Date() 
     }
   ]);
@@ -41,26 +41,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     setMessage('');
     setIsLoading(true);
     
-    const lowerMessage = message.toLowerCase().trim();
-    
-    // Cải tiến khả năng phát hiện yêu cầu quiz
-    const isQuizRequest = true; // Luôn xử lý như yêu cầu quiz
-      
     setTimeout(() => {
-      let aiResponse = '';
+      let aiResponse = "Tôi đang tạo trang web tương tác hoàn chỉnh theo yêu cầu của bạn. Web sẽ có giao diện đẹp và chức năng đầy đủ, sử dụng các công nghệ web hiện đại. Vui lòng đợi trong giây lát...";
       
-      if (isQuizRequest) {
-        aiResponse = "Tôi đang tạo bài quiz tương tác dựa trên yêu cầu của bạn. Mỗi câu hỏi sẽ có demo code trực quan. Vui lòng đợi trong giây lát...";
-        
-        // Sử dụng toàn bộ nội dung tin nhắn làm chủ đề
-        const topic = message.trim();
-        
-        // Kích hoạt tạo quiz
-        if (onQuizRequest) {
-          onQuizRequest(topic);
-        }
-      } else {
-        aiResponse = "Vui lòng nhập chủ đề bạn muốn tạo quiz. Ví dụ: 'JavaScript DOM', 'CSS Grid', 'React Components' hoặc bất kỳ chủ đề lập trình nào khác.";
+      // Sử dụng toàn bộ nội dung tin nhắn làm chủ đề
+      const topic = message.trim();
+      
+      // Kích hoạt tạo web/quiz
+      if (onQuizRequest) {
+        onQuizRequest(topic);
       }
       
       const aiMessage = {
@@ -90,7 +79,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
       <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/20">
         <div className="flex items-center">
           <BrainCircuit size={20} className="text-primary mr-2" />
-          <h3 className="font-medium">Trợ Lý Quiz Code</h3>
+          <h3 className="font-medium">Trợ Lý Tạo Web</h3>
         </div>
       </div>
       
@@ -136,7 +125,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
         <div className="relative">
           <textarea
             className="w-full p-2 pr-10 bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-sm"
-            placeholder="Nhập chủ đề lập trình để tạo quiz tương tác..."
+            placeholder="Nhập chủ đề hoặc ý tưởng để tạo trang web tương tác..."
             rows={2}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
