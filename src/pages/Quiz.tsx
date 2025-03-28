@@ -15,7 +15,7 @@ const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-    document.title = 'Tạo Quiz Code Tương Tác';
+    document.title = 'Tạo Web Tương Tác';
   }, []);
 
   const handleCreateFromPrompt = (type: BlockType, content: string) => {
@@ -34,7 +34,7 @@ const Quiz = () => {
     if (!requestedTopic.trim()) {
       toast({
         title: "Chủ Đề Trống",
-        description: "Vui lòng cung cấp chủ đề cho bài quiz",
+        description: "Vui lòng cung cấp chủ đề cho trang web",
         variant: "destructive",
       });
       return;
@@ -66,10 +66,8 @@ const Quiz = () => {
           </Sidebar>
           
           <SidebarInset className="flex-1">
-            <div className="flex-1 p-6 overflow-auto">
-              <div className="max-w-3xl mx-auto">
-                <QuizGenerator ref={quizGeneratorRef} />
-              </div>
+            <div className="flex-1 overflow-hidden">
+              <QuizGenerator ref={quizGeneratorRef} />
             </div>
           </SidebarInset>
         </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, X, ArrowRight, Loader2 } from 'lucide-react';
@@ -282,22 +281,20 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
   return (
     <div className="space-y-6">
       {quizQuestions.length > 0 && currentQuestion && (
-        <div className="flex flex-col space-y-6 p-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
+        <div className="flex flex-col space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-medium">Trang Web Tương Tác</h3>
           </div>
 
           {currentQuestion.interactiveDemo && (
-            <div className="border rounded-md w-full">
-              <div className="bg-white rounded-md overflow-hidden">
-                <iframe
-                  srcDoc={currentQuestion.interactiveDemo}
-                  title="Interactive Web"
-                  className="w-full h-[600px] border-none"
-                  sandbox="allow-scripts allow-same-origin"
-                  style={{ width: '100%', minHeight: '600px' }}
-                />
-              </div>
+            <div className="w-full h-full">
+              <iframe
+                srcDoc={currentQuestion.interactiveDemo}
+                title="Interactive Web"
+                className="w-full border-none"
+                sandbox="allow-scripts allow-same-origin"
+                style={{ width: '100%', height: 'calc(100vh - 200px)', minHeight: '600px' }}
+              />
             </div>
           )}
           
@@ -319,4 +316,3 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
 QuizGenerator.displayName = "QuizGenerator";
 
 export default QuizGenerator;
-
