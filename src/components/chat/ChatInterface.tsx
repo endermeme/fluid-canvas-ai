@@ -21,7 +21,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   const [conversation, setConversation] = useState<Message[]>([
     { 
       role: 'ai', 
-      message: 'Xin chào! Tôi là trợ lý AI. Hãy nhập chủ đề bạn muốn, tôi sẽ tạo trang web tương tác hoàn chỉnh bằng HTML, CSS, JavaScript hoặc React. Bạn có thể yêu cầu bất kỳ loại web nào: trò chơi, quiz tương tác, ứng dụng, portfolio, landing page... Hãy để trí tưởng tượng của bạn bay cao!', 
+      message: 'Xin chào! Tôi là trợ lý AI. Hãy nhập chủ đề bạn muốn, tôi sẽ tạo trang web tương tác hoàn chỉnh bằng HTML, CSS, JavaScript đầy đủ trong một file duy nhất. Web sẽ được hiển thị ngay để bạn trải nghiệm. Bạn có thể yêu cầu bất kỳ loại web nào: trò chơi, quiz tương tác, ứng dụng, portfolio, landing page...', 
       timestamp: new Date() 
     }
   ]);
@@ -42,7 +42,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     setIsLoading(true);
     
     setTimeout(() => {
-      let aiResponse = "Tôi đang tạo trang web tương tác hoàn chỉnh theo yêu cầu của bạn. Web sẽ có giao diện đẹp và chức năng đầy đủ, sử dụng các công nghệ web hiện đại. Vui lòng đợi trong giây lát...";
+      let aiResponse = "Tôi đang tạo trang web đầy đủ theo yêu cầu của bạn. Trang web sẽ bao gồm toàn bộ code HTML, CSS và JavaScript trong một file HTML hoàn chỉnh, sẵn sàng để hiển thị. Vui lòng đợi trong giây lát...";
       
       // Sử dụng toàn bộ nội dung tin nhắn làm chủ đề
       const topic = message.trim();
@@ -125,7 +125,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
         <div className="relative">
           <textarea
             className="w-full p-2 pr-10 bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-sm"
-            placeholder="Nhập chủ đề hoặc ý tưởng để tạo trang web tương tác..."
+            placeholder="Nhập chủ đề hoặc ý tưởng để tạo trang web tương tác đầy đủ..."
             rows={2}
             value={message}
             onChange={(e) => setMessage(e.target.value)}

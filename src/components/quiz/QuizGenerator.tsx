@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, X, ArrowRight, Loader2 } from 'lucide-react';
@@ -32,204 +31,103 @@ class AIQuizGenerator {
 
   async generateQuizFromContext(userMessage: string): Promise<QuizQuestion[] | null> {
     try {
-      console.log("Đang tạo quiz cho chủ đề:", userMessage);
+      console.log("Đang tạo web cho chủ đề:", userMessage);
       
-      const prompt = `Tạo một bài quiz tương tác về lập trình với các câu hỏi liên quan đến ${userMessage}. Bài quiz cần chứa các đoạn code minh họa và demo tương tác.
+      const prompt = `Tạo một trang web tương tác hoàn chỉnh về chủ đề ${userMessage}. Trang web cần bao gồm toàn bộ HTML, CSS và JavaScript trong một file duy nhất, và không được sử dụng liên kết tới các tài nguyên bên ngoài.
 
 Yêu cầu chi tiết:
-- Tạo 4 câu hỏi trắc nghiệm có liên quan đến ${userMessage}
-- Mỗi câu hỏi phải đi kèm với một đoạn code thực tế bằng HTML, CSS, JavaScript hoặc React
-- Mỗi câu hỏi nên có một demo tương tác - là một đoạn code HTML/CSS/JavaScript hoàn chỉnh để hiển thị trực quan (như một canvas, animation, hoặc component tương tác)
-- Cung cấp 4 lựa chọn (A, B, C, D) cho mỗi câu hỏi
-- Đánh dấu đáp án đúng
-- Thêm phần giải thích ngắn gọn cho đáp án
+- Tạo một trang web hoàn chỉnh và đẹp mắt về chủ đề ${userMessage}.
+- Toàn bộ HTML, CSS và JavaScript phải nằm trong một file HTML duy nhất.
+- Trang web phải có tính tương tác cao và trải nghiệm người dùng tốt.
+- Thiết kế phải đẹp mắt, hiện đại và responsive.
+- Sử dụng CSS hiện đại, có thể sử dụng Flexbox hoặc Grid.
+- Phải tương thích với các trình duyệt hiện đại.
+- VIẾT HOÀN TOÀN BẰNG TIẾNG VIỆT nếu có nội dung hiển thị.
 
-Định dạng cho mỗi câu hỏi:
-Câu hỏi: [Nội dung câu hỏi]
+Định dạng trả về:
+Chỉ trả về một file HTML hoàn chỉnh bao gồm tất cả HTML, CSS và JavaScript.
 
-Code:
-\`\`\`[ngôn ngữ]
-[đoạn code minh họa]
-\`\`\`
-
-A. [Lựa chọn 1]
-B. [Lựa chọn 2]
-C. [Lựa chọn 3]
-D. [Lựa chọn 4]
-Đáp án đúng: [A/B/C/D]
-
-Giải thích: [Giải thích ngắn gọn]
-
-Demo tương tác:
 \`\`\`html
-<!-- Đây là đoạn HTML/CSS/JavaScript để tạo demo tương tác cho câu hỏi này -->
-<!-- Code này sẽ được nhúng vào trang web để người dùng có thể tương tác -->
-<!-- VD: một button để click, một animation, một component React, v.v... -->
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-<style>
-/* CSS cho demo */
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Web Tương Tác</title>
+    <style>
+        /* CSS ở đây */
+    </style>
 </head>
 <body>
-<!-- Nội dung HTML -->
-<script>
-// JavaScript cho demo
-</script>
+    <!-- HTML ở đây -->
+    
+    <script>
+        // JavaScript ở đây
+    </script>
 </body>
 </html>
 \`\`\`
 
 LƯU Ý QUAN TRỌNG: 
-- Đảm bảo đoạn code được hỗ trợ đầy đủ và có thể chạy được để minh họa.
-- Tập trung vào khía cạnh thực hành và ứng dụng thực tế của code.
-- Demo tương tác phải hoàn chỉnh và có thể hiển thị trực tiếp trên trình duyệt.
-- VIẾT HOÀN TOÀN BẰNG TIẾNG VIỆT.
-- Mỗi demo tương tác phải đơn giản nhưng đủ để minh họa vấn đề trong câu hỏi.`;
+- KHÔNG trả về bất kỳ giải thích nào, chỉ trả về một file HTML hoàn chỉnh.
+- Đảm bảo code chạy được ngay mà không cần sửa đổi thêm.
+- Không sử dụng các framework bên ngoài như React, Vue, Bootstrap, v.v... mà không đưa vào file.
+- Tất cả mã JavaScript phải nằm trong thẻ <script> của file HTML.
+- Tất cả CSS phải nằm trong thẻ <style> của file HTML.`;
 
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
       
-      console.log("Kết quả quiz thô:", text);
+      console.log("Kết quả web thô:", text);
       return this.parseQuizResponse(text);
     } catch (error) {
-      console.error('Lỗi tạo Quiz:', error);
+      console.error('Lỗi tạo Web:', error);
       return null;
     }
   }
 
   parseQuizResponse(rawText: string): QuizQuestion[] {
     try {
-      console.log("Đang phân tích kết quả quiz:", rawText);
+      console.log("Đang phân tích kết quả web:", rawText);
       
-      // Phân tích câu hỏi từ phản hồi
-      const questions: QuizQuestion[] = [];
-      const questionBlocks = rawText.split('Câu hỏi:').filter(block => block.trim().length > 0);
+      // Tìm nội dung HTML
+      let htmlContent = '';
+      const htmlMatch = rawText.match(/```html([\s\S]*?)```/);
       
-      for (const questionBlock of questionBlocks) {
-        const lines = questionBlock.trim().split('\n').filter(line => line.trim().length > 0);
-        
-        if (lines.length < 6) {
-          console.warn("Bỏ qua khối câu hỏi không đúng định dạng:", questionBlock);
-          continue;
-        }
-        
-        // Tìm đoạn code
-        let codeSnippet = '';
-        let codeStartIndex = -1;
-        let codeEndIndex = -1;
-        
-        for (let i = 0; i < lines.length; i++) {
-          if (lines[i].includes('```')) {
-            if (codeStartIndex === -1) {
-              codeStartIndex = i;
-            } else {
-              codeEndIndex = i;
-              break;
-            }
-          }
-        }
-        
-        if (codeStartIndex !== -1 && codeEndIndex !== -1) {
-          codeSnippet = lines.slice(codeStartIndex + 1, codeEndIndex).join('\n');
-        }
-        
-        // Tìm demo tương tác
-        let interactiveDemo = '';
-        let demoStartIndex = -1;
-        let demoEndIndex = -1;
-        
-        // Tìm đoạn Demo tương tác
-        let foundDemo = false;
-        for (let i = 0; i < lines.length; i++) {
-          if (lines[i].includes('Demo tương tác:')) {
-            foundDemo = true;
-          }
-          if (foundDemo && lines[i].includes('```html')) {
-            demoStartIndex = i;
-          } else if (foundDemo && demoStartIndex !== -1 && lines[i].includes('```')) {
-            demoEndIndex = i;
-            break;
-          }
-        }
-        
-        if (demoStartIndex !== -1 && demoEndIndex !== -1) {
-          interactiveDemo = lines.slice(demoStartIndex + 1, demoEndIndex).join('\n');
-        }
-        
-        // Tìm các lựa chọn
-        const optionIndices: number[] = [];
-        for (let i = 0; i < lines.length; i++) {
-          if (/^[A-D]\.\s/.test(lines[i])) {
-            optionIndices.push(i);
-          }
-        }
-        
-        if (optionIndices.length < 4) {
-          console.warn("Không đủ lựa chọn cho câu hỏi:", questionBlock);
-          continue;
-        }
-        
-        const options = optionIndices.map(idx => {
-          return lines[idx].replace(/^[A-D]\.\s*/, '').trim();
-        });
-        
-        // Tìm đáp án đúng
-        let correctAnswer = 'A'; // Mặc định nếu không tìm thấy
-        const correctAnswerLine = lines.find(line => 
-          line.includes('Đáp án đúng:') || 
-          line.includes('Đáp án:') || 
-          line.includes('Câu trả lời đúng:')
-        );
-        
-        if (correctAnswerLine) {
-          const match = correctAnswerLine.match(/[A-D]$/);
-          if (match && match[0]) {
-            correctAnswer = match[0];
-          }
-        }
-        
-        // Tìm giải thích
-        let explanation = '';
-        const explanationIndex = lines.findIndex(line => 
-          line.includes('Giải thích:') || 
-          line.includes('Lý giải:') || 
-          line.includes('Giải thích đáp án:')
-        );
-        
-        if (explanationIndex !== -1 && explanationIndex < lines.length - 1) {
-          explanation = lines[explanationIndex + 1];
-        }
-        
-        let questionText = lines[0].trim();
-        if (codeStartIndex > 1) {
-          // Nếu có nhiều dòng trước đoạn code, kết hợp chúng thành câu hỏi
-          questionText = lines.slice(0, codeStartIndex).join(' ').trim();
-        }
-        
-        questions.push({
-          question: questionText,
-          options,
-          correctAnswer,
-          codeSnippet,
-          explanation,
-          interactiveDemo
-        });
+      if (htmlMatch && htmlMatch[1]) {
+        htmlContent = htmlMatch[1].trim();
+      } else if (!rawText.includes('```')) {
+        // Nếu không có định dạng markdown, xử lý text thô
+        htmlContent = rawText.trim();
       }
       
-      console.log("Câu hỏi đã phân tích:", questions);
+      if (!htmlContent) {
+        console.error('Không tìm thấy nội dung HTML hợp lệ');
+        return [];
+      }
+
+      // Tạo một quiz duy nhất chứa toàn bộ nội dung web
+      const questions: QuizQuestion[] = [
+        {
+          question: 'Trang Web Tương Tác',
+          options: ['Xem Trang Web', 'Tùy Chọn B', 'Tùy Chọn C', 'Tùy Chọn D'],
+          correctAnswer: 'A',
+          interactiveDemo: htmlContent
+        }
+      ];
+      
+      console.log("Web đã phân tích:", questions);
       return questions;
     } catch (error) {
-      console.error("Lỗi phân tích kết quả quiz:", error);
+      console.error("Lỗi phân tích kết quả web:", error);
       return [];
     }
   }
 }
 
 const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, QuizGeneratorProps>(({ 
-  topic = "Kiến thức cơ bản",
+  topic = "Web tương tác",
   onQuizComplete
 }, ref) => {
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
@@ -265,18 +163,18 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
       if (questions && questions.length > 0) {
         setQuizQuestions(questions);
         toast({
-          title: "Bài Quiz Đã Sẵn Sàng",
-          description: `Đã tạo ${questions.length} câu hỏi về "${context}"`,
+          title: "Trang Web Đã Sẵn Sàng",
+          description: `Đã tạo trang web tương tác về "${context}"`,
         });
       } else {
-        throw new Error('Không thể tạo câu hỏi');
+        throw new Error('Không thể tạo trang web');
       }
     } catch (error) {
-      console.error('Lỗi Tạo Quiz:', error);
-      setErrorMessage('Không thể tạo quiz. Vui lòng thử lại hoặc chọn chủ đề khác.');
+      console.error('Lỗi Tạo Web:', error);
+      setErrorMessage('Không thể tạo trang web. Vui lòng thử lại hoặc chọn chủ đề khác.');
       toast({
-        title: "Lỗi Tạo Quiz",
-        description: "Có vấn đề khi tạo bài quiz. Vui lòng thử lại với chủ đề khác.",
+        title: "Lỗi Tạo Web",
+        description: "Có vấn đề khi tạo trang web. Vui lòng thử lại với chủ đề khác.",
         variant: "destructive",
       });
     } finally {
@@ -344,7 +242,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p>Đang tạo bài quiz tương tác từ chủ đề của bạn...</p>
+        <p>Đang tạo trang web tương tác từ chủ đề của bạn...</p>
       </div>
     );
   }
@@ -365,18 +263,11 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     return (
       <div className="flex flex-col space-y-6 p-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Kết Quả Bài Quiz</h2>
-          <p className="text-xl mb-4">
-            Điểm số của bạn: {score}/{quizQuestions.length}
-          </p>
+          <h2 className="text-2xl font-bold mb-2">Trang Web Đã Hoàn Thành</h2>
           
           <div className="flex justify-center">
-            <Button onClick={handleRestartQuiz} className="mr-2">Làm Lại Quiz</Button>
-            <Button 
-              onClick={() => generateQuiz(topic)}
-              variant="outline"
-            >
-              Tạo Quiz Mới
+            <Button onClick={() => generateQuiz(topic)} className="mr-2">
+              Tạo Trang Web Mới
             </Button>
           </div>
         </div>
@@ -389,85 +280,30 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
       {quizQuestions.length > 0 && currentQuestion && (
         <div className="flex flex-col space-y-6 p-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium">Câu hỏi {currentQuestionIndex + 1}/{quizQuestions.length}</h3>
-            <div className="text-muted-foreground">Điểm: {score}/{currentQuestionIndex}</div>
+            <h3 className="text-lg font-medium">Trang Web Tương Tác</h3>
           </div>
-          
-          <div className="text-xl font-medium">
-            {currentQuestion.question}
-          </div>
-
-          {currentQuestion.codeSnippet && (
-            <div className="bg-slate-900 text-white p-4 rounded-md overflow-auto font-mono text-sm">
-              <pre>{currentQuestion.codeSnippet}</pre>
-            </div>
-          )}
 
           {currentQuestion.interactiveDemo && (
-            <div className="border rounded-md p-4 bg-white">
-              <h4 className="text-sm font-medium mb-2">Demo Tương Tác:</h4>
-              <div className="bg-gray-50 rounded-md p-4 min-h-[200px] overflow-hidden">
+            <div className="border rounded-md">
+              <div className="bg-white rounded-md overflow-hidden">
                 <iframe
                   srcDoc={currentQuestion.interactiveDemo}
-                  title="Interactive Demo"
-                  className="w-full h-[300px] border-none"
+                  title="Interactive Web"
+                  className="w-full h-[600px] border-none"
                   sandbox="allow-scripts allow-same-origin"
                 />
               </div>
             </div>
           )}
           
-          <div className="space-y-3">
-            {currentQuestion.options.map((option, index) => (
-              <button
-                key={index}
-                className={`w-full text-left p-3 rounded-md border transition-all ${
-                  selectedAnswer === String.fromCharCode(65 + index)
-                    ? isAnswered 
-                      ? selectedAnswer === currentQuestion.correctAnswer 
-                        ? 'bg-green-100 dark:bg-green-900/20 border-green-300 dark:border-green-800'
-                        : 'bg-red-100 dark:bg-red-900/20 border-red-300 dark:border-red-800'
-                      : 'bg-primary/10 border-primary'
-                    : 'border-border hover:bg-secondary'
-                }`}
-                onClick={() => handleOptionSelect(index)}
-                disabled={isAnswered}
-              >
-                <div className="flex items-center">
-                  <div className={`w-6 h-6 flex items-center justify-center rounded-full mr-2 ${
-                    selectedAnswer === String.fromCharCode(65 + index) ? 'bg-primary text-white' : 'bg-secondary'
-                  }`}>
-                    {String.fromCharCode(65 + index)}
-                  </div>
-                  <span>{option}</span>
-                  {isAnswered && currentQuestion.correctAnswer === String.fromCharCode(65 + index) && (
-                    <Check className="ml-auto text-green-500" />
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-
-          <div className="flex justify-end space-x-3 pt-3">
-            {isAnswered ? (
-              <Button 
-                className="flex items-center"
-                variant="default"
-                onClick={handleNextQuestion}
-              >
-                {currentQuestionIndex < quizQuestions.length - 1 ? 'Câu Hỏi Tiếp Theo' : 'Hoàn Thành Quiz'} 
-                <ArrowRight size={16} className="ml-2" />
-              </Button>
-            ) : (
-              <Button 
-                className="flex items-center"
-                variant="default"
-                onClick={checkAnswer}
-                disabled={!selectedAnswer}
-              >
-                Kiểm Tra Đáp Án
-              </Button>
-            )}
+          <div className="flex justify-center space-x-3 pt-3">
+            <Button 
+              className="flex items-center"
+              variant="outline"
+              onClick={() => generateQuiz(topic)}
+            >
+              Tạo Trang Web Mới
+            </Button>
           </div>
         </div>
       )}
