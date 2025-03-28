@@ -13,6 +13,7 @@ interface QuizQuestion {
   correctAnswer: string;
   codeSnippet?: string;
   explanation?: string;
+  interactiveDemo?: string; // HTML/CSS/JS to render an interactive demo
 }
 
 interface QuizGeneratorProps {
@@ -33,13 +34,12 @@ class AIQuizGenerator {
     try {
       console.log("Đang tạo quiz cho chủ đề:", userMessage);
       
-      const prompt = `Tạo một bài kiểm tra trắc nghiệm tương tác về lập trình dựa trên chủ đề sau:
-
-Chủ đề: ${userMessage}
+      const prompt = `Tạo một bài quiz tương tác về lập trình với các câu hỏi liên quan đến ${userMessage}. Bài quiz cần chứa các đoạn code minh họa và demo tương tác.
 
 Yêu cầu chi tiết:
-- Tạo 4 câu hỏi trắc nghiệm về lập trình web với HTML, CSS, JavaScript hoặc React (tùy vào chủ đề người dùng yêu cầu)
-- Mỗi câu hỏi nên có một đoạn code minh họa hoặc phân tích code
+- Tạo 4 câu hỏi trắc nghiệm có liên quan đến ${userMessage}
+- Mỗi câu hỏi phải đi kèm với một đoạn code thực tế bằng HTML, CSS, JavaScript hoặc React
+- Mỗi câu hỏi nên có một demo tương tác - là một đoạn code HTML/CSS/JavaScript hoàn chỉnh để hiển thị trực quan (như một canvas, animation, hoặc component tương tác)
 - Cung cấp 4 lựa chọn (A, B, C, D) cho mỗi câu hỏi
 - Đánh dấu đáp án đúng
 - Thêm phần giải thích ngắn gọn cho đáp án
@@ -60,7 +60,33 @@ D. [Lựa chọn 4]
 
 Giải thích: [Giải thích ngắn gọn]
 
-LƯU Ý QUAN TRỌNG: Đảm bảo đoạn code được hỗ trợ đầy đủ và có thể chạy được để minh họa. Tập trung vào khía cạnh thực hành và ứng dụng thực tế của code. HÃY VIẾT HOÀN TOÀN BẰNG TIẾNG VIỆT.`;
+Demo tương tác:
+\`\`\`html
+<!-- Đây là đoạn HTML/CSS/JavaScript để tạo demo tương tác cho câu hỏi này -->
+<!-- Code này sẽ được nhúng vào trang web để người dùng có thể tương tác -->
+<!-- VD: một button để click, một animation, một component React, v.v... -->
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+/* CSS cho demo */
+</style>
+</head>
+<body>
+<!-- Nội dung HTML -->
+<script>
+// JavaScript cho demo
+</script>
+</body>
+</html>
+\`\`\`
+
+LƯU Ý QUAN TRỌNG: 
+- Đảm bảo đoạn code được hỗ trợ đầy đủ và có thể chạy được để minh họa.
+- Tập trung vào khía cạnh thực hành và ứng dụng thực tế của code.
+- Demo tương tác phải hoàn chỉnh và có thể hiển thị trực tiếp trên trình duyệt.
+- VIẾT HOÀN TOÀN BẰNG TIẾNG VIỆT.
+- Mỗi demo tương tác phải đơn giản nhưng đủ để minh họa vấn đề trong câu hỏi.`;
 
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
@@ -108,6 +134,29 @@ LƯU Ý QUAN TRỌNG: Đảm bảo đoạn code được hỗ trợ đầy đủ
         
         if (codeStartIndex !== -1 && codeEndIndex !== -1) {
           codeSnippet = lines.slice(codeStartIndex + 1, codeEndIndex).join('\n');
+        }
+        
+        // Tìm demo tương tác
+        let interactiveDemo = '';
+        let demoStartIndex = -1;
+        let demoEndIndex = -1;
+        
+        // Tìm đoạn Demo tương tác
+        let foundDemo = false;
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].includes('Demo tương tác:')) {
+            foundDemo = true;
+          }
+          if (foundDemo && lines[i].includes('```html')) {
+            demoStartIndex = i;
+          } else if (foundDemo && demoStartIndex !== -1 && lines[i].includes('```')) {
+            demoEndIndex = i;
+            break;
+          }
+        }
+        
+        if (demoStartIndex !== -1 && demoEndIndex !== -1) {
+          interactiveDemo = lines.slice(demoStartIndex + 1, demoEndIndex).join('\n');
         }
         
         // Tìm các lựa chọn
@@ -165,7 +214,8 @@ LƯU Ý QUAN TRỌNG: Đảm bảo đoạn code được hỗ trợ đầy đủ
           options,
           correctAnswer,
           codeSnippet,
-          explanation
+          explanation,
+          interactiveDemo
         });
       }
       
@@ -188,7 +238,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
   const [isAnswered, setIsAnswered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [userInput, setUserInput] = useState(topic);
   const { toast } = useToast();
   const [quizGenerator] = useState<AIQuizGenerator>(new AIQuizGenerator(API_KEY));
   const [score, setScore] = useState(0);
@@ -199,10 +248,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
       generateQuiz(topic);
     }
   }));
-
-  useEffect(() => {
-    setUserInput(topic);
-  }, [topic]);
 
   const generateQuiz = async (context: string) => {
     setIsLoading(true);
@@ -299,7 +344,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-lg border border-border">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p>Đang tạo bài quiz từ chủ đề của bạn...</p>
+        <p>Đang tạo bài quiz tương tác từ chủ đề của bạn...</p>
       </div>
     );
   }
@@ -311,7 +356,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
           <X size={36} />
         </div>
         <p>{errorMessage}</p>
-        <Button onClick={() => generateQuiz(userInput)}>Thử Lại</Button>
+        <Button onClick={() => generateQuiz(topic)}>Thử Lại</Button>
       </div>
     );
   }
@@ -328,7 +373,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
           <div className="flex justify-center">
             <Button onClick={handleRestartQuiz} className="mr-2">Làm Lại Quiz</Button>
             <Button 
-              onClick={() => generateQuiz(userInput)}
+              onClick={() => generateQuiz(topic)}
               variant="outline"
             >
               Tạo Quiz Mới
@@ -355,6 +400,20 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
           {currentQuestion.codeSnippet && (
             <div className="bg-slate-900 text-white p-4 rounded-md overflow-auto font-mono text-sm">
               <pre>{currentQuestion.codeSnippet}</pre>
+            </div>
+          )}
+
+          {currentQuestion.interactiveDemo && (
+            <div className="border rounded-md p-4 bg-white">
+              <h4 className="text-sm font-medium mb-2">Demo Tương Tác:</h4>
+              <div className="bg-gray-50 rounded-md p-4 min-h-[200px] overflow-hidden">
+                <iframe
+                  srcDoc={currentQuestion.interactiveDemo}
+                  title="Interactive Demo"
+                  className="w-full h-[300px] border-none"
+                  sandbox="allow-scripts allow-same-origin"
+                />
+              </div>
             </div>
           )}
           

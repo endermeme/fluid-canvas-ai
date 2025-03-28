@@ -21,7 +21,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   const [conversation, setConversation] = useState<Message[]>([
     { 
       role: 'ai', 
-      message: 'Xin chào! Tôi là trợ lý AI. Bạn muốn tạo quiz về chủ đề gì? Bạn có thể nhập chủ đề như "JavaScript", "ReactJS", "CSS Animation" hoặc bất kỳ chủ đề lập trình nào khác.', 
+      message: 'Xin chào! Tôi là trợ lý AI. Bạn muốn tạo quiz tương tác về chủ đề gì? Có thể nhập chủ đề như "JavaScript Arrays", "CSS Flexbox", "React Hooks" hoặc bất kỳ chủ đề lập trình nào khác. Tôi sẽ tạo các quiz có demo code tương tác!', 
       timestamp: new Date() 
     }
   ]);
@@ -50,7 +50,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
       let aiResponse = '';
       
       if (isQuizRequest) {
-        aiResponse = "Tôi đang tạo bài quiz dựa trên yêu cầu của bạn. Vui lòng đợi trong giây lát...";
+        aiResponse = "Tôi đang tạo bài quiz tương tác dựa trên yêu cầu của bạn. Mỗi câu hỏi sẽ có demo code trực quan. Vui lòng đợi trong giây lát...";
         
         // Sử dụng toàn bộ nội dung tin nhắn làm chủ đề
         const topic = message.trim();
@@ -60,7 +60,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
           onQuizRequest(topic);
         }
       } else {
-        aiResponse = "Vui lòng nhập chủ đề bạn muốn tạo quiz. Ví dụ: 'JavaScript', 'ReactJS', 'HTML & CSS' hoặc bất kỳ chủ đề lập trình nào khác.";
+        aiResponse = "Vui lòng nhập chủ đề bạn muốn tạo quiz. Ví dụ: 'JavaScript DOM', 'CSS Grid', 'React Components' hoặc bất kỳ chủ đề lập trình nào khác.";
       }
       
       const aiMessage = {
@@ -136,7 +136,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
         <div className="relative">
           <textarea
             className="w-full p-2 pr-10 bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-sm"
-            placeholder="Nhập chủ đề lập trình để tạo quiz..."
+            placeholder="Nhập chủ đề lập trình để tạo quiz tương tác..."
             rows={2}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
