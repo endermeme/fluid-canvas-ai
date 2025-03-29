@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Block as BlockType } from '@/lib/block-utils';
 import ContentEditable from './ContentEditable';
 import { animateBlockCreation } from '@/lib/animations';
-import { Menu, X, Move, Code, Image, StickyNote, Type, MoreHorizontal } from 'lucide-react';
+import { Menu, X, Move, Code, Image, StickyNote, Type, MoreHorizontal, Sparkles, PenLine, FileText, PencilRuler } from 'lucide-react';
 import BlockMenu from './BlockMenu';
 
 interface BlockProps {
@@ -79,9 +79,10 @@ const Block: React.FC<BlockProps> = ({
       case 'code':
         return (
           <div className="w-full h-full flex flex-col">
-            <div className="text-xs text-muted-foreground mb-1 px-1 flex items-center">
+            <div className="text-xs text-sea-bright mb-1 px-1 flex items-center">
               <Code size={12} className="mr-1" />
               <span>Code</span>
+              <Sparkles size={8} className="ml-1 text-sea-light animate-pulse-soft" />
             </div>
             <ContentEditable 
               content={block.content}
@@ -95,9 +96,9 @@ const Block: React.FC<BlockProps> = ({
       case 'image':
         return (
           <div className="w-full h-full flex flex-col">
-            <div className="text-xs text-muted-foreground mb-1 px-1 flex items-center">
+            <div className="text-xs text-sea-bright mb-1 px-1 flex items-center">
               <Image size={12} className="mr-1" />
-              <span>Image</span>
+              <span>Hình ảnh</span>
             </div>
             {block.content ? (
               <img 
@@ -107,7 +108,8 @@ const Block: React.FC<BlockProps> = ({
               />
             ) : (
               <div className="flex items-center justify-center w-full h-full bg-secondary/50 rounded text-muted-foreground text-sm">
-                Click to add an image
+                <Image size={20} className="mr-2 text-sea-light" />
+                Nhấp để thêm hình ảnh
               </div>
             )}
           </div>
@@ -117,7 +119,8 @@ const Block: React.FC<BlockProps> = ({
           <div className="w-full h-full flex flex-col bg-yellow-100 dark:bg-yellow-800/40">
             <div className="text-xs text-muted-foreground mb-1 px-1 flex items-center">
               <StickyNote size={12} className="mr-1" />
-              <span>Note</span>
+              <span>Ghi chú</span>
+              <Sparkles size={8} className="ml-1 text-yellow-500/70 animate-pulse-soft" />
             </div>
             <ContentEditable 
               content={block.content}
@@ -135,11 +138,11 @@ const Block: React.FC<BlockProps> = ({
   // Block header icons based on type
   const getBlockIcon = () => {
     switch (block.type) {
-      case 'text': return <Type size={14} />;
-      case 'code': return <Code size={14} />;
-      case 'image': return <Image size={14} />;
-      case 'sticky': return <StickyNote size={14} />;
-      default: return <Menu size={14} />;
+      case 'text': return <PenLine size={14} className="text-sea" />;
+      case 'code': return <Code size={14} className="text-sea-bright" />;
+      case 'image': return <Image size={14} className="text-sea" />;
+      case 'sticky': return <StickyNote size={14} className="text-yellow-500" />;
+      default: return <FileText size={14} className="text-sea" />;
     }
   };
   
@@ -185,20 +188,20 @@ const Block: React.FC<BlockProps> = ({
       >
         <div className="flex items-center space-x-1">
           {getBlockIcon()}
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-sea-dark">
             {new Date(block.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
         
         <div className="flex items-center">
           <button
-            className="p-1 rounded hover:bg-secondary/50 transition-colors"
+            className="p-1 rounded hover:bg-sea-pale/70 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
           >
-            <MoreHorizontal size={14} />
+            <MoreHorizontal size={14} className="text-sea-dark" />
           </button>
         </div>
       </div>

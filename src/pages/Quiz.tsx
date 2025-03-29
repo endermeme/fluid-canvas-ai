@@ -7,6 +7,7 @@ import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
 import { GameOptions } from '@/components/quiz/GameOptionsSelector';
+import { Brain, Sparkles, Gamepad, Stars, Rocket } from 'lucide-react';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
@@ -79,6 +80,11 @@ const Quiz = () => {
         <div className="flex-1 flex overflow-hidden">
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent className="bg-sidebar/80 backdrop-blur-md">
+              <div className="flex items-center justify-center gap-2 py-3 bg-sea/20 mb-2 rounded-md mx-2">
+                <Gamepad className="h-6 w-6 text-sea-bright animate-bounce-subtle" />
+                <h2 className="font-bold text-lg text-sea-dark">Trò Chơi Mini</h2>
+                <Stars className="h-5 w-5 text-sea-light animate-pulse-soft" />
+              </div>
               <ChatInterface 
                 onCreateBlock={handleCreateFromPrompt} 
                 onQuizRequest={handleGameRequest}

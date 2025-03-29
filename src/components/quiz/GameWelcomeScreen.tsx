@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Gamepad, Settings2, X, ChevronRight, FileText } from 'lucide-react';
+import { Gamepad, Settings2, X, ChevronRight, FileText, Star, Sparkles, Brain, Controller, Puzzle, Rocket, Trophy, Target, Timer, Music, Gift, Heart, Map } from 'lucide-react';
 import { 
   Drawer,
   DrawerClose,
@@ -22,9 +22,18 @@ interface GameWelcomeScreenProps {
 
 const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
   const suggestedTopics = [
-    "Trò Chơi Đố Vui", "Xếp Hình", "Nhớ Hình", "Phản Xạ", 
-    "Truy Tìm Kho Báu", "Câu Đố Logic", "Vẽ Tranh", "Giải Mã", 
-    "Đua Xe", "Ghép Đôi", "Trò Chơi Trí Nhớ", "Thử Thách"
+    { name: "Trò Chơi Đố Vui", icon: <Brain size={16} className="mr-1 text-sea-bright" /> }, 
+    { name: "Xếp Hình", icon: <Puzzle size={16} className="mr-1 text-sea-bright" /> }, 
+    { name: "Nhớ Hình", icon: <Star size={16} className="mr-1 text-sea-bright" /> }, 
+    { name: "Phản Xạ", icon: <Timer size={16} className="mr-1 text-sea-bright" /> }, 
+    { name: "Truy Tìm Kho Báu", icon: <Map size={16} className="mr-1 text-sea-bright" /> }, 
+    { name: "Câu Đố Logic", icon: <Brain size={16} className="mr-1 text-sea-bright" /> }, 
+    { name: "Vẽ Tranh", icon: <PenLine size={16} className="mr-1 text-sea-bright" /> }, 
+    { name: "Giải Mã", icon: <Puzzle size={16} className="mr-1 text-sea-bright" /> }, 
+    { name: "Đua Xe", icon: <Rocket size={16} className="mr-1 text-sea-bright" /> }, 
+    { name: "Ghép Đôi", icon: <Heart size={16} className="mr-1 text-sea-bright" /> }, 
+    { name: "Trò Chơi Trí Nhớ", icon: <Brain size={16} className="mr-1 text-sea-bright" /> }, 
+    { name: "Thử Thách", icon: <Trophy size={16} className="mr-1 text-sea-bright" /> }
   ];
   
   const [isShowingOptions, setIsShowingOptions] = useState(false);
@@ -69,8 +78,10 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
         <div className="absolute inset-0 rounded-full bg-sea-light/20 animate-ping"></div>
       </div>
       
-      <h2 className="text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-sea-bright to-sea-dark">
+      <h2 className="text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-sea-bright to-sea-dark flex items-center justify-center">
+        <Sparkles size={20} className="mr-2 text-sea-light animate-pulse-soft" />
         Trò Chơi Mini Tương Tác
+        <Sparkles size={20} className="ml-2 text-sea-light animate-pulse-soft" />
       </h2>
       
       <p className="text-center max-w-lg text-slate-600 dark:text-slate-300">
@@ -80,12 +91,13 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
       <div className="flex flex-wrap justify-center gap-3 max-w-xl mt-4">
         {suggestedTopics.map((topic) => (
           <Button 
-            key={topic}
+            key={topic.name}
             variant="outline" 
-            className="rounded-full border-sea-pale dark:border-sea-dark/80 hover:bg-sea-pale/70 dark:hover:bg-sea-dark/50 transition-all shadow-sm"
-            onClick={() => handleTopicClick(topic)}
+            className="rounded-full border-sea-pale dark:border-sea-dark/80 hover:bg-sea-pale/70 dark:hover:bg-sea-dark/50 transition-all shadow-sm flex items-center"
+            onClick={() => handleTopicClick(topic.name)}
           >
-            {topic}
+            {topic.icon}
+            {topic.name}
           </Button>
         ))}
         <Button 
@@ -95,6 +107,7 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
         >
           <FileText size={16} className="mr-1" />
           Tùy Chỉnh
+          <Sparkles size={12} className="ml-1 text-sea-light animate-pulse-soft" />
         </Button>
       </div>
 
@@ -102,7 +115,10 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
       <Dialog open={isCustomTopicDialog} onOpenChange={setIsCustomTopicDialog}>
         <DialogContent className="max-w-md bg-white/95 backdrop-blur-lg border-sea-pale/50">
           <DialogHeader>
-            <DialogTitle className="text-sea-dark">Tạo Chủ Đề Tùy Chỉnh</DialogTitle>
+            <DialogTitle className="text-sea-dark flex items-center">
+              <Controller size={18} className="mr-2 text-sea" />
+              Tạo Chủ Đề Tùy Chỉnh
+            </DialogTitle>
             <DialogDescription>
               Nhập chủ đề tùy chỉnh cho trò chơi mini của bạn
             </DialogDescription>
@@ -122,8 +138,9 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
               Hủy
             </Button>
             <Button onClick={handleCustomTopicConfirm}
-              className="bg-sea hover:bg-sea-bright">
+              className="bg-sea hover:bg-sea-bright flex items-center">
               Tiếp Tục
+              <ChevronRight size={16} className="ml-1" />
             </Button>
           </div>
         </DialogContent>
@@ -133,7 +150,10 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
       <Drawer open={isShowingOptions} onOpenChange={setIsShowingOptions}>
         <DrawerContent className="bg-white/95 backdrop-blur-lg border-t border-sea-pale/50">
           <DrawerHeader>
-            <DrawerTitle className="text-xl text-sea-bright">Tùy chỉnh minigame</DrawerTitle>
+            <DrawerTitle className="text-xl text-sea-bright flex items-center">
+              <Settings2 size={18} className="mr-2 text-sea animate-pulse-soft" />
+              Tùy chỉnh minigame
+            </DrawerTitle>
             <DrawerDescription>
               {selectedTopic ? (
                 <span>Điều chỉnh tùy chọn cho minigame <strong>"{selectedTopic}"</strong></span>
@@ -152,8 +172,9 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
             <div className="flex gap-3">
               <Button 
                 onClick={handleConfirm}
-                className="flex-1 bg-gradient-to-r from-sea to-sea-bright hover:from-sea-bright hover:to-sea-dark"
+                className="flex-1 bg-gradient-to-r from-sea to-sea-bright hover:from-sea-bright hover:to-sea-dark flex items-center justify-center"
               >
+                <Rocket size={16} className="mr-1" />
                 Tạo Minigame
                 <ChevronRight size={16} className="ml-1" />
               </Button>

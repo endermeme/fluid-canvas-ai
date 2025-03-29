@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { PlusCircle, Image, FileText, Code, Download, X } from 'lucide-react';
+import { PlusCircle, Image, FileText, Code, Download, X, PenLine, Puzzle, Sparkles } from 'lucide-react';
 import { BlockType } from '@/lib/block-utils';
 
 interface FloatingToolbarProps {
@@ -20,71 +20,73 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
         {/* Add Block Button/Menu */}
         <div className="relative">
           <button
-            className="p-2 rounded-full hover:bg-primary/10 transition-colors flex items-center space-x-1"
+            className="p-2 rounded-full hover:bg-sea-pale/70 transition-colors flex items-center space-x-1 group"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Add block"
           >
             {isMenuOpen ? (
               <>
-                <X size={20} />
-                <span className="text-sm">Close</span>
+                <X size={20} className="text-sea-dark group-hover:text-sea-bright transition-colors" />
+                <span className="text-sm text-sea-dark group-hover:text-sea-bright transition-colors">Đóng</span>
               </>
             ) : (
               <>
-                <PlusCircle size={20} />
-                <span className="text-sm">Add</span>
+                <PlusCircle size={20} className="text-sea-dark group-hover:text-sea-bright transition-colors" />
+                <span className="text-sm text-sea-dark group-hover:text-sea-bright transition-colors">Thêm</span>
               </>
             )}
           </button>
           
           {/* Block Type Menu */}
           {isMenuOpen && (
-            <div className="absolute bottom-12 left-0 bg-popover rounded-lg shadow-lg p-1 min-w-40 flex flex-col space-y-1 border border-border animate-scale-in">
+            <div className="absolute bottom-12 left-0 bg-white/90 backdrop-blur-md rounded-lg shadow-lg p-1 min-w-40 flex flex-col space-y-1 border border-sea-pale animate-scale-in">
               <button
-                className="flex items-center p-2 rounded hover:bg-secondary/70 transition-colors text-sm w-full text-left"
+                className="flex items-center p-2 rounded hover:bg-sea-pale/50 transition-colors text-sm w-full text-left group"
                 onClick={() => {
                   onAddBlock('text');
                   setIsMenuOpen(false);
                 }}
               >
-                <FileText size={16} className="mr-2" />
-                Text Block
+                <FileText size={16} className="mr-2 text-sea group-hover:text-sea-bright transition-colors" />
+                <span className="text-sea-dark group-hover:text-sea-bright transition-colors">Khối Văn Bản</span>
               </button>
               <button
-                className="flex items-center p-2 rounded hover:bg-secondary/70 transition-colors text-sm w-full text-left"
+                className="flex items-center p-2 rounded hover:bg-sea-pale/50 transition-colors text-sm w-full text-left group"
                 onClick={() => {
                   onAddBlock('image');
                   setIsMenuOpen(false);
                 }}
               >
-                <Image size={16} className="mr-2" />
-                Image Block
+                <Image size={16} className="mr-2 text-sea group-hover:text-sea-bright transition-colors" />
+                <span className="text-sea-dark group-hover:text-sea-bright transition-colors">Khối Hình Ảnh</span>
               </button>
               <button
-                className="flex items-center p-2 rounded hover:bg-secondary/70 transition-colors text-sm w-full text-left"
+                className="flex items-center p-2 rounded hover:bg-sea-pale/50 transition-colors text-sm w-full text-left group"
                 onClick={() => {
                   onAddBlock('code');
                   setIsMenuOpen(false);
                 }}
               >
-                <Code size={16} className="mr-2" />
-                Code Block
+                <Code size={16} className="mr-2 text-sea group-hover:text-sea-bright transition-colors" />
+                <span className="text-sea-dark group-hover:text-sea-bright transition-colors">Khối Mã Lệnh</span>
+                <Puzzle size={12} className="ml-1 text-sea-light/70 animate-pulse-soft" />
               </button>
             </div>
           )}
         </div>
         
         {/* Separator */}
-        <div className="h-6 w-px bg-border"></div>
+        <div className="h-6 w-px bg-sea-pale/70"></div>
         
         {/* Export Button */}
         <button
-          className="p-2 rounded-full hover:bg-primary/10 transition-colors flex items-center space-x-1"
+          className="p-2 rounded-full hover:bg-sea-pale/70 transition-colors flex items-center space-x-1 group"
           onClick={onExport}
           aria-label="Export canvas"
         >
-          <Download size={20} />
-          <span className="text-sm">Export</span>
+          <Download size={20} className="text-sea-dark group-hover:text-sea-bright transition-colors" />
+          <span className="text-sm text-sea-dark group-hover:text-sea-bright transition-colors">Xuất</span>
+          <Sparkles size={12} className="text-sea-light animate-pulse-soft" />
         </button>
       </div>
     </div>
