@@ -39,9 +39,9 @@ const Index = () => {
               <ChatInterface onCreateBlock={handleCreateFromPrompt} />
               <div className="p-3 border-t border-border mt-auto">
                 <Link to="/quiz">
-                  <Button variant="outline" className="w-full flex items-center justify-center gap-2 bg-sea-pale hover:bg-sea-light/30 border-sea text-sea-dark group transition-all duration-300">
+                  <Button variant="outline" className="w-full flex items-center justify-center gap-2 bg-sea-pale hover:bg-sea-light/30 border-sea text-sea-dark group transition-all duration-300 font-display font-medium shadow-button hover:shadow-glow">
                     <Gamepad className="h-5 w-5 text-sea group-hover:text-sea-bright transition-colors" />
-                    <span>Khám Phá Trò Chơi Mini</span>
+                    <span className="tracking-wide">Khám Phá Trò Chơi Mini</span>
                     <Sparkles className="h-4 w-4 text-sea-light group-hover:text-sea-bright animate-pulse-soft" />
                   </Button>
                 </Link>
@@ -59,4 +59,3 @@ const Index = () => {
 };
 
 export default Index;
-

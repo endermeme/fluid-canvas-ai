@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -19,6 +18,11 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Nunito', 'system-ui', 'sans-serif'],
+				display: ['Quicksand', 'system-ui', 'sans-serif'],
+				heading: ['Quicksand', 'system-ui', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -146,7 +150,57 @@ export default {
 				'gradient-block-hover': 'linear-gradient(to right bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85))',
 				'sea-gradient': 'linear-gradient(135deg, #0EA5E9, #0C87BD)',
 				'sea-light-gradient': 'linear-gradient(135deg, #33C3F0, #0EA5E9)',
-			}
+			},
+			boxShadow: {
+				'soft': '0 5px 15px rgba(0, 0, 0, 0.05)',
+				'glow': '0 0 15px rgba(14, 165, 233, 0.3)',
+				'button': '0 4px 6px -1px rgba(14, 165, 233, 0.2), 0 2px 4px -1px rgba(14, 165, 233, 0.1)',
+			},
+			typography: {
+				DEFAULT: {
+					css: {
+						maxWidth: '65ch',
+						color: 'hsl(var(--foreground))',
+						'[class~="lead"]': {
+							color: 'hsl(var(--foreground))',
+						},
+						a: {
+							color: 'hsl(var(--primary))',
+							textDecoration: 'underline',
+							fontWeight: '500',
+						},
+						strong: {
+							color: 'hsl(var(--foreground))',
+							fontWeight: '600',
+						},
+						h1: {
+							color: 'hsl(var(--foreground))',
+							fontWeight: '800',
+							fontFamily: 'Quicksand, system-ui, sans-serif',
+						},
+						h2: {
+							color: 'hsl(var(--foreground))',
+							fontWeight: '700',
+							fontFamily: 'Quicksand, system-ui, sans-serif',
+						},
+						h3: {
+							color: 'hsl(var(--foreground))',
+							fontWeight: '600',
+							fontFamily: 'Quicksand, system-ui, sans-serif',
+						},
+						h4: {
+							color: 'hsl(var(--foreground))',
+							fontWeight: '600',
+							fontFamily: 'Quicksand, system-ui, sans-serif',
+						},
+					},
+				},
+			},
+			textShadow: {
+				sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
+				DEFAULT: '0 2px 4px rgba(0, 0, 0, 0.05)',
+				lg: '0 8px 16px rgba(0, 0, 0, 0.05)',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
