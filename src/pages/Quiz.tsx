@@ -14,6 +14,15 @@ const Quiz = () => {
   const { addBlock } = useCanvasState();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [gameOptions, setGameOptions] = useState<GameOptions>({
+    contentType: 'entertainment',
+    difficulty: 'medium',
+    ageGroup: 'all',
+    customContent: '',
+    customFile: null,
+    questionCount: 5,
+    timePerQuestion: 30
+  });
 
   useEffect(() => {
     document.title = 'Trò Chơi Xếp Hình Tương Tác';
@@ -31,7 +40,7 @@ const Quiz = () => {
     addBlock(type, position, canvasRect as DOMRect);
   };
 
-  const handleGameRequest = (requestedTopic: string) => {
+  const handleGameRequest = (requestedTopic: string, options?: GameOptions) => {
     if (!requestedTopic.trim()) {
       toast({
         title: "Chủ Đề Trống",
@@ -42,11 +51,17 @@ const Quiz = () => {
     }
     
     setTopic(requestedTopic);
+    
+    // Update options if provided
+    if (options) {
+      setGameOptions(options);
+    }
+    
     setIsGenerating(true);
     
     setTimeout(() => {
       if (quizGeneratorRef.current) {
-        quizGeneratorRef.current.generateQuiz(requestedTopic);
+        quizGeneratorRef.current.generateQuiz(requestedTopic, options || gameOptions);
       } else {
         toast({
           title: "Lỗi Hệ Thống",

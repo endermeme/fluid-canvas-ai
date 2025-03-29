@@ -49,6 +49,8 @@ export class AIGameGenerator {
       const difficulty = options?.difficulty ? difficultyMap[options.difficulty] || 'trung bình' : 'trung bình';
       const contentType = options?.contentType ? contentTypeMap[options.contentType] || 'giải trí' : 'giải trí';
       const ageGroup = options?.ageGroup ? ageGroupMap[options.ageGroup] || 'mọi lứa tuổi' : 'mọi lứa tuổi';
+      const questionCount = options?.questionCount || 5;
+      const timePerQuestion = options?.timePerQuestion || 30;
 
       // Handle custom content if provided
       let customContentInfo = '';
@@ -293,6 +295,28 @@ export class AIGameGenerator {
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        .game-settings-pill {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .game-settings-pill .pill-icon {
+            width: 12px;
+            height: 12px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -300,6 +324,13 @@ export class AIGameGenerator {
         <h1>Xếp Hình: ${userMessage}</h1>
         <p>Xếp các mảnh ghép vào đúng vị trí</p>
         ${options?.customContent ? `<div class="custom-content">Nội dung tùy chỉnh</div>` : ''}
+        <div class="game-settings-pill">
+            <span class="pill-icon" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"white\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><polyline points=\"12 6 12 12 16 14\"/></svg>');"></span>
+            <span>${timePerQuestion}s</span>
+            <span>/</span>
+            <span class="pill-icon" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"white\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"6\" x2=\"21\" y2=\"6\"/><line x1=\"8\" y1=\"12\" x2=\"21\" y2=\"12\"/><line x1=\"8\" y1=\"18\" x2=\"21\" y2=\"18\"/><line x1=\"3\" y1=\"6\" x2=\"3.01\" y2=\"6\"/><line x1=\"3\" y1=\"12\" x2=\"3.01\" y2=\"12\"/><line x1=\"3\" y1=\"18\" x2=\"3.01\" y2=\"18\"/></svg>');"></span>
+            <span>${questionCount}</span>
+        </div>
     </div>
     
     <div id="game-container"></div>
@@ -347,6 +378,8 @@ export class AIGameGenerator {
         let gridSize = 3;
         let selectedPiece = null;
         let correctPieces = 0;
+        let questionCount = ${questionCount || 5};
+        let timePerQuestion = ${timePerQuestion || 30};
         
         // Game elements
         const gameContainer = document.getElementById('game-container');
@@ -535,7 +568,14 @@ export class AIGameGenerator {
                 const movesPenalty = Math.floor(moves / 2);
                 const timePenalty = Math.floor(gameTime / 10);
                 
-                score = Math.max(basePoints - movesPenalty - timePenalty, 10);
+                // Bonuses based on time per question setting
+                // Players get higher scores with less time per question
+                const timeBonus = Math.floor(1000 / timePerQuestion);
+                
+                // Question count bonus - more questions, higher potential score
+                const questionBonus = questionCount * 5;
+                
+                score = Math.max(basePoints - movesPenalty - timePenalty + timeBonus + questionBonus, 10);
                 scoreValue.textContent = score;
                 
                 message.textContent = \`Chúc mừng! Bạn đã hoàn thành với \${moves} bước!\`;
@@ -604,12 +644,24 @@ export class AIGameGenerator {
                 shufflePieces();
                 gameStarted = true;
                 
-                // Start timer
+                // Start timer with adjusted time based on timePerQuestion
                 clearInterval(timerInterval);
+                // Convert timePerQuestion from seconds to milliseconds for setInterval
+                const timerSpeed = 1000; // still update every second
+                
                 timerInterval = setInterval(() => {
                     gameTime++;
+                    
+                    // Check if time limit is reached (timePerQuestion * questionCount)
+                    if (gameTime >= timePerQuestion) {
+                        const timeLeft = timePerQuestion - gameTime;
+                        if (timeLeft <= 10 && timeLeft > 0) {
+                            message.textContent = \`Còn \${timeLeft} giây!\`;
+                        }
+                    }
+                    
                     timeValue.textContent = formatTime(gameTime);
-                }, 1000);
+                }, timerSpeed);
             }, 500);
         };
         
@@ -633,6 +685,8 @@ export class AIGameGenerator {
 - difficulty level: ${difficulty}
 - content type: ${contentType}
 - suitable for ${ageGroup}
+- with ${questionCount} questions
+- ${timePerQuestion} seconds per question
 ${customContentInfo ? `- using this custom content: ${customContentInfo}` : ''}
 ${customFileInfo ? `- incorporating information from file: ${customFileInfo}` : ''}
 `;

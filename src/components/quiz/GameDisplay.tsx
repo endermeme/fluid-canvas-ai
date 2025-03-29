@@ -2,30 +2,79 @@
 import React from 'react';
 import { MiniGame } from '@/utils/AIGameGenerator';
 import GameShareSection from './GameShareSection';
-import { FileText } from 'lucide-react';
+import { FileText, Clock, ListOrdered } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface GameDisplayProps {
   miniGame: MiniGame | null;
   hasCustomContent?: boolean;
+  questionCount?: number;
+  timePerQuestion?: number;
 }
 
-const GameDisplay = ({ miniGame, hasCustomContent }: GameDisplayProps) => {
+const GameDisplay = ({ miniGame, hasCustomContent, questionCount, timePerQuestion }: GameDisplayProps) => {
   if (!miniGame) return null;
 
   return (
     <div className="flex flex-col h-full overflow-hidden rounded-xl shadow-xl border border-sky-200/30 dark:border-sky-800/30">
       <div className="bg-gradient-to-r from-primary/90 via-primary/80 to-primary/70 backdrop-blur-md p-4 flex items-center justify-between text-white">
-        <h3 className="font-medium text-lg truncate mr-2 flex items-center">
-          <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></span>
-          {miniGame.title}
-          {hasCustomContent && (
-            <span className="ml-2 bg-white/20 text-xs px-2 py-0.5 rounded-full flex items-center">
-              <FileText size={12} className="mr-1" />
-              Tùy chỉnh
-            </span>
-          )}
-        </h3>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center flex-1 overflow-hidden">
+          <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse flex-shrink-0"></span>
+          <h3 className="font-medium text-lg truncate mr-2">
+            {miniGame.title}
+          </h3>
+          <div className="flex items-center gap-1.5 flex-shrink-0 ml-auto">
+            {hasCustomContent && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge variant="secondary" className="bg-white/20 hover:bg-white/30 flex items-center gap-1">
+                      <FileText size={12} />
+                      <span className="text-xs">Tùy chỉnh</span>
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Trò chơi sử dụng nội dung tùy chỉnh</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+            
+            {questionCount && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge variant="secondary" className="bg-white/20 hover:bg-white/30 flex items-center gap-1">
+                      <ListOrdered size={12} />
+                      <span className="text-xs">{questionCount}</span>
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Số lượng câu hỏi: {questionCount}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+            
+            {timePerQuestion && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge variant="secondary" className="bg-white/20 hover:bg-white/30 flex items-center gap-1">
+                      <Clock size={12} />
+                      <span className="text-xs">{timePerQuestion}s</span>
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Thời gian mỗi câu: {timePerQuestion} giây</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 ml-2 flex-shrink-0">
           <GameShareSection miniGame={miniGame} />
         </div>
       </div>

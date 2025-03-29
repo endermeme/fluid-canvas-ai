@@ -29,7 +29,9 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
     difficulty: 'medium',
     ageGroup: 'all',
     customContent: '',
-    customFile: null
+    customFile: null,
+    questionCount: 5,
+    timePerQuestion: 30
   });
   const [animationClass, setAnimationClass] = useState('');
 
@@ -64,6 +66,14 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
         toast({
           title: "Nội Dung Tùy Chỉnh",
           description: "Đang tạo trò chơi với nội dung tùy chỉnh của bạn...",
+        });
+      }
+      
+      // Add question count and time per question information to the toast
+      if (gameOptions.questionCount && gameOptions.timePerQuestion) {
+        toast({
+          title: "Cấu Hình Trò Chơi",
+          description: `Đang tạo trò chơi với ${gameOptions.questionCount} câu hỏi, ${gameOptions.timePerQuestion} giây/câu`,
         });
       }
       
@@ -126,7 +136,12 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
       )}
       
       <div className={animationClass}>
-        <GameDisplay miniGame={miniGame} />
+        <GameDisplay 
+          miniGame={miniGame} 
+          hasCustomContent={currentOptions.contentType === 'custom' || !!currentOptions.customFile}
+          questionCount={currentOptions.questionCount}
+          timePerQuestion={currentOptions.timePerQuestion}
+        />
       </div>
     </div>
   );
