@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    --background: 210 60% 98%;
+    --background: 195 65% 95%;
     --foreground: 222 47% 10%;
 
     --card: 0 0% 100%;
@@ -14,79 +14,79 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 10%;
 
-    --primary: 210 100% 50%;
+    --primary: 196 100% 45%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96%;
+    --secondary: 195 40% 92%;
     --secondary-foreground: 222 47% 10%;
 
-    --muted: 210 40% 96%;
+    --muted: 195 40% 90%;
     --muted-foreground: 215 25% 40%;
 
-    --accent: 210 40% 96%;
+    --accent: 195 40% 90%;
     --accent-foreground: 222 47% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 222 47% 10%;
+    --border: 195 32% 85%;
+    --input: 195 32% 85%;
+    --ring: 196 85% 45%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 195 50% 92%;
     --sidebar-foreground: 240 5% 26%;
-    --sidebar-primary: 240 6% 10%;
+    --sidebar-primary: 196 85% 40%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent: 195 40% 90%;
     --sidebar-accent-foreground: 240 6% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-border: 195 32% 85%;
+    --sidebar-ring: 196 85% 45%;
     
     --canvas-block: 0 0% 100%;
-    --canvas-block-hover: 210 100% 98%;
-    --canvas-grid: 210 20% 93%;
+    --canvas-block-hover: 196 100% 97%;
+    --canvas-grid: 195 40% 90%;
     --canvas-toolbar-bg: 0 0% 100%;
-    --canvas-selection: 210 100% 50% / 0.2;
-    --canvas-ai-suggestion: 180 100% 50% / 0.1;
+    --canvas-selection: 196 100% 50% / 0.2;
+    --canvas-ai-suggestion: 195 100% 50% / 0.1;
   }
 
   .dark {
-    --background: 222 47% 10%;
+    --background: 196 50% 15%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 10%;
+    --card: 196 45% 18%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 10%;
+    --popover: 196 45% 18%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 100% 50%;
+    --primary: 196 85% 50%;
     --primary-foreground: 222 47% 10%;
 
-    --secondary: 217 33% 18%;
+    --secondary: 196 40% 25%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 33% 18%;
+    --muted: 196 40% 25%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 217 33% 18%;
+    --accent: 196 40% 25%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217 33% 18%;
-    --input: 217 33% 18%;
-    --ring: 212 95% 65%;
+    --border: 196 40% 25%;
+    --input: 196 40% 25%;
+    --ring: 196 85% 60%;
     
-    --canvas-block: 223 47% 11%;
-    --canvas-block-hover: 222 47% 13%;
-    --canvas-grid: 220 30% 15%;
-    --canvas-toolbar-bg: 222 47% 12%;
-    --canvas-selection: 210 100% 50% / 0.3;
-    --canvas-ai-suggestion: 180 100% 50% / 0.15;
+    --canvas-block: 196 45% 18%;
+    --canvas-block-hover: 196 45% 20%;
+    --canvas-grid: 196 30% 22%;
+    --canvas-toolbar-bg: 196 45% 18%;
+    --canvas-selection: 196 100% 50% / 0.3;
+    --canvas-ai-suggestion: 195 100% 50% / 0.15;
   }
 }
 
@@ -98,6 +98,8 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+    background-image: linear-gradient(to bottom, hsl(var(--background)), hsl(var(--background) / 80%));
+    min-height: 100vh;
   }
 }
 
@@ -143,6 +145,36 @@
   .typing-indicator span {
     @apply inline-block w-1.5 h-1.5 bg-primary rounded-full mx-0.5 animate-bounce-subtle;
     animation-delay: calc(var(--dot-index) * 0.15s);
+  }
+  
+  .ocean-gradient {
+    background: linear-gradient(135deg, #0ea5e9, #0369a1);
+  }
+  
+  .ocean-card {
+    @apply bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-sky-100 dark:border-sky-900 shadow-lg rounded-xl;
+  }
+  
+  .water-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .water-ripple::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 100%);
+    opacity: 0.6;
+    z-index: 0;
+    pointer-events: none;
+  }
+  
+  .game-frame {
+    @apply rounded-xl shadow-lg border border-sky-200 dark:border-sky-800;
   }
 }
 
@@ -200,3 +232,4 @@
 .version-marker {
   @apply absolute w-2 h-2 rounded-full bg-primary cursor-pointer transform -translate-y-1/2 top-1/2 transition-all hover:scale-125;
 }
+
