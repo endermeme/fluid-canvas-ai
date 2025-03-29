@@ -1,7 +1,11 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Gamepad, Settings2, X, ChevronRight, FileText, Star, Sparkles, Brain, Controller, Puzzle, Rocket, Trophy, Target, Timer, Music, Gift, Heart, Map } from 'lucide-react';
+import { 
+  Gamepad, Settings2, X, ChevronRight, FileText, Star, Sparkles, 
+  Brain, Puzzle, Rocket, Trophy, Target, Timer, Music, Gift, Heart, Map,
+  Pencil, Joystick // Replacing PenLine with Pencil and Controller with Joystick
+} from 'lucide-react';
 import { 
   Drawer,
   DrawerClose,
@@ -28,7 +32,7 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
     { name: "Phản Xạ", icon: <Timer size={16} className="mr-1 text-sea-bright" /> }, 
     { name: "Truy Tìm Kho Báu", icon: <Map size={16} className="mr-1 text-sea-bright" /> }, 
     { name: "Câu Đố Logic", icon: <Brain size={16} className="mr-1 text-sea-bright" /> }, 
-    { name: "Vẽ Tranh", icon: <PenLine size={16} className="mr-1 text-sea-bright" /> }, 
+    { name: "Vẽ Tranh", icon: <Pencil size={16} className="mr-1 text-sea-bright" /> }, // Changed from PenLine to Pencil
     { name: "Giải Mã", icon: <Puzzle size={16} className="mr-1 text-sea-bright" /> }, 
     { name: "Đua Xe", icon: <Rocket size={16} className="mr-1 text-sea-bright" /> }, 
     { name: "Ghép Đôi", icon: <Heart size={16} className="mr-1 text-sea-bright" /> }, 
@@ -116,7 +120,7 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
         <DialogContent className="max-w-md bg-white/95 backdrop-blur-lg border-sea-pale/50">
           <DialogHeader>
             <DialogTitle className="text-sea-dark flex items-center">
-              <Controller size={18} className="mr-2 text-sea" />
+              <Joystick size={18} className="mr-2 text-sea" /> {/* Changed from Controller to Joystick */}
               Tạo Chủ Đề Tùy Chỉnh
             </DialogTitle>
             <DialogDescription>
@@ -193,3 +197,4 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
 };
 
 export default GameWelcomeScreen;
+

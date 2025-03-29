@@ -7,7 +7,7 @@ import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { Button } from '@/components/ui/button';
-import { Gamepad, Sparkles, PenLine } from 'lucide-react';
+import { Gamepad, Sparkles, Pencil } from 'lucide-react'; // Changed PenLine to Pencil
 
 const Index = () => {
   const [isChatOpen, setIsChatOpen] = useState(true);
@@ -59,3 +59,4 @@ const Index = () => {
 };
 
 export default Index;
+
