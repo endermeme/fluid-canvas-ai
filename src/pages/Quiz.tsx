@@ -25,7 +25,7 @@ const Quiz = () => {
   });
 
   useEffect(() => {
-    document.title = 'Trò Chơi Xếp Hình Tương Tác';
+    document.title = 'Trò Chơi Mini Tương Tác';
   }, []);
 
   const handleCreateFromPrompt = (type: BlockType, content: string) => {
@@ -44,7 +44,7 @@ const Quiz = () => {
     if (!requestedTopic.trim()) {
       toast({
         title: "Chủ Đề Trống",
-        description: "Vui lòng cung cấp chủ đề cho trò chơi xếp hình",
+        description: "Vui lòng cung cấp chủ đề cho trò chơi mini",
         variant: "destructive",
       });
       return;

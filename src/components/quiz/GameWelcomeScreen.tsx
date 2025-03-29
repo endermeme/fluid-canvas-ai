@@ -22,9 +22,9 @@ interface GameWelcomeScreenProps {
 
 const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
   const suggestedTopics = [
-    "Đố vui", "Xếp hình", "Nhớ hình", "Phản xạ", 
-    "Truy tìm", "Câu đố", "Vẽ tranh", "Toán học", 
-    "Địa lý", "Lịch sử", "Vật lý", "Hóa học"
+    "Trò Chơi Đố Vui", "Xếp Hình", "Nhớ Hình", "Phản Xạ", 
+    "Truy Tìm Kho Báu", "Câu Đố Logic", "Vẽ Tranh", "Giải Mã", 
+    "Đua Xe", "Ghép Đôi", "Trò Chơi Trí Nhớ", "Thử Thách"
   ];
   
   const [isShowingOptions, setIsShowingOptions] = useState(false);
