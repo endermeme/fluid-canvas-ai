@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Gamepad, Settings2, X, ChevronRight } from 'lucide-react';
+import { Gamepad, Settings2, X, ChevronRight, FileText } from 'lucide-react';
 import { 
   Drawer,
   DrawerClose,
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/drawer";
 import GameOptionsSelector, { GameOptions } from './GameOptionsSelector';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface GameWelcomeScreenProps {
   onTopicSelect: (topic: string, options?: GameOptions) => void;
@@ -28,10 +29,14 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
   
   const [isShowingOptions, setIsShowingOptions] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [isCustomTopicDialog, setIsCustomTopicDialog] = useState(false);
+  const [customTopic, setCustomTopic] = useState("");
   const [gameOptions, setGameOptions] = useState<GameOptions>({
     contentType: 'entertainment',
     difficulty: 'medium',
-    ageGroup: 'all'
+    ageGroup: 'all',
+    customContent: '',
+    customFile: null
   });
 
   const handleTopicClick = (topic: string) => {
@@ -46,6 +51,14 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
   const handleConfirm = () => {
     if (selectedTopic) {
       onTopicSelect(selectedTopic, gameOptions);
+    }
+  };
+
+  const handleCustomTopicConfirm = () => {
+    if (customTopic.trim()) {
+      setSelectedTopic(customTopic.trim());
+      setIsCustomTopicDialog(false);
+      setIsShowingOptions(true);
     }
   };
 
@@ -75,8 +88,46 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
             {topic}
           </Button>
         ))}
+        <Button 
+          variant="outline" 
+          className="rounded-full border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-all shadow-sm"
+          onClick={() => setIsCustomTopicDialog(true)}
+        >
+          <FileText size={16} className="mr-1" />
+          Tùy Chỉnh
+        </Button>
       </div>
 
+      {/* Custom Topic Dialog */}
+      <Dialog open={isCustomTopicDialog} onOpenChange={setIsCustomTopicDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Tạo Chủ Đề Tùy Chỉnh</DialogTitle>
+            <DialogDescription>
+              Nhập chủ đề tùy chỉnh cho trò chơi mini của bạn
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <input
+              type="text"
+              value={customTopic}
+              onChange={(e) => setCustomTopic(e.target.value)}
+              placeholder="Nhập chủ đề của bạn..."
+              className="w-full p-2 border border-sky-200 dark:border-sky-800 rounded-md bg-sky-50 dark:bg-slate-900"
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsCustomTopicDialog(false)}>
+              Hủy
+            </Button>
+            <Button onClick={handleCustomTopicConfirm}>
+              Tiếp Tục
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Game Options Drawer */}
       <Drawer open={isShowingOptions} onOpenChange={setIsShowingOptions}>
         <DrawerContent>
           <DrawerHeader>

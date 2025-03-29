@@ -27,7 +27,9 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
   const [currentOptions, setCurrentOptions] = useState<GameOptions>({
     contentType: 'entertainment',
     difficulty: 'medium',
-    ageGroup: 'all'
+    ageGroup: 'all',
+    customContent: '',
+    customFile: null
   });
   const [animationClass, setAnimationClass] = useState('');
 
@@ -48,7 +50,23 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
     
     const gameOptions = options || currentOptions;
 
-    try {      
+    try {
+      // Handle custom file if provided
+      if (gameOptions.customFile) {
+        toast({
+          title: "Đang xử lý tệp",
+          description: `Đang xử lý tệp "${gameOptions.customFile.name}"...`,
+        });
+      }
+      
+      // If custom content is provided, update the toast message
+      if (gameOptions.customContent && gameOptions.contentType === 'custom') {
+        toast({
+          title: "Nội Dung Tùy Chỉnh",
+          description: "Đang tạo trò chơi với nội dung tùy chỉnh của bạn...",
+        });
+      }
+      
       const game = await gameGenerator.generateMiniGame(topic, gameOptions);
       
       if (game) {

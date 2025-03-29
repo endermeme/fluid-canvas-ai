@@ -2,12 +2,14 @@
 import React from 'react';
 import { MiniGame } from '@/utils/AIGameGenerator';
 import GameShareSection from './GameShareSection';
+import { FileText } from 'lucide-react';
 
 interface GameDisplayProps {
   miniGame: MiniGame | null;
+  hasCustomContent?: boolean;
 }
 
-const GameDisplay = ({ miniGame }: GameDisplayProps) => {
+const GameDisplay = ({ miniGame, hasCustomContent }: GameDisplayProps) => {
   if (!miniGame) return null;
 
   return (
@@ -16,6 +18,12 @@ const GameDisplay = ({ miniGame }: GameDisplayProps) => {
         <h3 className="font-medium text-lg truncate mr-2 flex items-center">
           <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></span>
           {miniGame.title}
+          {hasCustomContent && (
+            <span className="ml-2 bg-white/20 text-xs px-2 py-0.5 rounded-full flex items-center">
+              <FileText size={12} className="mr-1" />
+              Tùy chỉnh
+            </span>
+          )}
         </h3>
         <div className="flex items-center gap-2">
           <GameShareSection miniGame={miniGame} />

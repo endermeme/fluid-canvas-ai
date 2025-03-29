@@ -35,7 +35,7 @@ export class AIGameGenerator {
         'puzzle': 'giải đố và thử thách tư duy',
         'brain': 'rèn luyện trí não và phát triển tư duy',
         'art': 'nghệ thuật và sáng tạo',
-        'custom': 'tùy chỉnh theo sở thích cá nhân'
+        'custom': 'tùy chỉnh theo nội dung người dùng cung cấp'
       };
       
       const ageGroupMap: Record<string, string> = {
@@ -49,6 +49,18 @@ export class AIGameGenerator {
       const difficulty = options?.difficulty ? difficultyMap[options.difficulty] || 'trung bình' : 'trung bình';
       const contentType = options?.contentType ? contentTypeMap[options.contentType] || 'giải trí' : 'giải trí';
       const ageGroup = options?.ageGroup ? ageGroupMap[options.ageGroup] || 'mọi lứa tuổi' : 'mọi lứa tuổi';
+
+      // Handle custom content if provided
+      let customContentInfo = '';
+      if (options?.customContent && options.contentType === 'custom') {
+        customContentInfo = `dựa trên nội dung tùy chỉnh sau: ${options.customContent}`;
+      }
+
+      // Handle file upload if provided
+      let customFileInfo = '';
+      if (options?.customFile) {
+        customFileInfo = `với thông tin từ tệp "${options.customFile.name}"`;
+      }
 
       const puzzleTemplate = `
 <!DOCTYPE html>
@@ -255,12 +267,39 @@ export class AIGameGenerator {
                 opacity: 0;
             }
         }
+        
+        .game-info {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            opacity: 0.7;
+            text-align: center;
+            width: 100%;
+            padding: 0 20px;
+        }
+        
+        .custom-content {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
 </head>
 <body>
     <div class="game-header">
         <h1>Xếp Hình: ${userMessage}</h1>
         <p>Xếp các mảnh ghép vào đúng vị trí</p>
+        ${options?.customContent ? `<div class="custom-content">Nội dung tùy chỉnh</div>` : ''}
     </div>
     
     <div id="game-container"></div>
@@ -293,6 +332,9 @@ export class AIGameGenerator {
     </div>
     
     <div class="win-animation" id="win-animation"></div>
+    
+    ${options?.customContent || options?.customFile ? 
+      `<div class="game-info">Trò chơi được tạo với nội dung tùy chỉnh</div>` : ''}
 
     <script>
         // Game variables
@@ -335,6 +377,7 @@ export class AIGameGenerator {
         const imageOptions = [
             // Use placeholder images
             'https://source.unsplash.com/random/800x800/?nature',
+            'https://source.unsplash.com/random/800x800/?${userMessage.toLowerCase().replace(/[^a-z0-9]/g, "")}',
             'https://source.unsplash.com/random/800x800/?animal',
             'https://source.unsplash.com/random/800x800/?architecture',
             'https://source.unsplash.com/random/800x800/?travel',
@@ -572,6 +615,14 @@ export class AIGameGenerator {
         
         // Attach event listener to start button
         startButton.addEventListener('click', startGame);
+        
+        ${options?.customContent ? 
+          `// Add custom content details
+          const gameHeader = document.querySelector('.game-header p');
+          if (gameHeader) {
+            gameHeader.textContent += ' - Nội dung tùy chỉnh';
+          }` : ''
+        }
     </script>
 </body>
 </html>`;
@@ -582,6 +633,8 @@ export class AIGameGenerator {
 - difficulty level: ${difficulty}
 - content type: ${contentType}
 - suitable for ${ageGroup}
+${customContentInfo ? `- using this custom content: ${customContentInfo}` : ''}
+${customFileInfo ? `- incorporating information from file: ${customFileInfo}` : ''}
 `;
 
       // Log the prompt for debugging
@@ -593,7 +646,7 @@ export class AIGameGenerator {
       // Create the MiniGame object
       return {
         title: `Xếp Hình: ${userMessage}`,
-        description: `Trò chơi xếp hình về ${userMessage}`,
+        description: `Trò chơi xếp hình về ${userMessage}${options?.customContent ? ' với nội dung tùy chỉnh' : ''}`,
         htmlContent: htmlContent
       };
     } catch (error) {
