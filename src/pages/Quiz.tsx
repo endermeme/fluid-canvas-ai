@@ -6,10 +6,11 @@ import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
+import { GameOptions } from '@/components/quiz/GameOptionsSelector';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
-  const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
+  const quizGeneratorRef = useRef<{ generateQuiz: (topic: string, options?: GameOptions) => void }>(null);
   const { addBlock } = useCanvasState();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);

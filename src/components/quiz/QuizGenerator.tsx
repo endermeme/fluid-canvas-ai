@@ -5,6 +5,7 @@ import { AIGameGenerator, MiniGame } from '@/utils/AIGameGenerator';
 import GameWelcomeScreen from './GameWelcomeScreen';
 import GameLoadingError from './GameLoadingError';
 import GameDisplay from './GameDisplay';
+import { GameOptions } from './GameOptionsSelector';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -13,7 +14,7 @@ interface QuizGeneratorProps {
   onQuizComplete?: () => void;
 }
 
-const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, QuizGeneratorProps>(({ 
+const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameOptions) => void }, QuizGeneratorProps>(({ 
   topic = "Minigame tương tác",
   onQuizComplete
 }, ref) => {
@@ -22,20 +23,30 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
+  const [currentOptions, setCurrentOptions] = useState<GameOptions>({
+    contentType: 'entertainment',
+    difficulty: 'medium',
+    ageGroup: 'all'
+  });
 
   useImperativeHandle(ref, () => ({
-    generateQuiz: (topic: string) => {
-      generateMiniGame(topic);
+    generateQuiz: (topic: string, options?: GameOptions) => {
+      if (options) {
+        setCurrentOptions(options);
+      }
+      generateMiniGame(topic, options);
     }
   }));
 
-  const generateMiniGame = async (topic: string) => {
+  const generateMiniGame = async (topic: string, options?: GameOptions) => {
     setIsLoading(true);
     setErrorMessage(null);
     setMiniGame(null);
+    
+    const gameOptions = options || currentOptions;
 
     try {      
-      const game = await gameGenerator.generateMiniGame(topic);
+      const game = await gameGenerator.generateMiniGame(topic, gameOptions);
       
       if (game) {
         setMiniGame(game);
@@ -63,8 +74,11 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
     generateMiniGame(topic || "minigame vui");
   };
 
-  const handleTopicSelect = (selectedTopic: string) => {
-    generateMiniGame(selectedTopic);
+  const handleTopicSelect = (selectedTopic: string, options?: GameOptions) => {
+    if (options) {
+      setCurrentOptions(options);
+    }
+    generateMiniGame(selectedTopic, options);
   };
 
   return (

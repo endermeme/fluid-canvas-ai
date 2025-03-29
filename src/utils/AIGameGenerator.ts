@@ -1,5 +1,6 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GameOptions } from '@/components/quiz/GameOptionsSelector';
 
 export interface MiniGame {
   title: string;
@@ -16,11 +17,45 @@ export class AIGameGenerator {
     this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
   }
 
-  async generateMiniGame(userMessage: string): Promise<MiniGame | null> {
+  async generateMiniGame(userMessage: string, options?: GameOptions): Promise<MiniGame | null> {
     try {
       console.log("Đang tạo minigame cho chủ đề:", userMessage);
+      console.log("Tùy chọn:", options);
       
-      const prompt = `Tạo một minigame đơn giản và vui nhộn về chủ đề "${userMessage}". Minigame phải gọn nhẹ, dễ chơi và có tính tương tác cao.
+      const difficultyMap: Record<string, string> = {
+        'easy': 'dễ, phù hợp cho người mới bắt đầu',
+        'medium': 'trung bình, có thách thức nhưng vẫn phù hợp cho hầu hết người chơi',
+        'hard': 'khó, có nhiều thách thức và yêu cầu kỹ năng nhất định',
+        'advanced': 'nâng cao, rất khó và thử thách, dành cho người chơi có kinh nghiệm'
+      };
+      
+      const contentTypeMap: Record<string, string> = {
+        'educational': 'giáo dục, học tập và kiến thức',
+        'entertainment': 'giải trí và vui chơi',
+        'puzzle': 'giải đố và thử thách tư duy',
+        'brain': 'rèn luyện trí não và phát triển tư duy',
+        'art': 'nghệ thuật và sáng tạo',
+        'custom': 'tùy chỉnh theo sở thích cá nhân'
+      };
+      
+      const ageGroupMap: Record<string, string> = {
+        'kids': 'trẻ em (3-7 tuổi)',
+        'children': 'thiếu nhi (8-12 tuổi)',
+        'teen': 'thiếu niên (13-17 tuổi)',
+        'adult': 'người lớn (18+ tuổi)',
+        'all': 'phù hợp mọi lứa tuổi'
+      };
+      
+      const difficulty = options?.difficulty ? difficultyMap[options.difficulty] || 'trung bình' : 'trung bình';
+      const contentType = options?.contentType ? contentTypeMap[options.contentType] || 'giải trí' : 'giải trí';
+      const ageGroup = options?.ageGroup ? ageGroupMap[options.ageGroup] || 'mọi lứa tuổi' : 'mọi lứa tuổi';
+
+      const prompt = `Tạo một minigame đơn giản và vui nhộn về chủ đề "${userMessage}" với các yếu tố sau:
+- Độ khó: ${difficulty}
+- Loại nội dung: ${contentType}
+- Độ tuổi phù hợp: ${ageGroup}
+
+Minigame phải gọn nhẹ, dễ chơi và có tính tương tác cao.
 
 Yêu cầu chi tiết:
 - Tạo một minigame đơn giản, vui nhộn về chủ đề ${userMessage}
