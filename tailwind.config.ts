@@ -70,6 +70,13 @@ export default {
 					'toolbar-bg': 'hsl(var(--canvas-toolbar-bg))',
 					'selection': 'hsl(var(--canvas-selection))',
 					'ai-suggestion': 'hsl(var(--canvas-ai-suggestion))',
+				},
+				sea: {
+					DEFAULT: '#0EA5E9',  // Ocean Blue
+					light: '#33C3F0',   // Sky Blue
+					bright: '#1EAEDB',  // Bright Blue
+					dark: '#0C87BD',    // Darker Ocean Blue
+					pale: '#D3E4FD',    // Soft Blue
 				}
 			},
 			borderRadius: {
@@ -132,11 +139,13 @@ export default {
 				'bounce-subtle': 'bounce-subtle 2s ease-in-out infinite'
 			},
 			backgroundImage: {
-				'gradient-canvas': 'linear-gradient(to right bottom, hsl(210, 100%, 98%), hsl(220, 100%, 97%))',
-				'gradient-toolbar': 'linear-gradient(to right, hsl(210, 100%, 97%), hsl(220, 100%, 95%))',
-				'gradient-ai-panel': 'linear-gradient(to bottom, hsl(210, 60%, 98%), hsl(220, 60%, 95%))',
+				'gradient-canvas': 'linear-gradient(to right bottom, hsl(195, 100%, 97%), hsl(200, 100%, 96%))',
+				'gradient-toolbar': 'linear-gradient(to right, hsl(195, 100%, 97%), hsl(200, 100%, 95%))',
+				'gradient-ai-panel': 'linear-gradient(to bottom, hsl(195, 70%, 98%), hsl(200, 70%, 95%))',
 				'gradient-block': 'linear-gradient(to right bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8))',
 				'gradient-block-hover': 'linear-gradient(to right bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85))',
+				'sea-gradient': 'linear-gradient(135deg, #0EA5E9, #0C87BD)',
+				'sea-light-gradient': 'linear-gradient(135deg, #33C3F0, #0EA5E9)',
 			}
 		}
 	},

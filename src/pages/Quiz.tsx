@@ -75,7 +75,7 @@ const Quiz = () => {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex flex-col w-full bg-gradient-to-br from-blue-900/90 via-indigo-900/90 to-blue-950/90">
+      <div className="min-h-screen flex flex-col w-full bg-gradient-to-br from-sea-light/70 via-sea/40 to-sea-dark/50">
         <div className="flex-1 flex overflow-hidden">
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent className="bg-sidebar/80 backdrop-blur-md">

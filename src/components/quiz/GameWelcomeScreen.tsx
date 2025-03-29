@@ -63,13 +63,13 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full space-y-6 p-6 bg-gradient-to-b from-sky-50/70 to-white/90 dark:from-sky-900/30 dark:to-slate-900/50 backdrop-blur-sm">
-      <div className="relative bg-gradient-to-r from-primary/90 to-blue-500/90 w-16 h-16 rounded-full flex items-center justify-center shadow-lg">
+    <div className="flex flex-col items-center justify-center h-full w-full space-y-6 p-6 bg-gradient-to-b from-sea-pale/70 to-white/90 dark:from-sea-dark/30 dark:to-slate-900/50 backdrop-blur-sm">
+      <div className="relative bg-gradient-to-r from-sea/90 to-sea-light/90 w-16 h-16 rounded-full flex items-center justify-center shadow-lg">
         <Gamepad size={32} className="text-white" />
-        <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping"></div>
+        <div className="absolute inset-0 rounded-full bg-sea-light/20 animate-ping"></div>
       </div>
       
-      <h2 className="text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
+      <h2 className="text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-sea-bright to-sea-dark">
         Trò Chơi Mini Tương Tác
       </h2>
       
@@ -82,7 +82,7 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
           <Button 
             key={topic}
             variant="outline" 
-            className="rounded-full border-sky-200 dark:border-sky-800 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-all shadow-sm"
+            className="rounded-full border-sea-pale dark:border-sea-dark/80 hover:bg-sea-pale/70 dark:hover:bg-sea-dark/50 transition-all shadow-sm"
             onClick={() => handleTopicClick(topic)}
           >
             {topic}
@@ -90,7 +90,7 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
         ))}
         <Button 
           variant="outline" 
-          className="rounded-full border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-all shadow-sm"
+          className="rounded-full border-sea/30 bg-sea/10 hover:bg-sea/20 text-sea-bright font-medium transition-all shadow-sm"
           onClick={() => setIsCustomTopicDialog(true)}
         >
           <FileText size={16} className="mr-1" />
@@ -100,9 +100,9 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
 
       {/* Custom Topic Dialog */}
       <Dialog open={isCustomTopicDialog} onOpenChange={setIsCustomTopicDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-white/95 backdrop-blur-lg border-sea-pale/50">
           <DialogHeader>
-            <DialogTitle>Tạo Chủ Đề Tùy Chỉnh</DialogTitle>
+            <DialogTitle className="text-sea-dark">Tạo Chủ Đề Tùy Chỉnh</DialogTitle>
             <DialogDescription>
               Nhập chủ đề tùy chỉnh cho trò chơi mini của bạn
             </DialogDescription>
@@ -113,14 +113,16 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
               value={customTopic}
               onChange={(e) => setCustomTopic(e.target.value)}
               placeholder="Nhập chủ đề của bạn..."
-              className="w-full p-2 border border-sky-200 dark:border-sky-800 rounded-md bg-sky-50 dark:bg-slate-900"
+              className="w-full p-2 border border-sea-pale dark:border-sea-dark/30 rounded-md bg-white/50 dark:bg-slate-900/50 focus:ring-sea focus:border-sea"
             />
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsCustomTopicDialog(false)}>
+            <Button variant="outline" onClick={() => setIsCustomTopicDialog(false)}
+              className="border-sea-pale dark:border-sea-dark/30">
               Hủy
             </Button>
-            <Button onClick={handleCustomTopicConfirm}>
+            <Button onClick={handleCustomTopicConfirm}
+              className="bg-sea hover:bg-sea-bright">
               Tiếp Tục
             </Button>
           </div>
@@ -129,9 +131,9 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
 
       {/* Game Options Drawer */}
       <Drawer open={isShowingOptions} onOpenChange={setIsShowingOptions}>
-        <DrawerContent>
+        <DrawerContent className="bg-white/95 backdrop-blur-lg border-t border-sea-pale/50">
           <DrawerHeader>
-            <DrawerTitle className="text-xl text-primary">Tùy chỉnh minigame</DrawerTitle>
+            <DrawerTitle className="text-xl text-sea-bright">Tùy chỉnh minigame</DrawerTitle>
             <DrawerDescription>
               {selectedTopic ? (
                 <span>Điều chỉnh tùy chọn cho minigame <strong>"{selectedTopic}"</strong></span>
@@ -150,13 +152,13 @@ const GameWelcomeScreen = ({ onTopicSelect }: GameWelcomeScreenProps) => {
             <div className="flex gap-3">
               <Button 
                 onClick={handleConfirm}
-                className="flex-1 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-700"
+                className="flex-1 bg-gradient-to-r from-sea to-sea-bright hover:from-sea-bright hover:to-sea-dark"
               >
                 Tạo Minigame
                 <ChevronRight size={16} className="ml-1" />
               </Button>
               <DrawerClose asChild>
-                <Button variant="outline" className="border-sky-200 dark:border-sky-800">
+                <Button variant="outline" className="border-sea-pale dark:border-sea-dark/30">
                   <X size={16} className="mr-1" />
                   Hủy
                 </Button>

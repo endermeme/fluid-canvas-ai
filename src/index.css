@@ -5,86 +5,86 @@
 
 @layer base {
   :root {
-    --background: 195 65% 95%;
-    --foreground: 222 47% 10%;
+    --background: 195 85% 97%;
+    --foreground: 200 47% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 10%;
+    --card-foreground: 200 47% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 10%;
+    --popover-foreground: 200 47% 15%;
 
-    --primary: 196 100% 45%;
+    --primary: 195 97% 48%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 195 40% 92%;
-    --secondary-foreground: 222 47% 10%;
+    --secondary: 195 70% 92%;
+    --secondary-foreground: 200 47% 15%;
 
-    --muted: 195 40% 90%;
-    --muted-foreground: 215 25% 40%;
+    --muted: 195 70% 92%;
+    --muted-foreground: 200 25% 40%;
 
-    --accent: 195 40% 90%;
-    --accent-foreground: 222 47% 10%;
+    --accent: 195 70% 90%;
+    --accent-foreground: 200 47% 15%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 195 32% 85%;
-    --input: 195 32% 85%;
-    --ring: 196 85% 45%;
+    --border: 195 70% 85%;
+    --input: 195 70% 85%;
+    --ring: 196 85% 48%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 195 50% 92%;
-    --sidebar-foreground: 240 5% 26%;
-    --sidebar-primary: 196 85% 40%;
+    --sidebar-background: 195 70% 92%;
+    --sidebar-foreground: 200 10% 26%;
+    --sidebar-primary: 196 85% 48%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 195 40% 90%;
-    --sidebar-accent-foreground: 240 6% 10%;
-    --sidebar-border: 195 32% 85%;
-    --sidebar-ring: 196 85% 45%;
+    --sidebar-accent: 195 70% 90%;
+    --sidebar-accent-foreground: 200 10% 10%;
+    --sidebar-border: 195 70% 85%;
+    --sidebar-ring: 196 85% 48%;
     
     --canvas-block: 0 0% 100%;
     --canvas-block-hover: 196 100% 97%;
-    --canvas-grid: 195 40% 90%;
+    --canvas-grid: 195 70% 90%;
     --canvas-toolbar-bg: 0 0% 100%;
     --canvas-selection: 196 100% 50% / 0.2;
     --canvas-ai-suggestion: 195 100% 50% / 0.1;
   }
 
   .dark {
-    --background: 196 50% 15%;
+    --background: 196 60% 15%;
     --foreground: 210 40% 98%;
 
-    --card: 196 45% 18%;
+    --card: 196 55% 18%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 196 45% 18%;
+    --popover: 196 55% 18%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 196 85% 50%;
+    --primary: 196 85% 55%;
     --primary-foreground: 222 47% 10%;
 
-    --secondary: 196 40% 25%;
+    --secondary: 196 50% 25%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 196 40% 25%;
+    --muted: 196 50% 25%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 196 40% 25%;
+    --accent: 196 50% 25%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 196 40% 25%;
-    --input: 196 40% 25%;
+    --border: 196 50% 25%;
+    --input: 196 50% 25%;
     --ring: 196 85% 60%;
     
-    --canvas-block: 196 45% 18%;
-    --canvas-block-hover: 196 45% 20%;
-    --canvas-grid: 196 30% 22%;
-    --canvas-toolbar-bg: 196 45% 18%;
+    --canvas-block: 196 55% 18%;
+    --canvas-block-hover: 196 55% 20%;
+    --canvas-grid: 196 40% 22%;
+    --canvas-toolbar-bg: 196 55% 18%;
     --canvas-selection: 196 100% 50% / 0.3;
     --canvas-ai-suggestion: 195 100% 50% / 0.15;
   }
@@ -123,11 +123,11 @@
   }
   
   .block-shadow {
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px -2px rgba(14, 165, 233, 0.08);
   }
   
   .block-shadow-hover {
-    box-shadow: 0 8px 30px -2px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 30px -2px rgba(14, 165, 233, 0.12);
   }
   
   .canvas-block {
@@ -148,11 +148,11 @@
   }
   
   .ocean-gradient {
-    background: linear-gradient(135deg, #0ea5e9, #0369a1);
+    background: linear-gradient(135deg, #33C3F0, #0C87BD);
   }
   
   .ocean-card {
-    @apply bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-sky-100 dark:border-sky-900 shadow-lg rounded-xl;
+    @apply bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-sea-pale dark:border-sea-dark/70 shadow-lg rounded-xl;
   }
   
   .water-ripple {
@@ -167,24 +167,24 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(51,195,240,0.05) 100%);
     opacity: 0.6;
     z-index: 0;
     pointer-events: none;
   }
   
   .game-frame {
-    @apply rounded-xl shadow-lg border border-sky-100 dark:border-sky-800 bg-white dark:bg-slate-800/20;
-    box-shadow: 0 8px 30px -2px rgba(0, 0, 0, 0.1);
+    @apply rounded-xl shadow-lg border border-sea-pale dark:border-sea-dark/50 bg-white dark:bg-slate-800/20;
+    box-shadow: 0 8px 30px -2px rgba(14, 165, 233, 0.1);
     transition: all 0.3s ease;
   }
   
   .game-frame:hover {
-    box-shadow: 0 12px 40px -2px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 40px -2px rgba(14, 165, 233, 0.15);
   }
   
   .ocean-button {
-    @apply bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-medium px-4 py-2 rounded-lg shadow-md transition-all duration-200;
+    @apply bg-gradient-to-r from-sea to-sea-light hover:from-sea-bright hover:to-sea text-white font-medium px-4 py-2 rounded-lg shadow-md transition-all duration-200;
   }
   
   .shimmer {
@@ -200,22 +200,22 @@
   
   /* Professional card designs */
   .pro-card {
-    @apply rounded-xl overflow-hidden bg-white dark:bg-slate-800/90 shadow-xl border border-sky-100/50 dark:border-sky-900/30;
+    @apply rounded-xl overflow-hidden bg-white dark:bg-slate-800/90 shadow-xl border border-sea-pale/50 dark:border-sea-dark/30;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
   
   .pro-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 15px 30px rgba(14, 165, 233, 0.1);
   }
   
   .pro-card-header {
-    @apply bg-gradient-to-r from-blue-500/90 via-blue-600/80 to-blue-700/90 p-4 text-white;
+    @apply bg-gradient-to-r from-sea/90 via-sea-bright/80 to-sea-dark/90 p-4 text-white;
   }
   
   .pro-button {
     @apply px-4 py-2 rounded-lg text-white font-medium transition-all duration-200 transform hover:scale-105 active:scale-95;
-    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    background: linear-gradient(135deg, #33C3F0, #0EA5E9);
     box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2), 0 2px 4px -1px rgba(14, 165, 233, 0.1);
   }
   
@@ -354,7 +354,7 @@
 /* 3D Button effect */
 .button-3d {
   @apply relative inline-block px-6 py-3 font-medium text-white rounded-lg shadow-lg transition-all duration-200;
-  background: linear-gradient(145deg, #0ea5e9, #0c87bd);
+  background: linear-gradient(145deg, #33C3F0, #0EA5E9);
   box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1), -4px -4px 8px rgba(255, 255, 255, 0.05), 
               inset 0px 0px 0px rgba(0, 0, 0, 0), inset 0px 0px 0px rgba(255, 255, 255, 0);
 }
