@@ -2,7 +2,7 @@
 import React from 'react';
 import { MiniGame } from '@/utils/AIGameGenerator';
 import GameShareSection from './GameShareSection';
-import { FileText, Clock, ListOrdered } from 'lucide-react';
+import { FileText, Clock, ListOrdered, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -25,6 +25,20 @@ const GameDisplay = ({ miniGame, hasCustomContent, questionCount, timePerQuestio
             {miniGame.title}
           </h3>
           <div className="flex items-center gap-1.5 flex-shrink-0 ml-auto">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge variant="secondary" className="bg-white/20 hover:bg-white/30 flex items-center gap-1">
+                    <Users size={12} />
+                    <span className="text-xs">Đa người chơi</span>
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Học sinh có thể chơi cùng nhau với mã QR</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
             {hasCustomContent && (
               <TooltipProvider>
                 <Tooltip>
