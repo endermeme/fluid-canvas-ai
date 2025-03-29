@@ -8,13 +8,15 @@ import GameDisplay from './GameDisplay';
 import { GameOptions } from './GameOptionsSelector';
 import { fadeIn, slideIn } from '@/lib/animations';
 
-const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
+// Use an environment variable if available, otherwise use this key
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
 interface QuizGeneratorProps {
   topic?: string;
   onQuizComplete?: () => void;
 }
 
+// Explicitly use the correct forwardRef type with the ref interface
 const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameOptions) => void }, QuizGeneratorProps>(({ 
   topic = "Minigame tương tác",
   onQuizComplete
@@ -23,7 +25,8 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
-  const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
+  // Create game generator on component mount
+  const [gameGenerator] = useState<AIGameGenerator>(() => new AIGameGenerator(API_KEY));
   const [currentOptions, setCurrentOptions] = useState<GameOptions>({
     contentType: 'entertainment',
     difficulty: 'medium',
@@ -35,6 +38,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
   });
   const [animationClass, setAnimationClass] = useState('');
 
+  // Expose the generateQuiz method to parent components through the ref
   useImperativeHandle(ref, () => ({
     generateQuiz: (topic: string, options?: GameOptions) => {
       if (options) {
@@ -70,13 +74,12 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
       }
       
       // Add question count and time per question information to the toast
-      if (gameOptions.questionCount && gameOptions.timePerQuestion) {
-        toast({
-          title: "Cấu Hình Trò Chơi",
-          description: `Đang tạo trò chơi với ${gameOptions.questionCount} câu hỏi, ${gameOptions.timePerQuestion} giây/câu`,
-        });
-      }
+      toast({
+        title: "Đang Tạo Trò Chơi",
+        description: `Đang tạo trò chơi với chủ đề "${topic}" - ${gameOptions.questionCount} câu hỏi, ${gameOptions.timePerQuestion} giây/câu`,
+      });
       
+      console.log("Gọi API tạo trò chơi với chủ đề:", topic);
       const game = await gameGenerator.generateMiniGame(topic, gameOptions);
       
       if (game) {
@@ -124,29 +127,42 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
 
   return (
     <div className="h-full w-full overflow-hidden flex flex-col">
-      <GameLoadingError 
-        isLoading={isLoading}
-        errorMessage={errorMessage}
-        onRetry={handleRetry}
-        topic={topic}
-      />
+      {isLoading && (
+        <GameLoadingError 
+          isLoading={isLoading}
+          errorMessage={null}
+          onRetry={handleRetry}
+          topic={topic}
+        />
+      )}
+      
+      {!isLoading && errorMessage && (
+        <GameLoadingError 
+          isLoading={false}
+          errorMessage={errorMessage}
+          onRetry={handleRetry}
+          topic={topic}
+        />
+      )}
       
       {!isLoading && !errorMessage && !miniGame && (
         <GameWelcomeScreen onTopicSelect={handleTopicSelect} />
       )}
       
-      <div className={animationClass}>
-        <GameDisplay 
-          miniGame={miniGame} 
-          hasCustomContent={currentOptions.contentType === 'custom' || !!currentOptions.customFile}
-          questionCount={currentOptions.questionCount}
-          timePerQuestion={currentOptions.timePerQuestion}
-        />
-      </div>
+      {miniGame && (
+        <div className={animationClass}>
+          <GameDisplay 
+            miniGame={miniGame} 
+            hasCustomContent={currentOptions.contentType === 'custom' || !!currentOptions.customFile}
+            questionCount={currentOptions.questionCount}
+            timePerQuestion={currentOptions.timePerQuestion}
+          />
+        </div>
+      )}
     </div>
   );
 });
 
-QuizGenerator.displayName = "QuizGenerator";
+QuizGenerator.displayName = "QuizGenerator"; // Required for forwardRef components
 
 export default QuizGenerator;

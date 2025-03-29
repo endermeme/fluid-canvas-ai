@@ -23,7 +23,9 @@ const GameLoadingError = ({ isLoading, errorMessage, onRetry, topic }: GameLoadi
         </div>
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-md rounded-xl p-6 shadow-lg border border-sky-100 dark:border-sky-800/30 max-w-md">
           <p className="text-2xl font-bold text-center text-primary mb-3">Đang tạo minigame</p>
-          <p className="text-slate-600 dark:text-slate-300 text-center">Từ chủ đề: <span className="font-medium text-slate-800 dark:text-white">{topic}</span></p>
+          <p className="text-slate-600 dark:text-slate-300 text-center">
+            Từ chủ đề: <span className="font-medium text-slate-800 dark:text-white">{topic || "Minigame tương tác"}</span>
+          </p>
           <div className="mt-6 flex justify-center">
             <div className="typing-indicator">
               <span style={{ '--dot-index': '0' } as React.CSSProperties}></span>

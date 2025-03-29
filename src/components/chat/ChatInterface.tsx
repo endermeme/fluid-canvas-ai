@@ -4,6 +4,7 @@ import { Send, Sparkles, BrainCircuit, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
+import { GameOptions } from '@/components/quiz/GameOptionsSelector';
 
 interface Message {
   role: 'user' | 'ai';
@@ -13,7 +14,7 @@ interface Message {
 
 interface ChatInterfaceProps {
   onCreateBlock?: (type: BlockType, content: string) => void;
-  onQuizRequest?: (topic: string) => void;
+  onQuizRequest?: (topic: string, options?: GameOptions) => void;
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequest }) => {
@@ -29,6 +30,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
+  // Scroll to bottom of messages whenever conversation updates
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation]);
@@ -38,18 +40,30 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     
     const userMessage = { role: 'user' as const, message: message.trim(), timestamp: new Date() };
     setConversation(prev => [...prev, userMessage]);
+    
+    const topic = message.trim();
     setMessage('');
     setIsLoading(true);
     
     setTimeout(() => {
+      // Create AI response
       let aiResponse = "Đang tạo trò chơi xếp hình tương tác với chủ đề của bạn. Xin vui lòng đợi trong giây lát...";
       
-      // Sử dụng toàn bộ nội dung tin nhắn làm chủ đề
-      const topic = message.trim();
-      
-      // Kích hoạt tạo web/quiz
       if (onQuizRequest) {
-        onQuizRequest(topic);
+        try {
+          // Pass topic to parent component to generate quiz
+          console.log("Chuyển chủ đề để tạo trò chơi:", topic);
+          onQuizRequest(topic);
+        } catch (error) {
+          console.error("Lỗi khi tạo trò chơi:", error);
+          aiResponse = "Có lỗi xảy ra khi tạo trò chơi. Vui lòng thử lại với chủ đề khác.";
+          
+          toast({
+            title: "Lỗi",
+            description: "Không thể tạo trò chơi với chủ đề này. Vui lòng thử lại.",
+            variant: "destructive",
+          });
+        }
       }
       
       const aiMessage = {
@@ -130,11 +144,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
+            disabled={isLoading}
           />
           <button
             className="absolute right-2 bottom-2 p-1.5 text-primary hover:bg-primary/10 rounded-full transition-colors"
             onClick={handleSendMessage}
-            disabled={!message.trim()}
+            disabled={!message.trim() || isLoading}
           >
             <Send size={16} />
           </button>
