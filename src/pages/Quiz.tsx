@@ -16,7 +16,7 @@ const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-    document.title = 'Minigame Tương Tác';
+    document.title = 'Trò Chơi Xếp Hình Tương Tác';
   }, []);
 
   const handleCreateFromPrompt = (type: BlockType, content: string) => {
@@ -35,7 +35,7 @@ const Quiz = () => {
     if (!requestedTopic.trim()) {
       toast({
         title: "Chủ Đề Trống",
-        description: "Vui lòng cung cấp chủ đề cho minigame",
+        description: "Vui lòng cung cấp chủ đề cho trò chơi xếp hình",
         variant: "destructive",
       });
       return;
@@ -50,7 +50,7 @@ const Quiz = () => {
       } else {
         toast({
           title: "Lỗi Hệ Thống",
-          description: "Không thể kết nối với trình tạo minigame. Vui lòng thử lại.",
+          description: "Không thể kết nối với trình tạo trò chơi. Vui lòng thử lại.",
           variant: "destructive",
         });
       }
@@ -60,7 +60,7 @@ const Quiz = () => {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex flex-col w-full">
+      <div className="min-h-screen flex flex-col w-full bg-gradient-to-br from-blue-900 to-indigo-900">
         <div className="flex-1 flex overflow-hidden">
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent>

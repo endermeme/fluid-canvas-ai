@@ -52,7 +52,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
         setMiniGame(game);
         toast({
           title: "Minigame Đã Sẵn Sàng",
-          description: `Đã tạo minigame về "${topic}"`,
+          description: `Đã tạo minigame xếp hình về "${topic}"`,
         });
       } else {
         throw new Error('Không thể tạo minigame');
