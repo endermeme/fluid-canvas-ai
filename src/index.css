@@ -143,7 +143,7 @@
   }
   
   .typing-indicator span {
-    @apply inline-block w-1.5 h-1.5 bg-primary rounded-full mx-0.5 animate-bounce-subtle;
+    @apply inline-block w-2 h-2 bg-primary rounded-full mx-1 animate-bounce-subtle;
     animation-delay: calc(var(--dot-index) * 0.15s);
   }
   
@@ -174,7 +174,37 @@
   }
   
   .game-frame {
-    @apply rounded-xl shadow-lg border border-sky-200 dark:border-sky-800;
+    @apply rounded-xl shadow-lg border border-sky-100 dark:border-sky-800 bg-white dark:bg-slate-800/20;
+    box-shadow: 0 8px 30px -2px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .game-frame:hover {
+    box-shadow: 0 12px 40px -2px rgba(0, 0, 0, 0.15);
+  }
+  
+  .ocean-button {
+    @apply bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-medium px-4 py-2 rounded-lg shadow-md transition-all duration-200;
+  }
+  
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 }
 
@@ -214,17 +244,14 @@
   @apply flex items-center justify-center w-9 h-9 rounded-full transition-colors hover:bg-primary/10 text-foreground/80 hover:text-primary;
 }
 
-/* Multi-selection area styling */
 .selection-box {
   @apply absolute border-2 border-primary/50 bg-canvas-selection rounded-md pointer-events-none;
 }
 
-/* Connection lines between blocks */
 .connection-line {
   @apply absolute pointer-events-none stroke-primary/60 stroke-2;
 }
 
-/* Version history timeline */
 .version-timeline {
   @apply h-1 bg-muted relative rounded-full overflow-hidden;
 }
@@ -233,3 +260,15 @@
   @apply absolute w-2 h-2 rounded-full bg-primary cursor-pointer transform -translate-y-1/2 top-1/2 transition-all hover:scale-125;
 }
 
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.float-animation {
+  animation: float 5s ease-in-out infinite;
+}
