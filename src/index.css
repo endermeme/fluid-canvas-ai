@@ -198,12 +198,103 @@
     animation: shimmer 2s infinite;
   }
   
+  /* Professional card designs */
+  .pro-card {
+    @apply rounded-xl overflow-hidden bg-white dark:bg-slate-800/90 shadow-xl border border-sky-100/50 dark:border-sky-900/30;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  
+  .pro-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .pro-card-header {
+    @apply bg-gradient-to-r from-blue-500/90 via-blue-600/80 to-blue-700/90 p-4 text-white;
+  }
+  
+  .pro-button {
+    @apply px-4 py-2 rounded-lg text-white font-medium transition-all duration-200 transform hover:scale-105 active:scale-95;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2), 0 2px 4px -1px rgba(14, 165, 233, 0.1);
+  }
+  
+  /* Animation utility classes */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  .animate-slide-in {
+    animation: slideIn 0.5s ease-out forwards;
+  }
+  
+  .animate-float {
+    animation: float 5s ease-in-out infinite;
+  }
+  
+  .animate-bounce-subtle {
+    animation: bounce-subtle 1.4s ease-in-out infinite;
+  }
+  
+  .animate-pulse-soft {
+    animation: pulse-soft 2s ease-in-out infinite;
+  }
+  
   @keyframes shimmer {
     0% {
       background-position: -200% 0;
     }
     100% {
       background-position: 200% 0;
+    }
+  }
+  
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes slideIn {
+    0% {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  @keyframes bounce-subtle {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+  
+  @keyframes pulse-soft {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
     }
   }
 }
@@ -260,15 +351,22 @@
   @apply absolute w-2 h-2 rounded-full bg-primary cursor-pointer transform -translate-y-1/2 top-1/2 transition-all hover:scale-125;
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+/* 3D Button effect */
+.button-3d {
+  @apply relative inline-block px-6 py-3 font-medium text-white rounded-lg shadow-lg transition-all duration-200;
+  background: linear-gradient(145deg, #0ea5e9, #0c87bd);
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1), -4px -4px 8px rgba(255, 255, 255, 0.05), 
+              inset 0px 0px 0px rgba(0, 0, 0, 0), inset 0px 0px 0px rgba(255, 255, 255, 0);
 }
 
-.float-animation {
-  animation: float 5s ease-in-out infinite;
+.button-3d:hover {
+  transform: translateY(-2px);
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15), -5px -5px 10px rgba(255, 255, 255, 0.07), 
+              inset 0px 0px 0px rgba(0, 0, 0, 0), inset 0px 0px 0px rgba(255, 255, 255, 0);
+}
+
+.button-3d:active {
+  transform: translateY(1px);
+  box-shadow: 0px 0px 0px rgba(0, 0, 0, 0), 0px 0px 0px rgba(255, 255, 255, 0), 
+              inset 4px 4px 8px rgba(0, 0, 0, 0.15), inset -4px -4px 8px rgba(255, 255, 255, 0.05);
 }

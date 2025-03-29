@@ -60,10 +60,10 @@ const Quiz = () => {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex flex-col w-full bg-gradient-to-br from-blue-900 to-indigo-900">
+      <div className="min-h-screen flex flex-col w-full bg-gradient-to-br from-blue-900/90 via-indigo-900/90 to-blue-950/90">
         <div className="flex-1 flex overflow-hidden">
           <Sidebar variant="inset" collapsible="icon">
-            <SidebarContent>
+            <SidebarContent className="bg-sidebar/80 backdrop-blur-md">
               <ChatInterface 
                 onCreateBlock={handleCreateFromPrompt} 
                 onQuizRequest={handleGameRequest}
@@ -71,7 +71,7 @@ const Quiz = () => {
             </SidebarContent>
           </Sidebar>
           
-          <SidebarInset className="flex-1 bg-background overflow-hidden p-0">
+          <SidebarInset className="flex-1 bg-background overflow-hidden p-0 m-0 md:m-3 rounded-none md:rounded-2xl shadow-2xl">
             <div className="h-full">
               <QuizGenerator 
                 ref={quizGeneratorRef} 

@@ -6,6 +6,7 @@ import GameWelcomeScreen from './GameWelcomeScreen';
 import GameLoadingError from './GameLoadingError';
 import GameDisplay from './GameDisplay';
 import { GameOptions } from './GameOptionsSelector';
+import { fadeIn, slideIn } from '@/lib/animations';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -28,6 +29,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
     difficulty: 'medium',
     ageGroup: 'all'
   });
+  const [animationClass, setAnimationClass] = useState('');
 
   useImperativeHandle(ref, () => ({
     generateQuiz: (topic: string, options?: GameOptions) => {
@@ -42,6 +44,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
     setIsLoading(true);
     setErrorMessage(null);
     setMiniGame(null);
+    setAnimationClass('');
     
     const gameOptions = options || currentOptions;
 
@@ -50,6 +53,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
       
       if (game) {
         setMiniGame(game);
+        setAnimationClass('animate-fade-in');
         toast({
           title: "Minigame Đã Sẵn Sàng",
           description: `Đã tạo minigame xếp hình về "${topic}"`,
@@ -81,6 +85,15 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
     generateMiniGame(selectedTopic, options);
   };
 
+  useEffect(() => {
+    if (miniGame) {
+      const element = document.querySelector('.game-frame');
+      if (element instanceof HTMLElement) {
+        fadeIn(element);
+      }
+    }
+  }, [miniGame]);
+
   return (
     <div className="h-full w-full overflow-hidden flex flex-col">
       <GameLoadingError 
@@ -94,7 +107,9 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
         <GameWelcomeScreen onTopicSelect={handleTopicSelect} />
       )}
       
-      <GameDisplay miniGame={miniGame} />
+      <div className={animationClass}>
+        <GameDisplay miniGame={miniGame} />
+      </div>
     </div>
   );
 });
