@@ -7,6 +7,7 @@ import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { Button } from '@/components/ui/button';
+import { Gamepad } from 'lucide-react';
 
 const Index = () => {
   const [isChatOpen, setIsChatOpen] = useState(true);
@@ -26,9 +27,6 @@ const Index = () => {
     
     // Add the block to the canvas with the content from the AI
     addBlock(type, position, canvasRect as DOMRect);
-    
-    // For image blocks, we'd update the content after creation
-    // This would happen in a real implementation with actual AI image generation
   };
 
   return (
@@ -41,8 +39,9 @@ const Index = () => {
               <ChatInterface onCreateBlock={handleCreateFromPrompt} />
               <div className="p-3 border-t border-border mt-auto">
                 <Link to="/quiz">
-                  <Button variant="outline" className="w-full">
-                    Go to Interactive Quiz
+                  <Button variant="outline" className="w-full flex items-center gap-2">
+                    <Gamepad className="h-4 w-4" />
+                    Minigame Tương Tác
                   </Button>
                 </Link>
               </div>

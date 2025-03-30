@@ -5,6 +5,7 @@ import { Check, X, ArrowRight, Loader2, Gamepad, Share2, Link2, Copy } from 'luc
 import { useToast } from '@/hooks/use-toast';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { saveGameForSharing } from '@/utils/gameExport';
+import { GameSettingsData } from '@/pages/Quiz';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -17,6 +18,7 @@ interface MiniGame {
 interface QuizGeneratorProps {
   topic?: string;
   onQuizComplete?: () => void;
+  gameSettings?: GameSettingsData;
 }
 
 class AIGameGenerator {
@@ -28,31 +30,48 @@ class AIGameGenerator {
     this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
   }
 
-  async generateMiniGame(userMessage: string): Promise<MiniGame | null> {
+  async generateMiniGame(userMessage: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
       console.log("Đang tạo minigame cho chủ đề:", userMessage);
+      console.log("Với các cài đặt:", settings);
       
-      const prompt = `Tạo một minigame đơn giản và vui nhộn về chủ đề "${userMessage}". Minigame phải gọn nhẹ, dễ chơi và có tính tương tác cao.
+      // Default settings
+      const gameSettings = settings || {
+        difficulty: 'medium',
+        questionCount: 10,
+        timePerQuestion: 30,
+        category: 'general'
+      };
+      
+      const difficultyDescriptions = {
+        easy: "câu hỏi đơn giản, phù hợp cho trẻ em hoặc người mới bắt đầu",
+        medium: "câu hỏi có độ khó vừa phải, phù hợp cho hầu hết người chơi",
+        hard: "câu hỏi khó, đòi hỏi kiến thức chuyên sâu và tư duy nhanh"
+      };
+      
+      const categoryDescriptions = {
+        general: "kiến thức chung về nhiều lĩnh vực",
+        history: "các sự kiện lịch sử, nhân vật và giai đoạn lịch sử quan trọng",
+        science: "khoa học, phát minh, và nguyên lý khoa học",
+        geography: "địa lý, quốc gia, thủ đô và địa hình",
+        arts: "nghệ thuật, âm nhạc, hội họa và văn học",
+        sports: "thể thao, vận động viên và giải đấu",
+        math: "toán học, câu đố logic và tính toán"
+      };
+      
+      const prompt = `Tạo một minigame đơn giản và vui nhộn về chủ đề "${userMessage}" với ${gameSettings.questionCount} câu hỏi ở mức độ ${gameSettings.difficulty} (${difficultyDescriptions[gameSettings.difficulty as keyof typeof difficultyDescriptions]}) tập trung vào lĩnh vực ${gameSettings.category} (${categoryDescriptions[gameSettings.category as keyof typeof categoryDescriptions]}). Thời gian trả lời mỗi câu hỏi là ${gameSettings.timePerQuestion} giây.
 
 Yêu cầu chi tiết:
-- Tạo một minigame đơn giản, vui nhộn về chủ đề ${userMessage}
+- Tạo một minigame câu hỏi trắc nghiệm với đúng ${gameSettings.questionCount} câu hỏi
 - Toàn bộ HTML, CSS và JavaScript phải nằm trong một file HTML duy nhất
 - Minigame phải có tính tương tác cao, dễ chơi và thú vị
 - Thiết kế phải màu sắc, bắt mắt, sinh động với nhiều màu sắc hài hòa
-- Có điểm số hoặc thông báo kết quả cho người chơi
+- Có điểm số và thời gian đếm ngược ${gameSettings.timePerQuestion} giây cho mỗi câu hỏi
 - Có hướng dẫn rõ ràng và dễ hiểu
 - Đảm bảo trò chơi đơn giản, không phức tạp, phù hợp để chơi trong vài phút
 - Phải tương thích với các trình duyệt hiện đại
 - VIẾT HOÀN TOÀN BẰNG TIẾNG VIỆT (nếu có nội dung hiển thị)
-
-Một số ý tưởng minigame phù hợp:
-- Trò chơi câu hỏi/đố vui
-- Trò chơi phản xạ/nhấp chuột
-- Trò chơi ghép cặp/nhớ hình
-- Trò chơi né vật thể
-- Trò chơi xếp hình đơn giản
-- Trò chơi sắp xếp/phân loại
-- Trò chơi vẽ và đoán
+- KHÔNG sử dụng thư viện bên ngoài, chỉ dùng JavaScript thuần
 
 Định dạng trả về:
 Chỉ trả về một file HTML hoàn chỉnh bao gồm tất cả HTML, CSS và JavaScript.
@@ -101,13 +120,14 @@ LƯU Ý QUAN TRỌNG:
 - Không sử dụng các framework bên ngoài.
 - Tất cả mã JavaScript phải nằm trong thẻ <script> của file HTML.
 - Tất cả CSS phải nằm trong thẻ <style> của file HTML.
-- Minigame phải đủ đơn giản để người chơi hiểu ngay và chơi được trong vài phút.`;
+- Minigame phải đủ đơn giản để người chơi hiểu ngay và chơi được trong vài phút.
+- Không tạo minigame phức tạp như game platformer, game 3D, hoặc game cần đồ họa phức tạp.`;
 
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
       
-      console.log("Kết quả minigame thô:", text);
+      console.log("Kết quả minigame thô:", text.substring(0, 200) + "...");
       return this.parseMiniGameResponse(text, userMessage);
     } catch (error) {
       console.error('Lỗi tạo Minigame:', error);
@@ -117,7 +137,7 @@ LƯU Ý QUAN TRỌNG:
 
   parseMiniGameResponse(rawText: string, topic: string): MiniGame | null {
     try {
-      console.log("Đang phân tích kết quả minigame:", rawText);
+      console.log("Đang phân tích kết quả minigame...");
       
       // Tìm nội dung HTML
       let htmlContent = '';
@@ -148,9 +168,10 @@ LƯU Ý QUAN TRỌNG:
   }
 }
 
-const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, QuizGeneratorProps>(({ 
+const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: GameSettingsData) => void }, QuizGeneratorProps>(({ 
   topic = "Minigame tương tác",
-  onQuizComplete
+  onQuizComplete,
+  gameSettings
 }, ref) => {
   const [miniGame, setMiniGame] = useState<MiniGame | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -161,19 +182,19 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
 
   useImperativeHandle(ref, () => ({
-    generateQuiz: (topic: string) => {
-      generateMiniGame(topic);
+    generateQuiz: (topic: string, settings?: GameSettingsData) => {
+      generateMiniGame(topic, settings);
     }
   }));
 
-  const generateMiniGame = async (topic: string) => {
+  const generateMiniGame = async (topic: string, settings?: GameSettingsData) => {
     setIsLoading(true);
     setErrorMessage(null);
     setMiniGame(null);
     setShareUrl(null);
 
     try {      
-      const game = await gameGenerator.generateMiniGame(topic);
+      const game = await gameGenerator.generateMiniGame(topic, settings);
       
       if (game) {
         setMiniGame(game);
