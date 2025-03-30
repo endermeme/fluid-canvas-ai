@@ -53,29 +53,6 @@ export const animateConnectionLine = (element: SVGElement): void => {
   );
 };
 
-// Fade in animation
-export const fadeIn = (element: HTMLElement): void => {
-  gsap.fromTo(
-    element,
-    { opacity: 0, y: 20 },
-    { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
-  );
-};
-
-// Slide in animation
-export const slideIn = (element: HTMLElement, direction: 'left' | 'right' | 'top' | 'bottom' = 'right'): void => {
-  const axis = direction === 'left' || direction === 'right' ? 'x' : 'y';
-  const value = direction === 'right' || direction === 'bottom' ? 100 : -100;
-  
-  const fromVars: any = { opacity: 0 };
-  fromVars[axis] = value;
-  
-  const toVars: any = { opacity: 1, duration: 0.5, ease: "power2.out" };
-  toVars[axis] = 0;
-  
-  gsap.fromTo(element, fromVars, toVars);
-};
-
 // Toolbar appearance animation
 export const animateToolbarAppear = (element: HTMLElement): void => {
   gsap.fromTo(
@@ -126,46 +103,32 @@ export const animateNotification = (element: HTMLElement): void => {
   );
 };
 
-// Pulse animation for elements
-export const pulsate = (element: HTMLElement): void => {
+// Content highlight animation
+export const animateContentHighlight = (element: HTMLElement): void => {
   gsap.fromTo(
     element,
-    { scale: 1 },
+    { backgroundColor: 'rgba(59, 130, 246, 0.2)' },
     { 
-      scale: 1.05, 
-      duration: 0.5, 
-      repeat: -1, 
-      yoyo: true, 
-      ease: "sine.inOut" 
+      backgroundColor: 'rgba(59, 130, 246, 0)', 
+      duration: 0.8, 
+      ease: "power2.inOut" 
     }
   );
 };
 
-// Button click effect
-export const buttonClickEffect = (element: HTMLElement): void => {
-  gsap.to(element, {
-    scale: 0.95,
-    duration: 0.1,
-    onComplete: () => {
-      gsap.to(element, {
-        scale: 1,
-        duration: 0.2,
-        ease: "back.out(2)"
-      });
-    }
+// AI suggestion appearance
+export const animateAISuggestion = (element: HTMLElement): void => {
+  gsap.fromTo(
+    element,
+    { opacity: 0, height: 0 },
+    { opacity: 1, height: 'auto', duration: 0.3, ease: "power2.out" }
+  );
+};
+
+// Typing indicator animation
+export const setupTypingIndicator = (element: HTMLElement): void => {
+  const dots = element.querySelectorAll('span');
+  dots.forEach((dot, index) => {
+    dot.style.setProperty('--dot-index', index.toString());
   });
-};
-
-// Shimmer effect for loading states
-export const shimmerEffect = (element: HTMLElement): void => {
-  gsap.fromTo(
-    element,
-    { backgroundPosition: "-200% 0" },
-    { 
-      backgroundPosition: "200% 0", 
-      duration: 1.5, 
-      repeat: -1, 
-      ease: "linear" 
-    }
-  );
 };

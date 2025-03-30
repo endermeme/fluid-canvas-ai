@@ -1,10 +1,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, BrainCircuit, Image } from 'lucide-react';
+import { Send, Sparkles, BrainCircuit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
-import { GameOptions } from '@/components/quiz/GameOptionsSelector';
 
 interface Message {
   role: 'user' | 'ai';
@@ -14,7 +13,7 @@ interface Message {
 
 interface ChatInterfaceProps {
   onCreateBlock?: (type: BlockType, content: string) => void;
-  onQuizRequest?: (topic: string, options?: GameOptions) => void;
+  onQuizRequest?: (topic: string) => void;
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequest }) => {
@@ -22,7 +21,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   const [conversation, setConversation] = useState<Message[]>([
     { 
       role: 'ai', 
-      message: 'Xin chào! Tôi là trợ lý AI. Hãy nhập chủ đề bạn muốn, tôi sẽ tạo trò chơi xếp hình tương tác với chủ đề của bạn. Ví dụ: "Thành phố Hà Nội", "Động vật hoang dã", "Vũ trụ kỳ diệu"...', 
+      message: 'Xin chào! Tôi là trợ lý AI. Hãy nhập chủ đề bạn muốn, tôi sẽ tạo trang web tương tác hoàn chỉnh bằng HTML, CSS, JavaScript đầy đủ trong một file duy nhất. Web sẽ được hiển thị ngay để bạn trải nghiệm. Bạn có thể yêu cầu bất kỳ loại web nào: trò chơi, quiz tương tác, ứng dụng, portfolio, landing page...', 
       timestamp: new Date() 
     }
   ]);
@@ -30,7 +29,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
-  // Scroll to bottom of messages whenever conversation updates
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation]);
@@ -40,71 +38,29 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     
     const userMessage = { role: 'user' as const, message: message.trim(), timestamp: new Date() };
     setConversation(prev => [...prev, userMessage]);
-    
-    const topic = message.trim();
     setMessage('');
     setIsLoading(true);
     
-    // Create AI response immediately to improve UX
-    const aiResponseMessage = { 
-      role: 'ai' as const, 
-      message: "Đang tạo trò chơi xếp hình tương tác với chủ đề của bạn. Xin vui lòng đợi trong giây lát...",
-      timestamp: new Date()
-    };
-    setConversation(prev => [...prev, aiResponseMessage]);
-    
-    // Use a small timeout to ensure the UI updates before potentially heavy processing
     setTimeout(() => {
+      let aiResponse = "Tôi đang tạo trang web đầy đủ theo yêu cầu của bạn. Trang web sẽ bao gồm toàn bộ code HTML, CSS và JavaScript trong một file HTML hoàn chỉnh, sẵn sàng để hiển thị. Vui lòng đợi trong giây lát...";
+      
+      // Sử dụng toàn bộ nội dung tin nhắn làm chủ đề
+      const topic = message.trim();
+      
+      // Kích hoạt tạo web/quiz
       if (onQuizRequest) {
-        try {
-          // Pass topic to parent component to generate quiz with Gemini
-          console.log("Chuyển chủ đề để tạo trò chơi:", topic);
-          
-          // Create default options to ensure the game is created with proper parameters
-          const options: GameOptions = {
-            contentType: 'entertainment',
-            difficulty: 'medium',
-            ageGroup: 'all',
-            customContent: '',
-            customFile: null,
-            questionCount: 5,
-            timePerQuestion: 30
-          };
-          
-          onQuizRequest(topic, options);
-        } catch (error) {
-          console.error("Lỗi khi tạo trò chơi:", error);
-          
-          // Update the last AI message to show the error
-          setConversation(prev => [
-            ...prev.slice(0, -1), 
-            { 
-              role: 'ai', 
-              message: "Có lỗi xảy ra khi tạo trò chơi. Vui lòng thử lại với chủ đề khác.", 
-              timestamp: new Date() 
-            }
-          ]);
-          
-          toast({
-            title: "Lỗi",
-            description: "Không thể tạo trò chơi với chủ đề này. Vui lòng thử lại.",
-            variant: "destructive",
-          });
-        }
-      } else {
-        // If no quiz request handler is provided
-        setConversation(prev => [
-          ...prev.slice(0, -1), 
-          { 
-            role: 'ai', 
-            message: "Không thể kết nối với trình tạo trò chơi. Vui lòng tải lại trang và thử lại.", 
-            timestamp: new Date() 
-          }
-        ]);
+        onQuizRequest(topic);
       }
       
+      const aiMessage = {
+        role: 'ai' as const, 
+        message: aiResponse,
+        timestamp: new Date()
+      };
+      
+      setConversation(prev => [...prev, aiMessage]);
       setIsLoading(false);
-    }, 100);
+    }, 500);
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -122,12 +78,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     <div className="flex flex-col h-full">
       <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/20">
         <div className="flex items-center">
-          <Image size={20} className="text-primary mr-2" />
-          <h3 className="font-medium">Trợ Lý Xếp Hình</h3>
-        </div>
-        <div className="flex items-center text-xs text-muted-foreground">
-          <Sparkles size={12} className="mr-1 text-primary" />
-          <span>Gemini AI</span>
+          <BrainCircuit size={20} className="text-primary mr-2" />
+          <h3 className="font-medium">Trợ Lý Tạo Web</h3>
         </div>
       </div>
       
@@ -173,21 +125,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
         <div className="relative">
           <textarea
             className="w-full p-2 pr-10 bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-sm"
-            placeholder="Nhập chủ đề cho trò chơi xếp hình (ví dụ: biển xanh, núi rừng, vũ trụ...)"
+            placeholder="Nhập chủ đề hoặc ý tưởng để tạo trang web tương tác đầy đủ..."
             rows={2}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isLoading}
           />
           <button
-            className={`absolute right-2 bottom-2 p-1.5 rounded-full transition-colors ${
-              !message.trim() || isLoading 
-                ? 'text-muted-foreground' 
-                : 'text-primary hover:bg-primary/10'
-            }`}
+            className="absolute right-2 bottom-2 p-1.5 text-primary hover:bg-primary/10 rounded-full transition-colors"
             onClick={handleSendMessage}
-            disabled={!message.trim() || isLoading}
+            disabled={!message.trim()}
           >
             <Send size={16} />
           </button>
@@ -199,9 +146,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
               <Sparkles size={16} className="text-primary" />
             </button>
           </div>
-          <div className="text-xs text-muted-foreground italic flex items-center">
-            <BrainCircuit size={12} className="mr-1" />
-            Powered by Gemini AI
+          <div className="text-xs text-muted-foreground italic">
+            Powered by CES AI
           </div>
         </div>
       </div>
