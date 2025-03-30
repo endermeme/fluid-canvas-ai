@@ -47,7 +47,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
       // Sử dụng toàn bộ nội dung tin nhắn làm chủ đề
       const topic = message.trim();
       
-      // Kích hoạt tạo web/quiz
+      // Kích hoạt tạo web/quiz ngay lập tức, không hiển thị cài đặt
       if (onQuizRequest) {
         onQuizRequest(topic);
       }
