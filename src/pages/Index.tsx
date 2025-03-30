@@ -118,7 +118,7 @@ const Index = () => {
             </div>
           </SidebarInset>
           
-          {/* Game Settings Modal using Dialog */}
+          {/* Game Settings Dialog */}
           <Dialog open={showSettings} onOpenChange={setShowSettings}>
             <DialogContent className="sm:max-w-md max-w-[calc(100%-2rem)] p-0 gap-0">
               <div className="p-0 overflow-hidden">
