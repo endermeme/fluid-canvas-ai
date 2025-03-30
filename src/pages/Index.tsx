@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CanvasContainer from '@/components/canvas/CanvasContainer';
@@ -58,14 +57,6 @@ const Index = () => {
     setShowSettings(false);
     setSelectedQuickGame(null);
   };
-  
-  // Handler for direct chat game creation (bypassing settings)
-  const handleChatGameRequest = (topic: string) => {
-    if (topic.trim()) {
-      // Navigate directly to the quiz page with the topic and default settings
-      navigate(`/quiz?topic=${encodeURIComponent(topic)}&autostart=true`);
-    }
-  };
 
   // Quick game options
   const quickGameOptions = [
@@ -84,10 +75,7 @@ const Index = () => {
         <div className="flex-1 flex overflow-hidden">
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent>
-              <ChatInterface 
-                onCreateBlock={handleCreateFromPrompt}
-                onQuizRequest={handleChatGameRequest} 
-              />
+              <ChatInterface onCreateBlock={handleCreateFromPrompt} />
               <div className="p-3 border-t border-border mt-auto">
                 <Link to="/quiz">
                   <Button 

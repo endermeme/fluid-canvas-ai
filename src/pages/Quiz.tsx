@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
@@ -70,7 +69,7 @@ const Quiz = () => {
           setIsGenerating(false);
         }, 100);
       } else {
-        // If no autostart, show settings (only for quick game buttons, not chat)
+        // If no autostart, show settings
         setShowSettings(true);
       }
     }
@@ -98,23 +97,8 @@ const Quiz = () => {
       return;
     }
     
-    // For direct chat game requests, skip settings and generate immediately
     setTopic(requestedTopic);
-    
-    // Generate game directly with default settings
-    setIsGenerating(true);
-    setTimeout(() => {
-      if (quizGeneratorRef.current) {
-        quizGeneratorRef.current.generateQuiz(requestedTopic, gameSettings);
-      } else {
-        toast({
-          title: "Lỗi Hệ Thống",
-          description: "Không thể kết nối với trình tạo minigame. Vui lòng thử lại.",
-          variant: "destructive",
-        });
-      }
-      setIsGenerating(false);
-    }, 100);
+    setShowSettings(true);
   };
   
   const handleStartGame = (settings: GameSettingsData) => {
