@@ -88,7 +88,7 @@ const SharedGame = () => {
 
   return (
     <div className="flex flex-col h-screen">
-      <header className="bg-background border-b p-3 flex justify-between items-center">
+      <header className="bg-background border-b py-2 px-3 flex justify-between items-center">
         <Link to="/quiz">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -102,13 +102,13 @@ const SharedGame = () => {
         </div>
       </header>
       
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 h-full overflow-hidden">
         <iframe
           srcDoc={game.htmlContent}
           title={game.title}
           sandbox="allow-scripts allow-same-origin"
           className="w-full h-full border-none"
-          style={{ height: '100%', width: '100%' }}
+          style={{ height: '100%', width: '100%', display: 'block' }}
         />
       </main>
     </div>

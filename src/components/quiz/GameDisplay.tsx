@@ -18,7 +18,7 @@ const GameDisplay = ({ miniGame, hasCustomContent, questionCount, timePerQuestio
 
   return (
     <div className="flex flex-col h-full overflow-hidden rounded-xl shadow-xl border border-sky-200/30 dark:border-sky-800/30">
-      <div className="bg-gradient-to-r from-primary/90 via-primary/80 to-primary/70 backdrop-blur-md p-4 flex items-center justify-between text-white">
+      <div className="bg-gradient-to-r from-primary/90 via-primary/80 to-primary/70 backdrop-blur-md p-3 flex items-center justify-between text-white">
         <div className="flex items-center flex-1 overflow-hidden">
           <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse flex-shrink-0"></span>
           <h3 className="font-medium text-lg truncate mr-2">
@@ -92,17 +92,14 @@ const GameDisplay = ({ miniGame, hasCustomContent, questionCount, timePerQuestio
           <GameShareSection miniGame={miniGame} />
         </div>
       </div>
-      <div className="flex-1 overflow-hidden bg-gradient-to-b from-sky-50/50 to-white/50 dark:from-sky-900/20 dark:to-slate-900/30 p-3">
-        <div className="rounded-lg shadow-inner bg-white/90 dark:bg-slate-800/40 h-full overflow-hidden border border-sky-100/50 dark:border-sky-900/50 backdrop-blur-sm">
-          {/* Sử dụng mã HTML trực tiếp từ Gemini không qua xử lý */}
-          <iframe
-            srcDoc={miniGame.htmlContent}
-            title={miniGame.title}
-            sandbox="allow-scripts allow-same-origin"
-            className="w-full h-full border-none game-frame transition-opacity"
-            style={{ height: '100%', width: '100%' }}
-          />
-        </div>
+      <div className="flex-1 h-full overflow-hidden">
+        <iframe
+          srcDoc={miniGame.htmlContent}
+          title={miniGame.title}
+          sandbox="allow-scripts allow-same-origin"
+          className="w-full h-full border-none game-frame"
+          style={{ height: '100%', width: '100%' }}
+        />
       </div>
     </div>
   );
