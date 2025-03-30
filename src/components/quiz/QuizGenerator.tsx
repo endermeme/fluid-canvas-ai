@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, X, ArrowRight, Loader2, Gamepad, Share2, Link2, Copy } from 'lucide-react';
@@ -44,9 +43,9 @@ class AIGameGenerator {
       };
       
       const difficultyDescriptions = {
-        easy: "câu hỏi đơn giản, phù hợp cho trẻ em hoặc người mới bắt đầu",
-        medium: "câu hỏi có độ khó vừa phải, phù hợp cho hầu hết người chơi",
-        hard: "câu hỏi khó, đòi hỏi kiến thức chuyên sâu và tư duy nhanh"
+        easy: "dễ, phù hợp cho trẻ em hoặc người mới bắt đầu",
+        medium: "độ khó vừa phải, phù hợp cho hầu hết người chơi",
+        hard: "khó, đòi hỏi suy nghĩ nhanh và kiến thức sâu"
       };
       
       const categoryDescriptions = {
@@ -59,22 +58,28 @@ class AIGameGenerator {
         math: "toán học, câu đố logic và tính toán"
       };
       
-      const prompt = `Tạo một minigame đơn giản và vui nhộn về chủ đề "${userMessage}" với ${gameSettings.questionCount} câu hỏi ở mức độ ${gameSettings.difficulty} (${difficultyDescriptions[gameSettings.difficulty as keyof typeof difficultyDescriptions]}) tập trung vào lĩnh vực ${gameSettings.category} (${categoryDescriptions[gameSettings.category as keyof typeof categoryDescriptions]}). Thời gian trả lời mỗi câu hỏi là ${gameSettings.timePerQuestion} giây.
+      const prompt = `Tạo một minigame tương tác và vui nhộn về chủ đề "${userMessage}" với mức độ ${gameSettings.difficulty} (${difficultyDescriptions[gameSettings.difficulty as keyof typeof difficultyDescriptions]}) phù hợp với lĩnh vực ${gameSettings.category} (${categoryDescriptions[gameSettings.category as keyof typeof categoryDescriptions]}).
 
 Yêu cầu chi tiết:
-- Tạo một minigame câu hỏi trắc nghiệm với đúng ${gameSettings.questionCount} câu hỏi
-- Toàn bộ HTML, CSS và JavaScript phải nằm trong một file HTML duy nhất
+- Phân tích yêu cầu của người dùng và tạo trò chơi tương tác phù hợp dựa trên chủ đề "${userMessage}"
+- Nếu chủ đề giống như câu đố kiến thức, hãy tạo trò chơi trắc nghiệm với ${gameSettings.questionCount} câu hỏi và thời gian ${gameSettings.timePerQuestion} giây/câu
+- Nếu chủ đề là về phản xạ, hãy tạo trò chơi phản xạ nhanh với các yếu tố hấp dẫn
+- Nếu chủ đề là về xếp hình, hãy tạo trò chơi xếp hình tương tác
+- Nếu chủ đề là về trò chơi ký ức, hãy tạo trò chơi lật thẻ nhớ hình
+- Nếu chủ đề là về từ vựng, hãy tạo trò chơi từ vựng thú vị
+- Nếu là yêu cầu khác, hãy tạo trò chơi tương ứng phù hợp với chủ đề
+- Toàn bộ trò chơi phải nằm trong một file HTML duy nhất
 - Minigame phải có tính tương tác cao, dễ chơi và thú vị
 - Thiết kế phải màu sắc, bắt mắt, sinh động với nhiều màu sắc hài hòa
-- Có điểm số và thời gian đếm ngược ${gameSettings.timePerQuestion} giây cho mỗi câu hỏi
+- Có điểm số và hệ thống phản hồi cho người chơi
 - Có hướng dẫn rõ ràng và dễ hiểu
 - Đảm bảo trò chơi đơn giản, không phức tạp, phù hợp để chơi trong vài phút
 - Phải tương thích với các trình duyệt hiện đại
 - VIẾT HOÀN TOÀN BẰNG TIẾNG VIỆT (nếu có nội dung hiển thị)
-- KHÔNG sử dụng thư viện bên ngoài, chỉ dùng JavaScript thuần
+- Trò chơi phải có đồ họa bắt mắt, màu sắc phù hợp, và hiệu ứng âm thanh nếu cần
 
 Định dạng trả về:
-Chỉ trả về một file HTML hoàn chỉnh bao gồm tất cả HTML, CSS và JavaScript.
+Chỉ trả về một file HTML hoàn chỉnh bao gồm tất cả mã cần thiết.
 
 \`\`\`html
 <!DOCTYPE html>
@@ -108,7 +113,7 @@ Chỉ trả về một file HTML hoàn chỉnh bao gồm tất cả HTML, CSS v�
     <!-- HTML ở đây -->
     
     <script>
-        // JavaScript ở đây
+        // Mã JavaScript ở đây
     </script>
 </body>
 </html>
@@ -117,11 +122,9 @@ Chỉ trả về một file HTML hoàn chỉnh bao gồm tất cả HTML, CSS v�
 LƯU Ý QUAN TRỌNG: 
 - KHÔNG trả về bất kỳ giải thích nào, chỉ trả về một file HTML hoàn chỉnh.
 - Đảm bảo code chạy được ngay mà không cần sửa đổi thêm.
-- Không sử dụng các framework bên ngoài.
-- Tất cả mã JavaScript phải nằm trong thẻ <script> của file HTML.
-- Tất cả CSS phải nằm trong thẻ <style> của file HTML.
-- Minigame phải đủ đơn giản để người chơi hiểu ngay và chơi được trong vài phút.
-- Không tạo minigame phức tạp như game platformer, game 3D, hoặc game cần đồ họa phức tạp.`;
+- Không sử dụng các thư viện bên ngoài.
+- Tất cả mã phải nằm trong file HTML.
+- Minigame phải đủ đơn giản để người chơi hiểu ngay và chơi được trong vài phút.`;
 
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
