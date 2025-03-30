@@ -45,18 +45,45 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     setMessage('');
     setIsLoading(true);
     
+    // Create AI response immediately to improve UX
+    const aiResponseMessage = { 
+      role: 'ai' as const, 
+      message: "Đang tạo trò chơi xếp hình tương tác với chủ đề của bạn. Xin vui lòng đợi trong giây lát...",
+      timestamp: new Date()
+    };
+    setConversation(prev => [...prev, aiResponseMessage]);
+    
+    // Use a small timeout to ensure the UI updates before potentially heavy processing
     setTimeout(() => {
-      // Create AI response
-      let aiResponse = "Đang tạo trò chơi xếp hình tương tác với chủ đề của bạn. Xin vui lòng đợi trong giây lát...";
-      
       if (onQuizRequest) {
         try {
-          // Pass topic to parent component to generate quiz
+          // Pass topic to parent component to generate quiz with Gemini
           console.log("Chuyển chủ đề để tạo trò chơi:", topic);
-          onQuizRequest(topic);
+          
+          // Create default options to ensure the game is created with proper parameters
+          const options: GameOptions = {
+            contentType: 'entertainment',
+            difficulty: 'medium',
+            ageGroup: 'all',
+            customContent: '',
+            customFile: null,
+            questionCount: 5,
+            timePerQuestion: 30
+          };
+          
+          onQuizRequest(topic, options);
         } catch (error) {
           console.error("Lỗi khi tạo trò chơi:", error);
-          aiResponse = "Có lỗi xảy ra khi tạo trò chơi. Vui lòng thử lại với chủ đề khác.";
+          
+          // Update the last AI message to show the error
+          setConversation(prev => [
+            ...prev.slice(0, -1), 
+            { 
+              role: 'ai', 
+              message: "Có lỗi xảy ra khi tạo trò chơi. Vui lòng thử lại với chủ đề khác.", 
+              timestamp: new Date() 
+            }
+          ]);
           
           toast({
             title: "Lỗi",
@@ -64,17 +91,20 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
             variant: "destructive",
           });
         }
+      } else {
+        // If no quiz request handler is provided
+        setConversation(prev => [
+          ...prev.slice(0, -1), 
+          { 
+            role: 'ai', 
+            message: "Không thể kết nối với trình tạo trò chơi. Vui lòng tải lại trang và thử lại.", 
+            timestamp: new Date() 
+          }
+        ]);
       }
       
-      const aiMessage = {
-        role: 'ai' as const, 
-        message: aiResponse,
-        timestamp: new Date()
-      };
-      
-      setConversation(prev => [...prev, aiMessage]);
       setIsLoading(false);
-    }, 500);
+    }, 100);
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -94,6 +124,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
         <div className="flex items-center">
           <Image size={20} className="text-primary mr-2" />
           <h3 className="font-medium">Trợ Lý Xếp Hình</h3>
+        </div>
+        <div className="flex items-center text-xs text-muted-foreground">
+          <Sparkles size={12} className="mr-1 text-primary" />
+          <span>Gemini AI</span>
         </div>
       </div>
       
@@ -147,7 +181,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
             disabled={isLoading}
           />
           <button
-            className="absolute right-2 bottom-2 p-1.5 text-primary hover:bg-primary/10 rounded-full transition-colors"
+            className={`absolute right-2 bottom-2 p-1.5 rounded-full transition-colors ${
+              !message.trim() || isLoading 
+                ? 'text-muted-foreground' 
+                : 'text-primary hover:bg-primary/10'
+            }`}
             onClick={handleSendMessage}
             disabled={!message.trim() || isLoading}
           >
@@ -161,8 +199,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
               <Sparkles size={16} className="text-primary" />
             </button>
           </div>
-          <div className="text-xs text-muted-foreground italic">
-            Powered by CES AI
+          <div className="text-xs text-muted-foreground italic flex items-center">
+            <BrainCircuit size={12} className="mr-1" />
+            Powered by Gemini AI
           </div>
         </div>
       </div>

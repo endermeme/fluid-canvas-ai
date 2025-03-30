@@ -53,16 +53,33 @@ const Quiz = () => {
     
     setTopic(requestedTopic);
     
-    // Update options if provided
-    if (options) {
-      setGameOptions(options);
-    }
+    // Update options if provided, otherwise use default options
+    const gameOpts = options || {
+      contentType: 'entertainment',
+      difficulty: 'medium',
+      ageGroup: 'all',
+      customContent: '',
+      customFile: null,
+      questionCount: 5,
+      timePerQuestion: 30
+    };
     
+    setGameOptions(gameOpts);
     setIsGenerating(true);
     
+    // Use a small timeout to ensure the UI updates before processing
     setTimeout(() => {
       if (quizGeneratorRef.current) {
-        quizGeneratorRef.current.generateQuiz(requestedTopic, options || gameOptions);
+        console.log("Đang tạo game với chủ đề:", requestedTopic);
+        console.log("Tùy chọn:", gameOpts);
+        
+        // Pass both the topic and options to the generator
+        quizGeneratorRef.current.generateQuiz(requestedTopic, gameOpts);
+        
+        toast({
+          title: "Đang Tạo Trò Chơi",
+          description: `Chủ đề: ${requestedTopic}`,
+        });
       } else {
         toast({
           title: "Lỗi Hệ Thống",

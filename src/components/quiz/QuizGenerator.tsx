@@ -37,6 +37,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
     timePerQuestion: 30
   });
   const [animationClass, setAnimationClass] = useState('');
+  const [attempts, setAttempts] = useState(0); // Track generation attempts
 
   // Expose the generateQuiz method to parent components through the ref
   useImperativeHandle(ref, () => ({
@@ -53,10 +54,13 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
     setErrorMessage(null);
     setMiniGame(null);
     setAnimationClass('');
+    setAttempts(attempts + 1);
     
     const gameOptions = options || currentOptions;
 
     try {
+      console.log("Gọi API tạo trò chơi với chủ đề:", topic);
+      
       // Handle custom file if provided
       if (gameOptions.customFile) {
         toast({
@@ -76,10 +80,9 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
       // Add question count and time per question information to the toast
       toast({
         title: "Đang Tạo Trò Chơi",
-        description: `Đang tạo trò chơi với chủ đề "${topic}" - ${gameOptions.questionCount} câu hỏi, ${gameOptions.timePerQuestion} giây/câu`,
+        description: `Đang tạo trò chơi với chủ đề "${topic}" - ${gameOptions.questionCount || 5} câu hỏi, ${gameOptions.timePerQuestion || 30} giây/câu`,
       });
       
-      console.log("Gọi API tạo trò chơi với chủ đề:", topic);
       const game = await gameGenerator.generateMiniGame(topic, gameOptions);
       
       if (game) {
@@ -90,7 +93,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
           description: `Đã tạo minigame xếp hình về "${topic}"`,
         });
       } else {
-        throw new Error('Không thể tạo minigame');
+        throw new Error('Không thể tạo minigame. Không có phản hồi từ AI.');
       }
     } catch (error) {
       console.error('Lỗi Tạo Minigame:', error);
