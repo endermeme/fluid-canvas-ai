@@ -10,6 +10,7 @@ import GameSettings from '@/components/quiz/GameSettings';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLocation } from 'react-router-dom';
 
 // Define the game settings interface
 export interface GameSettingsData {
@@ -33,10 +34,49 @@ const Quiz = () => {
   const { addBlock } = useCanvasState();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     document.title = 'Minigame Tương Tác';
-  }, []);
+    
+    // Parse URL parameters for direct game creation
+    const queryParams = new URLSearchParams(location.search);
+    const topicParam = queryParams.get('topic');
+    const autoStart = queryParams.get('autostart');
+    
+    if (topicParam) {
+      setTopic(topicParam);
+      
+      // Check for game settings in URL
+      const difficultyParam = queryParams.get('difficulty');
+      const questionCountParam = queryParams.get('questionCount');
+      const timePerQuestionParam = queryParams.get('timePerQuestion');
+      const categoryParam = queryParams.get('category');
+      
+      const urlSettings: GameSettingsData = {
+        difficulty: (difficultyParam as 'easy' | 'medium' | 'hard') || 'medium',
+        questionCount: questionCountParam ? parseInt(questionCountParam) : 10,
+        timePerQuestion: timePerQuestionParam ? parseInt(timePerQuestionParam) : 30,
+        category: categoryParam || 'general',
+      };
+      
+      setGameSettings(urlSettings);
+      
+      // If autostart is set, generate the quiz automatically
+      if (autoStart === 'true') {
+        setIsGenerating(true);
+        setTimeout(() => {
+          if (quizGeneratorRef.current) {
+            quizGeneratorRef.current.generateQuiz(topicParam, urlSettings);
+          }
+          setIsGenerating(false);
+        }, 100);
+      } else {
+        // If no autostart, show settings
+        setShowSettings(true);
+      }
+    }
+  }, [location.search]);
 
   const handleCreateFromPrompt = (type: BlockType, content: string) => {
     const canvasElement = document.querySelector('.canvas-grid');

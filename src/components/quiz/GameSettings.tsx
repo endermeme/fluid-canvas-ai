@@ -5,16 +5,18 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { GameSettingsData } from '@/pages/Quiz';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Gamepad } from 'lucide-react';
+import { Gamepad, X } from 'lucide-react';
 
 interface GameSettingsProps {
   onStart: (settings: GameSettingsData) => void;
   topic: string;
   initialSettings?: GameSettingsData;
   inDrawer?: boolean;
+  inModal?: boolean;
+  onCancel?: () => void;
 }
 
-const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false }: GameSettingsProps) => {
+const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inModal = false, onCancel }: GameSettingsProps) => {
   const [settings, setSettings] = useState<GameSettingsData>({
     difficulty: 'medium',
     questionCount: 10,
@@ -37,8 +39,8 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false }: Gam
   };
 
   return (
-    <div className={`${inDrawer ? '' : 'h-full w-full'} flex flex-col items-center justify-center p-6 bg-background`}>
-      <div className={`w-full max-w-md bg-card rounded-lg shadow-lg p-6 ${inDrawer ? '' : 'border'}`}>
+    <div className={`${inDrawer || inModal ? '' : 'h-full w-full'} flex flex-col items-center justify-center p-6 bg-background`}>
+      <div className={`w-full max-w-md bg-card rounded-lg ${inModal ? '' : 'shadow-lg'} p-6 ${inDrawer || inModal ? '' : 'border'}`}>
         <div className="flex items-center justify-center mb-6">
           <Gamepad className="h-10 w-10 text-primary mr-2" />
           <h2 className="text-2xl font-bold">Cài Đặt Minigame</h2>
@@ -117,7 +119,16 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false }: Gam
             </Select>
           </div>
 
-          <div className="pt-4">
+          <div className="pt-4 flex gap-3">
+            {onCancel && (
+              <Button 
+                variant="outline"
+                className="w-full"
+                onClick={onCancel}
+              >
+                Hủy
+              </Button>
+            )}
             <Button 
               className="w-full"
               onClick={() => onStart(settings)}
