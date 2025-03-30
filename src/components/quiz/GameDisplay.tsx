@@ -97,13 +97,7 @@ const GameDisplay = ({
           srcDoc={miniGame.htmlContent} 
           title={miniGame.title} 
           sandbox="allow-scripts allow-same-origin" 
-          className="w-full h-full border-none" 
-          style={{
-            height: '100%',
-            width: '100%',
-            display: 'block',
-            overflow: 'hidden'
-          }} 
+          className="w-full h-full border-none"
         />
       </div>
     </div>

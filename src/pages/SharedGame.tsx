@@ -102,18 +102,12 @@ const SharedGame = () => {
         </div>
       </header>
       
-      <div className="flex-1" style={{ height: "calc(100vh - 41px)" }}>
+      <div className="flex-1">
         <iframe
           srcDoc={game.htmlContent}
           title={game.title}
           sandbox="allow-scripts allow-same-origin"
           className="w-full h-full border-none"
-          style={{ 
-            height: '100%', 
-            width: '100%', 
-            display: 'block',
-            overflow: 'hidden'
-          }}
         />
       </div>
     </div>
