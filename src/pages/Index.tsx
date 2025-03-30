@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CanvasContainer from '@/components/canvas/CanvasContainer';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
@@ -50,15 +49,22 @@ const Index = () => {
   // Handler for starting the game after settings are selected
   const handleStartGame = (settings: GameSettingsData) => {
     if (selectedQuickGame) {
+      console.log("Navigating to game with topic:", selectedQuickGame, "and settings:", settings);
       navigate(`/quiz?topic=${encodeURIComponent(selectedQuickGame)}&autostart=true&difficulty=${settings.difficulty}&questionCount=${settings.questionCount}&timePerQuestion=${settings.timePerQuestion}&category=${settings.category}`);
     }
   };
 
   // Handler for canceling game settings
   const handleCancelSettings = () => {
+    console.log("Settings canceled");
     setShowSettings(false);
     setSelectedQuickGame(null);
   };
+
+  // Log when showSettings changes
+  useEffect(() => {
+    console.log("showSettings state:", showSettings);
+  }, [showSettings]);
 
   // Quick game options
   const quickGameOptions = [
@@ -120,21 +126,28 @@ const Index = () => {
           </SidebarInset>
           
           {/* Game Settings Dialog */}
-          <Dialog open={showSettings} onOpenChange={(open) => {
-            if (!open) {
-              handleCancelSettings();
-            }
-            setShowSettings(open);
-          }}>
+          <Dialog 
+            open={showSettings} 
+            onOpenChange={(open) => {
+              console.log("Dialog onOpenChange:", open);
+              if (!open) {
+                handleCancelSettings();
+              } else {
+                setShowSettings(open);
+              }
+            }}
+          >
             <DialogContent className="sm:max-w-md max-w-[calc(100%-2rem)] p-0 gap-0">
               <div className="p-0 overflow-hidden">
                 <div className="p-4 sm:p-6">
-                  <GameSettings 
-                    onStart={handleStartGame} 
-                    topic={selectedQuickGame || ""}
-                    onCancel={handleCancelSettings}
-                    inModal={true}
-                  />
+                  {selectedQuickGame && (
+                    <GameSettings 
+                      onStart={handleStartGame} 
+                      topic={selectedQuickGame}
+                      onCancel={handleCancelSettings}
+                      inModal={true}
+                    />
+                  )}
                 </div>
               </div>
             </DialogContent>
