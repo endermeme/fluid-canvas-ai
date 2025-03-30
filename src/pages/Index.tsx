@@ -86,7 +86,7 @@ const Index = () => {
             <SidebarContent>
               <ChatInterface 
                 onCreateBlock={handleCreateFromPrompt}
-                onQuizRequest={handleChatGameRequest} // Pass the direct game request handler
+                onQuizRequest={handleChatGameRequest} 
               />
               <div className="p-3 border-t border-border mt-auto">
                 <Link to="/quiz">
