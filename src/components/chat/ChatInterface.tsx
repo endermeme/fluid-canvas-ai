@@ -4,6 +4,7 @@ import { Send, Sparkles, BrainCircuit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   role: 'user' | 'ai';
@@ -28,6 +29,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -47,11 +49,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
       // Sử dụng toàn bộ nội dung tin nhắn làm chủ đề
       const topic = message.trim();
       
-      // Kích hoạt tạo web/quiz
-      if (onQuizRequest) {
-        onQuizRequest(topic);
-      }
-      
       const aiMessage = {
         role: 'ai' as const, 
         message: aiResponse,
@@ -60,6 +57,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
       
       setConversation(prev => [...prev, aiMessage]);
       setIsLoading(false);
+      
+      // Directly navigate to quiz page with the topic (skip settings)
+      if (window.location.pathname.includes('/quiz')) {
+        // We're already on the quiz page, just notify the parent
+        if (onQuizRequest) {
+          onQuizRequest(topic);
+        }
+      } else {
+        // Navigate to quiz page with the topic
+        navigate(`/quiz?topic=${encodeURIComponent(topic)}&autostart=true`);
+      }
     }, 500);
   };
   

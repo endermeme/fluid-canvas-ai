@@ -100,8 +100,22 @@ const Quiz = () => {
       return;
     }
     
+    // For chat input, directly generate the game without showing settings
     setTopic(requestedTopic);
-    setShowSettings(true);
+    setIsGenerating(true);
+    
+    setTimeout(() => {
+      if (quizGeneratorRef.current) {
+        quizGeneratorRef.current.generateQuiz(requestedTopic, gameSettings);
+      } else {
+        toast({
+          title: "Lỗi Hệ Thống",
+          description: "Không thể kết nối với trình tạo minigame. Vui lòng thử lại.",
+          variant: "destructive",
+        });
+      }
+      setIsGenerating(false);
+    }, 100);
   };
   
   const handleStartGame = (settings: GameSettingsData) => {
