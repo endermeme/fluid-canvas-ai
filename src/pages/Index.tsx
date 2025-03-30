@@ -42,6 +42,7 @@ const Index = () => {
 
   // Handler for quick game selection
   const handleQuickGameSelect = (gameTopic: string) => {
+    console.log("Quick game selected:", gameTopic);
     setSelectedQuickGame(gameTopic);
     setShowSettings(true);
   };
@@ -119,7 +120,12 @@ const Index = () => {
           </SidebarInset>
           
           {/* Game Settings Dialog */}
-          <Dialog open={showSettings} onOpenChange={setShowSettings}>
+          <Dialog open={showSettings} onOpenChange={(open) => {
+            if (!open) {
+              handleCancelSettings();
+            }
+            setShowSettings(open);
+          }}>
             <DialogContent className="sm:max-w-md max-w-[calc(100%-2rem)] p-0 gap-0">
               <div className="p-0 overflow-hidden">
                 <div className="p-4 sm:p-6">

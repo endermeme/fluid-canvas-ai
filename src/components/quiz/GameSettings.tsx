@@ -57,6 +57,12 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inMod
     }
   }, [topic]);
 
+  // Hàm xử lý khi người dùng nhấn nút Bắt Đầu Trò Chơi
+  const handleStart = () => {
+    console.log("Starting game with settings:", settings);
+    onStart(settings);
+  };
+
   return (
     <div className={`${inDrawer || inModal ? '' : 'h-full w-full'} flex flex-col items-center justify-center ${inModal ? 'p-0' : 'p-6'} bg-background`}>
       <div className={`w-full max-w-md bg-card rounded-lg ${inModal ? '' : 'shadow-lg'} ${inModal ? 'p-0' : 'p-6'} ${inDrawer || inModal ? '' : 'border'}`}>
@@ -150,7 +156,7 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inMod
             )}
             <Button 
               className="w-full"
-              onClick={() => onStart(settings)}
+              onClick={handleStart}
             >
               Bắt Đầu Trò Chơi
             </Button>
