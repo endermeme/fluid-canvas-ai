@@ -8,11 +8,11 @@ import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { Button } from '@/components/ui/button';
 import { Gamepad } from 'lucide-react';
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import GameSettings from '@/components/quiz/GameSettings';
 import { GameSettingsData } from '@/pages/Quiz';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 const Index = () => {
   const [isChatOpen, setIsChatOpen] = useState(true);
@@ -49,6 +49,12 @@ const Index = () => {
     if (selectedQuickGame) {
       navigate(`/quiz?topic=${encodeURIComponent(selectedQuickGame)}&autostart=true&difficulty=${settings.difficulty}&questionCount=${settings.questionCount}&timePerQuestion=${settings.timePerQuestion}&category=${settings.category}`);
     }
+  };
+
+  // Handler for canceling game settings
+  const handleCancelSettings = () => {
+    setShowSettings(false);
+    setSelectedQuickGame(null);
   };
 
   // Quick game options
@@ -110,22 +116,21 @@ const Index = () => {
             </div>
           </SidebarInset>
           
-          {/* Game Settings Modal */}
-          {selectedQuickGame && showSettings && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-card rounded-lg shadow-lg overflow-hidden max-w-md w-full">
-                <div className="p-4 border-b">
-                  <h3 className="text-lg font-medium">Cài Đặt: {selectedQuickGame}</h3>
+          {/* Game Settings Modal using Dialog */}
+          <Dialog open={showSettings} onOpenChange={setShowSettings}>
+            <DialogContent className="sm:max-w-md">
+              <div className="p-0 overflow-hidden">
+                <div className="p-6">
+                  <GameSettings 
+                    onStart={handleStartGame} 
+                    topic={selectedQuickGame || ""}
+                    onCancel={handleCancelSettings}
+                    inModal={true}
+                  />
                 </div>
-                <GameSettings 
-                  onStart={handleStartGame} 
-                  topic={selectedQuickGame}
-                  onCancel={() => setShowSettings(false)}
-                  inModal={true}
-                />
               </div>
-            </div>
-          )}
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </SidebarProvider>

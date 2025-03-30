@@ -38,9 +38,26 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inMod
     setSettings(prev => ({ ...prev, [name]: value }));
   };
 
+  // Adjust game category based on topic if possible
+  useEffect(() => {
+    if (topic) {
+      if (topic.includes("Lịch Sử")) {
+        handleSelectChange('category', 'history');
+      } else if (topic.includes("Địa Lý")) {
+        handleSelectChange('category', 'geography');
+      } else if (topic.includes("Toán")) {
+        handleSelectChange('category', 'math');
+      } else if (topic.includes("Từ Vựng")) {
+        handleSelectChange('category', 'arts');
+      } else if (topic.includes("Khoa Học")) {
+        handleSelectChange('category', 'science');
+      }
+    }
+  }, [topic]);
+
   return (
-    <div className={`${inDrawer || inModal ? '' : 'h-full w-full'} flex flex-col items-center justify-center p-6 bg-background`}>
-      <div className={`w-full max-w-md bg-card rounded-lg ${inModal ? '' : 'shadow-lg'} p-6 ${inDrawer || inModal ? '' : 'border'}`}>
+    <div className={`${inDrawer || inModal ? '' : 'h-full w-full'} flex flex-col items-center justify-center ${inModal ? 'p-0' : 'p-6'} bg-background`}>
+      <div className={`w-full max-w-md bg-card rounded-lg ${inModal ? '' : 'shadow-lg'} ${inModal ? 'p-0' : 'p-6'} ${inDrawer || inModal ? '' : 'border'}`}>
         <div className="flex items-center justify-center mb-6">
           <Gamepad className="h-10 w-10 text-primary mr-2" />
           <h2 className="text-2xl font-bold">Cài Đặt Minigame</h2>
