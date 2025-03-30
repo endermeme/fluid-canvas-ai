@@ -6,6 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import { GameSettingsData } from '@/pages/Quiz';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Gamepad, X } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GameSettingsProps {
   onStart: (settings: GameSettingsData) => void;
@@ -17,6 +18,7 @@ interface GameSettingsProps {
 }
 
 const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inModal = false, onCancel }: GameSettingsProps) => {
+  const isMobile = useIsMobile();
   const [settings, setSettings] = useState<GameSettingsData>({
     difficulty: 'medium',
     questionCount: 10,
@@ -58,19 +60,19 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inMod
   return (
     <div className={`${inDrawer || inModal ? '' : 'h-full w-full'} flex flex-col items-center justify-center ${inModal ? 'p-0' : 'p-6'} bg-background`}>
       <div className={`w-full max-w-md bg-card rounded-lg ${inModal ? '' : 'shadow-lg'} ${inModal ? 'p-0' : 'p-6'} ${inDrawer || inModal ? '' : 'border'}`}>
-        <div className="flex items-center justify-center mb-6">
-          <Gamepad className="h-10 w-10 text-primary mr-2" />
-          <h2 className="text-2xl font-bold">Cài Đặt Minigame</h2>
+        <div className="flex items-center justify-center mb-4 sm:mb-6">
+          <Gamepad className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />
+          <h2 className="text-xl sm:text-2xl font-bold">Cài Đặt Minigame</h2>
         </div>
 
         {topic && (
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">Chủ đề: <span className="text-primary">{topic}</span></h3>
+          <div className="mb-4 sm:mb-6">
+            <h3 className="text-base sm:text-lg font-medium mb-1 sm:mb-2">Chủ đề: <span className="text-primary">{topic}</span></h3>
           </div>
         )}
 
-        <div className="space-y-6">
-          <div className="space-y-3">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-2 sm:space-y-3">
             <Label htmlFor="difficulty">Độ Khó</Label>
             <Select 
               value={settings.difficulty} 
@@ -79,7 +81,7 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inMod
               <SelectTrigger>
                 <SelectValue placeholder="Chọn độ khó" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="min-w-[180px]">
                 <SelectItem value="easy">Dễ</SelectItem>
                 <SelectItem value="medium">Trung bình</SelectItem>
                 <SelectItem value="hard">Khó</SelectItem>
@@ -87,7 +89,7 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inMod
             </Select>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <div className="flex justify-between">
               <Label htmlFor="questionCount">Số Câu Hỏi: {settings.questionCount}</Label>
             </div>
@@ -101,7 +103,7 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inMod
             />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <div className="flex justify-between">
               <Label htmlFor="timePerQuestion">Thời Gian Mỗi Câu: {settings.timePerQuestion} giây</Label>
             </div>
@@ -115,7 +117,7 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inMod
             />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <Label htmlFor="category">Thể Loại</Label>
             <Select 
               value={settings.category} 
@@ -124,7 +126,7 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inMod
               <SelectTrigger>
                 <SelectValue placeholder="Chọn thể loại" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="min-w-[180px]">
                 <SelectItem value="general">Kiến thức chung</SelectItem>
                 <SelectItem value="history">Lịch sử</SelectItem>
                 <SelectItem value="science">Khoa học</SelectItem>
@@ -136,7 +138,7 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inMod
             </Select>
           </div>
 
-          <div className="pt-4 flex gap-3">
+          <div className="pt-3 sm:pt-4 flex gap-3">
             {onCancel && (
               <Button 
                 variant="outline"

@@ -13,9 +13,11 @@ import { GameSettingsData } from '@/pages/Quiz';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
-  const [isChatOpen, setIsChatOpen] = useState(true);
+  const isMobile = useIsMobile();
+  const [isChatOpen, setIsChatOpen] = useState(!isMobile);
   const { addBlock } = useCanvasState();
   const [selectedQuickGame, setSelectedQuickGame] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -68,7 +70,7 @@ const Index = () => {
   ];
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex flex-col w-full">
         {/* Main content with sidebar */}
         <div className="flex-1 flex overflow-hidden">
@@ -92,9 +94,9 @@ const Index = () => {
             </div>
             
             {/* Quick Game Options Panel */}
-            <div className="bg-card/50 backdrop-blur-sm border-t p-4">
+            <div className="bg-card/50 backdrop-blur-sm border-t p-3 md:p-4">
               <div className="max-w-4xl mx-auto">
-                <h3 className="text-lg font-medium mb-3 flex items-center">
+                <h3 className="text-lg font-medium mb-2 md:mb-3 flex items-center">
                   <Gamepad className="h-5 w-5 mr-2" />
                   Tạo nhanh minigame
                 </h3>
@@ -118,9 +120,9 @@ const Index = () => {
           
           {/* Game Settings Modal using Dialog */}
           <Dialog open={showSettings} onOpenChange={setShowSettings}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md max-w-[calc(100%-2rem)] p-0 gap-0">
               <div className="p-0 overflow-hidden">
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   <GameSettings 
                     onStart={handleStartGame} 
                     topic={selectedQuickGame || ""}
