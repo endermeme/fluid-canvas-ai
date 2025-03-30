@@ -6,9 +6,9 @@ import GameWelcomeScreen from './GameWelcomeScreen';
 import GameLoadingError from './GameLoadingError';
 import GameDisplay from './GameDisplay';
 import { GameOptions } from './GameOptionsSelector';
-import { fadeIn, slideIn } from '@/lib/animations';
+import { fadeIn } from '@/lib/animations';
 
-// Use an environment variable if available, otherwise use this key
+// Sử dụng biến môi trường nếu có, nếu không thì sử dụng key này
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
 interface QuizGeneratorProps {
@@ -16,7 +16,7 @@ interface QuizGeneratorProps {
   onQuizComplete?: () => void;
 }
 
-// Explicitly use the correct forwardRef type with the ref interface
+// Sử dụng rõ ràng kiểu forwardRef với giao diện ref
 const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameOptions) => void }, QuizGeneratorProps>(({ 
   topic = "Minigame tương tác",
   onQuizComplete
@@ -25,7 +25,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
-  // Create game generator on component mount
   const [gameGenerator] = useState<AIGameGenerator>(() => new AIGameGenerator(API_KEY));
   const [currentOptions, setCurrentOptions] = useState<GameOptions>({
     contentType: 'entertainment',
@@ -39,7 +38,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
   const [animationClass, setAnimationClass] = useState('');
   const [attempts, setAttempts] = useState(0);
 
-  // Expose the generateQuiz method to parent components through the ref
+  // Chia sẻ phương thức generateQuiz với các thành phần cha thông qua ref
   useImperativeHandle(ref, () => ({
     generateQuiz: (topic: string, options?: GameOptions) => {
       if (options) {
@@ -60,8 +59,9 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
 
     try {
       console.log("Gọi API tạo trò chơi với chủ đề:", topic);
+      console.log("Tạo minigame với tùy chọn:", gameOptions);
       
-      // Show toast messages for different scenarios
+      // Hiển thị thông báo toast cho các tình huống khác nhau
       if (gameOptions.customFile) {
         toast({
           title: "Đang xử lý tệp",
@@ -83,7 +83,8 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
       
       const game = await gameGenerator.generateMiniGame(topic, gameOptions);
       
-      if (game) {
+      if (game && game.htmlContent) {
+        console.log("Gemini đã tạo nội dung HTML thành công, độ dài:", game.htmlContent.length);
         setMiniGame(game);
         setAnimationClass('animate-fade-in');
         toast({
@@ -91,11 +92,11 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
           description: `Đã tạo minigame về "${topic}"`,
         });
       } else {
-        throw new Error('Không thể tạo minigame. Không có phản hồi từ AI Gemini.');
+        throw new Error('Không thể tạo minigame. Không có phản hồi từ AI Gemini hoặc nội dung HTML trống.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Lỗi Tạo Minigame:', error);
-      setErrorMessage('Không thể tạo minigame với Gemini AI. Vui lòng thử lại hoặc chọn chủ đề khác.');
+      setErrorMessage(`Không thể tạo minigame với Gemini AI: ${error.message || 'Lỗi không xác định'}. Vui lòng thử lại hoặc chọn chủ đề khác.`);
       toast({
         title: "Lỗi Tạo Minigame",
         description: "Có vấn đề khi tạo minigame với Gemini. Vui lòng thử lại với chủ đề khác.",
@@ -164,6 +165,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
   );
 });
 
-QuizGenerator.displayName = "QuizGenerator"; // Required for forwardRef components
+QuizGenerator.displayName = "QuizGenerator"; // Bắt buộc cho các thành phần forwardRef
 
 export default QuizGenerator;

@@ -52,19 +52,19 @@ export class AIGameGenerator {
       const questionCount = options?.questionCount || 5;
       const timePerQuestion = options?.timePerQuestion || 30;
 
-      // Handle custom content if provided
+      // Xử lý nội dung tùy chỉnh nếu được cung cấp
       let customContentInfo = '';
       if (options?.customContent && options.contentType === 'custom') {
         customContentInfo = `dựa trên nội dung tùy chỉnh sau: ${options.customContent}`;
       }
 
-      // Handle file upload if provided
+      // Xử lý tệp tải lên nếu được cung cấp
       let customFileInfo = '';
       if (options?.customFile) {
         customFileInfo = `với thông tin từ tệp "${options.customFile.name}"`;
       }
 
-      // Create prompt for Gemini
+      // Tạo prompt cho Gemini
       const prompt = `
       Tạo cho tôi một HTML minigame hoàn chỉnh cho chủ đề "${userMessage}" với các đặc điểm:
       - Độ khó: ${difficulty}
@@ -75,33 +75,38 @@ export class AIGameGenerator {
       ${customContentInfo ? `- Sử dụng nội dung: ${customContentInfo}` : ''}
       ${customFileInfo ? `- Kết hợp thông tin từ tệp: ${customFileInfo}` : ''}
       
-      Yêu cầu:
+      Yêu cầu QUAN TRỌNG:
       1. Tạo một file HTML hoàn chỉnh, có thể chạy độc lập.
-      2. Bao gồm tất cả CSS và JavaScript trong file HTML, không có tài nguyên bên ngoài.
-      3. Tạo giao diện đẹp và thân thiện với người dùng, có thể chơi được trên cả điện thoại lẫn máy tính.
+      2. Bao gồm TẤT CẢ CSS và JavaScript trong file HTML, KHÔNG có tài nguyên bên ngoài.
+      3. Tạo giao diện đẹp, thân thiện với người dùng, đáp ứng (responsive) cho cả điện thoại lẫn máy tính.
       4. Có hiển thị điểm số và thời gian.
       5. Có logic hoàn chỉnh để chơi, bao gồm bắt đầu, kết thúc, và tính điểm.
-      6. Có thể là bất kỳ loại trò chơi nào phù hợp với chủ đề.
-      7. Bản thân game là một trang web HTML đầy đủ có thể chạy độc lập.
+      6. Minigame này PHẢI chạy ngay trong iframe mà không cần bất kỳ sự can thiệp nào.
+      7. KHÔNG sử dụng bất kỳ thư viện bên ngoài nào (như jQuery, Bootstrap).
+      8. Không thêm bất kỳ chú thích markdown nào (```html, ```), chỉ trả về mã HTML thuần túy.
+      9. Minigame phải có đủ tính năng chơi được ngay, không phải chỉ là bố cục hoặc demo.
 
-      Chỉ trả về mã HTML hoàn chỉnh, không cần giải thích gì thêm.
+      QUAN TRỌNG: CHỈ TRẢ VỀ MÃ HTML HOÀN CHỈNH. KHÔNG THÊM CHÚ THÍCH HOẶC GIẢI THÍCH GÌ KHÁC.
       `;
       
-      // Log the prompt for debugging
-      console.log("Prompt gửi tới Gemini:", prompt);
+      console.log("Đang gửi prompt tới Gemini...");
 
-      // Generate content using Gemini
+      // Tạo nội dung sử dụng Gemini
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const textResponse = response.text();
-      console.log("Nhận phản hồi từ Gemini, chiều dài:", textResponse.length);
 
-      // Create the MiniGame object with Gemini's response
-      const gameTitle = `${userMessage} - Mini Game`;
+      console.log("Đã nhận phản hồi từ Gemini, độ dài:", textResponse.length);
+
+      // Xử lý phản hồi để đảm bảo là HTML thuần túy
+      const cleanHtml = this.cleanHtmlResponse(textResponse);
+      console.log("HTML đã được làm sạch, độ dài:", cleanHtml.length);
+
+      // Tạo đối tượng MiniGame với phản hồi của Gemini
       return {
-        title: gameTitle,
+        title: `Minigame: ${userMessage}`,
         description: `Trò chơi về chủ đề ${userMessage}${options?.customContent ? ' với nội dung tùy chỉnh' : ''}`,
-        htmlContent: textResponse
+        htmlContent: cleanHtml
       };
     } catch (error) {
       console.error('Lỗi tạo Minigame:', error);
@@ -109,35 +114,39 @@ export class AIGameGenerator {
     }
   }
 
-  parseMiniGameResponse(rawText: string, topic: string): MiniGame | null {
-    try {
-      console.log("Đang phân tích kết quả minigame:", rawText);
-      
-      // Tìm nội dung HTML
-      let htmlContent = '';
-      const htmlMatch = rawText.match(/```html([\s\S]*?)```/);
-      
-      if (htmlMatch && htmlMatch[1]) {
-        htmlContent = htmlMatch[1].trim();
-      } else if (!rawText.includes('```')) {
-        // Nếu không có định dạng markdown, xử lý text thô
-        htmlContent = rawText.trim();
+  // Hàm để làm sạch phản hồi HTML, loại bỏ các đánh dấu markdown
+  cleanHtmlResponse(htmlText: string): string {
+    // Loại bỏ các khối mã markdown nếu có
+    let cleanedHtml = htmlText;
+    
+    // Nếu có định dạng ```html ... ```
+    const htmlBlockMatch = cleanedHtml.match(/```html\s*([\s\S]*?)\s*```/);
+    if (htmlBlockMatch && htmlBlockMatch[1]) {
+      cleanedHtml = htmlBlockMatch[1].trim();
+    } 
+    // Nếu chỉ có ``` ... ``` không có từ khóa html
+    else if (cleanedHtml.includes('```')) {
+      const codeBlockMatch = cleanedHtml.match(/```\s*([\s\S]*?)\s*```/);
+      if (codeBlockMatch && codeBlockMatch[1]) {
+        cleanedHtml = codeBlockMatch[1].trim();
       }
-      
-      if (!htmlContent) {
-        console.error('Không tìm thấy nội dung HTML hợp lệ');
-        return null;
-      }
-
-      // Tạo đối tượng MiniGame
-      return {
-        title: `Minigame: ${topic}`,
-        description: `Minigame tương tác về chủ đề ${topic}`,
-        htmlContent: htmlContent
-      };
-    } catch (error) {
-      console.error("Lỗi phân tích kết quả minigame:", error);
-      return null;
     }
+
+    // Đảm bảo mã HTML bắt đầu với <!DOCTYPE html> hoặc <html>
+    if (!cleanedHtml.trim().startsWith('<!DOCTYPE') && !cleanedHtml.trim().startsWith('<html')) {
+      cleanedHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minigame</title>
+</head>
+<body>
+${cleanedHtml}
+</body>
+</html>`;
+    }
+
+    return cleanedHtml;
   }
 }

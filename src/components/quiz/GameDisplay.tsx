@@ -94,11 +94,12 @@ const GameDisplay = ({ miniGame, hasCustomContent, questionCount, timePerQuestio
       </div>
       <div className="flex-1 overflow-hidden bg-gradient-to-b from-sky-50/50 to-white/50 dark:from-sky-900/20 dark:to-slate-900/30 p-3">
         <div className="rounded-lg shadow-inner bg-white/90 dark:bg-slate-800/40 h-full overflow-hidden border border-sky-100/50 dark:border-sky-900/50 backdrop-blur-sm">
+          {/* Sử dụng mã HTML trực tiếp từ Gemini không qua xử lý */}
           <iframe
             srcDoc={miniGame.htmlContent}
             title={miniGame.title}
             sandbox="allow-scripts allow-same-origin"
-            className="w-full h-full border-none game-frame transition-transform hover:scale-[1.01]"
+            className="w-full h-full border-none game-frame transition-opacity"
             style={{ height: '100%', width: '100%' }}
           />
         </div>
