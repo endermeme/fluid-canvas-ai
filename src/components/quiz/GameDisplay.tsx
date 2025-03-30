@@ -91,7 +91,8 @@ const GameDisplay = ({
           <GameShareSection miniGame={miniGame} />
         </div>
       </div>
-      <div className="flex-1 overflow-hidden" style={{ height: "calc(100% - 48px)" }}>
+      
+      <div className="flex-1">
         <iframe 
           srcDoc={miniGame.htmlContent} 
           title={miniGame.title} 
@@ -100,7 +101,8 @@ const GameDisplay = ({
           style={{
             height: '100%',
             width: '100%',
-            display: 'block'
+            display: 'block',
+            overflow: 'hidden'
           }} 
         />
       </div>
