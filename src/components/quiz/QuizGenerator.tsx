@@ -229,9 +229,16 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       );
       
       setShareUrl(url);
+      
+      // Copy to clipboard automatically
+      navigator.clipboard.writeText(url).then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      });
+      
       toast({
         title: "Đã Tạo Liên Kết Chia Sẻ",
-        description: "Liên kết có hiệu lực trong 48 giờ và đã được sao chép vào clipboard."
+        description: "Liên kết có hiệu lực trong 48 giờ và đã được sao chép vào clipboard.",
       });
     } catch (error) {
       console.error('Lỗi khi chia sẻ game:', error);
@@ -263,75 +270,90 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full w-full space-y-4">
-        <Loader2 className="w-12 h-12 animate-spin text-primary" />
-        <p className="text-lg">Đang tạo minigame từ chủ đề của bạn...</p>
+      <div className="flex flex-col items-center justify-center h-full w-full space-y-4 bg-gradient-to-r from-indigo-500/30 to-purple-500/30 backdrop-blur-sm">
+        <div className="glass-morphism p-8 rounded-xl flex flex-col items-center">
+          <Loader2 className="w-16 h-16 animate-spin text-primary mb-4" />
+          <p className="text-xl font-medium">Đang tạo minigame từ chủ đề "{topic}"...</p>
+          <p className="text-sm text-muted-foreground mt-2">Vui lòng đợi trong giây lát</p>
+        </div>
       </div>
     );
   }
 
   if (errorMessage) {
     return (
-      <div className="flex flex-col items-center justify-center h-full w-full space-y-6">
-        <div className="text-red-500">
-          <X size={48} />
+      <div className="flex flex-col items-center justify-center h-full w-full space-y-6 bg-gradient-to-r from-red-500/10 to-orange-500/10">
+        <div className="glass-morphism p-8 rounded-xl max-w-md text-center">
+          <div className="bg-red-500/20 p-4 rounded-full inline-flex mb-4">
+            <X size={48} className="text-red-500" />
+          </div>
+          <p className="text-xl font-medium mb-4">{errorMessage}</p>
+          <Button 
+            onClick={() => generateMiniGame(topic || "minigame vui")} 
+            size="lg" 
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+          >
+            Thử Lại
+          </Button>
         </div>
-        <p className="text-lg text-center">{errorMessage}</p>
-        <Button onClick={() => generateMiniGame(topic || "minigame vui")} size="lg">Thử Lại</Button>
       </div>
     );
   }
 
   if (!miniGame) {
     return (
-      <div className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10">
-        <div className="text-primary mb-4">
-          <Gamepad size={64} />
-        </div>
-        <h2 className="text-2xl font-bold text-center">Chào mừng đến với Trò Chơi Mini</h2>
-        <p className="text-center max-w-md">
-          Nhập chủ đề vào thanh chat bên trái để tạo một minigame vui nhộn và tương tác.
-        </p>
-        <div className="flex flex-wrap justify-center gap-3 max-w-lg mt-4">
-          {["Đố vui", "Xếp hình", "Nhớ hình", "Phản xạ", "Truy tìm", "Câu đố", "Vẽ tranh"].map((idea) => (
-            <Button 
-              key={idea}
-              variant="outline" 
-              className="rounded-full"
-              onClick={() => generateMiniGame(idea)}
-            >
-              {idea}
-            </Button>
-          ))}
+      <div className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+        <div className="glass-morphism p-8 rounded-xl max-w-lg">
+          <div className="text-primary mb-6 flex justify-center">
+            <Gamepad size={80} className="text-primary/80" />
+          </div>
+          <h2 className="text-3xl font-bold text-center mb-4">Chào mừng đến với Trò Chơi Mini</h2>
+          <p className="text-center text-lg mb-8">
+            Nhập chủ đề vào thanh chat bên trái hoặc chọn một ý tưởng bên dưới để tạo minigame vui nhộn và tương tác.
+          </p>
+          <p className="text-center text-muted-foreground mb-6">Hoặc chọn một trong các ý tưởng sau:</p>
+          
+          <div className="flex flex-wrap justify-center gap-3 max-w-lg">
+            {["Đố vui", "Xếp hình", "Nhớ hình", "Phản xạ", "Truy tìm", "Câu đố", "Vẽ tranh"].map((idea) => (
+              <Button 
+                key={idea}
+                variant="outline" 
+                className="rounded-full px-4 py-2 bg-white/50 dark:bg-black/20 backdrop-blur-sm border-primary/20 hover:bg-primary/20"
+                onClick={() => generateMiniGame(idea)}
+              >
+                {idea}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full w-full overflow-hidden flex flex-col">
+    <div className="h-full w-full overflow-hidden flex flex-col bg-gradient-to-r from-indigo-500/5 to-purple-500/5">
       {miniGame && (
         <>
-          <div className="bg-background border-b p-2 flex items-center justify-between">
-            <h3 className="text-sm font-medium truncate mr-2">
+          <div className="bg-background/80 backdrop-blur-sm border-b p-3 flex items-center justify-between">
+            <h3 className="text-base font-medium truncate mr-2">
               {miniGame.title}
             </h3>
             <div className="flex items-center gap-2">
               {shareUrl ? (
-                <div className="flex items-center gap-2 bg-muted p-1 rounded-md max-w-sm">
+                <div className="flex items-center gap-2 bg-muted/80 backdrop-blur-sm p-2 rounded-lg max-w-sm">
                   <input 
                     type="text" 
                     value={shareUrl} 
                     readOnly 
-                    className="bg-transparent text-xs flex-1 min-w-0 outline-none px-2"
+                    className="bg-transparent text-sm flex-1 min-w-0 outline-none px-2"
                   />
                   <Button 
                     size="sm" 
                     variant="ghost" 
-                    className="h-7 px-2"
+                    className="h-8 px-2 hover:bg-primary/10"
                     onClick={() => copyToClipboard(shareUrl)}
                   >
-                    {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                    {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
               ) : (
@@ -339,7 +361,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
                   onClick={handleShareGame} 
                   variant="outline" 
                   size="sm" 
-                  className="h-8"
+                  className="h-9 bg-white/50 dark:bg-black/20 backdrop-blur-sm hover:bg-primary/20"
                 >
                   <Share2 className="h-4 w-4 mr-1" />
                   Chia Sẻ (48h)

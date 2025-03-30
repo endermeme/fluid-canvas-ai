@@ -12,6 +12,7 @@ export interface StoredGame {
 
 // Get the base URL for shared games
 const getBaseUrl = () => {
+  // Use dynamic base URL detection for Vercel deployment
   const url = window.location.origin;
   return `${url}/quiz/shared`;
 };
