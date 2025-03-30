@@ -1,15 +1,18 @@
+
 import React from 'react';
 import { MiniGame } from '@/utils/AIGameGenerator';
 import GameShareSection from './GameShareSection';
 import { FileText, Clock, ListOrdered, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 interface GameDisplayProps {
   miniGame: MiniGame | null;
   hasCustomContent?: boolean;
   questionCount?: number;
   timePerQuestion?: number;
 }
+
 const GameDisplay = ({
   miniGame,
   hasCustomContent,
@@ -17,7 +20,9 @@ const GameDisplay = ({
   timePerQuestion
 }: GameDisplayProps) => {
   if (!miniGame) return null;
-  return <div className="flex flex-col h-full overflow-hidden rounded-xl shadow-xl border border-sky-200/30 dark:border-sky-800/30">
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden rounded-xl shadow-xl border border-sky-200/30 dark:border-sky-800/30">
       <div className="bg-gradient-to-r from-primary/90 via-primary/80 to-primary/70 backdrop-blur-md p-3 flex items-center justify-between text-white py-[12px]">
         <div className="flex items-center flex-1 overflow-hidden">
           <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse flex-shrink-0"></span>
@@ -86,12 +91,21 @@ const GameDisplay = ({
           <GameShareSection miniGame={miniGame} />
         </div>
       </div>
-      <div className="flex-1 h-full overflow-hidden">
-        <iframe srcDoc={miniGame.htmlContent} title={miniGame.title} sandbox="allow-scripts allow-same-origin" className="w-full h-full border-none game-frame" style={{
-        height: '100%',
-        width: '100%'
-      }} />
+      <div className="flex-1 overflow-hidden" style={{ height: "calc(100% - 48px)" }}>
+        <iframe 
+          srcDoc={miniGame.htmlContent} 
+          title={miniGame.title} 
+          sandbox="allow-scripts allow-same-origin" 
+          className="w-full h-full border-none" 
+          style={{
+            height: '100%',
+            width: '100%',
+            display: 'block'
+          }} 
+        />
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default GameDisplay;
