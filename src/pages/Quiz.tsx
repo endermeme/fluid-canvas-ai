@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
@@ -7,8 +6,6 @@ import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
 import GameSettings from '@/components/quiz/GameSettings';
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'react-router-dom';
 
@@ -141,25 +138,6 @@ const Quiz = () => {
               <GameSettings onStart={handleStartGame} topic={topic} />
             ) : (
               <div className="h-full relative">
-                <div className="absolute top-2 right-2 z-10">
-                  <Drawer>
-                    <DrawerTrigger asChild>
-                      <Button variant="outline" size="icon" className="rounded-full bg-background/50 backdrop-blur-sm">
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                    </DrawerTrigger>
-                    <DrawerContent>
-                      <div className="p-4 max-w-md mx-auto">
-                        <GameSettings 
-                          onStart={handleStartGame} 
-                          topic={topic} 
-                          initialSettings={gameSettings}
-                          inDrawer={true}
-                        />
-                      </div>
-                    </DrawerContent>
-                  </Drawer>
-                </div>
                 <QuizGenerator 
                   ref={quizGeneratorRef} 
                   topic={topic}
