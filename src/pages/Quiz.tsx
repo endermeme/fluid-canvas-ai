@@ -77,13 +77,13 @@ const Quiz = () => {
         quizGeneratorRef.current.generateQuiz(requestedTopic, gameOpts);
         
         toast({
-          title: "Đang Tạo Trò Chơi",
+          title: "Đang Tạo Trò Chơi Với Gemini AI",
           description: `Chủ đề: ${requestedTopic}`,
         });
       } else {
         toast({
           title: "Lỗi Hệ Thống",
-          description: "Không thể kết nối với trình tạo trò chơi. Vui lòng thử lại.",
+          description: "Không thể kết nối với trình tạo trò chơi Gemini AI. Vui lòng thử lại.",
           variant: "destructive",
         });
       }

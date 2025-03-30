@@ -37,7 +37,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
     timePerQuestion: 30
   });
   const [animationClass, setAnimationClass] = useState('');
-  const [attempts, setAttempts] = useState(0); // Track generation attempts
+  const [attempts, setAttempts] = useState(0);
 
   // Expose the generateQuiz method to parent components through the ref
   useImperativeHandle(ref, () => ({
@@ -61,7 +61,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
     try {
       console.log("Gọi API tạo trò chơi với chủ đề:", topic);
       
-      // Handle custom file if provided
+      // Show toast messages for different scenarios
       if (gameOptions.customFile) {
         toast({
           title: "Đang xử lý tệp",
@@ -69,7 +69,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
         });
       }
       
-      // If custom content is provided, update the toast message
       if (gameOptions.customContent && gameOptions.contentType === 'custom') {
         toast({
           title: "Nội Dung Tùy Chỉnh",
@@ -77,10 +76,9 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
         });
       }
       
-      // Add question count and time per question information to the toast
       toast({
         title: "Đang Tạo Trò Chơi",
-        description: `Đang tạo trò chơi với chủ đề "${topic}" - ${gameOptions.questionCount || 5} câu hỏi, ${gameOptions.timePerQuestion || 30} giây/câu`,
+        description: `Đang tạo trò chơi với Gemini AI về "${topic}" - ${gameOptions.questionCount || 5} câu hỏi, ${gameOptions.timePerQuestion || 30} giây/câu`,
       });
       
       const game = await gameGenerator.generateMiniGame(topic, gameOptions);
@@ -90,17 +88,17 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, options?: GameO
         setAnimationClass('animate-fade-in');
         toast({
           title: "Minigame Đã Sẵn Sàng",
-          description: `Đã tạo minigame xếp hình về "${topic}"`,
+          description: `Đã tạo minigame về "${topic}"`,
         });
       } else {
-        throw new Error('Không thể tạo minigame. Không có phản hồi từ AI.');
+        throw new Error('Không thể tạo minigame. Không có phản hồi từ AI Gemini.');
       }
     } catch (error) {
       console.error('Lỗi Tạo Minigame:', error);
-      setErrorMessage('Không thể tạo minigame. Vui lòng thử lại hoặc chọn chủ đề khác.');
+      setErrorMessage('Không thể tạo minigame với Gemini AI. Vui lòng thử lại hoặc chọn chủ đề khác.');
       toast({
         title: "Lỗi Tạo Minigame",
-        description: "Có vấn đề khi tạo minigame. Vui lòng thử lại với chủ đề khác.",
+        description: "Có vấn đề khi tạo minigame với Gemini. Vui lòng thử lại với chủ đề khác.",
         variant: "destructive",
       });
     } finally {
