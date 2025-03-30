@@ -64,7 +64,7 @@ export class AIGameGenerator {
         customFileInfo = `với thông tin từ tệp "${options.customFile.name}"`;
       }
 
-      // Tạo prompt cho Gemini
+      // Tạo prompt cho Gemini - Fixing the issue with backticks by escaping them
       const prompt = `
       Tạo cho tôi một HTML minigame hoàn chỉnh cho chủ đề "${userMessage}" với các đặc điểm:
       - Độ khó: ${difficulty}
@@ -83,7 +83,7 @@ export class AIGameGenerator {
       5. Có logic hoàn chỉnh để chơi, bao gồm bắt đầu, kết thúc, và tính điểm.
       6. Minigame này PHẢI chạy ngay trong iframe mà không cần bất kỳ sự can thiệp nào.
       7. KHÔNG sử dụng bất kỳ thư viện bên ngoài nào (như jQuery, Bootstrap).
-      8. Không thêm bất kỳ chú thích markdown nào (```html, ```), chỉ trả về mã HTML thuần túy.
+      8. Không thêm bất kỳ chú thích markdown nào (\`\`\`html, \`\`\`), chỉ trả về mã HTML thuần túy.
       9. Minigame phải có đủ tính năng chơi được ngay, không phải chỉ là bố cục hoặc demo.
 
       QUAN TRỌNG: CHỈ TRẢ VỀ MÃ HTML HOÀN CHỈNH. KHÔNG THÊM CHÚ THÍCH HOẶC GIẢI THÍCH GÌ KHÁC.
