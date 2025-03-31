@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Gamepad } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { GameSettingsData } from '@/pages/Quiz';
 interface GameWelcomeProps {
   onTopicSelect: (topic: string) => void;
   showSettings?: boolean;
-  onStartWithSettings?: (topic: string, settings: GameSettingsData) => void;
+  onStartWithSettings?: (topic: string) => void;
 }
 
 const GameWelcome: React.FC<GameWelcomeProps> = ({ onTopicSelect, showSettings = false, onStartWithSettings }) => {
