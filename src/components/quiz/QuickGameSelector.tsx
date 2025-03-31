@@ -1,7 +1,6 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Gamepad, Settings, PuzzlePiece, BrainCircuit, Clock4, Dices, PenTool, HeartHandshake, Lightbulb } from 'lucide-react';
+import { Gamepad, Settings, Puzzle, BrainCircuit, Clock4, Dices, PenTool, HeartHandshake, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
 import GameLoading from './GameLoading';
@@ -127,7 +126,7 @@ const QuickGameSelector: React.FC = () => {
   const getIconComponent = (iconName: string) => {
     switch(iconName) {
       case 'brain-circuit': return <BrainCircuit />;
-      case 'puzzle-piece': return <PuzzlePiece />;
+      case 'puzzle-piece': return <Puzzle />;
       case 'light-bulb': return <Lightbulb />;
       case 'clock': return <Clock4 />;
       case 'dices': return <Dices />;

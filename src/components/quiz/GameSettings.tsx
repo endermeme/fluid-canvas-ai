@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { GameSettingsData, GameType } from './types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Gamepad, X, BrainCircuit, PuzzlePiece, Lightbulb, Clock4, Dices, HeartHandshake, PenTool } from 'lucide-react';
+import { Gamepad, X, BrainCircuit, Puzzle, Lightbulb, Clock4, Dices, HeartHandshake, PenTool } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { animateToolbarAppear } from '@/lib/animations';
 
@@ -105,7 +104,7 @@ const GameSettings = ({
     
     switch (gameType.icon) {
       case 'brain-circuit': return <BrainCircuit className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
-      case 'puzzle-piece': return <PuzzlePiece className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
+      case 'puzzle-piece': return <Puzzle className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
       case 'light-bulb': return <Lightbulb className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
       case 'clock': return <Clock4 className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
       case 'dices': return <Dices className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
