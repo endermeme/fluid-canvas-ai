@@ -18,7 +18,7 @@ export class AIGameGenerator {
 
   constructor(apiKey: string) {
     this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-pro-exp-03-25" });
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
   }
 
   async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
