@@ -1,3 +1,4 @@
+
 import { GameSettingsData } from './types';
 
 export interface MiniGame {
@@ -46,7 +47,7 @@ export class AIGameGenerator {
         7. Kiểu dáng hiện đại với viền bo tròn, bóng đổ, và các phần tử trong suốt
         8. Bố cục tối ưu cho cả điện thoại và máy tính
         
-        Trả về định dạng JSON với các trường sau:
+        Trả về định dạng JSON đơn giản với các trường sau:
         {
           "title": "Tên minigame",
           "description": "Mô tả ngắn gọn về minigame",
@@ -56,8 +57,9 @@ export class AIGameGenerator {
           "cssStyles": "CSS cho game (không bao gồm thẻ style) - hãy tạo nhiều màu sắc và hiệu ứng đẹp mắt"
         }
         
+        QUAN TRỌNG: Các chuỗi trong JSON cần được định dạng để có thể phân tích được, không sử dụng ký tự đặc biệt như backticks. Sử dụng ký tự escape cho dấu nháy đôi trong chuỗi.
         Không trả lời bất kỳ điều gì khác ngoài đối tượng JSON.
-        Đảm bảo JSON được trả về là hợp lệ và có thể phân tích được.
+        Đảm bảo JSON được trả về là hợp lệ và có thể phân tích được dễ dàng.
       `;
 
       console.log("Sending request to Claude API");
@@ -106,7 +108,7 @@ export class AIGameGenerator {
           throw new Error('Invalid Claude API response structure');
         }
         
-        // Try to parse the JSON response
+        // Try to parse the JSON response with improved error handling for bad formatted JSON
         let parsedData;
         try {
           // Check if the response is already a parsed object
@@ -114,12 +116,37 @@ export class AIGameGenerator {
             parsedData = gameData;
           } else {
             // Handle the case where the API returned text instead of JSON
-            // Try to extract JSON from text by finding outermost { and }
-            const jsonMatch = gameData.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-              parsedData = JSON.parse(jsonMatch[0]);
-            } else {
-              parsedData = JSON.parse(gameData);
+            // Extract JSON from the response by finding outermost { and }
+            let jsonMatch = gameData.match(/\{[\s\S]*\}/);
+            let jsonString = jsonMatch ? jsonMatch[0] : gameData;
+            
+            // Remove backticks from CSS styles which often cause JSON parse errors
+            jsonString = jsonString.replace(/`([\s\S]*?)`/g, function(match, p1) {
+              // Escape newlines and quotes in the CSS content
+              return JSON.stringify(p1);
+            });
+            
+            // Try to parse the cleaned JSON
+            try {
+              parsedData = JSON.parse(jsonString);
+            } catch (innerError) {
+              console.error("First JSON parse attempt failed:", innerError);
+              
+              // If that fails, try a more aggressive approach to fix the JSON
+              jsonString = jsonString
+                .replace(/(\r\n|\n|\r)/gm, "\\n")  // Replace newlines with escaped newlines
+                .replace(/"/g, '\\"')              // Escape double quotes
+                .replace(/\t/g, "\\t");           // Replace tabs with escaped tabs
+              
+              // Reconstruct a valid JSON string and parse again
+              jsonString = `{"title":"${parsedData.title || 'Minigame'}","description":"${
+                parsedData.description || 'Interactive minigame'}","instructionsHtml":"${
+                parsedData.instructionsHtml || ''}","gameHtml":"${
+                parsedData.gameHtml || '<div>Game content</div>'}","gameScript":"${
+                parsedData.gameScript || 'console.log(\"Game loaded\");'}","cssStyles":"${
+                parsedData.cssStyles || 'body { margin: 0; padding: 0; }'}"}`;
+              
+              parsedData = JSON.parse(jsonString);
             }
           }
           
