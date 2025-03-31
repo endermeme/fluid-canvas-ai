@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Gamepad, Settings, Puzzle, BrainCircuit, Clock4, Dices, PenTool, HeartHandshake, Lightbulb, Sparkles } from 'lucide-react';
@@ -10,6 +11,7 @@ import GameSettings from './GameSettings';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { GameSettingsData, GameType } from './types';
 import { animateBlockCreation } from '@/lib/animations';
+import { Link } from 'react-router-dom';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
