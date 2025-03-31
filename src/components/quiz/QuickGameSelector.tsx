@@ -112,7 +112,6 @@ const QuickGameSelector: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Apply animations to game buttons when component mounts
     const gameButtons = containerRef.current?.querySelectorAll('.game-button');
     gameButtons?.forEach((button, index) => {
       setTimeout(() => {

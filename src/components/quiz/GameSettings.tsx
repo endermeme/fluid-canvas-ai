@@ -43,7 +43,6 @@ const GameSettings = ({
   }, [initialSettings]);
 
   useEffect(() => {
-    // Apply animations when component mounts
     if (containerRef.current) {
       animateToolbarAppear(containerRef.current);
     }
@@ -78,10 +77,8 @@ const GameSettings = ({
     onStart(settings);
   };
 
-  // Configure settings based on game type
   useEffect(() => {
     if (gameType) {
-      // Adjust slider ranges based on game type
       const sliderConfig = document.getElementById('questionCount') as HTMLInputElement;
       const timeSlider = document.getElementById('timePerQuestion') as HTMLInputElement;
       
