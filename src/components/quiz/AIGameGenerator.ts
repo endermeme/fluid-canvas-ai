@@ -44,14 +44,16 @@ export class AIGameGenerator {
         4. Bố cục responsive cho cả điện thoại và máy tính
         5. Code rõ ràng, dễ hiểu với chức năng game đơn giản
         
-        CHÚ Ý QUAN TRỌNG:
-        - PHẢI trả về CHÍNH XÁC theo cấu trúc JSON dưới đây, không thêm bớt trường nào
-        - KHÔNG sử dụng backticks (\`) trong JSON
-        - LUÔN escape dấu nháy kép trong chuỗi bằng dấu backslash (\\")
-        - ĐẢM BẢO CSS, HTML, và JavaScript đều là chuỗi hợp lệ có thể phân tích được trong JSON
-        - KHÔNG trả lời bằng markdown, chỉ trả về JSON đúng định dạng
+        HƯỚNG DẪN KỸ THUẬT QUAN TRỌNG:
+        - Chỉ trả về JSON hợp lệ, không có markdown, không có mở đầu hoặc kết thúc
+        - KHÔNG sử dụng dấu backtick (\`) trong JSON của bạn
+        - KHÔNG sử dụng cú pháp markdown như \`\`\`json ... \`\`\`
+        - Bất kỳ dấu nháy kép (") trong CSS, HTML, hoặc JavaScript PHẢI được escape bằng dấu backslash (\\")
+        - Sử dụng dấu nháy đơn (') thay vì dấu nháy kép trong code CSS, HTML và JavaScript khi có thể
+        - String CSS phải được định dạng với đúng cú pháp, không có kí tự ngắt dòng thô
+        - Tất cả các thuộc tính phải chính xác như mẫu dưới đây
         
-        Mẫu JSON trả về:
+        CẤU TRÚC JSON BẮT BUỘC (không thêm/bớt trường nào):
         {
           "title": "Tên minigame",
           "description": "Mô tả ngắn về minigame",
@@ -119,7 +121,7 @@ export class AIGameGenerator {
             let jsonText = gameData.trim();
             
             // Remove markdown code block indicators if present
-            jsonText = jsonText.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+            jsonText = jsonText.replace(/^```json\s*/gm, '').replace(/^```\s*/gm, '').replace(/```\s*$/gm, '').trim();
             
             // Find the outermost JSON object
             const jsonMatch = jsonText.match(/(\{[\s\S]*\})/);
@@ -127,24 +129,89 @@ export class AIGameGenerator {
               jsonText = jsonMatch[0];
             }
             
+            // Create a safe version of the JSON content by properly handling multiline strings and backticks
+            jsonText = jsonText
+              .replace(/`([\s\S]*?)`/g, function(_, p1) {
+                return JSON.stringify(p1).slice(1, -1);
+              })
+              // Fix CSS multiline strings by removing newlines
+              .replace(/("cssStyles"\s*:\s*")([^"]*)(")/gs, function(_, start, cssContent, end) {
+                const fixedCss = cssContent
+                  .replace(/\n/g, ' ')
+                  .replace(/\s+/g, ' ')
+                  .replace(/\\"/g, "'")  // Replace escaped quotes with single quotes in CSS
+                  .trim();
+                return start + fixedCss + end;
+              });
+
             try {
               // First attempt to parse
               parsedData = JSON.parse(jsonText);
             } catch (parseError) {
               console.error("First JSON parse attempt failed:", parseError);
+              console.error("Raw response was:", gameData);
               
               // If parsing fails due to issues with CSS multi-line strings or escaping
-              // Try to clean up the JSON
-              jsonText = jsonText
-                .replace(/`([\s\S]*?)`/g, function(match, p1) {
-                  // Replace backtick-wrapped content with properly escaped string
-                  return JSON.stringify(p1).slice(1, -1);
-                })
-                .replace(/\r?\n/g, '\\n')  // Replace actual newlines with escaped newlines
-                .replace(/\t/g, '\\t');    // Replace tabs with escaped tabs
+              // Try a more aggressive approach
+              const getBetweenBraces = (str: string) => {
+                const start = str.indexOf('{');
+                let open = 0;
+                let end = start;
+                
+                for (let i = start; i < str.length; i++) {
+                  if (str[i] === '{') open++;
+                  if (str[i] === '}') open--;
+                  
+                  if (open === 0) {
+                    end = i + 1;
+                    break;
+                  }
+                }
+                
+                return str.substring(start, end);
+              };
               
-              // Try parsing again
-              parsedData = JSON.parse(jsonText);
+              // Extract the outermost JSON object more aggressively
+              const jsonObject = getBetweenBraces(jsonText);
+              
+              // Try to manually reconstruct the JSON
+              try {
+                // Create a structured object manually
+                const titleMatch = /\"title\":\s*\"([^\"]+)\"/i.exec(jsonObject);
+                const descriptionMatch = /\"description\":\s*\"([^\"]+)\"/i.exec(jsonObject);
+                const instructionsHtmlMatch = /\"instructionsHtml\":\s*\"(.*?)\"/is.exec(jsonObject);
+                const gameHtmlMatch = /\"gameHtml\":\s*\"(.*?)\",\s*\"gameScript\"/is.exec(jsonObject);
+                const gameScriptMatch = /\"gameScript\":\s*\"(.*?)\",\s*\"cssStyles\"/is.exec(jsonObject);
+                const cssStylesMatch = /\"cssStyles\":\s*\"(.*?)\"\s*\}/is.exec(jsonObject);
+                
+                if (titleMatch && descriptionMatch && gameHtmlMatch && gameScriptMatch && cssStylesMatch) {
+                  parsedData = {
+                    title: titleMatch[1],
+                    description: descriptionMatch[1],
+                    instructionsHtml: instructionsHtmlMatch ? instructionsHtmlMatch[1] : "",
+                    gameHtml: gameHtmlMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"'),
+                    gameScript: gameScriptMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"'),
+                    cssStyles: cssStylesMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"')
+                  };
+                } else {
+                  throw new Error("Couldn't extract all required fields from JSON");
+                }
+              } catch (manualParseError) {
+                console.error("Manual JSON extraction failed:", manualParseError);
+                
+                // Last resort approach - try fixing common JSON issues
+                jsonText = jsonText
+                  // Replace escaped backticks with actual backticks
+                  .replace(/\\`/g, '`')
+                  // Fix unclosed quotes
+                  .replace(/([^\\])"([^"]*)\n/g, '$1"$2\\n"')
+                  // Clean up extra backticks
+                  .replace(/`/g, '')
+                  // Remove or fix invalid control characters
+                  .replace(/[\x00-\x1F\x7F]/g, ' ');
+                
+                parsedData = JSON.parse(jsonText);
+              }
             }
           }
           
