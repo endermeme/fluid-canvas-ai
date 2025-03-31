@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from './components/ui/theme-provider';
 import { Toaster } from './components/ui/toaster';
 import { cleanupExpiredGames } from './utils/gameExport';
-import axios from 'axios';
 
 import Index from './pages/Index';
 import Quiz from './pages/Quiz';
@@ -21,7 +20,7 @@ declare const window: CustomWindow;
 const DEFAULT_CLAUDE_API_KEY = '';
 const API_KEY_STORAGE_KEY = 'claude-api-key';
 
-// Setup our proxy route handler
+// Setup our proxy route handler - using native fetch instead of axios
 if (!window.proxyInitialized) {
   window.proxyInitialized = true;
   
@@ -33,42 +32,90 @@ if (!window.proxyInitialized) {
       const { prompt, apiKey } = body;
       
       try {
-        // Make request through CORS proxy
-        const response = await fetch('https://cors-anywhere.herokuapp.com/https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01'
-          },
-          body: JSON.stringify({
-            model: 'claude-3-sonnet-20240229',
-            max_tokens: 4000,
-            messages: [
-              {
-                role: 'user',
-                content: prompt
-              }
-            ],
-            response_format: { type: "json_object" }
-          })
-        });
-
+        console.log("Making direct request to Claude API through proxy");
+        
+        // Try different CORS proxies
+        const proxyUrls = [
+          'https://cors-anywhere.herokuapp.com/https://api.anthropic.com/v1/messages',
+          'https://corsproxy.io/?https://api.anthropic.com/v1/messages',
+          'https://api.allorigins.win/raw?url=https://api.anthropic.com/v1/messages'
+        ];
+        
+        let response = null;
+        let error = null;
+        
+        // Try each proxy in order until one succeeds
+        for (const proxyUrl of proxyUrls) {
+          try {
+            console.log(`Attempting proxy: ${proxyUrl.split('?')[0]}`);
+            
+            response = await fetch(proxyUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey,
+                'anthropic-version': '2023-06-01'
+              },
+              body: JSON.stringify({
+                model: 'claude-3-sonnet-20240229',
+                max_tokens: 4000,
+                messages: [
+                  {
+                    role: 'user',
+                    content: prompt
+                  }
+                ],
+                response_format: { type: "json_object" }
+              })
+            });
+            
+            // If successful, break out of loop
+            if (response.ok) {
+              console.log("Proxy request successful");
+              break;
+            }
+          } catch (e) {
+            console.error(`Error with proxy ${proxyUrl}:`, e);
+            error = e;
+          }
+        }
+        
+        if (!response || !response.ok) {
+          console.error("All proxies failed");
+          throw error || new Error("All proxies failed");
+        }
+        
         const data = await response.json();
         
         // Return a synthesized response that matches our API
         return Promise.resolve({
           ok: true,
           status: 200,
-          json: async () => ({
-            content: data.content[0].text
-          })
+          json: async () => {
+            try {
+              if (data.content && Array.isArray(data.content) && data.content[0]?.text) {
+                return {
+                  content: data.content[0].text
+                };
+              } else {
+                console.error("Unexpected Claude API response structure:", data);
+                return {
+                  error: "Invalid response structure from Claude API"
+                };
+              }
+            } catch (parseError) {
+              console.error("Error processing Claude response:", parseError);
+              return {
+                error: "Failed to process Claude API response"
+              };
+            }
+          }
         });
       } catch (error) {
         console.error("Proxy error:", error);
         return Promise.resolve({
           ok: false,
-          status: 500,
+          status: error.status || 500,
           json: async () => ({
             error: error.message || "CORS proxy request failed"
           })

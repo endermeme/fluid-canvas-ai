@@ -1,11 +1,12 @@
 
 import React, { useEffect, useRef } from 'react';
-import { X, RefreshCw, Settings, ExternalLink } from 'lucide-react';
+import { X, RefreshCw, Settings, ExternalLink, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { animateBlockCreation } from '@/lib/animations';
 import { useToast } from '@/hooks/use-toast';
 import ApiKeySettings from './ApiKeySettings';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface GameErrorProps {
   errorMessage: string;
@@ -33,13 +34,20 @@ const GameError: React.FC<GameErrorProps> = ({ errorMessage, onRetry, topic }) =
   };
   
   const isApiKeyError = errorMessage.includes('API key') || 
+    errorMessage.includes('key không hợp lệ') ||
     errorMessage.includes('kết nối') ||
     errorMessage.includes('vượt quá giới hạn API') ||
     errorMessage.includes('server') ||
-    errorMessage.toLowerCase().includes('cors');
+    errorMessage.toLowerCase().includes('unauthorized');
   
   const isCorsError = errorMessage.toLowerCase().includes('cors') ||
-    errorMessage.toLowerCase().includes('proxy');
+    errorMessage.toLowerCase().includes('proxy') ||
+    errorMessage.includes('kết nối') ||
+    errorMessage.includes('404');
+    
+  const isParseError = errorMessage.toLowerCase().includes('parse') ||
+    errorMessage.toLowerCase().includes('phân tích') ||
+    errorMessage.toLowerCase().includes('xử lý dữ liệu');
   
   return (
     <div 
@@ -79,7 +87,7 @@ const GameError: React.FC<GameErrorProps> = ({ errorMessage, onRetry, topic }) =
         
         {isApiKeyError && (
           <div className="text-sm text-center text-muted-foreground mt-2 space-y-2">
-            <p>Lỗi này có thể do API key không hợp lệ hoặc CORS</p>
+            <p>Lỗi này có thể do API key không hợp lệ</p>
             <p>API key Claude phải bắt đầu bằng <code className="bg-muted px-1 py-0.5 rounded">sk-</code></p>
             <a 
               href="https://console.anthropic.com/" 
@@ -98,10 +106,37 @@ const GameError: React.FC<GameErrorProps> = ({ errorMessage, onRetry, topic }) =
             <AlertTitle>Lỗi CORS / Network</AlertTitle>
             <AlertDescription className="text-sm">
               <p className="mb-2">Hệ thống đang sử dụng CORS proxy để kết nối tới Claude API. Proxy này có thể bị giới hạn truy cập hoặc không hoạt động.</p>
-              <p>Nếu vấn đề vẫn tiếp diễn, hãy thử lại sau hoặc thử chủ đề khác.</p>
+              <p>Đã thử sử dụng nhiều proxy khác nhau nhưng không thành công. Vui lòng thử lại sau hoặc thử chủ đề khác.</p>
             </AlertDescription>
           </Alert>
         )}
+        
+        {isParseError && (
+          <Alert className="bg-blue-50 border-blue-200">
+            <AlertTitle>Lỗi Phân Tích Dữ Liệu</AlertTitle>
+            <AlertDescription className="text-sm">
+              <p className="mb-2">Không thể xử lý phản hồi từ API. Điều này có thể do định dạng phản hồi không hợp lệ.</p>
+              <p>Vui lòng thử chủ đề đơn giản hơn hoặc thử lại sau.</p>
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="troubleshooting">
+            <AccordionTrigger className="text-sm font-normal">
+              <div className="flex items-center">
+                <Info className="h-4 w-4 mr-2" />
+                Hướng dẫn khắc phục
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="text-sm space-y-2 text-muted-foreground">
+              <p>1. <strong>Kiểm tra API key</strong>: Đảm bảo API key Claude bắt đầu bằng "sk-" và được nhập đúng.</p>
+              <p>2. <strong>Thử chủ đề khác</strong>: Một số chủ đề có thể quá phức tạp hoặc gây lỗi.</p>
+              <p>3. <strong>Thử lại sau</strong>: Proxy CORS có thể bị giới hạn truy cập tạm thời.</p>
+              <p>4. <strong>Kiểm tra kết nối mạng</strong>: Đảm bảo bạn có kết nối internet ổn định.</p>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
       
       <ApiKeySettings 

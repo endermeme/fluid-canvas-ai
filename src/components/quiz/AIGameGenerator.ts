@@ -1,4 +1,4 @@
-import axios from 'axios';
+
 import { GameSettingsData } from './types';
 
 export interface MiniGame {
@@ -58,31 +58,71 @@ export class AIGameGenerator {
         }
         
         Không trả lời bất kỳ điều gì khác ngoài đối tượng JSON.
+        Đảm bảo JSON được trả về là hợp lệ và có thể phân tích được.
       `;
 
-      console.log("Sending request through CORS proxy with key: " + this.apiKey.substring(0, 4) + "****");
+      console.log("Sending request through proxy with key: " + this.apiKey.substring(0, 4) + "****");
 
       try {
-        // Use our proxy endpoint
-        const response = await axios.post(
-          '/api/claude-proxy',
-          {
+        // Use our proxy endpoint with native fetch
+        const response = await fetch('/api/claude-proxy', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
             prompt,
             apiKey: this.apiKey
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            timeout: 60000 // 60 seconds timeout
-          }
-        );
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
 
         console.log("Received response from proxy");
-        const gameData = response.data.content;
+        const responseData = await response.json();
+        
+        if (responseData.error) {
+          throw new Error(responseData.error);
+        }
+
+        // Extract content from response
+        const gameData = responseData.content;
+        console.log("Parsing response content:", typeof gameData, gameData?.slice(0, 100) + "...");
         
         // Try to parse the JSON response
-        const parsedData = JSON.parse(gameData);
+        let parsedData;
+        try {
+          // Check if the response is already a parsed object
+          if (typeof gameData === 'object' && gameData !== null) {
+            parsedData = gameData;
+          } else {
+            // Handle the case where the API returned text instead of JSON
+            // Try to extract JSON from text by finding outermost { and }
+            const jsonMatch = gameData.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              parsedData = JSON.parse(jsonMatch[0]);
+            } else {
+              parsedData = JSON.parse(gameData);
+            }
+          }
+          
+          console.log("Successfully parsed game data");
+        } catch (jsonError) {
+          console.error("Error parsing JSON from Claude response:", jsonError);
+          console.error("Raw response was:", gameData);
+          throw new Error('Không thể phân tích dữ liệu từ API Claude. Định dạng phản hồi không hợp lệ.');
+        }
+        
+        // Validate the required fields
+        const requiredFields = ['title', 'description', 'gameHtml', 'gameScript', 'cssStyles'];
+        for (const field of requiredFields) {
+          if (!parsedData[field]) {
+            throw new Error(`Thiếu trường dữ liệu bắt buộc: ${field}`);
+          }
+        }
         
         // Build a full HTML document from the parts
         const fullHtmlContent = this.buildFullHtmlDocument(
@@ -90,42 +130,45 @@ export class AIGameGenerator {
           parsedData.gameHtml,
           parsedData.gameScript,
           parsedData.cssStyles,
-          parsedData.instructionsHtml
+          parsedData.instructionsHtml || ''
         );
         
         return {
           title: parsedData.title,
           description: parsedData.description,
           content: fullHtmlContent,
-          instructionsHtml: parsedData.instructionsHtml,
+          instructionsHtml: parsedData.instructionsHtml || '',
           gameHtml: parsedData.gameHtml,
           gameScript: parsedData.gameScript,
           cssStyles: parsedData.cssStyles
         };
-      } catch (jsonError) {
-        console.error("Error parsing JSON from Claude response:", jsonError);
-        console.log("Attempted to parse:", jsonError);
-        throw new Error('Không thể xử lý dữ liệu từ Claude API. Vui lòng thử lại.');
+      } catch (fetchError) {
+        console.error("Error fetching from Claude API:", fetchError);
+        
+        // Handle specific fetch errors
+        if (fetchError.message.includes('404')) {
+          throw new Error('Lỗi kết nối: CORS proxy không tìm thấy (404). Vui lòng thử lại sau.');
+        } else if (fetchError.message.includes('429')) {
+          throw new Error('Đã vượt quá giới hạn API. Vui lòng thử lại sau.');
+        } else {
+          throw new Error(`Lỗi kết nối tới Claude API: ${fetchError.message}`);
+        }
       }
     } catch (error: any) {
       console.error("Error generating mini game:", error);
       
       // More specific error messages based on error type
-      if (axios.isAxiosError(error)) {
-        if (error.code === 'ERR_NETWORK') {
-          throw new Error('Không thể kết nối tới API Claude. CORS proxy có thể bị giới hạn truy cập, vui lòng thử lại sau.');
-        } else if (error.response?.status === 401) {
-          throw new Error('API key không hợp lệ. Vui lòng kiểm tra lại API key Claude của bạn.');
-        } else if (error.response?.status === 429) {
-          throw new Error('Đã vượt quá giới hạn API. Vui lòng thử lại sau.');
-        } else if (error.message && error.message.includes('CORS')) {
-          throw new Error('Lỗi CORS: Không thể truy cập Claude API. Proxy CORS đang được sử dụng nhưng có thể bị giới hạn truy cập.');
-        } else {
-          throw new Error(`Lỗi khi tạo minigame: ${error.message}`);
-        }
+      if (error.message.includes('404')) {
+        throw new Error('CORS proxy không tìm thấy (404). Vui lòng thử proxy khác hoặc thử lại sau.');
+      } else if (error.message.includes('CORS')) {
+        throw new Error('Lỗi CORS: Không thể truy cập Claude API. Proxy CORS đang được sử dụng nhưng có thể bị giới hạn truy cập.');
+      } else if (error.message.includes('API key')) {
+        throw new Error('API key không hợp lệ. Vui lòng kiểm tra lại API key Claude của bạn.');
+      } else if (error.message.includes('phân tích') || error.message.includes('parse')) {
+        throw new Error('Không thể xử lý dữ liệu từ Claude API. Vui lòng thử lại với chủ đề khác.');
+      } else {
+        throw new Error(`Lỗi khi tạo minigame: ${error.message}`);
       }
-      
-      throw error; // Re-throw for proper error handling upstream
     }
   }
   
