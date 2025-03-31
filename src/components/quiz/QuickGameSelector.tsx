@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Gamepad, Settings, Puzzle, BrainCircuit, Clock4, Dices, PenTool, HeartHandshake, Lightbulb, Sparkles, Key } from 'lucide-react';
@@ -14,8 +15,6 @@ import { animateBlockCreation } from '@/lib/animations';
 
 const DEFAULT_API_KEY = 'replace-with-default-key';
 const API_KEY_STORAGE_KEY = 'claude-api-key';
-const SECRET_PHRASE = 'trợ lý tạo web';
-const REQUIRED_REPEATS = 3;
 
 const QuickGameSelector: React.FC = () => {
   const [selectedGame, setSelectedGame] = useState<MiniGame | null>(null);
@@ -24,8 +23,6 @@ const QuickGameSelector: React.FC = () => {
   const [selectedTopic, setSelectedTopic] = useState<string>("");
   const [showSettings, setShowSettings] = useState(false);
   const [showApiSettings, setShowApiSettings] = useState(false);
-  const [secretPhraseCount, setSecretPhraseCount] = useState(0);
-  const [lastCommandTime, setLastCommandTime] = useState(0);
   const { toast } = useToast();
   const [gameGenerator, setGameGenerator] = useState<AIGameGenerator | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -119,65 +116,15 @@ const QuickGameSelector: React.FC = () => {
   ];
 
   useEffect(() => {
-    let keypressBuffer = '';
-    let lastKeypressTime = 0;
-    const keypressTimeout = 1000; // 1 second timeout between keypresses
-    
-    const handleKeyPress = (e: KeyboardEvent) => {
-      const currentTime = Date.now();
-      
-      // Reset buffer if timeout has passed
-      if (currentTime - lastKeypressTime > keypressTimeout) {
-        keypressBuffer = '';
-      }
-      
-      // Add the key to the buffer
-      keypressBuffer += e.key.toLowerCase();
-      lastKeypressTime = currentTime;
-      
-      // Check if the buffer contains the secret phrase
-      if (keypressBuffer.includes(SECRET_PHRASE.toLowerCase())) {
-        keypressBuffer = '';
-        
-        // Check if this is within the timeout for repeated commands
-        if (currentTime - lastCommandTime < 2000) {
-          const newCount = secretPhraseCount + 1;
-          setSecretPhraseCount(newCount);
-          
-          if (newCount >= REQUIRED_REPEATS) {
-            setSecretPhraseCount(0);
-            setShowApiSettings(true);
-            
-            toast({
-              title: "Cài đặt API mở",
-              description: "Bạn đã mở cài đặt API key",
-            });
-          } else {
-            const remaining = REQUIRED_REPEATS - newCount;
-            toast({
-              title: `Nhập thêm ${remaining} lần nữa`,
-              description: `Cần nhập "${SECRET_PHRASE}" thêm ${remaining} lần để mở cài đặt API`,
-            });
-          }
-        } else {
-          // First detection
-          setSecretPhraseCount(1);
-          toast({
-            title: `Nhập thêm ${REQUIRED_REPEATS - 1} lần nữa`,
-            description: `Cần nhập "${SECRET_PHRASE}" thêm ${REQUIRED_REPEATS - 1} lần để mở cài đặt API`,
-          });
+    const gameButtons = containerRef.current?.querySelectorAll('.game-button');
+    gameButtons?.forEach((button, index) => {
+      setTimeout(() => {
+        if (button instanceof HTMLElement) {
+          animateBlockCreation(button);
         }
-        
-        setLastCommandTime(currentTime);
-      }
-    };
-    
-    document.addEventListener('keydown', handleKeyPress);
-    
-    return () => {
-      document.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [secretPhraseCount, lastCommandTime]);
+      }, index * 80);
+    });
+  }, []);
 
   useEffect(() => {
     const storedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
@@ -191,17 +138,6 @@ const QuickGameSelector: React.FC = () => {
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  useEffect(() => {
-    const gameButtons = containerRef.current?.querySelectorAll('.game-button');
-    gameButtons?.forEach((button, index) => {
-      setTimeout(() => {
-        if (button instanceof HTMLElement) {
-          animateBlockCreation(button);
-        }
-      }, index * 80);
-    });
   }, []);
 
   const getIconComponent = (iconName: string) => {
@@ -275,6 +211,10 @@ const QuickGameSelector: React.FC = () => {
     setErrorMessage(null);
   };
 
+  const handleOpenApiSettings = () => {
+    setShowApiSettings(true);
+  };
+
   if (isLoading) {
     return <GameLoading />;
   }
@@ -332,6 +272,18 @@ const QuickGameSelector: React.FC = () => {
             <span className="font-medium text-base">{gameType.name}</span>
           </Button>
         ))}
+      </div>
+      
+      <div className="mt-8">
+        <Button 
+          variant="outline" 
+          size="sm"
+          className="flex items-center gap-2 bg-background/50 backdrop-blur-sm border border-primary/20 hover:bg-primary/10"
+          onClick={handleOpenApiSettings}
+        >
+          <Key size={14} />
+          Cài đặt API Key
+        </Button>
       </div>
       
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
