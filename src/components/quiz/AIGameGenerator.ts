@@ -1,11 +1,15 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { GameSettingsData } from '@/pages/Quiz';
+import { GameSettingsData } from './types';
 
 export interface MiniGame {
   title: string;
   description: string;
-  htmlContent: string;
+  content: string;
+  instructionsHtml: string;
+  gameHtml: string;
+  gameScript: string;
+  cssStyles: string;
 }
 
 export class AIGameGenerator {
@@ -14,146 +18,69 @@ export class AIGameGenerator {
 
   constructor(apiKey: string) {
     this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
   }
 
-  async generateMiniGame(userMessage: string, settings?: GameSettingsData): Promise<MiniGame | null> {
+  async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
-      console.log("Đang tạo minigame cho chủ đề:", userMessage);
-      console.log("Với các cài đặt:", settings);
-      
-      // Default settings
-      const gameSettings = settings || {
-        difficulty: 'medium',
-        questionCount: 10,
-        timePerQuestion: 30,
-        category: 'general'
-      };
-      
-      const difficultyDescriptions = {
-        easy: "dễ, phù hợp cho trẻ em hoặc người mới bắt đầu",
-        medium: "độ khó vừa phải, phù hợp cho hầu hết người chơi",
-        hard: "khó, đòi hỏi suy nghĩ nhanh và kiến thức sâu"
-      };
-      
-      const categoryDescriptions = {
-        general: "kiến thức chung về nhiều lĩnh vực",
-        history: "các sự kiện lịch sử, nhân vật và giai đoạn lịch sử quan trọng",
-        science: "khoa học, phát minh, và nguyên lý khoa học",
-        geography: "địa lý, quốc gia, thủ đô và địa hình",
-        arts: "nghệ thuật, âm nhạc, hội họa và văn học",
-        sports: "thể thao, vận động viên và giải đấu",
-        math: "toán học, câu đố logic và tính toán"
-      };
-      
-      const prompt = `Tạo một minigame tương tác và vui nhộn về chủ đề "${userMessage}" với mức độ ${gameSettings.difficulty} (${difficultyDescriptions[gameSettings.difficulty as keyof typeof difficultyDescriptions]}) phù hợp với lĩnh vực ${gameSettings.category} (${categoryDescriptions[gameSettings.category as keyof typeof categoryDescriptions]}).
+      const settingsPrompt = settings ? `
+        Hãy tạo với các cài đặt sau:
+        - Độ khó: ${settings.difficulty}
+        - Số lượng câu hỏi/thử thách: ${settings.questionCount}
+        - Thời gian cho mỗi câu hỏi/thử thách: ${settings.timePerQuestion} giây
+        - Thể loại: ${settings.category}
+      ` : '';
 
-Yêu cầu chi tiết:
-- Phân tích yêu cầu của người dùng và tạo trò chơi tương tác phù hợp dựa trên chủ đề "${userMessage}"
-- Nếu chủ đề giống như câu đố kiến thức, hãy tạo trò chơi trắc nghiệm với ${gameSettings.questionCount} câu hỏi và thời gian ${gameSettings.timePerQuestion} giây/câu
-- Nếu chủ đề là về phản xạ, hãy tạo trò chơi phản xạ nhanh với các yếu tố hấp dẫn
-- Nếu chủ đề là về xếp hình, hãy tạo trò chơi xếp hình tương tác
-- Nếu chủ đề là về trò chơi ký ức, hãy tạo trò chơi lật thẻ nhớ hình
-- Nếu chủ đề là về từ vựng, hãy tạo trò chơi từ vựng thú vị
-- Nếu là yêu cầu khác, hãy tạo trò chơi tương ứng phù hợp với chủ đề
-- Toàn bộ trò chơi phải nằm trong một file HTML duy nhất
-- Minigame phải có tính tương tác cao, dễ chơi và thú vị
-- Thiết kế phải màu sắc, bắt mắt, sinh động với nhiều màu sắc hài hòa
-- Có điểm số và hệ thống phản hồi cho người chơi
-- Có hướng dẫn rõ ràng và dễ hiểu
-- Đảm bảo trò chơi đơn giản, không phức tạp, phù hợp để chơi trong vài phút
-- Phải tương thích với các trình duyệt hiện đại
-- VIẾT HOÀN TOÀN BẰNG TIẾNG VIỆT (nếu có nội dung hiển thị)
-- Trò chơi phải có đồ họa bắt mắt, màu sắc phù hợp, và hiệu ứng âm thanh nếu cần
-
-Định dạng trả về:
-Chỉ trả về một file HTML hoàn chỉnh bao gồm tất cả mã cần thiết.
-
-\`\`\`html
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minigame: ${userMessage}</title>
-    <style>
-        /* CSS ở đây */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
+      const prompt = `
+        Tạo một minigame tương tác về chủ đề "${topic}" bằng HTML, CSS và JavaScript.
+        ${settingsPrompt}
+        
+        Minigame cần phải có:
+        1. Giao diện thân thiện với người dùng, đẹp mắt
+        2. Hướng dẫn rõ ràng cho người chơi
+        3. Tương tác tốt bằng chuột hoặc chạm
+        4. Có thể chơi được trên điện thoại và máy tính
+        5. Code HTML, CSS và JavaScript đơn giản, dễ hiểu
+        6. Hiển thị điểm số hoặc kết quả cuối cùng
+        7. Nút để chơi lại game
+        
+        Trả về định dạng JSON với các trường sau:
+        {
+          "title": "Tên minigame",
+          "description": "Mô tả ngắn gọn về minigame",
+          "instructionsHtml": "Hướng dẫn chơi game dưới dạng HTML",
+          "gameHtml": "Mã HTML của game",
+          "gameScript": "Mã JavaScript của game (không bao gồm thẻ script)",
+          "cssStyles": "CSS cho game (không bao gồm thẻ style)"
         }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        /* Thêm CSS của bạn ở đây */
-    </style>
-</head>
-<body>
-    <!-- HTML ở đây -->
-    
-    <script>
-        // Mã JavaScript ở đây
-    </script>
-</body>
-</html>
-\`\`\`
-
-LƯU Ý QUAN TRỌNG: 
-- KHÔNG trả về bất kỳ giải thích nào, chỉ trả về một file HTML hoàn chỉnh.
-- Đảm bảo code chạy được ngay mà không cần sửa đổi thêm.
-- Không sử dụng các thư viện bên ngoài.
-- Tất cả mã phải nằm trong file HTML.
-- Minigame phải đủ đơn giản để người chơi hiểu ngay và chơi được trong vài phút.`;
+        
+        Không trả lời bất kỳ điều gì khác ngoài đối tượng JSON.
+      `;
 
       const result = await this.model.generateContent(prompt);
-      const response = await result.response;
+      const response = result.response;
       const text = response.text();
       
-      console.log("Kết quả minigame thô:", text.substring(0, 200) + "...");
-      return this.parseMiniGameResponse(text, userMessage);
-    } catch (error) {
-      console.error('Lỗi tạo Minigame:', error);
+      // Extract the JSON object from the response
+      const jsonMatch = text.match(/{[\s\S]*}/);
+      if (jsonMatch) {
+        const jsonStr = jsonMatch[0];
+        const gameData = JSON.parse(jsonStr);
+        
+        return {
+          title: gameData.title,
+          description: gameData.description,
+          content: text,
+          instructionsHtml: gameData.instructionsHtml,
+          gameHtml: gameData.gameHtml,
+          gameScript: gameData.gameScript,
+          cssStyles: gameData.cssStyles
+        };
+      }
+      
       return null;
-    }
-  }
-
-  parseMiniGameResponse(rawText: string, topic: string): MiniGame | null {
-    try {
-      console.log("Đang phân tích kết quả minigame...");
-      
-      // Tìm nội dung HTML
-      let htmlContent = '';
-      const htmlMatch = rawText.match(/```html([\s\S]*?)```/);
-      
-      if (htmlMatch && htmlMatch[1]) {
-        htmlContent = htmlMatch[1].trim();
-      } else if (!rawText.includes('```')) {
-        // Nếu không có định dạng markdown, xử lý text thô
-        htmlContent = rawText.trim();
-      }
-      
-      if (!htmlContent) {
-        console.error('Không tìm thấy nội dung HTML hợp lệ');
-        return null;
-      }
-
-      // Tạo đối tượng MiniGame
-      return {
-        title: `Minigame: ${topic}`,
-        description: `Minigame tương tác về chủ đề ${topic}`,
-        htmlContent: htmlContent
-      };
     } catch (error) {
-      console.error("Lỗi phân tích kết quả minigame:", error);
+      console.error("Error generating mini game:", error);
       return null;
     }
   }

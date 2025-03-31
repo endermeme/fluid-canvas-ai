@@ -5,6 +5,7 @@ import { AIGameGenerator, MiniGame } from './AIGameGenerator';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
 import GameView from './GameView';
+import { GameSettingsData } from './types';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -74,7 +75,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
   }
 
   if (!miniGame) {
-    // Removed GameWelcome rendering here - this component will only handle manual quiz generation
     return (
       <div className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10">
         <p className="text-lg">Vui lòng nhập chủ đề vào thanh chat để tạo minigame</p>

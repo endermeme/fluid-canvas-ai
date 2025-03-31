@@ -1,12 +1,15 @@
 
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Gamepad } from 'lucide-react';
+import { Gamepad, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
 import GameView from './GameView';
+import GameSettings from './GameSettings';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { GameSettingsData } from './types';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -14,17 +17,34 @@ const QuickGameSelector: React.FC = () => {
   const [selectedGame, setSelectedGame] = useState<MiniGame | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<string>("");
+  const [showSettings, setShowSettings] = useState(false);
   const { toast } = useToast();
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
   
+  const [defaultSettings] = useState<GameSettingsData>({
+    difficulty: 'medium',
+    questionCount: 10,
+    timePerQuestion: 30,
+    category: 'general',
+  });
+  
   const gameIdeas = ["Đố vui", "Xếp hình", "Nhớ hình", "Phản xạ", "Truy tìm", "Câu đố", "Vẽ tranh"];
 
-  const handleTopicSelect = async (selectedTopic: string) => {
+  const handleTopicSelect = (topic: string) => {
+    setSelectedTopic(topic);
+    setShowSettings(true);
+  };
+  
+  const handleStartGame = async (settings: GameSettingsData) => {
+    setShowSettings(false);
+    if (!selectedTopic) return;
+    
     setIsLoading(true);
     setErrorMessage(null);
     
     try {
-      const game = await gameGenerator.generateMiniGame(selectedTopic);
+      const game = await gameGenerator.generateMiniGame(selectedTopic, settings);
       
       if (game) {
         setSelectedGame(game);
@@ -46,6 +66,11 @@ const QuickGameSelector: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCancelSettings = () => {
+    setShowSettings(false);
+    setSelectedTopic("");
   };
 
   if (isLoading) {
@@ -85,6 +110,18 @@ const QuickGameSelector: React.FC = () => {
           </Button>
         ))}
       </div>
+      
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="sm:max-w-md">
+          <GameSettings 
+            topic={selectedTopic}
+            onStart={handleStartGame}
+            initialSettings={defaultSettings}
+            onCancel={handleCancelSettings}
+            inModal={true}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

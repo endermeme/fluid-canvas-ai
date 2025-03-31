@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { GameSettingsData } from '@/pages/Quiz';
+import { GameSettingsData } from './types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Gamepad, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -40,7 +39,6 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inMod
     setSettings(prev => ({ ...prev, [name]: value }));
   };
 
-  // Adjust game category based on topic if possible
   useEffect(() => {
     if (topic) {
       if (topic.includes("Lịch Sử")) {
@@ -57,7 +55,6 @@ const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inMod
     }
   }, [topic]);
 
-  // Hàm xử lý khi người dùng nhấn nút Bắt Đầu Trò Chơi
   const handleStart = () => {
     console.log("Starting game with settings:", settings);
     onStart(settings);
