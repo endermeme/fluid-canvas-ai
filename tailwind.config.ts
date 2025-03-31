@@ -121,6 +121,18 @@ export default {
 				'glow': {
 					'0%, 100%': { opacity: '1', boxShadow: '0 0 10px rgba(59, 130, 246, 0.5)' },
 					'50%': { opacity: '0.8', boxShadow: '0 0 20px rgba(59, 130, 246, 0.8)' }
+				},
+				'shimmer': {
+					'0%': { backgroundPosition: '-200% 0' },
+					'100%': { backgroundPosition: '200% 0' }
+				},
+				'breathe': {
+					'0%, 100%': { transform: 'scale(1)' },
+					'50%': { transform: 'scale(1.03)' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-5px)' }
 				}
 			},
 			animation: {
@@ -134,7 +146,10 @@ export default {
 				'slide-out-right': 'slide-out-right 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
 				'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
 				'bounce-subtle': 'bounce-subtle 2s ease-in-out infinite',
-				'glow': 'glow 2.5s ease-in-out infinite'
+				'glow': 'glow 2.5s ease-in-out infinite',
+				'shimmer': 'shimmer 3s ease-in-out infinite',
+				'breathe': 'breathe 4s ease-in-out infinite',
+				'float': 'float 3s ease-in-out infinite'
 			},
 			backgroundImage: {
 				'gradient-canvas': 'linear-gradient(to right bottom, hsl(210, 100%, 98%), hsl(220, 100%, 97%))',
@@ -142,7 +157,10 @@ export default {
 				'gradient-ai-panel': 'linear-gradient(to bottom, hsl(210, 60%, 98%), hsl(220, 60%, 95%))',
 				'gradient-block': 'linear-gradient(to right bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8))',
 				'gradient-block-hover': 'linear-gradient(to right bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85))',
-				'gradient-game': 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1))'
+				'gradient-game': 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1))',
+				'shimmer': 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+				'glass-gradient': 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05))',
+				'glow-gradient': 'radial-gradient(circle, rgba(59,130,246,0.3) 0%, rgba(59,130,246,0.1) 50%, transparent 70%)'
 			}
 		}
 	},

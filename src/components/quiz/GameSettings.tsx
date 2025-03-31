@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { GameSettingsData, GameType } from './types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Gamepad, X, BrainCircuit, Puzzle, Lightbulb, Clock4, Dices, HeartHandshake, PenTool } from 'lucide-react';
+import { Gamepad, BrainCircuit, Puzzle, Lightbulb, Clock4, Dices, HeartHandshake, PenTool } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { animateToolbarAppear } from '@/lib/animations';
 
@@ -97,17 +98,17 @@ const GameSettings = ({
   }, [gameType]);
 
   const getGameIcon = () => {
-    if (!gameType) return <Gamepad className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
+    if (!gameType) return <Gamepad className="h-10 w-10 text-primary" />;
     
     switch (gameType.icon) {
-      case 'brain-circuit': return <BrainCircuit className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
-      case 'puzzle-piece': return <Puzzle className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
-      case 'light-bulb': return <Lightbulb className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
-      case 'clock': return <Clock4 className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
-      case 'dices': return <Dices className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
-      case 'heart-handshake': return <HeartHandshake className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
-      case 'pen-tool': return <PenTool className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
-      default: return <Gamepad className="h-8 w-8 sm:h-10 sm:w-10 text-primary mr-2" />;
+      case 'brain-circuit': return <BrainCircuit className="h-10 w-10 text-primary" />;
+      case 'puzzle-piece': return <Puzzle className="h-10 w-10 text-primary" />;
+      case 'light-bulb': return <Lightbulb className="h-10 w-10 text-primary" />;
+      case 'clock': return <Clock4 className="h-10 w-10 text-primary" />;
+      case 'dices': return <Dices className="h-10 w-10 text-primary" />;
+      case 'heart-handshake': return <HeartHandshake className="h-10 w-10 text-primary" />;
+      case 'pen-tool': return <PenTool className="h-10 w-10 text-primary" />;
+      default: return <Gamepad className="h-10 w-10 text-primary" />;
     }
   };
 
@@ -127,43 +128,58 @@ const GameSettings = ({
   };
 
   return (
-    <div ref={containerRef} className={`${inDrawer || inModal ? '' : 'h-full w-full'} flex flex-col items-center justify-center ${inModal ? 'p-0' : 'p-6'} bg-background`}>
-      <div className={`w-full max-w-md bg-card rounded-lg ${inModal ? '' : 'shadow-lg'} ${inModal ? 'p-0' : 'p-6'} ${inDrawer || inModal ? '' : 'border'}`}>
-        <div className="flex items-center justify-center mb-4 sm:mb-6">
-          {getGameIcon()}
-          <h2 className="text-xl sm:text-2xl font-bold">Cài Đặt Minigame</h2>
+    <div 
+      ref={containerRef} 
+      className={`${inDrawer || inModal ? '' : 'h-full w-full'} flex flex-col items-center justify-center py-4 ${inModal ? 'px-1' : 'px-4'}`}
+    >
+      <div className="w-full max-w-md">
+        <div className="flex flex-col items-center mb-6 relative">
+          <div className="absolute inset-0 blur-2xl bg-primary/10 rounded-full opacity-70"></div>
+          <div className="z-10 flex flex-col items-center">
+            <div className="flex items-center justify-center p-3 mb-4 rounded-full bg-primary/10 backdrop-blur-sm">
+              {getGameIcon()}
+            </div>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              Cài Đặt Minigame
+            </h2>
+          </div>
         </div>
 
         {topic && (
-          <div className="mb-4 sm:mb-6">
-            <h3 className="text-base sm:text-lg font-medium mb-1 sm:mb-2">Chủ đề: <span className="text-primary">{topic}</span></h3>
+          <div className="mb-6 text-center">
+            <div className="inline-block px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/20 to-primary/5 backdrop-blur-sm">
+              <h3 className="text-lg font-medium">{topic}</h3>
+            </div>
             {gameType?.description && (
-              <p className="text-sm text-muted-foreground">{gameType.description}</p>
+              <p className="text-sm text-muted-foreground mt-2">{gameType.description}</p>
             )}
           </div>
         )}
 
-        <div className="space-y-4 sm:space-y-6">
-          <div className="space-y-2 sm:space-y-3">
-            <Label htmlFor="difficulty">Độ Khó</Label>
+        <div className="space-y-6 backdrop-blur-sm bg-card/30 rounded-xl p-5 border border-primary/10">
+          <div className="space-y-3">
+            <Label htmlFor="difficulty" className="flex items-center gap-2 text-base font-medium">
+              Độ Khó
+            </Label>
             <Select 
               value={settings.difficulty} 
               onValueChange={(value) => handleSelectChange('difficulty', value)}
             >
-              <SelectTrigger className="transition-colors focus:ring-2 focus:ring-primary/20 active:scale-[0.98]">
+              <SelectTrigger className="rounded-lg border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20">
                 <SelectValue placeholder="Chọn độ khó" />
               </SelectTrigger>
-              <SelectContent className="min-w-[180px]">
-                <SelectItem value="easy">Dễ</SelectItem>
-                <SelectItem value="medium">Trung bình</SelectItem>
-                <SelectItem value="hard">Khó</SelectItem>
+              <SelectContent className="rounded-lg border-primary/20 bg-white/95 backdrop-blur-lg shadow-lg">
+                <SelectItem value="easy" className="cursor-pointer focus:bg-primary/10">Dễ</SelectItem>
+                <SelectItem value="medium" className="cursor-pointer focus:bg-primary/10">Trung bình</SelectItem>
+                <SelectItem value="hard" className="cursor-pointer focus:bg-primary/10">Khó</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="space-y-2 sm:space-y-3">
-            <div className="flex justify-between">
-              <Label htmlFor="questionCount">{getCountLabel()} {settings.questionCount}</Label>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="questionCount" className="text-base font-medium">{getCountLabel()}</Label>
+              <span className="px-3 py-1 bg-primary/10 rounded-full text-sm font-medium">{settings.questionCount}</span>
             </div>
             <Slider 
               id="questionCount"
@@ -176,9 +192,10 @@ const GameSettings = ({
             />
           </div>
 
-          <div className="space-y-2 sm:space-y-3">
-            <div className="flex justify-between">
-              <Label htmlFor="timePerQuestion">{getTimeLabel()} {settings.timePerQuestion} giây</Label>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="timePerQuestion" className="text-base font-medium">{getTimeLabel()}</Label>
+              <span className="px-3 py-1 bg-primary/10 rounded-full text-sm font-medium">{settings.timePerQuestion} giây</span>
             </div>
             <Slider 
               id="timePerQuestion"
@@ -192,40 +209,42 @@ const GameSettings = ({
           </div>
 
           {(!gameType || !(gameType.id === 'memory' || gameType.id === 'drawing' || gameType.id === 'reflex')) && (
-            <div className="space-y-2 sm:space-y-3">
-              <Label htmlFor="category">Thể Loại</Label>
+            <div className="space-y-3">
+              <Label htmlFor="category" className="flex items-center gap-2 text-base font-medium">
+                Thể Loại
+              </Label>
               <Select 
                 value={settings.category} 
                 onValueChange={(value) => handleSelectChange('category', value)}
               >
-                <SelectTrigger className="transition-colors focus:ring-2 focus:ring-primary/20 active:scale-[0.98]">
+                <SelectTrigger className="rounded-lg border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20">
                   <SelectValue placeholder="Chọn thể loại" />
                 </SelectTrigger>
-                <SelectContent className="min-w-[180px]">
-                  <SelectItem value="general">Kiến thức chung</SelectItem>
-                  <SelectItem value="history">Lịch sử</SelectItem>
-                  <SelectItem value="science">Khoa học</SelectItem>
-                  <SelectItem value="geography">Địa lý</SelectItem>
-                  <SelectItem value="arts">Nghệ thuật</SelectItem>
-                  <SelectItem value="sports">Thể thao</SelectItem>
-                  <SelectItem value="math">Toán học</SelectItem>
+                <SelectContent className="rounded-lg border-primary/20 bg-white/95 backdrop-blur-lg shadow-lg">
+                  <SelectItem value="general" className="cursor-pointer focus:bg-primary/10">Kiến thức chung</SelectItem>
+                  <SelectItem value="history" className="cursor-pointer focus:bg-primary/10">Lịch sử</SelectItem>
+                  <SelectItem value="science" className="cursor-pointer focus:bg-primary/10">Khoa học</SelectItem>
+                  <SelectItem value="geography" className="cursor-pointer focus:bg-primary/10">Địa lý</SelectItem>
+                  <SelectItem value="arts" className="cursor-pointer focus:bg-primary/10">Nghệ thuật</SelectItem>
+                  <SelectItem value="sports" className="cursor-pointer focus:bg-primary/10">Thể thao</SelectItem>
+                  <SelectItem value="math" className="cursor-pointer focus:bg-primary/10">Toán học</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           )}
 
-          <div className="pt-3 sm:pt-4 flex gap-3">
+          <div className="pt-4 flex gap-3">
             {onCancel && (
               <Button 
                 variant="outline"
-                className="w-full transition-transform active:scale-95"
+                className="w-full transition-all border-primary/20 hover:border-primary/30 hover:bg-primary/5 active:scale-95 rounded-lg"
                 onClick={onCancel}
               >
                 Hủy
               </Button>
             )}
             <Button 
-              className="w-full transition-transform active:scale-95"
+              className="w-full transition-all active:scale-95 bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 rounded-lg shadow-md shadow-primary/20"
               onClick={handleStart}
             >
               Bắt Đầu Trò Chơi
