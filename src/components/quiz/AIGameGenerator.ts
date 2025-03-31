@@ -65,17 +65,34 @@ export class AIGameGenerator {
       const jsonMatch = text.match(/{[\s\S]*}/);
       if (jsonMatch) {
         const jsonStr = jsonMatch[0];
-        const gameData = JSON.parse(jsonStr);
+        let gameData;
         
-        return {
-          title: gameData.title,
-          description: gameData.description,
-          content: text,
-          instructionsHtml: gameData.instructionsHtml,
-          gameHtml: gameData.gameHtml,
-          gameScript: gameData.gameScript,
-          cssStyles: gameData.cssStyles
-        };
+        try {
+          gameData = JSON.parse(jsonStr);
+          
+          // Build a full HTML document from the parts
+          const fullHtmlContent = this.buildFullHtmlDocument(
+            gameData.title,
+            gameData.gameHtml,
+            gameData.gameScript,
+            gameData.cssStyles,
+            gameData.instructionsHtml
+          );
+          
+          return {
+            title: gameData.title,
+            description: gameData.description,
+            content: fullHtmlContent,
+            instructionsHtml: gameData.instructionsHtml,
+            gameHtml: gameData.gameHtml,
+            gameScript: gameData.gameScript,
+            cssStyles: gameData.cssStyles
+          };
+        } catch (jsonError) {
+          console.error("Error parsing JSON from Gemini response:", jsonError);
+          console.log("Attempted to parse:", jsonStr);
+          return null;
+        }
       }
       
       return null;
@@ -83,5 +100,55 @@ export class AIGameGenerator {
       console.error("Error generating mini game:", error);
       return null;
     }
+  }
+  
+  private buildFullHtmlDocument(title: string, html: string, script: string, css: string, instructions: string): string {
+    return `
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  <style>
+    /* Game CSS */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-color: #f8f9fa;
+    }
+    
+    /* Game instructions */
+    .game-instructions {
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Custom styles */
+    ${css}
+  </style>
+</head>
+<body>
+  <div class="game-instructions">
+    ${instructions}
+  </div>
+
+  <!-- Game content -->
+  ${html}
+
+  <script>
+    // Game logic
+    ${script}
+  </script>
+</body>
+</html>
+    `;
   }
 }
