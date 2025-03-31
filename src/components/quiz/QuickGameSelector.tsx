@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Gamepad, Settings, Puzzle, BrainCircuit, Clock4, Dices, PenTool, HeartHandshake, Lightbulb } from 'lucide-react';
@@ -235,7 +236,6 @@ const QuickGameSelector: React.FC = () => {
               {getIconComponent(gameType.icon)}
             </div>
             <span className="font-medium text-sm">{gameType.name}</span>
-            <span className="text-xs text-muted-foreground line-clamp-1">{gameType.description}</span>
           </Button>
         ))}
       </div>
