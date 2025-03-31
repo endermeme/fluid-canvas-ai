@@ -1,7 +1,6 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Gamepad, Settings, Puzzle, BrainCircuit, Clock4, Dices, PenTool, HeartHandshake, Lightbulb } from 'lucide-react';
+import { Gamepad, Settings, Puzzle, BrainCircuit, Clock4, Dices, PenTool, HeartHandshake, Lightbulb, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
 import GameLoading from './GameLoading';
@@ -125,14 +124,14 @@ const QuickGameSelector: React.FC = () => {
 
   const getIconComponent = (iconName: string) => {
     switch(iconName) {
-      case 'brain-circuit': return <BrainCircuit size={32} />;
-      case 'puzzle-piece': return <Puzzle size={32} />;
-      case 'light-bulb': return <Lightbulb size={32} />;
-      case 'clock': return <Clock4 size={32} />;
-      case 'dices': return <Dices size={32} />;
-      case 'heart-handshake': return <HeartHandshake size={32} />;
-      case 'pen-tool': return <PenTool size={32} />;
-      default: return <Gamepad size={32} />;
+      case 'brain-circuit': return <BrainCircuit size={36} />;
+      case 'puzzle-piece': return <Puzzle size={36} />;
+      case 'light-bulb': return <Lightbulb size={36} />;
+      case 'clock': return <Clock4 size={36} />;
+      case 'dices': return <Dices size={36} />;
+      case 'heart-handshake': return <HeartHandshake size={36} />;
+      case 'pen-tool': return <PenTool size={36} />;
+      default: return <Gamepad size={36} />;
     }
   };
 
@@ -216,29 +215,36 @@ const QuickGameSelector: React.FC = () => {
   }
 
   return (
-    <div ref={containerRef} className="flex flex-col items-center h-full w-full py-6 px-4">
-      <div className="text-primary mb-2 animate-float-in">
-        <Gamepad size={48} />
+    <div ref={containerRef} className="flex flex-col items-center h-full w-full bg-gradient-to-b from-background to-background/80 p-6">
+      <div className="text-primary mb-4 animate-float-in">
+        <div className="relative">
+          <div className="absolute inset-0 blur-xl bg-primary/20 rounded-full animate-pulse-soft"></div>
+          <Sparkles size={56} className="relative z-10 text-primary" />
+        </div>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-3xl mt-4 w-full">
+      <h2 className="text-2xl font-bold mb-8 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-fade-in">
+        Minigames
+      </h2>
+      
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 max-w-3xl w-full">
         {gameTypes.map((gameType) => (
           <Button 
             key={gameType.id}
             variant="outline" 
-            className="game-button flex flex-col h-24 p-2 justify-center items-center gap-2 transition-all border hover:border-primary/60 hover:shadow-md hover:bg-accent/40 active:scale-95 opacity-0"
+            className="game-button flex flex-col h-32 justify-center items-center gap-2 transition-all duration-300 rounded-xl border border-white/20 bg-white/5 backdrop-blur-sm hover:border-primary/60 hover:shadow-lg hover:bg-primary/5 active:scale-95 opacity-0 group"
             onClick={() => handleTopicSelect(gameType)}
           >
-            <div className="text-primary p-2 bg-primary/10 rounded-full">
+            <div className="text-primary/80 p-3 rounded-full bg-primary/10 transition-all duration-300 group-hover:bg-primary/20 group-hover:text-primary">
               {getIconComponent(gameType.icon)}
             </div>
-            <span className="font-medium text-sm">{gameType.name}</span>
+            <span className="font-medium text-base">{gameType.name}</span>
           </Button>
         ))}
       </div>
       
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-lg border-white/20">
           <GameSettings 
             topic={selectedTopic}
             onStart={handleStartGame}

@@ -7,7 +7,7 @@ import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { Button } from '@/components/ui/button';
-import { Gamepad } from 'lucide-react';
+import { Gamepad, Sparkles } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
@@ -71,12 +71,14 @@ const Index = () => {
               <CanvasContainer />
             </div>
             
-            {/* Quick Game Options Panel */}
-            <div className="bg-card/50 backdrop-blur-sm border-t p-3">
+            {/* Quick Game Options Panel - Modern Design */}
+            <div className="bg-gradient-to-r from-background to-accent/20 backdrop-blur-md border-t border-border/40 p-3">
               <div className="max-w-4xl mx-auto">
-                <div className="flex items-center mb-2">
-                  <Gamepad className="h-5 w-5 mr-2 text-primary" />
-                  <h3 className="text-lg font-medium">Tạo nhanh</h3>
+                <div className="flex items-center mb-3">
+                  <div className="bg-primary/10 rounded-full p-1 mr-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-medium bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Tạo nhanh</h3>
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-2">
                   {quickGameOptions.map((game) => (
@@ -84,7 +86,7 @@ const Index = () => {
                       <Button
                         variant="ghost" 
                         size="sm"
-                        className="w-full text-xs h-auto py-2 hover:bg-primary/10"
+                        className="w-full text-xs h-auto py-2 px-2 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-primary/10 hover:border-primary/30 transition-all duration-200 shadow-sm"
                         onClick={() => handleQuickGameSelect(game)}
                       >
                         {game}
