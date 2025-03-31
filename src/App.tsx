@@ -10,8 +10,8 @@ import Quiz from './pages/Quiz';
 import SharedGame from './pages/SharedGame';
 import NotFound from './pages/NotFound';
 
-// Default API Key - this would be replaced by user's key
-const DEFAULT_CLAUDE_API_KEY = 'your-default-key';
+// Default API Key placeholder - will be prompted for replacement
+const DEFAULT_CLAUDE_API_KEY = '';
 const API_KEY_STORAGE_KEY = 'claude-api-key';
 
 const App = () => {

@@ -98,11 +98,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
         <div className="flex items-center">
           <BrainCircuit size={20} className="text-primary mr-2" />
           <h3 
-            className="font-medium cursor-pointer hover:text-primary transition-colors" 
+            className="font-medium cursor-pointer hover:text-primary transition-colors flex items-center gap-1" 
             onClick={handleOpenApiSettings}
             title="Click để mở cài đặt API"
           >
             Trợ Lý Tạo Web
+            <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">API</span>
           </h3>
         </div>
       </div>
