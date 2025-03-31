@@ -1,14 +1,24 @@
-
 import React from 'react';
 import { Gamepad } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { GameSettingsData } from '@/pages/Quiz';
 
 interface GameWelcomeProps {
   onTopicSelect: (topic: string) => void;
+  showSettings?: boolean;
+  onStartWithSettings?: (topic: string, settings: GameSettingsData) => void;
 }
 
-const GameWelcome: React.FC<GameWelcomeProps> = ({ onTopicSelect }) => {
+const GameWelcome: React.FC<GameWelcomeProps> = ({ onTopicSelect, showSettings = false, onStartWithSettings }) => {
   const gameIdeas = ["Đố vui", "Xếp hình", "Nhớ hình", "Phản xạ", "Truy tìm", "Câu đố", "Vẽ tranh"];
+  
+  const handleTopicSelect = (topic: string) => {
+    if (showSettings && onStartWithSettings) {
+      onStartWithSettings(topic);
+    } else {
+      onTopicSelect(topic);
+    }
+  };
   
   return (
     <div className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10">
@@ -25,7 +35,7 @@ const GameWelcome: React.FC<GameWelcomeProps> = ({ onTopicSelect }) => {
             key={idea}
             variant="outline" 
             className="rounded-full"
-            onClick={() => onTopicSelect(idea)}
+            onClick={() => handleTopicSelect(idea)}
           >
             {idea}
           </Button>
