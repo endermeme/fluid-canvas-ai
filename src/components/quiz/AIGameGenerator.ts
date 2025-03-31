@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { GameSettingsData } from './types';
 
@@ -61,33 +60,25 @@ export class AIGameGenerator {
         Không trả lời bất kỳ điều gì khác ngoài đối tượng JSON.
       `;
 
-      console.log("Sending request to Claude API with key: " + this.apiKey.substring(0, 4) + "****");
+      console.log("Sending request to local proxy with key: " + this.apiKey.substring(0, 4) + "****");
 
+      // Use our local proxy endpoint instead of calling Anthropic directly
       const response = await axios.post(
-        'https://api.anthropic.com/v1/messages',
+        '/api/claude-proxy',
         {
-          model: 'claude-3-sonnet-20240229',
-          max_tokens: 4000,
-          messages: [
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          response_format: { type: "json_object" }
+          prompt,
+          apiKey: this.apiKey
         },
         {
           headers: {
             'Content-Type': 'application/json',
-            'x-api-key': this.apiKey,
-            'anthropic-version': '2023-06-01'
           },
           timeout: 60000 // 60 seconds timeout
         }
       );
 
-      console.log("Received response from Claude API");
-      const gameData = response.data.content[0].text;
+      console.log("Received response from proxy");
+      const gameData = response.data.content;
       
       try {
         const parsedData = JSON.parse(gameData);
@@ -121,13 +112,13 @@ export class AIGameGenerator {
       // More specific error messages based on error type
       if (axios.isAxiosError(error)) {
         if (error.code === 'ERR_NETWORK') {
-          throw new Error('Không thể kết nối tới API Claude. Kiểm tra kết nối internet của bạn.');
+          throw new Error('Không thể kết nối tới server. Kiểm tra kết nối internet của bạn.');
         } else if (error.response?.status === 401) {
           throw new Error('API key không hợp lệ. Vui lòng kiểm tra lại API key Claude của bạn.');
         } else if (error.response?.status === 429) {
           throw new Error('Đã vượt quá giới hạn API. Vui lòng thử lại sau.');
         } else {
-          throw new Error(`Lỗi API Claude: ${error.message}`);
+          throw new Error(`Lỗi khi tạo minigame: ${error.message}`);
         }
       }
       
