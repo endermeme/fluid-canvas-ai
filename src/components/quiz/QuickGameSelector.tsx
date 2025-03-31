@@ -1,17 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Gamepad, Settings, Puzzle, BrainCircuit, Clock4, Dices, PenTool, HeartHandshake, Lightbulb, Sparkles } from 'lucide-react';
+import { Gamepad, Settings, Puzzle, BrainCircuit, Clock4, Dices, PenTool, HeartHandshake, Lightbulb, Sparkles, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
 import GameView from './GameView';
 import GameSettings from './GameSettings';
+import ApiKeySettings from './ApiKeySettings';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { GameSettingsData, GameType } from './types';
 import { animateBlockCreation } from '@/lib/animations';
 
-const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
+const DEFAULT_API_KEY = 'replace-with-default-key';
+const API_KEY_STORAGE_KEY = 'claude-api-key';
+const SECRET_PHRASE = 'trợ lý tạo web';
+const REQUIRED_REPEATS = 3;
 
 const QuickGameSelector: React.FC = () => {
   const [selectedGame, setSelectedGame] = useState<MiniGame | null>(null);
@@ -19,8 +23,11 @@ const QuickGameSelector: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<string>("");
   const [showSettings, setShowSettings] = useState(false);
+  const [showApiSettings, setShowApiSettings] = useState(false);
+  const [secretPhraseCount, setSecretPhraseCount] = useState(0);
+  const [lastCommandTime, setLastCommandTime] = useState(0);
   const { toast } = useToast();
-  const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
+  const [gameGenerator, setGameGenerator] = useState<AIGameGenerator | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentGameType, setCurrentGameType] = useState<GameType | null>(null);
   
@@ -112,6 +119,81 @@ const QuickGameSelector: React.FC = () => {
   ];
 
   useEffect(() => {
+    let keypressBuffer = '';
+    let lastKeypressTime = 0;
+    const keypressTimeout = 1000; // 1 second timeout between keypresses
+    
+    const handleKeyPress = (e: KeyboardEvent) => {
+      const currentTime = Date.now();
+      
+      // Reset buffer if timeout has passed
+      if (currentTime - lastKeypressTime > keypressTimeout) {
+        keypressBuffer = '';
+      }
+      
+      // Add the key to the buffer
+      keypressBuffer += e.key.toLowerCase();
+      lastKeypressTime = currentTime;
+      
+      // Check if the buffer contains the secret phrase
+      if (keypressBuffer.includes(SECRET_PHRASE.toLowerCase())) {
+        keypressBuffer = '';
+        
+        // Check if this is within the timeout for repeated commands
+        if (currentTime - lastCommandTime < 2000) {
+          const newCount = secretPhraseCount + 1;
+          setSecretPhraseCount(newCount);
+          
+          if (newCount >= REQUIRED_REPEATS) {
+            setSecretPhraseCount(0);
+            setShowApiSettings(true);
+            
+            toast({
+              title: "Cài đặt API mở",
+              description: "Bạn đã mở cài đặt API key",
+            });
+          } else {
+            const remaining = REQUIRED_REPEATS - newCount;
+            toast({
+              title: `Nhập thêm ${remaining} lần nữa`,
+              description: `Cần nhập "${SECRET_PHRASE}" thêm ${remaining} lần để mở cài đặt API`,
+            });
+          }
+        } else {
+          // First detection
+          setSecretPhraseCount(1);
+          toast({
+            title: `Nhập thêm ${REQUIRED_REPEATS - 1} lần nữa`,
+            description: `Cần nhập "${SECRET_PHRASE}" thêm ${REQUIRED_REPEATS - 1} lần để mở cài đặt API`,
+          });
+        }
+        
+        setLastCommandTime(currentTime);
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyPress);
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [secretPhraseCount, lastCommandTime]);
+
+  useEffect(() => {
+    const storedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+    const apiKey = storedApiKey || DEFAULT_API_KEY;
+    setGameGenerator(new AIGameGenerator(apiKey));
+
+    const handleStorageChange = () => {
+      const newApiKey = localStorage.getItem(API_KEY_STORAGE_KEY) || DEFAULT_API_KEY;
+      setGameGenerator(new AIGameGenerator(newApiKey));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  useEffect(() => {
     const gameButtons = containerRef.current?.querySelectorAll('.game-button');
     gameButtons?.forEach((button, index) => {
       setTimeout(() => {
@@ -142,6 +224,15 @@ const QuickGameSelector: React.FC = () => {
   };
   
   const handleStartGame = async (settings: GameSettingsData) => {
+    if (!gameGenerator) {
+      toast({
+        title: "Lỗi Khởi Tạo",
+        description: "Không thể khởi tạo trình tạo game. Kiểm tra API key của bạn.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setShowSettings(false);
     if (!selectedTopic) return;
     
@@ -162,10 +253,10 @@ const QuickGameSelector: React.FC = () => {
       }
     } catch (error) {
       console.error('Lỗi Tạo Minigame:', error);
-      setErrorMessage('Không thể tạo minigame. Vui lòng thử lại hoặc chọn chủ đề khác.');
+      setErrorMessage('Không thể tạo minigame. Vui lòng ki��m tra API key hoặc chọn chủ đề khác.');
       toast({
         title: "Lỗi Tạo Minigame",
-        description: "Có vấn đề khi tạo minigame. Vui lòng thử lại với chủ đề khác.",
+        description: "Có vấn đề khi tạo minigame. Kiểm tra API key hoặc thử chủ đề khác.",
         variant: "destructive",
       });
     } finally {
@@ -255,6 +346,11 @@ const QuickGameSelector: React.FC = () => {
           />
         </DialogContent>
       </Dialog>
+      
+      <ApiKeySettings 
+        isOpen={showApiSettings}
+        onClose={() => setShowApiSettings(false)}
+      />
     </div>
   );
 };

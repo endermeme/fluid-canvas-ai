@@ -10,8 +10,17 @@ import Quiz from './pages/Quiz';
 import SharedGame from './pages/SharedGame';
 import NotFound from './pages/NotFound';
 
+// Default API Key - this would be replaced by user's key
+const DEFAULT_CLAUDE_API_KEY = 'your-default-key';
+const API_KEY_STORAGE_KEY = 'claude-api-key';
+
 const App = () => {
   useEffect(() => {
+    // Initialize Claude API key if not already set
+    if (!localStorage.getItem(API_KEY_STORAGE_KEY)) {
+      localStorage.setItem(API_KEY_STORAGE_KEY, DEFAULT_CLAUDE_API_KEY);
+    }
+    
     // Clean up expired games when app loads
     cleanupExpiredGames();
     

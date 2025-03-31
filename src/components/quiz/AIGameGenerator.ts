@@ -1,5 +1,5 @@
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import axios from 'axios';
 import { GameSettingsData } from './types';
 
 export interface MiniGame {
@@ -13,12 +13,10 @@ export interface MiniGame {
 }
 
 export class AIGameGenerator {
-  private genAI: GoogleGenerativeAI;
-  private model: any;
+  private apiKey: string;
 
   constructor(apiKey: string) {
-    this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    this.apiKey = apiKey;
   }
 
   async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
@@ -58,45 +56,56 @@ export class AIGameGenerator {
         Không trả lời bất kỳ điều gì khác ngoài đối tượng JSON.
       `;
 
-      const result = await this.model.generateContent(prompt);
-      const response = result.response;
-      const text = response.text();
-      
-      // Extract the JSON object from the response
-      const jsonMatch = text.match(/{[\s\S]*}/);
-      if (jsonMatch) {
-        const jsonStr = jsonMatch[0];
-        let gameData;
-        
-        try {
-          gameData = JSON.parse(jsonStr);
-          
-          // Build a full HTML document from the parts
-          const fullHtmlContent = this.buildFullHtmlDocument(
-            gameData.title,
-            gameData.gameHtml,
-            gameData.gameScript,
-            gameData.cssStyles,
-            gameData.instructionsHtml
-          );
-          
-          return {
-            title: gameData.title,
-            description: gameData.description,
-            content: fullHtmlContent,
-            instructionsHtml: gameData.instructionsHtml,
-            gameHtml: gameData.gameHtml,
-            gameScript: gameData.gameScript,
-            cssStyles: gameData.cssStyles
-          };
-        } catch (jsonError) {
-          console.error("Error parsing JSON from Gemini response:", jsonError);
-          console.log("Attempted to parse:", jsonStr);
-          return null;
+      const response = await axios.post(
+        'https://api.anthropic.com/v1/messages',
+        {
+          model: 'claude-3-sonnet-20240229',
+          max_tokens: 4000,
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          response_format: { type: "json_object" }
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': this.apiKey,
+            'anthropic-version': '2023-06-01'
+          }
         }
-      }
+      );
+
+      const gameData = response.data.content[0].text;
       
-      return null;
+      try {
+        const parsedData = JSON.parse(gameData);
+        
+        // Build a full HTML document from the parts
+        const fullHtmlContent = this.buildFullHtmlDocument(
+          parsedData.title,
+          parsedData.gameHtml,
+          parsedData.gameScript,
+          parsedData.cssStyles,
+          parsedData.instructionsHtml
+        );
+        
+        return {
+          title: parsedData.title,
+          description: parsedData.description,
+          content: fullHtmlContent,
+          instructionsHtml: parsedData.instructionsHtml,
+          gameHtml: parsedData.gameHtml,
+          gameScript: parsedData.gameScript,
+          cssStyles: parsedData.cssStyles
+        };
+      } catch (jsonError) {
+        console.error("Error parsing JSON from Claude response:", jsonError);
+        console.log("Attempted to parse:", gameData);
+        return null;
+      }
     } catch (error) {
       console.error("Error generating mini game:", error);
       return null;
