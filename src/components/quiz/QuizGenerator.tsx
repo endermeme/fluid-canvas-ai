@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
@@ -5,12 +6,8 @@ import GameLoading from './GameLoading';
 import GameError from './GameError';
 import GameView from './GameView';
 import { GameSettingsData } from './types';
-import ApiKeySettings from './ApiKeySettings';
 
-const DEFAULT_API_KEY = 'replace-with-default-key';
-const API_KEY_STORAGE_KEY = 'claude-api-key';
-const SECRET_PHRASE = 'trợ lý tạo web';
-const REQUIRED_REPEATS = 3;
+const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
 interface QuizGeneratorProps {
   topic?: string;
@@ -25,9 +22,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
-  const [gameGenerator, setGameGenerator] = useState<AIGameGenerator | null>(null);
-  const [secretPhraseCount, setSecretPhraseCount] = useState<number>(0);
-  const [showApiSettings, setShowApiSettings] = useState<boolean>(false);
+  const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
   
   const defaultSettings: GameSettingsData = {
     difficulty: 'medium',
@@ -35,47 +30,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     timePerQuestion: 30,
     category: 'general',
   };
-
-  useEffect(() => {
-    const storedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-    const apiKey = storedApiKey || DEFAULT_API_KEY;
-    setGameGenerator(new AIGameGenerator(apiKey));
-  }, []);
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY) || DEFAULT_API_KEY;
-      setGameGenerator(new AIGameGenerator(apiKey));
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  useEffect(() => {
-    if (topic && topic.toLowerCase() === SECRET_PHRASE.toLowerCase()) {
-      const newCount = secretPhraseCount + 1;
-      setSecretPhraseCount(newCount);
-      
-      if (newCount >= REQUIRED_REPEATS) {
-        setSecretPhraseCount(0);
-        setShowApiSettings(true);
-        
-        toast({
-          title: "Cài đặt API mở",
-          description: "Bạn đã mở cài đặt API key",
-        });
-      } else {
-        const remaining = REQUIRED_REPEATS - newCount;
-        toast({
-          title: `Nhập thêm ${remaining} lần nữa`,
-          description: `Cần nhập "${SECRET_PHRASE}" thêm ${remaining} lần để mở cài đặt API`,
-        });
-      }
-    } else {
-      setSecretPhraseCount(0);
-    }
-  }, [topic]);
 
   useImperativeHandle(ref, () => ({
     generateQuiz: (topic: string, settings?: GameSettingsData) => {
@@ -88,6 +42,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const getSettingsFromTopic = (topic: string): GameSettingsData => {
     let settings = {...defaultSettings};
     
+    // Adjust settings based on topic keywords
     if (topic.toLowerCase().includes('trí nhớ') || topic.toLowerCase().includes('nhớ hình')) {
       settings.questionCount = 8;
       settings.timePerQuestion = 3;
@@ -106,6 +61,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       settings.timePerQuestion = 40;
     }
     
+    // Adjust category based on topic
     if (topic.toLowerCase().includes('lịch sử')) {
       settings.category = 'history';
     } else if (topic.toLowerCase().includes('khoa học')) {
@@ -124,15 +80,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   };
 
   const generateMiniGame = async (topic: string, settings: GameSettingsData = defaultSettings) => {
-    if (!gameGenerator) {
-      toast({
-        title: "Lỗi Khởi Tạo",
-        description: "Không thể khởi tạo trình tạo game. Kiểm tra API key của bạn.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
     setErrorMessage(null);
     setMiniGame(null);
@@ -151,10 +98,10 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       }
     } catch (error) {
       console.error('Lỗi Tạo Minigame:', error);
-      setErrorMessage('Không thể tạo minigame. Vui lòng thử lại hoặc kiểm tra API key của bạn.');
+      setErrorMessage('Không thể tạo minigame. Vui lòng thử lại hoặc chọn chủ đề khác.');
       toast({
         title: "Lỗi Tạo Minigame",
-        description: "Có vấn đề khi tạo minigame. Kiểm tra API key hoặc thử chủ đề khác.",
+        description: "Có vấn đề khi tạo minigame. Vui lòng thử lại với chủ đề khác.",
         variant: "destructive",
       });
     } finally {
@@ -178,23 +125,11 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     return (
       <div className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10">
         <p className="text-lg">Vui lòng nhập chủ đề vào thanh chat để tạo minigame</p>
-        <ApiKeySettings 
-          isOpen={showApiSettings}
-          onClose={() => setShowApiSettings(false)}
-        />
       </div>
     );
   }
 
-  return (
-    <>
-      <GameView miniGame={miniGame} />
-      <ApiKeySettings 
-        isOpen={showApiSettings}
-        onClose={() => setShowApiSettings(false)}
-      />
-    </>
-  );
+  return <GameView miniGame={miniGame} />;
 });
 
 QuizGenerator.displayName = "QuizGenerator";

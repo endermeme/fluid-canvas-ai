@@ -1,4 +1,5 @@
 
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GameSettingsData } from './types';
 
 export interface MiniGame {
@@ -12,19 +13,16 @@ export interface MiniGame {
 }
 
 export class AIGameGenerator {
-  private apiKey: string;
+  private genAI: GoogleGenerativeAI;
+  private model: any;
 
   constructor(apiKey: string) {
-    this.apiKey = apiKey;
+    this.genAI = new GoogleGenerativeAI(apiKey);
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
   }
 
   async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
-      // Check if API key is configured properly
-      if (!this.apiKey || this.apiKey === 'replace-with-default-key' || this.apiKey === 'your-default-key') {
-        throw new Error('API key not configured. Please configure your Claude API key first.');
-      }
-
       const settingsPrompt = settings ? `
         Hãy tạo với các cài đặt sau:
         - Độ khó: ${settings.difficulty}
@@ -34,177 +32,74 @@ export class AIGameGenerator {
       ` : '';
 
       const prompt = `
-        Tạo một minigame tương tác về chủ đề "${topic}" sử dụng HTML, CSS và JavaScript thuần.
+        Tạo một minigame tương tác trực quan, đầy màu sắc về chủ đề "${topic}" bằng HTML, CSS và JavaScript.
         ${settingsPrompt}
         
-        YÊU CẦU KỸ THUẬT QUAN TRỌNG:
-        1. Trả lời của bạn PHẢI là một đối tượng JSON hợp lệ với đúng định dạng sau (không thêm/bớt trường nào):
+        Minigame cần phải có:
+        1. Giao diện với nhiều màu sắc tươi sáng, gradient, hiệu ứng trực quan
+        2. Màu nền đặc biệt hoặc gradient thay vì màu trắng đơn điệu
+        3. Tương tác tốt bằng chuột hoặc chạm
+        4. Phản hồi trực quan khi người chơi tương tác
+        5. Hiệu ứng chuyển động, hoạt ảnh đơn giản
+        6. Hiển thị điểm số hoặc kết quả cuối cùng với hiệu ứng nổi bật
+        7. Kiểu dáng hiện đại với viền bo tròn, bóng đổ, và các phần tử trong suốt
+        8. Bố cục tối ưu cho cả điện thoại và máy tính
+        
+        Trả về định dạng JSON với các trường sau:
         {
           "title": "Tên minigame",
-          "description": "Mô tả ngắn về minigame",
-          "instructionsHtml": "HTML hướng dẫn người chơi",
+          "description": "Mô tả ngắn gọn về minigame",
+          "instructionsHtml": "Để trống",
           "gameHtml": "Mã HTML của game",
-          "gameScript": "Mã JavaScript của game",
-          "cssStyles": "CSS cho game" 
+          "gameScript": "Mã JavaScript của game (không bao gồm thẻ script)",
+          "cssStyles": "CSS cho game (không bao gồm thẻ style) - hãy tạo nhiều màu sắc và hiệu ứng đẹp mắt"
         }
         
-        2. KHÔNG bao gồm markdown, backticks (\`\`\`), hoặc bất kỳ định dạng nào khác.
-        3. KHÔNG có khai báo thẻ như <html>, <head>, <body>, <script>, <style>. Chỉ bao gồm nội dung bên trong.
-        4. Tất cả dấu nháy kép (") trong mã JavaScript và CSS phải được escape bằng dấu backslash (\\").
-        5. Tất cả dấu nháy kép (") trong giá trị JSON phải được escape đúng cách.
-        6. Sử dụng dấu nháy đơn (') trong mã HTML, CSS và JavaScript khi có thể.
-        7. CSSStyles phải là một chuỗi duy nhất, không có ngắt dòng thô.
-        
-        THIẾT KẾ MINIGAME:
-        - Giao diện đẹp với màu sắc tươi sáng, gradient, hiệu ứng trực quan
-        - Tương tác tốt bằng chuột hoặc chạm
-        - Hiển thị điểm số và/hoặc kết quả cuối cùng
-        - Thiết kế responsive cho cả điện thoại và máy tính
-        - Code đơn giản, rõ ràng và dễ hiểu
-        
-        ĐẢM BẢO KHÔNG CÓ LỖI CÚ PHÁP JSON VÀ HOÀN THÀNH TẤT CẢ CÁC TRƯỜNG.
+        Không trả lời bất kỳ điều gì khác ngoài đối tượng JSON.
       `;
 
-      console.log("Sending request to Claude API");
-
-      try {
-        // Direct request with browser headers
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': this.apiKey,
-            'anthropic-version': '2023-06-01',
-            'anthropic-dangerous-direct-browser-access': 'true',
-          },
-          body: JSON.stringify({
-            model: 'claude-3-sonnet-20240229',
-            max_tokens: 4000,
-            messages: [
-              {
-                role: 'user',
-                content: prompt
-              }
-            ]
-          })
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.text();
-          console.error("Claude API error response:", errorData);
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        console.log("Successfully received Claude API response");
-        const data = await response.json();
-        
-        // Extract content from response
+      const result = await this.model.generateContent(prompt);
+      const response = result.response;
+      const text = response.text();
+      
+      // Extract the JSON object from the response
+      const jsonMatch = text.match(/{[\s\S]*}/);
+      if (jsonMatch) {
+        const jsonStr = jsonMatch[0];
         let gameData;
-        if (data.content && Array.isArray(data.content) && data.content.length > 0) {
-          const contentItem = data.content.find(item => item.type === 'text');
-          if (contentItem && contentItem.text) {
-            gameData = contentItem.text;
-          } else {
-            throw new Error('Invalid Claude API response structure');
-          }
-        } else {
-          throw new Error('Invalid Claude API response structure');
-        }
         
-        // Parse JSON with multiple fallback strategies
-        let parsedData;
         try {
-          console.log("Raw response:", gameData);
+          gameData = JSON.parse(jsonStr);
           
-          // Clean up the response text to extract just the JSON
-          let jsonText = gameData.trim();
-            
-          // Remove markdown code block indicators if present
-          jsonText = jsonText.replace(/^```json\s*/gm, '').replace(/^```\s*/gm, '').replace(/```\s*$/gm, '').trim();
+          // Build a full HTML document from the parts
+          const fullHtmlContent = this.buildFullHtmlDocument(
+            gameData.title,
+            gameData.gameHtml,
+            gameData.gameScript,
+            gameData.cssStyles,
+            gameData.instructionsHtml
+          );
           
-          // Find the outermost JSON object
-          const jsonMatch = jsonText.match(/(\{[\s\S]*\})/);
-          if (jsonMatch) {
-            jsonText = jsonMatch[0];
-          }
-          
-          // Fix common JSON issues
-          const fixedJsonText = jsonText
-            // Remove backticks if they exist
-            .replace(/`/g, '')
-            // Fix multiline strings 
-            .replace(/\n/g, ' ')
-            // Fix CSS properties with improper escaping
-            .replace(/(\w+):\s*([^,}]+)/g, (match, prop, value) => {
-              // Only process string values
-              if (value.includes('"') && !value.includes('\\"')) {
-                return `${prop}: "${value.replace(/"/g, '\\"').trim()}"`;
-              }
-              return match;
-            });
-          
-          try {
-            parsedData = JSON.parse(fixedJsonText);
-            console.log("Successfully parsed JSON data");
-          } catch (parseError) {
-            console.error("JSON parse error:", parseError);
-            
-            // Handle CSS strings with template literals
-            if (jsonText.includes('`')) {
-              const cssMatch = jsonText.match(/"cssStyles"\s*:\s*`([^`]*)`/);
-              if (cssMatch) {
-                const cssContent = cssMatch[1];
-                const modifiedJson = jsonText.replace(/"cssStyles"\s*:\s*`([^`]*)`/, `"cssStyles": "${cssContent.replace(/"/g, '\\"').replace(/\n/g, ' ')}"`);
-                parsedData = JSON.parse(modifiedJson);
-              }
-            } else {
-              throw parseError;
-            }
-          }
-          
-          // Validate the structure
-          const requiredFields = ['title', 'description', 'gameHtml', 'gameScript', 'cssStyles'];
-          for (const field of requiredFields) {
-            if (!parsedData[field]) {
-              throw new Error(`Thiếu trường dữ liệu bắt buộc: ${field}`);
-            }
-          }
-          
-          // Make sure instructionsHtml exists, even if empty
-          if (!parsedData.instructionsHtml) {
-            parsedData.instructionsHtml = '';
-          }
-          
+          return {
+            title: gameData.title,
+            description: gameData.description,
+            content: fullHtmlContent,
+            instructionsHtml: gameData.instructionsHtml,
+            gameHtml: gameData.gameHtml,
+            gameScript: gameData.gameScript,
+            cssStyles: gameData.cssStyles
+          };
         } catch (jsonError) {
-          console.error("Error parsing JSON from Claude response:", jsonError);
-          throw new Error('Không thể phân tích dữ liệu từ API Claude. Định dạng phản hồi không hợp lệ.');
+          console.error("Error parsing JSON from Gemini response:", jsonError);
+          console.log("Attempted to parse:", jsonStr);
+          return null;
         }
-        
-        // Build a full HTML document from the parts
-        const fullHtmlContent = this.buildFullHtmlDocument(
-          parsedData.title,
-          parsedData.gameHtml,
-          parsedData.gameScript,
-          parsedData.cssStyles,
-          parsedData.instructionsHtml || ''
-        );
-        
-        return {
-          title: parsedData.title,
-          description: parsedData.description,
-          content: fullHtmlContent,
-          instructionsHtml: parsedData.instructionsHtml || '',
-          gameHtml: parsedData.gameHtml,
-          gameScript: parsedData.gameScript,
-          cssStyles: parsedData.cssStyles
-        };
-      } catch (apiError) {
-        console.error("Error with direct Claude API request:", apiError);
-        throw apiError;
       }
-    } catch (error: any) {
+      
+      return null;
+    } catch (error) {
       console.error("Error generating mini game:", error);
-      throw error;
+      return null;
     }
   }
   
@@ -230,7 +125,7 @@ export class AIGameGenerator {
       align-items: center;
     }
     
-    /* Game container */
+    /* Modern UI Elements */
     .game-container {
       width: 100%;
       max-width: 800px;
@@ -243,9 +138,73 @@ export class AIGameGenerator {
       margin: 20px;
     }
     
-    /* Game styles */
+    button {
+      background: linear-gradient(90deg, #4776E6 0%, #8E54E9 100%);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    button:active {
+      transform: translateY(1px);
+    }
+    
+    input, select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.7);
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Game instructions - hidden by default */
+    .game-instructions {
+      display: none;
+    }
+    
+    /* Custom game styles */
     ${css}
     
+    /* Animation keyframes */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Apply animations to common elements */
+    .game-title {
+      animation: fadeIn 0.6s ease-out;
+    }
+    
+    .score-display {
+      animation: pulse 2s infinite;
+    }
+    
+    .loading {
+      animation: spin 1s linear infinite;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .game-container {
@@ -256,9 +215,6 @@ export class AIGameGenerator {
   </style>
 </head>
 <body>
-  <!-- Game instructions if provided -->
-  ${instructions ? `<div class="game-container instructions-container">${instructions}</div>` : ''}
-  
   <!-- Game content -->
   <div class="game-container">
     ${html}

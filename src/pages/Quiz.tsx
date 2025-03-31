@@ -9,17 +9,10 @@ import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
 import { animateAIPanelSlideIn, animateContentHighlight } from '@/lib/animations';
-import { Settings, Key } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import ApiKeySettings from '@/components/quiz/ApiKeySettings';
-
-const API_KEY_STORAGE_KEY = 'claude-api-key';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
   const [isManualMode, setIsManualMode] = useState(false);
-  const [showApiSettings, setShowApiSettings] = useState(false);
-  const [hasValidApiKey, setHasValidApiKey] = useState(false);
   
   const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
   const { addBlock } = useCanvasState();
@@ -31,10 +24,6 @@ const Quiz = () => {
 
   useEffect(() => {
     document.title = 'Minigame Tương Tác';
-    
-    // Check API key validity
-    const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY) || '';
-    setHasValidApiKey(apiKey.startsWith('sk-'));
     
     // Parse URL parameters for direct game creation
     const queryParams = new URLSearchParams(location.search);
@@ -56,15 +45,6 @@ const Quiz = () => {
         }, 100);
       }
     }
-    
-    // Listen for storage events (API key changes)
-    const handleStorageChange = () => {
-      const newApiKey = localStorage.getItem(API_KEY_STORAGE_KEY) || '';
-      setHasValidApiKey(newApiKey.startsWith('sk-'));
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
   }, [location.search]);
 
   useEffect(() => {
@@ -100,18 +80,6 @@ const Quiz = () => {
       return;
     }
     
-    // Check for valid API key first
-    const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY) || '';
-    if (!apiKey.startsWith('sk-')) {
-      toast({
-        title: "API Key Không Hợp Lệ",
-        description: "Vui lòng cấu hình API key Claude hợp lệ trước",
-        variant: "destructive",
-      });
-      setShowApiSettings(true);
-      return;
-    }
-    
     // Switch to manual mode when a chat request comes in
     setIsManualMode(true);
     
@@ -136,19 +104,6 @@ const Quiz = () => {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex flex-col w-full">
-        {/* API Key Status Indicator */}
-        <div className="bg-background border-b px-4 py-2 flex items-center justify-end">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className={`gap-1 ${!hasValidApiKey ? 'text-red-500 hover:text-red-600' : 'text-green-600 hover:text-green-700'}`}
-            onClick={() => setShowApiSettings(true)}
-          >
-            <Key className="h-4 w-4" />
-            {hasValidApiKey ? 'API Key Đã Cấu Hình' : 'Thiết Lập API Key'}
-          </Button>
-        </div>
-        
         <div className="flex-1 flex overflow-hidden">
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent>
@@ -175,11 +130,6 @@ const Quiz = () => {
           </SidebarInset>
         </div>
       </div>
-      
-      <ApiKeySettings 
-        isOpen={showApiSettings}
-        onClose={() => setShowApiSettings(false)}
-      />
     </SidebarProvider>
   );
 };

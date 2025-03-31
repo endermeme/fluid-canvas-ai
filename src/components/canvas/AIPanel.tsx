@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, X, Sparkles, BrainCircuit } from 'lucide-react';
 import { animateAIPanelSlideIn, animateAIPanelSlideOut } from '@/lib/animations';
 import { Block, BlockType } from '@/lib/block-utils';
-import ApiKeySettings from '@/components/quiz/ApiKeySettings';
 
 interface AIPanelProps {
   isOpen: boolean;
@@ -21,7 +20,6 @@ const AIPanel: React.FC<AIPanelProps> = ({
     { role: 'ai', message: 'Hi there! I\'m your AI assistant. How can I help with your canvas today?' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showApiSettings, setShowApiSettings] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -116,10 +114,6 @@ const AIPanel: React.FC<AIPanelProps> = ({
       handleSendMessage();
     }
   };
-
-  const handleOpenApiSettings = () => {
-    setShowApiSettings(true);
-  };
   
   // Insert content buttons (these would actually insert content into the canvas)
   const renderInsertButtons = () => (
@@ -160,13 +154,7 @@ const AIPanel: React.FC<AIPanelProps> = ({
       <div className="p-3 border-b border-border flex items-center justify-between">
         <div className="flex items-center">
           <BrainCircuit size={20} className="text-primary mr-2" />
-          <h3 
-            className="font-medium cursor-pointer hover:text-primary transition-colors"
-            onClick={handleOpenApiSettings}
-            title="Click để mở cài đặt API"
-          >
-            Trợ Lý Tạo Web
-          </h3>
+          <h3 className="font-medium">AI Assistant</h3>
         </div>
         <button 
           className="p-1 rounded-full hover:bg-secondary/70 transition-colors"
@@ -224,12 +212,6 @@ const AIPanel: React.FC<AIPanelProps> = ({
           </button>
         </div>
       </div>
-
-      {/* API Key Settings Dialog */}
-      <ApiKeySettings 
-        isOpen={showApiSettings}
-        onClose={() => setShowApiSettings(false)}
-      />
     </div>
   );
 };

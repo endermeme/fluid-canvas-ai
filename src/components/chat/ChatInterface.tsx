@@ -5,7 +5,6 @@ import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
 import { useNavigate } from 'react-router-dom';
-import ApiKeySettings from '@/components/quiz/ApiKeySettings';
 
 interface Message {
   role: 'user' | 'ai';
@@ -31,7 +30,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [showApiSettings, setShowApiSettings] = useState(false);
   
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -83,28 +81,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
-
-  const handleOpenApiSettings = () => {
-    setShowApiSettings(true);
-    toast({
-      title: "Cài Đặt API Mở",
-      description: "Bạn có thể cài đặt API key của Claude tại đây.",
-    });
-  };
   
   return (
     <div className="flex flex-col h-full">
       <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/20">
         <div className="flex items-center">
           <BrainCircuit size={20} className="text-primary mr-2" />
-          <h3 
-            className="font-medium cursor-pointer hover:text-primary transition-colors flex items-center gap-1" 
-            onClick={handleOpenApiSettings}
-            title="Click để mở cài đặt API"
-          >
-            Trợ Lý Tạo Web
-            <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">API</span>
-          </h3>
+          <h3 className="font-medium">Trợ Lý Tạo Web</h3>
         </div>
       </div>
       
@@ -176,12 +159,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
           </div>
         </div>
       </div>
-
-      {/* API Key Settings Dialog */}
-      <ApiKeySettings 
-        isOpen={showApiSettings}
-        onClose={() => setShowApiSettings(false)}
-      />
     </div>
   );
 };

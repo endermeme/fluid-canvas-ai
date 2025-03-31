@@ -10,17 +10,8 @@ import Quiz from './pages/Quiz';
 import SharedGame from './pages/SharedGame';
 import NotFound from './pages/NotFound';
 
-// Default API Key placeholder - will be prompted for replacement
-const DEFAULT_CLAUDE_API_KEY = '';
-const API_KEY_STORAGE_KEY = 'claude-api-key';
-
 const App = () => {
   useEffect(() => {
-    // Initialize Claude API key if not already set
-    if (!localStorage.getItem(API_KEY_STORAGE_KEY)) {
-      localStorage.setItem(API_KEY_STORAGE_KEY, DEFAULT_CLAUDE_API_KEY);
-    }
-    
     // Clean up expired games when app loads
     cleanupExpiredGames();
     
@@ -29,10 +20,7 @@ const App = () => {
       cleanupExpiredGames();
     }, 60 * 60 * 1000); // Check every hour
     
-    // Cleanup function
-    return () => {
-      clearInterval(cleanupInterval);
-    };
+    return () => clearInterval(cleanupInterval);
   }, []);
 
   return (
