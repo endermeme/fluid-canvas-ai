@@ -32,30 +32,49 @@ export class AIGameGenerator {
       ` : '';
 
       const prompt = `
-        Tạo một minigame tương tác trực quan, đầy màu sắc về chủ đề "${topic}" bằng HTML, CSS và JavaScript.
+        Tạo một minigame tương tác HTML/CSS/JS hoàn chỉnh về chủ đề "${topic}".
         ${settingsPrompt}
         
-        Minigame cần phải có:
-        1. Giao diện với nhiều màu sắc tươi sáng, gradient, hiệu ứng trực quan
-        2. Màu nền đặc biệt hoặc gradient thay vì màu trắng đơn điệu
-        3. Tương tác tốt bằng chuột hoặc chạm
-        4. Phản hồi trực quan khi người chơi tương tác
-        5. Hiệu ứng chuyển động, hoạt ảnh đơn giản
-        6. Hiển thị điểm số hoặc kết quả cuối cùng với hiệu ứng nổi bật
-        7. Kiểu dáng hiện đại với viền bo tròn, bóng đổ, và các phần tử trong suốt
-        8. Bố cục tối ưu cho cả điện thoại và máy tính
+        HƯỚNG DẪN CHI TIẾT:
+        1. CODE PHẢI HOÀN CHỈNH:
+           - Viết đầy đủ HTML, CSS và JavaScript để game hoạt động độc lập
+           - JavaScript phải có đầy đủ xử lý sự kiện và logic game
+           - CSS phải đầy đủ để tạo giao diện trực quan, đẹp mắt
         
-        Trả về định dạng JSON với các trường sau:
+        2. GIAO DIỆN:
+           - Sử dụng nhiều màu sắc tươi sáng, gradient cho nền và các phần tử
+           - Tạo hiệu ứng hover, active cho các thành phần tương tác
+           - Thêm animation cho các chuyển động và hiệu ứng
+           - Tất cả các phần tử phải được style đẹp mắt, không để mặc định
+           - Giao diện phải responsive (hoạt động tốt trên điện thoại và máy tính)
+        
+        3. TÍNH NĂNG GAME:
+           - Hiển thị điểm số rõ ràng
+           - Có thông báo kết quả sau mỗi câu trả lời hoặc hành động
+           - Có hệ thống tính giờ nếu phù hợp với loại game
+           - Hiển thị màn hình kết quả cuối game với tổng điểm và đánh giá
+           - Có nút chơi lại để bắt đầu game mới
+        
+        4. KỸ THUẬT:
+           - Tất cả các biến và hàm JavaScript phải được đặt tên có ý nghĩa
+           - Code phải được comment để giải thích các phần phức tạp
+           - Sử dụng CSS modern (flexbox/grid) cho bố cục
+           - Xử lý các trường hợp lỗi (input không hợp lệ, v.v.)
+           - Code phải hoạt động hoàn toàn với sandbox="allow-scripts allow-same-origin"
+           - KHÔNG ĐƯỢC sử dụng bất kỳ thư viện ngoài (như jQuery, Bootstrap)
+        
+        Trả về một đối tượng JSON với cấu trúc chính xác như sau:
         {
           "title": "Tên minigame",
           "description": "Mô tả ngắn gọn về minigame",
-          "instructionsHtml": "Để trống",
-          "gameHtml": "Mã HTML của game",
-          "gameScript": "Mã JavaScript của game (không bao gồm thẻ script)",
-          "cssStyles": "CSS cho game (không bao gồm thẻ style) - hãy tạo nhiều màu sắc và hiệu ứng đẹp mắt"
+          "instructionsHtml": "Hướng dẫn HTML cho người chơi",
+          "gameHtml": "Mã HTML đầy đủ của game (không bao gồm thẻ html/head/body)",
+          "gameScript": "Mã JavaScript đầy đủ của game (không bao gồm thẻ script)",
+          "cssStyles": "CSS đầy đủ cho game (không bao gồm thẻ style)"
         }
         
-        Không trả lời bất kỳ điều gì khác ngoài đối tượng JSON.
+        QUAN TRỌNG: Trả về JSON thuần túy, không có văn bản giải thích hoặc trình bày thêm.
+        Đảm bảo JSON được định dạng đúng và có thể phân tích bằng JSON.parse().
       `;
 
       const result = await this.model.generateContent(prompt);
@@ -112,32 +131,40 @@ export class AIGameGenerator {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
   <style>
+    /* Reset CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     /* Base Styles */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
       min-height: 100vh;
       background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      padding: 20px;
     }
     
-    /* Modern UI Elements */
+    /* Game Container */
     .game-container {
       width: 100%;
       max-width: 800px;
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(10px);
       border-radius: 16px;
       padding: 20px;
       box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
       border: 1px solid rgba(255, 255, 255, 0.18);
-      margin: 20px;
+      margin: 0 auto;
+      overflow: hidden;
     }
     
+    /* Common UI Elements */
     button {
       background: linear-gradient(90deg, #4776E6 0%, #8E54E9 100%);
       border: none;
@@ -167,15 +194,7 @@ export class AIGameGenerator {
       box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
     }
     
-    /* Game instructions - hidden by default */
-    .game-instructions {
-      display: none;
-    }
-    
-    /* Custom game styles */
-    ${css}
-    
-    /* Animation keyframes */
+    /* Animation Effects */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -192,37 +211,44 @@ export class AIGameGenerator {
       100% { transform: rotate(360deg); }
     }
     
-    /* Apply animations to common elements */
-    .game-title {
+    /* Apply animations */
+    .animate-fade-in {
       animation: fadeIn 0.6s ease-out;
     }
     
-    .score-display {
+    .animate-pulse {
       animation: pulse 2s infinite;
     }
     
-    .loading {
+    .animate-spin {
       animation: spin 1s linear infinite;
     }
 
-    /* Responsive adjustments */
+    /* Responsive Adjustments */
     @media (max-width: 768px) {
       .game-container {
-        margin: 10px;
+        margin: 0;
         padding: 15px;
+        max-width: 100%;
       }
     }
+    
+    /* Custom Game Styles */
+    ${css}
   </style>
 </head>
 <body>
-  <!-- Game content -->
-  <div class="game-container">
+  <!-- Game container -->
+  <div class="game-container animate-fade-in">
     ${html}
   </div>
 
   <script>
-    // Game logic
-    ${script}
+    // Game initialization and logic
+    document.addEventListener('DOMContentLoaded', function() {
+      // Game code
+      ${script}
+    });
   </script>
 </body>
 </html>
