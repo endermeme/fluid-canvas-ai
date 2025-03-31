@@ -1,15 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Gamepad, Settings } from 'lucide-react';
+import { Gamepad, Settings, PuzzlePiece, BrainCircuit, Clock4, Dices, PenTool, HeartHandshake, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
 import GameView from './GameView';
 import GameSettings from './GameSettings';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { GameSettingsData } from './types';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { GameSettingsData, GameType } from './types';
+import { animateBlockCreation } from '@/lib/animations';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -21,18 +22,124 @@ const QuickGameSelector: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const { toast } = useToast();
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [currentGameType, setCurrentGameType] = useState<GameType | null>(null);
   
-  const [defaultSettings] = useState<GameSettingsData>({
-    difficulty: 'medium',
-    questionCount: 10,
-    timePerQuestion: 30,
-    category: 'general',
-  });
-  
-  const gameIdeas = ["Đố vui", "Xếp hình", "Nhớ hình", "Phản xạ", "Truy tìm", "Câu đố", "Vẽ tranh"];
+  const gameTypes: GameType[] = [
+    {
+      id: "quiz",
+      name: "Đố vui",
+      description: "Trắc nghiệm kiến thức đa dạng",
+      icon: "brain-circuit",
+      defaultSettings: {
+        difficulty: 'medium',
+        questionCount: 10,
+        timePerQuestion: 30,
+        category: 'general',
+      }
+    },
+    {
+      id: "puzzle",
+      name: "Xếp hình",
+      description: "Ghép hình và hoàn thành các câu đố",
+      icon: "puzzle-piece",
+      defaultSettings: {
+        difficulty: 'medium',
+        questionCount: 5,
+        timePerQuestion: 60,
+        category: 'general',
+      }
+    },
+    {
+      id: "memory",
+      name: "Nhớ hình",
+      description: "Rèn luyện trí nhớ với các thẻ bài",
+      icon: "light-bulb",
+      defaultSettings: {
+        difficulty: 'medium',
+        questionCount: 8,
+        timePerQuestion: 3,
+        category: 'general',
+      }
+    },
+    {
+      id: "reflex",
+      name: "Phản xạ",
+      description: "Kiểm tra tốc độ phản xạ của bạn",
+      icon: "clock",
+      defaultSettings: {
+        difficulty: 'medium',
+        questionCount: 15,
+        timePerQuestion: 5,
+        category: 'general',
+      }
+    },
+    {
+      id: "hunt",
+      name: "Truy tìm",
+      description: "Tìm kiếm và khám phá các manh mối",
+      icon: "dices",
+      defaultSettings: {
+        difficulty: 'medium',
+        questionCount: 6,
+        timePerQuestion: 45,
+        category: 'general',
+      }
+    },
+    {
+      id: "riddle",
+      name: "Câu đố",
+      description: "Suy luận và giải quyết các câu đố",
+      icon: "heart-handshake",
+      defaultSettings: {
+        difficulty: 'medium',
+        questionCount: 8,
+        timePerQuestion: 40,
+        category: 'general',
+      }
+    },
+    {
+      id: "drawing",
+      name: "Vẽ tranh",
+      description: "Phát huy khả năng sáng tạo nghệ thuật",
+      icon: "pen-tool",
+      defaultSettings: {
+        difficulty: 'medium',
+        questionCount: 4,
+        timePerQuestion: 60,
+        category: 'arts',
+      }
+    },
+  ];
 
-  const handleTopicSelect = (topic: string) => {
-    setSelectedTopic(topic);
+  useEffect(() => {
+    // Apply animations to game buttons when component mounts
+    const gameButtons = containerRef.current?.querySelectorAll('.game-button');
+    gameButtons?.forEach((button, index) => {
+      setTimeout(() => {
+        if (button instanceof HTMLElement) {
+          animateBlockCreation(button);
+        }
+      }, index * 80);
+    });
+  }, []);
+
+  const getIconComponent = (iconName: string) => {
+    switch(iconName) {
+      case 'brain-circuit': return <BrainCircuit />;
+      case 'puzzle-piece': return <PuzzlePiece />;
+      case 'light-bulb': return <Lightbulb />;
+      case 'clock': return <Clock4 />;
+      case 'dices': return <Dices />;
+      case 'heart-handshake': return <HeartHandshake />;
+      case 'pen-tool': return <PenTool />;
+      default: return <Gamepad />;
+    }
+  };
+
+  const handleTopicSelect = (gameType: GameType) => {
+    setSelectedTopic(gameType.name);
+    setCurrentGameType(gameType);
     setShowSettings(true);
   };
   
@@ -71,6 +178,12 @@ const QuickGameSelector: React.FC = () => {
   const handleCancelSettings = () => {
     setShowSettings(false);
     setSelectedTopic("");
+    setCurrentGameType(null);
+  };
+
+  const handleBackToSelection = () => {
+    setSelectedGame(null);
+    setErrorMessage(null);
   };
 
   if (isLoading) {
@@ -86,27 +199,45 @@ const QuickGameSelector: React.FC = () => {
   }
 
   if (selectedGame) {
-    return <GameView miniGame={selectedGame} />;
+    return (
+      <div className="h-full relative">
+        <GameView miniGame={selectedGame} />
+        <div className="absolute bottom-4 right-4">
+          <Button 
+            onClick={handleBackToSelection}
+            variant="outline"
+            size="sm"
+            className="bg-background/80 backdrop-blur-sm shadow-md transition-transform active:scale-95 animate-fade-in"
+          >
+            Chọn Game Khác
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10">
-      <div className="text-primary mb-4">
+    <div ref={containerRef} className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10 px-4">
+      <div className="text-primary mb-4 animate-float-in">
         <Gamepad size={64} />
       </div>
-      <h2 className="text-2xl font-bold text-center">Chào mừng đến với Trò Chơi Mini</h2>
-      <p className="text-center max-w-md">
-        Chọn một chủ đề dưới đây hoặc nhập chủ đề vào thanh chat bên trái để tạo một minigame vui nhộn và tương tác.
+      <h2 className="text-2xl font-bold text-center animate-fade-in">Chào mừng đến với Trò Chơi Mini</h2>
+      <p className="text-center max-w-md animate-fade-in opacity-90">
+        Chọn một thể loại game dưới đây hoặc nhập chủ đề vào thanh chat để tạo một minigame vui nhộn và tương tác.
       </p>
-      <div className="flex flex-wrap justify-center gap-3 max-w-lg mt-4">
-        {gameIdeas.map((idea) => (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-3xl mt-4 px-4">
+        {gameTypes.map((gameType) => (
           <Button 
-            key={idea}
+            key={gameType.id}
             variant="outline" 
-            className="rounded-full"
-            onClick={() => handleTopicSelect(idea)}
+            className="game-button flex flex-col h-28 p-4 justify-center items-center gap-2 transition-all border-2 hover:border-primary/60 hover:shadow-md active:scale-95 opacity-0"
+            onClick={() => handleTopicSelect(gameType)}
           >
-            {idea}
+            <div className="text-primary">
+              {getIconComponent(gameType.icon)}
+            </div>
+            <span className="font-medium text-sm">{gameType.name}</span>
+            <span className="text-xs text-muted-foreground line-clamp-1">{gameType.description}</span>
           </Button>
         ))}
       </div>
@@ -116,9 +247,10 @@ const QuickGameSelector: React.FC = () => {
           <GameSettings 
             topic={selectedTopic}
             onStart={handleStartGame}
-            initialSettings={defaultSettings}
+            initialSettings={currentGameType?.defaultSettings}
             onCancel={handleCancelSettings}
             inModal={true}
+            gameType={currentGameType}
           />
         </DialogContent>
       </Dialog>

@@ -14,7 +14,7 @@ interface QuizGeneratorProps {
   onQuizComplete?: () => void;
 }
 
-const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, QuizGeneratorProps>(({ 
+const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: GameSettingsData) => void }, QuizGeneratorProps>(({ 
   topic = "Minigame tương tác",
   onQuizComplete,
 }, ref) => {
@@ -23,22 +23,69 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
+  
+  const defaultSettings: GameSettingsData = {
+    difficulty: 'medium',
+    questionCount: 10,
+    timePerQuestion: 30,
+    category: 'general',
+  };
 
   useImperativeHandle(ref, () => ({
-    generateQuiz: (topic: string) => {
+    generateQuiz: (topic: string, settings?: GameSettingsData) => {
       if (topic.trim()) {
-        generateMiniGame(topic);
+        generateMiniGame(topic, settings || getSettingsFromTopic(topic));
       }
     }
   }));
 
-  const generateMiniGame = async (topic: string) => {
+  const getSettingsFromTopic = (topic: string): GameSettingsData => {
+    let settings = {...defaultSettings};
+    
+    // Adjust settings based on topic keywords
+    if (topic.toLowerCase().includes('trí nhớ') || topic.toLowerCase().includes('nhớ hình')) {
+      settings.questionCount = 8;
+      settings.timePerQuestion = 3;
+    } else if (topic.toLowerCase().includes('xếp hình') || topic.toLowerCase().includes('puzzle')) {
+      settings.questionCount = 5;
+      settings.timePerQuestion = 60;
+    } else if (topic.toLowerCase().includes('phản xạ') || topic.toLowerCase().includes('nhanh')) {
+      settings.questionCount = 15;
+      settings.timePerQuestion = 5;
+    } else if (topic.toLowerCase().includes('vẽ') || topic.toLowerCase().includes('drawing')) {
+      settings.category = 'arts';
+      settings.questionCount = 4;
+      settings.timePerQuestion = 60;
+    } else if (topic.toLowerCase().includes('câu đố') || topic.toLowerCase().includes('riddle')) {
+      settings.questionCount = 8;
+      settings.timePerQuestion = 40;
+    }
+    
+    // Adjust category based on topic
+    if (topic.toLowerCase().includes('lịch sử')) {
+      settings.category = 'history';
+    } else if (topic.toLowerCase().includes('khoa học')) {
+      settings.category = 'science';
+    } else if (topic.toLowerCase().includes('địa lý')) {
+      settings.category = 'geography';
+    } else if (topic.toLowerCase().includes('nghệ thuật') || topic.toLowerCase().includes('âm nhạc')) {
+      settings.category = 'arts';
+    } else if (topic.toLowerCase().includes('thể thao')) {
+      settings.category = 'sports';
+    } else if (topic.toLowerCase().includes('toán')) {
+      settings.category = 'math';
+    }
+    
+    return settings;
+  };
+
+  const generateMiniGame = async (topic: string, settings: GameSettingsData = defaultSettings) => {
     setIsLoading(true);
     setErrorMessage(null);
     setMiniGame(null);
 
     try {      
-      const game = await gameGenerator.generateMiniGame(topic);
+      const game = await gameGenerator.generateMiniGame(topic, settings);
       
       if (game) {
         setMiniGame(game);
@@ -69,7 +116,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, Quiz
   if (errorMessage) {
     return <GameError 
       errorMessage={errorMessage} 
-      onRetry={() => generateMiniGame(topic || "minigame vui")} 
+      onRetry={() => generateMiniGame(topic || "minigame vui", defaultSettings)} 
       topic={topic} 
     />;
   }

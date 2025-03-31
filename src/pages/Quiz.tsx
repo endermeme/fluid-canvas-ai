@@ -8,6 +8,7 @@ import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
+import { animateAIPanelSlideIn, animateContentHighlight } from '@/lib/animations';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
@@ -18,6 +19,8 @@ const Quiz = () => {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const location = useLocation();
+  const mainContentRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.title = 'Minigame Tương Tác';
@@ -43,6 +46,17 @@ const Quiz = () => {
       }
     }
   }, [location.search]);
+
+  useEffect(() => {
+    // Apply animations on mount
+    if (sidebarRef.current) {
+      animateAIPanelSlideIn(sidebarRef.current);
+    }
+    
+    if (mainContentRef.current) {
+      animateContentHighlight(mainContentRef.current);
+    }
+  }, []);
 
   const handleCreateFromPrompt = (type: BlockType, content: string) => {
     const canvasElement = document.querySelector('.canvas-grid');
@@ -93,15 +107,17 @@ const Quiz = () => {
         <div className="flex-1 flex overflow-hidden">
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent>
-              <ChatInterface 
-                onCreateBlock={handleCreateFromPrompt} 
-                onQuizRequest={handleGameRequest}
-              />
+              <div ref={sidebarRef} className="h-full">
+                <ChatInterface 
+                  onCreateBlock={handleCreateFromPrompt} 
+                  onQuizRequest={handleGameRequest}
+                />
+              </div>
             </SidebarContent>
           </Sidebar>
           
           <SidebarInset className="flex-1 bg-background overflow-hidden p-0 relative">
-            <div className="h-full relative">
+            <div ref={mainContentRef} className="h-full relative">
               {isManualMode ? (
                 <QuizGenerator 
                   ref={quizGeneratorRef} 
