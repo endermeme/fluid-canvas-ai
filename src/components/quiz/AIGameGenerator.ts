@@ -15,13 +15,10 @@ export interface MiniGame {
 export class AIGameGenerator {
   private genAI: GoogleGenerativeAI;
   private model: any;
-  private apiKey: string;
 
   constructor(apiKey: string) {
-    this.apiKey = apiKey;
     this.genAI = new GoogleGenerativeAI(apiKey);
-    // Updated model name to use beta endpoint
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-pro-exp-03-25" });
   }
 
   async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
@@ -60,7 +57,6 @@ export class AIGameGenerator {
         Không trả lời bất kỳ điều gì khác ngoài đối tượng JSON.
       `;
 
-      // Use the model to generate content
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const text = response.text();
