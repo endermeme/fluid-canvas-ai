@@ -38,6 +38,9 @@ const GameError: React.FC<GameErrorProps> = ({ errorMessage, onRetry, topic }) =
     errorMessage.includes('server') ||
     errorMessage.toLowerCase().includes('cors');
   
+  const isCorsError = errorMessage.toLowerCase().includes('cors') ||
+    errorMessage.toLowerCase().includes('proxy');
+  
   return (
     <div 
       ref={containerRef}
@@ -88,6 +91,16 @@ const GameError: React.FC<GameErrorProps> = ({ errorMessage, onRetry, topic }) =
               <ExternalLink size={14} />
             </a>
           </div>
+        )}
+        
+        {isCorsError && (
+          <Alert className="bg-amber-50 border-amber-200">
+            <AlertTitle>Lỗi CORS / Network</AlertTitle>
+            <AlertDescription className="text-sm">
+              <p className="mb-2">Hệ thống đang sử dụng CORS proxy để kết nối tới Claude API. Proxy này có thể bị giới hạn truy cập hoặc không hoạt động.</p>
+              <p>Nếu vấn đề vẫn tiếp diễn, hãy thử lại sau hoặc thử chủ đề khác.</p>
+            </AlertDescription>
+          </Alert>
         )}
       </div>
       

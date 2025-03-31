@@ -11,6 +11,12 @@ import Quiz from './pages/Quiz';
 import SharedGame from './pages/SharedGame';
 import NotFound from './pages/NotFound';
 
+// Add interface to extend Window type
+interface CustomWindow extends Window {
+  proxyInitialized?: boolean;
+}
+declare const window: CustomWindow;
+
 // Default API Key placeholder - will be prompted for replacement
 const DEFAULT_CLAUDE_API_KEY = '';
 const API_KEY_STORAGE_KEY = 'claude-api-key';
@@ -27,10 +33,15 @@ if (!window.proxyInitialized) {
       const { prompt, apiKey } = body;
       
       try {
-        // Make direct request to Claude API
-        const response = await axios.post(
-          'https://api.anthropic.com/v1/messages',
-          {
+        // Make request through CORS proxy
+        const response = await fetch('https://cors-anywhere.herokuapp.com/https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
             model: 'claude-3-sonnet-20240229',
             max_tokens: 4000,
             messages: [
@@ -40,31 +51,26 @@ if (!window.proxyInitialized) {
               }
             ],
             response_format: { type: "json_object" }
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': apiKey,
-              'anthropic-version': '2023-06-01'
-            }
-          }
-        );
+          })
+        });
 
+        const data = await response.json();
+        
         // Return a synthesized response that matches our API
         return Promise.resolve({
           ok: true,
           status: 200,
           json: async () => ({
-            content: response.data.content[0].text
+            content: data.content[0].text
           })
         });
       } catch (error) {
         console.error("Proxy error:", error);
         return Promise.resolve({
           ok: false,
-          status: error.response?.status || 500,
+          status: 500,
           json: async () => ({
-            error: error.message
+            error: error.message || "CORS proxy request failed"
           })
         });
       }

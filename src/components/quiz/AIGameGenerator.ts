@@ -60,27 +60,28 @@ export class AIGameGenerator {
         Không trả lời bất kỳ điều gì khác ngoài đối tượng JSON.
       `;
 
-      console.log("Sending request to local proxy with key: " + this.apiKey.substring(0, 4) + "****");
+      console.log("Sending request through CORS proxy with key: " + this.apiKey.substring(0, 4) + "****");
 
-      // Use our local proxy endpoint instead of calling Anthropic directly
-      const response = await axios.post(
-        '/api/claude-proxy',
-        {
-          prompt,
-          apiKey: this.apiKey
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          timeout: 60000 // 60 seconds timeout
-        }
-      );
-
-      console.log("Received response from proxy");
-      const gameData = response.data.content;
-      
       try {
+        // Use our proxy endpoint
+        const response = await axios.post(
+          '/api/claude-proxy',
+          {
+            prompt,
+            apiKey: this.apiKey
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            timeout: 60000 // 60 seconds timeout
+          }
+        );
+
+        console.log("Received response from proxy");
+        const gameData = response.data.content;
+        
+        // Try to parse the JSON response
         const parsedData = JSON.parse(gameData);
         
         // Build a full HTML document from the parts
@@ -103,8 +104,8 @@ export class AIGameGenerator {
         };
       } catch (jsonError) {
         console.error("Error parsing JSON from Claude response:", jsonError);
-        console.log("Attempted to parse:", gameData);
-        return null;
+        console.log("Attempted to parse:", jsonError);
+        throw new Error('Không thể xử lý dữ liệu từ Claude API. Vui lòng thử lại.');
       }
     } catch (error: any) {
       console.error("Error generating mini game:", error);
@@ -112,11 +113,13 @@ export class AIGameGenerator {
       // More specific error messages based on error type
       if (axios.isAxiosError(error)) {
         if (error.code === 'ERR_NETWORK') {
-          throw new Error('Không thể kết nối tới server. Kiểm tra kết nối internet của bạn.');
+          throw new Error('Không thể kết nối tới API Claude. CORS proxy có thể bị giới hạn truy cập, vui lòng thử lại sau.');
         } else if (error.response?.status === 401) {
           throw new Error('API key không hợp lệ. Vui lòng kiểm tra lại API key Claude của bạn.');
         } else if (error.response?.status === 429) {
           throw new Error('Đã vượt quá giới hạn API. Vui lòng thử lại sau.');
+        } else if (error.message && error.message.includes('CORS')) {
+          throw new Error('Lỗi CORS: Không thể truy cập Claude API. Proxy CORS đang được sử dụng nhưng có thể bị giới hạn truy cập.');
         } else {
           throw new Error(`Lỗi khi tạo minigame: ${error.message}`);
         }
