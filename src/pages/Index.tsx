@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CanvasContainer from '@/components/canvas/CanvasContainer';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
 import ChatInterface from '@/components/chat/ChatInterface';
@@ -8,21 +8,13 @@ import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { Button } from '@/components/ui/button';
 import { Gamepad } from 'lucide-react';
-import GameSettings from '@/components/quiz/GameSettings';
-import { GameSettingsData } from '@/pages/Quiz';
-import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const isMobile = useIsMobile();
   const [isChatOpen, setIsChatOpen] = useState(!isMobile);
   const { addBlock } = useCanvasState();
-  const [selectedQuickGame, setSelectedQuickGame] = useState<string | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   // Handler for creating blocks from AI prompts
   const handleCreateFromPrompt = (type: BlockType, content: string) => {
@@ -42,22 +34,7 @@ const Index = () => {
 
   // Handler for quick game selection
   const handleQuickGameSelect = (gameTopic: string) => {
-    console.log("Quick game selected:", gameTopic);
-    setSelectedQuickGame(gameTopic);
-    setShowSettings(true);
-  };
-
-  // Handler for starting the game after settings are selected
-  const handleStartGame = (settings: GameSettingsData) => {
-    if (selectedQuickGame) {
-      navigate(`/quiz?topic=${encodeURIComponent(selectedQuickGame)}&autostart=true&difficulty=${settings.difficulty}&questionCount=${settings.questionCount}&timePerQuestion=${settings.timePerQuestion}&category=${settings.category}`);
-    }
-  };
-
-  // Handler for canceling game settings
-  const handleCancelSettings = () => {
-    setShowSettings(false);
-    setSelectedQuickGame(null);
+    navigate(`/quiz?topic=${encodeURIComponent(gameTopic)}&autostart=true`);
   };
 
   // Quick game options
@@ -118,27 +95,6 @@ const Index = () => {
               </div>
             </div>
           </SidebarInset>
-          
-          {/* Game Settings Dialog */}
-          <Dialog open={showSettings} onOpenChange={(open) => {
-            if (!open) {
-              handleCancelSettings();
-            }
-            setShowSettings(open);
-          }}>
-            <DialogContent className="sm:max-w-md max-w-[calc(100%-2rem)] p-0 gap-0">
-              <div className="p-0 overflow-hidden">
-                <div className="p-4 sm:p-6">
-                  <GameSettings 
-                    onStart={handleStartGame} 
-                    topic={selectedQuickGame || ""}
-                    onCancel={handleCancelSettings}
-                    inModal={true}
-                  />
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
     </SidebarProvider>

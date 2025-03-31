@@ -6,10 +6,6 @@ import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
-import GameSettings from '@/components/quiz/GameSettings';
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import { Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useLocation } from 'react-router-dom';
 
 // Define the game settings interface
@@ -22,8 +18,7 @@ export interface GameSettingsData {
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
-  const [showSettings, setShowSettings] = useState(false);
-  const [gameSettings, setGameSettings] = useState<GameSettingsData>({
+  const [gameSettings] = useState<GameSettingsData>({
     difficulty: 'medium',
     questionCount: 10,
     timePerQuestion: 30,
@@ -47,33 +42,15 @@ const Quiz = () => {
     if (topicParam) {
       setTopic(topicParam);
       
-      // Check for game settings in URL
-      const difficultyParam = queryParams.get('difficulty');
-      const questionCountParam = queryParams.get('questionCount');
-      const timePerQuestionParam = queryParams.get('timePerQuestion');
-      const categoryParam = queryParams.get('category');
-      
-      const urlSettings: GameSettingsData = {
-        difficulty: (difficultyParam as 'easy' | 'medium' | 'hard') || 'medium',
-        questionCount: questionCountParam ? parseInt(questionCountParam) : 10,
-        timePerQuestion: timePerQuestionParam ? parseInt(timePerQuestionParam) : 30,
-        category: categoryParam || 'general',
-      };
-      
-      setGameSettings(urlSettings);
-      
       // If autostart is set, generate the quiz automatically
       if (autoStart === 'true') {
         setIsGenerating(true);
         setTimeout(() => {
           if (quizGeneratorRef.current) {
-            quizGeneratorRef.current.generateQuiz(topicParam, urlSettings);
+            quizGeneratorRef.current.generateQuiz(topicParam, gameSettings);
           }
           setIsGenerating(false);
         }, 100);
-      } else {
-        // If no autostart, show settings
-        setShowSettings(true);
       }
     }
   }, [location.search]);
@@ -100,32 +77,13 @@ const Quiz = () => {
       return;
     }
     
-    // For chat input, directly generate the game without showing settings
+    // Directly generate the game
     setTopic(requestedTopic);
     setIsGenerating(true);
     
     setTimeout(() => {
       if (quizGeneratorRef.current) {
         quizGeneratorRef.current.generateQuiz(requestedTopic, gameSettings);
-      } else {
-        toast({
-          title: "Lỗi Hệ Thống",
-          description: "Không thể kết nối với trình tạo minigame. Vui lòng thử lại.",
-          variant: "destructive",
-        });
-      }
-      setIsGenerating(false);
-    }, 100);
-  };
-  
-  const handleStartGame = (settings: GameSettingsData) => {
-    setGameSettings(settings);
-    setShowSettings(false);
-    setIsGenerating(true);
-    
-    setTimeout(() => {
-      if (quizGeneratorRef.current) {
-        quizGeneratorRef.current.generateQuiz(topic, settings);
       } else {
         toast({
           title: "Lỗi Hệ Thống",
@@ -151,36 +109,13 @@ const Quiz = () => {
           </Sidebar>
           
           <SidebarInset className="flex-1 bg-background overflow-hidden p-0 relative">
-            {showSettings ? (
-              <GameSettings onStart={handleStartGame} topic={topic} />
-            ) : (
-              <div className="h-full relative">
-                <div className="absolute top-2 right-2 z-10">
-                  <Drawer>
-                    <DrawerTrigger asChild>
-                      <Button variant="outline" size="icon" className="rounded-full bg-background/50 backdrop-blur-sm">
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                    </DrawerTrigger>
-                    <DrawerContent>
-                      <div className="p-4 max-w-md mx-auto">
-                        <GameSettings 
-                          onStart={handleStartGame} 
-                          topic={topic} 
-                          initialSettings={gameSettings}
-                          inDrawer={true}
-                        />
-                      </div>
-                    </DrawerContent>
-                  </Drawer>
-                </div>
-                <QuizGenerator 
-                  ref={quizGeneratorRef} 
-                  topic={topic}
-                  gameSettings={gameSettings}
-                />
-              </div>
-            )}
+            <div className="h-full relative">
+              <QuizGenerator 
+                ref={quizGeneratorRef} 
+                topic={topic}
+                gameSettings={gameSettings}
+              />
+            </div>
           </SidebarInset>
         </div>
       </div>

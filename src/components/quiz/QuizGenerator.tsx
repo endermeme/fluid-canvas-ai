@@ -7,7 +7,6 @@ import GameLoading from './GameLoading';
 import GameError from './GameError';
 import GameWelcome from './GameWelcome';
 import GameView from './GameView';
-import GameSettings from './GameSettings';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -25,8 +24,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const [miniGame, setMiniGame] = useState<MiniGame | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const { toast } = useToast();
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
 
@@ -74,20 +71,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     generateMiniGame(selectedTopic);
   };
 
-  // Handle showing settings before generating
-  const handleShowSettings = (selectedTopic: string) => {
-    setSelectedTopic(selectedTopic);
-    setShowSettings(true);
-  };
-
-  // Handle starting game after settings are selected
-  const handleStartWithSettings = (settings: GameSettingsData) => {
-    if (selectedTopic) {
-      setShowSettings(false);
-      generateMiniGame(selectedTopic, settings);
-    }
-  };
-
   if (isLoading) {
     return <GameLoading />;
   }
@@ -100,24 +83,8 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     />;
   }
 
-  if (showSettings && selectedTopic) {
-    return (
-      <GameSettings 
-        onStart={handleStartWithSettings} 
-        topic={selectedTopic} 
-        onCancel={() => setShowSettings(false)}
-      />
-    );
-  }
-
   if (!miniGame) {
-    return (
-      <GameWelcome 
-        onTopicSelect={handleTopicSelect} 
-        showSettings={false} 
-        onStartWithSettings={handleShowSettings}
-      />
-    );
+    return <GameWelcome onTopicSelect={handleTopicSelect} />;
   }
 
   return <GameView miniGame={miniGame} />;
