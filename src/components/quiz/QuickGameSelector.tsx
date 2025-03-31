@@ -125,14 +125,14 @@ const QuickGameSelector: React.FC = () => {
 
   const getIconComponent = (iconName: string) => {
     switch(iconName) {
-      case 'brain-circuit': return <BrainCircuit />;
-      case 'puzzle-piece': return <Puzzle />;
-      case 'light-bulb': return <Lightbulb />;
-      case 'clock': return <Clock4 />;
-      case 'dices': return <Dices />;
-      case 'heart-handshake': return <HeartHandshake />;
-      case 'pen-tool': return <PenTool />;
-      default: return <Gamepad />;
+      case 'brain-circuit': return <BrainCircuit size={32} />;
+      case 'puzzle-piece': return <Puzzle size={32} />;
+      case 'light-bulb': return <Lightbulb size={32} />;
+      case 'clock': return <Clock4 size={32} />;
+      case 'dices': return <Dices size={32} />;
+      case 'heart-handshake': return <HeartHandshake size={32} />;
+      case 'pen-tool': return <PenTool size={32} />;
+      default: return <Gamepad size={32} />;
     }
   };
 
@@ -216,23 +216,20 @@ const QuickGameSelector: React.FC = () => {
   }
 
   return (
-    <div ref={containerRef} className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10 px-4">
-      <div className="text-primary mb-4 animate-float-in">
-        <Gamepad size={64} />
+    <div ref={containerRef} className="flex flex-col items-center h-full w-full py-6 px-4">
+      <div className="text-primary mb-2 animate-float-in">
+        <Gamepad size={48} />
       </div>
-      <h2 className="text-2xl font-bold text-center animate-fade-in">Chào mừng đến với Trò Chơi Mini</h2>
-      <p className="text-center max-w-md animate-fade-in opacity-90">
-        Chọn một thể loại game dưới đây hoặc nhập chủ đề vào thanh chat để tạo một minigame vui nhộn và tương tác.
-      </p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-3xl mt-4 px-4">
+      
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-3xl mt-4 w-full">
         {gameTypes.map((gameType) => (
           <Button 
             key={gameType.id}
             variant="outline" 
-            className="game-button flex flex-col h-28 p-4 justify-center items-center gap-2 transition-all border-2 hover:border-primary/60 hover:shadow-md active:scale-95 opacity-0"
+            className="game-button flex flex-col h-24 p-2 justify-center items-center gap-2 transition-all border hover:border-primary/60 hover:shadow-md hover:bg-accent/40 active:scale-95 opacity-0"
             onClick={() => handleTopicSelect(gameType)}
           >
-            <div className="text-primary">
+            <div className="text-primary p-2 bg-primary/10 rounded-full">
               {getIconComponent(gameType.icon)}
             </div>
             <span className="font-medium text-sm">{gameType.name}</span>

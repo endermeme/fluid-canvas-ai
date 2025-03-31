@@ -59,7 +59,7 @@ const Index = () => {
                 <Link to="/quiz">
                   <Button variant="outline" className="w-full flex items-center gap-2">
                     <Gamepad className="h-4 w-4" />
-                    Minigame Tương Tác
+                    Minigame
                   </Button>
                 </Link>
               </div>
@@ -72,19 +72,19 @@ const Index = () => {
             </div>
             
             {/* Quick Game Options Panel */}
-            <div className="bg-card/50 backdrop-blur-sm border-t p-3 md:p-4">
+            <div className="bg-card/50 backdrop-blur-sm border-t p-3">
               <div className="max-w-4xl mx-auto">
-                <h3 className="text-lg font-medium mb-2 md:mb-3 flex items-center">
-                  <Gamepad className="h-5 w-5 mr-2" />
-                  Tạo nhanh minigame
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                <div className="flex items-center mb-2">
+                  <Gamepad className="h-5 w-5 mr-2 text-primary" />
+                  <h3 className="text-lg font-medium">Tạo nhanh</h3>
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-2">
                   {quickGameOptions.map((game) => (
                     <div key={game} className="flex">
                       <Button
-                        variant="outline" 
+                        variant="ghost" 
                         size="sm"
-                        className="w-full text-xs h-auto py-2"
+                        className="w-full text-xs h-auto py-2 hover:bg-primary/10"
                         onClick={() => handleQuickGameSelect(game)}
                       >
                         {game}
