@@ -34,38 +34,38 @@ export class AIGameGenerator {
       ` : '';
 
       const prompt = `
-        Tạo một minigame tương tác trực quan, đầy màu sắc về chủ đề "${topic}" bằng HTML, CSS và JavaScript.
+        Hãy tạo một minigame tương tác học tập về chủ đề "${topic}" bằng HTML, CSS và JavaScript thuần.
         ${settingsPrompt}
         
-        Minigame cần phải có:
-        1. Giao diện với nhiều màu sắc tươi sáng, gradient, hiệu ứng trực quan
-        2. Màu nền đặc biệt hoặc gradient thay vì màu trắng đơn điệu
-        3. Tương tác tốt bằng chuột hoặc chạm
-        4. Phản hồi trực quan khi người chơi tương tác
-        5. Hiệu ứng chuyển động, hoạt ảnh đơn giản
-        6. Hiển thị điểm số hoặc kết quả cuối cùng với hiệu ứng nổi bật
-        7. Kiểu dáng hiện đại với viền bo tròn, bóng đổ, và các phần tử trong suốt
-        8. Bố cục tối ưu cho cả điện thoại và máy tính
+        Yêu cầu:
+        1. Giao diện có màu sắc tươi sáng, gradient, hiệu ứng trực quan
+        2. Tương tác tốt bằng chuột hoặc chạm
+        3. Hiển thị điểm số và/hoặc kết quả cuối cùng
+        4. Bố cục responsive cho cả điện thoại và máy tính
+        5. Code rõ ràng, dễ hiểu với chức năng game đơn giản
         
-        Trả về định dạng JSON đơn giản với các trường sau:
+        CHÚ Ý QUAN TRỌNG:
+        - PHẢI trả về CHÍNH XÁC theo cấu trúc JSON dưới đây, không thêm bớt trường nào
+        - KHÔNG sử dụng backticks (\`) trong JSON
+        - LUÔN escape dấu nháy kép trong chuỗi bằng dấu backslash (\\")
+        - ĐẢM BẢO CSS, HTML, và JavaScript đều là chuỗi hợp lệ có thể phân tích được trong JSON
+        - KHÔNG trả lời bằng markdown, chỉ trả về JSON đúng định dạng
+        
+        Mẫu JSON trả về:
         {
           "title": "Tên minigame",
-          "description": "Mô tả ngắn gọn về minigame",
-          "instructionsHtml": "Để trống",
-          "gameHtml": "Mã HTML của game",
+          "description": "Mô tả ngắn về minigame",
+          "instructionsHtml": "HTML hướng dẫn chơi game (có thể để trống)",
+          "gameHtml": "Mã HTML của game (không bao gồm thẻ html, head, body)",
           "gameScript": "Mã JavaScript của game (không bao gồm thẻ script)",
-          "cssStyles": "CSS cho game (không bao gồm thẻ style) - hãy tạo nhiều màu sắc và hiệu ứng đẹp mắt"
+          "cssStyles": "CSS cho game (không bao gồm thẻ style)"
         }
-        
-        QUAN TRỌNG: Các chuỗi trong JSON cần được định dạng để có thể phân tích được, không sử dụng ký tự đặc biệt như backticks. Sử dụng ký tự escape cho dấu nháy đôi trong chuỗi.
-        Không trả lời bất kỳ điều gì khác ngoài đối tượng JSON.
-        Đảm bảo JSON được trả về là hợp lệ và có thể phân tích được dễ dàng.
       `;
 
       console.log("Sending request to Claude API");
 
       try {
-        // Try direct request with browser headers - preferred method
+        // Direct request with browser headers
         const response = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
@@ -108,61 +108,61 @@ export class AIGameGenerator {
           throw new Error('Invalid Claude API response structure');
         }
         
-        // Try to parse the JSON response with improved error handling for bad formatted JSON
+        // Safely extract and parse the JSON
         let parsedData;
         try {
-          // Check if the response is already a parsed object
+          // First try to handle if it's already a parsed object
           if (typeof gameData === 'object' && gameData !== null) {
             parsedData = gameData;
           } else {
-            // Handle the case where the API returned text instead of JSON
-            // Extract JSON from the response by finding outermost { and }
-            let jsonMatch = gameData.match(/\{[\s\S]*\}/);
-            let jsonString = jsonMatch ? jsonMatch[0] : gameData;
+            // Clean up the response text to extract just the JSON
+            let jsonText = gameData.trim();
             
-            // Remove backticks from CSS styles which often cause JSON parse errors
-            jsonString = jsonString.replace(/`([\s\S]*?)`/g, function(match, p1) {
-              // Escape newlines and quotes in the CSS content
-              return JSON.stringify(p1);
-            });
+            // Remove markdown code block indicators if present
+            jsonText = jsonText.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
             
-            // Try to parse the cleaned JSON
+            // Find the outermost JSON object
+            const jsonMatch = jsonText.match(/(\{[\s\S]*\})/);
+            if (jsonMatch) {
+              jsonText = jsonMatch[0];
+            }
+            
             try {
-              parsedData = JSON.parse(jsonString);
-            } catch (innerError) {
-              console.error("First JSON parse attempt failed:", innerError);
+              // First attempt to parse
+              parsedData = JSON.parse(jsonText);
+            } catch (parseError) {
+              console.error("First JSON parse attempt failed:", parseError);
               
-              // If that fails, try a more aggressive approach to fix the JSON
-              jsonString = jsonString
-                .replace(/(\r\n|\n|\r)/gm, "\\n")  // Replace newlines with escaped newlines
-                .replace(/"/g, '\\"')              // Escape double quotes
-                .replace(/\t/g, "\\t");           // Replace tabs with escaped tabs
+              // If parsing fails due to issues with CSS multi-line strings or escaping
+              // Try to clean up the JSON
+              jsonText = jsonText
+                .replace(/`([\s\S]*?)`/g, function(match, p1) {
+                  // Replace backtick-wrapped content with properly escaped string
+                  return JSON.stringify(p1).slice(1, -1);
+                })
+                .replace(/\r?\n/g, '\\n')  // Replace actual newlines with escaped newlines
+                .replace(/\t/g, '\\t');    // Replace tabs with escaped tabs
               
-              // Reconstruct a valid JSON string and parse again
-              jsonString = `{"title":"${parsedData.title || 'Minigame'}","description":"${
-                parsedData.description || 'Interactive minigame'}","instructionsHtml":"${
-                parsedData.instructionsHtml || ''}","gameHtml":"${
-                parsedData.gameHtml || '<div>Game content</div>'}","gameScript":"${
-                parsedData.gameScript || 'console.log(\"Game loaded\");'}","cssStyles":"${
-                parsedData.cssStyles || 'body { margin: 0; padding: 0; }'}"}`;
-              
-              parsedData = JSON.parse(jsonString);
+              // Try parsing again
+              parsedData = JSON.parse(jsonText);
             }
           }
           
           console.log("Successfully parsed game data");
+          
+          // Validate the structure
+          const requiredFields = ['title', 'description', 'gameHtml', 'gameScript', 'cssStyles'];
+          for (const field of requiredFields) {
+            if (!parsedData[field]) {
+              console.error(`Missing required field: ${field}`);
+              throw new Error(`Thiếu trường dữ liệu bắt buộc: ${field}`);
+            }
+          }
+          
         } catch (jsonError) {
           console.error("Error parsing JSON from Claude response:", jsonError);
           console.error("Raw response was:", gameData);
           throw new Error('Không thể phân tích dữ liệu từ API Claude. Định dạng phản hồi không hợp lệ.');
-        }
-        
-        // Validate the required fields
-        const requiredFields = ['title', 'description', 'gameHtml', 'gameScript', 'cssStyles'];
-        for (const field of requiredFields) {
-          if (!parsedData[field]) {
-            throw new Error(`Thiếu trường dữ liệu bắt buộc: ${field}`);
-          }
         }
         
         // Build a full HTML document from the parts
