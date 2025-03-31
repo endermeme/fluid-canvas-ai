@@ -35,15 +35,16 @@ const GameError: React.FC<GameErrorProps> = ({ errorMessage, onRetry, topic }) =
   
   const isApiKeyError = errorMessage.includes('API key') || 
     errorMessage.includes('key không hợp lệ') ||
-    errorMessage.includes('kết nối') ||
+    errorMessage.includes('401') ||
     errorMessage.includes('vượt quá giới hạn API') ||
     errorMessage.includes('server') ||
     errorMessage.toLowerCase().includes('unauthorized');
   
   const isCorsError = errorMessage.toLowerCase().includes('cors') ||
-    errorMessage.toLowerCase().includes('proxy') ||
+    errorMessage.toLowerCase().includes('network') ||
     errorMessage.includes('kết nối') ||
-    errorMessage.includes('404');
+    errorMessage.includes('403') ||
+    errorMessage.includes('dangerous-direct-browser-access');
     
   const isParseError = errorMessage.toLowerCase().includes('parse') ||
     errorMessage.toLowerCase().includes('phân tích') ||
@@ -105,8 +106,12 @@ const GameError: React.FC<GameErrorProps> = ({ errorMessage, onRetry, topic }) =
           <Alert className="bg-amber-50 border-amber-200">
             <AlertTitle>Lỗi CORS / Network</AlertTitle>
             <AlertDescription className="text-sm">
-              <p className="mb-2">Hệ thống đang sử dụng CORS proxy để kết nối tới Claude API. Proxy này có thể bị giới hạn truy cập hoặc không hoạt động.</p>
-              <p>Đã thử sử dụng nhiều proxy khác nhau nhưng không thành công. Vui lòng thử lại sau hoặc thử chủ đề khác.</p>
+              <p className="mb-2">Claude API không cho phép truy cập trực tiếp từ trình duyệt. Để khắc phục lỗi này:</p>
+              <ol className="list-decimal list-inside space-y-1">
+                <li>Đảm bảo API key của bạn là hợp lệ và chính xác</li>
+                <li>Thêm tiêu đề <code className="bg-muted px-1 py-0.5 rounded">anthropic-dangerous-direct-browser-access: true</code> vào yêu cầu của bạn</li>
+                <li>Nếu vẫn gặp vấn đề, hãy xem xét sử dụng Claude API qua một máy chủ proxy của riêng bạn</li>
+              </ol>
             </AlertDescription>
           </Alert>
         )}
@@ -131,9 +136,10 @@ const GameError: React.FC<GameErrorProps> = ({ errorMessage, onRetry, topic }) =
             </AccordionTrigger>
             <AccordionContent className="text-sm space-y-2 text-muted-foreground">
               <p>1. <strong>Kiểm tra API key</strong>: Đảm bảo API key Claude bắt đầu bằng "sk-" và được nhập đúng.</p>
-              <p>2. <strong>Thử chủ đề khác</strong>: Một số chủ đề có thể quá phức tạp hoặc gây lỗi.</p>
-              <p>3. <strong>Thử lại sau</strong>: Proxy CORS có thể bị giới hạn truy cập tạm thời.</p>
-              <p>4. <strong>Kiểm tra kết nối mạng</strong>: Đảm bảo bạn có kết nối internet ổn định.</p>
+              <p>2. <strong>Truy cập Claude API trực tiếp</strong>: Claude API yêu cầu tiêu đề <code className="bg-muted px-1 py-0.5 rounded">anthropic-dangerous-direct-browser-access: true</code> để truy cập từ trình duyệt.</p>
+              <p>3. <strong>Thử chủ đề khác</strong>: Một số chủ đề có thể quá phức tạp hoặc gây lỗi.</p>
+              <p>4. <strong>Thử lại sau</strong>: API của Claude có thể bị giới hạn truy cập tạm thời.</p>
+              <p>5. <strong>Kiểm tra kết nối mạng</strong>: Đảm bảo bạn có kết nối internet ổn định.</p>
             </AccordionContent>
           </AccordionItem>
         </Accordion>

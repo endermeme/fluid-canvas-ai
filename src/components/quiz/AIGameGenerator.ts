@@ -61,36 +61,52 @@ export class AIGameGenerator {
         Đảm bảo JSON được trả về là hợp lệ và có thể phân tích được.
       `;
 
-      console.log("Sending request through proxy with key: " + this.apiKey.substring(0, 4) + "****");
+      console.log("Sending request to Claude API");
 
       try {
-        // Use our proxy endpoint with native fetch
-        const response = await fetch('/api/claude-proxy', {
+        // Try direct request with browser headers - preferred method
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'x-api-key': this.apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
           },
           body: JSON.stringify({
-            prompt,
-            apiKey: this.apiKey
+            model: 'claude-3-sonnet-20240229',
+            max_tokens: 4000,
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            response_format: { type: "json_object" }
           })
         });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-        }
-
-        console.log("Received response from proxy");
-        const responseData = await response.json();
         
-        if (responseData.error) {
-          throw new Error(responseData.error);
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error("Claude API error response:", errorData);
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+        console.log("Successfully received Claude API response");
+        const data = await response.json();
+        
         // Extract content from response
-        const gameData = responseData.content;
-        console.log("Parsing response content:", typeof gameData, gameData?.slice(0, 100) + "...");
+        let gameData;
+        if (data.content && Array.isArray(data.content) && data.content.length > 0) {
+          const contentItem = data.content.find(item => item.type === 'text');
+          if (contentItem && contentItem.text) {
+            gameData = contentItem.text;
+          } else {
+            throw new Error('Invalid Claude API response structure');
+          }
+        } else {
+          throw new Error('Invalid Claude API response structure');
+        }
         
         // Try to parse the JSON response
         let parsedData;
@@ -142,27 +158,25 @@ export class AIGameGenerator {
           gameScript: parsedData.gameScript,
           cssStyles: parsedData.cssStyles
         };
-      } catch (fetchError) {
-        console.error("Error fetching from Claude API:", fetchError);
+      } catch (apiError) {
+        console.error("Error with direct Claude API request:", apiError);
         
-        // Handle specific fetch errors
-        if (fetchError.message.includes('404')) {
-          throw new Error('Lỗi kết nối: CORS proxy không tìm thấy (404). Vui lòng thử lại sau.');
-        } else if (fetchError.message.includes('429')) {
+        // Handle specific API errors
+        if (apiError.message.includes('401')) {
+          throw new Error('API key không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra lại API key.');
+        } else if (apiError.message.includes('429')) {
           throw new Error('Đã vượt quá giới hạn API. Vui lòng thử lại sau.');
+        } else if (apiError.message.includes('CORS') || apiError.message.includes('NetworkError')) {
+          throw new Error('CORS error: Claude API không cho phép truy cập trực tiếp từ trình duyệt. Vui lòng kiểm tra cài đặt API của bạn.');
         } else {
-          throw new Error(`Lỗi kết nối tới Claude API: ${fetchError.message}`);
+          throw new Error(`Lỗi kết nối tới Claude API: ${apiError.message}`);
         }
       }
     } catch (error: any) {
       console.error("Error generating mini game:", error);
       
       // More specific error messages based on error type
-      if (error.message.includes('404')) {
-        throw new Error('CORS proxy không tìm thấy (404). Vui lòng thử proxy khác hoặc thử lại sau.');
-      } else if (error.message.includes('CORS')) {
-        throw new Error('Lỗi CORS: Không thể truy cập Claude API. Proxy CORS đang được sử dụng nhưng có thể bị giới hạn truy cập.');
-      } else if (error.message.includes('API key')) {
+      if (error.message.includes('API key')) {
         throw new Error('API key không hợp lệ. Vui lòng kiểm tra lại API key Claude của bạn.');
       } else if (error.message.includes('phân tích') || error.message.includes('parse')) {
         throw new Error('Không thể xử lý dữ liệu từ Claude API. Vui lòng thử lại với chủ đề khác.');
