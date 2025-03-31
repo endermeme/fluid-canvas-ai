@@ -1,11 +1,9 @@
 
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { GameSettingsData } from '@/pages/Quiz';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
-import GameWelcome from './GameWelcome';
 import GameView from './GameView';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
@@ -13,13 +11,11 @@ const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 interface QuizGeneratorProps {
   topic?: string;
   onQuizComplete?: () => void;
-  gameSettings?: GameSettingsData;
 }
 
-const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: GameSettingsData) => void }, QuizGeneratorProps>(({ 
+const QuizGenerator = forwardRef<{ generateQuiz: (topic: string) => void }, QuizGeneratorProps>(({ 
   topic = "Minigame tương tác",
   onQuizComplete,
-  gameSettings
 }, ref) => {
   const [miniGame, setMiniGame] = useState<MiniGame | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,20 +24,20 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
 
   useImperativeHandle(ref, () => ({
-    generateQuiz: (topic: string, settings?: GameSettingsData) => {
+    generateQuiz: (topic: string) => {
       if (topic.trim()) {
-        generateMiniGame(topic, settings);
+        generateMiniGame(topic);
       }
     }
   }));
 
-  const generateMiniGame = async (topic: string, settings?: GameSettingsData) => {
+  const generateMiniGame = async (topic: string) => {
     setIsLoading(true);
     setErrorMessage(null);
     setMiniGame(null);
 
     try {      
-      const game = await gameGenerator.generateMiniGame(topic, settings);
+      const game = await gameGenerator.generateMiniGame(topic);
       
       if (game) {
         setMiniGame(game);
@@ -65,12 +61,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     }
   };
 
-  // Handle topic selection from GameWelcome quick buttons
-  const handleTopicSelect = (selectedTopic: string) => {
-    // Directly generate for chat-based requests (no settings shown)
-    generateMiniGame(selectedTopic);
-  };
-
   if (isLoading) {
     return <GameLoading />;
   }
@@ -84,7 +74,12 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   }
 
   if (!miniGame) {
-    return <GameWelcome onTopicSelect={handleTopicSelect} />;
+    // Removed GameWelcome rendering here - this component will only handle manual quiz generation
+    return (
+      <div className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10">
+        <p className="text-lg">Vui lòng nhập chủ đề vào thanh chat để tạo minigame</p>
+      </div>
+    );
   }
 
   return <GameView miniGame={miniGame} />;

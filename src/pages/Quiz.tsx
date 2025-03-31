@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
+import QuickGameSelector from '@/components/quiz/QuickGameSelector';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
@@ -8,24 +9,11 @@ import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
 
-// Define the game settings interface
-export interface GameSettingsData {
-  difficulty: 'easy' | 'medium' | 'hard';
-  questionCount: number;
-  timePerQuestion: number;
-  category: string;
-}
-
 const Quiz = () => {
   const [topic, setTopic] = useState('');
-  const [gameSettings] = useState<GameSettingsData>({
-    difficulty: 'medium',
-    questionCount: 10,
-    timePerQuestion: 30,
-    category: 'general',
-  });
+  const [isManualMode, setIsManualMode] = useState(false);
   
-  const quizGeneratorRef = useRef<{ generateQuiz: (topic: string, settings?: GameSettingsData) => void }>(null);
+  const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
   const { addBlock } = useCanvasState();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
@@ -41,13 +29,14 @@ const Quiz = () => {
     
     if (topicParam) {
       setTopic(topicParam);
+      setIsManualMode(true);
       
       // If autostart is set, generate the quiz automatically
       if (autoStart === 'true') {
         setIsGenerating(true);
         setTimeout(() => {
           if (quizGeneratorRef.current) {
-            quizGeneratorRef.current.generateQuiz(topicParam, gameSettings);
+            quizGeneratorRef.current.generateQuiz(topicParam);
           }
           setIsGenerating(false);
         }, 100);
@@ -77,13 +66,16 @@ const Quiz = () => {
       return;
     }
     
+    // Switch to manual mode when a chat request comes in
+    setIsManualMode(true);
+    
     // Directly generate the game
     setTopic(requestedTopic);
     setIsGenerating(true);
     
     setTimeout(() => {
       if (quizGeneratorRef.current) {
-        quizGeneratorRef.current.generateQuiz(requestedTopic, gameSettings);
+        quizGeneratorRef.current.generateQuiz(requestedTopic);
       } else {
         toast({
           title: "Lỗi Hệ Thống",
@@ -110,11 +102,14 @@ const Quiz = () => {
           
           <SidebarInset className="flex-1 bg-background overflow-hidden p-0 relative">
             <div className="h-full relative">
-              <QuizGenerator 
-                ref={quizGeneratorRef} 
-                topic={topic}
-                gameSettings={gameSettings}
-              />
+              {isManualMode ? (
+                <QuizGenerator 
+                  ref={quizGeneratorRef} 
+                  topic={topic}
+                />
+              ) : (
+                <QuickGameSelector />
+              )}
             </div>
           </SidebarInset>
         </div>
