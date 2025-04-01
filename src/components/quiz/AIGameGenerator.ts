@@ -1,4 +1,3 @@
-
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GameSettingsData } from './types';
 
@@ -131,7 +130,14 @@ export class AIGameGenerator {
         let gameData;
         
         try {
-          gameData = JSON.parse(jsonStr);
+          // Fix potential escaping issues in the JSON string before parsing
+          const cleanedJsonStr = jsonStr
+            .replace(/\\'/g, "'") // Replace escaped single quotes
+            .replace(/\\n/g, "\\n") // Ensure newlines are properly escaped
+            .replace(/\\/g, "\\\\") // Double escape backslashes
+            .replace(/\\\\\"/g, '\\"'); // Fix double escaped quotes
+            
+          gameData = JSON.parse(cleanedJsonStr);
           
           // Build a full HTML document from the parts
           const fullHtmlContent = this.buildFullHtmlDocument(
@@ -154,7 +160,45 @@ export class AIGameGenerator {
         } catch (jsonError) {
           console.error("Error parsing JSON from Gemini response:", jsonError);
           console.log("Attempted to parse:", jsonStr);
-          return null;
+          
+          // Try a more robust approach as fallback
+          try {
+            // Use a regex pattern to extract each field separately
+            const extractField = (fieldName: string) => {
+              const pattern = new RegExp(`"${fieldName}"\\s*:\\s*"([^"]*(?:"[^"]*"[^"]*)*)"`, 'g');
+              const match = pattern.exec(jsonStr);
+              return match ? match[1] : '';
+            };
+            
+            const title = extractField('title');
+            const description = extractField('description');
+            const instructionsHtml = extractField('instructionsHtml');
+            const gameHtml = extractField('gameHtml');
+            const gameScript = extractField('gameScript');
+            const cssStyles = extractField('cssStyles');
+            
+            // Build full HTML content
+            const fullHtmlContent = this.buildFullHtmlDocument(
+              title,
+              gameHtml,
+              gameScript,
+              cssStyles,
+              instructionsHtml
+            );
+            
+            return {
+              title,
+              description,
+              content: fullHtmlContent,
+              instructionsHtml,
+              gameHtml,
+              gameScript,
+              cssStyles
+            };
+          } catch (fallbackError) {
+            console.error("Fallback parsing also failed:", fallbackError);
+            return null;
+          }
         }
       }
       
