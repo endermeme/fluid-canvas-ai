@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
@@ -45,7 +44,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const getSettingsFromTopic = (topic: string): GameSettingsData => {
     let settings = {...defaultSettings};
     
-    // Adjust settings based on topic keywords
     if (topic.toLowerCase().includes('trí nhớ') || topic.toLowerCase().includes('nhớ hình')) {
       settings.questionCount = 8;
       settings.timePerQuestion = 3;
@@ -64,7 +62,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       settings.timePerQuestion = 40;
     }
     
-    // Adjust category based on topic
     if (topic.toLowerCase().includes('lịch sử')) {
       settings.category = 'history';
     } else if (topic.toLowerCase().includes('khoa học')) {
@@ -87,7 +84,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     setTitleClickCount(prev => {
       const newCount = prev + 1;
       if (newCount === 3) {
-        // Reset count and show modal
         setTimeout(() => {
           setShowOpenAIKeyModal(true);
           return 0;

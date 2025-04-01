@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { MiniGame } from './AIGameGenerator';
-import { animateContentHighlight } from '@/lib/animations';
 
 interface GameViewProps {
   miniGame: MiniGame;

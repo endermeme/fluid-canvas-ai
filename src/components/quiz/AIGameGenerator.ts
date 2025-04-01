@@ -6,10 +6,6 @@ export interface MiniGame {
   title: string;
   description: string;
   content: string;
-  instructionsHtml: string;
-  gameHtml: string;
-  gameScript: string;
-  cssStyles: string;
 }
 
 export class AIGameGenerator {
@@ -20,11 +16,9 @@ export class AIGameGenerator {
   constructor(apiKey: string) {
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    // Try to load OpenAI key from localStorage if available
     this.openAIKey = localStorage.getItem('openai_api_key');
   }
 
-  // Method to set OpenAI API key
   setOpenAIKey(key: string) {
     if (key && key.trim() !== '') {
       this.openAIKey = key;
@@ -34,7 +28,6 @@ export class AIGameGenerator {
     return false;
   }
 
-  // Check if OpenAI key is configured
   hasOpenAIKey(): boolean {
     return this.openAIKey !== null && this.openAIKey !== '';
   }
@@ -43,7 +36,7 @@ export class AIGameGenerator {
     try {
       console.log(`Starting game generation for topic: "${topic}" with settings:`, settings);
       
-      // Step 1: Generate base game with Gemini
+      // Generate with Gemini first
       const geminiResult = await this.generateWithGemini(topic, settings);
       
       if (!geminiResult) {
@@ -51,9 +44,9 @@ export class AIGameGenerator {
         return null;
       }
       
-      console.log("Gemini successfully generated base game");
+      console.log("Gemini successfully generated game");
       
-      // Step 2: If OpenAI key is available, enhance the code
+      // If OpenAI key is available, enhance the code
       if (this.hasOpenAIKey() && geminiResult) {
         console.log("OpenAI key available, enhancing game...");
         return await this.enhanceWithOpenAI(geminiResult, topic);
@@ -77,56 +70,42 @@ export class AIGameGenerator {
     ` : '';
 
     const prompt = `
-      Tạo một minigame tương tác HTML/CSS/JS hoàn chỉnh về chủ đề "${topic}".
+      Tạo một minigame tương tác hoàn chỉnh về chủ đề "${topic}".
       ${settingsPrompt}
       
       HƯỚNG DẪN CHI TIẾT:
-      1. CODE PHẢI HOÀN CHỈNH:
-         - Viết đầy đủ HTML, CSS và JavaScript để game hoạt động độc lập
-         - JavaScript phải có đầy đủ xử lý sự kiện và logic game
-         - CSS phải đầy đủ để tạo giao diện trực quan, đẹp mắt
+      1. TẠO MỘT FILE HTML ĐẦY ĐỦ:
+         - Bao gồm đầy đủ HTML, CSS và JavaScript trong một file HTML duy nhất
+         - Sử dụng thẻ <style> cho CSS và thẻ <script> cho JavaScript
+         - Không tách riêng code thành nhiều file
       
-      2. GIAO DIỆN:
-         - Sử dụng nhiều màu sắc tươi sáng, gradient cho nền và các phần tử
-         - Tạo hiệu ứng hover, active cho các thành phần tương tác
-         - Thêm animation cho các chuyển động và hiệu ứng
-         - Tất cả các phần tử phải được style đẹp mắt, không để mặc định
-         - Giao diện phải responsive (hoạt động tốt trên điện thoại và máy tính)
+      2. YÊU CẦU KỸ THUẬT:
+         - Code phải sạch sẽ, có indentation đúng và có comments giải thích
+         - Tất cả các chức năng phải hoạt động trong một file HTML duy nhất
+         - Game phải responsive, hoạt động tốt trên cả điện thoại và máy tính
+         - Có đầy đủ xử lý lỗi và phản hồi người dùng
+         - KHÔNG sử dụng thư viện bên ngoài hay CDN
       
-      3. CẤU TRÚC CODE:
-         - Tổ chức code rõ ràng, chia thành các hàm/module riêng biệt
-         - Sử dụng biến và hàm có tên mô tả rõ ràng
-         - Thêm comment giải thích cho các phần code phức tạp
-         - Xử lý đầy đủ các trường hợp lỗi người dùng
-         - Đảm bảo code được tối ưu và không có bug
+      3. TÍNH NĂNG GAME:
+         - Giao diện hấp dẫn với màu sắc và animation
+         - Tính năng tương tác như đếm điểm, hiển thị thời gian
+         - Có màn hình kết thúc game và nút chơi lại
+         - Thêm âm thanh nếu cần thiết (sử dụng Web Audio API)
       
-      4. TÍNH NĂNG GAME:
-         - Hiển thị điểm số rõ ràng
-         - Có thông báo kết quả sau mỗi câu trả lời hoặc hành động
-         - Có hệ thống tính giờ nếu phù hợp với loại game
-         - Hiển thị màn hình kết quả cuối game với tổng điểm và đánh giá
-         - Có nút chơi lại để bắt đầu game mới
+      4. YÊU CẦU PHỨC TẠP HƠN:
+         - Có thể tạo các loại game phức tạp như xếp hình, platformer, puzzle...
+         - Có thể lưu trữ điểm số cao nhất vào localStorage
+         - Thêm các hiệu ứng đặc biệt nếu phù hợp
+         - Thêm nhiều cấp độ nếu có thể
       
-      5. KỸ THUẬT:
-         - Tất cả các biến và hàm JavaScript phải được đặt tên có ý nghĩa
-         - Code phải được comment để giải thích các phần phức tạp
-         - Sử dụng CSS modern (flexbox/grid) cho bố cục
-         - Xử lý các trường hợp lỗi (input không hợp lệ, v.v.)
-         - Code phải hoạt động hoàn toàn với sandbox="allow-scripts allow-same-origin"
-         - KHÔNG ĐƯỢC sử dụng bất kỳ thư viện ngoài (như jQuery, Bootstrap)
-      
-      Trả về một đối tượng JSON với cấu trúc chính xác như sau:
+      Trả về một đối tượng JSON với định dạng sau:
       {
         "title": "Tên minigame",
         "description": "Mô tả ngắn gọn về minigame",
-        "instructionsHtml": "Hướng dẫn HTML cho người chơi",
-        "gameHtml": "Mã HTML đầy đủ của game (không bao gồm thẻ html/head/body)",
-        "gameScript": "Mã JavaScript đầy đủ của game (không bao gồm thẻ script)",
-        "cssStyles": "CSS đầy đủ cho game (không bao gồm thẻ style)"
+        "content": "<đây là toàn bộ mã HTML đầy đủ, bao gồm cả CSS và JavaScript>"
       }
       
-      QUAN TRỌNG: Trả về JSON thuần túy, không có văn bản giải thích hoặc trình bày thêm.
-      Đảm bảo JSON được định dạng đúng và có thể phân tích bằng JSON.parse().
+      QUAN TRỌNG: Trả về JSON hoàn chỉnh. Mã HTML phải là một trang web hoàn chỉnh và có thể chạy độc lập.
     `;
 
     try {
@@ -135,137 +114,69 @@ export class AIGameGenerator {
       const response = result.response;
       const text = response.text();
       
-      console.log("Received Gemini response, length:", text.length);
+      console.log("Received Gemini response, extracting JSON...");
       
-      // Extract the JSON object from the response
+      // Clean and extract the JSON object
       const jsonMatch = text.match(/{[\s\S]*}/);
       if (jsonMatch) {
-        const jsonStr = jsonMatch[0];
-        console.log("Extracted JSON string length:", jsonStr.length);
-        let gameData;
-        
         try {
-          // Fix potential escaping issues in the JSON string before parsing
-          const cleanedJsonStr = jsonStr
-            .replace(/\\'/g, "'") // Replace escaped single quotes
-            .replace(/\\n/g, "\\n") // Ensure newlines are properly escaped
-            .replace(/\\/g, "\\\\") // Double escape backslashes
-            .replace(/\\\\\"/g, '\\"'); // Fix double escaped quotes
+          // Remove problematic escape sequences
+          const cleanedJson = jsonMatch[0]
+            .replace(/\\(?!["\\/bfnrt])/g, "")
+            .replace(/\\\\/g, "\\")
+            .replace(/\\n/g, "\n")
+            .replace(/\\"/g, '"');
           
-          console.log("Attempting to parse cleaned JSON string...");
-          gameData = JSON.parse(cleanedJsonStr);
-          console.log("JSON parsing successful");
-          
-          // Build a full HTML document from the parts
-          const fullHtmlContent = this.buildFullHtmlDocument(
-            gameData.title,
-            gameData.gameHtml,
-            gameData.gameScript,
-            gameData.cssStyles,
-            gameData.instructionsHtml
-          );
+          console.log("Parsing JSON from Gemini response...");
+          const gameData = JSON.parse(cleanedJson);
           
           return {
             title: gameData.title,
             description: gameData.description,
-            content: fullHtmlContent,
-            instructionsHtml: gameData.instructionsHtml,
-            gameHtml: gameData.gameHtml,
-            gameScript: gameData.gameScript,
-            cssStyles: gameData.cssStyles
+            content: gameData.content
           };
         } catch (jsonError) {
-          console.error("Error parsing JSON from Gemini response:", jsonError);
-          console.log("First 500 chars of attempted JSON:", jsonStr.substring(0, 500));
-          console.log("Last 500 chars of attempted JSON:", jsonStr.substring(jsonStr.length - 500));
+          console.error("Error parsing Gemini JSON:", jsonError);
+          console.log("JSON extraction failed, attempting manual extraction");
           
-          // Try a more robust approach as fallback
-          try {
-            console.log("Attempting fallback JSON extraction method...");
-            // Use a regex pattern to extract each field separately
-            const extractField = (fieldName: string) => {
-              const pattern = new RegExp(`"${fieldName}"\\s*:\\s*"([^"]*(?:"[^"]*"[^"]*)*)"`, 'g');
-              const match = pattern.exec(jsonStr);
-              return match ? match[1].replace(/\\"/g, '"').replace(/\\n/g, '\n') : '';
-            };
-            
-            const extractMultilineField = (fieldName: string) => {
-              // This pattern works better for multiline fields with complex content
-              const startPattern = new RegExp(`"${fieldName}"\\s*:\\s*"`, 'g');
-              const startMatch = startPattern.exec(jsonStr);
+          // Manual extraction as fallback
+          const titleMatch = text.match(/"title"\s*:\s*"([^"]*)"/);
+          const descriptionMatch = text.match(/"description"\s*:\s*"([^"]*)"/);
+          const contentStartMatch = text.match(/"content"\s*:\s*"(<!DOCTYPE html>|<html>|<body>)/);
+          
+          if (titleMatch && descriptionMatch && contentStartMatch) {
+            // Find start index of content
+            const contentStartIdx = text.indexOf('"content"');
+            if (contentStartIdx > 0) {
+              // Extract from content start to end, handling escaping
+              let contentStr = "";
+              let inContent = false;
+              let quoteCount = 0;
               
-              if (!startMatch) return '';
-              
-              const startIndex = startMatch.index + startMatch[0].length;
-              let endIndex = -1;
-              let openQuotes = false;
-              let escapeNext = false;
-              
-              // Find the matching end quote that's not escaped
-              for (let i = startIndex; i < jsonStr.length; i++) {
-                if (escapeNext) {
-                  escapeNext = false;
-                  continue;
+              for (let i = contentStartIdx + 10; i < text.length; i++) {
+                if (text[i] === '"' && (i === 0 || text[i-1] !== '\\')) {
+                  quoteCount++;
+                  if (quoteCount === 1) {
+                    inContent = true;
+                    continue;
+                  } else if (inContent && quoteCount > 1 && text.substr(i-1, 2) !== '\\"') {
+                    break;
+                  }
                 }
-                
-                if (jsonStr[i] === '\\') {
-                  escapeNext = true;
-                } else if (jsonStr[i] === '"' && !openQuotes) {
-                  endIndex = i;
-                  break;
-                }
+                if (inContent) contentStr += text[i];
               }
               
-              if (endIndex === -1) return '';
-              
-              return jsonStr.substring(startIndex, endIndex).replace(/\\"/g, '"').replace(/\\n/g, '\n');
-            };
-            
-            console.log("Extracting fields one by one...");
-            const title = extractField('title');
-            const description = extractField('description');
-            // Use multiline extraction for complex fields
-            const instructionsHtml = extractMultilineField('instructionsHtml');
-            const gameHtml = extractMultilineField('gameHtml');
-            const gameScript = extractMultilineField('gameScript');
-            const cssStyles = extractMultilineField('cssStyles');
-            
-            console.log("Extracted fields:", {
-              title: title ? "✓" : "✗",
-              description: description ? "✓" : "✗",
-              instructionsHtml: instructionsHtml ? "✓" : "✗",
-              gameHtml: gameHtml ? "✓" : "✗",
-              gameScript: gameScript ? "✓" : "✗",
-              cssStyles: cssStyles ? "✓" : "✗"
-            });
-            
-            // Build full HTML content
-            const fullHtmlContent = this.buildFullHtmlDocument(
-              title,
-              gameHtml,
-              gameScript,
-              cssStyles,
-              instructionsHtml
-            );
-            
-            return {
-              title,
-              description,
-              content: fullHtmlContent,
-              instructionsHtml,
-              gameHtml,
-              gameScript,
-              cssStyles
-            };
-          } catch (fallbackError) {
-            console.error("Fallback parsing also failed:", fallbackError);
-            return null;
+              return {
+                title: titleMatch[1],
+                description: descriptionMatch[1],
+                content: contentStr.replace(/\\"/g, '"').replace(/\\n/g, '\n')
+              };
+            }
           }
         }
-      } else {
-        console.error("No JSON found in Gemini response:", text);
       }
       
+      console.error("Failed to extract game content from Gemini response");
       return null;
     } catch (error) {
       console.error("Error generating with Gemini:", error);
@@ -281,45 +192,27 @@ export class AIGameGenerator {
       const prompt = `
       You are a master web developer specializing in creating bug-free, interactive web games.
       
-      I'm going to provide you with HTML, CSS, and JavaScript code for a mini-game on the topic of "${topic}".
+      I'm going to provide you with HTML code for a mini-game on the topic of "${topic}".
       Your task is to improve this code by:
       
       1. Fixing any bugs or errors
       2. Improving functionality and user experience
-      3. Optimizing code performance
-      4. Ensuring all features work as intended
-      5. Adding helpful comments
-      6. Ensuring the game is responsive
+      3. Adding more game complexity if appropriate
+      4. Ensuring the game is responsive and runs well on mobile
+      5. Keep ALL code in a single HTML file with internal <style> and <script> tags
       
-      IMPORTANT: Do NOT change the fundamental game concept. Only improve what's already there.
-      
-      Please return the improved code in the exact same JSON format:
-      
-      {
-        "title": "${geminiGame.title}",
-        "description": "${geminiGame.description}",
-        "instructionsHtml": "improved HTML instructions",
-        "gameHtml": "improved HTML code",
-        "gameScript": "improved JavaScript code",
-        "cssStyles": "improved CSS code"
-      }
+      IMPORTANT:
+      - Do NOT change the fundamental game concept
+      - Return ONLY the complete, enhanced HTML file - nothing else
+      - Make sure all code is properly formatted and indented
+      - Add helpful comments to explain complex logic
       
       Here is the current code:
       
-      --- HTML ---
-      ${geminiGame.gameHtml}
-      
-      --- CSS ---
-      ${geminiGame.cssStyles}
-      
-      --- JavaScript ---
-      ${geminiGame.gameScript}
-      
-      --- Instructions ---
-      ${geminiGame.instructionsHtml}
+      ${geminiGame.content}
       `;
 
-      console.log("Sending request to OpenAI API...");
+      console.log("Sending request to OpenAI API (gpt-4o model)...");
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -337,265 +230,42 @@ export class AIGameGenerator {
       if (!response.ok) {
         const errorData = await response.text();
         console.error("OpenAI API error:", errorData);
-        console.log("Falling back to Gemini result due to OpenAI error");
         return geminiGame; // Return original game if enhancement fails
       }
 
-      console.log("Received OpenAI response, processing...");
+      console.log("Received OpenAI response");
       const data = await response.json();
       
       if (data.choices && data.choices[0] && data.choices[0].message) {
         const content = data.choices[0].message.content;
-        console.log("OpenAI response content length:", content.length);
-        try {
-          // Find and parse the JSON in the response
-          const jsonMatch = content.match(/{[\s\S]*}/);
-          if (jsonMatch) {
-            const jsonStr = jsonMatch[0];
-            console.log("Extracted JSON from OpenAI response, length:", jsonStr.length);
-            
-            try {
-              const cleanedJsonStr = jsonStr
-                .replace(/\\'/g, "'")
-                .replace(/\\n/g, "\\n")
-                .replace(/\\\\/g, "\\")
-                .replace(/\\\\\"/g, '\\"');
-                
-              console.log("Attempting to parse OpenAI JSON...");
-              const openAIResult = JSON.parse(cleanedJsonStr);
-              
-              // Verify all required fields are present
-              const requiredFields = ['title', 'description', 'instructionsHtml', 'gameHtml', 'gameScript', 'cssStyles'];
-              const missingFields = requiredFields.filter(field => !openAIResult[field]);
-              
-              if (missingFields.length > 0) {
-                console.error("OpenAI response missing required fields:", missingFields);
-                console.log("Using original Gemini data for missing fields");
-                
-                // Fill in any missing fields with original data
-                missingFields.forEach(field => {
-                  openAIResult[field] = geminiGame[field];
-                });
-              }
-              
-              // Build a new full HTML document with the enhanced code
-              const fullHtmlContent = this.buildFullHtmlDocument(
-                openAIResult.title || geminiGame.title,
-                openAIResult.gameHtml,
-                openAIResult.gameScript,
-                openAIResult.cssStyles,
-                openAIResult.instructionsHtml
-              );
-              
-              console.log("Successfully created enhanced game content");
-              return {
-                title: openAIResult.title || geminiGame.title,
-                description: openAIResult.description || geminiGame.description,
-                content: fullHtmlContent,
-                instructionsHtml: openAIResult.instructionsHtml,
-                gameHtml: openAIResult.gameHtml,
-                gameScript: openAIResult.gameScript,
-                cssStyles: openAIResult.cssStyles
-              };
-            } catch (jsonError) {
-              console.error("Failed to parse OpenAI JSON:", jsonError);
-              console.log("First 500 chars of OpenAI JSON:", jsonStr.substring(0, 500));
-              
-              // Try advanced extraction as a fallback
-              console.log("Attempting advanced field extraction from OpenAI response...");
-              try {
-                const extractMultilineField = (fieldName: string, content: string) => {
-                  const pattern = new RegExp(`["']${fieldName}["']\\s*:\\s*["']([\\s\\S]*?)["'](?=\\s*,\\s*["']|\\s*\\})`, 'g');
-                  const match = pattern.exec(content);
-                  if (match && match[1]) {
-                    return match[1].replace(/\\"/g, '"').replace(/\\n/g, '\n');
-                  }
-                  return geminiGame[fieldName]; // Fallback to original
-                };
-                
-                const extractedTitle = extractMultilineField('title', content) || geminiGame.title;
-                const extractedDescription = extractMultilineField('description', content) || geminiGame.description;
-                const extractedInstructionsHtml = extractMultilineField('instructionsHtml', content) || geminiGame.instructionsHtml;
-                const extractedGameHtml = extractMultilineField('gameHtml', content) || geminiGame.gameHtml;
-                const extractedGameScript = extractMultilineField('gameScript', content) || geminiGame.gameScript;
-                const extractedCssStyles = extractMultilineField('cssStyles', content) || geminiGame.cssStyles;
-                
-                // Build a new full HTML document with the extracted content
-                const fullHtmlContent = this.buildFullHtmlDocument(
-                  extractedTitle,
-                  extractedGameHtml,
-                  extractedGameScript,
-                  extractedCssStyles,
-                  extractedInstructionsHtml
-                );
-                
-                console.log("Successfully extracted fields from OpenAI response");
-                return {
-                  title: extractedTitle,
-                  description: extractedDescription,
-                  content: fullHtmlContent,
-                  instructionsHtml: extractedInstructionsHtml,
-                  gameHtml: extractedGameHtml,
-                  gameScript: extractedGameScript,
-                  cssStyles: extractedCssStyles
-                };
-              } catch (extractionError) {
-                console.error("Advanced extraction failed:", extractionError);
-                console.log("Falling back to original Gemini game");
-                return geminiGame;
-              }
-            }
-          } else {
-            console.error("No JSON found in OpenAI response");
-            return geminiGame;
-          }
-        } catch (error) {
-          console.error("Error processing OpenAI response:", error);
-          return geminiGame;
+        console.log("OpenAI content length:", content.length);
+        
+        // Extract HTML document
+        const htmlMatch = content.match(/<(!DOCTYPE|html)[\s\S]*<\/html>/i);
+        if (htmlMatch) {
+          const enhancedHtml = htmlMatch[0];
+          console.log("Successfully extracted HTML from OpenAI response");
+          
+          return {
+            title: geminiGame.title,
+            description: geminiGame.description,
+            content: enhancedHtml
+          };
+        } else {
+          console.log("Could not extract HTML from OpenAI response, using complete response");
+          return {
+            title: geminiGame.title,
+            description: geminiGame.description,
+            content: content
+          };
         }
-      } else {
-        console.error("Invalid or empty OpenAI response structure");
       }
       
-      // Return the original game if parsing fails
-      console.log("Falling back to original Gemini game");
+      console.log("No valid content from OpenAI, returning original game");
       return geminiGame;
     } catch (error) {
       console.error("Error enhancing with OpenAI:", error);
-      return geminiGame; // Return original game if enhancement fails
+      return geminiGame;
     }
-  }
-  
-  private buildFullHtmlDocument(title: string, html: string, script: string, css: string, instructions: string): string {
-    return `
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title}</title>
-  <style>
-    /* Reset CSS */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    /* Base Styles */
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    
-    /* Game Container */
-    .game-container {
-      width: 100%;
-      max-width: 800px;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      margin: 0 auto;
-      overflow: hidden;
-    }
-    
-    /* Common UI Elements */
-    button {
-      background: linear-gradient(90deg, #4776E6 0%, #8E54E9 100%);
-      border: none;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-    
-    button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
-    }
-    
-    button:active {
-      transform: translateY(1px);
-    }
-    
-    input, select {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      background: rgba(255, 255, 255, 0.7);
-      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
-    }
-    
-    /* Animation Effects */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    /* Apply animations */
-    .animate-fade-in {
-      animation: fadeIn 0.6s ease-out;
-    }
-    
-    .animate-pulse {
-      animation: pulse 2s infinite;
-    }
-    
-    .animate-spin {
-      animation: spin 1s linear infinite;
-    }
-
-    /* Responsive Adjustments */
-    @media (max-width: 768px) {
-      .game-container {
-        margin: 0;
-        padding: 15px;
-        max-width: 100%;
-      }
-    }
-    
-    /* Custom Game Styles */
-    ${css}
-  </style>
-</head>
-<body>
-  <!-- Game container -->
-  <div class="game-container animate-fade-in">
-    ${html}
-  </div>
-
-  <script>
-    // Game initialization and logic
-    document.addEventListener('DOMContentLoaded', function() {
-      // Game code
-      ${script}
-    });
-  </script>
-</body>
-</html>
-    `;
   }
 }
