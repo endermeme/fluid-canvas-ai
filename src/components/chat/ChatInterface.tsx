@@ -1,10 +1,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, BrainCircuit } from 'lucide-react';
+import { Send, Sparkles, BrainCircuit, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
 import { useNavigate } from 'react-router-dom';
+import OpenAIKeyModal from '@/components/quiz/OpenAIKeyModal';
 
 interface Message {
   role: 'user' | 'ai';
@@ -27,6 +28,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -69,6 +71,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
         navigate(`/quiz?topic=${encodeURIComponent(topic)}&autostart=true`);
       }
     }, 500);
+  };
+
+  const handleSaveOpenAIKey = (key: string) => {
+    if (key) {
+      localStorage.setItem('openai_api_key', key);
+      toast({
+        title: "API Key Đã Lưu",
+        description: "OpenAI API key của bạn đã được lưu thành công.",
+      });
+    }
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -150,8 +162,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
         
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center">
-            <button className="p-1 rounded-full hover:bg-secondary/70 transition-colors">
-              <Sparkles size={16} className="text-primary" />
+            <button 
+              className="p-1 rounded-full hover:bg-secondary/70 transition-colors"
+              onClick={() => setShowOpenAIKeyModal(true)}
+            >
+              <Star size={16} className="text-primary" />
             </button>
           </div>
           <div className="text-xs text-muted-foreground italic">
@@ -159,6 +174,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
           </div>
         </div>
       </div>
+
+      <OpenAIKeyModal 
+        isOpen={showOpenAIKeyModal}
+        onClose={() => setShowOpenAIKeyModal(false)}
+        onSave={handleSaveOpenAIKey}
+        currentKey={localStorage.getItem('openai_api_key')}
+      />
     </div>
   );
 };
