@@ -5,6 +5,7 @@ import { AIGameGenerator, MiniGame } from './AIGameGenerator';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
 import GameView from './GameView';
+import OpenAIKeyModal from './OpenAIKeyModal';
 import { GameSettingsData } from './types';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
@@ -23,6 +24,8 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
+  const [titleClickCount, setTitleClickCount] = useState(0);
+  const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
   
   const defaultSettings: GameSettingsData = {
     difficulty: 'medium',
@@ -79,6 +82,24 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     return settings;
   };
 
+  const handleTitleClick = () => {
+    setTitleClickCount(prev => {
+      const newCount = prev + 1;
+      if (newCount === 3) {
+        // Reset count and show modal
+        setTimeout(() => {
+          setShowOpenAIKeyModal(true);
+          return 0;
+        }, 100);
+      }
+      return newCount;
+    });
+  };
+
+  const handleSaveOpenAIKey = (key: string) => {
+    gameGenerator.setOpenAIKey(key);
+  };
+
   const generateMiniGame = async (topic: string, settings: GameSettingsData = defaultSettings) => {
     setIsLoading(true);
     setErrorMessage(null);
@@ -91,7 +112,9 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
         setMiniGame(game);
         toast({
           title: "Minigame Đã Sẵn Sàng",
-          description: `Đã tạo minigame về "${topic}"`,
+          description: gameGenerator.hasOpenAIKey() 
+            ? `Đã tạo và cải thiện minigame về "${topic}"` 
+            : `Đã tạo minigame về "${topic}"`,
         });
       } else {
         throw new Error('Không thể tạo minigame');
@@ -125,11 +148,43 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     return (
       <div className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10">
         <p className="text-lg">Vui lòng nhập chủ đề vào thanh chat để tạo minigame</p>
+        <h3 
+          className="text-xl font-bold cursor-pointer select-none" 
+          onClick={handleTitleClick}
+          title="Trợ Lý Tạo Web"
+        >
+          Trợ Lý Tạo Web
+        </h3>
+        <OpenAIKeyModal 
+          isOpen={showOpenAIKeyModal}
+          onClose={() => setShowOpenAIKeyModal(false)}
+          onSave={handleSaveOpenAIKey}
+          currentKey={localStorage.getItem('openai_api_key')}
+        />
       </div>
     );
   }
 
-  return <GameView miniGame={miniGame} />;
+  return (
+    <>
+      <GameView miniGame={miniGame} />
+      <div className="absolute top-4 right-4">
+        <h3 
+          className="text-sm font-medium text-primary/60 cursor-pointer select-none" 
+          onClick={handleTitleClick}
+          title="Trợ Lý Tạo Web"
+        >
+          Trợ Lý Tạo Web
+        </h3>
+      </div>
+      <OpenAIKeyModal 
+        isOpen={showOpenAIKeyModal}
+        onClose={() => setShowOpenAIKeyModal(false)}
+        onSave={handleSaveOpenAIKey}
+        currentKey={localStorage.getItem('openai_api_key')}
+      />
+    </>
+  );
 });
 
 QuizGenerator.displayName = "QuizGenerator";

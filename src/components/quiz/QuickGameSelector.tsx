@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Gamepad, Settings, Puzzle, BrainCircuit, Clock4, Dices, PenTool, HeartHandshake, Lightbulb, Sparkles } from 'lucide-react';
@@ -12,6 +11,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { GameSettingsData, GameType } from './types';
 import { animateBlockCreation } from '@/lib/animations';
 import { Link } from 'react-router-dom';
+import OpenAIKeyModal from './OpenAIKeyModal';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -25,6 +25,8 @@ const QuickGameSelector: React.FC = () => {
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentGameType, setCurrentGameType] = useState<GameType | null>(null);
+  const [titleClickCount, setTitleClickCount] = useState(0);
+  const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
   
   const gameTypes: GameType[] = [
     {
@@ -124,6 +126,23 @@ const QuickGameSelector: React.FC = () => {
     });
   }, []);
 
+  const handleTitleClick = () => {
+    setTitleClickCount(prev => {
+      const newCount = prev + 1;
+      if (newCount === 3) {
+        setTimeout(() => {
+          setShowOpenAIKeyModal(true);
+          return 0;
+        }, 100);
+      }
+      return newCount;
+    });
+  };
+
+  const handleSaveOpenAIKey = (key: string) => {
+    gameGenerator.setOpenAIKey(key);
+  };
+
   const getIconComponent = (iconName: string) => {
     switch(iconName) {
       case 'brain-circuit': return <BrainCircuit size={36} />;
@@ -157,7 +176,9 @@ const QuickGameSelector: React.FC = () => {
         setSelectedGame(game);
         toast({
           title: "Minigame Đã Sẵn Sàng",
-          description: `Đã tạo minigame về "${selectedTopic}"`,
+          description: gameGenerator.hasOpenAIKey() 
+            ? `Đã tạo và cải thiện minigame về "${selectedTopic}"` 
+            : `Đã tạo minigame về "${selectedTopic}"`,
         });
       } else {
         throw new Error('Không thể tạo minigame');
@@ -212,6 +233,15 @@ const QuickGameSelector: React.FC = () => {
             Chọn Game Khác
           </Button>
         </div>
+        <div className="absolute top-4 right-4">
+          <h3 
+            className="text-sm font-medium text-primary/60 cursor-pointer select-none" 
+            onClick={handleTitleClick}
+            title="Trợ Lý Tạo Web"
+          >
+            Trợ Lý Tạo Web
+          </h3>
+        </div>
       </div>
     );
   }
@@ -225,7 +255,10 @@ const QuickGameSelector: React.FC = () => {
         </div>
       </div>
       
-      <h2 className="text-2xl font-bold mb-8 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-fade-in">
+      <h2 
+        className="text-2xl font-bold mb-8 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-fade-in cursor-pointer"
+        onClick={handleTitleClick}
+      >
         Minigames
       </h2>
       
@@ -257,6 +290,13 @@ const QuickGameSelector: React.FC = () => {
           />
         </DialogContent>
       </Dialog>
+
+      <OpenAIKeyModal 
+        isOpen={showOpenAIKeyModal}
+        onClose={() => setShowOpenAIKeyModal(false)}
+        onSave={handleSaveOpenAIKey}
+        currentKey={localStorage.getItem('openai_api_key')}
+      />
     </div>
   );
 };
