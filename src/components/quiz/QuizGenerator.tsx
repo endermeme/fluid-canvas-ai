@@ -79,6 +79,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       settings.category = 'math';
     }
     
+    console.log("Settings for topic:", topic, settings);
     return settings;
   };
 
@@ -97,7 +98,13 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   };
 
   const handleSaveOpenAIKey = (key: string) => {
-    gameGenerator.setOpenAIKey(key);
+    console.log("Saving OpenAI key...");
+    const success = gameGenerator.setOpenAIKey(key);
+    if (success) {
+      console.log("OpenAI key saved successfully");
+    } else {
+      console.log("Failed to save OpenAI key");
+    }
   };
 
   const generateMiniGame = async (topic: string, settings: GameSettingsData = defaultSettings) => {
@@ -105,10 +112,14 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     setErrorMessage(null);
     setMiniGame(null);
 
+    console.log("Starting minigame generation for topic:", topic);
+    console.log("Starting game with settings:", settings);
+
     try {      
       const game = await gameGenerator.generateMiniGame(topic, settings);
       
       if (game) {
+        console.log("Minigame generated successfully:", game.title);
         setMiniGame(game);
         toast({
           title: "Minigame Đã Sẵn Sàng",

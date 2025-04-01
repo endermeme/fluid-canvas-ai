@@ -1,3 +1,4 @@
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GameSettingsData } from './types';
 
@@ -40,18 +41,28 @@ export class AIGameGenerator {
 
   async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
+      console.log(`Starting game generation for topic: "${topic}" with settings:`, settings);
+      
       // Step 1: Generate base game with Gemini
       const geminiResult = await this.generateWithGemini(topic, settings);
       
+      if (!geminiResult) {
+        console.error("Gemini failed to generate a valid result");
+        return null;
+      }
+      
+      console.log("Gemini successfully generated base game");
+      
       // Step 2: If OpenAI key is available, enhance the code
       if (this.hasOpenAIKey() && geminiResult) {
+        console.log("OpenAI key available, enhancing game...");
         return await this.enhanceWithOpenAI(geminiResult, topic);
       }
       
       // If no OpenAI key, return the Gemini result
       return geminiResult;
     } catch (error) {
-      console.error("Error generating mini game:", error);
+      console.error("Fatal error in generateMiniGame:", error);
       return null;
     }
   }
@@ -119,14 +130,18 @@ export class AIGameGenerator {
     `;
 
     try {
+      console.log("Sending request to Gemini API...");
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const text = response.text();
+      
+      console.log("Received Gemini response, length:", text.length);
       
       // Extract the JSON object from the response
       const jsonMatch = text.match(/{[\s\S]*}/);
       if (jsonMatch) {
         const jsonStr = jsonMatch[0];
+        console.log("Extracted JSON string length:", jsonStr.length);
         let gameData;
         
         try {
@@ -136,8 +151,10 @@ export class AIGameGenerator {
             .replace(/\\n/g, "\\n") // Ensure newlines are properly escaped
             .replace(/\\/g, "\\\\") // Double escape backslashes
             .replace(/\\\\\"/g, '\\"'); // Fix double escaped quotes
-            
+          
+          console.log("Attempting to parse cleaned JSON string...");
           gameData = JSON.parse(cleanedJsonStr);
+          console.log("JSON parsing successful");
           
           // Build a full HTML document from the parts
           const fullHtmlContent = this.buildFullHtmlDocument(
@@ -159,23 +176,68 @@ export class AIGameGenerator {
           };
         } catch (jsonError) {
           console.error("Error parsing JSON from Gemini response:", jsonError);
-          console.log("Attempted to parse:", jsonStr);
+          console.log("First 500 chars of attempted JSON:", jsonStr.substring(0, 500));
+          console.log("Last 500 chars of attempted JSON:", jsonStr.substring(jsonStr.length - 500));
           
           // Try a more robust approach as fallback
           try {
+            console.log("Attempting fallback JSON extraction method...");
             // Use a regex pattern to extract each field separately
             const extractField = (fieldName: string) => {
               const pattern = new RegExp(`"${fieldName}"\\s*:\\s*"([^"]*(?:"[^"]*"[^"]*)*)"`, 'g');
               const match = pattern.exec(jsonStr);
-              return match ? match[1] : '';
+              return match ? match[1].replace(/\\"/g, '"').replace(/\\n/g, '\n') : '';
             };
             
+            const extractMultilineField = (fieldName: string) => {
+              // This pattern works better for multiline fields with complex content
+              const startPattern = new RegExp(`"${fieldName}"\\s*:\\s*"`, 'g');
+              const startMatch = startPattern.exec(jsonStr);
+              
+              if (!startMatch) return '';
+              
+              const startIndex = startMatch.index + startMatch[0].length;
+              let endIndex = -1;
+              let openQuotes = false;
+              let escapeNext = false;
+              
+              // Find the matching end quote that's not escaped
+              for (let i = startIndex; i < jsonStr.length; i++) {
+                if (escapeNext) {
+                  escapeNext = false;
+                  continue;
+                }
+                
+                if (jsonStr[i] === '\\') {
+                  escapeNext = true;
+                } else if (jsonStr[i] === '"' && !openQuotes) {
+                  endIndex = i;
+                  break;
+                }
+              }
+              
+              if (endIndex === -1) return '';
+              
+              return jsonStr.substring(startIndex, endIndex).replace(/\\"/g, '"').replace(/\\n/g, '\n');
+            };
+            
+            console.log("Extracting fields one by one...");
             const title = extractField('title');
             const description = extractField('description');
-            const instructionsHtml = extractField('instructionsHtml');
-            const gameHtml = extractField('gameHtml');
-            const gameScript = extractField('gameScript');
-            const cssStyles = extractField('cssStyles');
+            // Use multiline extraction for complex fields
+            const instructionsHtml = extractMultilineField('instructionsHtml');
+            const gameHtml = extractMultilineField('gameHtml');
+            const gameScript = extractMultilineField('gameScript');
+            const cssStyles = extractMultilineField('cssStyles');
+            
+            console.log("Extracted fields:", {
+              title: title ? "✓" : "✗",
+              description: description ? "✓" : "✗",
+              instructionsHtml: instructionsHtml ? "✓" : "✗",
+              gameHtml: gameHtml ? "✓" : "✗",
+              gameScript: gameScript ? "✓" : "✗",
+              cssStyles: cssStyles ? "✓" : "✗"
+            });
             
             // Build full HTML content
             const fullHtmlContent = this.buildFullHtmlDocument(
@@ -200,6 +262,8 @@ export class AIGameGenerator {
             return null;
           }
         }
+      } else {
+        console.error("No JSON found in Gemini response:", text);
       }
       
       return null;
@@ -213,6 +277,7 @@ export class AIGameGenerator {
     if (!this.openAIKey) return geminiGame;
     
     try {
+      console.log("Preparing OpenAI enhancement request...");
       const prompt = `
       You are a master web developer specializing in creating bug-free, interactive web games.
       
@@ -254,6 +319,7 @@ export class AIGameGenerator {
       ${geminiGame.instructionsHtml}
       `;
 
+      console.log("Sending request to OpenAI API...");
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -261,7 +327,7 @@ export class AIGameGenerator {
           'Authorization': `Bearer ${this.openAIKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
+          model: 'gpt-4o',
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.5,
           max_tokens: 4000
@@ -271,44 +337,128 @@ export class AIGameGenerator {
       if (!response.ok) {
         const errorData = await response.text();
         console.error("OpenAI API error:", errorData);
+        console.log("Falling back to Gemini result due to OpenAI error");
         return geminiGame; // Return original game if enhancement fails
       }
 
+      console.log("Received OpenAI response, processing...");
       const data = await response.json();
       
       if (data.choices && data.choices[0] && data.choices[0].message) {
         const content = data.choices[0].message.content;
+        console.log("OpenAI response content length:", content.length);
         try {
           // Find and parse the JSON in the response
           const jsonMatch = content.match(/{[\s\S]*}/);
           if (jsonMatch) {
-            const openAIResult = JSON.parse(jsonMatch[0]);
+            const jsonStr = jsonMatch[0];
+            console.log("Extracted JSON from OpenAI response, length:", jsonStr.length);
             
-            // Build a new full HTML document with the enhanced code
-            const fullHtmlContent = this.buildFullHtmlDocument(
-              openAIResult.title || geminiGame.title,
-              openAIResult.gameHtml,
-              openAIResult.gameScript,
-              openAIResult.cssStyles,
-              openAIResult.instructionsHtml
-            );
-            
-            return {
-              title: openAIResult.title || geminiGame.title,
-              description: openAIResult.description || geminiGame.description,
-              content: fullHtmlContent,
-              instructionsHtml: openAIResult.instructionsHtml,
-              gameHtml: openAIResult.gameHtml,
-              gameScript: openAIResult.gameScript,
-              cssStyles: openAIResult.cssStyles
-            };
+            try {
+              const cleanedJsonStr = jsonStr
+                .replace(/\\'/g, "'")
+                .replace(/\\n/g, "\\n")
+                .replace(/\\\\/g, "\\")
+                .replace(/\\\\\"/g, '\\"');
+                
+              console.log("Attempting to parse OpenAI JSON...");
+              const openAIResult = JSON.parse(cleanedJsonStr);
+              
+              // Verify all required fields are present
+              const requiredFields = ['title', 'description', 'instructionsHtml', 'gameHtml', 'gameScript', 'cssStyles'];
+              const missingFields = requiredFields.filter(field => !openAIResult[field]);
+              
+              if (missingFields.length > 0) {
+                console.error("OpenAI response missing required fields:", missingFields);
+                console.log("Using original Gemini data for missing fields");
+                
+                // Fill in any missing fields with original data
+                missingFields.forEach(field => {
+                  openAIResult[field] = geminiGame[field];
+                });
+              }
+              
+              // Build a new full HTML document with the enhanced code
+              const fullHtmlContent = this.buildFullHtmlDocument(
+                openAIResult.title || geminiGame.title,
+                openAIResult.gameHtml,
+                openAIResult.gameScript,
+                openAIResult.cssStyles,
+                openAIResult.instructionsHtml
+              );
+              
+              console.log("Successfully created enhanced game content");
+              return {
+                title: openAIResult.title || geminiGame.title,
+                description: openAIResult.description || geminiGame.description,
+                content: fullHtmlContent,
+                instructionsHtml: openAIResult.instructionsHtml,
+                gameHtml: openAIResult.gameHtml,
+                gameScript: openAIResult.gameScript,
+                cssStyles: openAIResult.cssStyles
+              };
+            } catch (jsonError) {
+              console.error("Failed to parse OpenAI JSON:", jsonError);
+              console.log("First 500 chars of OpenAI JSON:", jsonStr.substring(0, 500));
+              
+              // Try advanced extraction as a fallback
+              console.log("Attempting advanced field extraction from OpenAI response...");
+              try {
+                const extractMultilineField = (fieldName: string, content: string) => {
+                  const pattern = new RegExp(`["']${fieldName}["']\\s*:\\s*["']([\\s\\S]*?)["'](?=\\s*,\\s*["']|\\s*\\})`, 'g');
+                  const match = pattern.exec(content);
+                  if (match && match[1]) {
+                    return match[1].replace(/\\"/g, '"').replace(/\\n/g, '\n');
+                  }
+                  return geminiGame[fieldName]; // Fallback to original
+                };
+                
+                const extractedTitle = extractMultilineField('title', content) || geminiGame.title;
+                const extractedDescription = extractMultilineField('description', content) || geminiGame.description;
+                const extractedInstructionsHtml = extractMultilineField('instructionsHtml', content) || geminiGame.instructionsHtml;
+                const extractedGameHtml = extractMultilineField('gameHtml', content) || geminiGame.gameHtml;
+                const extractedGameScript = extractMultilineField('gameScript', content) || geminiGame.gameScript;
+                const extractedCssStyles = extractMultilineField('cssStyles', content) || geminiGame.cssStyles;
+                
+                // Build a new full HTML document with the extracted content
+                const fullHtmlContent = this.buildFullHtmlDocument(
+                  extractedTitle,
+                  extractedGameHtml,
+                  extractedGameScript,
+                  extractedCssStyles,
+                  extractedInstructionsHtml
+                );
+                
+                console.log("Successfully extracted fields from OpenAI response");
+                return {
+                  title: extractedTitle,
+                  description: extractedDescription,
+                  content: fullHtmlContent,
+                  instructionsHtml: extractedInstructionsHtml,
+                  gameHtml: extractedGameHtml,
+                  gameScript: extractedGameScript,
+                  cssStyles: extractedCssStyles
+                };
+              } catch (extractionError) {
+                console.error("Advanced extraction failed:", extractionError);
+                console.log("Falling back to original Gemini game");
+                return geminiGame;
+              }
+            }
+          } else {
+            console.error("No JSON found in OpenAI response");
+            return geminiGame;
           }
         } catch (error) {
-          console.error("Error parsing OpenAI response:", error);
+          console.error("Error processing OpenAI response:", error);
+          return geminiGame;
         }
+      } else {
+        console.error("Invalid or empty OpenAI response structure");
       }
       
       // Return the original game if parsing fails
+      console.log("Falling back to original Gemini game");
       return geminiGame;
     } catch (error) {
       console.error("Error enhancing with OpenAI:", error);

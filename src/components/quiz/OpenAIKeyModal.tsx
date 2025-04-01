@@ -47,14 +47,14 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({ isOpen, onClose, onSave
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-lg border-white/20">
+      <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-lg border-white/20" aria-describedby="api-key-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
               OpenAI API Key
             </span>
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="api-key-description">
             Nhập API key OpenAI để cải thiện chất lượng minigame tạo ra.
           </DialogDescription>
         </DialogHeader>
