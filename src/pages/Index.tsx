@@ -97,6 +97,26 @@ const Index = () => {
         
         {/* Main canvas area */}
         <div className="flex-1 flex flex-col">
+          {/* Educational Game Access - New Prominent Banner */}
+          <div className="bg-gradient-to-r from-primary/10 to-background p-4 border-b border-border/40 shadow-sm">
+            <div className="max-w-4xl mx-auto flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 mr-3 animate-pulse-soft">
+                  <GraduationCap className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium">Minigame Giáo Dục</h3>
+                  <p className="text-sm text-muted-foreground">Học tập vui vẻ với trò chơi tương tác</p>
+                </div>
+              </div>
+              <Link to="/quiz">
+                <Button className="bg-primary hover:bg-primary/90">
+                  Chơi Ngay
+                </Button>
+              </Link>
+            </div>
+          </div>
+          
           <div className="flex-1">
             <CanvasContainer />
           </div>

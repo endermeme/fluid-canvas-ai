@@ -4,7 +4,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import QuickGameSelector from '@/components/quiz/QuickGameSelector';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ArrowLeft } from 'lucide-react';
 import { GameSettingsData } from '@/components/quiz/types';
 
 const Quiz = () => {
@@ -35,30 +35,34 @@ const Quiz = () => {
   
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <div className="flex items-center border-b border-border/40 p-3 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
-        <Link to="/">
-          <Button variant="ghost" size="sm" className="mr-4">
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            Canvas
+      <div className="flex items-center justify-between border-b border-border/40 p-3 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="flex items-center">
+          <Link to="/">
+            <Button variant="ghost" size="sm" className="mr-4">
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Canvas
+            </Button>
+          </Link>
+          <h1 className="text-xl font-bold">Minigame Giáo Dục</h1>
+        </div>
+        
+        {selectedGame && (
+          <Button
+            onClick={handleBackToMenu}
+            variant="outline"
+            size="sm"
+            className="bg-background/80 backdrop-blur-sm shadow-md transition-transform active:scale-95"
+          >
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Quay Lại Menu
           </Button>
-        </Link>
-        <h1 className="text-xl font-bold">Minigame Giáo Dục</h1>
+        )}
       </div>
       
       <div className="flex-1 overflow-hidden relative">
         {selectedGame ? (
           <div className="flex-1 h-full relative">
             <QuizGenerator topic={selectedGame} ref={quizRef} />
-            <div className="absolute bottom-4 left-4">
-              <Button
-                onClick={handleBackToMenu}
-                variant="outline"
-                size="sm"
-                className="bg-background/80 backdrop-blur-sm shadow-md transition-transform active:scale-95"
-              >
-                Quay Lại Menu
-              </Button>
-            </div>
           </div>
         ) : (
           <div className="h-full">
