@@ -194,7 +194,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             </button>
           </div>
           <div className="text-xs text-muted-foreground italic">
-            Powered by Giáo Dục AI
+            Powered by CES AI
           </div>
         </div>
       </div>
