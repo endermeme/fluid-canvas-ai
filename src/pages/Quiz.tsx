@@ -9,6 +9,7 @@ import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
 import { animateAIPanelSlideIn, animateContentHighlight } from '@/lib/animations';
+import { BookmarkCheck, Bookmark } from 'lucide-react';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
@@ -116,14 +117,26 @@ const Quiz = () => {
                 <ChatInterface 
                   onCreateBlock={handleCreateFromPrompt} 
                   onQuizRequest={handleGameRequest}
-                  onToggleSidebar={toggleSidebar}
-                  isSidebarOpen={sidebarOpen}
                 />
               </div>
             </SidebarContent>
           </Sidebar>
           
           <SidebarInset className="flex-1 bg-background overflow-hidden p-0 relative">
+            {/* Sidebar toggle button positioned on the left edge */}
+            <button
+              onClick={toggleSidebar}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-2 bg-primary/10 rounded-r-md hover:bg-primary/20 transition-colors"
+              title={sidebarOpen ? "Thu gọn" : "Mở rộng"}
+              aria-label={sidebarOpen ? "Thu gọn" : "Mở rộng"}
+            >
+              {sidebarOpen ? (
+                <BookmarkCheck size={20} className="text-primary" />
+              ) : (
+                <Bookmark size={20} className="text-primary" />
+              )}
+            </button>
+            
             <div ref={mainContentRef} className="h-full relative">
               {isManualMode ? (
                 <QuizGenerator 

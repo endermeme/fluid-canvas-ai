@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, BrainCircuit, Star, GraduationCap, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Send, Sparkles, BrainCircuit, Star, GraduationCap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
@@ -16,15 +15,11 @@ interface Message {
 interface ChatInterfaceProps {
   onCreateBlock?: (type: BlockType, content: string) => void;
   onQuizRequest?: (topic: string) => void;
-  onToggleSidebar?: () => void;
-  isSidebarOpen?: boolean;
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
   onCreateBlock, 
-  onQuizRequest, 
-  onToggleSidebar,
-  isSidebarOpen = true
+  onQuizRequest
 }) => {
   const [message, setMessage] = useState('');
   const [conversation, setConversation] = useState<Message[]>([
@@ -100,12 +95,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
-
-  const handleToggleSidebar = () => {
-    if (onToggleSidebar) {
-      onToggleSidebar();
-    }
-  };
   
   return (
     <div className="flex flex-col h-full">
@@ -114,17 +103,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <GraduationCap size={20} className="text-primary mr-2" />
           <h3 className="font-medium">Trợ Lý Giáo Dục</h3>
         </div>
-        <button
-          onClick={handleToggleSidebar}
-          className="p-1.5 rounded-md hover:bg-secondary/40 transition-colors"
-          title={isSidebarOpen ? "Thu gọn" : "Mở rộng"}
-        >
-          {isSidebarOpen ? (
-            <BookmarkCheck size={18} className="text-primary" />
-          ) : (
-            <Bookmark size={18} className="text-primary" />
-          )}
-        </button>
       </div>
       
       <ScrollArea className="flex-1">
