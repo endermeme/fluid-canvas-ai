@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, BrainCircuit, Star, GraduationCap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -100,14 +99,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   
   return (
     <div className="flex flex-col h-full">
-      <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/20">
+      <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/20 shrink-0">
         <div className="flex items-center">
           <GraduationCap size={20} className="text-primary mr-2" />
           <h3 className="font-medium">Trợ Lý Giáo Dục</h3>
         </div>
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto">
+      <ScrollArea className="flex-grow overflow-y-auto">
         <div className="p-3 space-y-3">
           {conversation.map((item, index) => (
             <div 
@@ -145,7 +144,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
       </ScrollArea>
       
-      <div className="p-3 border-t border-border bg-background">
+      <div className="p-3 border-t border-border bg-background shrink-0">
         <div className="relative">
           <Textarea
             className="w-full p-2 pr-10 bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-sm min-h-[70px]"
