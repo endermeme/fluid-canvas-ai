@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, BrainCircuit, Star } from 'lucide-react';
+import { Send, Sparkles, BrainCircuit, Star, GraduationCap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
@@ -23,7 +23,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   const [conversation, setConversation] = useState<Message[]>([
     { 
       role: 'ai', 
-      message: 'Xin chào! Tôi là trợ lý AI. Hãy nhập chủ đề bạn muốn, tôi sẽ tạo minigame tương tác theo yêu cầu của bạn. Bạn có thể yêu cầu bất kỳ loại trò chơi nào: câu đố, xếp hình, trò chơi phản xạ, hoặc bất kỳ ý tưởng thú vị nào khác!', 
+      message: 'Xin chào! Tôi là trợ lý AI giáo dục. Hãy nhập chủ đề học tập bạn muốn, tôi sẽ tạo minigame tương tác theo yêu cầu của bạn. Bạn có thể yêu cầu các trò chơi toán học, từ vựng, lịch sử, khoa học, hoặc bất kỳ chủ đề giáo dục nào!', 
       timestamp: new Date() 
     }
   ]);
@@ -46,7 +46,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     setIsLoading(true);
     
     setTimeout(() => {
-      let aiResponse = "Tôi đang tạo minigame tương tác theo yêu cầu của bạn. Vui lòng đợi trong giây lát...";
+      let aiResponse = "Tôi đang tạo trò chơi học tập tương tác theo yêu cầu của bạn. Vui lòng đợi trong giây lát...";
       
       // Sử dụng toàn bộ nội dung tin nhắn làm chủ đề
       const topic = message.trim();
@@ -98,8 +98,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     <div className="flex flex-col h-full">
       <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/20">
         <div className="flex items-center">
-          <BrainCircuit size={20} className="text-primary mr-2" />
-          <h3 className="font-medium">Trợ Lý Tạo Web</h3>
+          <GraduationCap size={20} className="text-primary mr-2" />
+          <h3 className="font-medium">Trợ Lý Giáo Dục</h3>
         </div>
       </div>
       
@@ -145,7 +145,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
         <div className="relative">
           <textarea
             className="w-full p-2 pr-10 bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-sm"
-            placeholder="Nhập chủ đề hoặc ý tưởng để tạo trang web tương tác đầy đủ..."
+            placeholder="Nhập chủ đề học tập để tạo trò chơi tương tác giáo dục..."
             rows={2}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -170,7 +170,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
             </button>
           </div>
           <div className="text-xs text-muted-foreground italic">
-            Powered by CES AI
+            Powered by Giáo Dục AI
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Gamepad, Settings, Puzzle, BrainCircuit, Clock4, Dices, PenTool, HeartHandshake, Lightbulb, Sparkles } from 'lucide-react';
+import { Gamepad, Settings, Puzzle, BrainCircuit, Clock4, Dices, PenTool, HeartHandshake, Lightbulb, Sparkles, Book, GraduationCap, School, Award, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
 import GameLoading from './GameLoading';
@@ -30,10 +30,10 @@ const QuickGameSelector: React.FC = () => {
   
   const gameTypes: GameType[] = [
     {
-      id: "quiz",
-      name: "Đố vui",
-      description: "Trắc nghiệm kiến thức đa dạng",
-      icon: "brain-circuit",
+      id: "vocabulary",
+      name: "Từ vựng",
+      description: "Học từ mới qua các trò chơi tương tác",
+      icon: "book",
       defaultSettings: {
         difficulty: 'medium',
         questionCount: 10,
@@ -42,22 +42,58 @@ const QuickGameSelector: React.FC = () => {
       }
     },
     {
-      id: "puzzle",
-      name: "Xếp hình",
-      description: "Ghép hình và hoàn thành các câu đố",
-      icon: "puzzle-piece",
+      id: "math",
+      name: "Toán học",
+      description: "Rèn luyện kỹ năng tính toán nhanh",
+      icon: "brain-circuit",
       defaultSettings: {
         difficulty: 'medium',
-        questionCount: 5,
-        timePerQuestion: 60,
-        category: 'general',
+        questionCount: 8,
+        timePerQuestion: 30,
+        category: 'math',
+      }
+    },
+    {
+      id: "science",
+      name: "Khoa học",
+      description: "Khám phá thế giới khoa học kỳ thú",
+      icon: "lightbulb",
+      defaultSettings: {
+        difficulty: 'medium',
+        questionCount: 10,
+        timePerQuestion: 45,
+        category: 'science',
+      }
+    },
+    {
+      id: "history",
+      name: "Lịch sử",
+      description: "Khám phá các sự kiện lịch sử quan trọng",
+      icon: "graduation-cap",
+      defaultSettings: {
+        difficulty: 'medium',
+        questionCount: 10,
+        timePerQuestion: 40,
+        category: 'history',
+      }
+    },
+    {
+      id: "geography",
+      name: "Địa lý",
+      description: "Khám phá các quốc gia và địa danh",
+      icon: "globe",
+      defaultSettings: {
+        difficulty: 'medium',
+        questionCount: 8,
+        timePerQuestion: 30,
+        category: 'geography',
       }
     },
     {
       id: "memory",
-      name: "Nhớ hình",
-      description: "Rèn luyện trí nhớ với các thẻ bài",
-      icon: "light-bulb",
+      name: "Trí nhớ",
+      description: "Rèn luyện trí nhớ với các thử thách",
+      icon: "puzzle",
       defaultSettings: {
         difficulty: 'medium',
         questionCount: 8,
@@ -66,51 +102,27 @@ const QuickGameSelector: React.FC = () => {
       }
     },
     {
-      id: "reflex",
-      name: "Phản xạ",
-      description: "Kiểm tra tốc độ phản xạ của bạn",
-      icon: "clock",
-      defaultSettings: {
-        difficulty: 'medium',
-        questionCount: 15,
-        timePerQuestion: 5,
-        category: 'general',
-      }
-    },
-    {
-      id: "hunt",
-      name: "Truy tìm",
-      description: "Tìm kiếm và khám phá các manh mối",
-      icon: "dices",
-      defaultSettings: {
-        difficulty: 'medium',
-        questionCount: 6,
-        timePerQuestion: 45,
-        category: 'general',
-      }
-    },
-    {
-      id: "riddle",
-      name: "Câu đố",
-      description: "Suy luận và giải quyết các câu đố",
-      icon: "heart-handshake",
-      defaultSettings: {
-        difficulty: 'medium',
-        questionCount: 8,
-        timePerQuestion: 40,
-        category: 'general',
-      }
-    },
-    {
-      id: "drawing",
-      name: "Vẽ tranh",
-      description: "Phát huy khả năng sáng tạo nghệ thuật",
+      id: "grammar",
+      name: "Ngữ pháp",
+      description: "Học ngữ pháp qua các bài tập tương tác",
       icon: "pen-tool",
       defaultSettings: {
         difficulty: 'medium',
-        questionCount: 4,
-        timePerQuestion: 60,
+        questionCount: 10,
+        timePerQuestion: 40,
         category: 'arts',
+      }
+    },
+    {
+      id: "logic",
+      name: "Tư duy",
+      description: "Rèn luyện tư duy logic và phản xạ nhanh",
+      icon: "award",
+      defaultSettings: {
+        difficulty: 'medium',
+        questionCount: 6,
+        timePerQuestion: 30,
+        category: 'general',
       }
     },
   ];
@@ -152,6 +164,11 @@ const QuickGameSelector: React.FC = () => {
       case 'dices': return <Dices size={36} />;
       case 'heart-handshake': return <HeartHandshake size={36} />;
       case 'pen-tool': return <PenTool size={36} />;
+      case 'book': return <Book size={36} />;
+      case 'graduation-cap': return <GraduationCap size={36} />;
+      case 'globe': return <Globe size={36} />;
+      case 'award': return <Award size={36} />;
+      case 'school': return <School size={36} />;
       default: return <Gamepad size={36} />;
     }
   };
@@ -251,7 +268,7 @@ const QuickGameSelector: React.FC = () => {
       <div className="text-primary mb-4 animate-float-in">
         <div className="relative">
           <div className="absolute inset-0 blur-xl bg-primary/20 rounded-full animate-pulse-soft"></div>
-          <Sparkles size={56} className="relative z-10 text-primary" />
+          <School size={56} className="relative z-10 text-primary" />
         </div>
       </div>
       
@@ -259,7 +276,7 @@ const QuickGameSelector: React.FC = () => {
         className="text-2xl font-bold mb-8 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-fade-in cursor-pointer"
         onClick={handleTitleClick}
       >
-        Minigames
+        Minigames Giáo Dục
       </h2>
       
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 max-w-3xl w-full">

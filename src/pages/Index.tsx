@@ -7,7 +7,7 @@ import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { Button } from '@/components/ui/button';
-import { Gamepad, Sparkles } from 'lucide-react';
+import { Gamepad, Sparkles, GraduationCap } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -38,14 +38,14 @@ const Index = () => {
     navigate(`/quiz?topic=${encodeURIComponent(gameTopic)}&autostart=true`);
   };
 
-  // Quick game options
+  // Quick game options for educational games
   const quickGameOptions = [
-    "Câu Đố Lịch Sử", 
-    "Trắc Nghiệm Địa Lý",
-    "Truy Tìm Kho Báu",
-    "Đố Vui Toán Học",
-    "Trò Chơi Từ Vựng",
-    "Thách Đố Khoa Học"
+    "Học Toán Vui", 
+    "Từ Vựng Tiếng Anh",
+    "Khám Phá Lịch Sử",
+    "Địa Lý Thế Giới",
+    "Thí Nghiệm Khoa Học",
+    "Tư Duy Logic"
   ];
 
   return (
@@ -59,8 +59,8 @@ const Index = () => {
               <div className="p-3 border-t border-border mt-auto">
                 <Link to="/quiz">
                   <Button variant="outline" className="w-full flex items-center gap-2 min-h-[44px]">
-                    <Gamepad className="h-4 w-4" />
-                    Minigame
+                    <GraduationCap className="h-4 w-4" />
+                    Minigame Giáo Dục
                   </Button>
                 </Link>
               </div>
@@ -80,7 +80,7 @@ const Index = () => {
                     <Sparkles className="h-4 w-4 text-primary" />
                   </div>
                   <h3 className="text-lg font-medium bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                    Tạo nhanh
+                    Học tập vui
                   </h3>
                 </div>
                 
