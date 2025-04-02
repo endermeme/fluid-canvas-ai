@@ -62,8 +62,8 @@ const CanvasArea: React.FC<CanvasAreaProps> = ({
     const canvas = canvasRef.current;
     
     if (canvas) {
-      // Add touch highlight color style to improve mobile experience
-      canvas.style.webkitTapHighlightColor = 'transparent';
+      // Fix for TypeScript error - use setAttribute for vendor prefixed properties
+      canvas.setAttribute('style', 'webkit-tap-highlight-color: transparent');
       
       if (isMobile) {
         // Better touch handling for mobile
