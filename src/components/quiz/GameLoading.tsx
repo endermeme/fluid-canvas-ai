@@ -41,6 +41,12 @@ const GameLoading: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      <div className="max-w-md text-center mt-6 px-4">
+        <p className="text-sm text-muted-foreground bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-md">
+          Minigame bởi AI khi tạo ra có thể bị lỗi hoặc không hoạt động như mong muốn, vui lòng tạo lại khi gặp lỗi
+        </p>
+      </div>
     </div>
   );
 };
