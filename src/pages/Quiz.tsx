@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
 import QuickGameSelector from '@/components/quiz/QuickGameSelector';
@@ -118,7 +117,7 @@ const Quiz = () => {
           className="z-20 h-full"
         >
           <div className={`transition-all duration-300 h-full ${sidebarOpen ? 'w-72' : 'w-0'}`}>
-            <CollapsibleContent className="h-full flex flex-col">
+            <CollapsibleContent className="h-full">
               <div ref={sidebarRef} className="h-full flex flex-col">
                 <ChatInterface 
                   onCreateBlock={handleCreateFromPrompt} 
