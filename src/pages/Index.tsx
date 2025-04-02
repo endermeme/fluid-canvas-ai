@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CanvasContainer from '@/components/canvas/CanvasContainer';
-import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarContent } from '@/components/ui/sidebar';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
@@ -80,6 +80,9 @@ const Index = () => {
           )}
         >
           <div className="flex flex-col h-full">
+            <div className="p-4 border-b border-border">
+              <h2 className="text-xl font-semibold">Trợ Lý Canvas</h2>
+            </div>
             <ChatInterface onCreateBlock={handleCreateFromPrompt} />
             <div className="p-3 border-t border-border mt-auto">
               <Link to="/quiz">
