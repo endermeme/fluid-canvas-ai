@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Share2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,14 +25,14 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
 
   const handleShareGame = () => {
     try {
-      if (!miniGame.content) {
+      if (!miniGame.html) {
         throw new Error('Game content is missing');
       }
       
       const url = saveGameForSharing(
         miniGame.title,
         miniGame.description,
-        miniGame.content
+        miniGame.html
       );
       
       setShareUrl(url);
@@ -232,7 +233,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         
         <iframe
           ref={iframeRef}
-          srcDoc={miniGame.content}
+          srcDoc={miniGame.html}
           title={miniGame.title}
           sandbox="allow-scripts allow-same-origin"
           className={`w-full h-full border-none ${isFrameLoaded ? 'opacity-100' : 'opacity-0'}`}
