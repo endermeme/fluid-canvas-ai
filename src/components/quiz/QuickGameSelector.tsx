@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
-import GameView from './GameView';
 import GameSettings from './GameSettings';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { GameSettingsData, GameType } from './types';
@@ -15,7 +14,11 @@ import OpenAIKeyModal from './OpenAIKeyModal';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
-const QuickGameSelector: React.FC = () => {
+interface QuickGameSelectorProps {
+  onGameSelect?: (topic: string) => void;
+}
+
+const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameSelect }) => {
   const [selectedGame, setSelectedGame] = useState<MiniGame | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -176,7 +179,12 @@ const QuickGameSelector: React.FC = () => {
   const handleTopicSelect = (gameType: GameType) => {
     setSelectedTopic(gameType.name);
     setCurrentGameType(gameType);
-    setShowSettings(true);
+    
+    if (onGameSelect) {
+      onGameSelect(gameType.name);
+    } else {
+      setShowSettings(true);
+    }
   };
   
   const handleStartGame = async (settings: GameSettingsData) => {
@@ -239,8 +247,7 @@ const QuickGameSelector: React.FC = () => {
   if (selectedGame) {
     return (
       <div className="h-full relative">
-        <GameView miniGame={selectedGame} />
-        <div className="absolute bottom-4 right-4">
+        <div className="absolute top-4 right-4">
           <Button 
             onClick={handleBackToSelection}
             variant="outline"
@@ -250,7 +257,10 @@ const QuickGameSelector: React.FC = () => {
             Chọn Game Khác
           </Button>
         </div>
-        <div className="absolute top-4 right-4">
+        <div className="h-full">
+          {selectedGame && <div className="h-full">{JSON.stringify(selectedGame)}</div>}
+        </div>
+        <div className="absolute top-4 right-20">
           <h3 
             className="text-sm font-medium text-primary/60 cursor-pointer select-none" 
             onClick={handleTitleClick}

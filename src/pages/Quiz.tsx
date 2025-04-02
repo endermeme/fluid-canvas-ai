@@ -1,136 +1,72 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import QuizGenerator from '@/components/quiz/QuizGenerator';
+import { useSearchParams, Link } from 'react-router-dom';
 import QuickGameSelector from '@/components/quiz/QuickGameSelector';
-import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
-import ChatInterface from '@/components/chat/ChatInterface';
-import { useCanvasState } from '@/hooks/useCanvasState';
-import { BlockType } from '@/lib/block-utils';
-import { useToast } from '@/hooks/use-toast';
-import { useLocation } from 'react-router-dom';
-import { animateAIPanelSlideIn, animateContentHighlight } from '@/lib/animations';
+import QuizGenerator from '@/components/quiz/QuizGenerator';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft } from 'lucide-react';
+import { GameSettingsData } from '@/components/quiz/types';
 
 const Quiz = () => {
-  const [topic, setTopic] = useState('');
-  const [isManualMode, setIsManualMode] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [selectedGame, setSelectedGame] = useState<string | null>(null);
+  const quizRef = useRef<{ generateQuiz: (topic: string, settings?: GameSettingsData) => void }>(null);
+  const topic = searchParams.get('topic');
+  const autostart = searchParams.get('autostart') === 'true';
   
-  const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
-  const { addBlock } = useCanvasState();
-  const { toast } = useToast();
-  const [isGenerating, setIsGenerating] = useState(false);
-  const location = useLocation();
-  const mainContentRef = useRef<HTMLDivElement>(null);
-  const sidebarRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
-    document.title = 'Minigame Tương Tác';
-    
-    // Parse URL parameters for direct game creation
-    const queryParams = new URLSearchParams(location.search);
-    const topicParam = queryParams.get('topic');
-    const autoStart = queryParams.get('autostart');
-    
-    if (topicParam) {
-      setTopic(topicParam);
-      setIsManualMode(true);
+    if (topic && autostart) {
+      setSelectedGame(topic);
       
-      // If autostart is set, generate the quiz automatically
-      if (autoStart === 'true') {
-        setIsGenerating(true);
-        setTimeout(() => {
-          if (quizGeneratorRef.current) {
-            quizGeneratorRef.current.generateQuiz(topicParam);
-          }
-          setIsGenerating(false);
-        }, 100);
-      }
+      // Give time for the component to mount and ref to be available
+      const timer = setTimeout(() => {
+        if (quizRef.current) {
+          quizRef.current.generateQuiz(topic);
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
-  }, [location.search]);
-
-  useEffect(() => {
-    // Apply animations on mount
-    if (sidebarRef.current) {
-      animateAIPanelSlideIn(sidebarRef.current);
-    }
-    
-    if (mainContentRef.current) {
-      animateContentHighlight(mainContentRef.current);
-    }
-  }, []);
-
-  const handleCreateFromPrompt = (type: BlockType, content: string) => {
-    const canvasElement = document.querySelector('.canvas-grid');
-    const canvasRect = canvasElement?.getBoundingClientRect();
-    
-    const position = {
-      x: ((canvasRect?.width || 800) / 2) - 150,
-      y: ((canvasRect?.height || 600) / 2) - 100
-    };
-    
-    addBlock(type, position, canvasRect as DOMRect);
+  }, [topic, autostart]);
+  
+  const handleBackToMenu = () => {
+    setSelectedGame(null);
   };
-
-  const handleGameRequest = (requestedTopic: string) => {
-    if (!requestedTopic.trim()) {
-      toast({
-        title: "Chủ Đề Trống",
-        description: "Vui lòng cung cấp chủ đề cho minigame",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Switch to manual mode when a chat request comes in
-    setIsManualMode(true);
-    
-    // Directly generate the game
-    setTopic(requestedTopic);
-    setIsGenerating(true);
-    
-    setTimeout(() => {
-      if (quizGeneratorRef.current) {
-        quizGeneratorRef.current.generateQuiz(requestedTopic);
-      } else {
-        toast({
-          title: "Lỗi Hệ Thống",
-          description: "Không thể kết nối với trình tạo minigame. Vui lòng thử lại.",
-          variant: "destructive",
-        });
-      }
-      setIsGenerating(false);
-    }, 100);
-  };
-
+  
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex flex-col w-full">
-        <div className="flex-1 flex overflow-hidden">
-          <Sidebar variant="inset" collapsible="icon">
-            <SidebarContent>
-              <div ref={sidebarRef} className="h-full">
-                <ChatInterface 
-                  onCreateBlock={handleCreateFromPrompt} 
-                  onQuizRequest={handleGameRequest}
-                />
-              </div>
-            </SidebarContent>
-          </Sidebar>
-          
-          <SidebarInset className="flex-1 bg-background overflow-hidden p-0 relative">
-            <div ref={mainContentRef} className="h-full relative">
-              {isManualMode ? (
-                <QuizGenerator 
-                  ref={quizGeneratorRef} 
-                  topic={topic}
-                />
-              ) : (
-                <QuickGameSelector />
-              )}
-            </div>
-          </SidebarInset>
-        </div>
+    <div className="min-h-screen flex flex-col bg-background">
+      <div className="flex items-center border-b border-border/40 p-3 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+        <Link to="/">
+          <Button variant="ghost" size="sm" className="mr-4">
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Canvas
+          </Button>
+        </Link>
+        <h1 className="text-xl font-bold">Minigame Giáo Dục</h1>
       </div>
-    </SidebarProvider>
+      
+      <div className="flex-1 overflow-hidden relative">
+        {selectedGame ? (
+          <div className="flex-1 h-full relative">
+            <QuizGenerator topic={selectedGame} ref={quizRef} />
+            <div className="absolute bottom-4 left-4">
+              <Button
+                onClick={handleBackToMenu}
+                variant="outline"
+                size="sm"
+                className="bg-background/80 backdrop-blur-sm shadow-md transition-transform active:scale-95"
+              >
+                Quay Lại Menu
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="h-full">
+            <QuickGameSelector onGameSelect={setSelectedGame} />
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
