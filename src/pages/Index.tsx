@@ -7,7 +7,7 @@ import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { Button } from '@/components/ui/button';
-import { Gamepad, Sparkles, GraduationCap } from 'lucide-react';
+import { Gamepad, Sparkles, GraduationCap, History } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -56,11 +56,17 @@ const Index = () => {
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent>
               <ChatInterface onCreateBlock={handleCreateFromPrompt} />
-              <div className="p-3 border-t border-border mt-auto">
+              <div className="p-3 border-t border-border mt-auto space-y-2">
                 <Link to="/quiz">
                   <Button variant="outline" className="w-full flex items-center gap-2 min-h-[44px]">
                     <GraduationCap className="h-4 w-4" />
                     Minigame Giáo Dục
+                  </Button>
+                </Link>
+                <Link to="/quiz/history">
+                  <Button variant="ghost" className="w-full flex items-center gap-2 min-h-[44px]">
+                    <History className="h-4 w-4" />
+                    Lịch Sử Game
                   </Button>
                 </Link>
               </div>

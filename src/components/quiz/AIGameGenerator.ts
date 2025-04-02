@@ -1,271 +1,225 @@
-
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GameSettingsData } from './types';
 
 export interface MiniGame {
   title: string;
   description: string;
-  content: string;
+  html: string;
 }
 
 export class AIGameGenerator {
-  private genAI: GoogleGenerativeAI;
-  private model: any;
-  private openAIKey: string | null = null;
-
+  private apiKey: string;
+  private openaiKey: string | null = null;
+  
   constructor(apiKey: string) {
-    this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    this.openAIKey = localStorage.getItem('openai_api_key');
-  }
-
-  setOpenAIKey(key: string) {
-    if (key && key.trim() !== '') {
-      this.openAIKey = key;
-      localStorage.setItem('openai_api_key', key);
-      return true;
-    }
-    return false;
-  }
-
-  hasOpenAIKey(): boolean {
-    return this.openAIKey !== null && this.openAIKey !== '';
-  }
-
-  async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
-    try {
-      console.log(`Starting game generation for topic: "${topic}" with settings:`, settings);
-      
-      // Generate with Gemini first
-      const geminiResult = await this.generateWithGemini(topic, settings);
-      
-      if (!geminiResult) {
-        console.error("Gemini failed to generate a valid result");
-        return null;
-      }
-      
-      console.log("Gemini successfully generated game");
-      
-      // If OpenAI key is available, enhance the code
-      if (this.hasOpenAIKey() && geminiResult) {
-        console.log("OpenAI key available, enhancing game...");
-        return await this.enhanceWithOpenAI(geminiResult, topic);
-      }
-      
-      // If no OpenAI key, return the Gemini result
-      return geminiResult;
-    } catch (error) {
-      console.error("Fatal error in generateMiniGame:", error);
-      return null;
-    }
+    this.apiKey = apiKey;
+    // Try to load OpenAI key from localStorage
+    this.openaiKey = localStorage.getItem('openai_api_key');
   }
   
-  private async generateWithGemini(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
-    const settingsPrompt = settings ? `
-      Hãy tạo với các cài đặt sau:
-      - Độ khó: ${settings.difficulty}
-      - Số lượng câu hỏi/thử thách: ${settings.questionCount}
-      - Thời gian cho mỗi câu hỏi/thử thách: ${settings.timePerQuestion} giây
-      - Thể loại: ${settings.category}
-    ` : '';
-
-    const prompt = `
-      Tạo một minigame tương tác hoàn chỉnh về chủ đề "${topic}".
-      ${settingsPrompt}
-      
-      HƯỚNG DẪN CHI TIẾT:
-      1. TẠO MỘT FILE HTML ĐẦY ĐỦ:
-         - Bao gồm đầy đủ HTML, CSS và JavaScript trong một file HTML duy nhất
-         - Sử dụng thẻ <style> cho CSS và thẻ <script> cho JavaScript
-         - Không tách riêng code thành nhiều file
-      
-      2. YÊU CẦU KỸ THUẬT:
-         - Code phải sạch sẽ, có indentation đúng và có comments giải thích
-         - Tất cả các chức năng phải hoạt động trong một file HTML duy nhất
-         - Game phải responsive, hoạt động tốt trên cả điện thoại và máy tính
-         - Có đầy đủ xử lý lỗi và phản hồi người dùng
-         - KHÔNG sử dụng thư viện bên ngoài hay CDN
-      
-      3. TÍNH NĂNG GAME:
-         - Giao diện hấp dẫn với màu sắc và animation
-         - Tính năng tương tác như đếm điểm, hiển thị thời gian
-         - Có màn hình kết thúc game và nút chơi lại
-         - Thêm âm thanh nếu cần thiết (sử dụng Web Audio API)
-      
-      4. YÊU CẦU PHỨC TẠP HƠN:
-         - Có thể tạo các loại game phức tạp như xếp hình, platformer, puzzle...
-         - Có thể lưu trữ điểm số cao nhất vào localStorage
-         - Thêm các hiệu ứng đặc biệt nếu phù hợp
-         - Thêm nhiều cấp độ nếu có thể
-      
-      Trả về một đối tượng JSON với định dạng sau:
-      {
-        "title": "Tên minigame",
-        "description": "Mô tả ngắn gọn về minigame",
-        "content": "<đây là toàn bộ mã HTML đầy đủ, bao gồm cả CSS và JavaScript>"
-      }
-      
-      QUAN TRỌNG: Trả về JSON hoàn chỉnh. Mã HTML phải là một trang web hoàn chỉnh và có thể chạy độc lập.
-    `;
-
-    try {
-      console.log("Sending request to Gemini API...");
-      const result = await this.model.generateContent(prompt);
-      const response = result.response;
-      const text = response.text();
-      
-      console.log("Received Gemini response, extracting JSON...");
-      
-      // Clean and extract the JSON object
-      const jsonMatch = text.match(/{[\s\S]*}/);
-      if (jsonMatch) {
-        try {
-          // Remove problematic escape sequences
-          const cleanedJson = jsonMatch[0]
-            .replace(/\\(?!["\\/bfnrt])/g, "")
-            .replace(/\\\\/g, "\\")
-            .replace(/\\n/g, "\n")
-            .replace(/\\"/g, '"');
-          
-          console.log("Parsing JSON from Gemini response...");
-          const gameData = JSON.parse(cleanedJson);
-          
-          return {
-            title: gameData.title,
-            description: gameData.description,
-            content: gameData.content
-          };
-        } catch (jsonError) {
-          console.error("Error parsing Gemini JSON:", jsonError);
-          console.log("JSON extraction failed, attempting manual extraction");
-          
-          // Manual extraction as fallback
-          const titleMatch = text.match(/"title"\s*:\s*"([^"]*)"/);
-          const descriptionMatch = text.match(/"description"\s*:\s*"([^"]*)"/);
-          const contentStartMatch = text.match(/"content"\s*:\s*"(<!DOCTYPE html>|<html>|<body>)/);
-          
-          if (titleMatch && descriptionMatch && contentStartMatch) {
-            // Find start index of content
-            const contentStartIdx = text.indexOf('"content"');
-            if (contentStartIdx > 0) {
-              // Extract from content start to end, handling escaping
-              let contentStr = "";
-              let inContent = false;
-              let quoteCount = 0;
-              
-              for (let i = contentStartIdx + 10; i < text.length; i++) {
-                if (text[i] === '"' && (i === 0 || text[i-1] !== '\\')) {
-                  quoteCount++;
-                  if (quoteCount === 1) {
-                    inContent = true;
-                    continue;
-                  } else if (inContent && quoteCount > 1 && text.substr(i-1, 2) !== '\\"') {
-                    break;
-                  }
-                }
-                if (inContent) contentStr += text[i];
-              }
-              
-              return {
-                title: titleMatch[1],
-                description: descriptionMatch[1],
-                content: contentStr.replace(/\\"/g, '"').replace(/\\n/g, '\n')
-              };
-            }
-          }
-        }
-      }
-      
-      console.error("Failed to extract game content from Gemini response");
-      return null;
-    } catch (error) {
-      console.error("Error generating with Gemini:", error);
-      return null;
+  public setOpenAIKey(key: string): boolean {
+    if (!key.trim()) {
+      localStorage.removeItem('openai_api_key');
+      this.openaiKey = null;
+      return false;
     }
-  }
-  
-  private async enhanceWithOpenAI(geminiGame: MiniGame, topic: string): Promise<MiniGame | null> {
-    if (!this.openAIKey) return geminiGame;
     
     try {
-      console.log("Preparing OpenAI enhancement request...");
+      localStorage.setItem('openai_api_key', key.trim());
+      this.openaiKey = key.trim();
+      return true;
+    } catch (e) {
+      console.error('Failed to save OpenAI key:', e);
+      return false;
+    }
+  }
+  
+  public hasOpenAIKey(): boolean {
+    return !!this.openaiKey;
+  }
+  
+  private async fetchWithTimeout(url: string, options: RequestInit, timeout = 30000): Promise<Response> {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      });
+      clearTimeout(id);
+      return response;
+    } catch (error) {
+      clearTimeout(id);
+      throw error;
+    }
+  }
+  
+  private async generateWithGemini(topic: string, settings: GameSettingsData): Promise<MiniGame | null> {
+    try {
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.apiKey}`;
+      
+      const difficultyDesc = {
+        easy: "very simple for young children (6-8 years old)",
+        medium: "moderately challenging for children (9-12 years old)",
+        hard: "challenging for teenagers (13-16 years old)"
+      }[settings.difficulty] || "moderately challenging for children";
+      
+      const categoryDesc = {
+        general: "general knowledge",
+        math: "mathematics",
+        science: "science",
+        history: "history",
+        geography: "geography",
+        arts: "arts and music",
+        sports: "sports"
+      }[settings.category] || "general knowledge";
+      
       const prompt = `
-      You are a master web developer specializing in creating bug-free, interactive web games.
-      
-      I'm going to provide you with HTML code for a mini-game on the topic of "${topic}".
-      Your task is to improve this code by:
-      
-      1. Fixing any bugs or errors
-      2. Improving functionality and user experience
-      3. Adding more game complexity if appropriate
-      4. Ensuring the game is responsive and runs well on mobile
-      5. Keep ALL code in a single HTML file with internal <style> and <script> tags
-      
-      IMPORTANT:
-      - Do NOT change the fundamental game concept
-      - Return ONLY the complete, enhanced HTML file - nothing else
-      - Make sure all code is properly formatted and indented
-      - Add helpful comments to explain complex logic
-      
-      Here is the current code:
-      
-      ${geminiGame.content}
+        Create an interactive HTML5 educational minigame about "${topic}" with the following specifications:
+        - Difficulty level: ${difficultyDesc}
+        - Category: ${categoryDesc}
+        - Number of questions/challenges: ${settings.questionCount}
+        - Time per question: ${settings.timePerQuestion} seconds
+        
+        The game should:
+        1. Be completely self-contained in a single HTML file with inline JavaScript and CSS
+        2. Be visually appealing with a clean, modern design suitable for children
+        3. Include a title screen, game mechanics, scoring system, and end screen
+        4. Work in any modern browser without external dependencies
+        5. Be educational and engaging
+        6. Include Vietnamese language instructions and content
+        7. Have clear instructions for players
+        8. Include sound effects (optional) and visual feedback
+        9. Be responsive and work on both desktop and mobile devices
+        
+        Return ONLY the complete HTML code without any explanations or markdown formatting.
       `;
-
-      console.log("Sending request to OpenAI API (gpt-4o model)...");
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      
+      const response = await this.fetchWithTimeout(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.openAIKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.5,
-          max_tokens: 4000
+          contents: [
+            {
+              parts: [
+                { text: prompt }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 8192,
+          }
         })
-      });
-
+      }, 60000);
+      
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error("OpenAI API error:", errorData);
-        return geminiGame; // Return original game if enhancement fails
+        console.error('Gemini API error:', await response.text());
+        throw new Error(`Gemini API error: ${response.status}`);
       }
-
-      console.log("Received OpenAI response");
+      
       const data = await response.json();
       
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        const content = data.choices[0].message.content;
-        console.log("OpenAI content length:", content.length);
-        
-        // Extract HTML document
-        const htmlMatch = content.match(/<(!DOCTYPE|html)[\s\S]*<\/html>/i);
-        if (htmlMatch) {
-          const enhancedHtml = htmlMatch[0];
-          console.log("Successfully extracted HTML from OpenAI response");
-          
-          return {
-            title: geminiGame.title,
-            description: geminiGame.description,
-            content: enhancedHtml
-          };
-        } else {
-          console.log("Could not extract HTML from OpenAI response, using complete response");
-          return {
-            title: geminiGame.title,
-            description: geminiGame.description,
-            content: content
-          };
-        }
+      // Extract the HTML content from the response
+      const htmlContent = data.candidates[0].content.parts[0].text;
+      
+      // Extract title from HTML (looking for <title> tag)
+      const titleMatch = htmlContent.match(/<title>(.*?)<\/title>/i);
+      const title = titleMatch ? titleMatch[1] : topic;
+      
+      // Extract meta description or create one
+      const descriptionMatch = htmlContent.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
+      const description = descriptionMatch ? descriptionMatch[1] : `Educational game about ${topic}`;
+      
+      return {
+        title,
+        description,
+        html: htmlContent
+      };
+    } catch (error) {
+      console.error('Error generating game with Gemini:', error);
+      return null;
+    }
+  }
+  
+  private async enhanceWithOpenAI(miniGame: MiniGame): Promise<MiniGame> {
+    if (!this.openaiKey) {
+      return miniGame;
+    }
+    
+    try {
+      const response = await this.fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.openaiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert HTML5 game developer specializing in educational games. Your task is to improve the provided HTML5 game code to make it more engaging, visually appealing, and educational."
+            },
+            {
+              role: "user",
+              content: `Please improve this educational HTML5 game. Focus on:
+              1. Fixing any bugs or issues
+              2. Improving the visual design and animations
+              3. Enhancing game mechanics for better engagement
+              4. Adding better feedback and instructions
+              5. Ensuring it works well on mobile devices
+              
+              Here's the current code:
+              
+              ${miniGame.html}`
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 4096
+        })
+      }, 60000);
+      
+      if (!response.ok) {
+        console.error('OpenAI API error:', await response.text());
+        return miniGame; // Return original if enhancement fails
       }
       
-      console.log("No valid content from OpenAI, returning original game");
-      return geminiGame;
+      const data = await response.json();
+      const enhancedHtml = data.choices[0].message.content.replace(/```html|```/g, '').trim();
+      
+      return {
+        ...miniGame,
+        html: enhancedHtml
+      };
     } catch (error) {
-      console.error("Error enhancing with OpenAI:", error);
-      return geminiGame;
+      console.error('Error enhancing game with OpenAI:', error);
+      return miniGame; // Return original if enhancement fails
+    }
+  }
+  
+  public async generateMiniGame(topic: string, settings: GameSettingsData): Promise<MiniGame | null> {
+    try {
+      // First generate with Gemini
+      const miniGame = await this.generateWithGemini(topic, settings);
+      
+      if (!miniGame) {
+        throw new Error('Failed to generate game with Gemini');
+      }
+      
+      // If OpenAI key is available, enhance the game
+      if (this.openaiKey) {
+        return await this.enhanceWithOpenAI(miniGame);
+      }
+      
+      return miniGame;
+    } catch (error) {
+      console.error('Error in generateMiniGame:', error);
+      return null;
     }
   }
 }

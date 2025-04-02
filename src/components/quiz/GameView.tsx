@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Share2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,7 +19,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Reset loaded state when game changes
     setIsFrameLoaded(false);
   }, [miniGame]);
 
@@ -38,9 +36,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
       
       setShareUrl(url);
       
-      // Copy to clipboard automatically
       navigator.clipboard.writeText(url).catch(() => {
-        // Silent fallback if clipboard API fails
       });
       
       toast({
@@ -78,14 +74,12 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   const handleFrameLoad = () => {
     setIsFrameLoaded(true);
     
-    // Animate the iframe container when content loads
     const container = iframeRef.current?.parentElement;
     if (container) {
       container.classList.add('animate-fade-in');
     }
   };
 
-  // Thêm mã CSS cho hiệu ứng click
   const injectClickEffectScript = () => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
       try {
@@ -125,18 +119,16 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
           
           @media (max-width: 768px) {
             button, a, input[type="submit"], input[type="button"] {
-              min-height: 38px; /* Làm cho các nút dễ bấm hơn trên thiết bị di động */
+              min-height: 38px;
               padding: 8px 16px;
             }
           }
         `;
         iframeDocument.head.appendChild(style);
         
-        // Thêm script xử lý hiệu ứng click
         const script = iframeDocument.createElement('script');
         script.textContent = `
           document.addEventListener('click', function(e) {
-            // Kiểm tra xem có phải là phần tử tương tác không
             const isInteractive = e.target.matches('button, a, [role="button"], input[type="submit"], input[type="button"], .clickable') ||
                                   e.target.closest('button, a, [role="button"], input[type="submit"], input[type="button"], .clickable');
             
@@ -163,7 +155,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
             }
           });
           
-          // Thêm tính năng thích ứng màn hình
           const meta = document.querySelector('meta[name="viewport"]');
           if (!meta) {
             const newMeta = document.createElement('meta');
@@ -183,7 +174,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
 
   useEffect(() => {
     if (isFrameLoaded) {
-      // Chờ một chút để đảm bảo iframe đã tải hoàn toàn
       const timer = setTimeout(() => {
         injectClickEffectScript();
       }, 200);

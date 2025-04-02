@@ -8,6 +8,7 @@ import { cleanupExpiredGames } from './utils/gameExport';
 import Index from './pages/Index';
 import Quiz from './pages/Quiz';
 import SharedGame from './pages/SharedGame';
+import GameHistory from './pages/GameHistory';
 import NotFound from './pages/NotFound';
 
 const App = () => {
@@ -31,6 +32,7 @@ const App = () => {
           <Route path="/canvas" element={<Index />} />
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/quiz/shared/:id" element={<SharedGame />} />
+          <Route path="/quiz/history" element={<GameHistory />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

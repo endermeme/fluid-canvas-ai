@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
 import QuickGameSelector from '@/components/quiz/QuickGameSelector';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
@@ -9,6 +10,8 @@ import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
 import { animateAIPanelSlideIn, animateContentHighlight } from '@/lib/animations';
+import { History } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
@@ -104,6 +107,17 @@ const Quiz = () => {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex flex-col w-full">
+        {/* Header with history button */}
+        <div className="w-full bg-background z-10 border-b border-border/40 px-4 py-2 flex justify-between items-center">
+          <h1 className="text-lg font-semibold">Minigame Giáo Dục</h1>
+          <Link to="/quiz/history">
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              Lịch sử game
+            </Button>
+          </Link>
+        </div>
+        
         <div className="flex-1 flex overflow-hidden">
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent>
