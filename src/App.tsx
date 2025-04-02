@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { ThemeProvider } from './components/ui/theme-provider';
 import { Toaster } from './components/ui/toaster';
 import { cleanupExpiredGames } from './utils/gameExport';
@@ -8,6 +8,7 @@ import { cleanupExpiredGames } from './utils/gameExport';
 import Index from './pages/Index';
 import Quiz from './pages/Quiz';
 import SharedGame from './pages/SharedGame';
+import GameHistory from './pages/GameHistory';
 import NotFound from './pages/NotFound';
 
 const App = () => {
@@ -27,10 +28,11 @@ const App = () => {
     <ThemeProvider defaultTheme="system" enableSystem>
       <Router>
         <Routes>
-          <Route path="/" element={<Navigate to="/canvas" replace />} />
+          <Route path="/" element={<Navigate to="/quiz" replace />} />
           <Route path="/canvas" element={<Index />} />
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/quiz/shared/:id" element={<SharedGame />} />
+          <Route path="/quiz/history" element={<GameHistory />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

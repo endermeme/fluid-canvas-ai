@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Clock, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Clock, AlertTriangle, History } from 'lucide-react';
 
 const SharedGame = () => {
   const { id } = useParams<{ id: string }>();
@@ -61,12 +61,20 @@ const SharedGame = () => {
         <p className="text-muted-foreground text-center max-w-md">
           Liên kết này có thể đã hết hạn hoặc không tồn tại. Trò chơi chỉ có hiệu lực trong 48 giờ.
         </p>
-        <Link to="/quiz">
-          <Button>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Quay lại màn hình chính
-          </Button>
-        </Link>
+        <div className="flex space-x-4">
+          <Link to="/quiz">
+            <Button>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Quay lại màn hình chính
+            </Button>
+          </Link>
+          <Link to="/quiz/history">
+            <Button variant="outline">
+              <History className="mr-2 h-4 w-4" />
+              Xem lịch sử game
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -76,12 +84,20 @@ const SharedGame = () => {
       <div className="flex flex-col items-center justify-center h-screen space-y-6 p-4">
         <AlertTriangle className="text-destructive h-16 w-16" />
         <h1 className="text-2xl font-bold">Trò chơi không tìm thấy</h1>
-        <Link to="/quiz">
-          <Button>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Tạo trò chơi mới
-          </Button>
-        </Link>
+        <div className="flex space-x-4">
+          <Link to="/quiz">
+            <Button>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Tạo trò chơi mới
+            </Button>
+          </Link>
+          <Link to="/quiz/history">
+            <Button variant="outline">
+              <History className="mr-2 h-4 w-4" />
+              Xem lịch sử game
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -89,16 +105,26 @@ const SharedGame = () => {
   return (
     <div className="flex flex-col h-screen">
       <header className="bg-background border-b p-3 flex justify-between items-center">
-        <Link to="/quiz">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Quay lại
-          </Button>
-        </Link>
+        <div className="flex space-x-3">
+          <Link to="/quiz">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Quay lại
+            </Button>
+          </Link>
+          <Link to="/quiz/history">
+            <Button variant="ghost" size="sm">
+              <History className="h-4 w-4 mr-2" />
+              Lịch sử
+            </Button>
+          </Link>
+        </div>
         
-        <div className="flex items-center text-sm text-muted-foreground">
+        <div className="flex items-center text-sm">
           <Clock className="h-4 w-4 mr-1" />
-          <span>Còn lại: {timeLeft}</span>
+          <span className={game.isShared ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}>
+            {game.isShared ? `Có hiệu lực: ${timeLeft}` : timeLeft}
+          </span>
         </div>
       </header>
       
