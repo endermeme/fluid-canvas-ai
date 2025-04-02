@@ -145,7 +145,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
       </ScrollArea>
       
-      <div className="p-3 border-t border-border mt-auto sticky bottom-0 bg-background">
+      <div className="p-3 border-t border-border bg-background">
         <div className="relative">
           <Textarea
             className="w-full p-2 pr-10 bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-sm min-h-[70px]"

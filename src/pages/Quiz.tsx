@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
 import QuickGameSelector from '@/components/quiz/QuickGameSelector';
