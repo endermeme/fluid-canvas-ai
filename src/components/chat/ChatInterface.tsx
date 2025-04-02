@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, BrainCircuit, Star, GraduationCap } from 'lucide-react';
+import { Send, Star, GraduationCap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
@@ -108,8 +108,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
       </div>
       
-      {/* Messages area - Flexible height */}
-      <div className="flex-1 overflow-hidden">
+      {/* Messages area - Flexible height with scroll */}
+      <div className="flex-grow overflow-hidden relative">
         <ScrollArea className="h-full">
           <div className="p-3 space-y-3">
             {conversation.map((item, index) => (
@@ -149,7 +149,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </ScrollArea>
       </div>
       
-      {/* Input area - Fixed height */}
+      {/* Input area - Fixed at bottom */}
       <div className="p-3 border-t border-border bg-background shrink-0">
         <div className="relative">
           <Textarea

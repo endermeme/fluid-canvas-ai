@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
 import { animateAIPanelSlideIn, animateContentHighlight } from '@/lib/animations';
 import { BookmarkCheck, Bookmark } from 'lucide-react';
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
@@ -107,29 +107,33 @@ const Quiz = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Use Drawer for mobile and custom sidebar for desktop
+  const isMobile = window.innerWidth < 768;
+
   return (
-    <div className="min-h-screen flex flex-col w-full">
-      <div className="flex-1 flex overflow-hidden">
-        {/* Improved sidebar with fixed height */}
-        <Collapsible
-          open={sidebarOpen}
-          onOpenChange={setSidebarOpen}
-          className="z-20 h-full"
-        >
-          <div className={`transition-all duration-300 h-full ${sidebarOpen ? 'w-72' : 'w-0'}`}>
-            <CollapsibleContent className="h-full">
-              <div ref={sidebarRef} className="h-full flex flex-col">
+    <div className="min-h-screen flex flex-col w-full bg-background">
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Sidebar for desktop */}
+        {!isMobile ? (
+          <div 
+            ref={sidebarRef}
+            className={`h-full transition-all duration-300 border-r border-border ${
+              sidebarOpen ? 'w-72' : 'w-0 overflow-hidden'
+            }`}
+          >
+            {sidebarOpen && (
+              <div className="h-full flex flex-col">
                 <ChatInterface 
                   onCreateBlock={handleCreateFromPrompt} 
                   onQuizRequest={handleGameRequest}
                 />
               </div>
-            </CollapsibleContent>
+            )}
           </div>
-        </Collapsible>
+        ) : null}
         
-        <div className="flex-1 bg-background overflow-hidden p-0 relative">
-          {/* Sidebar toggle button positioned on the left edge */}
+        <div className="flex-1 overflow-hidden p-0 relative">
+          {/* Sidebar toggle button */}
           <button
             onClick={toggleSidebar}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-30 p-2 bg-primary/10 rounded-r-md hover:bg-primary/20 transition-colors"
@@ -154,6 +158,20 @@ const Quiz = () => {
             )}
           </div>
         </div>
+        
+        {/* Drawer for mobile */}
+        {isMobile && (
+          <Drawer open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            <DrawerContent className="h-[80vh]">
+              <div className="h-full">
+                <ChatInterface 
+                  onCreateBlock={handleCreateFromPrompt} 
+                  onQuizRequest={handleGameRequest}
+                />
+              </div>
+            </DrawerContent>
+          </Drawer>
+        )}
       </div>
     </div>
   );
