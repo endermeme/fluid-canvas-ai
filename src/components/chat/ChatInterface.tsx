@@ -1,12 +1,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Star, GraduationCap } from 'lucide-react';
+import { Send, Sparkles, BrainCircuit, Star, GraduationCap, Bookmark, BookmarkCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
 import { useNavigate } from 'react-router-dom';
 import OpenAIKeyModal from '@/components/quiz/OpenAIKeyModal';
-import { Textarea } from '@/components/ui/textarea';
 
 interface Message {
   role: 'user' | 'ai';
@@ -17,11 +16,15 @@ interface Message {
 interface ChatInterfaceProps {
   onCreateBlock?: (type: BlockType, content: string) => void;
   onQuizRequest?: (topic: string) => void;
+  onToggleSidebar?: () => void;
+  isSidebarOpen?: boolean;
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
   onCreateBlock, 
-  onQuizRequest
+  onQuizRequest, 
+  onToggleSidebar,
+  isSidebarOpen = true
 }) => {
   const [message, setMessage] = useState('');
   const [conversation, setConversation] = useState<Message[]>([
@@ -97,64 +100,77 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
+
+  const handleToggleSidebar = () => {
+    if (onToggleSidebar) {
+      onToggleSidebar();
+    }
+  };
   
   return (
-    <div className="flex flex-col h-full w-full">
-      {/* Header - Fixed height */}
-      <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/20 shrink-0">
+    <div className="flex flex-col h-full">
+      <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/20">
         <div className="flex items-center">
           <GraduationCap size={20} className="text-primary mr-2" />
           <h3 className="font-medium">Trợ Lý Giáo Dục</h3>
         </div>
+        <button
+          onClick={handleToggleSidebar}
+          className="p-1.5 rounded-md hover:bg-secondary/40 transition-colors"
+          title={isSidebarOpen ? "Thu gọn" : "Mở rộng"}
+        >
+          {isSidebarOpen ? (
+            <BookmarkCheck size={18} className="text-primary" />
+          ) : (
+            <Bookmark size={18} className="text-primary" />
+          )}
+        </button>
       </div>
       
-      {/* Messages area - Flexible height with scroll */}
-      <div className="flex-grow overflow-hidden relative">
-        <ScrollArea className="h-full">
-          <div className="p-3 space-y-3">
-            {conversation.map((item, index) => (
+      <ScrollArea className="flex-1">
+        <div className="p-3 space-y-3">
+          {conversation.map((item, index) => (
+            <div 
+              key={index} 
+              className={`flex flex-col ${item.role === 'user' ? 'items-end' : 'items-start'}`}
+            >
               <div 
-                key={index} 
-                className={`flex flex-col ${item.role === 'user' ? 'items-end' : 'items-start'}`}
+                className={`p-3 max-w-[85%] rounded-lg ${
+                  item.role === 'user' 
+                    ? 'bg-primary/10 rounded-tr-none' 
+                    : 'bg-secondary/70 rounded-tl-none'
+                }`}
               >
-                <div 
-                  className={`p-3 max-w-[85%] rounded-lg ${
-                    item.role === 'user' 
-                      ? 'bg-primary/10 rounded-tr-none' 
-                      : 'bg-secondary/70 rounded-tl-none'
-                  }`}
-                >
-                  <p className="text-sm">{item.message}</p>
-                </div>
-                <span className="text-xs text-muted-foreground mt-1">
-                  {formatTime(item.timestamp)}
-                </span>
+                <p className="text-sm">{item.message}</p>
               </div>
-            ))}
-            
-            {isLoading && (
-              <div className="flex items-start">
-                <div className="p-3 bg-secondary/70 rounded-lg rounded-tl-none flex items-center">
-                  <div className="typing-indicator">
-                    <span style={{ '--dot-index': '0' } as React.CSSProperties}></span>
-                    <span style={{ '--dot-index': '1' } as React.CSSProperties}></span>
-                    <span style={{ '--dot-index': '2' } as React.CSSProperties}></span>
-                  </div>
+              <span className="text-xs text-muted-foreground mt-1">
+                {formatTime(item.timestamp)}
+              </span>
+            </div>
+          ))}
+          
+          {isLoading && (
+            <div className="flex items-start">
+              <div className="p-3 bg-secondary/70 rounded-lg rounded-tl-none flex items-center">
+                <div className="typing-indicator">
+                  <span style={{ '--dot-index': '0' } as React.CSSProperties}></span>
+                  <span style={{ '--dot-index': '1' } as React.CSSProperties}></span>
+                  <span style={{ '--dot-index': '2' } as React.CSSProperties}></span>
                 </div>
               </div>
-            )}
-            
-            <div ref={messagesEndRef} />
-          </div>
-        </ScrollArea>
-      </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+      </ScrollArea>
       
-      {/* Input area - Fixed at bottom */}
-      <div className="p-3 border-t border-border bg-background shrink-0">
+      <div className="p-3 border-t border-border">
         <div className="relative">
-          <Textarea
-            className="w-full p-2 pr-10 bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-sm min-h-[70px]"
+          <textarea
+            className="w-full p-2 pr-10 bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-sm"
             placeholder="Nhập chủ đề học tập để tạo trò chơi tương tác giáo dục..."
+            rows={2}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
