@@ -62,8 +62,8 @@ const CanvasArea: React.FC<CanvasAreaProps> = ({
     const canvas = canvasRef.current;
     
     if (canvas) {
-      // Fix for TypeScript error - use setAttribute for vendor prefixed properties
-      canvas.setAttribute('style', 'webkit-tap-highlight-color: transparent');
+      // Fix for TypeScript - avoid using vendor prefixed properties directly
+      canvas.style.setProperty('-webkit-tap-highlight-color', 'transparent');
       
       if (isMobile) {
         // Better touch handling for mobile
