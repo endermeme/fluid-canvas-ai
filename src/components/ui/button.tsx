@@ -49,26 +49,36 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         props.onClick(e);
       }
       
-      // Tạo hiệu ứng gợn sóng khi click
+      // Create ripple effect
       const button = e.currentTarget;
       const rect = button.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
+      const size = Math.max(rect.width, rect.height) * 2;
+      
+      // Calculate position relative to the button
       const x = e.clientX - rect.left - size/2;
       const y = e.clientY - rect.top - size/2;
       
+      // Create ripple element
       const ripple = document.createElement('span');
-      ripple.style.width = ripple.style.height = size + 'px';
-      ripple.style.left = x + 'px';
-      ripple.style.top = y + 'px';
-      ripple.className = 'absolute rounded-full bg-white/20 pointer-events-none transform scale-0';
-      ripple.style.animationName = 'button-ripple';
-      ripple.style.animationDuration = '0.6s';
+      ripple.className = 'absolute rounded-full bg-white/30 pointer-events-none transform animate-ripple';
+      ripple.style.width = ripple.style.height = `${size}px`;
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
       
+      // Make sure button has position relative for absolute positioning of ripple
+      if (window.getComputedStyle(button).position !== 'relative') {
+        button.style.position = 'relative';
+      }
+      button.style.overflow = 'hidden';
+      
+      // Add ripple and remove after animation completes
       button.appendChild(ripple);
       
       setTimeout(() => {
-        ripple.remove();
-      }, 600);
+        if (button.contains(ripple)) {
+          ripple.remove();
+        }
+      }, 700);
     };
     
     return (

@@ -58,7 +58,7 @@ const Index = () => {
               <ChatInterface onCreateBlock={handleCreateFromPrompt} />
               <div className="p-3 border-t border-border mt-auto">
                 <Link to="/quiz">
-                  <Button variant="outline" className="w-full flex items-center gap-2">
+                  <Button variant="outline" className="w-full flex items-center gap-2 min-h-[44px]">
                     <Gamepad className="h-4 w-4" />
                     Minigame
                   </Button>
@@ -72,11 +72,11 @@ const Index = () => {
               <CanvasContainer />
             </div>
             
-            {/* Quick Game Options Panel - Modern Design */}
-            <div className="bg-gradient-to-r from-background to-accent/20 backdrop-blur-md border-t border-border/40 p-3">
+            {/* Quick Game Options Panel - Enhanced Design */}
+            <div className="bg-gradient-to-r from-background to-accent/20 backdrop-blur-md border-t border-border/40 p-3 shadow-sm">
               <div className="max-w-4xl mx-auto">
                 <div className="flex items-center mb-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 mr-2">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 mr-2 animate-pulse-soft">
                     <Sparkles className="h-4 w-4 text-primary" />
                   </div>
                   <h3 className="text-lg font-medium bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
@@ -84,13 +84,13 @@ const Index = () => {
                   </h3>
                 </div>
                 
-                <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
                   {quickGameOptions.map((game, index) => (
                     <div key={game} className="flex">
                       <Button
                         variant="ghost" 
                         size="sm"
-                        className="w-full h-auto py-2.5 px-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-primary/10 hover:border-primary/30 transition-all duration-200 shadow-sm animate-float-in"
+                        className="w-full h-auto py-3 px-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-primary/10 hover:border-primary/30 transition-all duration-200 shadow-sm animate-float-in min-h-[52px] text-sm"
                         style={{animationDelay: `${index * 0.05}s`}}
                         onClick={() => handleQuickGameSelect(game)}
                       >
