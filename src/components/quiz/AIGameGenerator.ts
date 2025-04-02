@@ -1,4 +1,3 @@
-
 import { GameSettingsData } from './types';
 
 export interface MiniGame {
@@ -57,7 +56,7 @@ export class AIGameGenerator {
   
   private async generateWithGemini(topic: string, settings: GameSettingsData): Promise<MiniGame | null> {
     try {
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.apiKey}`;
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.apiKey}`;
       
       const difficultyDesc = {
         easy: "very simple for young children (6-8 years old)",
@@ -125,14 +124,11 @@ export class AIGameGenerator {
       
       const data = await response.json();
       
-      // Extract the HTML content from the response
       const htmlContent = data.candidates[0].content.parts[0].text;
       
-      // Extract title from HTML (looking for <title> tag)
       const titleMatch = htmlContent.match(/<title>(.*?)<\/title>/i);
       const title = titleMatch ? titleMatch[1] : topic;
       
-      // Extract meta description or create one
       const descriptionMatch = htmlContent.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
       const description = descriptionMatch ? descriptionMatch[1] : `Educational game about ${topic}`;
       
@@ -187,7 +183,7 @@ export class AIGameGenerator {
       
       if (!response.ok) {
         console.error('OpenAI API error:', await response.text());
-        return miniGame; // Return original if enhancement fails
+        return miniGame;
       }
       
       const data = await response.json();
@@ -199,20 +195,18 @@ export class AIGameGenerator {
       };
     } catch (error) {
       console.error('Error enhancing game with OpenAI:', error);
-      return miniGame; // Return original if enhancement fails
+      return miniGame;
     }
   }
   
   public async generateMiniGame(topic: string, settings: GameSettingsData): Promise<MiniGame | null> {
     try {
-      // First generate with Gemini
       const miniGame = await this.generateWithGemini(topic, settings);
       
       if (!miniGame) {
         throw new Error('Failed to generate game with Gemini');
       }
       
-      // If OpenAI key is available, enhance the game
       if (this.openaiKey) {
         return await this.enhanceWithOpenAI(miniGame);
       }
