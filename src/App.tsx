@@ -27,7 +27,7 @@ const App = () => {
     <ThemeProvider defaultTheme="system" enableSystem>
       <Router>
         <Routes>
-          <Route path="/" element={<Navigate to="/quiz" replace />} />
+          <Route path="/" element={<Navigate to="/canvas" replace />} />
           <Route path="/canvas" element={<Index />} />
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/quiz/shared/:id" element={<SharedGame />} />
