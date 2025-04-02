@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, BrainCircuit, Star, GraduationCap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -5,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
 import { useNavigate } from 'react-router-dom';
 import OpenAIKeyModal from '@/components/quiz/OpenAIKeyModal';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Message {
   role: 'user' | 'ai';
@@ -143,12 +145,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
       </ScrollArea>
       
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-border mt-auto">
         <div className="relative">
-          <textarea
-            className="w-full p-2 pr-10 bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-sm"
+          <Textarea
+            className="w-full p-2 pr-10 bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-sm min-h-[70px]"
             placeholder="Nhập chủ đề học tập để tạo trò chơi tương tác giáo dục..."
-            rows={2}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}

@@ -115,11 +115,11 @@ const Quiz = () => {
         <Collapsible
           open={sidebarOpen}
           onOpenChange={setSidebarOpen}
-          className="z-20"
+          className="z-20 h-full"
         >
-          <div className={`transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-0'}`}>
-            <CollapsibleContent className="h-full">
-              <div ref={sidebarRef} className="h-full">
+          <div className={`transition-all duration-300 h-full ${sidebarOpen ? 'w-72' : 'w-0'}`}>
+            <CollapsibleContent className="h-full flex flex-col">
+              <div ref={sidebarRef} className="h-full flex flex-col">
                 <ChatInterface 
                   onCreateBlock={handleCreateFromPrompt} 
                   onQuizRequest={handleGameRequest}
