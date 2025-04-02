@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
 import { animateAIPanelSlideIn, animateContentHighlight } from '@/lib/animations';
 import { BookmarkCheck, Bookmark } from 'lucide-react';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
@@ -108,49 +109,54 @@ const Quiz = () => {
   };
 
   return (
-    <SidebarProvider defaultOpen={sidebarOpen}>
-      <div className="min-h-screen flex flex-col w-full">
-        <div className="flex-1 flex overflow-hidden">
-          <Sidebar variant="inset" collapsible="icon">
-            <SidebarContent>
+    <div className="min-h-screen flex flex-col w-full">
+      <div className="flex-1 flex overflow-hidden">
+        {/* Use Collapsible to control the sidebar visibility */}
+        <Collapsible
+          open={sidebarOpen}
+          onOpenChange={setSidebarOpen}
+          className="z-20"
+        >
+          <div className={`transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-0'}`}>
+            <CollapsibleContent className="h-full">
               <div ref={sidebarRef} className="h-full">
                 <ChatInterface 
                   onCreateBlock={handleCreateFromPrompt} 
                   onQuizRequest={handleGameRequest}
                 />
               </div>
-            </SidebarContent>
-          </Sidebar>
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
+        
+        <div className="flex-1 bg-background overflow-hidden p-0 relative">
+          {/* Sidebar toggle button positioned on the left edge */}
+          <button
+            onClick={toggleSidebar}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-30 p-2 bg-primary/10 rounded-r-md hover:bg-primary/20 transition-colors"
+            title={sidebarOpen ? "Thu gọn" : "Mở rộng"}
+            aria-label={sidebarOpen ? "Thu gọn" : "Mở rộng"}
+          >
+            {sidebarOpen ? (
+              <BookmarkCheck size={20} className="text-primary" />
+            ) : (
+              <Bookmark size={20} className="text-primary" />
+            )}
+          </button>
           
-          <SidebarInset className="flex-1 bg-background overflow-hidden p-0 relative">
-            {/* Sidebar toggle button positioned on the left edge */}
-            <button
-              onClick={toggleSidebar}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-2 bg-primary/10 rounded-r-md hover:bg-primary/20 transition-colors"
-              title={sidebarOpen ? "Thu gọn" : "Mở rộng"}
-              aria-label={sidebarOpen ? "Thu gọn" : "Mở rộng"}
-            >
-              {sidebarOpen ? (
-                <BookmarkCheck size={20} className="text-primary" />
-              ) : (
-                <Bookmark size={20} className="text-primary" />
-              )}
-            </button>
-            
-            <div ref={mainContentRef} className="h-full relative">
-              {isManualMode ? (
-                <QuizGenerator 
-                  ref={quizGeneratorRef} 
-                  topic={topic}
-                />
-              ) : (
-                <QuickGameSelector />
-              )}
-            </div>
-          </SidebarInset>
+          <div ref={mainContentRef} className="h-full relative">
+            {isManualMode ? (
+              <QuizGenerator 
+                ref={quizGeneratorRef} 
+                topic={topic}
+              />
+            ) : (
+              <QuickGameSelector />
+            )}
+          </div>
         </div>
       </div>
-    </SidebarProvider>
+    </div>
   );
 };
 
