@@ -45,10 +45,33 @@
 @keyframes ripple {
   0% {
     transform: scale(0);
-    opacity: 0.6;
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(5);
+    opacity: 0.5;
   }
   100% {
     transform: scale(10);
     opacity: 0;
   }
+}
+
+/* Thêm hiệu ứng hover cho canvas */
+.canvas-grid:hover {
+  background-color: rgba(230, 240, 255, 0.8) !important;
+}
+
+/* Tạo hiệu ứng đường viền cho canvas khi focus */
+.canvas-grid:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+}
+
+/* Tăng độ tương phản cho lưới */
+.bg-gradient-canvas {
+  background-image: linear-gradient(to right, rgba(100, 130, 255, 0.2) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(100, 130, 255, 0.2) 1px, transparent 1px) !important;
+  background-size: 20px 20px;
+  transition: all 0.3s ease;
 }

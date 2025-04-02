@@ -34,24 +34,24 @@ const CanvasArea: React.FC<CanvasAreaProps> = ({
   // Add tap effect for canvas
   const handleCanvasClick = (e: React.MouseEvent) => {
     if (e.target === canvasRef.current || e.target === canvasAreaRef.current) {
-      // Create ripple effect on canvas
+      // Create ripple effect on canvas with enhanced visibility
       const ripple = document.createElement('div');
       ripple.style.position = 'absolute';
       ripple.style.borderRadius = '50%';
-      ripple.style.width = '40px';
-      ripple.style.height = '40px';
-      ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+      ripple.style.width = '80px'; // Tăng kích thước
+      ripple.style.height = '80px'; // Tăng kích thước
+      ripple.style.backgroundColor = 'rgba(25, 118, 210, 0.4)'; // Màu xanh đậm hơn
       ripple.style.transform = 'scale(0)';
-      ripple.style.left = `${e.clientX - 20}px`;
-      ripple.style.top = `${e.clientY - 20}px`;
+      ripple.style.left = `${e.clientX - 40}px`;
+      ripple.style.top = `${e.clientY - 40}px`;
       ripple.style.pointerEvents = 'none';
-      ripple.style.animation = 'ripple 0.6s linear';
+      ripple.style.animation = 'ripple 0.8s linear'; // Kéo dài hiệu ứng
       
       canvasRef.current?.appendChild(ripple);
       
       setTimeout(() => {
         ripple.remove();
-      }, 600);
+      }, 800); // Kéo dài thời gian hiển thị
       
       onCanvasClick();
     }
@@ -69,6 +69,10 @@ const CanvasArea: React.FC<CanvasAreaProps> = ({
         // Better touch handling for mobile
         canvas.style.touchAction = 'manipulation';
       }
+      
+      // Thêm màu nền nhẹ để thấy sự thay đổi
+      canvas.style.backgroundColor = 'rgba(240, 245, 255, 0.5)';
+      canvas.style.transition = 'background-color 0.3s ease';
     }
   }, [canvasRef, isMobile]);
 
