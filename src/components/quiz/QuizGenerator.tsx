@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
@@ -7,7 +6,6 @@ import GameError from './GameError';
 import GameView from './GameView';
 import OpenAIKeyModal from './OpenAIKeyModal';
 import { GameSettingsData } from './types';
-import { saveGameToHistory } from '@/utils/gameExport';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -119,14 +117,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       if (game) {
         console.log("Minigame generated successfully:", game.title);
         setMiniGame(game);
-        
-        // Save the generated game to history
-        saveGameToHistory(
-          game.title || topic,
-          game.description || `Minigame về chủ đề ${topic}`,
-          game.html
-        );
-        
         toast({
           title: "Minigame Đã Sẵn Sàng",
           description: gameGenerator.hasOpenAIKey() 
