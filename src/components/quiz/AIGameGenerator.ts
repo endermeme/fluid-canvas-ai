@@ -1,3 +1,4 @@
+
 import { GameSettingsData } from './types';
 
 export interface MiniGame {
