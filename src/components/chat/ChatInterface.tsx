@@ -1,17 +1,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, BrainCircuit, Star, GraduationCap } from 'lucide-react';
+import { Send, Star, GraduationCap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
 import { useNavigate } from 'react-router-dom';
 import OpenAIKeyModal from '@/components/quiz/OpenAIKeyModal';
-
-interface Message {
-  role: 'user' | 'ai';
-  message: string;
-  timestamp: Date;
-}
+import { Message, formatTime, getInitialMessage, generateAIResponse } from '@/utils/chatUtils';
 
 interface ChatInterfaceProps {
   onCreateBlock?: (type: BlockType, content: string) => void;
@@ -20,13 +15,7 @@ interface ChatInterfaceProps {
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequest }) => {
   const [message, setMessage] = useState('');
-  const [conversation, setConversation] = useState<Message[]>([
-    { 
-      role: 'ai', 
-      message: 'Xin chào! Tôi là trợ lý AI giáo dục. Hãy nhập chủ đề học tập bạn muốn, tôi sẽ tạo minigame tương tác theo yêu cầu của bạn. Bạn có thể yêu cầu các trò chơi toán học, từ vựng, lịch sử, khoa học, hoặc bất kỳ chủ đề giáo dục nào!', 
-      timestamp: new Date() 
-    }
-  ]);
+  const [conversation, setConversation] = useState<Message[]>([getInitialMessage()]);
   const [isLoading, setIsLoading] = useState(false);
   const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -37,7 +26,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation]);
   
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!message.trim()) return;
     
     const userMessage = { role: 'user' as const, message: message.trim(), timestamp: new Date() };
@@ -45,32 +34,29 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     setMessage('');
     setIsLoading(true);
     
-    setTimeout(() => {
-      let aiResponse = "Tôi đang tạo trò chơi học tập tương tác theo yêu cầu của bạn. Vui lòng đợi trong giây lát...";
-      
-      // Sử dụng toàn bộ nội dung tin nhắn làm chủ đề
-      const topic = message.trim();
-      
-      const aiMessage = {
-        role: 'ai' as const, 
-        message: aiResponse,
-        timestamp: new Date()
-      };
-      
-      setConversation(prev => [...prev, aiMessage]);
-      setIsLoading(false);
-      
-      // Directly navigate to quiz page with the topic (skip settings)
-      if (window.location.pathname.includes('/quiz')) {
-        // We're already on the quiz page, just notify the parent
-        if (onQuizRequest) {
-          onQuizRequest(topic);
-        }
-      } else {
-        // Navigate to quiz page with the topic
-        navigate(`/quiz?topic=${encodeURIComponent(topic)}&autostart=true`);
+    // Use the topic directly from user message
+    const topic = message.trim();
+    
+    // Get AI response
+    const aiResponse = await generateAIResponse(topic);
+    
+    const aiMessage = {
+      role: 'ai' as const, 
+      message: aiResponse,
+      timestamp: new Date()
+    };
+    
+    setConversation(prev => [...prev, aiMessage]);
+    setIsLoading(false);
+    
+    // Navigate based on current location
+    if (window.location.pathname.includes('/quiz')) {
+      if (onQuizRequest) {
+        onQuizRequest(topic);
       }
-    }, 500);
+    } else {
+      navigate(`/quiz?topic=${encodeURIComponent(topic)}&autostart=true`);
+    }
   };
 
   const handleSaveOpenAIKey = (key: string) => {
@@ -88,10 +74,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
       e.preventDefault();
       handleSendMessage();
     }
-  };
-  
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
   
   return (
