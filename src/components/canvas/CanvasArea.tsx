@@ -63,7 +63,7 @@ const CanvasArea: React.FC<CanvasAreaProps> = ({
     
     if (canvas) {
       // Add touch highlight color style to improve mobile experience
-      canvas.style.WebkitTapHighlightColor = 'transparent';
+      canvas.style.webkitTapHighlightColor = 'transparent';
       
       if (isMobile) {
         // Better touch handling for mobile
