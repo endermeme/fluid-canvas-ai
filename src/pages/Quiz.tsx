@@ -13,6 +13,7 @@ import { animateAIPanelSlideIn, animateContentHighlight } from '@/lib/animations
 const Quiz = () => {
   const [topic, setTopic] = useState('');
   const [isManualMode, setIsManualMode] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   
   const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
   const { addBlock } = useCanvasState();
@@ -101,8 +102,12 @@ const Quiz = () => {
     }, 100);
   };
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={sidebarOpen}>
       <div className="min-h-screen flex flex-col w-full">
         <div className="flex-1 flex overflow-hidden">
           <Sidebar variant="inset" collapsible="icon">
@@ -111,6 +116,8 @@ const Quiz = () => {
                 <ChatInterface 
                   onCreateBlock={handleCreateFromPrompt} 
                   onQuizRequest={handleGameRequest}
+                  onToggleSidebar={toggleSidebar}
+                  isSidebarOpen={sidebarOpen}
                 />
               </div>
             </SidebarContent>
