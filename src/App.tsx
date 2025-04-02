@@ -10,17 +10,9 @@ import Quiz from './pages/Quiz';
 import SharedGame from './pages/SharedGame';
 import NotFound from './pages/NotFound';
 
-const App: React.FC = () => {
-  // Move useEffect inside of AppContent where it's properly in a React component render cycle
-  return (
-    <ThemeProvider defaultTheme="system" enableSystem>
-      <AppContent />
-    </ThemeProvider>
-  );
-};
-
-// Separate component to handle the useEffect hook properly
-const AppContent: React.FC = () => {
+// Create a separate component for the app content
+// This ensures hooks are called within the proper component context
+const AppContent = () => {
   React.useEffect(() => {
     // Clean up expired games when app loads
     cleanupExpiredGames();
@@ -46,6 +38,15 @@ const AppContent: React.FC = () => {
       </Router>
       <Toaster />
     </>
+  );
+};
+
+// Main App component that wraps ThemeProvider around the AppContent
+const App = () => {
+  return (
+    <ThemeProvider defaultTheme="system" enableSystem>
+      <AppContent />
+    </ThemeProvider>
   );
 };
 
