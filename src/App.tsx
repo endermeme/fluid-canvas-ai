@@ -1,6 +1,6 @@
 
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './components/ui/theme-provider';
 import { Toaster } from './components/ui/toaster';
 import { cleanupExpiredGames } from './utils/gameExport';
@@ -10,8 +10,18 @@ import Quiz from './pages/Quiz';
 import SharedGame from './pages/SharedGame';
 import NotFound from './pages/NotFound';
 
-const App = () => {
-  useEffect(() => {
+const App: React.FC = () => {
+  // Move useEffect inside of AppContent where it's properly in a React component render cycle
+  return (
+    <ThemeProvider defaultTheme="system" enableSystem>
+      <AppContent />
+    </ThemeProvider>
+  );
+};
+
+// Separate component to handle the useEffect hook properly
+const AppContent: React.FC = () => {
+  React.useEffect(() => {
     // Clean up expired games when app loads
     cleanupExpiredGames();
     
@@ -24,7 +34,7 @@ const App = () => {
   }, []);
 
   return (
-    <ThemeProvider defaultTheme="system" enableSystem>
+    <>
       <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/quiz" replace />} />
@@ -35,7 +45,7 @@ const App = () => {
         </Routes>
       </Router>
       <Toaster />
-    </ThemeProvider>
+    </>
   );
 };
 
