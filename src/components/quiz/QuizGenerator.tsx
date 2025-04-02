@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
@@ -7,7 +6,6 @@ import GameError from './GameError';
 import GameView from './GameView';
 import OpenAIKeyModal from './OpenAIKeyModal';
 import { GameSettingsData } from './types';
-import { Button } from '@/components/ui/button';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -175,7 +173,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   }
 
   return (
-    <div className="h-full relative">
+    <>
       <GameView miniGame={miniGame} />
       <div className="absolute top-4 right-4">
         <h3 
@@ -192,7 +190,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
         onSave={handleSaveOpenAIKey}
         currentKey={localStorage.getItem('openai_api_key')}
       />
-    </div>
+    </>
   );
 });
 

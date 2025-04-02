@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, Star } from 'lucide-react';
+import { Send, Sparkles, BrainCircuit, Star, GraduationCap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
@@ -96,6 +96,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   
   return (
     <div className="flex flex-col h-full">
+      <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/20">
+        <div className="flex items-center">
+          <GraduationCap size={20} className="text-primary mr-2" />
+          <h3 className="font-medium">Trợ Lý Giáo Dục</h3>
+        </div>
+      </div>
+      
       <ScrollArea className="flex-1">
         <div className="p-3 space-y-3">
           {conversation.map((item, index) => (
