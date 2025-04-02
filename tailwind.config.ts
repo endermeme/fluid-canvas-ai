@@ -133,6 +133,15 @@ export default {
 				'float': {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-5px)' }
+				},
+				'ripple': {
+					'0%': { transform: 'scale(0)', opacity: '0.5' },
+					'100%': { transform: 'scale(4)', opacity: '0' }
+				},
+				'touch-response': {
+					'0%': { transform: 'scale(1)' },
+					'50%': { transform: 'scale(0.97)' },
+					'100%': { transform: 'scale(1)' }
 				}
 			},
 			animation: {
@@ -149,7 +158,9 @@ export default {
 				'glow': 'glow 2.5s ease-in-out infinite',
 				'shimmer': 'shimmer 3s ease-in-out infinite',
 				'breathe': 'breathe 4s ease-in-out infinite',
-				'float': 'float 3s ease-in-out infinite'
+				'float': 'float 3s ease-in-out infinite',
+				'ripple': 'ripple 0.6s linear',
+				'touch-response': 'touch-response 0.3s ease-out'
 			},
 			backgroundImage: {
 				'gradient-canvas': 'linear-gradient(to right bottom, hsl(210, 100%, 98%), hsl(220, 100%, 97%))',

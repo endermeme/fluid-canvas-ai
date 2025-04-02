@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { MiniGame } from './AIGameGenerator';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GameViewProps {
   miniGame: MiniGame;
@@ -16,6 +17,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   const { toast } = useToast();
   const [isFrameLoaded, setIsFrameLoaded] = useState(false);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Reset loaded state when game changes
@@ -83,9 +85,116 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
     }
   };
 
+  // Thêm mã CSS cho hiệu ứng click
+  const injectClickEffectScript = () => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      try {
+        const iframeDocument = iframeRef.current.contentWindow.document;
+        const style = iframeDocument.createElement('style');
+        style.textContent = `
+          * {
+            -webkit-tap-highlight-color: transparent;
+          }
+          
+          button, a, [role="button"], input[type="submit"], input[type="button"], .clickable {
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+          }
+          
+          button:active, a:active, [role="button"]:active, 
+          input[type="submit"]:active, input[type="button"]:active, .clickable:active {
+            transform: scale(0.97);
+          }
+          
+          .click-ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+          }
+          
+          @keyframes ripple {
+            to {
+              transform: scale(4);
+              opacity: 0;
+            }
+          }
+          
+          @media (max-width: 768px) {
+            button, a, input[type="submit"], input[type="button"] {
+              min-height: 38px; /* Làm cho các nút dễ bấm hơn trên thiết bị di động */
+              padding: 8px 16px;
+            }
+          }
+        `;
+        iframeDocument.head.appendChild(style);
+        
+        // Thêm script xử lý hiệu ứng click
+        const script = iframeDocument.createElement('script');
+        script.textContent = `
+          document.addEventListener('click', function(e) {
+            // Kiểm tra xem có phải là phần tử tương tác không
+            const isInteractive = e.target.matches('button, a, [role="button"], input[type="submit"], input[type="button"], .clickable') ||
+                                  e.target.closest('button, a, [role="button"], input[type="submit"], input[type="button"], .clickable');
+            
+            if (isInteractive) {
+              const target = e.target.matches('button, a, [role="button"], input[type="submit"], input[type="button"], .clickable') ? 
+                            e.target : 
+                            e.target.closest('button, a, [role="button"], input[type="submit"], input[type="button"], .clickable');
+              
+              const ripple = document.createElement('span');
+              ripple.classList.add('click-ripple');
+              
+              const rect = target.getBoundingClientRect();
+              const size = Math.max(rect.width, rect.height);
+              
+              ripple.style.width = ripple.style.height = size + 'px';
+              ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+              ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+              
+              target.appendChild(ripple);
+              
+              ripple.addEventListener('animationend', () => {
+                ripple.remove();
+              });
+            }
+          });
+          
+          // Thêm tính năng thích ứng màn hình
+          const meta = document.querySelector('meta[name="viewport"]');
+          if (!meta) {
+            const newMeta = document.createElement('meta');
+            newMeta.name = 'viewport';
+            newMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+            document.head.appendChild(newMeta);
+          } else {
+            meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+          }
+        `;
+        iframeDocument.body.appendChild(script);
+      } catch (error) {
+        console.error('Không thể thêm hiệu ứng click vào iframe:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isFrameLoaded) {
+      // Chờ một chút để đảm bảo iframe đã tải hoàn toàn
+      const timer = setTimeout(() => {
+        injectClickEffectScript();
+      }, 200);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isFrameLoaded]);
+
   return (
     <div className="h-full w-full overflow-hidden flex flex-col">
-      <div className="bg-background border-b p-2 flex items-center justify-between shadow-sm">
+      <div className={`bg-background border-b p-2 flex items-center justify-between shadow-sm ${isMobile ? 'flex-col gap-2' : ''}`}>
         <h3 className="text-sm font-medium truncate mr-2">
           {miniGame.title}
         </h3>
@@ -112,7 +221,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
               onClick={handleShareGame} 
               variant="outline" 
               size="sm" 
-              className="h-8 transition-transform active:scale-95 animate-float-in"
+              className="h-8 transition-transform active:scale-95 animate-float-in neo-button"
             >
               <Share2 className="h-4 w-4 mr-1" />
               Chia Sẻ (48h)

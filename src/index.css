@@ -93,11 +93,30 @@
 @layer base {
   * {
     @apply border-border;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+  }
+  
+  /* Tăng kích thước của các phần tử tương tác trên di động */
+  @media (max-width: 768px) {
+    button, 
+    a, 
+    [role="button"],
+    input[type="submit"],
+    input[type="button"] {
+      min-height: 38px;
+      padding: 8px 16px;
+    }
+    
+    input, 
+    select, 
+    textarea {
+      font-size: 16px; /* Ngăn iOS zoom khi focus */
+    }
   }
 }
 
@@ -168,6 +187,28 @@
   .breathing-element {
     @apply animate-breathe;
   }
+  
+  /* Hiệu ứng khi nhấp chuột */
+  .touch-effect {
+    @apply relative overflow-hidden;
+  }
+  
+  .touch-effect:active {
+    @apply transform scale-[0.98] transition-transform;
+  }
+  
+  /* Hiệu ứng gợn sóng cho nút */
+  .ripple {
+    @apply absolute pointer-events-none rounded-full bg-white/20 transform scale-0;
+    animation: button-ripple 0.6s linear;
+  }
+  
+  /* Nút kiểu neo-morphism */
+  .neo-button {
+    @apply px-4 py-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 
+         hover:bg-primary/10 hover:border-primary/30 transition-all duration-200
+         shadow-sm active:scale-95;
+  }
 }
 
 .ai-suggestion {
@@ -225,27 +266,42 @@
   @apply absolute w-2 h-2 rounded-full bg-primary cursor-pointer transform -translate-y-1/2 top-1/2 transition-all hover:scale-125;
 }
 
-/* Modern UI element styles */
-.neo-button {
-  @apply px-4 py-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 
-         hover:bg-primary/10 hover:border-primary/30 transition-all duration-200
-         shadow-sm active:scale-95;
+/* Hiệu ứng ripple khi nhấp chuột */
+@keyframes button-ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
 }
 
-.neo-card {
-  @apply rounded-xl bg-white/10 backdrop-blur-lg border border-white/20 
-         shadow-lg overflow-hidden transition-all duration-300;
+/* Hiệu ứng phản hồi chạm trên điện thoại */
+@keyframes touch-feedback {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(0.97);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
 }
 
-.text-gradient {
-  @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent;
+/* CSS cho thiết bị di động */
+@media (max-width: 768px) {
+  .mobile-touch-target {
+    min-height: 44px; /* Apple khuyến nghị 44px là kích thước tối thiểu */
+  }
+  
+  .mobile-spacing {
+    padding: 16px;
+  }
+  
+  .mobile-font {
+    font-size: 16px; /* Ngăn iOS zoom khi focus */
+  }
 }
 
-.glow-effect {
-  @apply relative after:absolute after:inset-0 after:bg-glow-gradient after:opacity-0 
-         after:transition-opacity hover:after:opacity-100;
-}
-
-.glass-effect {
-  @apply bg-glass-gradient backdrop-blur-md border border-white/20;
-}
