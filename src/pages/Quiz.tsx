@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
 import QuickGameSelector from '@/components/quiz/QuickGameSelector';
-import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
@@ -111,15 +110,15 @@ const Quiz = () => {
   return (
     <div className="min-h-screen flex flex-col w-full">
       <div className="flex-1 flex overflow-hidden">
-        {/* Use Collapsible to control the sidebar visibility */}
+        {/* Improved sidebar with fixed height */}
         <Collapsible
           open={sidebarOpen}
           onOpenChange={setSidebarOpen}
           className="z-20 h-full"
         >
           <div className={`transition-all duration-300 h-full ${sidebarOpen ? 'w-72' : 'w-0'}`}>
-            <CollapsibleContent className="h-full flex flex-col">
-              <div ref={sidebarRef} className="h-full">
+            <CollapsibleContent className="h-full">
+              <div ref={sidebarRef} className="h-full flex flex-col">
                 <ChatInterface 
                   onCreateBlock={handleCreateFromPrompt} 
                   onQuizRequest={handleGameRequest}
