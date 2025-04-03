@@ -85,6 +85,8 @@ export class AIGameGenerator {
          - Game phải responsive, hoạt động tốt trên cả điện thoại và máy tính
          - Có đầy đủ xử lý lỗi và phản hồi người dùng
          - KHÔNG sử dụng thư viện bên ngoài hay CDN
+         - TUYỆT ĐỐI KHÔNG TẠO BẤT KỲ HEADER NÀO TRONG GAME
+         - Game phải chiếm toàn bộ màn hình, không có header, footer hay menu
       
       3. TÍNH NĂNG GAME:
          - Giao diện hấp dẫn với màu sắc và animation
@@ -97,6 +99,13 @@ export class AIGameGenerator {
          - Có thể lưu trữ điểm số cao nhất vào localStorage
          - Thêm các hiệu ứng đặc biệt nếu phù hợp
          - Thêm nhiều cấp độ nếu có thể
+      
+      5. YÊU CẦU GIAO DIỆN:
+         - KHÔNG tạo header hoặc footer
+         - Game phải chiếm toàn bộ không gian màn hình
+         - Giao diện phải RESPONSIVE cho cả máy tính và điện thoại
+         - Sử dụng media queries để đảm bảo trải nghiệm tốt trên mọi thiết bị
+         - Các nút và phần tử tương tác phải đủ lớn để dễ dàng sử dụng trên điện thoại
       
       Trả về một đối tượng JSON với định dạng sau:
       {
@@ -203,6 +212,9 @@ export class AIGameGenerator {
       
       IMPORTANT:
       - Do NOT change the fundamental game concept
+      - Do NOT add any headers or footers to the game
+      - Make the game fully responsive for both desktop and mobile
+      - The game should take up the entire screen space
       - Return ONLY the complete, enhanced HTML file - nothing else
       - Make sure all code is properly formatted and indented
       - Add helpful comments to explain complex logic
