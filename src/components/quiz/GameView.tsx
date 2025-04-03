@@ -158,15 +158,16 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   }
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <div className="flex-1 relative w-full h-full overflow-hidden">
+    <div className="flex flex-col h-full w-full items-center justify-center">
+      <div className="flex-1 relative w-full h-full overflow-hidden flex items-center justify-center">
         <iframe
           ref={iframeRef}
           srcDoc={miniGame.content}
-          className="w-full h-full border-0"
+          className="w-full h-full border-0 mx-auto"
           sandbox="allow-scripts allow-popups"
           onLoad={handleIframeLoad}
           title={miniGame.title}
+          style={{ maxWidth: '100%', margin: '0 auto' }}
         />
       </div>
       
