@@ -108,7 +108,7 @@ const Quiz = () => {
 
   return (
     <SidebarProvider defaultOpen={sidebarOpen}>
-      <div className="min-h-screen flex flex-col w-full">
+      <div className="min-h-screen flex flex-col w-full overflow-hidden">
         <div className="flex-1 flex overflow-hidden">
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent>

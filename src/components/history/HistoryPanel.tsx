@@ -41,7 +41,15 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectGame }) => {
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet open={isOpen} onOpenChange={(open) => {
+      setIsOpen(open);
+      if (open) {
+        loadGames();
+      }
+      // Prevent body scroll manipulation when sheet closes
+      document.body.style.overflow = open ? 'hidden' : '';
+      document.body.style.position = open ? 'relative' : '';
+    }}>
       <SheetTrigger asChild>
         <Button 
           variant="ghost" 
