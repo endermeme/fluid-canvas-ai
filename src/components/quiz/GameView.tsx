@@ -84,11 +84,11 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
       container.classList.add('animate-fade-in');
     }
     
-    // Remove any headers or unwanted elements from the iframe
+    // Inject scripts to control the iframe content
     injectClickEffectScript();
   };
 
-  // Thêm mã CSS cho hiệu ứng click và xóa header
+  // Thêm mã CSS và JS để xóa header và ngăn chặn scroll
   const injectClickEffectScript = () => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
       try {
@@ -99,17 +99,41 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
             -webkit-tap-highlight-color: transparent;
           }
           
-          /* Prevent scrolling */
+          /* Fix position of the game content */
           html, body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-            position: fixed;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            width: 100% !important;
+            height: 100% !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
           }
           
-          /* Remove any headers */
+          /* Force all containers to be full size */
+          body > div, 
+          #root, 
+          #app, 
+          .game-container, 
+          main, 
+          [class*="container"],
+          [id*="container"] {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+          }
+          
+          /* Remove any headers and navigation elements */
           header, 
           .header,
           [class*="header"],
@@ -118,10 +142,20 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
           [class*="navbar"],
           [class*="nav-bar"],
           [id*="navbar"],
-          [id*="nav-bar"] {
+          [id*="nav-bar"],
+          nav,
+          .nav,
+          .navigation,
+          #nav,
+          #navigation,
+          [class*="challenge-header"],
+          [id*="challenge-header"],
+          [class*="game-header"],
+          [id*="game-header"] {
             display: none !important;
           }
           
+          /* Make buttons and interactive elements feel responsive */
           button, a, [role="button"], input[type="submit"], input[type="button"], .clickable {
             position: relative;
             overflow: hidden;
@@ -151,7 +185,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
           
           @media (max-width: 768px) {
             button, a, input[type="submit"], input[type="button"] {
-              min-height: 38px; /* Làm cho các nút dễ bấm hơn trên thiết bị di động */
+              min-height: 38px;
               padding: 8px 16px;
             }
           }
@@ -161,12 +195,27 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         // Thêm script xử lý hiệu ứng click và xóa header
         const script = iframeDocument.createElement('script');
         script.textContent = `
-          // Xóa bất kỳ header hoặc thanh điều hướng nào
+          // Disable scrolling completely
+          document.body.style.overflow = 'hidden';
+          document.documentElement.style.overflow = 'hidden';
+          
+          // Prevent scroll events
+          document.addEventListener('wheel', function(e) {
+            e.preventDefault();
+          }, { passive: false });
+          
+          document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+          }, { passive: false });
+          
+          // Xóa headers và thanh điều hướng
           function removeHeaders() {
             const selectors = [
               'header', '.header', '[class*="header"]', '[id*="header"]',
               '[class*="title-bar"]', '[class*="navbar"]', '[class*="nav-bar"]',
-              '[id*="navbar"]', '[id*="nav-bar"]'
+              '[id*="navbar"]', '[id*="nav-bar"]', 'nav', '.nav', '.navigation', 
+              '#nav', '#navigation', '[class*="challenge-header"]', '[id*="challenge-header"]',
+              '[class*="game-header"]', '[id*="game-header"]'
             ];
             
             selectors.forEach(selector => {
@@ -176,11 +225,13 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
               });
             });
             
-            // Xóa bất kỳ phần tử nào có text chứa từ khóa header
+            // Remove any elements containing header-related text
             document.querySelectorAll('*').forEach(el => {
               if (el.innerText && 
                  (el.innerText.toLowerCase().includes('challenge') || 
                   el.innerText.toLowerCase().includes('challeng') ||
+                  el.innerText.toLowerCase().includes('header') ||
+                  el.innerText.toLowerCase().includes('geo') ||
                   el.innerText.match(/^\\s*[a-zA-Z0-9\\s]+\\s*$/))) {
                 const parent = el.parentNode;
                 if (parent && 
@@ -193,21 +244,46 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
                 }
               }
             });
+            
+            // Force all containers to be full-sized
+            const containers = document.querySelectorAll('body > div, #root, #app, .game-container, main, [class*="container"], [id*="container"]');
+            containers.forEach(container => {
+              if (container) {
+                container.style.width = '100%';
+                container.style.height = '100%';
+                container.style.maxWidth = '100%';
+                container.style.maxHeight = '100%';
+                container.style.position = 'absolute';
+                container.style.top = '0';
+                container.style.left = '0';
+                container.style.margin = '0';
+                container.style.padding = '0';
+                container.style.overflow = 'hidden';
+              }
+            });
+            
+            // Remove any "next game" or "choose another game" buttons
+            document.querySelectorAll('button, a, [role="button"]').forEach(el => {
+              if (el.innerText && 
+                 (el.innerText.toLowerCase().includes('next') ||
+                  el.innerText.toLowerCase().includes('another') ||
+                  el.innerText.toLowerCase().includes('different') ||
+                  el.innerText.toLowerCase().includes('choose'))) {
+                el.style.display = 'none';
+              }
+            });
           }
           
-          // Run initially
+          // Run initially and periodically
           removeHeaders();
-          
-          // Run again after a slight delay to catch dynamically added elements
-          setTimeout(removeHeaders, 500);
-          setTimeout(removeHeaders, 1500);
+          setInterval(removeHeaders, 500);
           
           // Set up observer to keep removing headers
           const observer = new MutationObserver(removeHeaders);
           observer.observe(document.body, { childList: true, subtree: true });
           
+          // Add touch effects for better interactivity
           document.addEventListener('click', function(e) {
-            // Kiểm tra xem có phải là phần tử tương tác không
             const isInteractive = e.target.matches('button, a, [role="button"], input[type="submit"], input[type="button"], .clickable') ||
                                   e.target.closest('button, a, [role="button"], input[type="submit"], input[type="button"], .clickable');
             
@@ -234,7 +310,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
             }
           });
           
-          // Thêm tính năng thích ứng màn hình
+          // Make viewport fixed
           const meta = document.querySelector('meta[name="viewport"]');
           if (!meta) {
             const newMeta = document.createElement('meta');
@@ -311,16 +387,17 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
           </div>
         )}
         
-        <iframe
-          ref={iframeRef}
-          srcDoc={miniGame.content}
-          title={miniGame.title}
-          sandbox="allow-scripts allow-same-origin"
-          className={`w-full h-full border-none ${isFrameLoaded ? 'opacity-100' : 'opacity-0'}`}
-          style={{ height: '100%', width: '100%', overflow: 'hidden', position: 'absolute' }}
-          onLoad={handleFrameLoad}
-          scrolling="no"
-        />
+        <div className="w-full h-full">
+          <iframe
+            ref={iframeRef}
+            srcDoc={miniGame.content}
+            title={miniGame.title}
+            sandbox="allow-scripts allow-same-origin"
+            className={`w-full h-full border-none ${isFrameLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={handleFrameLoad}
+            scrolling="no"
+          />
+        </div>
       </div>
     </div>
   );

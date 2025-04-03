@@ -38,20 +38,20 @@ const CanvasArea: React.FC<CanvasAreaProps> = ({
       const ripple = document.createElement('div');
       ripple.style.position = 'absolute';
       ripple.style.borderRadius = '50%';
-      ripple.style.width = '80px'; // Tăng kích thước
-      ripple.style.height = '80px'; // Tăng kích thước
-      ripple.style.backgroundColor = 'rgba(25, 118, 210, 0.4)'; // Màu xanh đậm hơn
+      ripple.style.width = '80px'; // Larger size for better visibility
+      ripple.style.height = '80px';
+      ripple.style.backgroundColor = 'rgba(25, 118, 210, 0.4)'; // Slightly darker blue
       ripple.style.transform = 'scale(0)';
       ripple.style.left = `${e.clientX - 40}px`;
       ripple.style.top = `${e.clientY - 40}px`;
       ripple.style.pointerEvents = 'none';
-      ripple.style.animation = 'ripple 0.8s linear'; // Kéo dài hiệu ứng
+      ripple.style.animation = 'ripple 0.8s linear';
       
       canvasRef.current?.appendChild(ripple);
       
       setTimeout(() => {
         ripple.remove();
-      }, 800); // Kéo dài thời gian hiển thị
+      }, 800);
       
       onCanvasClick();
     }
@@ -70,7 +70,7 @@ const CanvasArea: React.FC<CanvasAreaProps> = ({
         canvas.style.touchAction = 'manipulation';
       }
       
-      // Thêm màu nền nhẹ để thấy sự thay đổi
+      // Add subtle background color to make the canvas more visible
       canvas.style.backgroundColor = 'rgba(240, 245, 255, 0.5)';
       canvas.style.transition = 'background-color 0.3s ease';
     }
@@ -82,6 +82,7 @@ const CanvasArea: React.FC<CanvasAreaProps> = ({
         ref={canvasRef}
         className="canvas-grid bg-gradient-canvas relative"
         onClick={handleCanvasClick}
+        style={{ minWidth: '100%', minHeight: '100%' }}
       >
         <div 
           ref={canvasAreaRef}
