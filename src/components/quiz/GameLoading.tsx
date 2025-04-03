@@ -25,7 +25,7 @@ const GameLoading: React.FC = () => {
   }, []);
   
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full space-y-6">
+    <div className="flex flex-col items-center justify-center h-full w-full space-y-6 fixed inset-0 overflow-hidden">
       <div className="relative">
         <div className="w-16 h-16 rounded-full border-4 border-primary/30 border-t-primary animate-spin"></div>
         <Loader2 className="w-10 h-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-primary animate-pulse" />
