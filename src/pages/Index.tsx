@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CanvasContainer from '@/components/canvas/CanvasContainer';
@@ -10,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Gamepad, Sparkles, GraduationCap } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import HistoryPanel from '@/components/history/HistoryPanel';
+import { StoredGame } from '@/utils/gameExport';
 
 const Index = () => {
   const isMobile = useIsMobile();
@@ -17,28 +18,26 @@ const Index = () => {
   const { addBlock } = useCanvasState();
   const navigate = useNavigate();
 
-  // Handler for creating blocks from AI prompts
   const handleCreateFromPrompt = (type: BlockType, content: string) => {
-    // Get a reference to the canvas element
     const canvasElement = document.querySelector('.canvas-grid');
     const canvasRect = canvasElement?.getBoundingClientRect();
     
-    // Calculate a position in the visible part of the canvas
     const position = {
       x: ((canvasRect?.width || 800) / 2) - 150,
       y: ((canvasRect?.height || 600) / 2) - 100
     };
     
-    // Add the block to the canvas with the content from the AI
     addBlock(type, position, canvasRect as DOMRect);
   };
 
-  // Handler for quick game selection
   const handleQuickGameSelect = (gameTopic: string) => {
     navigate(`/quiz?topic=${encodeURIComponent(gameTopic)}&autostart=true`);
   };
 
-  // Quick game options for educational games
+  const handleGameSelect = (game: StoredGame) => {
+    navigate(`/quiz/shared/${game.id}`);
+  };
+
   const quickGameOptions = [
     "Học Toán Vui", 
     "Từ Vựng Tiếng Anh",
@@ -51,7 +50,8 @@ const Index = () => {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex flex-col w-full">
-        {/* Main content with sidebar */}
+        <HistoryPanel onSelectGame={handleGameSelect} />
+        
         <div className="flex-1 flex overflow-hidden">
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent>
@@ -72,7 +72,6 @@ const Index = () => {
               <CanvasContainer />
             </div>
             
-            {/* Quick Game Options Panel - Enhanced Design */}
             <div className="bg-gradient-to-r from-background to-accent/20 backdrop-blur-md border-t border-border/40 p-3 shadow-sm">
               <div className="max-w-4xl mx-auto">
                 <div className="flex items-center mb-3">
