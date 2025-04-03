@@ -22,7 +22,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         saveGameForSharing(
           miniGame.title,
           miniGame.description || "Minigame tương tác",
-          miniGame.html
+          miniGame.content
         );
       } catch (e) {
         console.error("Error saving game to history:", e);
@@ -36,7 +36,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
       const shareUrl = saveGameForSharing(
         miniGame.title,
         miniGame.description || "Minigame tương tác",
-        miniGame.html
+        miniGame.content
       );
       
       navigator.clipboard.writeText(shareUrl);
@@ -153,7 +153,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
     }
   };
 
-  if (!miniGame || !miniGame.html) {
+  if (!miniGame || !miniGame.content) {
     return <div>Không thể tải minigame</div>;
   }
 
@@ -162,7 +162,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
       <div className="flex-1 relative w-full h-full overflow-hidden">
         <iframe
           ref={iframeRef}
-          srcDoc={miniGame.html}
+          srcDoc={miniGame.content}
           className="w-full h-full border-0"
           sandbox="allow-scripts allow-popups"
           onLoad={handleIframeLoad}
