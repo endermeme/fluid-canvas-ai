@@ -1,11 +1,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, BrainCircuit, Star, GraduationCap, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Send, Sparkles, BrainCircuit, Star, GraduationCap, History, BookmarkCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
 import { useNavigate } from 'react-router-dom';
 import OpenAIKeyModal from '@/components/quiz/OpenAIKeyModal';
+import HistoryPanel from '@/components/history/HistoryPanel';
 
 interface Message {
   role: 'user' | 'ai';
@@ -36,6 +37,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
+  const [showHistoryPanel, setShowHistoryPanel] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -106,6 +108,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       onToggleSidebar();
     }
   };
+
+  const handleGameSelect = (game: any) => {
+    if (window.location.pathname.includes('/quiz')) {
+      navigate(`/quiz/shared/${game.id}`);
+    }
+  };
   
   return (
     <div className="flex flex-col h-full">
@@ -114,17 +122,26 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <GraduationCap size={20} className="text-primary mr-2" />
           <h3 className="font-medium">Trợ Lý Giáo Dục</h3>
         </div>
-        <button
-          onClick={handleToggleSidebar}
-          className="p-1.5 rounded-md hover:bg-secondary/40 transition-colors"
-          title={isSidebarOpen ? "Thu gọn" : "Mở rộng"}
-        >
-          {isSidebarOpen ? (
-            <BookmarkCheck size={18} className="text-primary" />
-          ) : (
-            <Bookmark size={18} className="text-primary" />
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowHistoryPanel(true)}
+            className="p-1.5 rounded-md hover:bg-secondary/40 transition-colors"
+            title="Lịch sử game"
+          >
+            <History size={18} className="text-primary" />
+          </button>
+          <button
+            onClick={handleToggleSidebar}
+            className="p-1.5 rounded-md hover:bg-secondary/40 transition-colors"
+            title={isSidebarOpen ? "Thu gọn" : "Mở rộng"}
+          >
+            {isSidebarOpen ? (
+              <BookmarkCheck size={18} className="text-primary" />
+            ) : (
+              <BookmarkCheck size={18} className="text-primary/50" />
+            )}
+          </button>
+        </div>
       </div>
       
       <ScrollArea className="flex-1">
@@ -204,6 +221,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         onClose={() => setShowOpenAIKeyModal(false)}
         onSave={handleSaveOpenAIKey}
         currentKey={localStorage.getItem('openai_api_key')}
+      />
+
+      <HistoryPanel 
+        isOpen={showHistoryPanel}
+        onClose={() => setShowHistoryPanel(false)}
+        onSelectGame={handleGameSelect}
       />
     </div>
   );
