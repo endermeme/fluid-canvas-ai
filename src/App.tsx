@@ -1,11 +1,10 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ThemeProvider } from './components/ui/theme-provider';
 import { Toaster } from './components/ui/toaster';
-import { cleanupExpiredGames } from './utils/gameExport';
+import { cleanupExpiredGames, getSharedGame, StoredGame } from './utils/gameExport';
 import HistoryPanel from './components/history/HistoryPanel';
-import { useNavigate } from 'react-router-dom';
 
 import Index from './pages/Index';
 import Quiz from './pages/Quiz';
@@ -16,7 +15,7 @@ import NotFound from './pages/NotFound';
 const HistoryNavigator = () => {
   const navigate = useNavigate();
   
-  const handleGameSelect = (game: any) => {
+  const handleGameSelect = (game: StoredGame) => {
     navigate(`/quiz/shared/${game.id}`);
   };
   
@@ -40,17 +39,14 @@ const AppContent = () => {
 
   return (
     <>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Navigate to="/quiz" replace />} />
-          <Route path="/canvas" element={<Index />} />
-          <Route path="/quiz" element={<Quiz />} />
-          <Route path="/quiz/shared/:id" element={<SharedGame />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <HistoryNavigator />
-      </Router>
-      <Toaster />
+      <Routes>
+        <Route path="/" element={<Navigate to="/quiz" replace />} />
+        <Route path="/canvas" element={<Index />} />
+        <Route path="/quiz" element={<Quiz />} />
+        <Route path="/quiz/shared/:id" element={<SharedGame />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <HistoryNavigator />
     </>
   );
 };
@@ -59,7 +55,10 @@ const AppContent = () => {
 const App = () => {
   return (
     <ThemeProvider defaultTheme="system" enableSystem>
-      <AppContent />
+      <Router>
+        <AppContent />
+        <Toaster />
+      </Router>
     </ThemeProvider>
   );
 };

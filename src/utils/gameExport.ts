@@ -38,6 +38,16 @@ export const saveGameForSharing = (title: string, description: string, htmlConte
   // Remove expired games
   games = games.filter(game => game.expiresAt > now);
   
+  // Check for duplicate titles to prevent multiple entries of same game
+  const existingGameIndex = games.findIndex(g => g.title === title && g.description === description);
+  
+  if (existingGameIndex >= 0) {
+    // Update existing game instead of adding a new one
+    games[existingGameIndex] = {...game, id: games[existingGameIndex].id};
+    localStorage.setItem('shared_games', JSON.stringify(games));
+    return `${getBaseUrl()}/${games[existingGameIndex].id}`;
+  }
+  
   // Add new game
   games.push(game);
   

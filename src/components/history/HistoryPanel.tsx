@@ -1,44 +1,56 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { History, BookmarkCheck } from 'lucide-react';
-import { StoredGame } from '@/utils/gameExport';
-import { getRemainingTime } from '@/utils/gameExport';
+import { StoredGame, cleanupExpiredGames, getRemainingTime } from '@/utils/gameExport';
+import { useNavigate } from 'react-router-dom';
 
 interface HistoryPanelProps {
   onSelectGame?: (game: StoredGame) => void;
 }
 
 const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectGame }) => {
-  const [games, setGames] = React.useState<StoredGame[]>([]);
+  const [games, setGames] = useState<StoredGame[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
   
-  React.useEffect(() => {
-    const loadGames = () => {
-      const gamesJson = localStorage.getItem('shared_games');
-      if (gamesJson) {
-        const parsedGames: StoredGame[] = JSON.parse(gamesJson);
-        const now = Date.now();
-        // Only show non-expired games
-        const validGames = parsedGames.filter(game => game.expiresAt > now);
-        setGames(validGames);
-      }
-    };
+  // Load games when opening the panel
+  const loadGames = () => {
+    cleanupExpiredGames(); // First clean up expired games
+    const gamesJson = localStorage.getItem('shared_games');
+    if (gamesJson) {
+      const parsedGames: StoredGame[] = JSON.parse(gamesJson);
+      const now = Date.now();
+      // Only show non-expired games
+      const validGames = parsedGames.filter(game => game.expiresAt > now);
+      setGames(validGames);
+    } else {
+      setGames([]);
+    }
+  };
 
-    loadGames();
-    // Refresh games list every minute
-    const interval = setInterval(loadGames, 60000);
-    return () => clearInterval(interval);
-  }, []);
+  // Handle game selection
+  const handleSelectGame = (game: StoredGame) => {
+    if (onSelectGame) {
+      onSelectGame(game);
+    } else {
+      navigate(`/quiz/shared/${game.id}`);
+    }
+    setIsOpen(false);
+  };
 
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button 
           variant="ghost" 
           size="icon"
           className="fixed right-4 top-20 z-50 bg-primary/10 hover:bg-primary/20"
           title="Lịch sử game"
+          onClick={() => {
+            loadGames();
+          }}
         >
           <History className="h-4 w-4" />
         </Button>
@@ -68,7 +80,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectGame }) => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onSelectGame?.(game)}
+                      onClick={() => handleSelectGame(game)}
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       Mở lại
