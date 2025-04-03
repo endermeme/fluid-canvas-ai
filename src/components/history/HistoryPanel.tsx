@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { History, BookmarkCheck } from 'lucide-react';
+import { Bookmark } from 'lucide-react';
 import { StoredGame, cleanupExpiredGames, getRemainingTime } from '@/utils/gameExport';
 import { useNavigate } from 'react-router-dom';
 
@@ -46,27 +46,26 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onSelectGame }) => {
       if (open) {
         loadGames();
       }
-      // Prevent body scroll manipulation when sheet closes
+      // Prevent scroll issues when sheet is open
       document.body.style.overflow = open ? 'hidden' : '';
-      document.body.style.position = open ? 'relative' : '';
     }}>
       <SheetTrigger asChild>
         <Button 
           variant="ghost" 
           size="icon"
-          className="fixed right-4 top-20 z-50 bg-primary/10 hover:bg-primary/20"
+          className="fixed right-4 top-4 z-50 bg-primary/10 hover:bg-primary/20 shadow-sm"
           title="Lịch sử game"
           onClick={() => {
             loadGames();
           }}
         >
-          <History className="h-4 w-4" />
+          <Bookmark className="h-5 w-5" />
         </Button>
       </SheetTrigger>
       <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <BookmarkCheck className="h-5 w-5 text-primary" />
+            <Bookmark className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-medium">Lịch sử game</h2>
           </div>
           

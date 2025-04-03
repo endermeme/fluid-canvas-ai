@@ -38,7 +38,7 @@ const AppContent = () => {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen w-full overflow-hidden">
+    <div className="relative flex flex-col min-h-screen w-full overflow-hidden">
       <Routes>
         <Route path="/" element={<Navigate to="/quiz" replace />} />
         <Route path="/canvas" element={<Index />} />
