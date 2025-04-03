@@ -4,11 +4,24 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from './components/ui/theme-provider';
 import { Toaster } from './components/ui/toaster';
 import { cleanupExpiredGames } from './utils/gameExport';
+import HistoryPanel from './components/history/HistoryPanel';
+import { useNavigate } from 'react-router-dom';
 
 import Index from './pages/Index';
 import Quiz from './pages/Quiz';
 import SharedGame from './pages/SharedGame';
 import NotFound from './pages/NotFound';
+
+// Component to handle history navigation
+const HistoryNavigator = () => {
+  const navigate = useNavigate();
+  
+  const handleGameSelect = (game: any) => {
+    navigate(`/quiz/shared/${game.id}`);
+  };
+  
+  return <HistoryPanel onSelectGame={handleGameSelect} />;
+};
 
 // Create a separate component for the app content
 // This ensures hooks are called within the proper component context
@@ -35,6 +48,7 @@ const AppContent = () => {
           <Route path="/quiz/shared/:id" element={<SharedGame />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <HistoryNavigator />
       </Router>
       <Toaster />
     </>

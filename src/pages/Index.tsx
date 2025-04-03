@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CanvasContainer from '@/components/canvas/CanvasContainer';
@@ -9,8 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Gamepad, Sparkles, GraduationCap } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import HistoryPanel from '@/components/history/HistoryPanel';
-import { StoredGame } from '@/utils/gameExport';
 
 const Index = () => {
   const isMobile = useIsMobile();
@@ -34,10 +33,6 @@ const Index = () => {
     navigate(`/quiz?topic=${encodeURIComponent(gameTopic)}&autostart=true`);
   };
 
-  const handleGameSelect = (game: StoredGame) => {
-    navigate(`/quiz/shared/${game.id}`);
-  };
-
   const quickGameOptions = [
     "Học Toán Vui", 
     "Từ Vựng Tiếng Anh",
@@ -50,8 +45,6 @@ const Index = () => {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex flex-col w-full">
-        <HistoryPanel onSelectGame={handleGameSelect} />
-        
         <div className="flex-1 flex overflow-hidden">
           <Sidebar variant="inset" collapsible="icon">
             <SidebarContent>
