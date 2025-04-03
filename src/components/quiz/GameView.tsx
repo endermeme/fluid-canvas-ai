@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Share2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { MiniGame } from './AIGameGenerator';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface GameViewProps {
   miniGame: MiniGame;
@@ -83,9 +83,12 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
     if (container) {
       container.classList.add('animate-fade-in');
     }
+    
+    // Remove any headers or unwanted elements from the iframe
+    injectClickEffectScript();
   };
 
-  // Thêm mã CSS cho hiệu ứng click
+  // Thêm mã CSS cho hiệu ứng click và xóa header
   const injectClickEffectScript = () => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
       try {
@@ -94,6 +97,29 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         style.textContent = `
           * {
             -webkit-tap-highlight-color: transparent;
+          }
+          
+          /* Prevent scrolling */
+          html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            position: fixed;
+          }
+          
+          /* Remove any headers */
+          header, 
+          .header,
+          [class*="header"],
+          [id*="header"],
+          [class*="title-bar"],
+          [class*="navbar"],
+          [class*="nav-bar"],
+          [id*="navbar"],
+          [id*="nav-bar"] {
+            display: none !important;
           }
           
           button, a, [role="button"], input[type="submit"], input[type="button"], .clickable {
@@ -132,9 +158,54 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         `;
         iframeDocument.head.appendChild(style);
         
-        // Thêm script xử lý hiệu ứng click
+        // Thêm script xử lý hiệu ứng click và xóa header
         const script = iframeDocument.createElement('script');
         script.textContent = `
+          // Xóa bất kỳ header hoặc thanh điều hướng nào
+          function removeHeaders() {
+            const selectors = [
+              'header', '.header', '[class*="header"]', '[id*="header"]',
+              '[class*="title-bar"]', '[class*="navbar"]', '[class*="nav-bar"]',
+              '[id*="navbar"]', '[id*="nav-bar"]'
+            ];
+            
+            selectors.forEach(selector => {
+              const elements = document.querySelectorAll(selector);
+              elements.forEach(el => {
+                if (el) el.style.display = 'none';
+              });
+            });
+            
+            // Xóa bất kỳ phần tử nào có text chứa từ khóa header
+            document.querySelectorAll('*').forEach(el => {
+              if (el.innerText && 
+                 (el.innerText.toLowerCase().includes('challenge') || 
+                  el.innerText.toLowerCase().includes('challeng') ||
+                  el.innerText.match(/^\\s*[a-zA-Z0-9\\s]+\\s*$/))) {
+                const parent = el.parentNode;
+                if (parent && 
+                    parent.children.length <= 3 && 
+                    parent !== document.body && 
+                    !parent.querySelector('canvas') &&
+                    !parent.querySelector('input') &&
+                    !parent.querySelector('button')) {
+                  parent.style.display = 'none';
+                }
+              }
+            });
+          }
+          
+          // Run initially
+          removeHeaders();
+          
+          // Run again after a slight delay to catch dynamically added elements
+          setTimeout(removeHeaders, 500);
+          setTimeout(removeHeaders, 1500);
+          
+          // Set up observer to keep removing headers
+          const observer = new MutationObserver(removeHeaders);
+          observer.observe(document.body, { childList: true, subtree: true });
+          
           document.addEventListener('click', function(e) {
             // Kiểm tra xem có phải là phần tử tương tác không
             const isInteractive = e.target.matches('button, a, [role="button"], input[type="submit"], input[type="button"], .clickable') ||
@@ -246,8 +317,9 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
           title={miniGame.title}
           sandbox="allow-scripts allow-same-origin"
           className={`w-full h-full border-none ${isFrameLoaded ? 'opacity-100' : 'opacity-0'}`}
-          style={{ height: '100%', width: '100%' }}
+          style={{ height: '100%', width: '100%', overflow: 'hidden', position: 'absolute' }}
           onLoad={handleFrameLoad}
+          scrolling="no"
         />
       </div>
     </div>

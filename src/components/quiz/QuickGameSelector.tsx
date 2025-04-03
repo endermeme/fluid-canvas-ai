@@ -219,11 +219,6 @@ const QuickGameSelector: React.FC = () => {
     setCurrentGameType(null);
   };
 
-  const handleBackToSelection = () => {
-    setSelectedGame(null);
-    setErrorMessage(null);
-  };
-
   if (isLoading) {
     return <GameLoading />;
   }
@@ -240,16 +235,6 @@ const QuickGameSelector: React.FC = () => {
     return (
       <div className="h-full relative">
         <GameView miniGame={selectedGame} />
-        <div className="absolute bottom-4 right-4">
-          <Button 
-            onClick={handleBackToSelection}
-            variant="outline"
-            size="sm"
-            className="bg-background/80 backdrop-blur-sm shadow-md transition-transform active:scale-95 animate-fade-in"
-          >
-            Chọn Game Khác
-          </Button>
-        </div>
         <div className="absolute top-4 right-4">
           <h3 
             className="text-sm font-medium text-primary/60 cursor-pointer select-none" 
