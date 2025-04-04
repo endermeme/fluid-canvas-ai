@@ -1,5 +1,7 @@
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GameSettingsData } from './types';
+import { getGameTypeByTopic } from './gameTypes';
 
 export interface MiniGame {
   title: string;
@@ -86,49 +88,10 @@ export class AIGameGenerator {
   }
   
   private async generateWithGemini(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
-    const inferGameType = (topic: string): string => {
-      const lowerTopic = topic.toLowerCase();
-      
-      // Check if the topic itself describes a game mechanic
-      if (lowerTopic.includes('ghép cặp thông tin') || lowerTopic.includes('ghép đôi') || lowerTopic.includes('từ và nghĩa')) {
-        return "trò chơi ghép cặp từ với nghĩa";
-      }
-      if (lowerTopic.includes('xáo trộn chữ cái') || lowerTopic.includes('xáo chữ')) {
-        return "trò chơi xáo trộn chữ cái để người chơi sắp xếp lại";
-      }
-      if (lowerTopic.includes('sắp xếp từ') || lowerTopic.includes('sắp xếp câu')) {
-        return "trò chơi sắp xếp các từ để tạo thành câu hoàn chỉnh";
-      }
-      if (lowerTopic.includes('tìm cặp đôi') || lowerTopic.includes('tìm cặp giống nhau')) {
-        return "trò chơi tìm cặp đôi giống nhau";
-      }
-      if (lowerTopic.includes('thẻ hai mặt') || lowerTopic.includes('thẻ ghi nhớ')) {
-        return "trò chơi thẻ ghi nhớ hai mặt, một mặt câu hỏi, một mặt trả lời";
-      }
-      if (lowerTopic.includes('câu hỏi trắc nghiệm') || lowerTopic.includes('trắc nghiệm')) {
-        return "trò chơi câu hỏi trắc nghiệm nhiều lựa chọn";
-      }
-      if (lowerTopic.includes('từ nam châm') || lowerTopic.includes('nam châm từ')) {
-        return "trò chơi kéo thả các từ như nam châm để tạo thành câu hoàn chỉnh";
-      }
-      if (lowerTopic.includes('ô chữ')) {
-        return "trò chơi ô chữ với các gợi ý";
-      }
-      if (lowerTopic.includes('đánh vần')) {
-        return "trò chơi đánh vần từ bằng cách điền từng chữ cái";
-      }
-      if (lowerTopic.includes('đúng hay sai') || lowerTopic.includes('true false')) {
-        return "trò chơi đúng hay sai, người chơi chọn đúng hoặc sai cho mỗi câu hỏi";
-      }
-      if (lowerTopic.includes('ghi nhớ') || lowerTopic.includes('trí nhớ')) {
-        return "trò chơi thử thách trí nhớ, ghi nhớ các mục hiển thị";
-      }
-      
-      // Default to quiz if no specific game type is detected
-      return topic;
-    };
-
-    const gamePrompt = inferGameType(topic);
+    // Get game type from topic to provide better context for the AI
+    const gameType = getGameTypeByTopic(topic);
+    const gameDescription = gameType ? gameType.description : "trò chơi tương tác";
+    
     const settingsPrompt = settings ? `
       Hãy tạo với các cài đặt sau:
       - Độ khó: ${settings.difficulty}
@@ -138,7 +101,7 @@ export class AIGameGenerator {
     ` : '';
 
     const prompt = `
-      Tạo một minigame tương tác hoàn chỉnh để học về chủ đề "${gamePrompt}".
+      Tạo một minigame tương tác hoàn chỉnh để học về chủ đề "${topic}" dưới dạng ${gameDescription}.
       ${settingsPrompt}
       
       HƯỚNG DẪN CHI TIẾT:
@@ -229,10 +192,18 @@ export class AIGameGenerator {
     
     try {
       console.log("Preparing OpenAI enhancement request...");
+      
+      // Get game type from topic for better context
+      const gameType = getGameTypeByTopic(topic);
+      const gameDescription = gameType ? gameType.description : "";
+      const gameTypeContext = gameDescription ? `This game should be a ${gameDescription}.` : "";
+      
       const prompt = `
       You are a master web developer specializing in creating bug-free, interactive web games.
       
       I'm going to provide you with HTML code for a mini-game on the topic of "${topic}".
+      ${gameTypeContext}
+      
       Your task is to improve this code by:
       
       1. IDENTIFY AND FIX ALL BUGS AND ERRORS in the code - this is your highest priority
@@ -375,15 +346,19 @@ export class AIGameGenerator {
   }
 
   private getBasicGame(topic: string): MiniGame {
+    // Get game type from topic to create appropriate fallback
+    const gameType = getGameTypeByTopic(topic);
+    const gameTitle = gameType ? `${gameType.name} về ${topic}` : `Quiz về ${topic}`;
+    
     return {
-      title: `Quiz về ${topic}`,
-      description: `Minigame quiz đơn giản về chủ đề ${topic}`,
+      title: gameTitle,
+      description: `Minigame đơn giản về chủ đề ${topic}`,
       content: `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz về ${topic}</title>
+    <title>${gameTitle}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -501,7 +476,7 @@ export class AIGameGenerator {
 </head>
 <body>
     <div id="game-container">
-        <h1>Quiz về ${topic}</h1>
+        <h1>${gameTitle}</h1>
         <div id="progress-bar">
             <div id="progress"></div>
         </div>

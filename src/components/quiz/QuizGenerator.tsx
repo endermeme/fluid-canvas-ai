@@ -7,6 +7,7 @@ import GameError from './GameError';
 import GameView from './GameView';
 import OpenAIKeyModal from './OpenAIKeyModal';
 import { GameSettingsData } from './types';
+import { getGameTypeByTopic } from './gameTypes';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -43,6 +44,13 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   }));
 
   const getSettingsFromTopic = (topic: string): GameSettingsData => {
+    // First try to get specific game type settings
+    const gameType = getGameTypeByTopic(topic);
+    if (gameType) {
+      return {...gameType.defaultSettings};
+    }
+    
+    // Fall back to manual settings based on keywords
     let settings = {...defaultSettings};
     
     const lowerTopic = topic.toLowerCase();
