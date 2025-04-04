@@ -202,15 +202,6 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     return (
       <div className="h-full relative">
         <GameView miniGame={selectedGame} />
-        <div className="absolute top-4 right-4">
-          <h3 
-            className="text-sm font-medium text-primary/60 cursor-pointer select-none" 
-            onClick={handleTitleClick}
-            title="Trợ Lý Tạo Web"
-          >
-            Trợ Lý Tạo Web
-          </h3>
-        </div>
       </div>
     );
   }
