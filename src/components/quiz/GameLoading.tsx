@@ -28,7 +28,13 @@ const GameLoading: React.FC = () => {
     <div className="flex flex-col items-center justify-center h-full w-full space-y-6 fixed inset-0 overflow-hidden">
       <div className="relative">
         <div className="w-16 h-16 rounded-full border-4 border-primary/30 border-t-primary animate-spin"></div>
-        <Loader2 className="w-10 h-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-primary animate-pulse" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <img 
+            src="https://cdn.glitch.global/1eee455c-65a0-428f-a71b-89f07640b91b/Thi%E1%BA%BFt%20k%E1%BA%BF%20ch%C6%B0a%20c%C3%B3%20t%C3%AAn.svg?v=1742919732332" 
+            alt="Logo" 
+            className="w-8 h-8 animate-pulse"
+          />
+        </div>
       </div>
       
       <div className="space-y-2 text-center">
