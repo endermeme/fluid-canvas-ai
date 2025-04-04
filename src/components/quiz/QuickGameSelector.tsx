@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -10,7 +9,7 @@ import {
   Calculator, BadgeDollarSign, Blocks
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AIGameGenerator, MiniGame } from './AIGameGenerator';
+import { AIGameGenerator, MiniGame } from './generator/AIGameGenerator';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
 import GameView from './GameView';
@@ -22,6 +21,9 @@ import { Link } from 'react-router-dom';
 import OpenAIKeyModal from './OpenAIKeyModal';
 import { Input } from '@/components/ui/input';
 import { gameTypes } from './gameTypes';
+import GameHeader from './quick-game-selector/GameHeader';
+import GameGrid from './quick-game-selector/GameGrid';
+import CustomGameForm from './quick-game-selector/CustomGameForm';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -193,66 +195,17 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
 
   return (
     <div ref={containerRef} className="flex flex-col items-center h-full w-full bg-gradient-to-b from-background to-background/80 p-4 md:p-6 overflow-auto">
-      <div className="text-primary mb-4 animate-float-in">
-        <div className="relative">
-          <div className="absolute inset-0 blur-xl bg-primary/20 rounded-full animate-pulse-soft"></div>
-          <School size={56} className="relative z-10 text-primary" />
-        </div>
-      </div>
-      
-      <h2 
-        className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-fade-in cursor-pointer"
-        onClick={handleTitleClick}
-      >
-        Minigames Giáo Dục
-      </h2>
+      <GameHeader onTitleClick={handleTitleClick} />
 
       {/* Custom Game Button */}
-      <div className="w-full max-w-4xl mb-6 flex flex-col md:flex-row gap-3">
-        <Button 
-          onClick={handleCustomGameCreate}
-          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-base relative overflow-hidden"
-          size="lg"
-        >
-          <span className="mr-2">✨</span> Tạo Game Tùy Chỉnh <span className="ml-2">✨</span>
-          <span className="absolute inset-0 bg-white/20 blur-3xl opacity-20 animate-pulse-slow"></span>
-        </Button>
-        
-        <form onSubmit={handleCustomTopicSubmit} className="flex-1 flex gap-2">
-          <Input
-            type="text"
-            value={customTopic}
-            onChange={(e) => setCustomTopic(e.target.value)}
-            placeholder="Nhập chủ đề cho minigame..."
-            className="flex-1 min-w-0 rounded-lg border-gray-300 text-base"
-          />
-          <Button 
-            type="submit" 
-            variant="default"
-            className="whitespace-nowrap"
-            disabled={!customTopic.trim()}
-          >
-            Tạo Game
-          </Button>
-        </form>
-      </div>
+      <CustomGameForm 
+        onCustomGameCreate={handleCustomGameCreate}
+        customTopic={customTopic}
+        setCustomTopic={setCustomTopic}
+        handleCustomTopicSubmit={handleCustomTopicSubmit}
+      />
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 max-w-6xl w-full">
-        {gameTypes.map((gameType) => (
-          <Button 
-            key={gameType.id}
-            variant="outline" 
-            className="game-button flex flex-col h-28 justify-center items-center gap-2 transition-all duration-300 rounded-xl border border-white/20 bg-white/5 backdrop-blur-sm hover:border-primary/60 hover:shadow-lg hover:bg-primary/5 active:scale-95 opacity-0 group"
-            onClick={() => handleTopicSelect(gameType)}
-            title={gameType.description}
-          >
-            <div className="text-primary/80 p-2 rounded-full bg-primary/10 transition-all duration-300 group-hover:bg-primary/20 group-hover:text-primary">
-              {getIconComponent(gameType.icon)}
-            </div>
-            <span className="font-medium text-sm text-center line-clamp-2">{gameType.name}</span>
-          </Button>
-        ))}
-      </div>
+      <GameGrid gameTypes={gameTypes} onTopicSelect={handleTopicSelect} getIconComponent={getIconComponent} />
       
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-lg border-white/20">

@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { MiniGame } from './AIGameGenerator';
+import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
 import { Share2, Download, Sparkles } from 'lucide-react';
 import { saveGameForSharing } from '@/utils/gameExport';
