@@ -2,18 +2,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
 import QuickGameSelector from '@/components/quiz/QuickGameSelector';
-import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
-import { animateAIPanelSlideIn, animateContentHighlight } from '@/lib/animations';
+import { animateContentHighlight } from '@/lib/animations';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
   const [isManualMode, setIsManualMode] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showChatInterface, setShowChatInterface] = useState(false);
   
   const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
   const { addBlock } = useCanvasState();
@@ -21,7 +20,6 @@ const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const location = useLocation();
   const mainContentRef = useRef<HTMLDivElement>(null);
-  const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.title = 'Minigame Tương Tác';
@@ -50,10 +48,6 @@ const Quiz = () => {
 
   useEffect(() => {
     // Apply animations on mount
-    if (sidebarRef.current) {
-      animateAIPanelSlideIn(sidebarRef.current);
-    }
-    
     if (mainContentRef.current) {
       animateContentHighlight(mainContentRef.current);
     }
@@ -102,42 +96,54 @@ const Quiz = () => {
     }, 100);
   };
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+  const toggleChatInterface = () => {
+    setShowChatInterface(!showChatInterface);
   };
 
   return (
-    <SidebarProvider defaultOpen={sidebarOpen}>
-      <div className="min-h-screen flex flex-col w-full overflow-hidden">
-        <div className="flex-1 flex overflow-hidden">
-          <Sidebar variant="inset" collapsible="icon">
-            <SidebarContent>
-              <div ref={sidebarRef} className="h-full">
-                <ChatInterface 
-                  onCreateBlock={handleCreateFromPrompt} 
-                  onQuizRequest={handleGameRequest}
-                  onToggleSidebar={toggleSidebar}
-                  isSidebarOpen={sidebarOpen}
-                />
-              </div>
-            </SidebarContent>
-          </Sidebar>
-          
-          <SidebarInset className="flex-1 bg-background overflow-hidden p-0 relative">
-            <div ref={mainContentRef} className="h-full relative">
-              {isManualMode ? (
-                <QuizGenerator 
-                  ref={quizGeneratorRef} 
-                  topic={topic}
-                />
-              ) : (
-                <QuickGameSelector />
-              )}
-            </div>
-          </SidebarInset>
+    <div className="min-h-screen flex flex-col w-full overflow-hidden">
+      <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 bg-background overflow-hidden p-0 relative">
+          <div ref={mainContentRef} className="h-full relative">
+            {isManualMode ? (
+              <QuizGenerator 
+                ref={quizGeneratorRef} 
+                topic={topic}
+              />
+            ) : (
+              <QuickGameSelector 
+                onGameRequest={handleGameRequest}
+                onToggleChat={toggleChatInterface}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </SidebarProvider>
+      
+      {/* Floating Chat Interface */}
+      {showChatInterface && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 flex justify-center items-center">
+          <div className="bg-background rounded-lg shadow-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b border-border flex justify-between items-center">
+              <h2 className="text-xl font-bold">Tạo Game Tùy Chỉnh</h2>
+              <button 
+                className="text-foreground/70 hover:text-foreground"
+                onClick={toggleChatInterface}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="h-[60vh]">
+              <ChatInterface 
+                onCreateBlock={handleCreateFromPrompt} 
+                onQuizRequest={handleGameRequest}
+                onCloseChatInterface={toggleChatInterface}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
