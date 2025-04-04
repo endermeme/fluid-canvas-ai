@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X } from 'lucide-react';
+import { X, Info } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Label } from '@/components/ui/label';
 
@@ -12,14 +12,21 @@ interface OpenAIKeyModalProps {
   onClose: () => void;
   onSave: (key: string) => void;
   currentKey: string | null;
+  allowEmpty?: boolean;
 }
 
-const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({ isOpen, onClose, onSave, currentKey }) => {
+const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onSave, 
+  currentKey,
+  allowEmpty = false 
+}) => {
   const [apiKey, setApiKey] = useState<string>(currentKey || '');
   const { toast } = useToast();
 
   const handleSave = () => {
-    if (!apiKey.trim()) {
+    if (!apiKey.trim() && !allowEmpty) {
       toast({
         title: "API Key Required",
         description: "Vui lòng nhập API key của bạn.",
@@ -28,7 +35,7 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({ isOpen, onClose, onSave
       return;
     }
 
-    if (!apiKey.startsWith('sk-')) {
+    if (apiKey.trim() && !apiKey.startsWith('sk-')) {
       toast({
         title: "API Key Không Hợp Lệ",
         description: "API key OpenAI phải bắt đầu bằng sk-",
@@ -38,11 +45,15 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({ isOpen, onClose, onSave
     }
 
     onSave(apiKey);
-    toast({
-      title: "API Key Đã Lưu",
-      description: "API key OpenAI của bạn đã được lưu thành công.",
-    });
     onClose();
+  };
+  
+  const handleRemoveKey = () => {
+    if (allowEmpty) {
+      setApiKey('');
+      onSave('');
+      onClose();
+    }
   };
 
   return (
@@ -69,13 +80,26 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({ isOpen, onClose, onSave
               onChange={(e) => setApiKey(e.target.value)}
               className="bg-background/50 border-white/20"
             />
-            <p className="text-xs text-muted-foreground">
+            {allowEmpty && (
+              <div className="flex items-start gap-2 mt-2 p-2 rounded border border-yellow-500/20 bg-yellow-500/5">
+                <Info className="h-5 w-5 text-yellow-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground">
+                  Bạn có thể để trống API key. Khi đó, chỉ model Gemini sẽ được sử dụng và chế độ Canvas sẽ tự động được bật.
+                </p>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground mt-2">
               Key của bạn sẽ được lưu trên trình duyệt và không được gửi đến máy chủ của chúng tôi.
             </p>
           </div>
         </div>
         
         <div className="flex justify-end gap-3">
+          {allowEmpty && currentKey && (
+            <Button variant="destructive" onClick={handleRemoveKey}>
+              Xóa Key
+            </Button>
+          )}
           <Button variant="outline" onClick={onClose}>
             Hủy
           </Button>

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { KeyRound, Plus } from 'lucide-react';
+import { KeyRound, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import OpenAIKeyModal from '@/components/quiz/OpenAIKeyModal';
 import { useToast } from '@/hooks/use-toast';
@@ -10,11 +10,17 @@ const APIKeyButton = () => {
   const { toast } = useToast();
 
   const handleSaveOpenAIKey = (key: string) => {
+    // Allow empty key (user wants to remove the key)
+    localStorage.setItem('openai_api_key', key);
     if (key) {
-      localStorage.setItem('openai_api_key', key);
       toast({
         title: "API Key Đã Lưu",
         description: "OpenAI API key của bạn đã được lưu thành công.",
+      });
+    } else {
+      toast({
+        title: "Đã Xóa API Key",
+        description: "Đã chuyển sang chỉ sử dụng Gemini với chế độ Canvas.",
       });
     }
   };
@@ -36,6 +42,7 @@ const APIKeyButton = () => {
         onClose={() => setShowOpenAIKeyModal(false)}
         onSave={handleSaveOpenAIKey}
         currentKey={localStorage.getItem('openai_api_key')}
+        allowEmpty={true}
       />
     </>
   );

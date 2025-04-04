@@ -17,26 +17,36 @@ export class AIGameGenerator {
   constructor(apiKey: string, options?: { modelName?: string; canvasMode?: boolean }) {
     console.log("🚀 AIGameGenerator: Khởi tạo bộ tạo game AI");
     this.modelName = options?.modelName || 'gemini-2.0-flash';
-    this.canvasMode = options?.canvasMode || false;
+    
+    // If there's no OpenAI key, automatically enable canvas mode
+    const storedOpenAIKey = getOpenAIKey();
+    this.canvasMode = options?.canvasMode || !storedOpenAIKey ? true : false;
     
     console.log(`🚀 AIGameGenerator: Sử dụng mô hình ${this.modelName}`);
     console.log(`🚀 AIGameGenerator: Chế độ canvas: ${this.canvasMode ? 'BẬT' : 'TẮT'}`);
     
     this.model = createGeminiClient(apiKey);
-    this.openAIKey = getOpenAIKey();
+    this.openAIKey = storedOpenAIKey;
     
     if (this.openAIKey) {
       console.log("🚀 AIGameGenerator: Có sẵn OpenAI key cho cải thiện game");
     } else {
-      console.log("🚀 AIGameGenerator: Không có OpenAI key, sẽ chỉ sử dụng Gemini");
+      console.log("🚀 AIGameGenerator: Không có OpenAI key, sẽ chỉ sử dụng Gemini với chế độ Canvas");
     }
   }
 
   setOpenAIKey(key: string): boolean {
+    // Allow empty key to disable OpenAI enhancement
     const success = saveOpenAIKey(key);
     if (success) {
       console.log("🚀 AIGameGenerator: Đã lưu OpenAI key mới");
       this.openAIKey = key;
+      
+      // If the key is empty, automatically enable canvas mode
+      if (!key) {
+        this.canvasMode = true;
+        console.log("🚀 AIGameGenerator: Đã bật tự động chế độ Canvas do không có OpenAI key");
+      }
     } else {
       console.log("🚀 AIGameGenerator: Không thể lưu OpenAI key");
     }
@@ -71,7 +81,6 @@ export class AIGameGenerator {
       
       // Try first with Gemini
       console.log(`🚀 AIGameGenerator: Bắt đầu tạo game với ${this.modelName}...`);
-      // Fix: Pass this.canvasMode as the third argument instead of fourth
       const geminiResult = await tryGeminiGeneration(this.model, topic, settings);
       
       const geminiTime = ((Date.now() - startTime) / 1000).toFixed(2);
