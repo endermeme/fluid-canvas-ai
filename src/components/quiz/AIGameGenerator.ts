@@ -36,27 +36,44 @@ export class AIGameGenerator {
     try {
       console.log(`Starting game generation for topic: "${topic}" with settings:`, settings);
       
-      // Generate with Gemini first
-      const geminiResult = await this.generateWithGemini(topic, settings);
+      // Try first with Gemini
+      const geminiResult = await this.tryGeminiGeneration(topic, settings);
       
-      if (!geminiResult) {
-        console.error("Gemini failed to generate a valid result");
-        return null;
+      if (geminiResult) {
+        console.log("Successfully generated game with Gemini");
+        
+        // If OpenAI key is available, enhance the game
+        if (this.hasOpenAIKey()) {
+          console.log("OpenAI key available, enhancing game...");
+          return await this.enhanceWithOpenAI(geminiResult, topic);
+        }
+        
+        return geminiResult;
       }
       
-      console.log("Gemini successfully generated game");
+      console.log("Gemini generation failed, creating fallback game");
+      return this.createFallbackGame(topic);
       
-      // If OpenAI key is available, enhance the code
-      if (this.hasOpenAIKey() && geminiResult) {
-        console.log("OpenAI key available, enhancing game...");
-        return await this.enhanceWithOpenAI(geminiResult, topic);
-      }
-      
-      // If no OpenAI key, return the Gemini result
-      return geminiResult;
     } catch (error) {
-      console.error("Fatal error in generateMiniGame:", error);
+      console.error("Error in generateMiniGame:", error);
+      return this.createFallbackGame(topic);
+    }
+  }
+  
+  private async tryGeminiGeneration(topic: string, settings?: GameSettingsData, retryCount = 0): Promise<MiniGame | null> {
+    if (retryCount >= 2) {
+      console.log("Max retries reached for Gemini generation");
       return null;
+    }
+    
+    try {
+      console.log(`Gemini attempt ${retryCount + 1} for topic: "${topic}"`);
+      return await this.generateWithGemini(topic, settings);
+    } catch (error) {
+      console.error(`Gemini attempt ${retryCount + 1} failed:`, error);
+      // Wait a bit before retrying
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return this.tryGeminiGeneration(topic, settings, retryCount + 1);
     }
   }
   
@@ -77,35 +94,17 @@ export class AIGameGenerator {
       1. TẠO MỘT FILE HTML ĐẦY ĐỦ:
          - Bao gồm đầy đủ HTML, CSS và JavaScript trong một file HTML duy nhất
          - Sử dụng thẻ <style> cho CSS và thẻ <script> cho JavaScript
-         - Không tách riêng code thành nhiều file
       
       2. YÊU CẦU KỸ THUẬT:
-         - Code phải sạch sẽ, có indentation đúng và có comments giải thích
-         - Tất cả các chức năng phải hoạt động trong một file HTML duy nhất
+         - Code phải sạch sẽ và có indentation đúng
          - Game phải responsive, hoạt động tốt trên cả điện thoại và máy tính
-         - Có đầy đủ xử lý lỗi và phản hồi người dùng
          - KHÔNG sử dụng thư viện bên ngoài hay CDN
-         - TUYỆT ĐỐI KHÔNG TẠO BẤT KỲ HEADER NÀO TRONG GAME
-         - Game phải chiếm toàn bộ màn hình, không có header, footer hay menu
+         - Game phải chiếm toàn bộ màn hình
       
       3. TÍNH NĂNG GAME:
          - Giao diện hấp dẫn với màu sắc và animation
          - Tính năng tương tác như đếm điểm, hiển thị thời gian
          - Có màn hình kết thúc game và nút chơi lại
-         - Thêm âm thanh nếu cần thiết (sử dụng Web Audio API)
-      
-      4. YÊU CẦU PHỨC TẠP HƠN:
-         - Có thể tạo các loại game phức tạp như xếp hình, platformer, puzzle...
-         - Có thể lưu trữ điểm số cao nhất vào localStorage
-         - Thêm các hiệu ứng đặc biệt nếu phù hợp
-         - Thêm nhiều cấp độ nếu có thể
-      
-      5. YÊU CẦU GIAO DIỆN:
-         - KHÔNG tạo header hoặc footer
-         - Game phải chiếm toàn bộ không gian màn hình
-         - Giao diện phải RESPONSIVE cho cả máy tính và điện thoại
-         - Sử dụng media queries để đảm bảo trải nghiệm tốt trên mọi thiết bị
-         - Các nút và phần tử tương tác phải đủ lớn để dễ dàng sử dụng trên điện thoại
       
       Trả về một đối tượng JSON với định dạng sau:
       {
@@ -140,47 +139,28 @@ export class AIGameGenerator {
           const gameData = JSON.parse(cleanedJson);
           
           return {
-            title: gameData.title,
-            description: gameData.description,
-            content: gameData.content
+            title: gameData.title || `Game về ${topic}`,
+            description: gameData.description || `Minigame về chủ đề ${topic}`,
+            content: gameData.content || this.getBasicGame(topic).content
           };
         } catch (jsonError) {
           console.error("Error parsing Gemini JSON:", jsonError);
-          console.log("JSON extraction failed, attempting manual extraction");
           
           // Manual extraction as fallback
           const titleMatch = text.match(/"title"\s*:\s*"([^"]*)"/);
           const descriptionMatch = text.match(/"description"\s*:\s*"([^"]*)"/);
-          const contentStartMatch = text.match(/"content"\s*:\s*"(<!DOCTYPE html>|<html>|<body>)/);
+          const contentMatch = text.match(/"content"\s*:\s*"([\s\S]*?)(?:"\s*}|"\s*$)/);
           
-          if (titleMatch && descriptionMatch && contentStartMatch) {
-            // Find start index of content
-            const contentStartIdx = text.indexOf('"content"');
-            if (contentStartIdx > 0) {
-              // Extract from content start to end, handling escaping
-              let contentStr = "";
-              let inContent = false;
-              let quoteCount = 0;
-              
-              for (let i = contentStartIdx + 10; i < text.length; i++) {
-                if (text[i] === '"' && (i === 0 || text[i-1] !== '\\')) {
-                  quoteCount++;
-                  if (quoteCount === 1) {
-                    inContent = true;
-                    continue;
-                  } else if (inContent && quoteCount > 1 && text.substr(i-1, 2) !== '\\"') {
-                    break;
-                  }
-                }
-                if (inContent) contentStr += text[i];
-              }
-              
-              return {
-                title: titleMatch[1],
-                description: descriptionMatch[1],
-                content: contentStr.replace(/\\"/g, '"').replace(/\\n/g, '\n')
-              };
-            }
+          if (titleMatch && contentMatch) {
+            return {
+              title: titleMatch[1] || `Game về ${topic}`,
+              description: descriptionMatch ? descriptionMatch[1] : `Minigame về chủ đề ${topic}`,
+              content: contentMatch[1]
+                .replace(/\\n/g, '\n')
+                .replace(/\\"/g, '"')
+                .replace(/\\t/g, '\t')
+                .replace(/\\\\/g, '\\')
+            };
           }
         }
       }
@@ -189,7 +169,7 @@ export class AIGameGenerator {
       return null;
     } catch (error) {
       console.error("Error generating with Gemini:", error);
-      return null;
+      throw error; // Rethrow for retry mechanism
     }
   }
   
@@ -212,7 +192,6 @@ export class AIGameGenerator {
       
       IMPORTANT:
       - Do NOT change the fundamental game concept
-      - Do NOT add any headers or footers to the game
       - Make the game fully responsive for both desktop and mobile
       - The game should take up the entire screen space
       - Return ONLY the complete, enhanced HTML file - nothing else
@@ -263,14 +242,26 @@ export class AIGameGenerator {
             description: geminiGame.description,
             content: enhancedHtml
           };
-        } else {
-          console.log("Could not extract HTML from OpenAI response, using complete response");
-          return {
-            title: geminiGame.title,
-            description: geminiGame.description,
-            content: content
-          };
+        } else if (content.includes("<html")) {
+          // Try a more lenient match if the strict regex fails
+          console.log("Using lenient HTML extraction");
+          const startIndex = content.indexOf("<html");
+          const endIndex = content.lastIndexOf("</html>") + 7;
+          if (startIndex >= 0 && endIndex > startIndex) {
+            return {
+              title: geminiGame.title, 
+              description: geminiGame.description,
+              content: content.substring(startIndex - 9, endIndex) // Include <!DOCTYPE>
+            };
+          }
         }
+        
+        console.log("Could not extract HTML from OpenAI response, using complete response");
+        return {
+          title: geminiGame.title,
+          description: geminiGame.description,
+          content: content
+        };
       }
       
       console.log("No valid content from OpenAI, returning original game");
@@ -279,5 +270,275 @@ export class AIGameGenerator {
       console.error("Error enhancing with OpenAI:", error);
       return geminiGame;
     }
+  }
+
+  private createFallbackGame(topic: string): MiniGame {
+    console.log("Creating fallback game for topic:", topic);
+    return this.getBasicGame(topic);
+  }
+
+  private getBasicGame(topic: string): MiniGame {
+    return {
+      title: `Quiz về ${topic}`,
+      description: `Minigame quiz đơn giản về chủ đề ${topic}`,
+      content: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz về ${topic}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        #question {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 480px) {
+            .options {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option {
+            padding: 10px;
+            background-color: #e9ecef;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option:hover {
+            background-color: #dee2e6;
+        }
+
+        .option.selected {
+            background-color: #4dabf7;
+            color: white;
+        }
+
+        .option.correct {
+            background-color: #40c057;
+            color: white;
+        }
+
+        .option.wrong {
+            background-color: #fa5252;
+            color: white;
+        }
+
+        #next-btn, #restart-btn {
+            padding: 10px 20px;
+            background-color: #4dabf7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        #next-btn:hover, #restart-btn:hover {
+            background-color: #339af0;
+        }
+
+        #score-container {
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+
+        #progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #dee2e6;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        #progress {
+            height: 100%;
+            background-color: #4dabf7;
+            width: 0%;
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Quiz về ${topic}</h1>
+        <div id="progress-bar">
+            <div id="progress"></div>
+        </div>
+        <div id="question"></div>
+        <div class="options" id="options">
+            <!-- Options will be inserted here -->
+        </div>
+        <button id="next-btn" style="display:none;">Câu tiếp theo</button>
+        <div id="score-container" style="display:none;">
+            <p>Điểm của bạn: <span id="score">0</span>/<span id="total">0</span></p>
+            <button id="restart-btn">Chơi lại</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz data
+        const quizData = [
+            {
+                question: "Câu hỏi 1 về ${topic}?",
+                options: ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+                correct: 0
+            },
+            {
+                question: "Câu hỏi 2 về ${topic}?",
+                options: ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+                correct: 1
+            },
+            {
+                question: "Câu hỏi 3 về ${topic}?",
+                options: ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+                correct: 2
+            }
+        ];
+
+        // Game variables
+        let currentQuestion = 0;
+        let score = 0;
+        let optionSelected = false;
+
+        // DOM elements
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+        const nextBtn = document.getElementById('next-btn');
+        const scoreEl = document.getElementById('score');
+        const totalEl = document.getElementById('total');
+        const scoreContainer = document.getElementById('score-container');
+        const restartBtn = document.getElementById('restart-btn');
+        const progressBar = document.getElementById('progress');
+
+        // Load quiz
+        function loadQuiz() {
+            optionSelected = false;
+            nextBtn.style.display = 'none';
+            
+            const currentQuizData = quizData[currentQuestion];
+            questionEl.innerText = currentQuizData.question;
+            
+            optionsEl.innerHTML = '';
+            currentQuizData.options.forEach((option, index) => {
+                const optionEl = document.createElement('div');
+                optionEl.innerText = option;
+                optionEl.classList.add('option');
+                optionEl.addEventListener('click', () => selectOption(optionEl, index));
+                optionsEl.appendChild(optionEl);
+            });
+            
+            // Update progress bar
+            progressBar.style.width = \`\${(currentQuestion / quizData.length) * 100}%\`;
+        }
+
+        // Select option
+        function selectOption(optionEl, index) {
+            if (optionSelected) return;
+            
+            optionSelected = true;
+            const currentQuizData = quizData[currentQuestion];
+            
+            // Check if the selected option is correct
+            if (index === currentQuizData.correct) {
+                optionEl.classList.add('correct');
+                score++;
+            } else {
+                optionEl.classList.add('wrong');
+                // Highlight the correct answer
+                optionsEl.children[currentQuizData.correct].classList.add('correct');
+            }
+            
+            // Show next button
+            nextBtn.style.display = 'block';
+        }
+
+        // Go to next question or end quiz
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion < quizData.length) {
+                loadQuiz();
+            } else {
+                endQuiz();
+            }
+        }
+
+        // End quiz and show score
+        function endQuiz() {
+            questionEl.innerText = \`Quiz hoàn thành!\`;
+            optionsEl.innerHTML = '';
+            nextBtn.style.display = 'none';
+            
+            scoreEl.innerText = score;
+            totalEl.innerText = quizData.length;
+            scoreContainer.style.display = 'block';
+            
+            // Update progress bar to 100%
+            progressBar.style.width = '100%';
+        }
+
+        // Restart quiz
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            optionSelected = false;
+            scoreContainer.style.display = 'none';
+            loadQuiz();
+        }
+
+        // Event listeners
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', restartQuiz);
+
+        // Initialize quiz
+        loadQuiz();
+    </script>
+</body>
+</html>`
+    };
   }
 }
