@@ -45,6 +45,12 @@ export const generateWithGemini = async (
        - Tính năng tương tác như đếm điểm, hiển thị thời gian
        - Có màn hình kết thúc game và nút chơi lại
        - Kiểm tra logic game kỹ để tránh bug và lỗi
+       
+    4. SỬ DỤNG HÌNH ẢNH:
+       - Nếu game cần hình ảnh, HÃY SỬ DỤNG URL hình ảnh từ Google
+       - BẮT BUỘC giữ nguyên URL hình ảnh, KHÔNG được thay đổi hoặc xóa URL
+       - Đảm bảo URL hình ảnh được chèn chính xác vào mã HTML
+       - Sử dụng hình ảnh liên quan đến chủ đề và phù hợp với nội dung game
     
     Trả về một đối tượng JSON với định dạng sau:
     {
@@ -54,6 +60,7 @@ export const generateWithGemini = async (
     }
     
     QUAN TRỌNG: Trả về JSON hoàn chỉnh. Mã HTML phải là một trang web hoàn chỉnh và có thể chạy độc lập.
+    LƯU Ý ĐẶC BIỆT: Nếu có sử dụng hình ảnh, PHẢI GIỮ NGUYÊN URL hình ảnh và không được chỉnh sửa hoặc xóa chúng.
   `;
 
   try {
