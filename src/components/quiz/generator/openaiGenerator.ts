@@ -33,20 +33,28 @@ export const enhanceWithOpenAI = async (
     5. Ensure the game is fully responsive and runs well on mobile
     6. IMPORTANT: Verify that all JavaScript variables are properly declared with let/const/var
     7. Make sure all JavaScript code is placed inside DOMContentLoaded event
+    8. OPTIMIZE the code by REMOVING any unnecessary components or features
+    9. If there are any features not relevant to the game's main purpose, REMOVE them
+    10. REVIEW the entire game against the topic requirements and FIX any inconsistencies
     
     IMPORTANT REQUIREMENTS:
     - Make SIGNIFICANT improvements to the code quality, not just minor fixes
-    - Replace broken or non-functional sections completely if needed  
+    - Replace broken or non-functional sections completely if needed
     - Keep ALL code in a single HTML file with internal <style> and <script> tags
     - Do NOT change the fundamental game concept
     - Focus on ensuring smooth, bug-free gameplay first
+    - KEEP ALL IMAGE URLS exactly as they are - do not modify or remove any image URLs
     - Return ONLY the complete, enhanced HTML file - nothing else
     - Make sure all code is properly formatted and indented
     - Add helpful comments to explain complex logic
+    - SIMPLIFY complex code that could be written more elegantly
+    - REMOVE any unnecessary or redundant code
     
     If you see that the code is completely broken or has major issues, DO NOT try to fix it piecemeal. 
     Instead, rewrite it entirely while preserving the core game concept and mechanics. Do not add comments
     explaining your changes - just return the fixed code.
+    
+    Remember: NEVER remove or alter any image URLs in the code. They must remain exactly as they are.
     
     Return the fully fixed and enhanced HTML code WITHOUT any additional explanations before or after.
     
@@ -68,7 +76,7 @@ export const enhanceWithOpenAI = async (
       body: JSON.stringify({
         model: 'gpt-4o',
         messages: [{ role: 'user', content: prompt }],
-        temperature: 0.5,
+        temperature: 0.3, // Lower temperature for more consistent results
         max_tokens: 4000
       })
     });
@@ -127,15 +135,35 @@ export const enhanceWithOpenAI = async (
             "\n</html>";
           console.log("✅ OpenAI: Tái tạo HTML thành công bằng phương pháp 3");
         }
+      } 
+      // Method 4: Just look for a style or script tag and assume the rest is HTML
+      else if (content.includes("<style>") || content.includes("<script>")) {
+        console.log("🔶 OpenAI: Đang trích xuất HTML (phương pháp 4)...");
+        enhancedHtml = "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n" +
+          "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+          "<title>" + geminiGame.title + "</title>\n" + content + "\n</html>";
+        console.log("✅ OpenAI: Tái tạo HTML thành công bằng phương pháp 4");
       }
       
       if (enhancedHtml && enhancedHtml.length > 500) {
         // Basic HTML structure validation
         console.log("🔶 OpenAI: Đang xác thực cấu trúc HTML...");
-        if (!enhancedHtml.includes("<body") || !enhancedHtml.includes("</body>") || 
-            !enhancedHtml.includes("<head") || !enhancedHtml.includes("</head>")) {
+        const hasBasicStructure = enhancedHtml.includes("<body") || 
+                                 enhancedHtml.includes("<script") || 
+                                 enhancedHtml.includes("<style");
+                                 
+        if (!hasBasicStructure) {
           console.error("❌ OpenAI: Cấu trúc HTML không hợp lệ, sử dụng game ban đầu.");
           return geminiGame;
+        }
+        
+        // Ensure basic HTML structure if missing
+        if (!enhancedHtml.includes("<!DOCTYPE")) {
+          enhancedHtml = "<!DOCTYPE html>\n" + enhancedHtml;
+        }
+        if (!enhancedHtml.includes("<html")) {
+          enhancedHtml = enhancedHtml.replace("<!DOCTYPE html>", "<!DOCTYPE html>\n<html>");
+          enhancedHtml += "\n</html>";
         }
         
         console.log("✅ OpenAI: Đã xử lý HTML cải thiện thành công");
@@ -151,20 +179,6 @@ export const enhanceWithOpenAI = async (
           title: geminiGame.title,
           description: geminiGame.description,
           content: enhancedHtml
-        };
-      }
-      
-      // Last method: Use entire response if it's long enough and contains HTML
-      if (content.length > 1000 && 
-          (content.includes("<style>") || content.includes("<script>")) && 
-          (content.includes("<body") || content.includes("<html"))) {
-        
-        console.log("⚠️ OpenAI: Sử dụng toàn bộ phản hồi làm HTML (phương pháp dự phòng)");
-        return {
-          title: geminiGame.title,
-          description: geminiGame.description,
-          content: "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>" + 
-            geminiGame.title + "</title>\n" + content + "\n</html>"
         };
       }
       
