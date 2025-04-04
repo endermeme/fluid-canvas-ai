@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
@@ -35,7 +34,6 @@ const SharedGame = () => {
 
     loadGame();
     
-    // Update remaining time every minute
     const intervalId = setInterval(() => {
       if (game) {
         setTimeLeft(getRemainingTime(game.expiresAt));
@@ -46,8 +44,7 @@ const SharedGame = () => {
   }, [id, game]);
 
   const handleCreateNewGame = () => {
-    // Ensure we navigate to the main quiz page
-    navigate('/quiz');
+    navigate('/');
   };
 
   if (loading) {
@@ -67,7 +64,7 @@ const SharedGame = () => {
         <p className="text-muted-foreground text-center max-w-md">
           Liên kết này có thể đã hết hạn hoặc không tồn tại. Trò chơi chỉ có hiệu lực trong 48 giờ.
         </p>
-        <Link to="/quiz">
+        <Link to="/">
           <Button>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Quay lại màn hình chính
@@ -82,7 +79,7 @@ const SharedGame = () => {
       <div className="flex flex-col items-center justify-center h-screen space-y-6 p-4">
         <AlertTriangle className="text-destructive h-16 w-16" />
         <h1 className="text-2xl font-bold">Trò chơi không tìm thấy</h1>
-        <Link to="/quiz">
+        <Link to="/">
           <Button>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Tạo trò chơi mới
@@ -95,7 +92,7 @@ const SharedGame = () => {
   return (
     <div className="flex flex-col h-screen">
       <header className="bg-background border-b p-3 flex justify-between items-center">
-        <Link to="/quiz">
+        <Link to="/">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Quay lại

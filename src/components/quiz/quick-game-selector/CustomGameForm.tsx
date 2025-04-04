@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface CustomGameFormProps {
   onCustomGameCreate: () => void;
@@ -19,6 +19,8 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({
   handleCustomTopicSubmit: externalHandleCustomTopicSubmit
 }) => {
   const [internalCustomTopic, setInternalCustomTopic] = useState<string>("");
+  const [inputFocused, setInputFocused] = useState<boolean>(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   // Use either external or internal state management
   const customTopic = externalCustomTopic !== undefined ? externalCustomTopic : internalCustomTopic;
@@ -30,6 +32,14 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({
       onGameRequest(customTopic.trim());
     }
   });
+
+  // Auto resize textarea when content changes
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [customTopic]);
 
   return (
     <div className="w-full max-w-4xl mb-6 flex flex-col md:flex-row gap-3">
@@ -43,13 +53,18 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({
       </Button>
       
       <form onSubmit={handleCustomTopicSubmit} className="flex-1 flex gap-2">
-        <Input
-          type="text"
-          value={customTopic}
-          onChange={(e) => setCustomTopic(e.target.value)}
-          placeholder="Nhập chủ đề cho minigame..."
-          className="flex-1 min-w-0 rounded-lg border-gray-300 text-base"
-        />
+        <div className={`relative flex-1 transition-all duration-300 ${inputFocused ? 'flex-grow' : ''}`}>
+          <Textarea
+            ref={textareaRef}
+            value={customTopic}
+            onChange={(e) => setCustomTopic(e.target.value)}
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
+            placeholder="Nhập chủ đề cho minigame..."
+            className={`flex-1 min-w-0 rounded-lg border-gray-300 text-base resize-none overflow-hidden transition-all duration-300 min-h-[42px] ${inputFocused ? 'shadow-md border-primary/50' : ''}`}
+            style={{ height: customTopic ? 'auto' : '42px' }}
+          />
+        </div>
         <Button 
           type="submit" 
           variant="default"
