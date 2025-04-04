@@ -15,7 +15,7 @@ export class AIGameGenerator {
 
   constructor(apiKey: string, options?: { modelName?: string }) {
     console.log("🚀 AIGameGenerator: Khởi tạo bộ tạo game AI");
-    this.modelName = options?.modelName || 'gemini-pro';
+    this.modelName = options?.modelName || 'gemini-2.0-flash-thinking-exp-01-21';
     console.log(`🚀 AIGameGenerator: Sử dụng mô hình ${this.modelName}`);
     
     this.model = createGeminiClient(apiKey);
