@@ -8,14 +8,14 @@ const renderApp = () => {
   const rootElement = document.getElementById("root");
   if (!rootElement) return;
   
-  // Kiểm tra nếu đã có phiên bản trước đó
-  if (rootElement._reactRootContainer) {
-    console.log("Ứng dụng đã được khởi tạo, bỏ qua việc render lại");
-    return;
+  // Sử dụng cách an toàn hơn để kiểm tra việc render
+  try {
+    const root = createRoot(rootElement);
+    root.render(<App />);
+    console.log("Ứng dụng đã được khởi tạo thành công");
+  } catch (error) {
+    console.error("Lỗi khi khởi tạo ứng dụng:", error);
   }
-  
-  const root = createRoot(rootElement);
-  root.render(<App />);
 };
 
 renderApp();

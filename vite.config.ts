@@ -17,10 +17,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [
-    react({
-      // Tối ưu hóa cấu hình React để giảm thiểu khởi động lại
-      fastRefresh: true,
-    }),
+    react(),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
