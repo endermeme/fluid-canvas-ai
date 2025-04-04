@@ -64,4 +64,4 @@ export class AIGameGenerator {
 }
 
 // Re-export types for convenience
-export { MiniGame };
+export type { MiniGame };

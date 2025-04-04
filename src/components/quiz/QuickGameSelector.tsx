@@ -1,29 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Gamepad, Settings, Puzzle, BrainCircuit, Clock4, 
-  Dices, PenTool, HeartHandshake, Lightbulb, 
-  Sparkles, Book, GraduationCap, School, Award, Globe, 
-  MessageSquare, BookOpen, RotateCcw, Layers, FlaskConical, 
-  Image, Shuffle, Check, X, Shapes, Zap, Target, Plane, SortAsc,
-  Calculator, BadgeDollarSign, Blocks
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { AIGameGenerator, MiniGame } from './generator/AIGameGenerator';
+import { AIGameGenerator } from './generator/AIGameGenerator';
+import { MiniGame } from './generator/types';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
 import GameView from './GameView';
-import GameSettings from './GameSettings';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import GameSettings from './GameSettings';
 import { GameSettingsData, GameType } from './types';
-import { animateBlockCreation } from '@/lib/animations';
-import { Link } from 'react-router-dom';
 import OpenAIKeyModal from './OpenAIKeyModal';
-import { Input } from '@/components/ui/input';
 import { gameTypes } from './gameTypes';
+
 import GameHeader from './quick-game-selector/GameHeader';
-import GameGrid from './quick-game-selector/GameGrid';
 import CustomGameForm from './quick-game-selector/CustomGameForm';
+import GameGrid from './quick-game-selector/GameGrid';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -197,15 +187,15 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     <div ref={containerRef} className="flex flex-col items-center h-full w-full bg-gradient-to-b from-background to-background/80 p-4 md:p-6 overflow-auto">
       <GameHeader onTitleClick={handleTitleClick} />
 
-      {/* Custom Game Button */}
       <CustomGameForm 
         onCustomGameCreate={handleCustomGameCreate}
-        customTopic={customTopic}
-        setCustomTopic={setCustomTopic}
-        handleCustomTopicSubmit={handleCustomTopicSubmit}
+        onGameRequest={onGameRequest}
       />
       
-      <GameGrid gameTypes={gameTypes} onTopicSelect={handleTopicSelect} getIconComponent={getIconComponent} />
+      <GameGrid 
+        gameTypes={gameTypes} 
+        onTopicSelect={handleTopicSelect} 
+      />
       
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-lg border-white/20">

@@ -7,9 +7,10 @@ import GameButton from './GameButton';
 interface GameGridProps {
   gameTypes: GameType[];
   onTopicSelect: (gameType: GameType) => void;
+  getIconComponent?: (iconName: string) => React.ReactNode;
 }
 
-const GameGrid: React.FC<GameGridProps> = ({ gameTypes, onTopicSelect }) => {
+const GameGrid: React.FC<GameGridProps> = ({ gameTypes, onTopicSelect, getIconComponent }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,6 +34,7 @@ const GameGrid: React.FC<GameGridProps> = ({ gameTypes, onTopicSelect }) => {
           key={gameType.id} 
           gameType={gameType} 
           onClick={onTopicSelect} 
+          getIconComponent={getIconComponent}
         />
       ))}
     </div>

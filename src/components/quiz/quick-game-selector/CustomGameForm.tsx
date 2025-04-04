@@ -6,20 +6,30 @@ import { Input } from '@/components/ui/input';
 interface CustomGameFormProps {
   onCustomGameCreate: () => void;
   onGameRequest: (topic: string) => void;
+  customTopic?: string;
+  setCustomTopic?: React.Dispatch<React.SetStateAction<string>>;
+  handleCustomTopicSubmit?: (e: React.FormEvent) => void;
 }
 
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ 
   onCustomGameCreate,
-  onGameRequest
+  onGameRequest,
+  customTopic: externalCustomTopic,
+  setCustomTopic: externalSetCustomTopic,
+  handleCustomTopicSubmit: externalHandleCustomTopicSubmit
 }) => {
-  const [customTopic, setCustomTopic] = useState<string>("");
-
-  const handleCustomTopicSubmit = (e: React.FormEvent) => {
+  const [internalCustomTopic, setInternalCustomTopic] = useState<string>("");
+  
+  // Use either external or internal state management
+  const customTopic = externalCustomTopic !== undefined ? externalCustomTopic : internalCustomTopic;
+  const setCustomTopic = externalSetCustomTopic || setInternalCustomTopic;
+  
+  const handleCustomTopicSubmit = externalHandleCustomTopicSubmit || ((e: React.FormEvent) => {
     e.preventDefault();
     if (customTopic.trim()) {
       onGameRequest(customTopic.trim());
     }
-  };
+  });
 
   return (
     <div className="w-full max-w-4xl mb-6 flex flex-col md:flex-row gap-3">
