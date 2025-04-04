@@ -184,19 +184,23 @@ export class AIGameGenerator {
       I'm going to provide you with HTML code for a mini-game on the topic of "${topic}".
       Your task is to improve this code by:
       
-      1. Fixing any bugs or errors
-      2. Improving functionality and user experience
-      3. Adding more game complexity if appropriate
-      4. Ensuring the game is responsive and runs well on mobile
-      5. Keep ALL code in a single HTML file with internal <style> and <script> tags
+      1. IDENTIFY AND FIX ALL BUGS AND ERRORS in the code - this is your highest priority
+      2. Make sure all game mechanics work correctly
+      3. Ensure all game features are properly implemented and working 
+      4. Complete any unfinished or partially implemented features
+      5. Ensure the game is fully responsive and runs well on mobile
       
-      IMPORTANT:
+      IMPORTANT REQUIREMENTS:
+      - Make SIGNIFICANT improvements to the code quality, not just minor fixes
+      - Replace broken or non-functional sections completely if needed  
+      - Keep ALL code in a single HTML file with internal <style> and <script> tags
       - Do NOT change the fundamental game concept
-      - Make the game fully responsive for both desktop and mobile
-      - The game should take up the entire screen space
+      - Focus on ensuring smooth, bug-free gameplay first
       - Return ONLY the complete, enhanced HTML file - nothing else
       - Make sure all code is properly formatted and indented
       - Add helpful comments to explain complex logic
+      
+      Return the fully fixed and enhanced HTML code WITHOUT any additional explanations before or after.
       
       Here is the current code:
       
