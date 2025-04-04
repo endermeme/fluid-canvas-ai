@@ -4,7 +4,8 @@ import { MiniGame } from './types';
 export const enhanceWithOpenAI = async (
   openAIKey: string | null,
   geminiGame: MiniGame, 
-  topic: string
+  topic: string,
+  canvasMode: boolean = false
 ): Promise<MiniGame | null> => {
   if (!openAIKey) {
     console.log("⚠️ OpenAI: Không có API key, bỏ qua quá trình cải thiện game");
@@ -14,11 +15,12 @@ export const enhanceWithOpenAI = async (
   try {
     console.log("🔶 OpenAI: Chuẩn bị gửi yêu cầu cải thiện...");
     console.log(`🔶 OpenAI: Game ban đầu "${geminiGame.title}" - Kích thước code: ${geminiGame.content.length.toLocaleString()} ký tự`);
+    console.log(`🔶 OpenAI: Chế độ canvas: ${canvasMode ? 'BẬT' : 'TẮT'}`);
     
     // Get game type from topic for better context
     const gameTypeContext = "";
     
-    const prompt = `
+    let promptTemplate = `
     You are a master web developer specializing in creating bug-free, interactive web games.
     
     I'm going to provide you with HTML code for a mini-game on the topic of "${topic}".
@@ -36,7 +38,19 @@ export const enhanceWithOpenAI = async (
     8. OPTIMIZE the code by REMOVING any unnecessary components or features
     9. If there are any features not relevant to the game's main purpose, REMOVE them
     10. REVIEW the entire game against the topic requirements and FIX any inconsistencies
+    `;
     
+    if (canvasMode) {
+      promptTemplate += `
+    11. TRANSFORM the game to use HTML5 Canvas where appropriate for better interactivity
+    12. Implement smooth animations and transitions using requestAnimationFrame for Canvas elements
+    13. Ensure Canvas-based elements scale appropriately for different screen sizes
+    14. Add visual effects and polish to make the game more engaging
+    15. Implement proper Canvas state management and drawing optimization
+    `;
+    }
+    
+    promptTemplate += `
     IMPORTANT REQUIREMENTS:
     - Make SIGNIFICANT improvements to the code quality, not just minor fixes
     - Replace broken or non-functional sections completely if needed
@@ -49,7 +63,17 @@ export const enhanceWithOpenAI = async (
     - Add helpful comments to explain complex logic
     - SIMPLIFY complex code that could be written more elegantly
     - REMOVE any unnecessary or redundant code
+    `;
     
+    if (canvasMode) {
+      promptTemplate += `
+    - Prioritize using Canvas for animation and interactive elements
+    - Ensure smooth 60fps performance by optimizing Canvas operations
+    - Only render Canvas elements when needed to save resources
+    `;
+    }
+    
+    promptTemplate += `
     If you see that the code is completely broken or has major issues, DO NOT try to fix it piecemeal. 
     Instead, rewrite it entirely while preserving the core game concept and mechanics. Do not add comments
     explaining your changes - just return the fixed code.
@@ -64,7 +88,7 @@ export const enhanceWithOpenAI = async (
     `;
 
     console.log("🔶 OpenAI: Gửi yêu cầu đến OpenAI API (mô hình gpt-4o)...");
-    console.log("🔶 OpenAI: Kích thước prompt: " + prompt.length.toLocaleString() + " ký tự");
+    console.log("🔶 OpenAI: Kích thước prompt: " + promptTemplate.length.toLocaleString() + " ký tự");
     
     const startTime = Date.now();
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -75,7 +99,7 @@ export const enhanceWithOpenAI = async (
       },
       body: JSON.stringify({
         model: 'gpt-4o',
-        messages: [{ role: 'user', content: prompt }],
+        messages: [{ role: 'user', content: promptTemplate }],
         temperature: 0.3, // Lower temperature for more consistent results
         max_tokens: 4000
       })
@@ -166,6 +190,12 @@ export const enhanceWithOpenAI = async (
           enhancedHtml += "\n</html>";
         }
         
+        // Add canvas mode identifier comment
+        if (canvasMode) {
+          enhancedHtml = enhancedHtml.replace("<head>", 
+            "<head>\n<!-- CANVAS_MODE: enabled -->");
+        }
+        
         console.log("✅ OpenAI: Đã xử lý HTML cải thiện thành công");
         console.log(`🔶 OpenAI: Kích thước HTML gốc: ${geminiGame.content.length.toLocaleString()} vs mới: ${enhancedHtml.length.toLocaleString()}`);
         
@@ -173,7 +203,15 @@ export const enhanceWithOpenAI = async (
         const containsStyle = enhancedHtml.includes("<style>");
         const containsScript = enhancedHtml.includes("<script>");
         const containsBody = enhancedHtml.includes("<body");
-        console.log(`🔶 OpenAI: Kiểm tra HTML - Style: ${containsStyle}, Script: ${containsScript}, Body: ${containsBody}`);
+        const containsCanvas = enhancedHtml.includes("<canvas") || 
+                              enhancedHtml.includes("createElement('canvas')") || 
+                              enhancedHtml.includes('createElement("canvas")');
+                              
+        console.log(`🔶 OpenAI: Kiểm tra HTML - Style: ${containsStyle}, Script: ${containsScript}, Body: ${containsBody}, Canvas: ${containsCanvas}`);
+        
+        if (canvasMode && !containsCanvas) {
+          console.log("⚠️ OpenAI: Chế độ canvas được bật nhưng không tìm thấy canvas trong HTML");
+        }
         
         return {
           title: geminiGame.title,

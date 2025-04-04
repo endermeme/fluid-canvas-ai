@@ -28,7 +28,7 @@ const AppContent = () => {
   return (
     <div className="relative flex flex-col min-h-screen w-full overflow-hidden">
       <Routes>
-        <Route path="/" element={<Navigate to="/quiz" replace />} />
+        <Route path="/" element={<Quiz />} />
         <Route path="/canvas" element={<Index />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/quiz/shared/:id" element={<SharedGame />} />

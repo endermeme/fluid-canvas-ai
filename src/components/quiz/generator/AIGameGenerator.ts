@@ -12,11 +12,15 @@ export class AIGameGenerator {
   private model: any;
   private openAIKey: string | null = null;
   private modelName: string;
+  private canvasMode: boolean = false;
 
-  constructor(apiKey: string, options?: { modelName?: string }) {
+  constructor(apiKey: string, options?: { modelName?: string; canvasMode?: boolean }) {
     console.log("🚀 AIGameGenerator: Khởi tạo bộ tạo game AI");
     this.modelName = options?.modelName || 'gemini-2.0-flash';
+    this.canvasMode = options?.canvasMode || false;
+    
     console.log(`🚀 AIGameGenerator: Sử dụng mô hình ${this.modelName}`);
+    console.log(`🚀 AIGameGenerator: Chế độ canvas: ${this.canvasMode ? 'BẬT' : 'TẮT'}`);
     
     this.model = createGeminiClient(apiKey);
     this.openAIKey = getOpenAIKey();
@@ -39,14 +43,24 @@ export class AIGameGenerator {
     return success;
   }
 
+  setCanvasMode(enabled: boolean): void {
+    this.canvasMode = enabled;
+    console.log(`🚀 AIGameGenerator: Chế độ canvas đã ${enabled ? 'BẬT' : 'TẮT'}`);
+  }
+
   hasOpenAIKey(): boolean {
     return this.openAIKey !== null && this.openAIKey !== '';
+  }
+
+  isCanvasModeEnabled(): boolean {
+    return this.canvasMode;
   }
 
   async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
       console.log(`🚀 AIGameGenerator: Bắt đầu tạo game cho chủ đề: "${topic}"`);
       console.log(`🚀 AIGameGenerator: Cài đặt:`, settings);
+      console.log(`🚀 AIGameGenerator: Chế độ canvas: ${this.canvasMode ? 'BẬT' : 'TẮT'}`);
       
       const gameType = getGameTypeByTopic(topic);
       if (gameType) {
@@ -57,7 +71,7 @@ export class AIGameGenerator {
       
       // Try first with Gemini
       console.log(`🚀 AIGameGenerator: Bắt đầu tạo game với ${this.modelName}...`);
-      const geminiResult = await tryGeminiGeneration(this.model, topic, settings);
+      const geminiResult = await tryGeminiGeneration(this.model, topic, settings, this.canvasMode);
       
       const geminiTime = ((Date.now() - startTime) / 1000).toFixed(2);
       console.log(`🚀 AIGameGenerator: Tạo với Gemini hoàn tất sau ${geminiTime}s`);
@@ -71,7 +85,12 @@ export class AIGameGenerator {
           console.log("🚀 AIGameGenerator: Có OpenAI key, đang cải thiện game...");
           const enhanceStartTime = Date.now();
           
-          const enhancedGame = await enhanceWithOpenAI(this.openAIKey, geminiResult, topic);
+          const enhancedGame = await enhanceWithOpenAI(
+            this.openAIKey, 
+            geminiResult, 
+            topic, 
+            this.canvasMode
+          );
           
           const enhanceTime = ((Date.now() - enhanceStartTime) / 1000).toFixed(2);
           console.log(`🚀 AIGameGenerator: Quá trình cải thiện OpenAI hoàn tất sau ${enhanceTime}s`);
