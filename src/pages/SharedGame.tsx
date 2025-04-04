@@ -46,6 +46,7 @@ const SharedGame = () => {
   }, [id, game]);
 
   const handleCreateNewGame = () => {
+    // Ensure we navigate to the main quiz page
     navigate('/quiz');
   };
 
