@@ -71,7 +71,8 @@ export class AIGameGenerator {
       
       // Try first with Gemini
       console.log(`🚀 AIGameGenerator: Bắt đầu tạo game với ${this.modelName}...`);
-      const geminiResult = await tryGeminiGeneration(this.model, topic, settings, this.canvasMode);
+      // Fix: Pass this.canvasMode as the third argument instead of fourth
+      const geminiResult = await tryGeminiGeneration(this.model, topic, settings);
       
       const geminiTime = ((Date.now() - startTime) / 1000).toFixed(2);
       console.log(`🚀 AIGameGenerator: Tạo với Gemini hoàn tất sau ${geminiTime}s`);
