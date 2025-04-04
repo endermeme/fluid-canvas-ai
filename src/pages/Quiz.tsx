@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
-import QuickGameSelector from '@/components/quiz/QuickGameSelector';
+import QuickGameSelector from '@/components/quiz/quick-game-selector';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
