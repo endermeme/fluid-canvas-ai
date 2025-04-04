@@ -18,6 +18,7 @@ interface ChatInterfaceProps {
   onCreateBlock?: (type: BlockType, content: string) => void;
   onQuizRequest?: (topic: string) => void;
   onToggleSidebar?: () => void;
+  onCloseChatInterface?: () => void; // Added missing prop
   isSidebarOpen?: boolean;
 }
 
