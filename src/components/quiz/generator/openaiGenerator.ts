@@ -6,10 +6,14 @@ export const enhanceWithOpenAI = async (
   geminiGame: MiniGame, 
   topic: string
 ): Promise<MiniGame | null> => {
-  if (!openAIKey) return geminiGame;
+  if (!openAIKey) {
+    console.log("⚠️ OpenAI: Không có API key, bỏ qua quá trình cải thiện game");
+    return geminiGame;
+  }
   
   try {
-    console.log("Preparing OpenAI enhancement request...");
+    console.log("🔶 OpenAI: Chuẩn bị gửi yêu cầu cải thiện...");
+    console.log(`🔶 OpenAI: Game ban đầu "${geminiGame.title}" - Kích thước code: ${geminiGame.content.length.toLocaleString()} ký tự`);
     
     // Get game type from topic for better context
     const gameTypeContext = "";
@@ -27,6 +31,8 @@ export const enhanceWithOpenAI = async (
     3. Ensure all game features are properly implemented and working 
     4. Complete any unfinished or partially implemented features
     5. Ensure the game is fully responsive and runs well on mobile
+    6. IMPORTANT: Verify that all JavaScript variables are properly declared with let/const/var
+    7. Make sure all JavaScript code is placed inside DOMContentLoaded event
     
     IMPORTANT REQUIREMENTS:
     - Make SIGNIFICANT improvements to the code quality, not just minor fixes
@@ -49,7 +55,10 @@ export const enhanceWithOpenAI = async (
     ${geminiGame.content}
     `;
 
-    console.log("Sending request to OpenAI API (gpt-4o model)...");
+    console.log("🔶 OpenAI: Gửi yêu cầu đến OpenAI API (mô hình gpt-4o)...");
+    console.log("🔶 OpenAI: Kích thước prompt: " + prompt.length.toLocaleString() + " ký tự");
+    
+    const startTime = Date.now();
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -66,20 +75,22 @@ export const enhanceWithOpenAI = async (
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error("OpenAI API error:", errorData);
+      console.error("❌ OpenAI: Lỗi API:", errorData);
+      console.log("⚠️ OpenAI: Sử dụng game ban đầu do gặp lỗi khi cải thiện");
       return geminiGame; // Return original game if enhancement fails
     }
 
-    console.log("Received OpenAI response");
+    const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
+    console.log(`🔶 OpenAI: Đã nhận phản hồi sau ${timeTaken}s`);
     const data = await response.json();
     
     if (data.choices && data.choices[0] && data.choices[0].message) {
       const content = data.choices[0].message.content;
-      console.log("OpenAI content length:", content.length);
+      console.log("🔶 OpenAI: Độ dài phản hồi: " + content.length.toLocaleString() + " ký tự");
       
       // Only continue if response has sufficient content
       if (content.length < 500) {
-        console.error("OpenAI response too short, likely an error. Using original game.");
+        console.error("❌ OpenAI: Phản hồi quá ngắn, có thể có lỗi. Sử dụng game ban đầu.");
         return geminiGame;
       }
       
@@ -87,22 +98,25 @@ export const enhanceWithOpenAI = async (
       let enhancedHtml = "";
       
       // Method 1: Find complete HTML string
+      console.log("🔶 OpenAI: Đang trích xuất HTML (phương pháp 1)...");
       const htmlMatch = content.match(/<(!DOCTYPE|html)[\s\S]*<\/html>/i);
       if (htmlMatch) {
         enhancedHtml = htmlMatch[0];
-        console.log("Successfully extracted HTML from OpenAI response using method 1");
+        console.log("✅ OpenAI: Trích xuất HTML thành công bằng phương pháp 1");
       } 
       // Method 2: Find from <html> to </html>
       else if (content.includes("<html") && content.includes("</html>")) {
+        console.log("🔶 OpenAI: Đang trích xuất HTML (phương pháp 2)...");
         const startIndex = Math.max(0, content.indexOf("<html") - 15); // Add margin to catch DOCTYPE
         const endIndex = content.lastIndexOf("</html>") + 7;
         if (startIndex >= 0 && endIndex > startIndex) {
           enhancedHtml = content.substring(startIndex, endIndex);
-          console.log("Successfully extracted HTML from OpenAI response using method 2");
+          console.log("✅ OpenAI: Trích xuất HTML thành công bằng phương pháp 2");
         }
       } 
       // Method 3: Find individual pieces and reconstruct
       else if (content.includes("<head>") && content.includes("</body>")) {
+        console.log("🔶 OpenAI: Đang trích xuất HTML (phương pháp 3)...");
         // Create HTML from found parts
         const headStartIndex = content.indexOf("<head>");
         const bodyEndIndex = content.lastIndexOf("</body>");
@@ -111,19 +125,28 @@ export const enhanceWithOpenAI = async (
           enhancedHtml = "<!DOCTYPE html>\n<html>\n" + 
             content.substring(headStartIndex, bodyEndIndex + 7) + 
             "\n</html>";
-          console.log("Successfully reconstructed HTML from OpenAI response using method 3");
+          console.log("✅ OpenAI: Tái tạo HTML thành công bằng phương pháp 3");
         }
       }
       
       if (enhancedHtml && enhancedHtml.length > 500) {
         // Basic HTML structure validation
+        console.log("🔶 OpenAI: Đang xác thực cấu trúc HTML...");
         if (!enhancedHtml.includes("<body") || !enhancedHtml.includes("</body>") || 
             !enhancedHtml.includes("<head") || !enhancedHtml.includes("</head>")) {
-          console.error("OpenAI response has invalid HTML structure, using original game.");
+          console.error("❌ OpenAI: Cấu trúc HTML không hợp lệ, sử dụng game ban đầu.");
           return geminiGame;
         }
         
-        console.log("Successfully processed OpenAI enhanced HTML");
+        console.log("✅ OpenAI: Đã xử lý HTML cải thiện thành công");
+        console.log(`🔶 OpenAI: Kích thước HTML gốc: ${geminiGame.content.length.toLocaleString()} vs mới: ${enhancedHtml.length.toLocaleString()}`);
+        
+        // Check for key HTML components that should be present
+        const containsStyle = enhancedHtml.includes("<style>");
+        const containsScript = enhancedHtml.includes("<script>");
+        const containsBody = enhancedHtml.includes("<body");
+        console.log(`🔶 OpenAI: Kiểm tra HTML - Style: ${containsStyle}, Script: ${containsScript}, Body: ${containsBody}`);
+        
         return {
           title: geminiGame.title,
           description: geminiGame.description,
@@ -136,7 +159,7 @@ export const enhanceWithOpenAI = async (
           (content.includes("<style>") || content.includes("<script>")) && 
           (content.includes("<body") || content.includes("<html"))) {
         
-        console.log("Using complete OpenAI response as HTML");
+        console.log("⚠️ OpenAI: Sử dụng toàn bộ phản hồi làm HTML (phương pháp dự phòng)");
         return {
           title: geminiGame.title,
           description: geminiGame.description,
@@ -145,13 +168,13 @@ export const enhanceWithOpenAI = async (
         };
       }
       
-      console.log("Could not extract valid HTML from OpenAI response, using original game");
+      console.log("⚠️ OpenAI: Không thể trích xuất HTML hợp lệ từ phản hồi, sử dụng game ban đầu");
     }
     
-    console.log("No valid content from OpenAI, returning original game");
+    console.log("⚠️ OpenAI: Không có nội dung hợp lệ từ OpenAI, trả về game ban đầu");
     return geminiGame;
   } catch (error) {
-    console.error("Error enhancing with OpenAI:", error);
+    console.error("❌ OpenAI: Lỗi khi cải thiện với OpenAI:", error);
     return geminiGame;
   }
 };

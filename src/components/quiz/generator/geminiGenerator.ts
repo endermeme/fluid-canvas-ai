@@ -12,6 +12,9 @@ export const generateWithGemini = async (
   const gameType = getGameTypeByTopic(topic);
   const gameDescription = gameType ? gameType.description : "trò chơi tương tác";
   
+  console.log(`🔷 Gemini: Bắt đầu tạo game "${topic}" - Loại: ${gameType?.name || "Không xác định"}`);
+  console.log(`🔷 Gemini: Cài đặt: ${JSON.stringify(settings || {})}`);
+  
   const settingsPrompt = settings ? `
     Hãy tạo với các cài đặt sau:
     - Độ khó: ${settings.difficulty}
@@ -34,11 +37,14 @@ export const generateWithGemini = async (
        - Game phải responsive, hoạt động tốt trên cả điện thoại và máy tính
        - KHÔNG sử dụng thư viện bên ngoài hay CDN
        - Game phải chiếm toàn bộ màn hình
+       - Đảm bảo tất cả biến đều được khai báo đúng với let/const/var
+       - Tất cả mã JavaScript phải được đặt vào event DOMContentLoaded
     
     3. TÍNH NĂNG GAME:
        - Giao diện hấp dẫn với màu sắc và animation
        - Tính năng tương tác như đếm điểm, hiển thị thời gian
        - Có màn hình kết thúc game và nút chơi lại
+       - Kiểm tra logic game kỹ để tránh bug và lỗi
     
     Trả về một đối tượng JSON với định dạng sau:
     {
@@ -51,12 +57,12 @@ export const generateWithGemini = async (
   `;
 
   try {
-    console.log("Sending request to Gemini API...");
+    console.log("🔷 Gemini: Gửi yêu cầu đến Gemini API...");
     const result = await model.generateContent(prompt);
     const response = result.response;
     const text = response.text();
     
-    console.log("Received Gemini response, extracting JSON...");
+    console.log("🔷 Gemini: Đã nhận phản hồi, đang trích xuất JSON...");
     
     // Clean and extract the JSON object
     const jsonMatch = text.match(/{[\s\S]*}/);
@@ -69,8 +75,12 @@ export const generateWithGemini = async (
           .replace(/\\n/g, "\n")
           .replace(/\\"/g, '"');
         
-        console.log("Parsing JSON from Gemini response...");
+        console.log("🔷 Gemini: Đang phân tích JSON từ phản hồi...");
         const gameData = JSON.parse(cleanedJson);
+        
+        console.log(`🔷 Gemini: Đã tạo thành công game "${gameData.title || 'Không có tiêu đề'}"`);
+        console.log(`🔷 Gemini: Mô tả: ${gameData.description || 'Không có mô tả'}`);
+        console.log(`🔷 Gemini: Kích thước code: ${(gameData.content?.length || 0).toLocaleString()} ký tự`);
         
         return {
           title: gameData.title || `Game về ${topic}`,
@@ -78,14 +88,16 @@ export const generateWithGemini = async (
           content: gameData.content || ''
         };
       } catch (jsonError) {
-        console.error("Error parsing Gemini JSON:", jsonError);
+        console.error("❌ Gemini: Lỗi phân tích JSON:", jsonError);
         
         // Manual extraction as fallback
+        console.log("🔷 Gemini: Sử dụng phương pháp trích xuất thủ công...");
         const titleMatch = text.match(/"title"\s*:\s*"([^"]*)"/);
         const descriptionMatch = text.match(/"description"\s*:\s*"([^"]*)"/);
         const contentMatch = text.match(/"content"\s*:\s*"([\s\S]*?)(?:"\s*}|"\s*$)/);
         
         if (titleMatch && contentMatch) {
+          console.log("🔷 Gemini: Trích xuất thành công bằng regex");
           return {
             title: titleMatch[1] || `Game về ${topic}`,
             description: descriptionMatch ? descriptionMatch[1] : `Minigame về chủ đề ${topic}`,
@@ -99,10 +111,10 @@ export const generateWithGemini = async (
       }
     }
     
-    console.error("Failed to extract game content from Gemini response");
+    console.error("❌ Gemini: Không thể trích xuất nội dung game từ phản hồi");
     return null;
   } catch (error) {
-    console.error("Error generating with Gemini:", error);
+    console.error("❌ Gemini: Lỗi khi tạo với Gemini:", error);
     throw error; // Rethrow for retry mechanism
   }
 };
@@ -114,16 +126,17 @@ export const tryGeminiGeneration = async (
   retryCount = 0
 ): Promise<MiniGame | null> => {
   if (retryCount >= 2) {
-    console.log("Max retries reached for Gemini generation");
+    console.log("⚠️ Gemini: Đã đạt số lần thử lại tối đa");
     return null;
   }
   
   try {
-    console.log(`Gemini attempt ${retryCount + 1} for topic: "${topic}"`);
+    console.log(`⏳ Gemini: Lần thử ${retryCount + 1} cho chủ đề: "${topic}"`);
     return await generateWithGemini(model, topic, settings);
   } catch (error) {
-    console.error(`Gemini attempt ${retryCount + 1} failed:`, error);
+    console.error(`❌ Gemini: Lần thử ${retryCount + 1} thất bại:`, error);
     // Wait a bit before retrying
+    console.log(`⏳ Gemini: Đợi 1 giây trước khi thử lại...`);
     await new Promise(resolve => setTimeout(resolve, 1000));
     return tryGeminiGeneration(model, topic, settings, retryCount + 1);
   }

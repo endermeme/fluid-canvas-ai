@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from './generator/AIGameGenerator';
@@ -23,6 +22,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const [miniGame, setMiniGame] = useState<MiniGame | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [currentTopic, setCurrentTopic] = useState<string>(topic);
   const { toast } = useToast();
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
   const [titleClickCount, setTitleClickCount] = useState(0);
@@ -38,24 +38,22 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   useImperativeHandle(ref, () => ({
     generateQuiz: (topic: string, settings?: GameSettingsData) => {
       if (topic.trim()) {
+        setCurrentTopic(topic);
         generateMiniGame(topic, settings || getSettingsFromTopic(topic));
       }
     }
   }));
 
   const getSettingsFromTopic = (topic: string): GameSettingsData => {
-    // First try to get specific game type settings
     const gameType = getGameTypeByTopic(topic);
     if (gameType) {
       return {...gameType.defaultSettings};
     }
     
-    // Fall back to manual settings based on keywords
     let settings = {...defaultSettings};
     
     const lowerTopic = topic.toLowerCase();
     
-    // Adjust settings for different game types based on keywords in topic
     if (lowerTopic.includes('trí nhớ') || lowerTopic.includes('ghi nhớ')) {
       settings.questionCount = 8;
       settings.timePerQuestion = 3;
@@ -77,7 +75,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       settings.timePerQuestion = 45;
     }
     
-    // Adjust category based on topic
     if (lowerTopic.includes('lịch sử')) {
       settings.category = 'history';
     } else if (lowerTopic.includes('khoa học')) {
@@ -132,6 +129,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     setIsLoading(true);
     setErrorMessage(null);
     setMiniGame(null);
+    setCurrentTopic(topic);
 
     console.log("Starting minigame generation for topic:", topic);
     console.log("Starting game with settings:", settings);
@@ -165,7 +163,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   };
 
   if (isLoading) {
-    return <GameLoading />;
+    return <GameLoading topic={currentTopic} />;
   }
 
   if (errorMessage) {
