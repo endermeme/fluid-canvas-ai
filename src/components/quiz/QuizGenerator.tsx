@@ -45,35 +45,42 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const getSettingsFromTopic = (topic: string): GameSettingsData => {
     let settings = {...defaultSettings};
     
-    if (topic.toLowerCase().includes('trí nhớ') || topic.toLowerCase().includes('nhớ hình')) {
+    const lowerTopic = topic.toLowerCase();
+    
+    // Adjust settings for different game types based on keywords in topic
+    if (lowerTopic.includes('trí nhớ') || lowerTopic.includes('ghi nhớ')) {
       settings.questionCount = 8;
       settings.timePerQuestion = 3;
-    } else if (topic.toLowerCase().includes('xếp hình') || topic.toLowerCase().includes('puzzle')) {
+    } else if (lowerTopic.includes('xếp hình') || lowerTopic.includes('ghép hình')) {
       settings.questionCount = 5;
       settings.timePerQuestion = 60;
-    } else if (topic.toLowerCase().includes('phản xạ') || topic.toLowerCase().includes('nhanh')) {
+    } else if (lowerTopic.includes('phản xạ') || lowerTopic.includes('nhanh')) {
       settings.questionCount = 15;
       settings.timePerQuestion = 5;
-    } else if (topic.toLowerCase().includes('vẽ') || topic.toLowerCase().includes('drawing')) {
+    } else if (lowerTopic.includes('vẽ') || lowerTopic.includes('drawing')) {
       settings.category = 'arts';
       settings.questionCount = 4;
       settings.timePerQuestion = 60;
-    } else if (topic.toLowerCase().includes('câu đố') || topic.toLowerCase().includes('riddle')) {
+    } else if (lowerTopic.includes('câu đố') || lowerTopic.includes('đố')) {
       settings.questionCount = 8;
       settings.timePerQuestion = 40;
+    } else if (lowerTopic.includes('ghép cặp') || lowerTopic.includes('từ nam châm')) {
+      settings.questionCount = 8;
+      settings.timePerQuestion = 45;
     }
     
-    if (topic.toLowerCase().includes('lịch sử')) {
+    // Adjust category based on topic
+    if (lowerTopic.includes('lịch sử')) {
       settings.category = 'history';
-    } else if (topic.toLowerCase().includes('khoa học')) {
+    } else if (lowerTopic.includes('khoa học')) {
       settings.category = 'science';
-    } else if (topic.toLowerCase().includes('địa lý')) {
+    } else if (lowerTopic.includes('địa lý')) {
       settings.category = 'geography';
-    } else if (topic.toLowerCase().includes('nghệ thuật') || topic.toLowerCase().includes('âm nhạc')) {
+    } else if (lowerTopic.includes('nghệ thuật') || lowerTopic.includes('âm nhạc')) {
       settings.category = 'arts';
-    } else if (topic.toLowerCase().includes('thể thao')) {
+    } else if (lowerTopic.includes('thể thao')) {
       settings.category = 'sports';
-    } else if (topic.toLowerCase().includes('toán')) {
+    } else if (lowerTopic.includes('toán')) {
       settings.category = 'math';
     }
     

@@ -1,4 +1,3 @@
-
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GameSettingsData } from './types';
 
@@ -87,6 +86,49 @@ export class AIGameGenerator {
   }
   
   private async generateWithGemini(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
+    const inferGameType = (topic: string): string => {
+      const lowerTopic = topic.toLowerCase();
+      
+      // Check if the topic itself describes a game mechanic
+      if (lowerTopic.includes('ghép cặp thông tin') || lowerTopic.includes('ghép đôi') || lowerTopic.includes('từ và nghĩa')) {
+        return "trò chơi ghép cặp từ với nghĩa";
+      }
+      if (lowerTopic.includes('xáo trộn chữ cái') || lowerTopic.includes('xáo chữ')) {
+        return "trò chơi xáo trộn chữ cái để người chơi sắp xếp lại";
+      }
+      if (lowerTopic.includes('sắp xếp từ') || lowerTopic.includes('sắp xếp câu')) {
+        return "trò chơi sắp xếp các từ để tạo thành câu hoàn chỉnh";
+      }
+      if (lowerTopic.includes('tìm cặp đôi') || lowerTopic.includes('tìm cặp giống nhau')) {
+        return "trò chơi tìm cặp đôi giống nhau";
+      }
+      if (lowerTopic.includes('thẻ hai mặt') || lowerTopic.includes('thẻ ghi nhớ')) {
+        return "trò chơi thẻ ghi nhớ hai mặt, một mặt câu hỏi, một mặt trả lời";
+      }
+      if (lowerTopic.includes('câu hỏi trắc nghiệm') || lowerTopic.includes('trắc nghiệm')) {
+        return "trò chơi câu hỏi trắc nghiệm nhiều lựa chọn";
+      }
+      if (lowerTopic.includes('từ nam châm') || lowerTopic.includes('nam châm từ')) {
+        return "trò chơi kéo thả các từ như nam châm để tạo thành câu hoàn chỉnh";
+      }
+      if (lowerTopic.includes('ô chữ')) {
+        return "trò chơi ô chữ với các gợi ý";
+      }
+      if (lowerTopic.includes('đánh vần')) {
+        return "trò chơi đánh vần từ bằng cách điền từng chữ cái";
+      }
+      if (lowerTopic.includes('đúng hay sai') || lowerTopic.includes('true false')) {
+        return "trò chơi đúng hay sai, người chơi chọn đúng hoặc sai cho mỗi câu hỏi";
+      }
+      if (lowerTopic.includes('ghi nhớ') || lowerTopic.includes('trí nhớ')) {
+        return "trò chơi thử thách trí nhớ, ghi nhớ các mục hiển thị";
+      }
+      
+      // Default to quiz if no specific game type is detected
+      return topic;
+    };
+
+    const gamePrompt = inferGameType(topic);
     const settingsPrompt = settings ? `
       Hãy tạo với các cài đặt sau:
       - Độ khó: ${settings.difficulty}
@@ -96,7 +138,7 @@ export class AIGameGenerator {
     ` : '';
 
     const prompt = `
-      Tạo một minigame tương tác hoàn chỉnh về chủ đề "${topic}".
+      Tạo một minigame tương tác hoàn chỉnh để học về chủ đề "${gamePrompt}".
       ${settingsPrompt}
       
       HƯỚNG DẪN CHI TIẾT:
@@ -209,6 +251,10 @@ export class AIGameGenerator {
       - Make sure all code is properly formatted and indented
       - Add helpful comments to explain complex logic
       
+      If you see that the code is completely broken or has major issues, DO NOT try to fix it piecemeal. 
+      Instead, rewrite it entirely while preserving the core game concept and mechanics. Do not add comments
+      explaining your changes - just return the fixed code.
+      
       Return the fully fixed and enhanced HTML code WITHOUT any additional explanations before or after.
       
       Here is the current code:
@@ -244,7 +290,7 @@ export class AIGameGenerator {
         const content = data.choices[0].message.content;
         console.log("OpenAI content length:", content.length);
         
-        // Chỉ tiếp tục nếu phản hồi có nội dung đủ dài
+        // Only continue if response has sufficient content
         if (content.length < 500) {
           console.error("OpenAI response too short, likely an error. Using original game.");
           return geminiGame;
@@ -253,24 +299,24 @@ export class AIGameGenerator {
         // Extract HTML document - improved extraction logic
         let enhancedHtml = "";
         
-        // Phương pháp 1: Tìm chuỗi HTML hoàn chỉnh
+        // Method 1: Find complete HTML string
         const htmlMatch = content.match(/<(!DOCTYPE|html)[\s\S]*<\/html>/i);
         if (htmlMatch) {
           enhancedHtml = htmlMatch[0];
           console.log("Successfully extracted HTML from OpenAI response using method 1");
         } 
-        // Phương pháp 2: Tìm từ <html> đến </html>
+        // Method 2: Find from <html> to </html>
         else if (content.includes("<html") && content.includes("</html>")) {
-          const startIndex = Math.max(0, content.indexOf("<html") - 15); // Thêm khoảng lề để bắt DOCTYPE
+          const startIndex = Math.max(0, content.indexOf("<html") - 15); // Add margin to catch DOCTYPE
           const endIndex = content.lastIndexOf("</html>") + 7;
           if (startIndex >= 0 && endIndex > startIndex) {
             enhancedHtml = content.substring(startIndex, endIndex);
             console.log("Successfully extracted HTML from OpenAI response using method 2");
           }
         } 
-        // Phương pháp 3: Tìm các phần riêng lẻ và tái tạo
+        // Method 3: Find individual pieces and reconstruct
         else if (content.includes("<head>") && content.includes("</body>")) {
-          // Tạo HTML từ các phần tìm được
+          // Create HTML from found parts
           const headStartIndex = content.indexOf("<head>");
           const bodyEndIndex = content.lastIndexOf("</body>");
           
@@ -283,7 +329,7 @@ export class AIGameGenerator {
         }
         
         if (enhancedHtml && enhancedHtml.length > 500) {
-          // Thêm kiểm tra lỗi cú pháp HTML cơ bản
+          // Basic HTML structure validation
           if (!enhancedHtml.includes("<body") || !enhancedHtml.includes("</body>") || 
               !enhancedHtml.includes("<head") || !enhancedHtml.includes("</head>")) {
             console.error("OpenAI response has invalid HTML structure, using original game.");
@@ -298,7 +344,7 @@ export class AIGameGenerator {
           };
         }
         
-        // Phương pháp cuối cùng: Sử dụng toàn bộ phản hồi nếu phản hồi đủ dài và có vẻ chứa HTML
+        // Last method: Use entire response if it's long enough and contains HTML
         if (content.length > 1000 && 
             (content.includes("<style>") || content.includes("<script>")) && 
             (content.includes("<body") || content.includes("<html"))) {

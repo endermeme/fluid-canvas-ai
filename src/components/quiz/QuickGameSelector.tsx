@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -15,7 +14,7 @@ import GameLoading from './GameLoading';
 import GameError from './GameError';
 import GameView from './GameView';
 import GameSettings from './GameSettings';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { GameSettingsData, GameType } from './types';
 import { animateBlockCreation } from '@/lib/animations';
 import { Link } from 'react-router-dom';
@@ -34,6 +33,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<string>("");
+  const [selectedDescription, setSelectedDescription] = useState<string>("");
   const [customTopic, setCustomTopic] = useState<string>("");
   const [showSettings, setShowSettings] = useState(false);
   const { toast } = useToast();
@@ -46,7 +46,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   const gameTypes: GameType[] = [
     {
       id: "quiz",
-      name: "Trắc nghiệm",
+      name: "Câu hỏi trắc nghiệm",
       description: "Chuỗi câu hỏi trắc nghiệm có nhiều lựa chọn. Chọn đáp án đúng để tiếp tục qua câu tiếp theo.",
       icon: "award",
       defaultSettings: {
@@ -58,7 +58,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "flashcards",
-      name: "Thẻ ghi nhớ",
+      name: "Thẻ ghi nhớ hai mặt",
       description: "Thẻ có nội dung ở một mặt (câu hỏi) và câu trả lời ở mặt còn lại. Tự kiểm tra bản thân bằng cách lật mặt sau xem đáp án.",
       icon: "rotate-ccw",
       defaultSettings: {
@@ -70,7 +70,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "matchup",
-      name: "Ghép cặp từ - nghĩa",
+      name: "Ghép cặp thông tin",
       description: "Các từ hoặc khái niệm và định nghĩa rời rạc. Kéo và thả từng từ vào đúng định nghĩa của nó.",
       icon: "puzzle",
       defaultSettings: {
@@ -82,7 +82,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "anagram",
-      name: "Xáo chữ tạo từ",
+      name: "Xáo trộn chữ cái",
       description: "Một từ hoặc cụm từ bị xáo trộn chữ cái. Kéo các chữ cái vào đúng vị trí để tạo ra từ/cụm từ đúng.",
       icon: "shuffle",
       defaultSettings: {
@@ -94,7 +94,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "speakingcards",
-      name: "Thẻ nói",
+      name: "Thẻ hội thoại",
       description: "Bộ bài gồm nhiều chủ đề hoặc câu hỏi. Rút ngẫu nhiên một thẻ và nói/diễn đạt ý tưởng theo nội dung trên thẻ.",
       icon: "message-square",
       defaultSettings: {
@@ -106,7 +106,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "findmatch",
-      name: "Tìm cặp giống nhau",
+      name: "Tìm cặp đôi",
       description: "Cặp thông tin bị trộn lẫn (từ + nghĩa, hình + tên). Nhấn vào hai mục khớp nhau để loại bỏ. Làm đến khi hết.",
       icon: "layers",
       defaultSettings: {
@@ -118,7 +118,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "unjumble",
-      name: "Sắp xếp câu",
+      name: "Sắp xếp từ thành câu",
       description: "Một câu bị trộn lộn từ. Kéo và thả các từ để sắp xếp lại câu đúng ngữ pháp.",
       icon: "sort-asc",
       defaultSettings: {
@@ -130,7 +130,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "openbox",
-      name: "Mở hộp bí ẩn",
+      name: "Mở hộp bí mật",
       description: "Hộp được đánh số, mỗi hộp chứa một câu hỏi hoặc phần thưởng. Nhấn vào từng hộp để mở và xem nội dung bên trong.",
       icon: "blocks",
       defaultSettings: {
@@ -142,7 +142,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "spinwheel",
-      name: "Xoay bánh xe",
+      name: "Vòng quay may mắn",
       description: "Bánh xe có các lựa chọn ngẫu nhiên. Nhấn xoay và thực hiện nhiệm vụ ở ô đã dừng.",
       icon: "dices",
       defaultSettings: {
@@ -154,7 +154,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "groupsort",
-      name: "Phân loại nhóm",
+      name: "Phân loại thành nhóm",
       description: "Các mục rời rạc thuộc nhiều nhóm khác nhau. Kéo và thả vào nhóm đúng (vd: động vật–đồ vật–thực vật).",
       icon: "layers",
       defaultSettings: {
@@ -166,7 +166,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "matchpairs",
-      name: "Ghép cặp hình",
+      name: "Ghép cặp hình giống nhau",
       description: "Các ô ẩn, mỗi cặp là một sự khớp về nghĩa/hình/âm. Lật 2 ô một lượt, nếu trùng thì giữ lại, không thì úp xuống.",
       icon: "puzzle",
       defaultSettings: {
@@ -178,7 +178,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "sentence",
-      name: "Hoàn thành câu",
+      name: "Điền từ vào chỗ trống",
       description: "Câu bị bỏ trống từ/cụm từ. Kéo thả đúng từ vào chỗ trống để hoàn chỉnh câu.",
       icon: "pen-tool",
       defaultSettings: {
@@ -190,7 +190,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "gameshow",
-      name: "Đố vui kiểu gameshow",
+      name: "Trò chơi truyền hình",
       description: "Giống show truyền hình đố vui, có điểm số và áp lực thời gian. Trả lời đúng càng nhiều càng tốt, có thể có trợ giúp.",
       icon: "sparkles",
       defaultSettings: {
@@ -202,7 +202,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "fliptiles",
-      name: "Lật thẻ",
+      name: "Thẻ lật đôi",
       description: "Bộ thẻ hai mặt với nội dung liên quan. Nhấn lật từng thẻ để xem thông tin và tìm cặp/trả lời.",
       icon: "rotate-ccw",
       defaultSettings: {
@@ -214,7 +214,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "wordsearch",
-      name: "Tìm từ trong bảng chữ",
+      name: "Tìm từ trong ô chữ",
       description: "Một lưới chữ cái có giấu các từ vựng. Tìm và tô đậm các từ được yêu cầu càng nhanh càng tốt.",
       icon: "book-open",
       defaultSettings: {
@@ -238,7 +238,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "labelled",
-      name: "Gắn nhãn hình ảnh",
+      name: "Gắn nhãn vào hình",
       description: "Hình minh họa cần gắn nhãn đúng vị trí. Kéo các nhãn vào vị trí đúng trên sơ đồ/hình ảnh.",
       icon: "image",
       defaultSettings: {
@@ -262,7 +262,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "hangman",
-      name: "Treo cổ chữ cái",
+      name: "Treo người",
       description: "Đoán từng chữ cái để hoàn thành từ. Đoán sai nhiều lần là thua.",
       icon: "shapes",
       defaultSettings: {
@@ -274,7 +274,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "imagequiz",
-      name: "Đố qua hình ảnh",
+      name: "Câu đố hình ảnh",
       description: "Hình ảnh dần hé lộ, ai bấm chuông đầu tiên sẽ được trả lời câu hỏi.",
       icon: "image",
       defaultSettings: {
@@ -286,7 +286,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "flyingfruit",
-      name: "Trái cây bay",
+      name: "Hái quả bay",
       description: "Các đáp án bay ngang màn hình, bạn phải nhấn đúng khi thấy đáp án đúng.",
       icon: "zap",
       defaultSettings: {
@@ -310,7 +310,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "mazechase",
-      name: "Rượt đuổi mê cung",
+      name: "Đuổi bắt trong mê cung",
       description: "Điều khiển nhân vật chạy đến đáp án đúng, tránh va vào vật cản hoặc sai.",
       icon: "target",
       defaultSettings: {
@@ -334,7 +334,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "whackamole",
-      name: "Đập chuột chũi",
+      name: "Đập chuột",
       description: "Chuột hiện lên từng con, đập đúng con mang đáp án chính xác.",
       icon: "gamepad",
       defaultSettings: {
@@ -346,7 +346,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "memorize",
-      name: "Xem và ghi nhớ",
+      name: "Trò chơi ghi nhớ",
       description: "Xem một loạt vật phẩm xuất hiện, sau đó chọn lại đúng các món đã thấy.",
       icon: "brain-circuit",
       defaultSettings: {
@@ -358,7 +358,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "airplane",
-      name: "Máy bay đáp án",
+      name: "Lái máy bay tìm đáp án",
       description: "Điều khiển máy bay bay qua đáp án đúng, né các đáp án sai.",
       icon: "plane",
       defaultSettings: {
@@ -370,7 +370,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "rankorder",
-      name: "Xếp theo thứ tự",
+      name: "Sắp xếp theo thứ tự",
       description: "Kéo và thả các mục theo thứ tự đúng (vd: từ nhỏ đến lớn, theo thời gian...).",
       icon: "sort-asc",
       defaultSettings: {
@@ -382,7 +382,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "winlosequiz",
-      name: "Đố vui ăn điểm",
+      name: "Đặt cược điểm số",
       description: "Chọn số điểm đặt cược cho từng câu, đúng thì được, sai thì mất điểm.",
       icon: "badge-dollar-sign",
       defaultSettings: {
@@ -394,7 +394,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "mathgenerator",
-      name: "Tạo đề toán",
+      name: "Bài tập toán",
       description: "Chọn chủ đề toán học, hệ thống sẽ tạo ra loạt câu hỏi tự động.",
       icon: "calculator",
       defaultSettings: {
@@ -406,7 +406,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     },
     {
       id: "wordmagnets",
-      name: "Nam châm từ",
+      name: "Từ nam châm",
       description: "Kéo thả các từ hoặc chữ cái như nam châm để tạo thành câu hoàn chỉnh.",
       icon: "book-open",
       defaultSettings: {
@@ -481,7 +481,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   };
 
   const handleTopicSelect = (gameType: GameType) => {
-    setSelectedTopic(gameType.name);
+    setSelectedTopic(gameType.description);
     setCurrentGameType(gameType);
     setShowSettings(true);
   };
@@ -504,7 +504,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
         setSelectedGame(game);
         toast({
           title: "Minigame Đã Sẵn Sàng",
-          description: `Đã tạo minigame về "${selectedTopic}"`,
+          description: `Đã tạo minigame về "${currentGameType?.name || selectedTopic}"`,
         });
       } else {
         throw new Error('Không thể tạo minigame');
@@ -629,6 +629,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
       
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-lg border-white/20">
+          <DialogTitle>Điều chỉnh game {currentGameType?.name || ""}</DialogTitle>
           <GameSettings 
             topic={selectedTopic}
             onStart={handleStartGame}
