@@ -1,9 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Clock, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Clock, AlertTriangle, Plus } from 'lucide-react';
 
 const SharedGame = () => {
   const { id } = useParams<{ id: string }>();
@@ -11,6 +11,7 @@ const SharedGame = () => {
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!id) {
@@ -43,6 +44,10 @@ const SharedGame = () => {
     
     return () => clearInterval(intervalId);
   }, [id, game]);
+
+  const handleCreateNewGame = () => {
+    navigate('/quiz');
+  };
 
   if (loading) {
     return (
@@ -116,6 +121,18 @@ const SharedGame = () => {
           }}
         />
       </main>
+
+      <div className="absolute bottom-4 right-4 flex space-x-2">
+        <Button 
+          size="sm" 
+          variant="ghost"
+          className="bg-primary/10" 
+          onClick={handleCreateNewGame}
+        >
+          <Plus size={16} className="mr-1" />
+          Tạo Mới
+        </Button>
+      </div>
     </div>
   );
 };

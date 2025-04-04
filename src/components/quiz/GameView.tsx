@@ -2,9 +2,10 @@
 import React, { useEffect, useRef } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
-import { Share2, Download, Sparkles } from 'lucide-react';
+import { Share2, Download, Plus } from 'lucide-react';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface GameViewProps {
   miniGame: MiniGame;
@@ -13,6 +14,7 @@ interface GameViewProps {
 const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Save the game to history when it loads
   useEffect(() => {
@@ -52,6 +54,11 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         variant: "destructive",
       });
     }
+  };
+
+  // Handle creating a new game
+  const handleCreateNewGame = () => {
+    navigate('/quiz');
   };
 
   // Apply game optimization code when iframe loads
@@ -172,6 +179,16 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
       </div>
       
       <div className="absolute bottom-4 right-4 flex space-x-2">
+        <Button 
+          size="sm" 
+          variant="ghost"
+          className="bg-primary/10" 
+          onClick={handleCreateNewGame}
+        >
+          <Plus size={16} className="mr-1" />
+          Tạo Mới
+        </Button>
+        
         <Button 
           size="sm" 
           variant="ghost"
