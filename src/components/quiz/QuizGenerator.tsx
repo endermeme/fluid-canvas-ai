@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
@@ -120,7 +119,9 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
         setMiniGame(game);
         toast({
           title: "Minigame Đã Sẵn Sàng",
-          description: `Đã tạo minigame về "${topic}"`,
+          description: gameGenerator.hasOpenAIKey() 
+            ? `Đã tạo và cải thiện minigame về "${topic}"` 
+            : `Đã tạo minigame về "${topic}"`,
         });
       } else {
         throw new Error('Không thể tạo minigame');

@@ -36,7 +36,7 @@ export class AIGameGenerator {
     try {
       console.log(`Starting game generation for topic: "${topic}" with settings:`, settings);
       
-      // Generate with Gemini
+      // Generate with Gemini first
       const geminiResult = await this.generateWithGemini(topic, settings);
       
       if (!geminiResult) {
@@ -46,7 +46,13 @@ export class AIGameGenerator {
       
       console.log("Gemini successfully generated game");
       
-      // For template games, we're only using Gemini
+      // If OpenAI key is available, enhance the code
+      if (this.hasOpenAIKey() && geminiResult) {
+        console.log("OpenAI key available, enhancing game...");
+        return await this.enhanceWithOpenAI(geminiResult, topic);
+      }
+      
+      // If no OpenAI key, return the Gemini result
       return geminiResult;
     } catch (error) {
       console.error("Fatal error in generateMiniGame:", error);
@@ -184,6 +190,94 @@ export class AIGameGenerator {
     } catch (error) {
       console.error("Error generating with Gemini:", error);
       return null;
+    }
+  }
+  
+  private async enhanceWithOpenAI(geminiGame: MiniGame, topic: string): Promise<MiniGame | null> {
+    if (!this.openAIKey) return geminiGame;
+    
+    try {
+      console.log("Preparing OpenAI enhancement request...");
+      const prompt = `
+      You are a master web developer specializing in creating bug-free, interactive web games.
+      
+      I'm going to provide you with HTML code for a mini-game on the topic of "${topic}".
+      Your task is to improve this code by:
+      
+      1. Fixing any bugs or errors
+      2. Improving functionality and user experience
+      3. Adding more game complexity if appropriate
+      4. Ensuring the game is responsive and runs well on mobile
+      5. Keep ALL code in a single HTML file with internal <style> and <script> tags
+      
+      IMPORTANT:
+      - Do NOT change the fundamental game concept
+      - Do NOT add any headers or footers to the game
+      - Make the game fully responsive for both desktop and mobile
+      - The game should take up the entire screen space
+      - Return ONLY the complete, enhanced HTML file - nothing else
+      - Make sure all code is properly formatted and indented
+      - Add helpful comments to explain complex logic
+      
+      Here is the current code:
+      
+      ${geminiGame.content}
+      `;
+
+      console.log("Sending request to OpenAI API (gpt-4o model)...");
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.openAIKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.5,
+          max_tokens: 4000
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error("OpenAI API error:", errorData);
+        return geminiGame; // Return original game if enhancement fails
+      }
+
+      console.log("Received OpenAI response");
+      const data = await response.json();
+      
+      if (data.choices && data.choices[0] && data.choices[0].message) {
+        const content = data.choices[0].message.content;
+        console.log("OpenAI content length:", content.length);
+        
+        // Extract HTML document
+        const htmlMatch = content.match(/<(!DOCTYPE|html)[\s\S]*<\/html>/i);
+        if (htmlMatch) {
+          const enhancedHtml = htmlMatch[0];
+          console.log("Successfully extracted HTML from OpenAI response");
+          
+          return {
+            title: geminiGame.title,
+            description: geminiGame.description,
+            content: enhancedHtml
+          };
+        } else {
+          console.log("Could not extract HTML from OpenAI response, using complete response");
+          return {
+            title: geminiGame.title,
+            description: geminiGame.description,
+            content: content
+          };
+        }
+      }
+      
+      console.log("No valid content from OpenAI, returning original game");
+      return geminiGame;
+    } catch (error) {
+      console.error("Error enhancing with OpenAI:", error);
+      return geminiGame;
     }
   }
 }
