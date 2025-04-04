@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from './AIGameGenerator';
@@ -98,8 +99,17 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     const success = gameGenerator.setOpenAIKey(key);
     if (success) {
       console.log("OpenAI key saved successfully");
+      toast({
+        title: "API Key Đã Lưu",
+        description: "API key OpenAI đã được lưu. Các minigame tiếp theo sẽ được cải thiện chất lượng.",
+      });
     } else {
       console.log("Failed to save OpenAI key");
+      toast({
+        title: "Lỗi Lưu API Key",
+        description: "API key không hợp lệ hoặc trống.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -120,7 +130,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
         toast({
           title: "Minigame Đã Sẵn Sàng",
           description: gameGenerator.hasOpenAIKey() 
-            ? `Đã tạo và cải thiện minigame về "${topic}"` 
+            ? `Đã tạo và cải thiện minigame về "${topic}" với GPT-4o` 
             : `Đã tạo minigame về "${topic}"`,
         });
       } else {
