@@ -130,7 +130,7 @@ const SharedGame = () => {
           onClick={handleCreateNewGame}
         >
           <Plus size={16} className="mr-1" />
-          Tạo Mới
+          Quay Về
         </Button>
       </div>
     </div>
