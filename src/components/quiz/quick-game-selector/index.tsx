@@ -11,6 +11,37 @@ import GameSettings from '../GameSettings';
 import { GameSettingsData, GameType } from '../types';
 import OpenAIKeyModal from '../OpenAIKeyModal';
 import { gameTypes } from '../gameTypes';
+import { 
+  BrainCircuit, 
+  Puzzle, 
+  Lightbulb, 
+  Clock4, 
+  Dices, 
+  PenTool, 
+  Book, 
+  BookOpen, 
+  GraduationCap, 
+  Globe, 
+  Award, 
+  School, 
+  MessageSquare, 
+  RotateCcw, 
+  Layers, 
+  FlaskConical, 
+  ImageIcon, 
+  Shuffle, 
+  Check, 
+  X, 
+  Shapes, 
+  Zap, 
+  Target, 
+  Plane, 
+  ArrowUpDown, 
+  Calculator, 
+  BadgeDollarSign, 
+  Blocks, 
+  Gamepad
+} from 'lucide-react';
 
 // Import our new components
 import GameHeader from './GameHeader';
@@ -52,6 +83,40 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
 
   const handleSaveOpenAIKey = (key: string) => {
     gameGenerator.setOpenAIKey(key);
+  };
+
+  const getIconComponent = (iconName: string) => {
+    switch(iconName) {
+      case 'brain-circuit': return <BrainCircuit size={28} />;
+      case 'puzzle': return <Puzzle size={28} />;
+      case 'lightbulb': return <Lightbulb size={28} />;
+      case 'clock': return <Clock4 size={28} />;
+      case 'dices': return <Dices size={28} />;
+      case 'pen-tool': return <PenTool size={28} />;
+      case 'book': return <Book size={28} />;
+      case 'book-open': return <BookOpen size={28} />;
+      case 'graduation-cap': return <GraduationCap size={28} />;
+      case 'globe': return <Globe size={28} />;
+      case 'award': return <Award size={28} />;
+      case 'school': return <School size={28} />;
+      case 'message-square': return <MessageSquare size={28} />;
+      case 'rotate-ccw': return <RotateCcw size={28} />;
+      case 'layers': return <Layers size={28} />;
+      case 'flask-conical': return <FlaskConical size={28} />;
+      case 'image': return <ImageIcon size={28} />;
+      case 'shuffle': return <Shuffle size={28} />;
+      case 'check': return <Check size={28} />;
+      case 'x-mark': return <X size={28} />;
+      case 'shapes': return <Shapes size={28} />;
+      case 'zap': return <Zap size={28} />;
+      case 'target': return <Target size={28} />;
+      case 'plane': return <Plane size={28} />;
+      case 'sort-asc': return <ArrowUpDown size={28} />;
+      case 'calculator': return <Calculator size={28} />;
+      case 'badge-dollar-sign': return <BadgeDollarSign size={28} />;
+      case 'blocks': return <Blocks size={28} />;
+      default: return <Gamepad size={28} />;
+    }
   };
 
   const handleTopicSelect = (gameType: GameType) => {
@@ -140,7 +205,11 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
         onGameRequest={onGameRequest}
       />
       
-      <GameGrid gameTypes={gameTypes} onTopicSelect={handleTopicSelect} />
+      <GameGrid 
+        gameTypes={gameTypes} 
+        onTopicSelect={handleTopicSelect} 
+        getIconComponent={getIconComponent}
+      />
       
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-lg border-white/20">

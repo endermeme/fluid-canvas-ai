@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from './generator/AIGameGenerator';
@@ -10,6 +11,38 @@ import GameSettings from './GameSettings';
 import { GameSettingsData, GameType } from './types';
 import OpenAIKeyModal from './OpenAIKeyModal';
 import { gameTypes } from './gameTypes';
+import { animateBlockCreation } from '@/lib/animations';
+import { 
+  BrainCircuit, 
+  Puzzle, 
+  Lightbulb, 
+  Clock4, 
+  Dices, 
+  PenTool, 
+  Book, 
+  BookOpen, 
+  GraduationCap, 
+  Globe, 
+  Award, 
+  School, 
+  MessageSquare, 
+  RotateCcw, 
+  Layers, 
+  FlaskConical, 
+  ImageIcon as Image, 
+  Shuffle, 
+  Check, 
+  X, 
+  Shapes, 
+  Zap, 
+  Target, 
+  Plane, 
+  ArrowUpDown as SortAsc, 
+  Calculator, 
+  BadgeDollarSign, 
+  Blocks, 
+  Gamepad
+} from 'lucide-react';
 
 import GameHeader from './quick-game-selector/GameHeader';
 import CustomGameForm from './quick-game-selector/CustomGameForm';
@@ -195,6 +228,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
       <GameGrid 
         gameTypes={gameTypes} 
         onTopicSelect={handleTopicSelect} 
+        getIconComponent={getIconComponent}
       />
       
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
