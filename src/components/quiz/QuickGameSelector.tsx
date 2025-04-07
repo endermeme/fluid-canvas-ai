@@ -10,8 +10,13 @@ import GameSettings from './GameSettings';
 import { GameSettingsData, GameType } from './types';
 import OpenAIKeyModal from './OpenAIKeyModal';
 import { gameTypes } from './gameTypes';
-import { animateBlockCreation } from '@/lib/animations';
 import { getUseOpenAIAsPrimary } from './generator/apiUtils';
+import { animateBlockCreation } from '@/lib/animations';
+
+import GameHeader from './quick-game-selector/GameHeader';
+import CustomGameForm from './quick-game-selector/CustomGameForm';
+import GameGrid from './quick-game-selector/GameGrid';
+
 import { 
   BrainCircuit, 
   Puzzle, 
@@ -224,6 +229,9 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
       <CustomGameForm 
         onCustomGameCreate={handleCustomGameCreate}
         onGameRequest={onGameRequest}
+        customTopic={customTopic}
+        setCustomTopic={setCustomTopic}
+        handleCustomTopicSubmit={handleCustomTopicSubmit}
       />
       
       <GameGrid 

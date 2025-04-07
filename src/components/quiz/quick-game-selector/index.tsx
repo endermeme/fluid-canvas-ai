@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from '../generator/AIGameGenerator';
@@ -10,6 +11,7 @@ import GameSettings from '../GameSettings';
 import { GameSettingsData, GameType } from '../types';
 import OpenAIKeyModal from '../OpenAIKeyModal';
 import { gameTypes } from '../gameTypes';
+import { getUseOpenAIAsPrimary } from '../generator/apiUtils';
 import { 
   BrainCircuit, 
   Puzzle, 
