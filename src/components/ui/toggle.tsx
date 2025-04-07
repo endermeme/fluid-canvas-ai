@@ -34,9 +34,9 @@ const Toggle = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root> &
     VariantProps<typeof toggleVariants>
 >(({ className, variant, size, ...props }, ref) => {
-  const handlePress = (e: React.MouseEvent) => {
+  const handlePress = (e: React.MouseEvent<HTMLButtonElement>) => {
     // Add ripple effect
-    const button = e.currentTarget;
+    const button = e.currentTarget as HTMLButtonElement;
     const rect = button.getBoundingClientRect();
     const size = Math.max(rect.width, rect.height) * 2;
     
