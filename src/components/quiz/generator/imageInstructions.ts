@@ -8,11 +8,11 @@ export const getImageInstructions = (): string => {
     ## Chỉ dẫn đặc biệt cho trò chơi có hình ảnh
     
     - YÊU CẦU NGHIÊM NGẶT: Đối với trò chơi Đoán từ qua hình, PHẢI SỬ DỤNG HÌNH ẢNH THỰC TẾ (không phải văn bản)
-      - Sử dụng hình ảnh từ BẤT KỲ nguồn nào, KHÔNG giới hạn nguồn ảnh
-      - Các nguồn ảnh có thể sử dụng: Google Images, Flickr, Unsplash, Wikipedia, Shutterstock, v.v.
+      - Sử dụng hình ảnh từ bất kỳ nguồn nào, miễn là hiển thị được và liên quan đến từ cần đoán
+      - Các nguồn ảnh online bất kỳ có thể sử dụng: Google Images, Flickr, Unsplash, Wikipedia, v.v.
       - LUÔN cung cấp URL trực tiếp tới ảnh (không phải URL tới trang web chứa ảnh)
       - Đảm bảo URL ảnh có thể truy cập trực tiếp và hiển thị được (thường có đuôi .jpg, .png, .gif, .webp)
-      - URL phải có dạng https://path/to/image.jpg, KHÔNG CÓ CHỨA TEXT CHỈ URL HÌNH ẢNH
+      - Không giới hạn số lượng hình ảnh cho mỗi từ cần đoán
     
     - Đối với trò chơi Đoán từ qua hình:
       - PHẢI cung cấp 1-3 hình ảnh khác nhau cho mỗi từ cần đoán
@@ -24,7 +24,6 @@ export const getImageInstructions = (): string => {
       - KHÔNG sử dụng mô tả văn bản thay thế cho hình ảnh thực tế
       - KHÔNG sử dụng URL giả, URL không tồn tại hoặc không hiển thị được
       - KHÔNG tạo trò chơi đoán từ qua hình mà không có hình ảnh
-      - KHÔNG tạo hình ảnh động vật, đồ vật, hay con người không thích hợp
     
     ## Xử lý hình ảnh đúng cách trong JavaScript
     - Thêm event handler onerror cho mọi thẻ <img>:

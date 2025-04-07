@@ -109,15 +109,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
       'flashcards': 'flashcards',
       'memory-game': 'memory',
       'sequence': 'ordering',
-      'word-search': 'wordsearch',
-      'anagram': 'anagram',
-      'unjumble': 'ordering',
-      'pictionary': 'pictionary',
-      'truefalse': 'truefalse',
-      'matching': 'matching',
-      'spellword': 'spell',
-      'labeldiagram': 'label',
-      'crossword': 'crossword'
+      'word-search': 'wordsearch'
     };
     
     const presetType = presetMappings[gameType.id] || 'quiz'; // Default to quiz if mapping not found
