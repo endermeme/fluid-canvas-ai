@@ -178,7 +178,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
         <Progress 
           value={(timer / 30) * 100} 
           className="h-1" 
-          indicatorClassName={timer < 10 ? "bg-red-500" : timer < 20 ? "bg-yellow-500" : "bg-green-500"}
+          indicatorColor={timer < 10 ? "bg-red-500" : timer < 20 ? "bg-yellow-500" : "bg-green-500"}
         />
         <span className="absolute right-0 -top-5 text-xs">{timer}s</span>
       </div>
