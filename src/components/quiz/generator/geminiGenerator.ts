@@ -1,4 +1,3 @@
-
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -229,36 +228,12 @@ export const generateWithGemini = async (
     ${settingsPrompt}
 
     ## Cấu trúc file cuối cùng
-    ```html
-    <!DOCTYPE html>
-    <html lang="vi">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Trò chơi: ${topic}</title>
-        <style>
-            /* CSS ở đây */
-        </style>
-    </head>
-    <body>
-        <!-- HTML content ở đây -->
-        
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // JavaScript ở đây
-                
-                // Luôn có try-catch để xử lý lỗi
-                try {
-                    // Game initialization code
-                } catch (error) {
-                    console.error('Game error:', error);
-                    // Show user-friendly error message
-                }
-            });
-        </script>
-    </body>
-    </html>
-    ```
+    Một file HTML duy nhất với cấu trúc sau:
+    - DOCTYPE và thẻ HTML, head, body đầy đủ
+    - CSS trong thẻ style trong phần head
+    - JavaScript trong thẻ script ở cuối body
+    - Sử dụng DOMContentLoaded để khởi tạo game
+    - Xử lý lỗi với try-catch
 
     ## Định dạng đầu ra
     Kết quả cuối cùng phải được cung cấp dưới dạng một đối tượng JSON tối giản với cấu trúc sau:
@@ -267,11 +242,11 @@ export const generateWithGemini = async (
     - **\`content\`**: (string) Mã HTML đầy đủ của trò chơi.
 
     **Chi tiết quan trọng cho JSON đầu ra:**
-    - Không bao gồm bất kỳ định dạng markdown, dấu phân cách khối code hoặc văn bản giải thích bên ngoài JSON. Phản hồi chỉ nên là đối tượng JSON.
+    - Không bao gồm bất kỳ định dạng markdown, dấu phân cách khối code ho��c văn bản giải thích bên ngoài JSON. Phản hồi chỉ nên là đối tượng JSON.
     - JSON phải được định dạng đúng và thoát các ký tự đặc biệt.
     - Chuỗi \`content\` phải chứa một tài liệu HTML hoàn chỉnh, hợp lệ.
 
-    GIAO KẾT QUẢ DƯỚi DẠNG MỘT ĐỐI TƯỢNG JSON HỢP LỆ DUY NHẤT KHÔNG CÓ MARKDOWN HOẶC DẤU BACKTICK.
+    GIAO KẾT QUẢ DƯỚI DẠNG MỘT ĐỐI TƯỢNG JSON HỢP LỆ DUY NHẤT KHÔNG CÓ MARKDOWN HOẶC DẤU BACKTICK.
   `;
 
   try {
