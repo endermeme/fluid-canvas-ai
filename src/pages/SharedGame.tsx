@@ -3,9 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Clock, AlertTriangle, Home, History } from 'lucide-react';
-import SourceCodeViewer from '@/components/quiz/SourceCodeViewer';
-import HistoryPanel from '@/components/history/HistoryPanel';
+import { ArrowLeft, Clock, AlertTriangle, Plus } from 'lucide-react';
 
 const SharedGame = () => {
   const { id } = useParams<{ id: string }>();
@@ -13,7 +11,6 @@ const SharedGame = () => {
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [showHistoryPanel, setShowHistoryPanel] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,13 +45,9 @@ const SharedGame = () => {
     return () => clearInterval(intervalId);
   }, [id, game]);
 
-  const handleBackToHome = () => {
+  const handleCreateNewGame = () => {
     // Navigate to root path
-    window.location.href = '/';
-  };
-  
-  const toggleHistoryPanel = () => {
-    setShowHistoryPanel(!showHistoryPanel);
+    navigate('/');
   };
 
   if (loading) {
@@ -115,30 +108,19 @@ const SharedGame = () => {
         </div>
       </header>
       
-      <main className="flex-1 overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-hidden">
-          <iframe
-            srcDoc={game.htmlContent}
-            title={game.title}
-            sandbox="allow-scripts allow-same-origin"
-            className="w-full h-full border-none mx-auto"
-            style={{ 
-              height: '100%', 
-              width: '100%',
-              margin: '0 auto',
-              maxHeight: '100%'
-            }}
-          />
-        </div>
-        
-        {/* Source Code Viewer */}
-        <div className="w-full p-4 bg-background">
-          <SourceCodeViewer 
-            htmlContent={game.htmlContent} 
-            gameId={id}
-            showPreviewButton={false}
-          />
-        </div>
+      <main className="flex-1 overflow-hidden flex items-center justify-center">
+        <iframe
+          srcDoc={game.htmlContent}
+          title={game.title}
+          sandbox="allow-scripts allow-same-origin"
+          className="w-full h-full border-none mx-auto"
+          style={{ 
+            height: '100%', 
+            width: '100%',
+            margin: '0 auto',
+            maxHeight: '100%'
+          }}
+        />
       </main>
 
       <div className="absolute bottom-4 right-4 flex space-x-2">
@@ -146,28 +128,12 @@ const SharedGame = () => {
           size="sm" 
           variant="ghost"
           className="bg-primary/10" 
-          onClick={toggleHistoryPanel}
+          onClick={handleCreateNewGame}
         >
-          <History size={16} className="mr-1" />
-          Lịch sử
-        </Button>
-        
-        <Button 
-          size="sm" 
-          variant="ghost"
-          className="bg-primary/10" 
-          onClick={handleBackToHome}
-        >
-          <Home size={16} className="mr-1" />
-          Trở Về
+          <Plus size={16} className="mr-1" />
+          Quay Về
         </Button>
       </div>
-      
-      {/* History Panel */}
-      <HistoryPanel 
-        isOpen={showHistoryPanel}
-        onClose={toggleHistoryPanel}
-      />
     </div>
   );
 };

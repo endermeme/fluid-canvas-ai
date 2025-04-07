@@ -8,16 +8,11 @@ import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
 import { animateContentHighlight } from '@/lib/animations';
-import HistoryPanel from '@/components/history/HistoryPanel';
-import { Button } from '@/components/ui/button';
-import { History, BookOpen } from 'lucide-react';
-import { StoredGame } from '@/utils/gameExport';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
   const [isManualMode, setIsManualMode] = useState(false);
   const [showChatInterface, setShowChatInterface] = useState(false);
-  const [showHistoryPanel, setShowHistoryPanel] = useState(false);
   
   const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
   const { addBlock } = useCanvasState();
@@ -104,32 +99,6 @@ const Quiz = () => {
   const toggleChatInterface = () => {
     setShowChatInterface(!showChatInterface);
   };
-  
-  const toggleHistoryPanel = () => {
-    setShowHistoryPanel(!showHistoryPanel);
-  };
-  
-  const handleSelectFromHistory = (game: StoredGame) => {
-    setIsManualMode(true);
-    // Load the selected game directly into view
-    if (quizGeneratorRef.current) {
-      // We need to modify the QuizGenerator to accept a StoredGame directly
-      quizGeneratorRef.current.generateQuiz(game.title);
-      
-      // Simulate a delay to allow the component to initialize
-      setTimeout(() => {
-        const miniGame = {
-          title: game.title,
-          description: game.description,
-          content: game.htmlContent
-        };
-        
-        // This requires changing the interface of QuizGenerator, but for now
-        // we'll use what we have available
-        window.location.href = `/quiz/shared/${game.id}`;
-      }, 100);
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col w-full overflow-hidden">
@@ -150,24 +119,6 @@ const Quiz = () => {
           </div>
         </div>
       </div>
-      
-      {/* History Button */}
-      <div className="fixed bottom-4 left-4 z-30">
-        <Button 
-          onClick={toggleHistoryPanel}
-          variant="outline"
-          className="rounded-full h-12 w-12 p-0 bg-background/80 backdrop-blur-sm border-primary/30"
-        >
-          <BookOpen className="h-5 w-5 text-primary" />
-        </Button>
-      </div>
-      
-      {/* History Panel */}
-      <HistoryPanel 
-        isOpen={showHistoryPanel}
-        onClose={toggleHistoryPanel}
-        onSelectGame={handleSelectFromHistory}
-      />
       
       {/* Floating Chat Interface */}
       {showChatInterface && (
