@@ -102,12 +102,12 @@ export const gameTypes: GameType[] = [
   {
     id: "crossword",
     name: "Ô chữ",
-    description: "Điền từ vào các ô ngang và dọc dựa trên các gợi ý đã cho.",
+    description: "Điền từ vào các ô ngang và dọc dựa trên gợi ý. Ô chữ có kích thước phù hợp (5-10 ô), tự động điều chỉnh kích thước theo màn hình, lưu trữ từng ký tự người dùng nhập, và kiểm tra chính xác từng từ hoàn thành.",
     icon: "grid",
     defaultSettings: {
       difficulty: 'medium',
-      questionCount: 15,
-      timePerQuestion: 120,
+      questionCount: 12,
+      timePerQuestion: 180,
       category: 'general',
     }
   },

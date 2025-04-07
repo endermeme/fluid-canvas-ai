@@ -22,11 +22,66 @@ export const generateWithGemini = async (
     - Category: ${settings.category}
   ` : '';
 
+  // Additional instructions for specific game types
+  let gameSpecificInstructions = '';
+  
+  if (gameType?.id === 'crossword') {
+    gameSpecificInstructions = `
+    ## Special Instructions for Crossword Puzzle
+    
+    For this crossword puzzle game:
+    
+    1. **Grid Size and Complexity**:
+       - Create a manageable grid size (5x5 to 10x10 maximum)
+       - Only use simple words related to the topic "${topic}"
+       - Include ${settings?.questionCount || 10} words maximum
+       - Ensure words intersect in a valid crossword pattern
+    
+    2. **User Interface Requirements**:
+       - Each cell should be clearly visible and sized appropriately (minimum 40px on mobile)
+       - Show clue numbers in the grid that correspond to the clues list
+       - Provide separate lists for "Across" and "Down" clues
+       - Allow users to navigate between cells using keyboard arrow keys or touch
+       - Highlight the active word (all cells of the current word) when a cell is selected
+    
+    3. **Technical Implementation**:
+       - Store each letter in a separate input field or equivalent data structure
+       - Track filled cells and validate each word when all its cells are filled
+       - Auto-advance to the next cell when a letter is entered
+       - Auto-jump to the next word when current word is completed
+       - Allow one letter per cell, enforce uppercase letters only
+       - Prevent non-alphabetic characters from being entered
+    
+    4. **Responsive Design**:
+       - Scale the grid appropriately on different screen sizes
+       - On small screens, make sure the grid is still usable (minimum cell size of 40px)
+       - Allow zooming or scrolling if needed for very small screens
+    
+    5. **Feedback System**:
+       - Visual feedback when a word is correctly completed
+       - Validate each word individually instead of waiting for the entire puzzle
+       - Show progress indicator (e.g., 5/12 words completed)
+    
+    6. **Hint System**:
+       - Provide an optional hint button that reveals one letter in the current word
+       - Limit hints to prevent trivializing the game (e.g., 3 hints maximum)
+    
+    7. **Common Bugs to Avoid**:
+       - ENSURE letters in intersecting words stay consistent
+       - PREVENT input focus from being lost when using keyboard navigation
+       - HANDLE touch inputs properly for mobile users
+       - MAKE SURE all words and clues are properly initialized in the data structure
+       - TEST that crossword validation works for all words in all directions
+    `;
+  }
+
   const prompt = `
     # Single-File Interactive Educational Mini-Game
 
     ## Goal
     Create a fully **interactive educational mini-game** that runs entirely in a **single HTML file** (with embedded CSS and JavaScript). The game should be self-contained (no external libraries) and provide an engaging experience about the topic "${topic}".
+
+    ${gameSpecificInstructions}
 
     ## Game Types
     Your mini-game should support different game modes, offering a unique interaction style. These include:
