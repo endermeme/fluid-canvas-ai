@@ -40,7 +40,6 @@ const AppContent = () => {
           <Route path="/" element={<Quiz />} />
           <Route path="/canvas" element={<Index />} />
           <Route path="/quiz" element={<Quiz />} />
-          <Route path="/presets" element={<Quiz />} />
           <Route path="/quiz/shared/:id" element={<SharedGame />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

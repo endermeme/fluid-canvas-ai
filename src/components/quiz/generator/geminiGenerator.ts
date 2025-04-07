@@ -19,19 +19,16 @@ export const generateWithGemini = async (
   settings?: GameSettingsData,
   requiresImages: boolean = false
 ): Promise<MiniGame | null> => {
-  // Check if it's a preset-formatted topic
-  const isPresetFormat = topic.startsWith('Tạo một trò chơi');
-  
   // Get game type from topic to provide better context for the AI
-  const gameType = isPresetFormat ? null : getGameTypeByTopic(topic);
+  const gameType = getGameTypeByTopic(topic);
   const gameDescription = gameType ? gameType.description : "interactive learning game";
   
-  console.log(`🔷 Gemini: Starting game generation for "${topic}" - Type: ${gameType?.name || (isPresetFormat ? "Preset Format" : "Not specified")}`);
+  console.log(`🔷 Gemini: Starting game generation for "${topic}" - Type: ${gameType?.name || "Not specified"}`);
   console.log(`🔷 Gemini: Settings: ${JSON.stringify(settings || {})}`);
   console.log(`🔷 Gemini: Requires images: ${requiresImages}`);
   
   // Build the complete prompt
-  const prompt = isPresetFormat ? topic : buildGeminiPrompt(topic, gameType?.id, settings, requiresImages);
+  const prompt = buildGeminiPrompt(topic, gameType?.id, settings, requiresImages);
 
   try {
     console.log("🔷 Gemini: Sending request to Gemini API...");

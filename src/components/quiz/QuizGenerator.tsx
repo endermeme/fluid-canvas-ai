@@ -54,56 +54,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   }));
 
   const getSettingsFromTopic = (topic: string): GameSettingsData => {
-    // Detect if this is a formatted preset topic
-    if (topic.startsWith('Tạo một trò chơi')) {
-      // Adjust settings based on the type of preset
-      if (topic.includes('trắc nghiệm')) {
-        return {
-          ...defaultSettings,
-          questionCount: 10,
-          timePerQuestion: 30,
-          category: topic.toLowerCase().includes('lịch sử') ? 'history' : 
-                    topic.toLowerCase().includes('khoa học') ? 'science' : 'general'
-        };
-      } else if (topic.includes('thẻ ghi nhớ')) {
-        return {
-          ...defaultSettings,
-          questionCount: 8,
-          timePerQuestion: 20,
-          category: 'general'
-        };
-      } else if (topic.includes('ghép cặp')) {
-        return {
-          ...defaultSettings,
-          questionCount: 8,
-          timePerQuestion: 45,
-          category: 'general'
-        };
-      } else if (topic.includes('tìm từ ẩn')) {
-        return {
-          ...defaultSettings,
-          questionCount: 8,
-          timePerQuestion: 60,
-          category: 'general'
-        };
-      } else if (topic.includes('đúng hay sai')) {
-        return {
-          ...defaultSettings,
-          questionCount: 10,
-          timePerQuestion: 15,
-          category: 'general'
-        };
-      } else if (topic.includes('điền vào chỗ trống')) {
-        return {
-          ...defaultSettings,
-          questionCount: 8,
-          timePerQuestion: 30,
-          category: 'general'
-        };
-      }
-    }
-    
-    // Original logic for non-preset topics
     const gameType = getGameTypeByTopic(topic);
     if (gameType) {
       return {...gameType.defaultSettings};

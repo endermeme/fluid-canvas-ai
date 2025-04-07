@@ -8,14 +8,11 @@ import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
 import { animateContentHighlight } from '@/lib/animations';
-import GamePresets from '@/components/quiz/presets/GamePresets';
-import { getPresetById, formatPromptTemplate } from '@/components/quiz/presets/gamePresetData';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
   const [isManualMode, setIsManualMode] = useState(false);
   const [showChatInterface, setShowChatInterface] = useState(false);
-  const [showPresets, setShowPresets] = useState(false);
   
   const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
   const { addBlock } = useCanvasState();
@@ -31,31 +28,7 @@ const Quiz = () => {
     const queryParams = new URLSearchParams(location.search);
     const topicParam = queryParams.get('topic');
     const autoStart = queryParams.get('autostart');
-    const presetParam = queryParams.get('preset');
-    const contentParam = queryParams.get('content');
     
-    // Handle preset-based game generation
-    if (presetParam && contentParam) {
-      const preset = getPresetById(presetParam);
-      if (preset) {
-        const formattedPrompt = formatPromptTemplate(preset, contentParam);
-        setTopic(formattedPrompt);
-        setIsManualMode(true);
-        
-        if (autoStart === 'true') {
-          setIsGenerating(true);
-          setTimeout(() => {
-            if (quizGeneratorRef.current) {
-              quizGeneratorRef.current.generateQuiz(formattedPrompt);
-            }
-            setIsGenerating(false);
-          }, 100);
-        }
-        return;
-      }
-    }
-    
-    // Handle regular topic-based game generation
     if (topicParam) {
       setTopic(topicParam);
       setIsManualMode(true);
@@ -70,9 +43,6 @@ const Quiz = () => {
           setIsGenerating(false);
         }, 100);
       }
-    } else {
-      // Show presets by default if no topic is specified
-      setShowPresets(true);
     }
   }, [location.search]);
 
@@ -107,7 +77,6 @@ const Quiz = () => {
     
     // Switch to manual mode when a chat request comes in
     setIsManualMode(true);
-    setShowPresets(false);
     
     // Directly generate the game
     setTopic(requestedTopic);
@@ -131,21 +100,12 @@ const Quiz = () => {
     setShowChatInterface(!showChatInterface);
   };
 
-  const toggleShowPresets = () => {
-    setShowPresets(!showPresets);
-    if (!showPresets) {
-      setIsManualMode(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col w-full overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 bg-background overflow-hidden p-0 relative">
           <div ref={mainContentRef} className="h-full relative">
-            {showPresets ? (
-              <GamePresets />
-            ) : isManualMode ? (
+            {isManualMode ? (
               <QuizGenerator 
                 ref={quizGeneratorRef} 
                 topic={topic}
@@ -159,18 +119,6 @@ const Quiz = () => {
           </div>
         </div>
       </div>
-      
-      {/* Floating button to toggle between presets and quick selector */}
-      {!isManualMode && (
-        <div className="fixed bottom-4 right-4 z-10">
-          <button 
-            onClick={toggleShowPresets}
-            className="bg-primary text-primary-foreground rounded-full p-3 shadow-lg hover:shadow-xl transition-all"
-          >
-            {showPresets ? "Trò Chơi Nhanh" : "Game Presets"}
-          </button>
-        </div>
-      )}
       
       {/* Floating Chat Interface */}
       {showChatInterface && (
