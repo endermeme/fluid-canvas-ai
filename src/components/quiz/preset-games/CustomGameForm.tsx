@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SparklesIcon, Brain, Wand } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from '../generator/AIGameGenerator';
+import { GameSettingsData } from '../types';
 
 // API key cứng
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
@@ -23,7 +24,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   const [topic, setTopic] = useState('');
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [difficulty, setDifficulty] = useState('medium');
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const { toast } = useToast();
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
 
@@ -97,7 +98,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
       const gameTypePrompt = `Tạo nội dung cho trò chơi ${getGameTypeName()} về chủ đề: ${topic}. Độ khó: ${difficulty}.`;
       
       // Tạo settings tùy chỉnh dựa trên loại game
-      const settings = {
+      const settings: GameSettingsData = {
         difficulty: difficulty,
         questionCount: gameType === 'memory' ? 6 : gameType === 'pictionary' ? 5 : 10,
         timePerQuestion: gameType === 'wordsearch' ? 180 : gameType === 'ordering' ? 60 : 30,

@@ -13,6 +13,7 @@ import PictionaryTemplate from './templates/PictionaryTemplate';
 import TrueFalseTemplate from './templates/TrueFalseTemplate';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from '../generator/AIGameGenerator';
+import { GameSettingsData } from '../types';
 
 // Sample preset game content for testing/development
 import { quizSampleData } from './data/quizSampleData';
@@ -115,7 +116,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
       const gamePrompt = `Tạo trò chơi ${gameType} về chủ đề: ${topic}`;
       
       // Tạo settings tùy chỉnh dựa trên loại game
-      const settings = {
+      const settings: GameSettingsData = {
         difficulty: 'medium',
         questionCount: gameType === 'memory' ? 6 : gameType === 'pictionary' ? 5 : 10,
         timePerQuestion: gameType === 'wordsearch' ? 180 : gameType === 'ordering' ? 60 : 30,
