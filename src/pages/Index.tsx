@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CanvasArea from '@/components/canvas/CanvasArea';
@@ -29,17 +28,17 @@ const Index: React.FC = () => {
     addBlock(type, position, canvasRect as DOMRect);
   };
 
-  const handleQuickGameSelect = (gameTopic: string, gameType: string = 'quiz') => {
-    navigate(`/quiz?preset=${encodeURIComponent(gameType)}&topic=${encodeURIComponent(gameTopic)}`);
+  const handleQuickGameSelect = (gameTopic: string) => {
+    navigate(`/quiz?topic=${encodeURIComponent(gameTopic)}&autostart=true`);
   };
 
   const quickGameOptions = [
-    { name: "Trắc Nghiệm", type: "quiz", topic: "Học Toán Vui" },
-    { name: "Ghép Cặp", type: "matching", topic: "Từ Vựng Tiếng Anh" },
-    { name: "Ghi Nhớ", type: "memory", topic: "Khám Phá Lịch Sử" },
-    { name: "Thẻ Học Tập", type: "flashcards", topic: "Địa Lý Thế Giới" },
-    { name: "Sắp Xếp", type: "ordering", topic: "Thí Nghiệm Khoa Học" },
-    { name: "Tìm Từ", type: "wordsearch", topic: "Tư Duy Logic" }
+    "Học Toán Vui", 
+    "Từ Vựng Tiếng Anh",
+    "Khám Phá Lịch Sử",
+    "Địa Lý Thế Giới",
+    "Thí Nghiệm Khoa Học",
+    "Tư Duy Logic"
   ];
 
   return (
@@ -88,16 +87,16 @@ const Index: React.FC = () => {
                 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
                   {quickGameOptions.map((game, index) => (
-                    <div key={game.name} className="flex">
+                    <div key={game} className="flex">
                       <Button
                         variant="ghost" 
                         size="sm"
                         className="w-full h-auto py-3 px-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-primary/10 hover:border-primary/30 transition-all duration-200 shadow-sm animate-float-in min-h-[52px] text-sm"
                         style={{animationDelay: `${index * 0.05}s`}}
-                        onClick={() => handleQuickGameSelect(game.topic, game.type)}
+                        onClick={() => handleQuickGameSelect(game)}
                       >
                         <div className="flex flex-col items-center">
-                          {game.name}
+                          {game.split(' ').slice(-1)[0]}
                         </div>
                       </Button>
                       
@@ -108,7 +107,7 @@ const Index: React.FC = () => {
                           </button>
                         </PopoverTrigger>
                         <PopoverContent side="top" className="bg-white/90 backdrop-blur-md border border-primary/20 shadow-lg">
-                          {game.topic}
+                          {game}
                         </PopoverContent>
                       </Popover>
                     </div>

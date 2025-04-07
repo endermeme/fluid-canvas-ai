@@ -5,7 +5,7 @@ export const gameTypes: GameType[] = [
   {
     id: "quiz",
     name: "Trắc nghiệm ABCD",
-    description: "Câu hỏi trắc nghiệm có 4 lựa chọn, chọn đáp án đúng và được phản hồi ngay lập tức.",
+    description: "Câu hỏi trắc nghiệm có 4 lựa chọn A/B/C/D, chọn đáp án đúng, được phản hồi ngay lập tức.",
     icon: "check",
     defaultSettings: {
       difficulty: 'medium',
@@ -17,7 +17,7 @@ export const gameTypes: GameType[] = [
   {
     id: "flashcards",
     name: "Thẻ ghi nhớ",
-    description: "Thẻ hai mặt, một mặt hiển thị câu hỏi/từ vựng, lật sang mặt kia để xem đáp án.",
+    description: "Thẻ hiển thị nội dung một mặt rồi lật sang mặt khác để xem đáp án khi nhấn vào.",
     icon: "rotate-ccw",
     defaultSettings: {
       difficulty: 'medium',
@@ -27,56 +27,8 @@ export const gameTypes: GameType[] = [
     }
   },
   {
-    id: "matching",
-    name: "Nối từ - nghĩa",
-    description: "Nối các từ hoặc khái niệm ở cột bên trái với định nghĩa tương ứng ở cột bên phải.",
-    icon: "link",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 10,
-      timePerQuestion: 40,
-      category: 'general',
-    }
-  },
-  {
-    id: "anagram",
-    name: "Xáo chữ tạo từ",
-    description: "Sắp xếp lại các chữ cái bị xáo trộn để tạo thành từ hoặc cụm từ có nghĩa.",
-    icon: "shuffle",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 40,
-      category: 'general',
-    }
-  },
-  {
-    id: "speaking",
-    name: "Thẻ nói",
-    description: "Thẻ chứa chủ đề hoặc câu hỏi, người chơi phải nói hoặc diễn đạt ý tưởng theo nội dung.",
-    icon: "message-square",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 60,
-      category: 'general',
-    }
-  },
-  {
-    id: "memory",
-    name: "Tìm cặp giống nhau",
-    description: "Lật hai thẻ mỗi lượt, tìm các cặp thẻ khớp nhau về nội dung hoặc ý nghĩa.",
-    icon: "layers",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 40,
-      category: 'general',
-    }
-  },
-  {
     id: "unjumble",
-    name: "Sắp xếp câu",
+    name: "Xếp lại câu",
     description: "Sắp xếp các từ bị xáo trộn theo đúng thứ tự để tạo thành câu hoàn chỉnh.",
     icon: "sort-asc",
     defaultSettings: {
@@ -87,69 +39,9 @@ export const gameTypes: GameType[] = [
     }
   },
   {
-    id: "openbox",
-    name: "Mở hộp bí ẩn",
-    description: "Chọn và mở các hộp đánh số, mỗi hộp chứa một câu hỏi hoặc phần thưởng.",
-    icon: "box",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 30,
-      category: 'general',
-    }
-  },
-  {
-    id: "spinwheel",
-    name: "Xoay bánh xe",
-    description: "Xoay bánh xe ngẫu nhiên và thực hiện nhiệm vụ ở phần bánh xe dừng lại.",
-    icon: "refresh-cw",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 10,
-      timePerQuestion: 30,
-      category: 'general',
-    }
-  },
-  {
-    id: "groupsort",
-    name: "Phân loại nhóm",
-    description: "Phân loại các đối tượng vào các nhóm khác nhau dựa trên đặc điểm chung.",
-    icon: "folder",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 40,
-      category: 'general',
-    }
-  },
-  {
-    id: "fliptiles",
-    name: "Lật thẻ",
-    description: "Lật từng thẻ để xem thông tin và tìm cặp khớp hoặc trả lời câu hỏi.",
-    icon: "rotate-ccw",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 10,
-      timePerQuestion: 40,
-      category: 'general',
-    }
-  },
-  {
-    id: "wordsearch",
-    name: "Tìm từ ẩn",
-    description: "Tìm các từ ẩn giấu trong bảng chữ cái, các từ có thể nằm ngang, dọc hoặc chéo.",
-    icon: "search",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 60,
-      category: 'general',
-    }
-  },
-  {
-    id: "spellword",
-    name: "Đánh vần từ",
-    description: "Kéo các chữ cái vào đúng vị trí để hoàn thành từ theo gợi ý hoặc hình ảnh.",
+    id: "sentence",
+    name: "Điền vào chỗ trống",
+    description: "Câu bị thiếu một từ, gõ từ thích hợp vào ô trống để hoàn thành câu.",
     icon: "pen-tool",
     defaultSettings: {
       difficulty: 'medium',
@@ -159,86 +51,14 @@ export const gameTypes: GameType[] = [
     }
   },
   {
-    id: "labeldiagram",
-    name: "Gắn nhãn hình ảnh",
-    description: "Kéo các nhãn vào đúng vị trí trên sơ đồ hoặc hình ảnh.",
-    icon: "image",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 40,
-      category: 'general',
-    }
-  },
-  {
-    id: "crossword",
-    name: "Ô chữ",
-    description: "Điền từ vào ô chữ dựa trên các gợi ý ngang và dọc.",
-    icon: "grid",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 10,
-      timePerQuestion: 120,
-      category: 'general',
-    }
-  },
-  {
-    id: "hangman",
-    name: "Treo cổ chữ cái",
-    description: "Đoán từng chữ cái để hoàn thành từ trước khi hình người treo cổ hoàn thiện.",
-    icon: "user-minus",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 60,
-      category: 'general',
-    }
-  },
-  {
-    id: "pictionary",
-    name: "Đoán từ qua hình",
-    description: "Xem hình ảnh và đoán từ hoặc cụm từ được mô tả bằng hình ảnh đó.",
-    icon: "image",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 30,
-      category: 'general',
-    }
-  },
-  {
-    id: "flyingfruit",
-    name: "Trái cây bay",
-    description: "Các đáp án bay ngang màn hình, nhấn đúng khi thấy đáp án đúng.",
-    icon: "zap",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 30,
-      category: 'general',
-    }
-  },
-  {
     id: "truefalse",
     name: "Đúng hay sai",
-    description: "Phán đoán tính đúng đắn của các phát biểu bằng cách chọn Đúng hoặc Sai.",
+    description: "Phát biểu được đưa ra, chọn Đúng hoặc Sai tương ứng với tính chính xác của phát biểu.",
     icon: "check",
     defaultSettings: {
       difficulty: 'medium',
       questionCount: 15,
       timePerQuestion: 10,
-      category: 'general',
-    }
-  },
-  {
-    id: "mazechase",
-    name: "Rượt đuổi mê cung",
-    description: "Điều khiển nhân vật chạy đến đáp án đúng, tránh va vào vật cản.",
-    icon: "map",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 40,
       category: 'general',
     }
   },
@@ -255,22 +75,58 @@ export const gameTypes: GameType[] = [
     }
   },
   {
-    id: "rankorder",
-    name: "Xếp theo thứ tự",
-    description: "Kéo và thả các mục theo thứ tự đúng (nhỏ đến lớn, thời gian, cấp độ...).",
-    icon: "sort-asc",
+    id: "riddle",
+    name: "Câu đố mẹo",
+    description: "Giải câu đố vui hoặc câu đố logic, nhận gợi ý nếu gặp khó khăn.",
+    icon: "zap",
     defaultSettings: {
       difficulty: 'medium',
       questionCount: 8,
+      timePerQuestion: 60,
+      category: 'general',
+    }
+  },
+  {
+    id: "matching",
+    name: "Nối từ",
+    description: "Nối các từ hoặc khái niệm ở cột bên trái với định nghĩa tương ứng ở cột bên phải.",
+    icon: "link",
+    defaultSettings: {
+      difficulty: 'medium',
+      questionCount: 10,
       timePerQuestion: 40,
       category: 'general',
     }
   },
   {
-    id: "wordmagnets",
-    name: "Nam châm từ",
-    description: "Kéo thả các từ như nam châm để tạo thành câu hoàn chỉnh và có nghĩa.",
-    icon: "move",
+    id: "pictionary",
+    name: "Đoán từ qua hình",
+    description: "Xem hình ảnh và đoán từ hoặc cụm từ được mô tả bằng hình ảnh đó.",
+    icon: "image",
+    defaultSettings: {
+      difficulty: 'medium',
+      questionCount: 8,
+      timePerQuestion: 30,
+      category: 'general',
+    }
+  },
+  {
+    id: "wordsearch",
+    name: "Tìm từ ẩn",
+    description: "Tìm các từ ẩn giấu trong bảng chữ cái đơn giản, các từ có thể nằm ngang hoặc dọc.",
+    icon: "search",
+    defaultSettings: {
+      difficulty: 'medium',
+      questionCount: 8,
+      timePerQuestion: 60,
+      category: 'general',
+    }
+  },
+  {
+    id: "categorizing",
+    name: "Phân loại",
+    description: "Phân loại các đối tượng vào các nhóm khác nhau dựa trên đặc điểm chung.",
+    icon: "folder",
     defaultSettings: {
       difficulty: 'medium',
       questionCount: 8,
@@ -312,45 +168,15 @@ export const getGameTypeByTopic = (topic: string): GameType | undefined => {
           score += 8;
         }
         break;
-      case 'matching':
-        if (lowerTopic.includes('nối từ') || lowerTopic.includes('matching') || 
-            lowerTopic.includes('ghép đôi') || lowerTopic.includes('nối')) {
-          score += 8;
-        }
-        break;
-      case 'anagram':
-        if (lowerTopic.includes('xáo chữ') || lowerTopic.includes('anagram') || 
-            lowerTopic.includes('sắp xếp chữ') || lowerTopic.includes('tạo từ')) {
-          score += 8;
-        }
-        break;
-      case 'speaking':
-        if (lowerTopic.includes('thẻ nói') || lowerTopic.includes('speaking') || 
-            lowerTopic.includes('diễn đạt') || lowerTopic.includes('nói')) {
-          score += 8;
-        }
-        break;
-      case 'memory':
-        if (lowerTopic.includes('tìm cặp') || lowerTopic.includes('memory') || 
-            lowerTopic.includes('trùng khớp') || lowerTopic.includes('ghép cặp')) {
-          score += 8;
-        }
-        break;
       case 'unjumble':
         if (lowerTopic.includes('xếp lại') || lowerTopic.includes('sắp xếp') || 
             lowerTopic.includes('unjumble') || lowerTopic.includes('từ xáo trộn')) {
           score += 8;
         }
         break;
-      case 'wordsearch':
-        if (lowerTopic.includes('tìm từ') || lowerTopic.includes('word search') || 
-            lowerTopic.includes('từ ẩn') || lowerTopic.includes('tìm chữ')) {
-          score += 8;
-        }
-        break;
-      case 'pictionary':
-        if (lowerTopic.includes('đoán từ qua hình') || lowerTopic.includes('pictionary') || 
-            lowerTopic.includes('hình ảnh') || lowerTopic.includes('đoán hình')) {
+      case 'sentence':
+        if (lowerTopic.includes('điền vào chỗ trống') || lowerTopic.includes('hoàn thành câu') || 
+            lowerTopic.includes('fill in') || lowerTopic.includes('từ thiếu')) {
           score += 8;
         }
         break;
@@ -366,15 +192,33 @@ export const getGameTypeByTopic = (topic: string): GameType | undefined => {
           score += 8;
         }
         break;
-      case 'crossword':
-        if (lowerTopic.includes('ô chữ') || lowerTopic.includes('crossword') || 
-            lowerTopic.includes('điền chữ') || lowerTopic.includes('giải ô chữ')) {
+      case 'riddle':
+        if (lowerTopic.includes('câu đố') || lowerTopic.includes('đố') || 
+            lowerTopic.includes('riddle') || lowerTopic.includes('đố vui')) {
           score += 8;
         }
         break;
-      case 'hangman':
-        if (lowerTopic.includes('treo cổ') || lowerTopic.includes('hangman') || 
-            lowerTopic.includes('đoán chữ') || lowerTopic.includes('đoán từng chữ')) {
+      case 'matching':
+        if (lowerTopic.includes('nối từ') || lowerTopic.includes('matching') || 
+            lowerTopic.includes('ghép đôi') || lowerTopic.includes('nối')) {
+          score += 8;
+        }
+        break;
+      case 'pictionary':
+        if (lowerTopic.includes('đoán từ qua hình') || lowerTopic.includes('pictionary') || 
+            lowerTopic.includes('hình ảnh') || lowerTopic.includes('đoán hình')) {
+          score += 8;
+        }
+        break;
+      case 'wordsearch':
+        if (lowerTopic.includes('tìm từ') || lowerTopic.includes('word search') || 
+            lowerTopic.includes('từ ẩn') || lowerTopic.includes('tìm chữ')) {
+          score += 8;
+        }
+        break;
+      case 'categorizing':
+        if (lowerTopic.includes('phân loại') || lowerTopic.includes('categorizing') || 
+            lowerTopic.includes('phân nhóm') || lowerTopic.includes('sắp xếp nhóm')) {
           score += 8;
         }
         break;
