@@ -1,3 +1,4 @@
+
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -199,27 +200,34 @@ export const generateWithGemini = async (
       `;
   }
 
-  // Add specific instructions for image-related games
+  // Enhanced instructions for image-related games
   let imageInstructions = '';
   if (requiresImages) {
     imageInstructions = `
     ## Chỉ dẫn đặc biệt cho trò chơi có hình ảnh
     
     - QUAN TRỌNG: Nếu trò chơi cần hình ảnh, hãy sử dụng một trong các cách sau để cung cấp hình ảnh:
-      1. Sử dụng URL hình ảnh từ Unsplash: 'https://source.unsplash.com/random/{width}x{height}?{keywords}'
-         Ví dụ: https://source.unsplash.com/random/300x200?nature,forest
-      2. Sử dụng URL hình ảnh từ PlaceImg: 'https://placeimg.com/{width}/{height}/{category}'
-         Ví dụ: https://placeimg.com/300/200/animals
-      3. Sử dụng URL hình ảnh từ Picsum: 'https://picsum.photos/{width}/{height}'
-         Ví dụ: https://picsum.photos/300/200
-      4. Sử dụng hình ảnh ASCII/Unicode art khi không có hình ảnh trực tuyến
-      5. Tạo mô tả hình ảnh bằng SVG code đơn giản trong thẻ <svg>
-    
-    - Đối với trò chơi ghép thẻ hình ảnh (memory card), sử dụng 4-8 hình ảnh từ các nguồn trên
-    - Đối với trò chơi xếp hình, sử dụng 1 hình ảnh và chia nó thành các phần nhỏ bằng JavaScript
+      1. Sử dụng URL hình ảnh từ Wikimedia Commons: 'https://commons.wikimedia.org/wiki/Special:RandomInCategory/[category_name]'
+         Ví dụ: https://commons.wikimedia.org/wiki/Special:RandomInCategory/Nature
+      2. Sử dụng URL hình ảnh từ Pixabay:
+         'https://pixabay.com/api/?key=27172524-c6dc172848651f2956dec45c1&q=[keywords]&image_type=photo&orientation=horizontal'
+         Ví dụ: https://pixabay.com/get/g195c7ac0b32fb8ca4ccc9acbe03fcc38a2f064fd2ef9f0e4dd5c8f5b96a0c55c0a21c5c43429d0dcce92b26dda0aea13_1280.jpg
+      3. Sử dụng URL hình ảnh từ Unsplash: 'https://api.unsplash.com/photos/random?query=[keywords]'
+         Ví dụ: https://images.unsplash.com/photo-1505144808419-1957a94ca61e
+      4. Sử dụng hình ảnh ASCII/Unicode art khi không có hình ảnh trực tuyến khả dụng
+      5. Sử dụng SVG tạo hình đơn giản trực tiếp trong code HTML
+      6. Sử dụng URL ảnh từ placeholder.com: 'https://via.placeholder.com/[width]x[height].png?text=[text]'
+         Ví dụ: https://via.placeholder.com/300x200.png?text=Forest
+      7. Sử dụng URL ảnh từ loremflickr: 'https://loremflickr.com/[width]/[height]/[keywords]'
+         Ví dụ: https://loremflickr.com/320/240/dog,puppy
+
+    - Hãy sử dụng nhiều phương pháp khác nhau để cung cấp hình ảnh, không chỉ dựa vào một nguồn
+    - Khi sử dụng bất kỳ URL ảnh nào, luôn thêm xử lý lỗi trong JavaScript để hiển thị hình ảnh thay thế nếu URL chính không tải được
+    - Đối với trò chơi ghép thẻ hình ảnh (memory card), sử dụng 4-8 hình ảnh khác nhau với URL chắc chắn hoạt động
+    - Đối với trò chơi xếp hình, tạo chức năng phân chia hình ảnh thành các phần nhỏ bằng Canvas API
     - Đối với trò chơi đoán hình, sử dụng 5-10 hình ảnh khác nhau với đáp án tương ứng
-    - Nhớ sử dụng kích thước hình ảnh phù hợp để không làm chậm trò chơi (thông thường 300x200 hoặc 400x300)
-    - Nếu cần hình ảnh liên quan đến chủ đề cụ thể, thêm từ khóa vào URL Unsplash
+    - Nếu dùng ảnh từ API, hãy dựa vào các URL cố định đã kiểm tra thay vì gọi API trực tiếp
+    - Luôn có fallback thành ASCII art nếu tất cả các nguồn hình ảnh không khả dụng
     `;
   }
 
@@ -243,6 +251,14 @@ export const generateWithGemini = async (
     - **Tương thích trình duyệt:** Sử dụng các tính năng JavaScript được hỗ trợ rộng rãi.
     - **Tối ưu hiệu suất:** Tránh vòng lặp lồng nhau phức tạp và DOM manipulation không cần thiết.
     - **Xử lý hình ảnh:** Nếu trò chơi cần hình ảnh, sử dụng các dịch vụ hình ảnh miễn phí như đã nêu.
+
+    ## Xử lý hình ảnh đặc biệt
+    - **Đảm bảo hình ảnh hoạt động:** Luôn kiểm tra xem hình ảnh có tải được hay không
+    - **Có nhiều nguồn ảnh dự phòng:** Nếu một URL không hoạt động, thử URL khác
+    - **SVG Fallback:** Tạo SVG đơn giản làm dự phòng cuối cùng
+    - **ASCII Art:** Cung cấp ASCII art để hiển thị khi không có kết nối internet
+    - **Preload images:** Tải trước hình ảnh để tránh độ trễ khi chơi
+    - **Sử dụng nguồn đáng tin cậy:** Ưu tiên sử dụng placeholder.com, loremflickr.com và các nguồn ổn định
 
     ## Phòng tránh lỗi phổ biến
     - **Tránh click handlers không hoạt động:** Đảm bảo event listeners được đính kèm đúng cách.
