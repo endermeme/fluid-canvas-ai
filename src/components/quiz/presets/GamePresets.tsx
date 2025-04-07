@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PuzzlePiece, BrainCircuit, Lightbulb, Dices, BookText, MessageSquare } from 'lucide-react';
+import { Puzzle, BrainCircuit, Lightbulb, Dices, BookText, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { GamePresetType, PresetGameConfig } from './types';
@@ -58,7 +58,7 @@ const GamePresets = () => {
 
   const getPresetIcon = (iconName: string) => {
     switch (iconName) {
-      case 'puzzle-piece': return <PuzzlePiece className="h-6 w-6" />;
+      case 'puzzle-piece': return <Puzzle className="h-6 w-6" />;
       case 'brain-circuit': return <BrainCircuit className="h-6 w-6" />;
       case 'lightbulb': return <Lightbulb className="h-6 w-6" />;
       case 'dices': return <Dices className="h-6 w-6" />;
