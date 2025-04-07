@@ -1,4 +1,3 @@
-
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -11,11 +10,13 @@ export class AIGameGenerator {
   private model: any;
   private modelName: string;
   private canvasMode: boolean = false;
+  private geminiApiKey: string;
 
   constructor(apiKey: string, options?: { modelName?: string; canvasMode?: boolean }) {
     console.log("🚀 AIGameGenerator: Initializing AI game generator");
     this.modelName = options?.modelName || 'gemini-2.5-pro-preview-03-25';
     this.canvasMode = options?.canvasMode || false;
+    this.geminiApiKey = apiKey;
     
     console.log(`🚀 AIGameGenerator: Using model ${this.modelName}`);
     console.log(`🚀 AIGameGenerator: Canvas mode: ${this.canvasMode ? 'ON' : 'OFF'}`);
@@ -30,6 +31,19 @@ export class AIGameGenerator {
 
   isCanvasModeEnabled(): boolean {
     return this.canvasMode;
+  }
+
+  setOpenAIKey(key: string): void {
+    // For compatibility with old code, we'll keep this method
+    // but we'll actually use it to set a Gemini key
+    if (key && key.trim() !== '') {
+      this.geminiApiKey = key;
+      localStorage.setItem('gemini_api_key', key);
+      console.log(`🚀 AIGameGenerator: Gemini API key updated`);
+      
+      // Recreate the model with the new key
+      this.model = createGeminiClient(key);
+    }
   }
 
   async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {

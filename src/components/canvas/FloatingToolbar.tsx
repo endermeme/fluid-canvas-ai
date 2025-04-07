@@ -20,10 +20,10 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
   
   const handleSaveOpenAIKey = (key: string) => {
     if (key) {
-      localStorage.setItem('openai_api_key', key);
+      localStorage.setItem('gemini_api_key', key);
       toast({
         title: "API Key Đã Lưu",
-        description: "OpenAI API key của bạn đã được lưu thành công.",
+        description: "Gemini API key của bạn đã được lưu thành công.",
       });
     }
   };
@@ -104,7 +104,7 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
         {/* Separator */}
         <div className="h-6 w-px bg-border"></div>
         
-        {/* OpenAI Key Button */}
+        {/* API Key Button */}
         <button
           className="p-2 rounded-full hover:bg-primary/10 transition-colors flex items-center space-x-1"
           onClick={() => setShowOpenAIKeyModal(true)}
@@ -119,7 +119,7 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
         isOpen={showOpenAIKeyModal}
         onClose={() => setShowOpenAIKeyModal(false)}
         onSave={handleSaveOpenAIKey}
-        currentKey={localStorage.getItem('openai_api_key')}
+        currentKey={localStorage.getItem('gemini_api_key')}
       />
     </div>
   );
