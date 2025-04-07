@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from '../generator/AIGameGenerator';
@@ -180,7 +181,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
 
   if (selectedGame) {
     return (
-      <div className="h-full relative">
+      <div className="h-full relative overflow-hidden">
         <GameView miniGame={selectedGame} />
       </div>
     );
@@ -195,11 +196,13 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
         onGameRequest={onGameRequest}
       />
       
-      <GameGrid 
-        gameTypes={gameTypes} 
-        onTopicSelect={handleTopicSelect} 
-        getIconComponent={getIconComponent}
-      />
+      <div className="w-full max-h-[calc(100vh-250px)] overflow-auto pb-6">
+        <GameGrid 
+          gameTypes={gameTypes} 
+          onTopicSelect={handleTopicSelect} 
+          getIconComponent={getIconComponent}
+        />
+      </div>
       
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-lg border-white/20">

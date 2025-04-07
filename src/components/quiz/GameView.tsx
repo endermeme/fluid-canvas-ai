@@ -21,7 +21,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   useEffect(() => {
     if (miniGame && miniGame.content) {
       try {
-        // Save game to local storage for history - use the title as is for now
+        // Save game to local storage for history
         saveGameForSharing(
           miniGame.title || "Minigame tương tác", 
           "", // Empty description
@@ -219,7 +219,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   }
 
   return (
-    <div className="flex flex-col h-full w-full items-center justify-center">
+    <div className="flex flex-col h-full w-full items-center justify-center overflow-hidden">
       <div className="flex-1 relative w-full h-full overflow-hidden flex items-center justify-center">
         {iframeError ? (
           <div className="bg-destructive/10 text-destructive p-4 rounded-md flex flex-col items-center m-4">
@@ -240,13 +240,13 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
             sandbox="allow-scripts allow-popups allow-same-origin"
             onLoad={handleIframeLoad}
             title={miniGame.title || "Minigame"}
-            style={{ maxWidth: '100%', margin: '0 auto' }}
+            style={{ maxWidth: '100%', height: '100%', margin: '0 auto' }}
           />
         )}
       </div>
       
       {/* Control buttons */}
-      <div className="absolute bottom-4 right-4 flex space-x-2">
+      <div className="absolute bottom-4 right-4 flex space-x-2 z-10">
         <Button 
           size="sm" 
           variant="ghost"

@@ -93,7 +93,7 @@ const SharedGame = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen overflow-hidden">
       <header className="bg-background border-b p-3 flex justify-between items-center">
         <Link to="/quiz">
           <Button variant="outline" size="sm">

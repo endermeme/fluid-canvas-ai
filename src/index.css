@@ -96,9 +96,22 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  body {
+  html, body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  #root {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   
   /* Tăng kích thước của các phần tử tương tác trên di động */
