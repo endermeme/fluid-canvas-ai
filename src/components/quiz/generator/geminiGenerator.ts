@@ -146,13 +146,14 @@ export const generateWithGemini = async (
       gameSpecificInstructions = `
       ## Hướng dẫn cho trò chơi Đoán từ qua hình
       
-      - Chỉ sử dụng mô tả text-based cho hình ảnh, không nhúng hình ảnh thật
-      - Tạo mô tả hình vẽ đơn giản bằng ASCII art hoặc Unicode
+      - Sử dụng hình ảnh thực tế từ các nguồn có thật (xem phần "Xử lý hình ảnh đặc biệt")
+      - Ưu tiên sử dụng URL hình ảnh từ Google Images, Wikipedia hoặc các nguồn uy tín
+      - Tạo 5-10 câu hỏi đoán từ dựa trên hình ảnh
+      - Mỗi câu hỏi có một hình ảnh liên quan đến chủ đề "${topic}"
       - Cho phép người dùng nhập đáp án vào ô input
       - Cung cấp gợi ý nếu người dùng gặp khó khăn
-      - Các từ cần đoán liên quan chặt chẽ đến chủ đề "${topic}"
       - Đáp án không phân biệt hoa thường
-      - Hỗ trợ nhiều cách diễn đạt đúng khác nhau
+      - Hiển thị điểm số và kết quả cuối cùng
       `;
       break;
     
@@ -207,27 +208,48 @@ export const generateWithGemini = async (
     ## Chỉ dẫn đặc biệt cho trò chơi có hình ảnh
     
     - QUAN TRỌNG: Nếu trò chơi cần hình ảnh, hãy sử dụng một trong các cách sau để cung cấp hình ảnh:
-      1. Sử dụng URL hình ảnh từ Wikimedia Commons: 'https://commons.wikimedia.org/wiki/Special:RandomInCategory/[category_name]'
-         Ví dụ: https://commons.wikimedia.org/wiki/Special:RandomInCategory/Nature
+      1. Sử dụng URL hình ảnh cố định từ Wikipedia: 'https://upload.wikimedia.org/wikipedia/commons/thumb/[...].jpg'
+         Ví dụ: https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_processing_1.png/300px-Image_processing_1.png
       2. Sử dụng URL hình ảnh từ Pixabay:
-         'https://pixabay.com/api/?key=27172524-c6dc172848651f2956dec45c1&q=[keywords]&image_type=photo&orientation=horizontal'
+         'https://pixabay.com/get/[image_id].jpg'
          Ví dụ: https://pixabay.com/get/g195c7ac0b32fb8ca4ccc9acbe03fcc38a2f064fd2ef9f0e4dd5c8f5b96a0c55c0a21c5c43429d0dcce92b26dda0aea13_1280.jpg
-      3. Sử dụng URL hình ảnh từ Unsplash: 'https://api.unsplash.com/photos/random?query=[keywords]'
-         Ví dụ: https://images.unsplash.com/photo-1505144808419-1957a94ca61e
-      4. Sử dụng hình ảnh ASCII/Unicode art khi không có hình ảnh trực tuyến khả dụng
-      5. Sử dụng SVG tạo hình đơn giản trực tiếp trong code HTML
-      6. Sử dụng URL ảnh từ placeholder.com: 'https://via.placeholder.com/[width]x[height].png?text=[text]'
+      3. Sử dụng URL hình ảnh từ Google Images cache
+         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS[...]'
+         Ví dụ: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSC-qbvZ0MJEhAbgDZqf9KQgWNYJKrNLeFa4q5W8ZK6yQ&s
+      4. Sử dụng URL hình ảnh từ placeholder.com: 'https://via.placeholder.com/[width]x[height].png?text=[text]'
          Ví dụ: https://via.placeholder.com/300x200.png?text=Forest
-      7. Sử dụng URL ảnh từ loremflickr: 'https://loremflickr.com/[width]/[height]/[keywords]'
-         Ví dụ: https://loremflickr.com/320/240/dog,puppy
+      5. Sử dụng URL ảnh từ dummyimage.com: 'https://dummyimage.com/[width]x[height]/[color]/[textcolor]&text=[text]'
+         Ví dụ: https://dummyimage.com/300x200/7EC0EE/333333&text=Ocean
+      6. Sử dụng inline SVG trực tiếp trong HTML khi cần đồ họa đơn giản
+         Ví dụ: <svg width="100" height="100"><circle cx="50" cy="50" r="40" fill="red" /></svg>
+      7. Sử dụng base64 cho ảnh nhỏ (tối đa 3-5 ảnh nhỏ)
+         Ví dụ: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..." />
+      8. Tạo hình ảnh ASCII/Unicode art khi các phương pháp trên không khả dụng
 
-    - Hãy sử dụng nhiều phương pháp khác nhau để cung cấp hình ảnh, không chỉ dựa vào một nguồn
-    - Khi sử dụng bất kỳ URL ảnh nào, luôn thêm xử lý lỗi trong JavaScript để hiển thị hình ảnh thay thế nếu URL chính không tải được
+    - TUYỆT ĐỐI KHÔNG SỬ DỤNG URL từ source.unsplash.com vì chúng không ổn định
+    - TUYỆT ĐỐI KHÔNG SỬ DỤNG URL từ loremflickr.com vì chúng không ổn định
+    - Khi sử dụng hình ảnh từ Wikipedia, sử dụng đường dẫn trực tiếp tới file ảnh, không dùng URL tới bài viết
+    - Đối với ảnh từ Pixabay, chỉ sử dụng URL có dạng https://pixabay.com/get/[...]
+    - Khi sử dụng ảnh từ Google, chỉ dùng URL có dạng https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS[...]
     - Đối với trò chơi ghép thẻ hình ảnh (memory card), sử dụng 4-8 hình ảnh khác nhau với URL chắc chắn hoạt động
-    - Đối với trò chơi xếp hình, tạo chức năng phân chia hình ảnh thành các phần nhỏ bằng Canvas API
-    - Đối với trò chơi đoán hình, sử dụng 5-10 hình ảnh khác nhau với đáp án tương ứng
-    - Nếu dùng ảnh từ API, hãy dựa vào các URL cố định đã kiểm tra thay vì gọi API trực tiếp
-    - Luôn có fallback thành ASCII art nếu tất cả các nguồn hình ảnh không khả dụng
+    - Luôn cung cấp text thay thế cho ảnh (alt text) để đảm bảo trò chơi vẫn hoạt động nếu ảnh không tải được
+    - Khi một URL ảnh không khả dụng, hiển thị một hình ảnh phù hợp tạo bằng SVG hoặc base64
+    - Luôn có một backup plan nếu tất cả các hình ảnh không tải được (ví dụ: chuyển sang chế độ văn bản)
+
+    ## Xử lý hình ảnh đúng cách trong JavaScript
+    - Thêm event handler onerror cho mọi thẻ <img>:
+      <img src="URL" alt="Mô tả" onerror="this.onerror=null; this.src='URL_DỰ_PHÒNG'; this.alt='Không thể tải hình';">
+    - Thử tải hình ảnh trước khi sử dụng:
+      ```javascript
+      function preloadImage(url, successCallback, errorCallback) {
+        const img = new Image();
+        img.onload = successCallback;
+        img.onerror = errorCallback;
+        img.src = url;
+      }
+      ```
+    - Chuẩn bị các URL dự phòng cho mỗi hình ảnh cần thiết
+    - Tạo SVG động nếu tất cả URL dự phòng đều thất bại
     `;
   }
 
@@ -253,12 +275,12 @@ export const generateWithGemini = async (
     - **Xử lý hình ảnh:** Nếu trò chơi cần hình ảnh, sử dụng các dịch vụ hình ảnh miễn phí như đã nêu.
 
     ## Xử lý hình ảnh đặc biệt
-    - **Đảm bảo hình ảnh hoạt động:** Luôn kiểm tra xem hình ảnh có tải được hay không
-    - **Có nhiều nguồn ảnh dự phòng:** Nếu một URL không hoạt động, thử URL khác
+    - **Đảm bảo hình ảnh hoạt động:** Luôn sử dụng URL hình ảnh cố định, không dùng API ngẫu nhiên
+    - **Có nhiều nguồn ảnh dự phòng:** Nếu một URL không hoạt động, hiển thị ảnh dự phòng
     - **SVG Fallback:** Tạo SVG đơn giản làm dự phòng cuối cùng
-    - **ASCII Art:** Cung cấp ASCII art để hiển thị khi không có kết nối internet
+    - **Xử lý lỗi hình ảnh:** Luôn thêm thuộc tính onerror cho thẻ img
     - **Preload images:** Tải trước hình ảnh để tránh độ trễ khi chơi
-    - **Sử dụng nguồn đáng tin cậy:** Ưu tiên sử dụng placeholder.com, loremflickr.com và các nguồn ổn định
+    - **Hướng dẫn chi tiết:** Cho trò chơi hình ảnh, hãy bổ sung hướng dẫn cách chơi rõ ràng
 
     ## Phòng tránh lỗi phổ biến
     - **Tránh click handlers không hoạt động:** Đảm bảo event listeners được đính kèm đúng cách.
@@ -269,6 +291,7 @@ export const generateWithGemini = async (
     - **Tránh chồng chéo z-index:** Đảm bảo các phần tử không bị chồng lấp không mong muốn.
     - **Tránh animation lag:** Sử dụng CSS transitions thay vì JavaScript animations khi có thể.
     - **Tránh lỗi hình ảnh không tải được:** Luôn thêm xử lý lỗi cho hình ảnh.
+    - **Tránh lỗi chuỗi JSON bị hỏng:** Đảm bảo chuỗi JSON escape đúng các ký tự đặc biệt.
 
     ${settingsPrompt}
 
@@ -282,14 +305,18 @@ export const generateWithGemini = async (
 
     ## Định dạng đầu ra
     Kết quả cuối cùng phải được cung cấp dưới dạng một đối tượng JSON tối giản với cấu trúc sau:
-    - **\`title\`**: (string) Tiêu đề của trò chơi.
-    - **\`description\`**: (string) Mô tả ngắn về trò chơi.
-    - **\`content\`**: (string) Mã HTML đầy đủ của trò chơi.
+    {
+      "title": "Tiêu đề của trò chơi",
+      "description": "Mô tả ngắn về trò chơi",
+      "content": "Mã HTML đầy đủ của trò chơi"
+    }
 
     **Chi tiết quan trọng cho JSON đầu ra:**
-    - Không bao gồm bất kỳ định dạng markdown, dấu phân cách khối code ho��c văn bản giải thích bên ngoài JSON. Phản hồi chỉ nên là đối tượng JSON.
-    - JSON phải được định dạng đúng và thoát các ký tự đặc biệt.
-    - Chuỗi \`content\` phải chứa một tài liệu HTML hoàn chỉnh, hợp lệ.
+    - Không bao gồm bất kỳ định dạng markdown, dấu phân cách khối code hoặc văn bản giải thích bên ngoài JSON.
+    - JSON phải được định dạng đúng và thoát các ký tự đặc biệt đúng cách.
+    - Trong chuỗi JSON, các dấu ngoặc kép (") phải được escape bằng dấu gạch chéo ngược (\\").
+    - Trong chuỗi JSON, các dấu gạch chéo ngược (\\) phải được escape thành (\\\\).
+    - Chuỗi "content" phải chứa một tài liệu HTML hoàn chỉnh, hợp lệ.
 
     GIAO KẾT QUẢ DƯỚI DẠNG MỘT ĐỐI TƯỢNG JSON HỢP LỆ DUY NHẤT KHÔNG CÓ MARKDOWN HOẶC DẤU BACKTICK.
   `;
@@ -303,188 +330,59 @@ export const generateWithGemini = async (
     console.log("🔷 Gemini: Response received, extracting JSON...");
     console.log("🔷 Gemini: Response length:", text.length);
     
-    // Enhanced JSON extraction and cleaning
+    // Enhanced JSON extraction and cleaning with more robust error handling
     try {
-      // First prepare the text by trimming unnecessary parts
-      const preparedText = text.trim()
-        // Remove markdown code blocks if present
-        .replace(/```json\s+/g, '')
-        .replace(/```\s*$/g, '')
-        // Remove leading/trailing whitespace
-        .trim();
+      // First approach: Try to extract JSON directly
+      const jsonRegex = /\{[\s\S]*\}/g;
+      const jsonMatch = text.match(jsonRegex);
       
-      // Method 1: Try JSON.parse directly if it's valid JSON
-      try {
-        // Check if the entire response is a valid JSON
-        const gameData = JSON.parse(preparedText);
-        console.log("🔷 Gemini: Valid JSON, extraction successful");
-        
-        // Validate HTML content to catch common issues
-        if (!gameData.content || !gameData.content.includes('<!DOCTYPE html>')) {
-          console.warn("🔷 Gemini: HTML content may be incomplete, adding DOCTYPE");
-          gameData.content = `<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${gameData.title || topic}</title>
-</head>
-<body>
-    ${gameData.content || '<div>Content generation error</div>'}
-</body>
-</html>`;
-        }
-        
-        return {
-          title: gameData.title || topic,
-          description: gameData.description || "",
-          content: gameData.content || ''
-        };
-      } catch (directParseError) {
-        console.log("🔷 Gemini: Cannot parse directly, trying method 2...");
-        console.log("🔷 Gemini: Parse error:", directParseError.message);
-      }
-      
-      // Method 2: Use regex to find and extract JSON object
-      const jsonMatch = text.match(/{[\s\S]*?(?:}(?=[,\s]|$))/);
-      if (jsonMatch) {
-        // Clean the JSON string - replace problematic characters
-        const cleanedJson = jsonMatch[0]
-          .replace(/[\u0000-\u001F\u007F-\u009F]/g, "") // Remove control characters
-          .replace(/\\(?!["\\/bfnrt])/g, "\\\\") // Fix invalid escape sequences
-          .replace(/([^\\])"/g, '$1\\"') // Escape unescaped quotes
-          .replace(/([^\\])'/g, '$1"') // Replace single quotes with double quotes
-          .replace(/\\n/g, "\\n") // Properly escape newlines
-          .replace(/\\r/g, "\\r") // Properly escape carriage returns
-          .replace(/\\t/g, "\\t") // Properly escape tabs
-          .replace(/\\\\/g, "\\\\") // Fix double backslashes
-          .replace(/[\u201C\u201D]/g, '"') // Replace smart quotes
-          .replace(/[\u2018\u2019]/g, "'"); // Replace smart quotes
-        
-        console.log("🔷 Gemini: Parsing JSON from response (method 2)...");
+      if (jsonMatch && jsonMatch[0]) {
         try {
-          // Try with JSON5 parsing approach (more lenient)
-          const jsonString = `(${cleanedJson})`;
-          const gameData = eval(jsonString); // Using eval as a last resort for malformed JSON
+          // Try to parse the JSON directly
+          const gameData = JSON.parse(jsonMatch[0]);
           
-          console.log(`🔷 Gemini: Successfully created game "${gameData.title || 'No title'}"`);
-          console.log(`🔷 Gemini: Description: ${gameData.description || 'No description'}`);
-          console.log(`🔷 Gemini: Code size: ${(gameData.content?.length || 0).toLocaleString()} characters`);
-          
-          // Validate and fix HTML content
-          let htmlContent = gameData.content || '';
-          
-          // Ensure HTML has proper structure
-          if (!htmlContent.includes('<!DOCTYPE html>')) {
-            console.warn("🔷 Gemini: Adding missing DOCTYPE and HTML structure");
-            htmlContent = `<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${gameData.title || topic}</title>
-</head>
-<body>
-    ${htmlContent}
-</body>
-</html>`;
-          }
-          
-          // Check for unclosed tags
-          const openTags = (htmlContent.match(/<[a-z][^>]*>/gi) || []).length;
-          const closeTags = (htmlContent.match(/<\/[a-z][^>]*>/gi) || []).length;
-          if (openTags > closeTags) {
-            console.warn(`🔷 Gemini: Possible unclosed tags detected (${openTags} open vs ${closeTags} close)`);
-          }
+          console.log("🔷 Gemini: Successfully parsed JSON directly");
+          console.log(`🔷 Gemini: Game title: "${gameData.title || 'No title'}"`);
           
           return {
             title: gameData.title || topic,
             description: gameData.description || "",
-            content: htmlContent
+            content: gameData.content || ''
           };
-        } catch (jsonError) {
-          console.error("❌ Gemini: JSON parsing error (method 2):", jsonError);
-          console.log("🔷 Gemini: Using manual extraction method...");
-        }
-      }
-      
-      // Method 3: Manual extraction as final fallback
-      console.log("🔷 Gemini: Using manual extraction method (regex)...");
-      
-      // Extract content with a more robust pattern
-      let content = '';
-      const contentStart = text.indexOf('"content"');
-      if (contentStart !== -1) {
-        // Find the first quote after "content":
-        const firstQuotePos = text.indexOf('"', contentStart + 10);
-        if (firstQuotePos !== -1) {
-          // Now find the closing quote, accounting for escaped quotes
-          let pos = firstQuotePos + 1;
-          let foundClosingQuote = false;
-          let level = 0;
+        } catch (parseError) {
+          console.log("🔷 Gemini: Direct JSON parse failed, trying with sanitization:", parseError.message);
           
-          while (pos < text.length) {
-            if (text[pos] === '"' && text[pos-1] !== '\\') {
-              if (level === 0) {
-                foundClosingQuote = true;
-                break;
-              }
-              level--;
-            }
-            pos++;
-          }
+          // Try again with sanitization
+          let sanitizedJson = jsonMatch[0]
+            .replace(/\\(?!["\\/bfnrt])/g, "\\\\") // Fix invalid escape sequences
+            .replace(/\n/g, "\\n")               // Properly escape newlines
+            .replace(/\r/g, "\\r")               // Properly escape carriage returns
+            .replace(/\t/g, "\\t")               // Properly escape tabs
+            .replace(/\f/g, "\\f")               // Properly escape form feeds
+            .replace(/[\u0000-\u001F\u007F-\u009F]/g, ""); // Remove control characters
           
-          if (foundClosingQuote) {
-            content = text.substring(firstQuotePos + 1, pos)
-              .replace(/\\"/g, '"')
-              .replace(/\\n/g, '\n')
-              .replace(/\\t/g, '\t')
-              .replace(/\\\\/g, '\\');
+          try {
+            const gameData = JSON.parse(sanitizedJson);
+            console.log("🔷 Gemini: JSON parsed after sanitization");
+            
+            return {
+              title: gameData.title || topic,
+              description: gameData.description || "",
+              content: gameData.content || ''
+            };
+          } catch (secondParseError) {
+            console.log("🔷 Gemini: Sanitized JSON parse failed, moving to manual extraction:", secondParseError.message);
           }
         }
       }
       
-      // If we couldn't extract content, try a different approach
-      if (!content) {
-        const contentMatch = text.match(/"content"\s*:\s*"([\s\S]*?)(?:"\s*}|"\s*$)/);
-        if (contentMatch) {
-          content = contentMatch[1]
-            .replace(/\\n/g, '\n')
-            .replace(/\\"/g, '"')
-            .replace(/\\t/g, '\t')
-            .replace(/\\\\/g, '\\');
-        }
-      }
+      // Fallback: Manual extraction of HTML content
+      console.log("🔷 Gemini: Attempting to extract HTML content directly...");
+      const htmlRegex = /<!DOCTYPE html>[\s\S]*<\/html>/i;
+      const htmlMatch = text.match(htmlRegex);
       
-      // Ensure content has proper HTML structure
-      if (content && !content.includes('<!DOCTYPE html>')) {
-        console.warn("🔷 Gemini: Adding proper HTML structure to content");
-        content = `<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${topic}</title>
-</head>
-<body>
-    ${content}
-</body>
-</html>`;
-      }
-      
-      if (content) {
-        console.log("🔷 Gemini: Successful extraction using regex");
-        return {
-          title: topic,
-          description: "",
-          content: content
-        };
-      }
-      
-      // Last resort: Extract any HTML content
-      const htmlMatch = text.match(/<html[\s\S]*<\/html>/i);
-      if (htmlMatch) {
-        console.log("🔷 Gemini: Successful HTML extraction");
+      if (htmlMatch && htmlMatch[0]) {
+        console.log("🔷 Gemini: Successfully extracted HTML content");
         return {
           title: topic,
           description: "",
@@ -492,14 +390,28 @@ export const generateWithGemini = async (
         };
       }
       
-      throw new Error("Cannot extract JSON or HTML from response");
+      // Final fallback: Get anything between <html> and </html>
+      const fallbackHtmlRegex = /<html[\s\S]*<\/html>/i;
+      const fallbackHtmlMatch = text.match(fallbackHtmlRegex);
+      
+      if (fallbackHtmlMatch && fallbackHtmlMatch[0]) {
+        console.log("🔷 Gemini: Extracted HTML with fallback regex");
+        const htmlContent = `<!DOCTYPE html>${fallbackHtmlMatch[0]}`;
+        return {
+          title: topic,
+          description: "",
+          content: htmlContent
+        };
+      }
+      
+      throw new Error("Unable to extract valid content from Gemini response");
     } catch (extractionError) {
-      console.error("❌ Gemini: Extraction error:", extractionError);
-      return null;
+      console.error("❌ Gemini: Content extraction error:", extractionError);
+      throw extractionError;
     }
   } catch (error) {
     console.error("❌ Gemini: Error generating with Gemini:", error);
-    throw error; // Rethrow for retry mechanism
+    throw error;
   }
 };
 
