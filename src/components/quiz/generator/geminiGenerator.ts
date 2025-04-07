@@ -1,3 +1,4 @@
+
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -22,144 +23,69 @@ export const generateWithGemini = async (
     - Category: ${settings.category}
   ` : '';
 
-  // Additional instructions for specific game types
+  // Hướng dẫn đơn giản cho các trò chơi
   let gameSpecificInstructions = '';
   
-  if (gameType?.id === 'crossword') {
+  // Thêm hướng dẫn cụ thể cho trò chơi tìm từ ẩn
+  if (gameType?.id === 'wordsearch') {
     gameSpecificInstructions = `
-    ## Special Instructions for Crossword Puzzle
+    ## Hướng dẫn cho trò chơi Tìm từ ẩn
     
-    For this crossword puzzle game:
-    
-    1. **Grid Size and Complexity**:
-       - Create a manageable grid size (5x5 to 10x10 maximum)
-       - Only use simple words related to the topic "${topic}"
-       - Include ${settings?.questionCount || 10} words maximum
-       - Ensure words intersect in a valid crossword pattern
-    
-    2. **User Interface Requirements**:
-       - Each cell should be clearly visible and sized appropriately (minimum 40px on mobile)
-       - Show clue numbers in the grid that correspond to the clues list
-       - Provide separate lists for "Across" and "Down" clues
-       - Allow users to navigate between cells using keyboard arrow keys or touch
-       - Highlight the active word (all cells of the current word) when a cell is selected
-    
-    3. **Technical Implementation**:
-       - Store each letter in a separate input field or equivalent data structure
-       - Track filled cells and validate each word when all its cells are filled
-       - Auto-advance to the next cell when a letter is entered
-       - Auto-jump to the next word when current word is completed
-       - Allow one letter per cell, enforce uppercase letters only
-       - Prevent non-alphabetic characters from being entered
-    
-    4. **Responsive Design**:
-       - Scale the grid appropriately on different screen sizes
-       - On small screens, make sure the grid is still usable (minimum cell size of 40px)
-       - Allow zooming or scrolling if needed for very small screens
-    
-    5. **Feedback System**:
-       - Visual feedback when a word is correctly completed
-       - Validate each word individually instead of waiting for the entire puzzle
-       - Show progress indicator (e.g., 5/12 words completed)
-    
-    6. **Hint System**:
-       - Provide an optional hint button that reveals one letter in the current word
-       - Limit hints to prevent trivializing the game (e.g., 3 hints maximum)
-    
-    7. **Common Bugs to Avoid**:
-       - ENSURE letters in intersecting words stay consistent
-       - PREVENT input focus from being lost when using keyboard navigation
-       - HANDLE touch inputs properly for mobile users
-       - MAKE SURE all words and clues are properly initialized in the data structure
-       - TEST that crossword validation works for all words in all directions
+    - Tạo bảng chữ cái kích thước vừa phải (không quá 10x10)
+    - Chỉ sử dụng các từ đơn giản liên quan đến chủ đề "${topic}"
+    - Từ chỉ được sắp xếp theo chiều ngang hoặc dọc (không có chéo)
+    - Sử dụng CSS đơn giản để làm nổi bật từ khi người dùng tìm thấy
+    - Hiển thị danh sách các từ cần tìm ở bên cạnh bảng chữ cái
+    - Đảm bảo trò chơi hoạt động trên cả máy tính và thiết bị di động
     `;
   }
 
   const prompt = `
-    # Single-File Interactive Educational Mini-Game
+    # Trò chơi giáo dục tương tác đơn file
 
-    ## Goal
-    Create a fully **interactive educational mini-game** that runs entirely in a **single HTML file** (with embedded CSS and JavaScript). The game should be self-contained (no external libraries) and provide an engaging experience about the topic "${topic}".
+    ## Mục tiêu
+    Tạo một trò chơi giáo dục tương tác hoạt động hoàn toàn trong một file HTML duy nhất (với CSS và JavaScript được nhúng bên trong). Trò chơi phải tự chứa (không sử dụng thư viện bên ngoài) và cung cấp trải nghiệm hấp dẫn về chủ đề "${topic}".
 
     ${gameSpecificInstructions}
 
-    ## Game Types
-    Your mini-game should support different game modes, offering a unique interaction style. These include:
-    - **Quiz** (multiple-choice questions)
-    - **Flashcards** (flip cards to reveal information)
-    - **Unjumble** (rearrange letters or words to form the correct answer)
-    - **Fill-in-the-Blank** (provide the missing word or phrase)
-    - **True/False** (verify statements as true or false)
-    - **Word Magnets** (drag and drop words to form sentences or answers)
-    - **Speaking Cards** (cards that prompt the user to speak or read aloud)
-    - **Memorize** (memory matching game with cards or items)
-    - **Rank Order** (arrange items in the correct order)
-    - **Math Quiz** (solve math questions/problems)
-    - **Explain Why** (answer open-ended "why" questions with reasoning)
-    - **Would You Rather** (choose between two scenarios and justify the choice)
-    - **Riddles** (solve riddles or puzzles)
+    ## Loại trò chơi
+    Trò chơi của bạn nên hỗ trợ các chế độ chơi khác nhau, cung cấp phong cách tương tác độc đáo. Bao gồm:
+    - **Trắc nghiệm** (câu hỏi nhiều lựa chọn)
+    - **Thẻ ghi nhớ** (lật thẻ để hiển thị thông tin)
+    - **Xếp lại từ** (sắp xếp lại các chữ cái hoặc từ để tạo câu trả lời đúng)
+    - **Điền vào chỗ trống** (cung cấp từ hoặc cụm từ còn thiếu)
+    - **Đúng/Sai** (xác minh các phát biểu là đúng hay sai)
+    - **Câu đố toán học** (giải các câu hỏi/bài toán)
+    - **Câu đố vui** (giải các câu đố hoặc câu hỏi mẹo)
+    - **Nối từ** (nối các khái niệm với định nghĩa tương ứng)
+    - **Đoán từ qua hình** (xem hình ảnh và đoán từ)
+    - **Tìm từ ẩn** (tìm các từ ẩn trong bảng chữ cái)
+    - **Phân loại** (phân loại các đối tượng vào các nhóm khác nhau)
 
-    Choose the most appropriate game mode for the topic "${topic}".
+    Chọn chế độ chơi phù hợp nhất cho chủ đề "${topic}".
     ${settingsPrompt}
 
-    ## Technical Requirements
-    - **Single-File Solution:** All HTML, CSS, and JavaScript must be contained in one **single HTML file**. Do **not** use any external scripts, stylesheets, or libraries (no CDN links or imports). Everything (code, style, logic) should be embedded in the file.
-    - **Responsive Design:** The game must be **fully responsive** and function well on mobile phones, tablets, and desktop browsers.
-      - Use CSS media queries and flexible layouts so that components scale and rearrange appropriately on different screen sizes.
-      - All interactive elements (buttons, cards, etc.) must be **touch-friendly**. Use a minimum target size of about **44px by 44px** for touch controls to ensure they are easy to tap.
-    - **DOM Ready Script:** Wrap all JavaScript logic inside a \`DOMContentLoaded\` event listener. This ensures that the DOM is fully loaded before any script runs, preventing undefined element errors.
-    - **Proper Variable Declaration:** Declare all variables using \`let\`, \`const\`, or \`var\` as appropriate. **Do not** use undeclared variables or rely on implicit globals. This is to maintain clean scope and avoid reference errors.
-    - **High Contrast & Accessibility:** Use **bright, high-contrast colors** for game elements to make them visually distinct. Text should use an easily readable font with a size of at least **16px** for body text (larger for headings or important text).
-      - Ensure sufficient color contrast between text and background for readability (consider users with visual impairments).
-      - If sounds are used (optional), include captions or visual indicators for deaf or hard-of-hearing users.
-    - **Visual Feedback:** Provide immediate visual feedback for user interactions:
-      - Highlight selected answers or the card being flipped.
-      - Indicate correct vs incorrect answers with color changes (e.g., green for correct, red for incorrect) or small animations.
-      - Use simple animations (like a brief button press effect or a card flip animation) to enhance the experience. Keep animations subtle and avoid distracting the user from the content.
-    - **Full-Screen Usage:** Design the layout so that the game fills the entire browser viewport without unnecessary scrolling:
-      - Use CSS to ensure the main game container stretches to 100% width/height or uses flexbox/grid to center content appropriately.
-      - Avoid any fixed elements that cause overflow. If overflow is needed (e.g., for a scrollable list of options), implement it intentionally and make it clear to the user.
-    - **Game Logic & Flow:** Implement the logic for a complete game experience:
-      - **Content Generation:** Based on the chosen game type and topic "${topic}", generate the appropriate questions, puzzles, or cards.
-      - **User Interaction:** Allow the user to interact with the game (answer questions, flip cards, drag-drop words, etc. depending on the game type).
-      - **Feedback:** After an answer is submitted or an action is taken, immediately show whether it was correct (for quizzes, true/false, etc.) or provide the correct answer/explanation if applicable.
-      - **Score Tracking:** Keep track of the user's score or progress. For quiz-like games, count correct answers; for subjective ones like "Explain Why" or "Would You Rather," you might not score but you can acknowledge completion.
-      - **Navigation:** Include "Next" and "Previous" controls where appropriate (e.g., to go to the next flashcard or question). Ensure the user can navigate through all game content.
-      - **Completion Screen:** When the game (or a round of the game) is over, display a summary or **game-over screen**. This could show the final score, a message based on performance, or simply a congratulatory note for finishing.
-      - Ensure the game can be restarted without reloading the page (for example, show a "Play Again" option).
-    - **Image Usage:** If the game requires images (for example, images in flashcards or as part of questions):
-      - Use only images that can be loaded via **Google image URLs** or other public domain sources. *Do not use any external image hosting that might not load*.
-      - Each \`<img>\` tag should have descriptive \`alt\` text for accessibility (in case the image fails to load or for screen reader users).
-      - Implement a fallback for images: for example, check if an image fails to load and display a placeholder or an error message in place of the image.
-    - **Cross-Device Input Handling:** Make sure the game controls work with both **mouse/keyboard** and **touch** inputs:
-      - For clickable elements (buttons, cards), ensure they respond to a click event (desktop) as well as touch events (mobile). Generally, using standard \`<button>\` or \`<input>\` elements and click events should cover both.
-      - If implementing drag-and-drop (e.g., for Word Magnets), account for touch events (touchstart, touchmove, touchend) in addition to mouse events, or use pointer events that unify both.
-      - **Keyboard support:** Users on desktop should be able to use keyboard controls where it makes sense (e.g., pressing Enter to submit an answer, arrow keys to navigate between choices or cards, etc.). Add appropriate \`tabindex\` to custom elements if needed so that they can be focused and activated via keyboard.
-    - **Browser Compatibility:** The code should work on all modern browsers (Chrome, Firefox, Edge, Safari) without errors. Use standard web APIs and avoid anything experimental or specific to one browser.
-      - Use CSS prefixes if needed for certain features (though modern standard features are preferred).
-      - Ensure the layout and interaction work on both iOS and Android devices in addition to desktop.
-    - **Performance:** Keep the code efficient. Since everything is in one file, avoid heavy operations or large data that could slow down the game on lower-end devices. Use efficient loops and data structures for game logic.
-    - **Error-Free & Canvas Compatibility:** The code must be **error-free** (no JavaScript errors in the console, no broken HTML/CSS) and should run smoothly. If using an HTML5 \`<canvas>\` for any drawing or game logic, ensure it is properly implemented and compatible with the rest of the code. (Canvas is not required for these game types, but if used, it must degrade gracefully or not hinder other functionality.)
+    ## Yêu cầu kỹ thuật
+    - **Giải pháp một file:** Tất cả HTML, CSS và JavaScript phải được chứa trong một file HTML duy nhất. Không sử dụng bất kỳ script, stylesheet hoặc thư viện bên ngoài nào. Mọi thứ (code, style, logic) phải được nhúng vào file.
+    - **Thiết kế responsive:** Trò chơi phải hoàn toàn responsive và hoạt động tốt trên điện thoại di động, máy tính bảng và trình duyệt desktop.
+    - **Script DOM Ready:** Bọc tất cả logic JavaScript bên trong một event listener 'DOMContentLoaded'. Điều này đảm bảo rằng DOM được tải đầy đủ trước khi bất kỳ script nào chạy.
+    - **Giao diện đơn giản:** Sử dụng CSS cơ bản để tạo giao diện dễ nhìn, dễ sử dụng.
+    - **Không quá phức tạp:** Giữ cho code đơn giản, dễ hiểu, tránh các kỹ thuật phức tạp.
+    - **Làm việc trên mọi thiết bị:** Đảm bảo trò chơi hoạt động tốt trên cả máy tính và thiết bị di động.
+    - **Không lỗi:** Code phải hoạt động mà không có lỗi JavaScript trong console.
 
-    ## Output Format
-    The final answer (the content generated by the AI model) must be provided as a **minimal JSON object** with the following structure:
-    - **\`title\`**: (string) The title of the game.
-    - **\`description\`**: (string) A short description of the game.
-    - **\`content\`**: (string) The full HTML code of the mini-game.
+    ## Định dạng đầu ra
+    Kết quả cuối cùng phải được cung cấp dưới dạng một đối tượng JSON tối giản với cấu trúc sau:
+    - **\`title\`**: (string) Tiêu đề của trò chơi.
+    - **\`description\`**: (string) Mô tả ngắn về trò chơi.
+    - **\`content\`**: (string) Mã HTML đầy đủ của trò chơi.
 
-    **Important details for the output JSON:**
-    - Do **not** include any markdown formatting, code block delimiters, or explanatory text outside the JSON. The response should be *only* the JSON object.
-    - The JSON should be properly formatted and escape any special characters. In particular:
-      - Ensure that quotes (\`"\`) within the HTML content are escaped (e.g., \`\\"\`).
-      - Newline characters in the HTML content string should be properly represented so that the JSON remains valid. The model can either use \`\\n\` within the string or actually break the string into lines as long as it remains valid JSON syntax.
-      - No control characters or invalid Unicode should appear in the output.
-    - The \`content\` string must contain a **complete, valid HTML document**:
-      - Include a proper \`<!DOCTYPE html>\` declaration and \`<html>\`, \`<head>\`, \`<body>\` tags.
-      - All CSS should be inside a \`<style>\` tag within the \`<head>\` or \`<body>\` (either is fine, but typically in \`<head>\`).
-      - All JavaScript should be inside a \`<script>\` tag (preferably placed just before the closing \`</body>\` tag for best practice, or in \`<head>\` if using \`DOMContentLoaded\` properly).
-      - Make sure the HTML is well-formed (properly nested tags, closed tags, etc.) to avoid any parsing errors.
+    **Chi tiết quan trọng cho JSON đầu ra:**
+    - Không bao gồm bất kỳ định dạng markdown, dấu phân cách khối code hoặc văn bản giải thích bên ngoài JSON. Phản hồi chỉ nên là đối tượng JSON.
+    - JSON phải được định dạng đúng và thoát các ký tự đặc biệt.
+    - Chuỗi \`content\` phải chứa một tài liệu HTML hoàn chỉnh, hợp lệ.
 
-    DELIVER THE RESPONSE AS A SINGLE VALID JSON OBJECT WITH NO MARKDOWN OR BACKTICKS.
+    GIAO KẾT QUẢ DƯỚi DẠNG MỘT ĐỐI TƯỢNG JSON HỢP LỆ DUY NHẤT KHÔNG CÓ MARKDOWN HOẶC DẤU BACKTICK.
   `;
 
   try {

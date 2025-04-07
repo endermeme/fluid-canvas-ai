@@ -63,18 +63,6 @@ export const gameTypes: GameType[] = [
     }
   },
   {
-    id: "memorize",
-    name: "Ghi nhớ",
-    description: "Xem nội dung trong thời gian giới hạn, sau đó nhập lại những gì đã ghi nhớ được.",
-    icon: "brain-circuit",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 3,
-      category: 'general',
-    }
-  },
-  {
     id: "mathgenerator",
     name: "Đố vui Toán học",
     description: "Giải các biểu thức toán học đơn giản, nhập kết quả và kiểm tra đáp án.",
@@ -95,19 +83,6 @@ export const gameTypes: GameType[] = [
       difficulty: 'medium',
       questionCount: 8,
       timePerQuestion: 60,
-      category: 'general',
-    }
-  },
-  // New game types below
-  {
-    id: "crossword",
-    name: "Ô chữ",
-    description: "Điền từ vào các ô ngang và dọc dựa trên gợi ý. Ô chữ có kích thước phù hợp (5-10 ô), tự động điều chỉnh kích thước theo màn hình, lưu trữ từng ký tự người dùng nhập, và kiểm tra chính xác từng từ hoàn thành.",
-    icon: "grid",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 12,
-      timePerQuestion: 180,
       category: 'general',
     }
   },
@@ -138,24 +113,12 @@ export const gameTypes: GameType[] = [
   {
     id: "wordsearch",
     name: "Tìm từ ẩn",
-    description: "Tìm các từ ẩn giấu trong bảng chữ cái theo mọi hướng (ngang, dọc, chéo).",
+    description: "Tìm các từ ẩn giấu trong bảng chữ cái đơn giản, các từ có thể nằm ngang hoặc dọc.",
     icon: "search",
     defaultSettings: {
       difficulty: 'medium',
-      questionCount: 10,
+      questionCount: 8,
       timePerQuestion: 60,
-      category: 'general',
-    }
-  },
-  {
-    id: "sequencing",
-    name: "Sắp xếp quy trình",
-    description: "Sắp xếp các bước của một quy trình theo đúng thứ tự diễn ra.",
-    icon: "list",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 6,
-      timePerQuestion: 45,
       category: 'general',
     }
   },
@@ -203,18 +166,11 @@ export const getGameTypeByTopic = (topic: string): GameType | undefined => {
   if (lowerTopic.includes('đúng sai') || lowerTopic.includes('true false')) {
     return getGameTypeById('truefalse');
   }
-  if (lowerTopic.includes('ghi nhớ') || lowerTopic.includes('memorize')) {
-    return getGameTypeById('memorize');
-  }
   if (lowerTopic.includes('toán') || lowerTopic.includes('math')) {
     return getGameTypeById('mathgenerator');
   }
   if (lowerTopic.includes('câu đố') || lowerTopic.includes('riddle')) {
     return getGameTypeById('riddle');
-  }
-  // New game type matching
-  if (lowerTopic.includes('ô chữ') || lowerTopic.includes('crossword')) {
-    return getGameTypeById('crossword');
   }
   if (lowerTopic.includes('nối từ') || lowerTopic.includes('matching')) {
     return getGameTypeById('matching');
@@ -224,9 +180,6 @@ export const getGameTypeByTopic = (topic: string): GameType | undefined => {
   }
   if (lowerTopic.includes('tìm từ ẩn') || lowerTopic.includes('word search')) {
     return getGameTypeById('wordsearch');
-  }
-  if (lowerTopic.includes('sắp xếp quy trình') || lowerTopic.includes('sequencing')) {
-    return getGameTypeById('sequencing');
   }
   if (lowerTopic.includes('phân loại') || lowerTopic.includes('categorizing')) {
     return getGameTypeById('categorizing');
