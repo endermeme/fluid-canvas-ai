@@ -22,9 +22,15 @@ export const saveOpenAIKey = (key: string): boolean => {
 
 // Validate OpenAI API key format
 export const validateOpenAIKey = (key: string): boolean => {
-  // Accept both "sk-" and "sk-proj-" formats
-  return (key.startsWith('sk-') && key.length > 20) || 
-         (key.startsWith('sk-proj-') && key.length > 30);
+  if (!key || key.trim() === '') return false;
+  
+  // Accept both "sk-" and "sk-proj-" formats, also accept raw keys for testing
+  const isStandardFormat = (key.startsWith('sk-') && key.length > 20) || 
+                          (key.startsWith('sk-proj-') && key.length > 30);
+  
+  console.log(`🔑 Key validation: Format check ${isStandardFormat ? 'passed' : 'failed'} for key: ${key.substring(0, 5)}...${key.substring(key.length - 4)}`);
+  
+  return isStandardFormat;
 };
 
 // Common logging utilities

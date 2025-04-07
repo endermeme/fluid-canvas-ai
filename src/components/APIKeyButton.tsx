@@ -15,8 +15,8 @@ const APIKeyButton = () => {
     if (!key.trim()) {
       localStorage.removeItem('openai_api_key');
       toast({
-        title: "Đã Xóa API Key",
-        description: "Đã chuyển sang chỉ sử dụng Gemini với chế độ Canvas.",
+        title: "API Key Removed",
+        description: "Switched to using only Gemini with Canvas mode.",
       });
       return true;
     }
@@ -24,8 +24,8 @@ const APIKeyButton = () => {
     // Validate key format
     if (!validateOpenAIKey(key)) {
       toast({
-        title: "API Key Không Hợp Lệ",
-        description: "OpenAI API key không đúng định dạng. Vui lòng kiểm tra lại.",
+        title: "Invalid API Key",
+        description: "OpenAI API key is not in the correct format. Please check and try again.",
         variant: "destructive"
       });
       return false;
@@ -33,8 +33,8 @@ const APIKeyButton = () => {
     
     localStorage.setItem('openai_api_key', key);
     toast({
-      title: "API Key Đã Lưu",
-      description: "OpenAI API key của bạn đã được lưu thành công.",
+      title: "API Key Saved",
+      description: "Your OpenAI API key has been saved successfully.",
     });
     return true;
   };

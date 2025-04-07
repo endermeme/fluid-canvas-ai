@@ -14,30 +14,30 @@ export class AIGameGenerator {
   private canvasMode: boolean = false;
 
   constructor(apiKey: string, options?: { modelName?: string; canvasMode?: boolean }) {
-    console.log("🚀 AIGameGenerator: Khởi tạo bộ tạo game AI");
+    console.log("🚀 AIGameGenerator: Initializing AI game generator");
     this.modelName = options?.modelName || 'gemini-2.0-flash';
     
     // If there's no OpenAI key, automatically enable canvas mode
     const storedOpenAIKey = getOpenAIKey();
     this.canvasMode = options?.canvasMode || !storedOpenAIKey ? true : false;
     
-    console.log(`🚀 AIGameGenerator: Sử dụng mô hình ${this.modelName}`);
-    console.log(`🚀 AIGameGenerator: Chế độ canvas: ${this.canvasMode ? 'BẬT' : 'TẮT'}`);
+    console.log(`🚀 AIGameGenerator: Using model ${this.modelName}`);
+    console.log(`🚀 AIGameGenerator: Canvas mode: ${this.canvasMode ? 'ON' : 'OFF'}`);
     
     this.model = createGeminiClient(apiKey);
     this.openAIKey = storedOpenAIKey;
     
     if (this.openAIKey) {
-      console.log("🚀 AIGameGenerator: Có sẵn OpenAI key cho cải thiện game");
+      console.log("🚀 AIGameGenerator: OpenAI key available for game enhancement");
     } else {
-      console.log("🚀 AIGameGenerator: Không có OpenAI key, sẽ chỉ sử dụng Gemini với chế độ Canvas");
+      console.log("🚀 AIGameGenerator: No OpenAI key, will only use Gemini with Canvas mode");
     }
   }
 
   setOpenAIKey(key: string): boolean {
     if (!key.trim()) {
       // Allow empty key to disable OpenAI enhancement
-      console.log("🚀 AIGameGenerator: Đã xóa OpenAI key");
+      console.log("🚀 AIGameGenerator: Removed OpenAI key");
       localStorage.removeItem('openai_api_key');
       this.openAIKey = null;
       this.canvasMode = true;
@@ -46,30 +46,30 @@ export class AIGameGenerator {
     
     // Validate key format
     if (!validateOpenAIKey(key)) {
-      console.log("🚀 AIGameGenerator: API key không hợp lệ");
+      console.log("🚀 AIGameGenerator: Invalid API key");
       return false;
     }
     
     // Save valid key
     const success = saveOpenAIKey(key);
     if (success) {
-      console.log("🚀 AIGameGenerator: Đã lưu OpenAI key mới");
+      console.log("🚀 AIGameGenerator: Saved new OpenAI key");
       this.openAIKey = key;
       
       // If the key is empty, automatically enable canvas mode
       if (!key) {
         this.canvasMode = true;
-        console.log("🚀 AIGameGenerator: Đã bật tự động chế độ Canvas do không có OpenAI key");
+        console.log("🚀 AIGameGenerator: Automatically enabled Canvas mode due to no OpenAI key");
       }
     } else {
-      console.log("🚀 AIGameGenerator: Không thể lưu OpenAI key");
+      console.log("🚀 AIGameGenerator: Could not save OpenAI key");
     }
     return success;
   }
 
   setCanvasMode(enabled: boolean): void {
     this.canvasMode = enabled;
-    console.log(`🚀 AIGameGenerator: Chế độ canvas đã ${enabled ? 'BẬT' : 'TẮT'}`);
+    console.log(`🚀 AIGameGenerator: Canvas mode ${enabled ? 'ENABLED' : 'DISABLED'}`);
   }
 
   hasOpenAIKey(): boolean {
@@ -82,83 +82,84 @@ export class AIGameGenerator {
 
   async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
-      console.log(`🚀 AIGameGenerator: Bắt đầu tạo game cho chủ đề: "${topic}"`);
-      console.log(`🚀 AIGameGenerator: Cài đặt:`, settings);
-      console.log(`🚀 AIGameGenerator: Chế độ canvas: ${this.canvasMode ? 'BẬT' : 'TẮT'}`);
+      console.log(`🚀 AIGameGenerator: Starting game generation for topic: "${topic}"`);
+      console.log(`🚀 AIGameGenerator: Settings:`, settings);
+      console.log(`🚀 AIGameGenerator: Canvas mode: ${this.canvasMode ? 'ON' : 'OFF'}`);
       
       const gameType = getGameTypeByTopic(topic);
       if (gameType) {
-        console.log(`🚀 AIGameGenerator: Đã xác định loại game: ${gameType.name}`);
+        console.log(`🚀 AIGameGenerator: Determined game type: ${gameType.name}`);
       }
       
       const startTime = Date.now();
       
       // Try first with Gemini
-      console.log(`🚀 AIGameGenerator: Bắt đầu tạo game với ${this.modelName}...`);
+      console.log(`🚀 AIGameGenerator: Starting game generation with ${this.modelName}...`);
       const geminiResult = await tryGeminiGeneration(this.model, topic, settings);
       
       const geminiTime = ((Date.now() - startTime) / 1000).toFixed(2);
-      console.log(`🚀 AIGameGenerator: Tạo với Gemini hoàn tất sau ${geminiTime}s`);
+      console.log(`🚀 AIGameGenerator: Gemini generation completed in ${geminiTime}s`);
       
-      if (geminiResult) {
+      if (geminiResult && geminiResult.content) {
         // Simplify game response - only keep the HTML content
-        console.log(`🚀 AIGameGenerator: Đã tạo thành công game`);
-        console.log(`🚀 AIGameGenerator: Kích thước mã: ${geminiResult.content.length.toLocaleString()} ký tự`);
-        
-        const simplifiedGame: MiniGame = {
-          content: geminiResult.content,
-          title: topic,
-          description: ""
-        };
+        console.log(`🚀 AIGameGenerator: Successfully generated game`);
+        console.log(`🚀 AIGameGenerator: Code size: ${geminiResult.content.length.toLocaleString()} characters`);
         
         // If OpenAI key is available, enhance the game
         if (this.hasOpenAIKey()) {
-          console.log("🚀 AIGameGenerator: Có OpenAI key, đang cải thiện game...");
+          console.log("🚀 AIGameGenerator: OpenAI key available, enhancing game...");
           const enhanceStartTime = Date.now();
           
           const enhancedGame = await enhanceWithOpenAI(
             this.openAIKey, 
-            simplifiedGame, 
+            geminiResult, 
             topic, 
             this.canvasMode
           );
           
           const enhanceTime = ((Date.now() - enhanceStartTime) / 1000).toFixed(2);
-          console.log(`🚀 AIGameGenerator: Quá trình cải thiện OpenAI hoàn tất sau ${enhanceTime}s`);
+          console.log(`🚀 AIGameGenerator: OpenAI enhancement completed in ${enhanceTime}s`);
           
           // Only use the enhanced game if enhancing was successful
           if (enhancedGame && enhancedGame.content && enhancedGame.content.length > 100) {
-            console.log("🚀 AIGameGenerator: Đã cải thiện thành công game với OpenAI");
-            console.log(`🚀 AIGameGenerator: Kích thước mã gốc vs mới: ${simplifiedGame.content.length.toLocaleString()} → ${enhancedGame.content.length.toLocaleString()} ký tự`);
+            console.log("🚀 AIGameGenerator: Successfully enhanced game with OpenAI");
+            console.log(`🚀 AIGameGenerator: Original vs new code size: ${geminiResult.content.length.toLocaleString()} → ${enhancedGame.content.length.toLocaleString()} characters`);
             
             const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            console.log(`🚀 AIGameGenerator: Tổng thời gian tạo game: ${totalTime}s`);
+            console.log(`🚀 AIGameGenerator: Total game generation time: ${totalTime}s`);
             
-            // Return simplified result - just the content matters
             return {
-              title: topic,
-              description: "",
               content: enhancedGame.content
             };
           } else {
-            console.log("🚀 AIGameGenerator: Cải thiện OpenAI thất bại hoặc trả về nội dung không hợp lệ, sử dụng kết quả Gemini");
-            return simplifiedGame;
+            console.log("🚀 AIGameGenerator: OpenAI enhancement failed or returned invalid content, using Gemini result");
+            return {
+              content: geminiResult.content
+            };
           }
         }
         
         const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
-        console.log(`🚀 AIGameGenerator: Tổng thời gian tạo game: ${totalTime}s`);
+        console.log(`🚀 AIGameGenerator: Total game generation time: ${totalTime}s`);
         
-        return simplifiedGame;
+        return {
+          content: geminiResult.content
+        };
       }
       
-      console.log("⚠️ AIGameGenerator: Tạo với Gemini thất bại, sử dụng game dự phòng");
-      return createFallbackGame(topic);
+      console.log("⚠️ AIGameGenerator: Gemini generation failed, using fallback game");
+      const fallbackGame = createFallbackGame(topic);
+      return {
+        content: fallbackGame.content
+      };
       
     } catch (error) {
-      console.error("❌ AIGameGenerator: Lỗi trong generateMiniGame:", error);
-      console.log("⚠️ AIGameGenerator: Đang tạo game dự phòng do gặp lỗi");
-      return createFallbackGame(topic);
+      console.error("❌ AIGameGenerator: Error in generateMiniGame:", error);
+      console.log("⚠️ AIGameGenerator: Creating fallback game due to error");
+      const fallbackGame = createFallbackGame(topic);
+      return {
+        content: fallbackGame.content
+      };
     }
   }
 }
