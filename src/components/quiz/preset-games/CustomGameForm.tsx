@@ -28,6 +28,14 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   const { toast } = useToast();
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
 
+  // Fix: Create a handler function that properly handles the type conversion
+  const handleDifficultyChange = (value: string) => {
+    // Ensure value is one of the allowed difficulty types
+    if (value === 'easy' || value === 'medium' || value === 'hard') {
+      setDifficulty(value);
+    }
+  };
+
   const getGameTypeName = () => {
     switch (gameType) {
       case 'quiz': return 'Trắc Nghiệm';
@@ -203,7 +211,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
             <Label htmlFor="difficulty">Độ khó</Label>
             <Select 
               value={difficulty} 
-              onValueChange={setDifficulty}
+              onValueChange={handleDifficultyChange} // Use the fixed handler here
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Chọn độ khó" />
