@@ -47,10 +47,11 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({
       return;
     }
 
-    if (apiKey.trim() && !apiKey.startsWith('sk-')) {
+    // Update validation to accept both sk- and sk-proj- keys
+    if (apiKey.trim() && !(apiKey.startsWith('sk-') || apiKey.startsWith('sk-proj-'))) {
       toast({
         title: "API Key Không Hợp Lệ",
-        description: "API key OpenAI phải bắt đầu bằng sk-",
+        description: "API key OpenAI phải bắt đầu bằng sk- hoặc sk-proj-",
         variant: "destructive",
       });
       return;
@@ -92,7 +93,7 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({
             <Label htmlFor="apiKey">API Key</Label>
             <Input
               id="apiKey"
-              placeholder="sk-..."
+              placeholder="sk-... hoặc sk-proj-..."
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               className="bg-background/50 border-white/20"
