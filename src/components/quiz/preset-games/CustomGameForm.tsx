@@ -22,6 +22,7 @@ interface CustomGameFormProps {
 
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, onCancel }) => {
   const [topic, setTopic] = useState('');
+  const [gameRequirement, setGameRequirement] = useState('');
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
@@ -69,16 +70,11 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     }
   };
 
-  const handleSubmit = () => {
-    if (!topic.trim()) {
-      toast({
-        title: "Lỗi",
-        description: "Vui lòng nhập chủ đề cho trò chơi",
-        variant: "destructive"
-      });
-      return;
-    }
+  const getRequirementPlaceholder = () => {
+    return `Mô tả yêu cầu trò chơi ${getGameTypeName()} của bạn, ví dụ:\n- Tạo bộ câu hỏi về lịch sử thế giới\n- Tạo trò chơi dành cho trẻ em 5-7 tuổi\n- Tạo bài tập về ngữ pháp tiếng Anh cơ bản\n- Tạo trò chơi với các từ vựng chuyên ngành y khoa`;
+  };
 
+  const handleSubmit = () => {
     // Nếu người dùng đã nhập nội dung, sử dụng nội dung đó
     if (content.trim()) {
       onGenerate(content);
@@ -90,10 +86,10 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   };
 
   const handleAIGenerate = async (submitAfterGeneration = false) => {
-    if (!topic.trim()) {
+    if (!topic.trim() && !gameRequirement.trim()) {
       toast({
         title: "Lỗi",
-        description: "Vui lòng nhập chủ đề cho trò chơi",
+        description: "Vui lòng nhập chủ đề hoặc yêu cầu cho trò chơi",
         variant: "destructive"
       });
       return;
@@ -102,8 +98,14 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     setIsGenerating(true);
     
     try {
-      // Tạo prompt cho AI dựa trên loại game
-      const gameTypePrompt = `Tạo nội dung cho trò chơi ${getGameTypeName()} về chủ đề: ${topic}. Độ khó: ${difficulty}.`;
+      // Tạo prompt cho AI dựa trên loại game và yêu cầu
+      let gameTypePrompt = '';
+      
+      if (topic.trim()) {
+        gameTypePrompt = `Tạo nội dung cho trò chơi ${getGameTypeName()} về chủ đề: ${topic}. Độ khó: ${difficulty}.`;
+      } else if (gameRequirement.trim()) {
+        gameTypePrompt = `Tạo nội dung cho trò chơi ${getGameTypeName()} với yêu cầu sau: ${gameRequirement}. Độ khó: ${difficulty}.`;
+      }
       
       // Tạo settings tùy chỉnh dựa trên loại game
       const settings: GameSettingsData = {
@@ -139,7 +141,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
                 extractedContent += '\n';
               });
             } else {
-              extractedContent = `// AI đã tạo nội dung cho trò chơi ${getGameTypeName()} về chủ đề "${topic}"`;
+              extractedContent = `// AI đã tạo nội dung cho trò chơi ${getGameTypeName()} theo yêu cầu của bạn`;
             }
             break;
             
@@ -152,19 +154,19 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
                 extractedContent += `Mặt trước: ${front}\nMặt sau: ${back}\n\n`;
               });
             } else {
-              extractedContent = `// AI đã tạo nội dung cho trò chơi ${getGameTypeName()} về chủ đề "${topic}"`;
+              extractedContent = `// AI đã tạo nội dung cho trò chơi ${getGameTypeName()} theo yêu cầu của bạn`;
             }
             break;
             
           default:
-            extractedContent = `// AI đã tạo nội dung cho trò chơi ${getGameTypeName()} về chủ đề "${topic}"`;
+            extractedContent = `// AI đã tạo nội dung cho trò chơi ${getGameTypeName()} theo yêu cầu của bạn`;
         }
         
         setContent(extractedContent || gameData.content);
         
         toast({
           title: "AI đã tạo nội dung",
-          description: `Nội dung cho chủ đề "${topic}" đã được tạo. ${!submitAfterGeneration ? 'Bạn có thể chỉnh sửa trước khi tạo trò chơi.' : ''}`,
+          description: `Nội dung cho trò chơi ${getGameTypeName()} đã được tạo. ${!submitAfterGeneration ? 'Bạn có thể chỉnh sửa trước khi tạo trò chơi.' : ''}`,
         });
         
         if (submitAfterGeneration) {
@@ -197,31 +199,48 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
         </div>
         
         <div className="space-y-4">
-          <div>
-            <Label htmlFor="topic">Chủ đề</Label>
-            <Input 
-              id="topic" 
-              placeholder="Nhập chủ đề của trò chơi, ví dụ: Lịch sử Việt Nam" 
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="topic">Chủ đề (tùy chọn)</Label>
+              <Input 
+                id="topic" 
+                placeholder="Nhập chủ đề của trò chơi, ví dụ: Lịch sử Việt Nam" 
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="difficulty">Độ khó</Label>
+              <Select 
+                value={difficulty} 
+                onValueChange={handleDifficultyChange} // Use the fixed handler here
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Chọn độ khó" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="easy">Dễ</SelectItem>
+                  <SelectItem value="medium">Trung bình</SelectItem>
+                  <SelectItem value="hard">Khó</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
           <div>
-            <Label htmlFor="difficulty">Độ khó</Label>
-            <Select 
-              value={difficulty} 
-              onValueChange={handleDifficultyChange} // Use the fixed handler here
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Chọn độ khó" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="easy">Dễ</SelectItem>
-                <SelectItem value="medium">Trung bình</SelectItem>
-                <SelectItem value="hard">Khó</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="gameRequirement">Yêu cầu trò chơi (thay thế cho chủ đề)</Label>
+            <Textarea
+              id="gameRequirement"
+              placeholder={getRequirementPlaceholder()}
+              value={gameRequirement}
+              onChange={(e) => setGameRequirement(e.target.value)}
+              rows={4}
+              className="font-sans"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Mô tả yêu cầu của bạn về trò chơi này. Bạn có thể bỏ qua trường này nếu đã nhập chủ đề ở trên.
+            </p>
           </div>
           
           <div>
