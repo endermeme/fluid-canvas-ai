@@ -2,29 +2,25 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SparklesIcon, Brain } from 'lucide-react';
+import { SparklesIcon, Brain, Wand } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface CustomGameFormProps {
   gameType: string;
-  onGenerate: (content: string, difficulty: string) => void;
+  onGenerate: (content: string) => void;
   onCancel: () => void;
 }
 
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, onCancel }) => {
+  const [topic, setTopic] = useState('');
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [difficulty, setDifficulty] = useState('medium');
   const { toast } = useToast();
-
-  const handleDifficultyChange = (value: string) => {
-    if (value === 'easy' || value === 'medium' || value === 'hard') {
-      setDifficulty(value);
-    }
-  };
 
   const getGameTypeName = () => {
     switch (gameType) {
@@ -43,61 +39,69 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   const getPlaceholderText = () => {
     switch (gameType) {
       case 'quiz':
-        return 'Nhập yêu cầu để AI tạo câu hỏi trắc nghiệm.\n\nVí dụ:\n- Tạo 10 câu hỏi về địa lý Việt Nam\n- Tạo câu hỏi trắc nghiệm về văn học Việt Nam thế kỷ 20\n- Tạo trò chơi trắc nghiệm về động vật hoang dã';
+        return 'Nhập nội dung để tạo câu hỏi trắc nghiệm hoặc để trống để AI tự tạo theo chủ đề.\n\nVí dụ:\n1. Thủ đô của Việt Nam là gì?\na) Hà Nội\nb) TP.HCM\nc) Đà Nẵng\nd) Huế\n\n2. Việt Nam có bao nhiêu tỉnh thành?\na) 58\nb) 61\nc) 63\nd) 65';
       
       case 'flashcards':
-        return 'Nhập yêu cầu để AI tạo thẻ ghi nhớ.\n\nVí dụ:\n- Tạo flashcard về từ vựng tiếng Anh chủ đề du lịch\n- Tạo thẻ ghi nhớ cho các công thức toán học\n- Tạo thẻ học các ngày lễ quan trọng trong năm';
+        return 'Nhập nội dung để tạo thẻ ghi nhớ hoặc để trống để AI tự tạo theo chủ đề.\n\nVí dụ:\nMặt trước: Photosynthesis\nMặt sau: Quang hợp\n\nMặt trước: Democracy\nMặt sau: Dân chủ';
       
       case 'matching':
-        return 'Nhập yêu cầu để AI tạo trò chơi nối từ.\n\nVí dụ:\n- Tạo trò chơi nối từ đồng nghĩa tiếng Việt\n- Tạo game nối từ tiếng Anh-Việt về đồ vật trong nhà\n- Tạo game ghép cặp nước-thủ đô';
+        return 'Nhập nội dung để tạo trò chơi nối từ hoặc để trống để AI tự tạo theo chủ đề.\n\nVí dụ:\nBên trái: Mèo\nBên phải: Cat\n\nBên trái: Chó\nBên phải: Dog';
       
       case 'truefalse':
-        return 'Nhập yêu cầu để AI tạo câu hỏi đúng/sai.\n\nVí dụ:\n- Tạo câu hỏi đúng sai về lịch sử Việt Nam\n- Tạo câu đúng sai về kiến thức khoa học tự nhiên\n- Tạo game đúng sai về tin học cơ bản';
-      
-      case 'wordsearch':
-        return 'Nhập yêu cầu để AI tạo trò chơi tìm từ.\n\nVí dụ:\n- Tạo game tìm từ về các loài động vật\n- Tạo trò chơi tìm từ tiếng Anh chủ đề thể thao\n- Tạo game tìm từ về tên các loại trái cây';
-      
-      case 'ordering':
-        return 'Nhập yêu cầu để AI tạo trò chơi sắp xếp câu.\n\nVí dụ:\n- Tạo trò chơi sắp xếp từ thành câu tiếng Việt\n- Tạo game sắp xếp các sự kiện lịch sử theo thời gian\n- Tạo game sắp xếp các bước trong quy trình nấu ăn';
-      
-      case 'memory':
-        return 'Nhập yêu cầu để AI tạo trò chơi ghi nhớ.\n\nVí dụ:\n- Tạo trò chơi ghi nhớ với các biểu tượng động vật\n- Tạo game memory card với chủ đề phương tiện giao thông\n- Tạo game ghi nhớ về các loại hoa';
-      
-      case 'pictionary':
-        return 'Nhập yêu cầu để AI tạo trò chơi đoán hình.\n\nVí dụ:\n- Tạo trò chơi đoán hình về các danh lam thắng cảnh\n- Tạo game pictionary về các loài động vật\n- Tạo trò chơi đoán hình về đồ vật hàng ngày';
+        return 'Nhập nội dung để tạo câu hỏi đúng/sai hoặc để trống để AI tự tạo theo chủ đề.\n\nVí dụ:\nĐúng: Mặt trời mọc ở hướng đông.\nSai: Trái đất có hình vuông.';
       
       default:
-        return 'Nhập yêu cầu để AI tạo nội dung cho trò chơi của bạn.';
+        return 'Nhập nội dung để tạo trò chơi tùy chỉnh hoặc để trống để AI tự tạo theo chủ đề.';
     }
   };
 
   const handleSubmit = () => {
-    if (!content.trim()) {
+    if (!topic.trim()) {
       toast({
         title: "Lỗi",
-        description: "Vui lòng nhập yêu cầu nội dung cho trò chơi",
+        description: "Vui lòng nhập chủ đề cho trò chơi",
         variant: "destructive"
       });
       return;
     }
-    
+
     setIsGenerating(true);
     
-    // Call the onGenerate function with the content and difficulty
-    try {
-      onGenerate(content, difficulty);
-      
-      // Don't reset generating state here - let the parent component handle it
-      // since it will track the actual API call completion
-    } catch (error) {
+    // Simulate AI generation request
+    setTimeout(() => {
+      onGenerate(content);
       setIsGenerating(false);
+      
+      toast({
+        title: "Đã tạo trò chơi",
+        description: `Trò chơi ${getGameTypeName()} về chủ đề "${topic}" đã được tạo thành công.`,
+      });
+    }, 2000);
+  };
+
+  const handleAIGenerate = () => {
+    if (!topic.trim()) {
       toast({
         title: "Lỗi",
-        description: "Có lỗi xảy ra khi tạo trò chơi. Vui lòng thử lại.",
+        description: "Vui lòng nhập chủ đề cho trò chơi",
         variant: "destructive"
       });
-      console.error("Error generating game:", error);
+      return;
     }
+
+    setIsGenerating(true);
+    
+    // Simulate AI generation request
+    setTimeout(() => {
+      // AI would generate content here...
+      setContent("AI đã tạo nội dung cho trò chơi. Bấm Tạo trò chơi để tiếp tục.");
+      setIsGenerating(false);
+      
+      toast({
+        title: "AI đã tạo nội dung",
+        description: `Nội dung cho chủ đề "${topic}" đã được tạo. Bạn có thể chỉnh sửa trước khi tạo trò chơi.`,
+      });
+    }, 2000);
   };
 
   return (
@@ -106,17 +110,27 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
         <div className="mb-6">
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Brain className="h-6 w-6 text-primary" />
-            Tạo trò chơi {getGameTypeName()} với AI
+            Tạo trò chơi {getGameTypeName()} tùy chỉnh
           </h2>
-          <p className="text-muted-foreground">Nhập yêu cầu để AI tạo nội dung cho trò chơi của bạn</p>
+          <p className="text-muted-foreground">Điền thông tin dưới đây để tạo trò chơi theo ý bạn, hoặc để AI tự động tạo nội dung</p>
         </div>
         
         <div className="space-y-4">
           <div>
+            <Label htmlFor="topic">Chủ đề</Label>
+            <Input 
+              id="topic" 
+              placeholder="Nhập chủ đề của trò chơi, ví dụ: Lịch sử Việt Nam" 
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+            />
+          </div>
+          
+          <div>
             <Label htmlFor="difficulty">Độ khó</Label>
             <Select 
               value={difficulty} 
-              onValueChange={handleDifficultyChange}
+              onValueChange={setDifficulty}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Chọn độ khó" />
@@ -130,7 +144,18 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
           </div>
           
           <div>
-            <Label htmlFor="content">Yêu cầu nội dung</Label>
+            <div className="flex justify-between items-center mb-2">
+              <Label htmlFor="content">Nội dung trò chơi</Label>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleAIGenerate}
+                disabled={isGenerating}
+              >
+                <Wand className="h-4 w-4 mr-1" />
+                AI tạo nội dung
+              </Button>
+            </div>
             <Textarea
               id="content"
               placeholder={getPlaceholderText()}
@@ -139,16 +164,12 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
               rows={10}
               className="font-mono text-sm"
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              Nhập yêu cầu chi tiết để AI tạo nội dung trò chơi theo ý bạn.
-            </p>
           </div>
           
           <div className="flex justify-between pt-4">
             <Button 
               variant="outline" 
               onClick={onCancel}
-              disabled={isGenerating}
             >
               Hủy
             </Button>

@@ -10,7 +10,6 @@ import CustomGameForm from './CustomGameForm';
 const PresetGamesPage = () => {
   const [state, setState] = useState<'select' | 'play' | 'custom'>('select');
   const [gameType, setGameType] = useState<string>('');
-  const [customContent, setCustomContent] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
 
   const handleGameSelect = (type: string) => {
@@ -26,14 +25,14 @@ const PresetGamesPage = () => {
   const handleBack = () => {
     if (state === 'play' || state === 'custom') {
       setState('select');
-      setCustomContent(undefined);
     } else {
       navigate('/');
     }
   };
 
   const handleCustomGameGenerate = (content: string) => {
-    setCustomContent(content);
+    // In a real app, this would process the custom content
+    // For now, just switch to play mode
     setState('play');
   };
 
@@ -48,10 +47,7 @@ const PresetGamesPage = () => {
       
       <div className="flex-grow overflow-auto">
         {state === 'select' && (
-          <GameSelector 
-            onSelectGame={handleGameSelect} 
-            onCustomGame={handleCustomGameSelect}
-          />
+          <GameSelector onSelectGame={handleGameSelect} />
         )}
         
         {state === 'custom' && (
@@ -66,7 +62,6 @@ const PresetGamesPage = () => {
           <PresetGameManager 
             gameType={gameType}
             onBack={() => setState('select')}
-            customContent={customContent}
           />
         )}
       </div>
