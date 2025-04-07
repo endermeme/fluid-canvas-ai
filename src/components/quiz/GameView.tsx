@@ -2,10 +2,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
-import { Share2, Home } from 'lucide-react';
+import { Share2, Home, History } from 'lucide-react';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { useToast } from '@/hooks/use-toast';
 import SourceCodeViewer from './SourceCodeViewer';
+import HistoryPanel from '../history/HistoryPanel';
 
 interface GameViewProps {
   miniGame: MiniGame;
@@ -15,17 +16,23 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { toast } = useToast();
   const [iframeError, setIframeError] = useState<string | null>(null);
+  const [showHistoryPanel, setShowHistoryPanel] = useState(false);
+  const [gameId, setGameId] = useState<string | null>(null);
 
   // Save the game to history when it loads
   useEffect(() => {
     if (miniGame && miniGame.title) {
       try {
         // Save game to local storage for history
-        saveGameForSharing(
+        const shareUrl = saveGameForSharing(
           miniGame.title,
           miniGame.description || "Minigame tương tác",
           miniGame.content
         );
+        
+        // Extract game ID from the URL
+        const urlParts = shareUrl.split('/');
+        setGameId(urlParts[urlParts.length - 1]);
       } catch (e) {
         console.error("Error saving game to history:", e);
       }
@@ -60,6 +67,11 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   const handleBackToHome = () => {
     // Force navigation to the root path with window.location
     window.location.href = '/';
+  };
+  
+  // Toggle history panel
+  const toggleHistoryPanel = () => {
+    setShowHistoryPanel(!showHistoryPanel);
   };
 
   // Apply game optimization code when iframe loads
@@ -246,11 +258,25 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
       
       {/* Source Code Viewer */}
       <div className="w-full p-4 bg-background">
-        <SourceCodeViewer htmlContent={miniGame.content} />
+        <SourceCodeViewer 
+          htmlContent={miniGame.content} 
+          gameId={gameId || undefined}
+          showPreviewButton={false}
+        />
       </div>
       
       {/* Control buttons */}
       <div className="absolute bottom-4 right-4 flex space-x-2">
+        <Button 
+          size="sm" 
+          variant="ghost"
+          className="bg-primary/10" 
+          onClick={toggleHistoryPanel}
+        >
+          <History size={16} className="mr-1" />
+          Lịch sử
+        </Button>
+        
         <Button 
           size="sm" 
           variant="ghost"
@@ -271,6 +297,12 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
           Chia Sẻ
         </Button>
       </div>
+      
+      {/* History Panel */}
+      <HistoryPanel 
+        isOpen={showHistoryPanel}
+        onClose={toggleHistoryPanel}
+      />
     </div>
   );
 };

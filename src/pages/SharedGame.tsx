@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Clock, AlertTriangle, Home } from 'lucide-react';
+import { ArrowLeft, Clock, AlertTriangle, Home, History } from 'lucide-react';
 import SourceCodeViewer from '@/components/quiz/SourceCodeViewer';
+import HistoryPanel from '@/components/history/HistoryPanel';
 
 const SharedGame = () => {
   const { id } = useParams<{ id: string }>();
@@ -12,6 +13,7 @@ const SharedGame = () => {
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [showHistoryPanel, setShowHistoryPanel] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,6 +51,10 @@ const SharedGame = () => {
   const handleBackToHome = () => {
     // Navigate to root path
     window.location.href = '/';
+  };
+  
+  const toggleHistoryPanel = () => {
+    setShowHistoryPanel(!showHistoryPanel);
   };
 
   if (loading) {
@@ -127,11 +133,25 @@ const SharedGame = () => {
         
         {/* Source Code Viewer */}
         <div className="w-full p-4 bg-background">
-          <SourceCodeViewer htmlContent={game.htmlContent} />
+          <SourceCodeViewer 
+            htmlContent={game.htmlContent} 
+            gameId={id}
+            showPreviewButton={false}
+          />
         </div>
       </main>
 
       <div className="absolute bottom-4 right-4 flex space-x-2">
+        <Button 
+          size="sm" 
+          variant="ghost"
+          className="bg-primary/10" 
+          onClick={toggleHistoryPanel}
+        >
+          <History size={16} className="mr-1" />
+          Lịch sử
+        </Button>
+        
         <Button 
           size="sm" 
           variant="ghost"
@@ -142,6 +162,12 @@ const SharedGame = () => {
           Trở Về
         </Button>
       </div>
+      
+      {/* History Panel */}
+      <HistoryPanel 
+        isOpen={showHistoryPanel}
+        onClose={toggleHistoryPanel}
+      />
     </div>
   );
 };
