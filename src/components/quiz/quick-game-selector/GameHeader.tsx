@@ -2,11 +2,7 @@
 import React from 'react';
 import { School } from 'lucide-react';
 
-interface GameHeaderProps {
-  onTitleClick: () => void;
-}
-
-const GameHeader: React.FC<GameHeaderProps> = ({ onTitleClick }) => {
+const GameHeader: React.FC = () => {
   return (
     <>
       <div className="text-primary mb-4 animate-float-in">
@@ -16,10 +12,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({ onTitleClick }) => {
         </div>
       </div>
       
-      <h2 
-        className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-fade-in cursor-pointer"
-        onClick={onTitleClick}
-      >
+      <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-fade-in">
         Minigames Giáo Dục
       </h2>
     </>

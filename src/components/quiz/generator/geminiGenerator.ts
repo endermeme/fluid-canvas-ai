@@ -1,3 +1,4 @@
+
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -93,7 +94,7 @@ const buildContentPrompt = (topic: string, gameType: string, settings?: GameSett
             "id": 1,
             "term": "Term for card 1",
             "definition": "Definition or matching item",
-            "image": "" // Empty string, we don't use AI images
+            "image": "https://direct-image-url.jpg" // Must provide a VALID, DIRECT image URL
           },
           // more cards...
         ]
@@ -107,7 +108,8 @@ const buildContentPrompt = (topic: string, gameType: string, settings?: GameSett
           {
             "front": "Question or term",
             "back": "Answer or definition",
-            "hint": "Optional hint"
+            "hint": "Optional hint",
+            "image": "https://direct-image-url.jpg" // Optional direct image URL
           },
           // more flashcards...
         ]
@@ -124,7 +126,8 @@ const buildContentPrompt = (topic: string, gameType: string, settings?: GameSett
             {
               "id": 1,
               "text": "First item in correct order",
-              "order": 1
+              "order": 1,
+              "image": "https://direct-image-url.jpg" // Optional direct image URL
             },
             // more items in correct order...
           ]
@@ -138,8 +141,30 @@ const buildContentPrompt = (topic: string, gameType: string, settings?: GameSett
         {
           "title": "Word Search: ${topic}",
           "words": ["word1", "word2", "word3", ...],
-          "hints": ["hint for word1", "hint for word2", ...]
+          "hints": ["hint for word1", "hint for word2", ...],
+          "images": ["https://direct-image-url1.jpg", "https://direct-image-url2.jpg", ...] // Optional direct image URLs for visual hints
         }
+      `;
+      break;
+    case 'image-guess':
+      templateInstructions = `
+        Create ${questionCount} image guessing questions about "${topic}".
+        For each term to guess, provide multiple direct image URLs.
+        Format as a JSON array: 
+        [
+          {
+            "term": "Word to be guessed",
+            "images": [
+              "https://direct-image-url1.jpg",
+              "https://direct-image-url2.jpg"
+            ],
+            "hints": ["Hint 1", "Hint 2"]  // Optional progressive hints
+          },
+          // more items...
+        ]
+        
+        IMPORTANT: All image URLs must be direct links to actual images (ending in .jpg, .png, etc.) that can be displayed in an <img> tag.
+        You can use image sources from any website as long as they are direct image URLs.
       `;
       break;
     default:
@@ -175,13 +200,13 @@ const buildContentPrompt = (topic: string, gameType: string, settings?: GameSett
     ## Instructions
     ${templateInstructions}
     
-    ## Important Requirements
-    - Structure the response EXACTLY as specified in the format above
-    - Make all content educational and age-appropriate
-    - Ensure content difficulty is suitable for ${difficultyLevel} level
-    - Include only ${questionCount} items
-    - Focus only on generating the content, not HTML or visual elements
-    - Return valid JSON that can be parsed directly
+    ## Important Requirements for Images
+    - For any game templates that use images, you MUST provide direct image URLs that can be displayed in an <img> tag
+    - Image URLs can be from ANY source, but must be directly accessible and valid
+    - Each image URL must lead directly to an image file (typically ending in .jpg, .png, .gif, etc.)
+    - You can use images from Google Images, Unsplash, Pixabay, or any other public image repository
+    - Do NOT restrict yourself to specific image sources - use any valid image URL
+    - For image guessing games, provide multiple image URLs for each term to be guessed
     
     ## Response Format
     Provide ONLY the JSON content with no other text, explanations or formatting.
@@ -264,7 +289,7 @@ export const generateWithGemini = async (
   console.log(`🔷 Gemini: Requires images: ${requiresImages}`);
   
   // Build the complete prompt
-  const prompt = buildGeminiPrompt(topic, gameType?.id, settings, requiresImages);
+  const prompt = buildGeminiPrompt(topic, gameType?.id, settings, true); // Always allow images
 
   try {
     console.log("🔷 Gemini: Sending request to Gemini API...");

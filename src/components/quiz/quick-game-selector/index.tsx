@@ -45,7 +45,6 @@ import {
 
 // Import our components
 import GameHeader from './GameHeader';
-import CustomGameForm from './CustomGameForm';
 import GameGrid from './GameGrid';
 
 interface QuickGameSelectorProps {
@@ -162,14 +161,9 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
 
   return (
     <div ref={containerRef} className="flex flex-col items-center h-full w-full bg-gradient-to-b from-background to-background/80 p-4 md:p-6 overflow-auto">
-      <GameHeader onTitleClick={() => {}} />
+      <GameHeader />
       
-      <CustomGameForm 
-        onCustomGameCreate={handleCustomGameCreate}
-        onGameRequest={onGameRequest}
-      />
-      
-      <div className="w-full max-h-[calc(100vh-250px)] overflow-auto pb-6">
+      <div className="w-full max-h-[calc(100vh-150px)] overflow-auto pb-6">
         <GameGrid 
           gameTypes={gameTypes} 
           onTopicSelect={handleTopicSelect} 

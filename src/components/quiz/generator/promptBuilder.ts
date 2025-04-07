@@ -15,10 +15,10 @@ export const buildGeminiPrompt = (
   topic: string, 
   gameTypeId: string | undefined, 
   settings?: GameSettingsData,
-  requiresImages: boolean = false
+  requiresImages: boolean = true // Default to true - we want to encourage image usage
 ): string => {
   const gameSpecificInstructions = getGameSpecificInstructions(gameTypeId, topic);
-  const imageInstructions = requiresImages ? getImageInstructions() : '';
+  const imageInstructions = getImageInstructions(); // Always include image instructions
   const settingsPrompt = getSettingsPrompt(settings);
 
   return `
@@ -39,12 +39,11 @@ export const buildGeminiPrompt = (
     - **Script DOM Ready:** Đặt tất cả code JavaScript trong event listener 'DOMContentLoaded'.
     - **Tương thích trình duyệt:** Sử dụng các tính năng JavaScript được hỗ trợ rộng rãi.
     - **Tối ưu hiệu suất:** Tránh vòng lặp lồng nhau phức tạp và DOM manipulation không cần thiết.
-    - **Xử lý hình ảnh:** Nếu trò chơi cần hình ảnh, sử dụng các dịch vụ hình ảnh miễn phí như đã nêu.
+    - **Xử lý hình ảnh:** Đảm bảo sử dụng hình ảnh từ bất kỳ nguồn nào miễn là hiển thị được.
 
     ## Xử lý hình ảnh đặc biệt
-    - **Đảm bảo hình ảnh hoạt động:** Luôn sử dụng URL hình ảnh cố định, không dùng API ngẫu nhiên
-    - **Có nhiều nguồn ảnh dự phòng:** Nếu một URL không hoạt động, hiển thị ảnh dự phòng
-    - **SVG Fallback:** Tạo SVG đơn giản làm dự phòng cuối cùng
+    - **QUAN TRỌNG: Sử dụng hình ảnh từ bất kỳ nguồn nào:** Không giới hạn nguồn ảnh, miễn là hiển thị được trực tiếp
+    - **Đảm bảo URL hình ảnh:** Luôn sử dụng URL trực tiếp đến file hình ảnh, không sử dụng URL đến trang web chứa hình ảnh
     - **Xử lý lỗi hình ảnh:** Luôn thêm thuộc tính onerror cho thẻ img
     - **Preload images:** Tải trước hình ảnh để tránh độ trễ khi chơi
     - **Hướng dẫn chi tiết:** Cho trò chơi hình ảnh, hãy bổ sung hướng dẫn cách chơi rõ ràng
