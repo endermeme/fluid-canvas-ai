@@ -1,4 +1,3 @@
-
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -240,14 +239,12 @@ export const generateWithGemini = async (
     - Thêm event handler onerror cho mọi thẻ <img>:
       <img src="URL" alt="Mô tả" onerror="this.onerror=null; this.src='URL_DỰ_PHÒNG'; this.alt='Không thể tải hình';">
     - Thử tải hình ảnh trước khi sử dụng:
-      ```javascript
       function preloadImage(url, successCallback, errorCallback) {
         const img = new Image();
         img.onload = successCallback;
         img.onerror = errorCallback;
         img.src = url;
       }
-      ```
     - Chuẩn bị các URL dự phòng cho mỗi hình ảnh cần thiết
     - Tạo SVG động nếu tất cả URL dự phòng đều thất bại
     `;
