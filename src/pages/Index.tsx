@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import CanvasContainer from '@/components/canvas/CanvasContainer';
+import CanvasArea from '@/components/canvas/CanvasArea';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
@@ -61,7 +61,17 @@ const Index: React.FC = () => {
           
           <SidebarInset className="flex-1 flex flex-col">
             <div className="flex-1">
-              <CanvasContainer />
+              <CanvasArea 
+                blocks={[]} 
+                selectedBlockIds={[]} 
+                onBlockSelect={() => {}} 
+                onBlockUpdate={() => {}} 
+                onBlockDelete={() => {}} 
+                onBlockDuplicate={() => {}} 
+                onStartDrag={() => {}} 
+                onCanvasClick={() => {}} 
+                canvasRef={React.createRef()} 
+              />
             </div>
             
             <div className="bg-gradient-to-r from-background to-accent/20 backdrop-blur-md border-t border-border/40 p-3 shadow-sm">
