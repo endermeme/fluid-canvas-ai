@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface CustomGameFormProps {
   gameType: string;
-  onGenerate: (content: string) => void;
+  onGenerate: (content: string, difficulty: string) => void;
   onCancel: () => void;
 }
 
@@ -20,9 +20,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const { toast } = useToast();
 
-  // Fix: Create a handler function that properly handles the type conversion
   const handleDifficultyChange = (value: string) => {
-    // Ensure value is one of the allowed difficulty types
     if (value === 'easy' || value === 'medium' || value === 'hard') {
       setDifficulty(value);
     }
@@ -45,19 +43,31 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   const getPlaceholderText = () => {
     switch (gameType) {
       case 'quiz':
-        return 'Nhập nội dung để tạo câu hỏi trắc nghiệm hoặc yêu cầu AI tạo theo ý bạn.\n\nVí dụ:\n1. Thủ đô của Việt Nam là gì?\na) Hà Nội\nb) TP.HCM\nc) Đà Nẵng\nd) Huế\n\n2. Việt Nam có bao nhiêu tỉnh thành?\na) 58\nb) 61\nc) 63\nd) 65';
+        return 'Nhập yêu cầu để AI tạo câu hỏi trắc nghiệm.\n\nVí dụ:\n- Tạo 10 câu hỏi về địa lý Việt Nam\n- Tạo câu hỏi trắc nghiệm về văn học Việt Nam thế kỷ 20\n- Tạo trò chơi trắc nghiệm về động vật hoang dã';
       
       case 'flashcards':
-        return 'Nhập nội dung để tạo thẻ ghi nhớ hoặc yêu cầu AI tạo theo ý bạn.\n\nVí dụ:\nMặt trước: Photosynthesis\nMặt sau: Quang hợp\n\nMặt trước: Democracy\nMặt sau: Dân chủ';
+        return 'Nhập yêu cầu để AI tạo thẻ ghi nhớ.\n\nVí dụ:\n- Tạo flashcard về từ vựng tiếng Anh chủ đề du lịch\n- Tạo thẻ ghi nhớ cho các công thức toán học\n- Tạo thẻ học các ngày lễ quan trọng trong năm';
       
       case 'matching':
-        return 'Nhập nội dung để tạo trò chơi nối từ hoặc yêu cầu AI tạo theo ý bạn.\n\nVí dụ:\nBên trái: Mèo\nBên phải: Cat\n\nBên trái: Chó\nBên phải: Dog';
+        return 'Nhập yêu cầu để AI tạo trò chơi nối từ.\n\nVí dụ:\n- Tạo trò chơi nối từ đồng nghĩa tiếng Việt\n- Tạo game nối từ tiếng Anh-Việt về đồ vật trong nhà\n- Tạo game ghép cặp nước-thủ đô';
       
       case 'truefalse':
-        return 'Nhập nội dung để tạo câu hỏi đúng/sai hoặc yêu cầu AI tạo theo ý bạn.\n\nVí dụ:\nĐúng: Mặt trời mọc ở hướng đông.\nSai: Trái đất có hình vuông.';
+        return 'Nhập yêu cầu để AI tạo câu hỏi đúng/sai.\n\nVí dụ:\n- Tạo câu hỏi đúng sai về lịch sử Việt Nam\n- Tạo câu đúng sai về kiến thức khoa học tự nhiên\n- Tạo game đúng sai về tin học cơ bản';
+      
+      case 'wordsearch':
+        return 'Nhập yêu cầu để AI tạo trò chơi tìm từ.\n\nVí dụ:\n- Tạo game tìm từ về các loài động vật\n- Tạo trò chơi tìm từ tiếng Anh chủ đề thể thao\n- Tạo game tìm từ về tên các loại trái cây';
+      
+      case 'ordering':
+        return 'Nhập yêu cầu để AI tạo trò chơi sắp xếp câu.\n\nVí dụ:\n- Tạo trò chơi sắp xếp từ thành câu tiếng Việt\n- Tạo game sắp xếp các sự kiện lịch sử theo thời gian\n- Tạo game sắp xếp các bước trong quy trình nấu ăn';
+      
+      case 'memory':
+        return 'Nhập yêu cầu để AI tạo trò chơi ghi nhớ.\n\nVí dụ:\n- Tạo trò chơi ghi nhớ với các biểu tượng động vật\n- Tạo game memory card với chủ đề phương tiện giao thông\n- Tạo game ghi nhớ về các loại hoa';
+      
+      case 'pictionary':
+        return 'Nhập yêu cầu để AI tạo trò chơi đoán hình.\n\nVí dụ:\n- Tạo trò chơi đoán hình về các danh lam thắng cảnh\n- Tạo game pictionary về các loài động vật\n- Tạo trò chơi đoán hình về đồ vật hàng ngày';
       
       default:
-        return 'Nhập yêu cầu và nội dung để AI tạo trò chơi theo ý bạn.';
+        return 'Nhập yêu cầu để AI tạo nội dung cho trò chơi của bạn.';
     }
   };
 
@@ -65,13 +75,14 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     if (!content.trim()) {
       toast({
         title: "Lỗi",
-        description: "Vui lòng nhập nội dung hoặc yêu cầu cho trò chơi",
+        description: "Vui lòng nhập yêu cầu nội dung cho trò chơi",
         variant: "destructive"
       });
       return;
     }
     
-    onGenerate(content);
+    setIsGenerating(true);
+    onGenerate(content, difficulty);
   };
 
   return (
@@ -80,7 +91,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
         <div className="mb-6">
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Brain className="h-6 w-6 text-primary" />
-            Tạo trò chơi {getGameTypeName()} tùy chỉnh
+            Tạo trò chơi {getGameTypeName()} với AI
           </h2>
           <p className="text-muted-foreground">Nhập yêu cầu để AI tạo nội dung cho trò chơi của bạn</p>
         </div>
@@ -104,7 +115,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
           </div>
           
           <div>
-            <Label htmlFor="content">Yêu cầu nội dung trò chơi</Label>
+            <Label htmlFor="content">Yêu cầu nội dung</Label>
             <Textarea
               id="content"
               placeholder={getPlaceholderText()}

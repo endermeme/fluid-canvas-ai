@@ -14,6 +14,7 @@ import TrueFalseTemplate from './templates/TrueFalseTemplate';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from '../generator/AIGameGenerator';
 import { GameSettingsData } from '../types';
+import CustomGameForm from './CustomGameForm';
 
 // Sample preset game content for testing/development
 import { quizSampleData } from './data/quizSampleData';
@@ -41,14 +42,15 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
   initialTopic = "Học tiếng Việt",
   customContent
 }) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [gameContent, setGameContent] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showCustomForm, setShowCustomForm] = useState(false);
   const { toast } = useToast();
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
 
   useEffect(() => {
-    const loadGameContent = async () => {
+    const loadInitialGameContent = async () => {
       setLoading(true);
       
       try {
@@ -59,7 +61,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
           return;
         }
         
-        // Trong trường hợp không có nội dung tùy chỉnh, tải mẫu hoặc tạo mới với AI
+        // Trong trường hợp không có nội dung tùy chỉnh, tải mẫu
         setTimeout(() => {
           // Load sample data based on game type
           switch(gameType) {
@@ -103,44 +105,49 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
       }
     };
 
-    loadGameContent();
-  }, [gameType, toast, customContent]);
+    if (!showCustomForm) {
+      loadInitialGameContent();
+    }
+  }, [gameType, customContent, showCustomForm, toast]);
 
-  const generateWithAI = async () => {
+  const handleGenerateWithGemini = async (content: string, difficulty: string) => {
     setLoading(true);
     setError(null);
     
     try {
-      // Tạo prompt dựa trên loại game
-      const topic = initialTopic || "Học tiếng Việt";
-      const gamePrompt = `Tạo trò chơi ${gameType} về chủ đề: ${topic}`;
+      // Tạo prompt dựa trên loại game và nội dung người dùng
+      const gamePrompt = content;
       
       // Tạo settings tùy chỉnh dựa trên loại game
       const settings: GameSettingsData = {
-        difficulty: 'medium',
+        difficulty: difficulty as 'easy' | 'medium' | 'hard',
         questionCount: gameType === 'memory' ? 6 : gameType === 'pictionary' ? 5 : 10,
         timePerQuestion: gameType === 'wordsearch' ? 180 : gameType === 'ordering' ? 60 : 30,
         category: 'general',
       };
+      
+      console.log("Generating game with prompt:", gamePrompt);
+      console.log("Game settings:", settings);
       
       // Tạo game với AI
       const game = await gameGenerator.generateMiniGame(gamePrompt, settings);
       
       if (game) {
         setGameContent(game);
+        setShowCustomForm(false);
         toast({
           title: "Đã tạo trò chơi mới",
-          description: `Trò chơi ${gameType} về ${topic} đã được tạo thành công.`,
+          description: `Trò chơi ${gameType} đã được tạo thành công.`,
         });
       } else {
         throw new Error('Không thể tạo trò chơi');
       }
     } catch (error) {
       console.error('Lỗi khi tạo trò chơi:', error);
-      setError('Không thể tạo trò chơi. Vui lòng thử lại sau.');
+      setError('Không thể tạo trò chơi. Vui lòng thử lại với yêu cầu khác.');
       toast({
         title: "Lỗi",
-        description: "Không thể tạo trò chơi. Vui lòng thử lại sau.",
+        description: "Không thể tạo trò chơi. Vui lòng thử lại với yêu cầu khác.",
         variant: "destructive"
       });
     } finally {
@@ -174,6 +181,16 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
         return <DefaultTemplate content={gameContent} topic={topic} />;
     }
   };
+
+  if (showCustomForm) {
+    return (
+      <CustomGameForm
+        gameType={gameType}
+        onGenerate={handleGenerateWithGemini}
+        onCancel={() => setShowCustomForm(false)}
+      />
+    );
+  }
 
   if (loading) {
     return (
@@ -209,10 +226,10 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
         <Button 
           variant="outline" 
           size="sm" 
-          onClick={generateWithAI}
+          onClick={() => setShowCustomForm(true)}
           className="ml-auto"
         >
-          Tạo mới với AI
+          Tạo với AI
         </Button>
       </div>
       
@@ -220,6 +237,9 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
         {gameContent ? renderGameTemplate() : (
           <div className="flex items-center justify-center h-full">
             <p>Không có nội dung trò chơi</p>
+            <Button onClick={() => setShowCustomForm(true)} className="ml-2">
+              Tạo với AI
+            </Button>
           </div>
         )}
       </div>
