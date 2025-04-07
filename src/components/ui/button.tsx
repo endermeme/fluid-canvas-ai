@@ -19,6 +19,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:scale-[0.98] transition-transform",
         ghost: "hover:bg-accent hover:text-accent-foreground active:scale-[0.98] transition-transform",
         link: "text-primary underline-offset-4 hover:underline",
+        glass: "bg-white/20 backdrop-blur-sm border border-white/20 hover:bg-white/30 text-foreground shadow-sm active:scale-[0.98] transition-transform",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -26,10 +27,15 @@ const buttonVariants = cva(
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
       },
+      loading: {
+        true: "relative text-transparent transition-none hover:text-transparent",
+        false: "",
+      }
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      loading: false,
     },
   }
 )
@@ -37,11 +43,12 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+  asChild?: boolean;
+  loading?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, loading, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -49,16 +56,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         props.onClick(e);
       }
       
-      // Create ripple effect
+      // Enhanced ripple effect
       const button = e.currentTarget;
       const rect = button.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height) * 2;
+      const size = Math.max(rect.width, rect.height) * 2.5;
       
       // Calculate position relative to the button
       const x = e.clientX - rect.left - size/2;
       const y = e.clientY - rect.top - size/2;
       
-      // Create ripple element
+      // Create ripple element with better animation
       const ripple = document.createElement('span');
       ripple.className = 'absolute rounded-full bg-white/30 pointer-events-none transform animate-ripple';
       ripple.style.width = ripple.style.height = `${size}px`;
@@ -83,11 +90,24 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, loading, className }))}
         ref={ref}
         {...props}
         onClick={handleClick}
-      />
+      >
+        {props.children}
+        
+        {/* Loading spinner */}
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="flex gap-1">
+              <span className="animate-bounce-subtle h-1.5 w-1.5 rounded-full bg-current" style={{ animationDelay: "0ms" }} />
+              <span className="animate-bounce-subtle h-1.5 w-1.5 rounded-full bg-current" style={{ animationDelay: "150ms" }} />
+              <span className="animate-bounce-subtle h-1.5 w-1.5 rounded-full bg-current" style={{ animationDelay: "300ms" }} />
+            </div>
+          </div>
+        )}
+      </Comp>
     )
   }
 )
