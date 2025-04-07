@@ -85,7 +85,7 @@ const GamePresets: React.FC<GamePresetsProps> = ({ onSelectPreset, onCancel }) =
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
                       <div className="p-2 rounded-full bg-primary/10 text-primary">
-                        {React.createElement(preset.icon, { size: 20 })}
+                        {React.createElement(preset.icon)}
                       </div>
                       <CardTitle className="text-lg">{preset.name}</CardTitle>
                     </div>
@@ -105,7 +105,7 @@ const GamePresets: React.FC<GamePresetsProps> = ({ onSelectPreset, onCancel }) =
               >
                 <CardContent className="pt-6 pb-6 flex flex-col items-center justify-center h-full">
                   <div className="p-3 rounded-full bg-primary/10 text-primary mb-3">
-                    <MessageCircle size={24} />
+                    <MessageCircle />
                   </div>
                   <CardTitle className="text-lg mb-2">Chat Tùy Chỉnh</CardTitle>
                   <CardDescription className="text-center">
@@ -128,13 +128,13 @@ const GamePresets: React.FC<GamePresetsProps> = ({ onSelectPreset, onCancel }) =
                 className="mb-4"
                 onClick={handleBack}
               >
-                <ArrowLeft size={16} className="mr-2" /> Quay lại
+                <ArrowLeft className="mr-2" /> Quay lại
               </Button>
 
               <Card>
                 <CardHeader>
                   <div className="flex items-center gap-2">
-                    {selectedPreset && React.createElement(selectedPreset.icon, { size: 20, className: "text-primary" })}
+                    {selectedPreset && React.createElement(selectedPreset.icon, { className: "text-primary" })}
                     <CardTitle>
                       {selectedPreset?.name || "Mẫu trò chơi"}
                     </CardTitle>
@@ -169,7 +169,7 @@ const GamePresets: React.FC<GamePresetsProps> = ({ onSelectPreset, onCancel }) =
                     onClick={handleSubmit}
                     disabled={!customContent.trim()}
                   >
-                    <Send size={16} className="mr-2" /> Tạo trò chơi
+                    <Send className="mr-2" /> Tạo trò chơi
                   </Button>
                 </CardFooter>
               </Card>

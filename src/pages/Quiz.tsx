@@ -113,11 +113,15 @@ const Quiz = () => {
     setIsGenerating(true);
     setTimeout(() => {
       if (quizGeneratorRef.current) {
-        quizGeneratorRef.current.generateQuiz(combinedTopic, {
-          presetId,
-          customContent: content,
-          ...preset
-        });
+        // We need to pass the preset settings as a second argument here
+        // so we need to modify the QuizGenerator component to accept this
+        if (quizGeneratorRef.current.generateQuiz) {
+          (quizGeneratorRef.current.generateQuiz as any)(combinedTopic, {
+            presetId,
+            customContent: content,
+            ...preset
+          });
+        }
       } else {
         toast({
           title: "Lỗi Hệ Thống",

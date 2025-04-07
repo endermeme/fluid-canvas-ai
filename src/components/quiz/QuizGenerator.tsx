@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from './generator/AIGameGenerator';
@@ -171,6 +170,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Quiz
     }
   };
 
+  
   if (isLoading) {
     return <GameLoading topic={currentTopic} />;
   }
