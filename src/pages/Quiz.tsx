@@ -17,7 +17,7 @@ const Quiz = () => {
   const [showChatInterface, setShowChatInterface] = useState(false);
   const [showPresets, setShowPresets] = useState(true);
   
-  const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
+  const quizGeneratorRef = useRef<{ generateQuiz: (topic: string, settings?: any) => void }>(null);
   const { addBlock } = useCanvasState();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
@@ -113,15 +113,13 @@ const Quiz = () => {
     setIsGenerating(true);
     setTimeout(() => {
       if (quizGeneratorRef.current) {
-        // We need to pass the preset settings as a second argument here
-        // so we need to modify the QuizGenerator component to accept this
-        if (quizGeneratorRef.current.generateQuiz) {
-          (quizGeneratorRef.current.generateQuiz as any)(combinedTopic, {
-            presetId,
-            customContent: content,
-            ...preset
-          });
-        }
+        const settings = {
+          presetId,
+          customContent: content,
+          ...preset
+        };
+        
+        quizGeneratorRef.current.generateQuiz(combinedTopic, settings);
       } else {
         toast({
           title: "Lỗi Hệ Thống",
