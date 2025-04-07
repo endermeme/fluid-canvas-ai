@@ -19,12 +19,12 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
 
   // Save the game to history when it loads
   useEffect(() => {
-    if (miniGame && miniGame.title) {
+    if (miniGame && miniGame.content) {
       try {
-        // Save game to local storage for history
+        // Save game to local storage for history - use the title as is for now
         saveGameForSharing(
-          miniGame.title,
-          miniGame.description || "Minigame tương tác",
+          miniGame.title || "Minigame tương tác", 
+          "", // Empty description
           miniGame.content
         );
       } catch (e) {
@@ -37,8 +37,8 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   const handleShare = () => {
     try {
       const shareUrl = saveGameForSharing(
-        miniGame.title,
-        miniGame.description || "Minigame tương tác",
+        miniGame.title || "Minigame tương tác",
+        "", // Empty description
         miniGame.content
       );
       
@@ -239,7 +239,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
             className="w-full h-full border-0 mx-auto"
             sandbox="allow-scripts allow-popups allow-same-origin"
             onLoad={handleIframeLoad}
-            title={miniGame.title}
+            title={miniGame.title || "Minigame"}
             style={{ maxWidth: '100%', margin: '0 auto' }}
           />
         )}
