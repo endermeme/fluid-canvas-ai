@@ -100,10 +100,6 @@ const Quiz = () => {
     setShowChatInterface(!showChatInterface);
   };
 
-  const handleBackToHome = () => {
-    setIsManualMode(false);
-  };
-
   return (
     <div className="min-h-screen flex flex-col w-full overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
@@ -113,7 +109,6 @@ const Quiz = () => {
               <QuizGenerator 
                 ref={quizGeneratorRef} 
                 topic={topic}
-                onBackToHome={handleBackToHome}
               />
             ) : (
               <QuickGameSelector 

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from '../generator/AIGameGenerator';
@@ -167,14 +166,6 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     setCurrentGameType(null);
   };
 
-  // Add function to return to home screen
-  const handleBackToHome = () => {
-    setSelectedGame(null);
-    setSelectedTopic("");
-    setCurrentGameType(null);
-    setErrorMessage(null);
-  };
-
   if (isLoading) {
     return <GameLoading />;
   }
@@ -190,7 +181,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   if (selectedGame) {
     return (
       <div className="h-full relative">
-        <GameView miniGame={selectedGame} onBackToHome={handleBackToHome} />
+        <GameView miniGame={selectedGame} />
       </div>
     );
   }

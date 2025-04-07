@@ -7,22 +7,18 @@ import GameView from './GameView';
 import OpenAIKeyModal from './OpenAIKeyModal';
 import { GameSettingsData } from './types';
 import { getGameTypeByTopic } from './gameTypes';
-import { useNavigate } from 'react-router-dom';
 
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 interface QuizGeneratorProps {
   topic?: string;
   onQuizComplete?: () => void;
-  onBackToHome?: () => void;
 }
 
 const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: GameSettingsData) => void }, QuizGeneratorProps>(({ 
   topic = "Minigame tương tác",
   onQuizComplete,
-  onBackToHome,
 }, ref) => {
-  const navigate = useNavigate();
   const [miniGame, setMiniGame] = useState<MiniGame | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -166,15 +162,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     }
   };
 
-  const handleBackToHome = () => {
-    if (onBackToHome) {
-      onBackToHome();
-    } else {
-      setMiniGame(null);
-      navigate('/');
-    }
-  };
-
   if (isLoading) {
     return <GameLoading topic={currentTopic} />;
   }
@@ -210,7 +197,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
 
   return (
     <>
-      <GameView miniGame={miniGame} onBackToHome={handleBackToHome} />
+      <GameView miniGame={miniGame} />
       <div className="absolute top-4 right-4">
         <h3 
           className="text-sm font-medium text-primary/60 cursor-pointer select-none" 
