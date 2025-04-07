@@ -70,9 +70,9 @@ const GamePresets = () => {
   return (
     <div className="container mx-auto py-8">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold mb-2">Game Presets</h1>
+        <h1 className="text-3xl font-bold mb-2">Game Templates</h1>
         <p className="text-muted-foreground">
-          Chọn mẫu trò chơi và tạo nội dung của riêng bạn với AI
+          Chọn mẫu trò chơi và tạo nội dung của riêng bạn
         </p>
       </div>
 
@@ -103,7 +103,7 @@ const GamePresets = () => {
                 className="w-full" 
                 onClick={() => handlePresetSelect(preset)}
               >
-                Sử dụng Mẫu Này
+                Sử Dụng Template Này
               </Button>
             </CardFooter>
           </Card>
@@ -113,9 +113,9 @@ const GamePresets = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>{selectedPreset?.name || 'Customize Game'}</DialogTitle>
+            <DialogTitle>{selectedPreset?.name || 'Tùy chỉnh trò chơi'}</DialogTitle>
             <DialogDescription>
-              {selectedPreset?.customizeInstruction || 'Enter your content for the game'}
+              {selectedPreset?.customizeInstruction || 'Nhập nội dung cho trò chơi của bạn'}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
