@@ -24,8 +24,8 @@ export const saveGameForSharing = (title: string, description: string, htmlConte
   
   const game: StoredGame = {
     id,
-    title,
-    description,
+    title: title || "Minigame Tương tác",
+    description: description || "",
     htmlContent,
     createdAt: now,
     expiresAt
@@ -38,8 +38,8 @@ export const saveGameForSharing = (title: string, description: string, htmlConte
   // Remove expired games
   games = games.filter(game => game.expiresAt > now);
   
-  // Check for duplicate titles to prevent multiple entries of same game
-  const existingGameIndex = games.findIndex(g => g.title === title && g.description === description);
+  // Check for duplicate content to prevent multiple entries of same game
+  const existingGameIndex = games.findIndex(g => g.htmlContent === htmlContent);
   
   if (existingGameIndex >= 0) {
     // Update existing game instead of adding a new one
