@@ -5,7 +5,6 @@ import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
 import { useNavigate } from 'react-router-dom';
-import OpenAIKeyModal from '@/components/quiz/OpenAIKeyModal';
 import HistoryPanel from '@/components/history/HistoryPanel';
 import { Switch } from '@/components/ui/switch';
 
@@ -38,7 +37,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
   const [canvasMode, setCanvasMode] = useState(localStorage.getItem('canvas_mode') === 'true');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -93,16 +91,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       }
     }, 500);
   };
-
-  const handleSaveOpenAIKey = (key: string) => {
-    if (key) {
-      localStorage.setItem('openai_api_key', key);
-      toast({
-        title: "API Key Đã Lưu",
-        description: "OpenAI API key của bạn đã được lưu thành công.",
-      });
-    }
-  };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -146,13 +134,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <h3 className="font-medium">Trợ Lý Giáo Dục</h3>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowOpenAIKeyModal(true)}
-            className="p-1.5 rounded-md hover:bg-secondary/40 transition-colors"
-            title="Cài đặt API Key"
-          >
-            <Star size={18} className="text-primary" />
-          </button>
           <button
             onClick={() => setShowHistoryPanel(true)}
             className="p-1.5 rounded-md hover:bg-secondary/40 transition-colors"
@@ -256,13 +237,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </div>
         </div>
       </div>
-
-      <OpenAIKeyModal 
-        isOpen={showOpenAIKeyModal}
-        onClose={() => setShowOpenAIKeyModal(false)}
-        onSave={handleSaveOpenAIKey}
-        currentKey={localStorage.getItem('openai_api_key')}
-      />
 
       <HistoryPanel 
         isOpen={showHistoryPanel}

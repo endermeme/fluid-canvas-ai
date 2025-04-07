@@ -5,7 +5,8 @@ import { getGameTypeByTopic } from '../gameTypes';
 export const generateWithGemini = async (
   model: any, 
   topic: string, 
-  settings?: GameSettingsData
+  settings?: GameSettingsData,
+  requiresImages: boolean = false
 ): Promise<MiniGame | null> => {
   // Get game type from topic to provide better context for the AI
   const gameType = getGameTypeByTopic(topic);
@@ -13,6 +14,7 @@ export const generateWithGemini = async (
   
   console.log(`🔷 Gemini: Starting game generation for "${topic}" - Type: ${gameType?.name || "Not specified"}`);
   console.log(`🔷 Gemini: Settings: ${JSON.stringify(settings || {})}`);
+  console.log(`🔷 Gemini: Requires images: ${requiresImages}`);
   
   const settingsPrompt = settings ? `
     Create with these settings:
@@ -197,6 +199,30 @@ export const generateWithGemini = async (
       `;
   }
 
+  // Add specific instructions for image-related games
+  let imageInstructions = '';
+  if (requiresImages) {
+    imageInstructions = `
+    ## Chỉ dẫn đặc biệt cho trò chơi có hình ảnh
+    
+    - QUAN TRỌNG: Nếu trò chơi cần hình ảnh, hãy sử dụng một trong các cách sau để cung cấp hình ảnh:
+      1. Sử dụng URL hình ảnh từ Unsplash: 'https://source.unsplash.com/random/{width}x{height}?{keywords}'
+         Ví dụ: https://source.unsplash.com/random/300x200?nature,forest
+      2. Sử dụng URL hình ảnh từ PlaceImg: 'https://placeimg.com/{width}/{height}/{category}'
+         Ví dụ: https://placeimg.com/300/200/animals
+      3. Sử dụng URL hình ảnh từ Picsum: 'https://picsum.photos/{width}/{height}'
+         Ví dụ: https://picsum.photos/300/200
+      4. Sử dụng hình ảnh ASCII/Unicode art khi không có hình ảnh trực tuyến
+      5. Tạo mô tả hình ảnh bằng SVG code đơn giản trong thẻ <svg>
+    
+    - Đối với trò chơi ghép thẻ hình ảnh (memory card), sử dụng 4-8 hình ảnh từ các nguồn trên
+    - Đối với trò chơi xếp hình, sử dụng 1 hình ảnh và chia nó thành các phần nhỏ bằng JavaScript
+    - Đối với trò chơi đoán hình, sử dụng 5-10 hình ảnh khác nhau với đáp án tương ứng
+    - Nhớ sử dụng kích thước hình ảnh phù hợp để không làm chậm trò chơi (thông thường 300x200 hoặc 400x300)
+    - Nếu cần hình ảnh liên quan đến chủ đề cụ thể, thêm từ khóa vào URL Unsplash
+    `;
+  }
+
   // Base prompt template with enhanced HTML validation and error handling
   const prompt = `
     # Trò chơi giáo dục tương tác đơn file
@@ -205,6 +231,7 @@ export const generateWithGemini = async (
     Tạo một trò chơi giáo dục tương tác chất lượng cao về chủ đề "${topic}". Trò chơi phải hoạt động hoàn toàn trong một file HTML duy nhất (với CSS và JavaScript được nhúng bên trong).
 
     ${gameSpecificInstructions}
+    ${imageInstructions}
 
     ## Yêu cầu kỹ thuật
     - **Giải pháp một file:** Tất cả HTML, CSS và JavaScript phải được chứa trong một file HTML duy nhất.
@@ -215,6 +242,7 @@ export const generateWithGemini = async (
     - **Script DOM Ready:** Đặt tất cả code JavaScript trong event listener 'DOMContentLoaded'.
     - **Tương thích trình duyệt:** Sử dụng các tính năng JavaScript được hỗ trợ rộng rãi.
     - **Tối ưu hiệu suất:** Tránh vòng lặp lồng nhau phức tạp và DOM manipulation không cần thiết.
+    - **Xử lý hình ảnh:** Nếu trò chơi cần hình ảnh, sử dụng các dịch vụ hình ảnh miễn phí như đã nêu.
 
     ## Phòng tránh lỗi phổ biến
     - **Tránh click handlers không hoạt động:** Đảm bảo event listeners được đính kèm đúng cách.
@@ -224,6 +252,7 @@ export const generateWithGemini = async (
     - **Tránh lỗi input validation:** Kiểm tra và làm sạch dữ liệu input từ người dùng.
     - **Tránh chồng chéo z-index:** Đảm bảo các phần tử không bị chồng lấp không mong muốn.
     - **Tránh animation lag:** Sử dụng CSS transitions thay vì JavaScript animations khi có thể.
+    - **Tránh lỗi hình ảnh không tải được:** Luôn thêm xử lý lỗi cho hình ảnh.
 
     ${settingsPrompt}
 
@@ -461,7 +490,8 @@ export const generateWithGemini = async (
 export const tryGeminiGeneration = async (
   model: any,
   topic: string, 
-  settings?: GameSettingsData, 
+  settings?: GameSettingsData,
+  requiresImages: boolean = false,
   retryCount = 0
 ): Promise<MiniGame | null> => {
   const maxRetries = 5; // Maximum number of retries
@@ -473,13 +503,13 @@ export const tryGeminiGeneration = async (
   
   try {
     console.log(`⏳ Gemini: Attempt ${retryCount + 1} for topic: "${topic}"`);
-    return await generateWithGemini(model, topic, settings);
+    return await generateWithGemini(model, topic, settings, requiresImages);
   } catch (error) {
     console.error(`❌ Gemini: Attempt ${retryCount + 1} failed:`, error);
     // Wait a bit before retrying (increasing wait time with each retry)
     const waitTime = (retryCount + 1) * 1500; // Increase wait time between retries
     console.log(`⏳ Gemini: Waiting ${waitTime/1000} seconds before retrying...`);
     await new Promise(resolve => setTimeout(resolve, waitTime));
-    return tryGeminiGeneration(model, topic, settings, retryCount + 1);
+    return tryGeminiGeneration(model, topic, settings, requiresImages, retryCount + 1);
   }
 };

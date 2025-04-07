@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from './generator/AIGameGenerator';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
 import GameView from './GameView';
-import OpenAIKeyModal from './OpenAIKeyModal';
 import { GameSettingsData } from './types';
 import { getGameTypeByTopic } from './gameTypes';
 
@@ -25,8 +25,9 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const [currentTopic, setCurrentTopic] = useState<string>(topic);
   const { toast } = useToast();
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
-  const [titleClickCount, setTitleClickCount] = useState(0);
-  const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
+  const [canvasMode, setCanvasMode] = useState<boolean>(
+    localStorage.getItem('canvas_mode') === 'true'
+  );
   
   const defaultSettings: GameSettingsData = {
     difficulty: 'medium',
@@ -34,6 +35,13 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     timePerQuestion: 30,
     category: 'general',
   };
+  
+  // Set canvas mode based on localStorage
+  useEffect(() => {
+    const storedCanvasMode = localStorage.getItem('canvas_mode') === 'true';
+    gameGenerator.setCanvasMode(storedCanvasMode);
+    setCanvasMode(storedCanvasMode);
+  }, [gameGenerator]);
 
   useImperativeHandle(ref, () => ({
     generateQuiz: (topic: string, settings?: GameSettingsData) => {
@@ -93,38 +101,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     return settings;
   };
 
-  const handleTitleClick = () => {
-    setTitleClickCount(prev => {
-      const newCount = prev + 1;
-      if (newCount === 3) {
-        setTimeout(() => {
-          setShowOpenAIKeyModal(true);
-          return 0;
-        }, 100);
-      }
-      return newCount;
-    });
-  };
-
-  const handleSaveOpenAIKey = (key: string) => {
-    console.log("Saving OpenAI key...");
-    const success = gameGenerator.setOpenAIKey(key);
-    if (success) {
-      console.log("OpenAI key saved successfully");
-      toast({
-        title: "API Key Đã Lưu",
-        description: "API key OpenAI đã được lưu. Các minigame tiếp theo sẽ được cải thiện chất lượng.",
-      });
-    } else {
-      console.log("Failed to save OpenAI key");
-      toast({
-        title: "Lỗi Lưu API Key",
-        description: "API key không hợp lệ hoặc trống.",
-        variant: "destructive"
-      });
-    }
-  };
-
   const generateMiniGame = async (topic: string, settings: GameSettingsData = defaultSettings) => {
     setIsLoading(true);
     setErrorMessage(null);
@@ -142,9 +118,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
         setMiniGame(game);
         toast({
           title: "Minigame Đã Sẵn Sàng",
-          description: gameGenerator.hasOpenAIKey() 
-            ? `Đã tạo và cải thiện minigame về "${topic}" với GPT-4o` 
-            : `Đã tạo minigame về "${topic}"`,
+          description: `Đã tạo minigame về "${topic}" với Gemini`,
         });
       } else {
         throw new Error('Không thể tạo minigame');
@@ -178,19 +152,9 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     return (
       <div className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10">
         <p className="text-lg">Vui lòng nhập chủ đề vào thanh chat để tạo minigame</p>
-        <h3 
-          className="text-xl font-bold cursor-pointer select-none" 
-          onClick={handleTitleClick}
-          title="Trợ Lý Tạo Web"
-        >
+        <h3 className="text-xl font-bold cursor-pointer select-none">
           Trợ Lý Tạo Web
         </h3>
-        <OpenAIKeyModal 
-          isOpen={showOpenAIKeyModal}
-          onClose={() => setShowOpenAIKeyModal(false)}
-          onSave={handleSaveOpenAIKey}
-          currentKey={localStorage.getItem('openai_api_key')}
-        />
       </div>
     );
   }
@@ -199,20 +163,10 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     <>
       <GameView miniGame={miniGame} />
       <div className="absolute top-4 right-4">
-        <h3 
-          className="text-sm font-medium text-primary/60 cursor-pointer select-none" 
-          onClick={handleTitleClick}
-          title="Trợ Lý Tạo Web"
-        >
+        <h3 className="text-sm font-medium text-primary/60 cursor-pointer select-none">
           Trợ Lý Tạo Web
         </h3>
       </div>
-      <OpenAIKeyModal 
-        isOpen={showOpenAIKeyModal}
-        onClose={() => setShowOpenAIKeyModal(false)}
-        onSave={handleSaveOpenAIKey}
-        currentKey={localStorage.getItem('openai_api_key')}
-      />
     </>
   );
 });
