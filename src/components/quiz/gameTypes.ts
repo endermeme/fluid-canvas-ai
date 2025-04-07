@@ -141,50 +141,119 @@ export const getGameTypeById = (id: string): GameType | undefined => {
 };
 
 export const getGameTypeByTopic = (topic: string): GameType | undefined => {
+  if (!topic) return getGameTypeById('quiz'); // Default to quiz if no topic
+  
   const lowerTopic = topic.toLowerCase();
   
-  // Try to find a direct match in game descriptions
-  for (const gameType of gameTypes) {
+  // Improved matching algorithm with keyword weights
+  const gameMatches = gameTypes.map(gameType => {
+    let score = 0;
+    
+    // Direct name match gets highest score
     if (lowerTopic.includes(gameType.name.toLowerCase())) {
-      return gameType;
+      score += 10;
     }
+    
+    // Check for specific game keywords in the topic
+    switch (gameType.id) {
+      case 'quiz':
+        if (lowerTopic.includes('trắc nghiệm') || lowerTopic.includes('quiz') || 
+            lowerTopic.includes('abcd') || lowerTopic.includes('chọn đáp án')) {
+          score += 8;
+        }
+        break;
+      case 'flashcards':
+        if (lowerTopic.includes('thẻ ghi nhớ') || lowerTopic.includes('flash card') || 
+            lowerTopic.includes('flashcard') || lowerTopic.includes('thẻ học')) {
+          score += 8;
+        }
+        break;
+      case 'unjumble':
+        if (lowerTopic.includes('xếp lại') || lowerTopic.includes('sắp xếp') || 
+            lowerTopic.includes('unjumble') || lowerTopic.includes('từ xáo trộn')) {
+          score += 8;
+        }
+        break;
+      case 'sentence':
+        if (lowerTopic.includes('điền vào chỗ trống') || lowerTopic.includes('hoàn thành câu') || 
+            lowerTopic.includes('fill in') || lowerTopic.includes('từ thiếu')) {
+          score += 8;
+        }
+        break;
+      case 'truefalse':
+        if (lowerTopic.includes('đúng sai') || lowerTopic.includes('true false') || 
+            lowerTopic.includes('đúng hay sai') || lowerTopic.includes('thật giả')) {
+          score += 8;
+        }
+        break;
+      case 'mathgenerator':
+        if (lowerTopic.includes('toán') || lowerTopic.includes('math') || 
+            lowerTopic.includes('tính') || lowerTopic.includes('số học')) {
+          score += 8;
+        }
+        break;
+      case 'riddle':
+        if (lowerTopic.includes('câu đố') || lowerTopic.includes('đố') || 
+            lowerTopic.includes('riddle') || lowerTopic.includes('đố vui')) {
+          score += 8;
+        }
+        break;
+      case 'matching':
+        if (lowerTopic.includes('nối từ') || lowerTopic.includes('matching') || 
+            lowerTopic.includes('ghép đôi') || lowerTopic.includes('nối')) {
+          score += 8;
+        }
+        break;
+      case 'pictionary':
+        if (lowerTopic.includes('đoán từ qua hình') || lowerTopic.includes('pictionary') || 
+            lowerTopic.includes('hình ảnh') || lowerTopic.includes('đoán hình')) {
+          score += 8;
+        }
+        break;
+      case 'wordsearch':
+        if (lowerTopic.includes('tìm từ') || lowerTopic.includes('word search') || 
+            lowerTopic.includes('từ ẩn') || lowerTopic.includes('tìm chữ')) {
+          score += 8;
+        }
+        break;
+      case 'categorizing':
+        if (lowerTopic.includes('phân loại') || lowerTopic.includes('categorizing') || 
+            lowerTopic.includes('phân nhóm') || lowerTopic.includes('sắp xếp nhóm')) {
+          score += 8;
+        }
+        break;
+    }
+    
+    // Check for subject compatibility
+    if (gameType.id === 'mathgenerator' && 
+        (lowerTopic.includes('toán') || lowerTopic.includes('math') || 
+         lowerTopic.includes('tính') || lowerTopic.includes('số học'))) {
+      score += 5;
+    }
+    
+    if (gameType.id === 'pictionary' && 
+        (lowerTopic.includes('nghệ thuật') || lowerTopic.includes('hình ảnh') || 
+         lowerTopic.includes('vẽ') || lowerTopic.includes('minh họa'))) {
+      score += 5;
+    }
+    
+    if (gameType.id === 'matching' && 
+        (lowerTopic.includes('từ vựng') || lowerTopic.includes('vocabulary') || 
+         lowerTopic.includes('ghép đôi') || lowerTopic.includes('định nghĩa'))) {
+      score += 5;
+    }
+    
+    return { gameType, score };
+  });
+  
+  // Sort by score and get the highest match
+  gameMatches.sort((a, b) => b.score - a.score);
+  
+  // If we have a good match, return it
+  if (gameMatches[0].score > 0) {
+    return gameMatches[0].gameType;
   }
   
-  // Check for specific game mechanics in the topic
-  if (lowerTopic.includes('trắc nghiệm') || lowerTopic.includes('abcd')) {
-    return getGameTypeById('quiz');
-  }
-  if (lowerTopic.includes('thẻ ghi nhớ') || lowerTopic.includes('flash card')) {
-    return getGameTypeById('flashcards');
-  }
-  if (lowerTopic.includes('xếp lại câu') || lowerTopic.includes('unjumble')) {
-    return getGameTypeById('unjumble');
-  }
-  if (lowerTopic.includes('điền vào chỗ trống') || lowerTopic.includes('hoàn thành câu')) {
-    return getGameTypeById('sentence');
-  }
-  if (lowerTopic.includes('đúng sai') || lowerTopic.includes('true false')) {
-    return getGameTypeById('truefalse');
-  }
-  if (lowerTopic.includes('toán') || lowerTopic.includes('math')) {
-    return getGameTypeById('mathgenerator');
-  }
-  if (lowerTopic.includes('câu đố') || lowerTopic.includes('riddle')) {
-    return getGameTypeById('riddle');
-  }
-  if (lowerTopic.includes('nối từ') || lowerTopic.includes('matching')) {
-    return getGameTypeById('matching');
-  }
-  if (lowerTopic.includes('đoán từ qua hình') || lowerTopic.includes('pictionary')) {
-    return getGameTypeById('pictionary');
-  }
-  if (lowerTopic.includes('tìm từ ẩn') || lowerTopic.includes('word search')) {
-    return getGameTypeById('wordsearch');
-  }
-  if (lowerTopic.includes('phân loại') || lowerTopic.includes('categorizing')) {
-    return getGameTypeById('categorizing');
-  }
-  
-  // Default to quiz for general topics
+  // Default to quiz if no good match found
   return getGameTypeById('quiz');
 };
