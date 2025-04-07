@@ -1,3 +1,4 @@
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -133,6 +134,37 @@ export class AIGameGenerator {
       console.log("⚠️ AIGameGenerator: Đang tạo game dự phòng do gặp lỗi");
       return createFallbackGame(topic);
     }
+  }
+  
+  setOpenAIKey(key: string): boolean {
+    // Allow empty key to disable OpenAI enhancement
+    const success = saveOpenAIKey(key);
+    if (success) {
+      console.log("🚀 AIGameGenerator: Đã lưu OpenAI key mới");
+      this.openAIKey = key;
+      
+      // If the key is empty, automatically enable canvas mode
+      if (!key) {
+        this.canvasMode = true;
+        console.log("🚀 AIGameGenerator: Đã bật tự động chế độ Canvas do không có OpenAI key");
+      }
+    } else {
+      console.log("🚀 AIGameGenerator: Không thể lưu OpenAI key");
+    }
+    return success;
+  }
+
+  setCanvasMode(enabled: boolean): void {
+    this.canvasMode = enabled;
+    console.log(`🚀 AIGameGenerator: Chế độ canvas đã ${enabled ? 'BẬT' : 'TẮT'}`);
+  }
+
+  hasOpenAIKey(): boolean {
+    return this.openAIKey !== null && this.openAIKey !== '';
+  }
+
+  isCanvasModeEnabled(): boolean {
+    return this.canvasMode;
   }
 }
 
