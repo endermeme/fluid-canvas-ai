@@ -62,7 +62,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
       // Prevent scroll issues when sheet is open
       document.body.style.overflow = open ? 'hidden' : '';
     }}>
-      <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+      <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto" side="right">
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Bookmark className="h-5 w-5 text-primary" />
