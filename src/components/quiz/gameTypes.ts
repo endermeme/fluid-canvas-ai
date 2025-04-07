@@ -98,6 +98,79 @@ export const gameTypes: GameType[] = [
       category: 'general',
     }
   },
+  // New game types below
+  {
+    id: "crossword",
+    name: "Ô chữ",
+    description: "Điền từ vào các ô ngang và dọc dựa trên các gợi ý đã cho.",
+    icon: "grid",
+    defaultSettings: {
+      difficulty: 'medium',
+      questionCount: 15,
+      timePerQuestion: 120,
+      category: 'general',
+    }
+  },
+  {
+    id: "matching",
+    name: "Nối từ",
+    description: "Nối các từ hoặc khái niệm ở cột bên trái với định nghĩa tương ứng ở cột bên phải.",
+    icon: "link",
+    defaultSettings: {
+      difficulty: 'medium',
+      questionCount: 10,
+      timePerQuestion: 40,
+      category: 'general',
+    }
+  },
+  {
+    id: "pictionary",
+    name: "Đoán từ qua hình",
+    description: "Xem hình ảnh và đoán từ hoặc cụm từ được mô tả bằng hình ảnh đó.",
+    icon: "image",
+    defaultSettings: {
+      difficulty: 'medium',
+      questionCount: 8,
+      timePerQuestion: 30,
+      category: 'general',
+    }
+  },
+  {
+    id: "wordsearch",
+    name: "Tìm từ ẩn",
+    description: "Tìm các từ ẩn giấu trong bảng chữ cái theo mọi hướng (ngang, dọc, chéo).",
+    icon: "search",
+    defaultSettings: {
+      difficulty: 'medium',
+      questionCount: 10,
+      timePerQuestion: 60,
+      category: 'general',
+    }
+  },
+  {
+    id: "sequencing",
+    name: "Sắp xếp quy trình",
+    description: "Sắp xếp các bước của một quy trình theo đúng thứ tự diễn ra.",
+    icon: "list",
+    defaultSettings: {
+      difficulty: 'medium',
+      questionCount: 6,
+      timePerQuestion: 45,
+      category: 'general',
+    }
+  },
+  {
+    id: "categorizing",
+    name: "Phân loại",
+    description: "Phân loại các đối tượng vào các nhóm khác nhau dựa trên đặc điểm chung.",
+    icon: "folder",
+    defaultSettings: {
+      difficulty: 'medium',
+      questionCount: 8,
+      timePerQuestion: 40,
+      category: 'general',
+    }
+  }
 ];
 
 export const getGameTypeById = (id: string): GameType | undefined => {
@@ -138,6 +211,25 @@ export const getGameTypeByTopic = (topic: string): GameType | undefined => {
   }
   if (lowerTopic.includes('câu đố') || lowerTopic.includes('riddle')) {
     return getGameTypeById('riddle');
+  }
+  // New game type matching
+  if (lowerTopic.includes('ô chữ') || lowerTopic.includes('crossword')) {
+    return getGameTypeById('crossword');
+  }
+  if (lowerTopic.includes('nối từ') || lowerTopic.includes('matching')) {
+    return getGameTypeById('matching');
+  }
+  if (lowerTopic.includes('đoán từ qua hình') || lowerTopic.includes('pictionary')) {
+    return getGameTypeById('pictionary');
+  }
+  if (lowerTopic.includes('tìm từ ẩn') || lowerTopic.includes('word search')) {
+    return getGameTypeById('wordsearch');
+  }
+  if (lowerTopic.includes('sắp xếp quy trình') || lowerTopic.includes('sequencing')) {
+    return getGameTypeById('sequencing');
+  }
+  if (lowerTopic.includes('phân loại') || lowerTopic.includes('categorizing')) {
+    return getGameTypeById('categorizing');
   }
   
   // Default to quiz for general topics
