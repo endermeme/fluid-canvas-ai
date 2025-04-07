@@ -4,7 +4,7 @@ import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { MiniGame, AIGameGeneratorOptions } from './types';
 import { createGeminiClient, logError, logInfo, logWarning } from './apiUtils';
-import { tryGeminiGeneration, generateWithGeminiPrompt } from './geminiGenerator';
+import { tryGeminiGeneration } from './geminiGenerator';
 import { createFallbackGame } from './fallbackGenerator';
 
 // Sử dụng API key cứng
@@ -91,55 +91,6 @@ export class AIGameGenerator {
       const fallbackGame = createFallbackGame(topic);
       return {
         title: topic,
-        description: "",
-        content: fallbackGame.content
-      };
-    }
-  }
-
-  // New method to generate game with custom prompt for presets
-  async generateMiniGameWithPrompt(customPrompt: string): Promise<MiniGame | null> {
-    try {
-      console.log(`🚀 AIGameGenerator: Starting game generation with custom prompt`);
-      console.log(`🚀 AIGameGenerator: Canvas mode: ${this.canvasMode ? 'ON' : 'OFF'}`);
-      
-      const startTime = Date.now();
-      
-      // Generate with Gemini using custom prompt
-      console.log(`🚀 AIGameGenerator: Starting preset game generation with ${this.modelName}...`);
-      const geminiResult = await generateWithGeminiPrompt(this.model, customPrompt);
-      
-      const geminiTime = ((Date.now() - startTime) / 1000).toFixed(2);
-      console.log(`🚀 AIGameGenerator: Preset Gemini generation completed in ${geminiTime}s`);
-      
-      if (geminiResult && geminiResult.content) {
-        console.log(`🚀 AIGameGenerator: Successfully generated preset game`);
-        console.log(`🚀 AIGameGenerator: Code size: ${geminiResult.content.length.toLocaleString()} characters`);
-        
-        const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
-        console.log(`🚀 AIGameGenerator: Total preset game generation time: ${totalTime}s`);
-        
-        return {
-          title: geminiResult.title || "Trò chơi tùy chỉnh",
-          description: geminiResult.description || "",
-          content: geminiResult.content
-        };
-      }
-      
-      console.log("⚠️ AIGameGenerator: Preset Gemini generation failed, using fallback game");
-      const fallbackGame = createFallbackGame("Trò chơi tùy chỉnh");
-      return {
-        title: "Trò chơi tùy chỉnh",
-        description: "",
-        content: fallbackGame.content
-      };
-      
-    } catch (error) {
-      console.error("❌ AIGameGenerator: Error in generateMiniGameWithPrompt:", error);
-      console.log("⚠️ AIGameGenerator: Creating fallback game due to error");
-      const fallbackGame = createFallbackGame("Trò chơi tùy chỉnh");
-      return {
-        title: "Trò chơi tùy chỉnh",
         description: "",
         content: fallbackGame.content
       };

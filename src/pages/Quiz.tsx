@@ -8,16 +8,13 @@ import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
 import { animateContentHighlight } from '@/lib/animations';
-import GamePresets from '@/components/quiz/presets/GamePresets';
-import { getPresetById } from '@/components/quiz/presets/gamePresetData';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
   const [isManualMode, setIsManualMode] = useState(false);
   const [showChatInterface, setShowChatInterface] = useState(false);
-  const [showPresets, setShowPresets] = useState(true);
   
-  const quizGeneratorRef = useRef<{ generateQuiz: (topic: string, settings?: any) => void }>(null);
+  const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
   const { addBlock } = useCanvasState();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
@@ -35,7 +32,6 @@ const Quiz = () => {
     if (topicParam) {
       setTopic(topicParam);
       setIsManualMode(true);
-      setShowPresets(false);
       
       // If autostart is set, generate the quiz automatically
       if (autoStart === 'true') {
@@ -81,7 +77,6 @@ const Quiz = () => {
     
     // Switch to manual mode when a chat request comes in
     setIsManualMode(true);
-    setShowPresets(false);
     
     // Directly generate the game
     setTopic(requestedTopic);
@@ -101,43 +96,8 @@ const Quiz = () => {
     }, 100);
   };
 
-  const handlePresetSelect = (presetId: string, content: string) => {
-    const preset = getPresetById(presetId);
-    if (!preset) return;
-
-    const combinedTopic = `${preset.name}: ${content}`;
-    setTopic(combinedTopic);
-    setIsManualMode(true);
-    setShowPresets(false);
-    
-    setIsGenerating(true);
-    setTimeout(() => {
-      if (quizGeneratorRef.current) {
-        const settings = {
-          presetId,
-          customContent: content,
-          ...preset
-        };
-        
-        quizGeneratorRef.current.generateQuiz(combinedTopic, settings);
-      } else {
-        toast({
-          title: "Lỗi Hệ Thống",
-          description: "Không thể kết nối với trình tạo minigame. Vui lòng thử lại.",
-          variant: "destructive",
-        });
-      }
-      setIsGenerating(false);
-    }, 100);
-  };
-
   const toggleChatInterface = () => {
     setShowChatInterface(!showChatInterface);
-  };
-
-  const handleBackToPresets = () => {
-    setIsManualMode(false);
-    setShowPresets(true);
   };
 
   return (
@@ -145,12 +105,7 @@ const Quiz = () => {
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 bg-background overflow-hidden p-0 relative">
           <div ref={mainContentRef} className="h-full relative">
-            {showPresets && !isManualMode ? (
-              <GamePresets 
-                onSelectPreset={handlePresetSelect}
-                onCancel={handleBackToPresets}
-              />
-            ) : isManualMode ? (
+            {isManualMode ? (
               <QuizGenerator 
                 ref={quizGeneratorRef} 
                 topic={topic}
