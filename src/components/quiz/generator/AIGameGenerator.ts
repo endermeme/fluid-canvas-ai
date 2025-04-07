@@ -13,12 +13,12 @@ const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 export class AIGameGenerator {
   private model: any;
   private modelName: string;
-  private canvasMode: boolean = false;
+  private canvasMode: boolean = true;
 
   constructor(apiKey: string = API_KEY, options?: { modelName?: string; canvasMode?: boolean }) {
     console.log("🚀 AIGameGenerator: Initializing AI game generator");
-    this.modelName = options?.modelName || 'gemini-2.5-pro-preview-03-25';
-    this.canvasMode = options?.canvasMode || false;
+    this.modelName = options?.modelName || 'gemini-2.0-flash';
+    this.canvasMode = options?.canvasMode || true;
     
     console.log(`🚀 AIGameGenerator: Using model ${this.modelName}`);
     console.log(`🚀 AIGameGenerator: Canvas mode: ${this.canvasMode ? 'ON' : 'OFF'}`);
