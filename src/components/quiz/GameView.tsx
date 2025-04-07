@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/types';
 import sanitizeHtml from 'sanitize-html';
 import { Button } from '@/components/ui/button';
-import { Home, Share2, Copy } from 'lucide-react';
+import { Home, Share2, Copy, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
 
@@ -111,6 +111,20 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBackToHome }) => {
       >
         {/* The game will be loaded here */}
       </div>
+
+      {/* Nút Tạo Mới cố định ở góc dưới bên phải */}
+      {onBackToHome && (
+        <div className="absolute bottom-4 right-4">
+          <Button 
+            onClick={onBackToHome}
+            size="sm" 
+            className="bg-primary/80 hover:bg-primary shadow-lg"
+          >
+            <Plus size={16} className="mr-1" />
+            Tạo Mới
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
