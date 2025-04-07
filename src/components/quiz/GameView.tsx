@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Share2, Home } from 'lucide-react';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import SourceCodeViewer from './SourceCodeViewer';
 
 interface GameViewProps {
   miniGame: MiniGame;
@@ -14,7 +14,6 @@ interface GameViewProps {
 const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [iframeError, setIframeError] = useState<string | null>(null);
 
   // Save the game to history when it loads
@@ -243,6 +242,11 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
             style={{ maxWidth: '100%', margin: '0 auto' }}
           />
         )}
+      </div>
+      
+      {/* Source Code Viewer */}
+      <div className="w-full p-4 bg-background">
+        <SourceCodeViewer htmlContent={miniGame.content} />
       </div>
       
       {/* Control buttons */}
