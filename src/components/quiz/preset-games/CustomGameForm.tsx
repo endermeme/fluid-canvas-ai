@@ -82,7 +82,22 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     }
     
     setIsGenerating(true);
-    onGenerate(content, difficulty);
+    
+    // Call the onGenerate function with the content and difficulty
+    try {
+      onGenerate(content, difficulty);
+      
+      // Don't reset generating state here - let the parent component handle it
+      // since it will track the actual API call completion
+    } catch (error) {
+      setIsGenerating(false);
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi xảy ra khi tạo trò chơi. Vui lòng thử lại.",
+        variant: "destructive"
+      });
+      console.error("Error generating game:", error);
+    }
   };
 
   return (
@@ -133,6 +148,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
             <Button 
               variant="outline" 
               onClick={onCancel}
+              disabled={isGenerating}
             >
               Hủy
             </Button>

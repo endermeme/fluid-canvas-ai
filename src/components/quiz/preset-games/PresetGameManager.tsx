@@ -115,9 +115,6 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
     setError(null);
     
     try {
-      // Tạo prompt dựa trên loại game và nội dung người dùng
-      const gamePrompt = content;
-      
       // Tạo settings tùy chỉnh dựa trên loại game
       const settings: GameSettingsData = {
         difficulty: difficulty as 'easy' | 'medium' | 'hard',
@@ -126,13 +123,13 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
         category: 'general',
       };
       
-      console.log("Generating game with prompt:", gamePrompt);
+      console.log("Generating game with prompt:", content);
       console.log("Game settings:", settings);
       
       // Tạo game với AI
-      const game = await gameGenerator.generateMiniGame(gamePrompt, settings);
+      const game = await gameGenerator.generateMiniGame(content, settings);
       
-      if (game) {
+      if (game && game.content) {
         setGameContent(game);
         setShowCustomForm(false);
         toast({
@@ -158,6 +155,14 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
   // Render appropriate template based on game type
   const renderGameTemplate = () => {
     const topic = initialTopic || "Chủ đề chung";
+    
+    if (!gameContent) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-lg">Không có nội dung trò chơi.</p>
+        </div>
+      );
+    }
     
     switch(gameType) {
       case 'quiz':
