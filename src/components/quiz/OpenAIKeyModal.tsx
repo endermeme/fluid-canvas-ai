@@ -29,6 +29,14 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({
   const [isPrimaryAPI, setIsPrimaryAPI] = useState<boolean>(useOpenAIAsPrimary);
   const { toast } = useToast();
 
+  useEffect(() => {
+    console.log("OpenAIKeyModal: Current settings:", {
+      currentKey: currentKey ? "Set" : "Not set",
+      useOpenAIAsPrimary: useOpenAIAsPrimary
+    });
+    setIsPrimaryAPI(useOpenAIAsPrimary);
+  }, [currentKey, useOpenAIAsPrimary]);
+
   const handleSave = () => {
     if (!apiKey.trim() && !allowEmpty) {
       toast({
@@ -48,6 +56,11 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({
       return;
     }
 
+    console.log("OpenAIKeyModal: Saving settings:", {
+      hasKey: apiKey ? "Yes" : "No",
+      isPrimaryAPI
+    });
+    
     onSave(apiKey, isPrimaryAPI);
     onClose();
   };
@@ -103,6 +116,7 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({
                 <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <p className="text-xs text-muted-foreground">
                   Khi bật chế độ này, hệ thống sẽ sử dụng mô hình GPT-4o Mini của OpenAI để tạo game trực tiếp thay vì dùng Gemini.
+                  OpenAI sẽ tạo HTML và JavaScript dựa trên prompt tương tự với Gemini.
                 </p>
               </div>
             )}

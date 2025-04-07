@@ -121,6 +121,8 @@ Include these requirements:
 The game should be educational and fun, focused specifically on the topic: "${topic}".
 `;
 
+          console.log(`🚀 AIGameGenerator: Gửi prompt trực tiếp đến GPT-4o-mini: ${gamePrompt.substring(0, 100)}...`);
+          
           const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -137,13 +139,20 @@ The game should be educational and fun, focused specifically on the topic: "${to
 
           if (response.ok) {
             const data = await response.json();
+            console.log(`🚀 AIGameGenerator: Đã nhận phản hồi từ GPT-4o-mini`);
+            
             const content = data.choices && data.choices[0] && data.choices[0].message 
               ? data.choices[0].message.content 
               : null;
             
             if (content && content.length > 500) {
+              console.log(`🚀 AIGameGenerator: Độ dài phản hồi: ${content.length} ký tự`);
+              console.log(`🚀 AIGameGenerator: Trích xuất mã HTML từ nội dung...`);
+              
               const htmlMatch = content.match(/<(!DOCTYPE|html)[\s\S]*<\/html>/i);
               const gameHtml = htmlMatch ? htmlMatch[0] : content;
+              
+              console.log(`🚀 AIGameGenerator: Đã trích xuất HTML thành công, độ dài: ${gameHtml.length} ký tự`);
               
               const openAITime = ((Date.now() - startTime) / 1000).toFixed(2);
               console.log(`🚀 AIGameGenerator: Tạo game với OpenAI hoàn tất sau ${openAITime}s`);
@@ -154,7 +163,12 @@ The game should be educational and fun, focused specifically on the topic: "${to
                 description: `Game về chủ đề ${topic}`,
                 content: gameHtml
               };
+            } else {
+              console.log(`❌ AIGameGenerator: Phản hồi quá ngắn hoặc không có nội dung, độ dài: ${content ? content.length : 0} ký tự`);
             }
+          } else {
+            const errorText = await response.text();
+            console.error(`❌ AIGameGenerator: Lỗi từ API OpenAI: ${response.status} - ${errorText}`);
           }
           
           console.log("⚠️ AIGameGenerator: Lỗi khi tạo game trực tiếp với OpenAI, chuyển sang Gemini");

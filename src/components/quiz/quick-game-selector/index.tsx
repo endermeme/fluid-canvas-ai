@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from '../generator/AIGameGenerator';
@@ -83,6 +82,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   };
 
   const handleSaveOpenAIKey = (key: string, useAsPrimary: boolean = false) => {
+    console.log("QuickGameSelector: Saving OpenAI key, useAsPrimary:", useAsPrimary);
     gameGenerator.setOpenAIKey(key, useAsPrimary);
     if (key) {
       toast({
@@ -134,6 +134,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   };
 
   const handleTopicSelect = (gameType: GameType) => {
+    console.log("QuickGameSelector: Topic selected:", gameType.name);
     setSelectedTopic(gameType.description);
     setCurrentGameType(gameType);
     setShowSettings(true);
@@ -149,6 +150,8 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     
     setIsLoading(true);
     setErrorMessage(null);
+    
+    console.log("Starting game with settings:", settings);
     
     try {
       const game = await gameGenerator.generateMiniGame(selectedTopic, settings);
@@ -182,7 +185,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   };
 
   if (isLoading) {
-    return <GameLoading />;
+    return <GameLoading topic={selectedTopic || currentGameType?.name || "minigame"} />;
   }
 
   if (errorMessage) {
@@ -236,6 +239,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
         onSave={handleSaveOpenAIKey}
         currentKey={localStorage.getItem('openai_api_key')}
         useOpenAIAsPrimary={useOpenAIAsPrimary}
+        allowEmpty={true}
       />
     </div>
   );
