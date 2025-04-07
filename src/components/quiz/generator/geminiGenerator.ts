@@ -1,4 +1,3 @@
-
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -134,6 +133,8 @@ export const generateWithGemini = async (
         console.log("🔷 Gemini: Valid JSON, extraction successful");
         
         return {
+          title: gameData.title || topic,
+          description: gameData.description || "",
           content: gameData.content || ''
         };
       } catch (directParseError) {
@@ -168,6 +169,8 @@ export const generateWithGemini = async (
           console.log(`🔷 Gemini: Code size: ${(gameData.content?.length || 0).toLocaleString()} characters`);
           
           return {
+            title: gameData.title || topic,
+            description: gameData.description || "",
             content: gameData.content || ''
           };
         } catch (jsonError) {
@@ -227,6 +230,8 @@ export const generateWithGemini = async (
       if (content) {
         console.log("🔷 Gemini: Successful extraction using regex");
         return {
+          title: topic,
+          description: "",
           content: content
         };
       }
@@ -236,6 +241,8 @@ export const generateWithGemini = async (
       if (htmlMatch) {
         console.log("🔷 Gemini: Successful HTML extraction");
         return {
+          title: topic,
+          description: "",
           content: htmlMatch[0]
         };
       }
@@ -276,4 +283,3 @@ export const tryGeminiGeneration = async (
     return tryGeminiGeneration(model, topic, settings, retryCount + 1);
   }
 };
-

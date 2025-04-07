@@ -1,3 +1,4 @@
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -129,11 +130,15 @@ export class AIGameGenerator {
             console.log(`🚀 AIGameGenerator: Total game generation time: ${totalTime}s`);
             
             return {
+              title: topic,
+              description: "",
               content: enhancedGame.content
             };
           } else {
             console.log("🚀 AIGameGenerator: OpenAI enhancement failed or returned invalid content, using Gemini result");
             return {
+              title: topic,
+              description: "",
               content: geminiResult.content
             };
           }
@@ -143,6 +148,8 @@ export class AIGameGenerator {
         console.log(`🚀 AIGameGenerator: Total game generation time: ${totalTime}s`);
         
         return {
+          title: topic,
+          description: "",
           content: geminiResult.content
         };
       }
@@ -150,6 +157,8 @@ export class AIGameGenerator {
       console.log("⚠️ AIGameGenerator: Gemini generation failed, using fallback game");
       const fallbackGame = createFallbackGame(topic);
       return {
+        title: topic,
+        description: "",
         content: fallbackGame.content
       };
       
@@ -158,6 +167,8 @@ export class AIGameGenerator {
       console.log("⚠️ AIGameGenerator: Creating fallback game due to error");
       const fallbackGame = createFallbackGame(topic);
       return {
+        title: topic,
+        description: "",
         content: fallbackGame.content
       };
     }

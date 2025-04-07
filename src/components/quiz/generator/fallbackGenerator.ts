@@ -1,277 +1,260 @@
-
 import { MiniGame } from './types';
-import { getGameTypeByTopic } from '../gameTypes';
 
 export const createFallbackGame = (topic: string): MiniGame => {
-  console.log("Creating fallback game for topic:", topic);
-  return getBasicGame(topic);
-};
-
-export const getBasicGame = (topic: string): MiniGame => {
-  // Get game type from topic to create appropriate fallback
-  const gameType = getGameTypeByTopic(topic);
-  const gameTitle = gameType ? `${gameType.name} về ${topic}` : `Quiz về ${topic}`;
   
+  // Simple fallback game when all else fails
   return {
-    title: gameTitle,
-    description: `Minigame đơn giản về chủ đề ${topic}`,
-    content: `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${gameTitle}</title>
-    <style>
-        body {
+    title: `Fallback game about ${topic}`,
+    description: "A basic game when the AI generator encounters an issue",
+    content: `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Fallback Game about ${topic}</title>
+        <style>
+          body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
-            overflow: hidden;
-        }
-
-        #game-container {
+            margin: 0;
+            padding: 16px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+          }
+          .container {
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            padding: 20px;
-            width: 90%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
             max-width: 600px;
-            margin: 20px auto;
+            width: 100%;
             text-align: center;
-        }
-
-        h1 {
-            color: #2c3e50;
+          }
+          h1 {
+            color: #4a5568;
+            margin-top: 0;
+          }
+          p {
+            line-height: 1.6;
             margin-bottom: 20px;
-        }
-
-        #question {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .options {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        @media (min-width: 480px) {
-            .options {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .option {
-            padding: 10px;
-            background-color: #e9ecef;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .option:hover {
-            background-color: #dee2e6;
-        }
-
-        .option.selected {
-            background-color: #4dabf7;
-            color: white;
-        }
-
-        .option.correct {
-            background-color: #40c057;
-            color: white;
-        }
-
-        .option.wrong {
-            background-color: #fa5252;
-            color: white;
-        }
-
-        #next-btn, #restart-btn {
-            padding: 10px 20px;
-            background-color: #4dabf7;
+          }
+          .btn {
+            background-color: #4299e1;
             color: white;
             border: none;
-            border-radius: 8px;
+            padding: 10px 16px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.2s;
-        }
-
-        #next-btn:hover, #restart-btn:hover {
-            background-color: #339af0;
-        }
-
-        #score-container {
-            font-size: 1.2rem;
-            margin-top: 20px;
-        }
-
-        #progress-bar {
+            font-size: 16px;
+            transition: background-color 0.3s;
+          }
+          .btn:hover {
+            background-color: #3182ce;
+          }
+          .quiz-container {
+            margin-top: 24px;
             width: 100%;
-            height: 10px;
-            background-color: #dee2e6;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        #progress {
-            height: 100%;
-            background-color: #4dabf7;
-            width: 0%;
-            transition: width 0.5s;
-        }
-    </style>
-</head>
-<body>
-    <div id="game-container">
-        <h1>${gameTitle}</h1>
-        <div id="progress-bar">
-            <div id="progress"></div>
-        </div>
-        <div id="question"></div>
-        <div class="options" id="options">
-            <!-- Options will be inserted here -->
-        </div>
-        <button id="next-btn" style="display:none;">Câu tiếp theo</button>
-        <div id="score-container" style="display:none;">
-            <p>Điểm của bạn: <span id="score">0</span>/<span id="total">0</span></p>
-            <button id="restart-btn">Chơi lại</button>
-        </div>
-    </div>
-
-    <script>
-        // Quiz data
-        const quizData = [
-            {
-                question: "Câu hỏi 1 về ${topic}?",
-                options: ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
-                correct: 0
-            },
-            {
-                question: "Câu hỏi 2 về ${topic}?",
-                options: ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
-                correct: 1
-            },
-            {
-                question: "Câu hỏi 3 về ${topic}?",
-                options: ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
-                correct: 2
+          }
+          .question {
+            font-weight: bold;
+            margin-bottom: 12px;
+          }
+          .options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+          .option {
+            background-color: #e2e8f0;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            transition: background-color 0.3s;
+          }
+          .option:hover {
+            background-color: #cbd5e0;
+          }
+          .option.selected {
+            background-color: #bee3f8;
+          }
+          .option.correct {
+            background-color: #c6f6d5;
+          }
+          .option.incorrect {
+            background-color: #fed7d7;
+          }
+          .feedback {
+            margin-top: 16px;
+            font-weight: bold;
+          }
+          .next-btn {
+            margin-top: 16px;
+          }
+          @media (max-width: 480px) {
+            .container {
+              padding: 16px;
             }
-        ];
-
-        // Game variables
-        let currentQuestion = 0;
-        let score = 0;
-        let optionSelected = false;
-
-        // DOM elements
-        const questionEl = document.getElementById('question');
-        const optionsEl = document.getElementById('options');
-        const nextBtn = document.getElementById('next-btn');
-        const scoreEl = document.getElementById('score');
-        const totalEl = document.getElementById('total');
-        const scoreContainer = document.getElementById('score-container');
-        const restartBtn = document.getElementById('restart-btn');
-        const progressBar = document.getElementById('progress');
-
-        // Load quiz
-        function loadQuiz() {
-            optionSelected = false;
-            nextBtn.style.display = 'none';
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Learning about ${topic}</h1>
+          <p>Sorry, we couldn't generate a custom game. Let's try a simple quiz instead!</p>
+          
+          <div class="quiz-container">
+            <div id="question-container">
+              <p class="question" id="question-text">Loading questions about ${topic}...</p>
+              <div class="options" id="options-container">
+                <!-- Options will be inserted here by JS -->
+              </div>
+              <p class="feedback" id="feedback"></p>
+            </div>
+            <button class="btn next-btn" id="next-btn" style="display:none;">Next Question</button>
+            <button class="btn" id="restart-btn" style="display:none;">Try Again</button>
+          </div>
+        </div>
+        
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            // Simple fallback quiz about the topic
+            // We'll generate some generic questions that could apply to any topic
+            const topic = "${topic}";
             
-            const currentQuizData = quizData[currentQuestion];
-            questionEl.innerText = currentQuizData.question;
+            const questions = [
+              {
+                question: "What is the main purpose of studying " + topic + "?",
+                options: [
+                  "To understand its fundamental principles",
+                  "To apply it in real-world scenarios",
+                  "To solve related problems efficiently",
+                  "All of the above"
+                ],
+                correctIndex: 3
+              },
+              {
+                question: "Which of these might be considered a key element of " + topic + "?",
+                options: [
+                  "Research and investigation",
+                  "Practical application",
+                  "Historical context",
+                  "Technical details"
+                ],
+                correctIndex: Math.floor(Math.random() * 4) // Random correct answer
+              },
+              {
+                question: "How might professionals use knowledge of " + topic + " in their work?",
+                options: [
+                  "To make informed decisions",
+                  "To develop new methodologies",
+                  "To educate others on the subject",
+                  "To improve existing systems"
+                ],
+                correctIndex: Math.floor(Math.random() * 4) // Random correct answer
+              }
+            ];
             
-            optionsEl.innerHTML = '';
-            currentQuizData.options.forEach((option, index) => {
-                const optionEl = document.createElement('div');
-                optionEl.innerText = option;
-                optionEl.classList.add('option');
-                optionEl.addEventListener('click', () => selectOption(optionEl, index));
-                optionsEl.appendChild(optionEl);
+            let currentQuestionIndex = 0;
+            let score = 0;
+            
+            // DOM elements
+            const questionText = document.getElementById('question-text');
+            const optionsContainer = document.getElementById('options-container');
+            const feedbackElement = document.getElementById('feedback');
+            const nextButton = document.getElementById('next-btn');
+            const restartButton = document.getElementById('restart-btn');
+            
+            // Load the first question
+            loadQuestion();
+            
+            function loadQuestion() {
+              if (currentQuestionIndex >= questions.length) {
+                showResults();
+                return;
+              }
+              
+              const question = questions[currentQuestionIndex];
+              questionText.textContent = question.question;
+              
+              // Clear previous options
+              optionsContainer.innerHTML = '';
+              
+              // Add new options
+              question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.dataset.index = index;
+                optionElement.addEventListener('click', selectOption);
+                optionsContainer.appendChild(optionElement);
+              });
+              
+              // Hide feedback and next button
+              feedbackElement.textContent = '';
+              nextButton.style.display = 'none';
+            }
+            
+            function selectOption(e) {
+              // Prevent selecting after an answer is chosen
+              if (nextButton.style.display === 'block') return;
+              
+              const selectedIndex = parseInt(e.target.dataset.index);
+              const correctIndex = questions[currentQuestionIndex].correctIndex;
+              
+              // Remove any previous selections
+              document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+              });
+              
+              // Mark this option as selected
+              e.target.classList.add('selected');
+              
+              // Check if correct
+              if (selectedIndex === correctIndex) {
+                e.target.classList.add('correct');
+                feedbackElement.textContent = 'Correct!';
+                score++;
+              } else {
+                e.target.classList.add('incorrect');
+                // Also highlight the correct answer
+                document.querySelectorAll('.option')[correctIndex].classList.add('correct');
+                feedbackElement.textContent = 'Incorrect. Try again!';
+              }
+              
+              // Show next button
+              nextButton.style.display = 'block';
+            }
+            
+            function showResults() {
+              questionText.textContent = "Quiz Complete!";
+              optionsContainer.innerHTML = '';
+              feedbackElement.textContent = "Your score: " + score + " out of " + questions.length;
+              nextButton.style.display = 'none';
+              restartButton.style.display = 'block';
+            }
+            
+            // Event listeners
+            nextButton.addEventListener('click', () => {
+              currentQuestionIndex++;
+              loadQuestion();
             });
             
-            // Update progress bar
-            progressBar.style.width = \`\${(currentQuestion / quizData.length) * 100}%\`;
-        }
-
-        // Select option
-        function selectOption(optionEl, index) {
-            if (optionSelected) return;
-            
-            optionSelected = true;
-            const currentQuizData = quizData[currentQuestion];
-            
-            // Check if the selected option is correct
-            if (index === currentQuizData.correct) {
-                optionEl.classList.add('correct');
-                score++;
-            } else {
-                optionEl.classList.add('wrong');
-                // Highlight the correct answer
-                optionsEl.children[currentQuizData.correct].classList.add('correct');
-            }
-            
-            // Show next button
-            nextBtn.style.display = 'block';
-        }
-
-        // Go to next question or end quiz
-        function nextQuestion() {
-            currentQuestion++;
-            
-            if (currentQuestion < quizData.length) {
-                loadQuiz();
-            } else {
-                endQuiz();
-            }
-        }
-
-        // End quiz and show score
-        function endQuiz() {
-            questionEl.innerText = \`Quiz hoàn thành!\`;
-            optionsEl.innerHTML = '';
-            nextBtn.style.display = 'none';
-            
-            scoreEl.innerText = score;
-            totalEl.innerText = quizData.length;
-            scoreContainer.style.display = 'block';
-            
-            // Update progress bar to 100%
-            progressBar.style.width = '100%';
-        }
-
-        // Restart quiz
-        function restartQuiz() {
-            currentQuestion = 0;
-            score = 0;
-            optionSelected = false;
-            scoreContainer.style.display = 'none';
-            loadQuiz();
-        }
-
-        // Event listeners
-        nextBtn.addEventListener('click', nextQuestion);
-        restartBtn.addEventListener('click', restartQuiz);
-
-        // Initialize quiz
-        loadQuiz();
-    </script>
-</body>
-</html>`
+            restartButton.addEventListener('click', () => {
+              currentQuestionIndex = 0;
+              score = 0;
+              restartButton.style.display = 'none';
+              loadQuestion();
+            });
+          });
+        </script>
+      </body>
+      </html>
+    `
   };
 };

@@ -1,9 +1,7 @@
 
-import { GameSettingsData } from '../types';
-
 export interface MiniGame {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   content: string;
 }
 
