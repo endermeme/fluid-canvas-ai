@@ -4,18 +4,24 @@ import { KeyRound, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import OpenAIKeyModal from '@/components/quiz/OpenAIKeyModal';
 import { useToast } from '@/hooks/use-toast';
+import { getUseOpenAIAsPrimary } from '@/components/quiz/generator/apiUtils';
 
 const APIKeyButton = () => {
   const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
   const { toast } = useToast();
+  const useOpenAIAsPrimary = getUseOpenAIAsPrimary();
 
-  const handleSaveOpenAIKey = (key: string) => {
+  const handleSaveOpenAIKey = (key: string, useAsPrimary: boolean = false) => {
     // Allow empty key (user wants to remove the key)
     localStorage.setItem('openai_api_key', key);
+    localStorage.setItem('use_openai_primary', useAsPrimary ? 'true' : 'false');
+    
     if (key) {
       toast({
         title: "API Key Đã Lưu",
-        description: "OpenAI API key của bạn đã được lưu thành công.",
+        description: useAsPrimary 
+          ? "OpenAI sẽ được sử dụng làm API chính với GPT-4o-mini" 
+          : "OpenAI API key của bạn đã được lưu thành công.",
       });
     } else {
       toast({
@@ -43,6 +49,7 @@ const APIKeyButton = () => {
         onSave={handleSaveOpenAIKey}
         currentKey={localStorage.getItem('openai_api_key')}
         allowEmpty={true}
+        useOpenAIAsPrimary={useOpenAIAsPrimary}
       />
     </>
   );

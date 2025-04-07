@@ -6,13 +6,15 @@ import { Input } from "@/components/ui/input";
 import { X, Info } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 
 interface OpenAIKeyModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (key: string) => void;
+  onSave: (key: string, useOpenAIAsPrimary?: boolean) => void;
   currentKey: string | null;
   allowEmpty?: boolean;
+  useOpenAIAsPrimary?: boolean;
 }
 
 const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({ 
@@ -20,9 +22,11 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({
   onClose, 
   onSave, 
   currentKey,
-  allowEmpty = false 
+  allowEmpty = false,
+  useOpenAIAsPrimary = false
 }) => {
   const [apiKey, setApiKey] = useState<string>(currentKey || '');
+  const [isPrimaryAPI, setIsPrimaryAPI] = useState<boolean>(useOpenAIAsPrimary);
   const { toast } = useToast();
 
   const handleSave = () => {
@@ -44,14 +48,14 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({
       return;
     }
 
-    onSave(apiKey);
+    onSave(apiKey, isPrimaryAPI);
     onClose();
   };
   
   const handleRemoveKey = () => {
     if (allowEmpty) {
       setApiKey('');
-      onSave('');
+      onSave('', false);
       onClose();
     }
   };
@@ -80,6 +84,29 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({
               onChange={(e) => setApiKey(e.target.value)}
               className="bg-background/50 border-white/20"
             />
+            
+            {apiKey.trim() && (
+              <div className="flex items-center space-x-2 mt-4">
+                <Switch 
+                  id="use-openai-primary"
+                  checked={isPrimaryAPI}
+                  onCheckedChange={setIsPrimaryAPI}
+                />
+                <Label htmlFor="use-openai-primary" className="cursor-pointer">
+                  Sử dụng OpenAI làm API chính thay vì Gemini
+                </Label>
+              </div>
+            )}
+            
+            {isPrimaryAPI && apiKey.trim() && (
+              <div className="flex items-start gap-2 mt-3 p-2 rounded border border-primary/20 bg-primary/5">
+                <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground">
+                  Khi bật chế độ này, hệ thống sẽ sử dụng mô hình GPT-4o Mini của OpenAI để tạo game trực tiếp thay vì dùng Gemini.
+                </p>
+              </div>
+            )}
+            
             {allowEmpty && (
               <div className="flex items-start gap-2 mt-2 p-2 rounded border border-yellow-500/20 bg-yellow-500/5">
                 <Info className="h-5 w-5 text-yellow-500 shrink-0 mt-0.5" />

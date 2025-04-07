@@ -42,7 +42,6 @@ import {
   Gamepad
 } from 'lucide-react';
 
-// Import our new components
 import GameHeader from './GameHeader';
 import CustomGameForm from './CustomGameForm';
 import GameGrid from './GameGrid';
@@ -66,6 +65,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   const [currentGameType, setCurrentGameType] = useState<GameType | null>(null);
   const [titleClickCount, setTitleClickCount] = useState(0);
   const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
+  const useOpenAIAsPrimary = getUseOpenAIAsPrimary();
 
   const handleTitleClick = () => {
     setTitleClickCount(prev => {
@@ -80,8 +80,21 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     });
   };
 
-  const handleSaveOpenAIKey = (key: string) => {
-    gameGenerator.setOpenAIKey(key);
+  const handleSaveOpenAIKey = (key: string, useAsPrimary: boolean = false) => {
+    gameGenerator.setOpenAIKey(key, useAsPrimary);
+    if (key) {
+      toast({
+        title: "API Key Đã Lưu",
+        description: useAsPrimary 
+          ? "OpenAI sẽ được sử dụng làm API chính với GPT-4o-mini" 
+          : "OpenAI API key của bạn đã được lưu thành công.",
+      });
+    } else {
+      toast({
+        title: "Đã Xóa API Key",
+        description: "Đã chuyển sang chỉ sử dụng Gemini với chế độ Canvas.",
+      });
+    }
   };
 
   const getIconComponent = (iconName: string) => {
@@ -220,6 +233,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
         onClose={() => setShowOpenAIKeyModal(false)}
         onSave={handleSaveOpenAIKey}
         currentKey={localStorage.getItem('openai_api_key')}
+        useOpenAIAsPrimary={useOpenAIAsPrimary}
       />
     </div>
   );
