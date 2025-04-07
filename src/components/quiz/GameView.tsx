@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
-import { Share2, Download, Plus, AlertTriangle } from 'lucide-react';
+import { Share2, Home } from 'lucide-react';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -57,9 +57,10 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
     }
   };
 
-  // Handle creating a new game
-  const handleCreateNewGame = () => {
-    navigate('/quiz');
+  // Handle returning to home
+  const handleBackToHome = () => {
+    // Navigate to the root path
+    navigate('/');
   };
 
   // Apply game optimization code when iframe loads
@@ -222,7 +223,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
       <div className="flex-1 relative w-full h-full overflow-hidden flex items-center justify-center">
         {iframeError ? (
           <div className="bg-destructive/10 text-destructive p-4 rounded-md flex flex-col items-center m-4">
-            <AlertTriangle className="mb-2" size={24} />
             <p>{iframeError}</p>
             <Button 
               variant="outline" 
@@ -245,15 +245,16 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         )}
       </div>
       
+      {/* Control buttons */}
       <div className="absolute bottom-4 right-4 flex space-x-2">
         <Button 
           size="sm" 
           variant="ghost"
           className="bg-primary/10" 
-          onClick={handleCreateNewGame}
+          onClick={handleBackToHome}
         >
-          <Plus size={16} className="mr-1" />
-          Tạo Mới
+          <Home size={16} className="mr-1" />
+          Trở Về
         </Button>
         
         <Button 
