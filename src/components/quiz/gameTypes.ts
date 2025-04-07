@@ -63,30 +63,6 @@ export const gameTypes: GameType[] = [
     }
   },
   {
-    id: "wordmagnets",
-    name: "Tạo câu từ từ rời",
-    description: "Kéo và thả các từ rời rạc để tạo thành câu hoàn chỉnh và có nghĩa.",
-    icon: "book-open",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 45,
-      category: 'general',
-    }
-  },
-  {
-    id: "speakingcards",
-    name: "Thẻ luyện nói",
-    description: "Nhận chủ đề và nói câu trả lời, hệ thống sẽ ghi âm và phản hồi về nội dung phát biểu.",
-    icon: "message-square",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 5,
-      timePerQuestion: 60,
-      category: 'general',
-    }
-  },
-  {
     id: "memorize",
     name: "Ghi nhớ",
     description: "Xem nội dung trong thời gian giới hạn, sau đó nhập lại những gì đã ghi nhớ được.",
@@ -95,18 +71,6 @@ export const gameTypes: GameType[] = [
       difficulty: 'medium',
       questionCount: 8,
       timePerQuestion: 3,
-      category: 'general',
-    }
-  },
-  {
-    id: "rankorder",
-    name: "Sắp xếp theo thứ tự",
-    description: "Kéo các mục để sắp xếp theo đúng thứ tự yêu cầu (thời gian, kích thước, v.v.).",
-    icon: "sort-asc",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 45,
       category: 'general',
     }
   },
@@ -120,30 +84,6 @@ export const gameTypes: GameType[] = [
       questionCount: 10,
       timePerQuestion: 30,
       category: 'math',
-    }
-  },
-  {
-    id: "tellmewhy",
-    name: "Giải thích vì sao",
-    description: "Trả lời câu hỏi mở về nguyên nhân, hệ thống sẽ phân tích logic và phản hồi.",
-    icon: "lightbulb",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 5,
-      timePerQuestion: 120,
-      category: 'general',
-    }
-  },
-  {
-    id: "wouldyourather",
-    name: "Chọn giữa 2 lựa chọn",
-    description: "Đưa ra 2 lựa chọn khó, người học phải chọn một và giải thích lý do.",
-    icon: "layers",
-    defaultSettings: {
-      difficulty: 'medium',
-      questionCount: 8,
-      timePerQuestion: 90,
-      category: 'general',
     }
   },
   {
@@ -190,26 +130,11 @@ export const getGameTypeByTopic = (topic: string): GameType | undefined => {
   if (lowerTopic.includes('đúng sai') || lowerTopic.includes('true false')) {
     return getGameTypeById('truefalse');
   }
-  if (lowerTopic.includes('từ rời') || lowerTopic.includes('tạo câu')) {
-    return getGameTypeById('wordmagnets');
-  }
-  if (lowerTopic.includes('luyện nói') || lowerTopic.includes('speaking')) {
-    return getGameTypeById('speakingcards');
-  }
   if (lowerTopic.includes('ghi nhớ') || lowerTopic.includes('memorize')) {
     return getGameTypeById('memorize');
   }
-  if (lowerTopic.includes('sắp xếp thứ tự') || lowerTopic.includes('rank')) {
-    return getGameTypeById('rankorder');
-  }
   if (lowerTopic.includes('toán') || lowerTopic.includes('math')) {
     return getGameTypeById('mathgenerator');
-  }
-  if (lowerTopic.includes('tại sao') || lowerTopic.includes('giải thích')) {
-    return getGameTypeById('tellmewhy');
-  }
-  if (lowerTopic.includes('chọn giữa') || lowerTopic.includes('would you rather')) {
-    return getGameTypeById('wouldyourather');
   }
   if (lowerTopic.includes('câu đố') || lowerTopic.includes('riddle')) {
     return getGameTypeById('riddle');
