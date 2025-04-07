@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CanvasContainer from '@/components/canvas/CanvasContainer';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
@@ -11,7 +10,7 @@ import { Gamepad, Sparkles, GraduationCap } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-const Index = () => {
+const Index: React.FC = () => {
   const isMobile = useIsMobile();
   const [isChatOpen, setIsChatOpen] = useState(!isMobile);
   const { addBlock } = useCanvasState();
