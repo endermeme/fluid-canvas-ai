@@ -1,8 +1,9 @@
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { MiniGame, AIGameGeneratorOptions } from './types';
-import { createGeminiClient, getOpenAIKey, saveOpenAIKey, validateOpenAIKey, logError, logInfo, logWarning } from './apiUtils';
+import { createGeminiClient, getOpenAIKey, saveOpenAIKey } from './apiUtils';
 import { tryGeminiGeneration } from './geminiGenerator';
 import { enhanceWithOpenAI } from './openaiGenerator';
 import { createFallbackGame } from './fallbackGenerator';
@@ -35,22 +36,7 @@ export class AIGameGenerator {
   }
 
   setOpenAIKey(key: string): boolean {
-    if (!key.trim()) {
-      // Allow empty key to disable OpenAI enhancement
-      console.log("🚀 AIGameGenerator: Đã xóa OpenAI key");
-      localStorage.removeItem('openai_api_key');
-      this.openAIKey = null;
-      this.canvasMode = true;
-      return true;
-    }
-    
-    // Validate key format
-    if (!validateOpenAIKey(key)) {
-      console.log("🚀 AIGameGenerator: API key không hợp lệ");
-      return false;
-    }
-    
-    // Save valid key
+    // Allow empty key to disable OpenAI enhancement
     const success = saveOpenAIKey(key);
     if (success) {
       console.log("🚀 AIGameGenerator: Đã lưu OpenAI key mới");
@@ -101,15 +87,8 @@ export class AIGameGenerator {
       console.log(`🚀 AIGameGenerator: Tạo với Gemini hoàn tất sau ${geminiTime}s`);
       
       if (geminiResult) {
-        // Simplify game response - only keep the HTML content
-        console.log(`🚀 AIGameGenerator: Đã tạo thành công game`);
+        console.log(`🚀 AIGameGenerator: Đã tạo thành công game với Gemini: "${geminiResult.title}"`);
         console.log(`🚀 AIGameGenerator: Kích thước mã: ${geminiResult.content.length.toLocaleString()} ký tự`);
-        
-        const simplifiedGame: MiniGame = {
-          content: geminiResult.content,
-          title: topic,
-          description: ""
-        };
         
         // If OpenAI key is available, enhance the game
         if (this.hasOpenAIKey()) {
@@ -118,7 +97,7 @@ export class AIGameGenerator {
           
           const enhancedGame = await enhanceWithOpenAI(
             this.openAIKey, 
-            simplifiedGame, 
+            geminiResult, 
             topic, 
             this.canvasMode
           );
@@ -129,27 +108,22 @@ export class AIGameGenerator {
           // Only use the enhanced game if enhancing was successful
           if (enhancedGame && enhancedGame.content && enhancedGame.content.length > 100) {
             console.log("🚀 AIGameGenerator: Đã cải thiện thành công game với OpenAI");
-            console.log(`🚀 AIGameGenerator: Kích thước mã gốc vs mới: ${simplifiedGame.content.length.toLocaleString()} → ${enhancedGame.content.length.toLocaleString()} ký tự`);
+            console.log(`🚀 AIGameGenerator: Kích thước mã gốc vs mới: ${geminiResult.content.length.toLocaleString()} → ${enhancedGame.content.length.toLocaleString()} ký tự`);
             
             const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
             console.log(`🚀 AIGameGenerator: Tổng thời gian tạo game: ${totalTime}s`);
             
-            // Return simplified result - just the content matters
-            return {
-              title: topic,
-              description: "",
-              content: enhancedGame.content
-            };
+            return enhancedGame;
           } else {
             console.log("🚀 AIGameGenerator: Cải thiện OpenAI thất bại hoặc trả về nội dung không hợp lệ, sử dụng kết quả Gemini");
-            return simplifiedGame;
+            return geminiResult;
           }
         }
         
         const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
         console.log(`🚀 AIGameGenerator: Tổng thời gian tạo game: ${totalTime}s`);
         
-        return simplifiedGame;
+        return geminiResult;
       }
       
       console.log("⚠️ AIGameGenerator: Tạo với Gemini thất bại, sử dụng game dự phòng");

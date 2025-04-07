@@ -111,6 +111,7 @@ const SharedGame = () => {
       <main className="flex-1 overflow-hidden flex items-center justify-center">
         <iframe
           srcDoc={game.htmlContent}
+          title={game.title}
           sandbox="allow-scripts allow-same-origin"
           className="w-full h-full border-none mx-auto"
           style={{ 

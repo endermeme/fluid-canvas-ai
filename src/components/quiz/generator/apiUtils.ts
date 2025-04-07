@@ -7,7 +7,7 @@ export const createGeminiClient = (apiKey: string) => {
   return genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 };
 
-// OpenAI API key utils
+// OpenAI storage utils
 export const getOpenAIKey = (): string | null => {
   return localStorage.getItem('openai_api_key');
 };
@@ -18,13 +18,6 @@ export const saveOpenAIKey = (key: string): boolean => {
     return true;
   }
   return false;
-};
-
-// Validate OpenAI API key format
-export const validateOpenAIKey = (key: string): boolean => {
-  // Accept both "sk-" and "sk-proj-" formats
-  return (key.startsWith('sk-') && key.length > 20) || 
-         (key.startsWith('sk-proj-') && key.length > 30);
 };
 
 // Common logging utilities

@@ -1,6 +1,5 @@
 
 import { MiniGame } from './types';
-import { validateOpenAIKey, logError, logInfo, logWarning } from './apiUtils';
 
 export const enhanceWithOpenAI = async (
   openAIKey: string | null,
@@ -13,15 +12,9 @@ export const enhanceWithOpenAI = async (
     return geminiGame;
   }
   
-  // Validate OpenAI key format
-  if (!validateOpenAIKey(openAIKey)) {
-    console.error("❌ OpenAI: API key không hợp lệ");
-    return geminiGame;
-  }
-  
   try {
     console.log("🔶 OpenAI: Chuẩn bị gửi yêu cầu cải thiện...");
-    console.log(`🔶 OpenAI: Kích thước code ban đầu: ${geminiGame.content.length.toLocaleString()} ký tự`);
+    console.log(`🔶 OpenAI: Game ban đầu "${geminiGame.title}" - Kích thước code: ${geminiGame.content.length.toLocaleString()} ký tự`);
     console.log(`🔶 OpenAI: Chế độ canvas: ${canvasMode ? 'BẬT' : 'TẮT'}`);
     
     // Get game type from topic for better context
@@ -105,7 +98,7 @@ export const enhanceWithOpenAI = async (
         'Authorization': `Bearer ${openAIKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         messages: [{ role: 'user', content: promptTemplate }],
         temperature: 0.3, // Lower temperature for more consistent results
         max_tokens: 4000
@@ -114,7 +107,8 @@ export const enhanceWithOpenAI = async (
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error("❌ OpenAI: Lỗi từ API OpenAI:", response.status, "-", errorData);
+      console.error("❌ OpenAI: Lỗi API:", errorData);
+      console.log("⚠️ OpenAI: Sử dụng game ban đầu do gặp lỗi khi cải thiện");
       return geminiGame; // Return original game if enhancement fails
     }
 
@@ -171,7 +165,7 @@ export const enhanceWithOpenAI = async (
         console.log("🔶 OpenAI: Đang trích xuất HTML (phương pháp 4)...");
         enhancedHtml = "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n" +
           "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-          `<title>${topic}</title>\n` + content + "\n</html>";
+          "<title>" + geminiGame.title + "</title>\n" + content + "\n</html>";
         console.log("✅ OpenAI: Tái tạo HTML thành công bằng phương pháp 4");
       }
       
@@ -220,8 +214,8 @@ export const enhanceWithOpenAI = async (
         }
         
         return {
-          title: topic,
-          description: "",
+          title: geminiGame.title,
+          description: geminiGame.description,
           content: enhancedHtml
         };
       }
