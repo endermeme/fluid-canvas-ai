@@ -1,5 +1,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
+import { MiniGame } from '@/components/quiz/generator/types';
 
 export interface StoredGame {
   id: string;
@@ -56,6 +57,18 @@ export const saveGameForSharing = (title: string, description: string, htmlConte
   
   // Return the share URL
   return `${getBaseUrl()}/${id}`;
+};
+
+// Export function for compatibility with previous code
+export const exportGameToSharedURL = (miniGame: MiniGame): Promise<string> => {
+  return new Promise((resolve) => {
+    const url = saveGameForSharing(
+      miniGame.title,
+      miniGame.description || "",
+      miniGame.content
+    );
+    resolve(url);
+  });
 };
 
 // Get a game by ID

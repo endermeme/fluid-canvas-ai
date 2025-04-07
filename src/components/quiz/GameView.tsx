@@ -1,10 +1,11 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/types';
 import sanitizeHtml from 'sanitize-html';
 import { Button } from '@/components/ui/button';
 import { Home, Share2, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { exportGameToSharedURL } from '@/utils/gameExport';
+import { saveGameForSharing } from '@/utils/gameExport';
 
 interface GameViewProps {
   miniGame: MiniGame;
@@ -25,7 +26,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBackToHome }) => {
           ...sanitizeHtml.defaults.allowedAttributes,
           '*': ['style', 'class'],
           'div': ['data-*'],
-          'iframe': ['srcdoc', 'style', 'sandbox'],
+          'iframe': ['srcdoc', 'style'],
           'a': ['href', 'rel', 'target'],
         },
         allowedIframeHostnames: ['*'],
@@ -35,7 +36,9 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBackToHome }) => {
       iframe.width = "100%";
       iframe.height = "100%";
       iframe.style.border = 'none';
-      iframe.sandbox = 'allow-scripts allow-same-origin allow-forms allow-popups allow-modals';
+      
+      // Use setAttribute instead of direct property assignment for sandbox
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups allow-modals');
 
       // Clear previous content
       iframeContainerRef.current.innerHTML = '';
@@ -47,7 +50,12 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBackToHome }) => {
     if (!miniGame) return;
     
     try {
-      const shareableUrl = await exportGameToSharedURL(miniGame);
+      const shareableUrl = saveGameForSharing(
+        miniGame.title, 
+        miniGame.description || "", 
+        miniGame.content
+      );
+      
       if (shareableUrl) {
         navigator.clipboard.writeText(shareableUrl);
         setIsCopied(true);
@@ -69,7 +77,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBackToHome }) => {
     }
   };
   
-  // Find a good spot to add the back to home button
   return (
     <div className="flex flex-col h-full">
       <div className="p-4 flex justify-between items-center border-b">
