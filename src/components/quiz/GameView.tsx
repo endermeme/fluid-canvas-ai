@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/types';
 import sanitizeHtml from 'sanitize-html';
 import { Button } from '@/components/ui/button';
-import { Home, Share2, Copy, Plus } from 'lucide-react';
+import { Home, Share2, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
 
@@ -78,40 +78,38 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBackToHome }) => {
   };
   
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 flex justify-between items-center border-b">
-        <h1 className="text-2xl font-bold truncate">{miniGame.title}</h1>
-        <div className="flex gap-2">
-          {onBackToHome && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onBackToHome}
-              className="flex items-center gap-1"
-            >
-              <Home size={16} />
-              <span className="hidden sm:inline">Trang chủ</span>
-            </Button>
-          )}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleShare}
-            className="flex items-center gap-1"
-          >
-            <Share2 size={16} />
-            <span className="hidden sm:inline">Chia sẻ</span>
-          </Button>
-        </div>
-      </div>
-      
+    <div className="flex flex-col h-full relative">
       <div
         ref={iframeContainerRef}
-        className="relative flex-1 w-full overflow-hidden bg-white"
+        className="flex-1 w-full overflow-hidden bg-white"
       >
         {/* The game will be loaded here */}
       </div>
 
+      {/* Floating action buttons */}
+      <div className="absolute top-4 right-4 flex gap-2">
+        {onBackToHome && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={onBackToHome}
+            className="flex items-center gap-1 bg-white/70 backdrop-blur-sm hover:bg-white"
+          >
+            <Home size={16} />
+            <span className="hidden sm:inline">Trang chủ</span>
+          </Button>
+        )}
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleShare}
+          className="flex items-center gap-1 bg-white/70 backdrop-blur-sm hover:bg-white"
+        >
+          <Share2 size={16} />
+          <span className="hidden sm:inline">Chia sẻ</span>
+        </Button>
+      </div>
+      
       {/* Nút Tạo Mới cố định ở góc dưới bên phải */}
       {onBackToHome && (
         <div className="absolute bottom-4 right-4">
