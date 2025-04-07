@@ -57,10 +57,10 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
     }
   };
 
-  // Handle returning to home
+  // Handle returning to home - fixed to use absolute path
   const handleBackToHome = () => {
-    // Navigate to the root path
-    navigate('/');
+    // Force navigation to the root path with window.location
+    window.location.href = '/';
   };
 
   // Apply game optimization code when iframe loads
