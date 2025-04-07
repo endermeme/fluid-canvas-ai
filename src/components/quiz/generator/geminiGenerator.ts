@@ -1,4 +1,3 @@
-
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -35,26 +34,45 @@ export const generateWithGemini = async (
     
     2. YÊU CẦU KỸ THUẬT:
        - Code phải sạch sẽ và có indentation đúng
-       - Game phải responsive, hoạt động tốt trên cả điện thoại và máy tính
+       - Game PHẢI RESPONSIVE và tối ưu cho cả điện thoại di động và máy tính bảng/desktop
+       - Các phần tử tương tác phải đủ lớn để dễ dàng nhấn trên màn hình cảm ứng (tối thiểu 44px)
        - KHÔNG sử dụng thư viện bên ngoài hay CDN
-       - Game phải chiếm toàn bộ màn hình
+       - Game phải chiếm TOÀN BỘ MÀN HÌNH không có khoảng trống thừa
        - Đảm bảo tất cả biến đều được khai báo đúng với let/const/var
        - Tất cả mã JavaScript phải được đặt vào event DOMContentLoaded
        - Đảm bảo JSON trả về KHÔNG chứa ký tự điều khiển hoặc ký tự đặc biệt
     
-    3. TÍNH NĂNG GAME:
-       - Giao diện hấp dẫn với màu sắc và animation
+    3. THIẾT KẾ VÀ TƯƠNG TÁC:
+       - Sử dụng MÀU SẮC TƯƠI SÁNG, hấp dẫn và có độ tương phản cao
+       - Tạo giao diện dễ nhìn với font chữ rõ ràng và đủ lớn (tối thiểu 16px)
+       - Thêm hiệu ứng chuyển động, animation để tăng tính tương tác
+       - Các nút và vùng tương tác PHẢI đủ lớn, dễ nhấn trên điện thoại (ít nhất 44px)
+       - Game phải TỰ ĐIỀU CHỈNH với các kích thước màn hình khác nhau
+       - Đảm bảo game TỰ ĐỘNG ĐIỀU CHỈNH cho cả chiều ngang và chiều dọc
+       - Hiển thị điểm số, thời gian, tiến trình một cách rõ ràng
+       - Thêm hiệu ứng phản hồi khi người dùng tương tác (hover, click, touch)
+    
+    4. TÍNH NĂNG GAME:
+       - Giao diện hấp dẫn với màu sắc tươi sáng và animation
        - Tính năng tương tác như đếm điểm, hiển thị thời gian
        - Có màn hình kết thúc game và nút chơi lại
        - Kiểm tra logic game kỹ để tránh bug và lỗi
        - LOẠI BỎ những thành phần không cần thiết hoặc không liên quan đến chủ đề
        - ĐÁNH GIÁ lại thành phẩm so với yêu cầu của chủ đề và điều chỉnh để phù hợp
        
-    4. SỬ DỤNG HÌNH ẢNH:
+    5. SỬ DỤNG HÌNH ẢNH:
        - Nếu game cần hình ảnh, HÃY SỬ DỤNG URL hình ảnh từ Google
        - BẮT BUỘC giữ nguyên URL hình ảnh, KHÔNG được thay đổi hoặc xóa URL
        - Đảm bảo URL hình ảnh được chèn chính xác vào mã HTML
        - Sử dụng hình ảnh liên quan đến chủ đề và phù hợp với nội dung game
+       - Thêm thuộc tính alt cho hình ảnh và xử lý trường hợp hình ảnh không tải được
+    
+    6. TƯƠNG THÍCH THIẾT BỊ:
+       - Code PHẢI hoạt động tốt trên cả điện thoại di động và máy tính
+       - Sử dụng media queries để điều chỉnh layout cho từng thiết bị
+       - Xử lý các sự kiện touch cho thiết bị di động
+       - Đảm bảo game có thể chơi được với bàn phím trên desktop
+       - Tối ưu performance để game chạy mượt trên mọi thiết bị
     
     TRẢ VỀ MỘT ĐỐI TƯỢNG JSON CHUẨN VÀ ĐƠN GIẢN (KHÔNG PHẢI MÃ MARKDOWN, KHÔNG CÓ BACKTICKS) với định dạng sau:
     {
@@ -67,9 +85,11 @@ export const generateWithGemini = async (
     - Trả về JSON hoàn chỉnh và hợp lệ, KHÔNG chứa ký tự điều khiển, ký tự đặc biệt
     - KHÔNG sử dụng backticks hoặc markdown để bao quanh JSON
     - Mã HTML phải là một trang web hoàn chỉnh và có thể chạy độc lập
+    - ĐẢNH BẢO game hiển thị đầy đủ trên màn hình mà không có thanh cuộn không cần thiết
     - Nếu có sử dụng hình ảnh, PHẢI GIỮ NGUYÊN URL hình ảnh và không được chỉnh sửa hoặc xóa chúng
     - KIỂM TRA lại logic code và loại bỏ mọi lỗi trước khi trả về
     - TỰ XEM XÉT và ĐIỀU CHỈNH các thành phần không cần thiết hoặc không phù hợp với chủ đề
+    - KHÔNG sử dụng các animation phức tạp làm chậm thiết bị
   `;
 
   try {
