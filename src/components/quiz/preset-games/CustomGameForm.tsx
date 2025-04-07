@@ -8,6 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SparklesIcon, Brain, Wand } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { AIGameGenerator } from '../generator/AIGameGenerator';
+
+// API key cứng
+const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 interface CustomGameFormProps {
   gameType: string;
@@ -21,6 +25,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   const [isGenerating, setIsGenerating] = useState(false);
   const [difficulty, setDifficulty] = useState('medium');
   const { toast } = useToast();
+  const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
 
   const getGameTypeName = () => {
     switch (gameType) {
@@ -65,21 +70,17 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
       return;
     }
 
-    setIsGenerating(true);
-    
-    // Simulate AI generation request
-    setTimeout(() => {
+    // Nếu người dùng đã nhập nội dung, sử dụng nội dung đó
+    if (content.trim()) {
       onGenerate(content);
-      setIsGenerating(false);
-      
-      toast({
-        title: "Đã tạo trò chơi",
-        description: `Trò chơi ${getGameTypeName()} về chủ đề "${topic}" đã được tạo thành công.`,
-      });
-    }, 2000);
+      return;
+    }
+
+    // Nếu không có nội dung, sử dụng AI để tạo
+    handleAIGenerate(true);
   };
 
-  const handleAIGenerate = () => {
+  const handleAIGenerate = async (submitAfterGeneration = false) => {
     if (!topic.trim()) {
       toast({
         title: "Lỗi",
@@ -91,17 +92,88 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
 
     setIsGenerating(true);
     
-    // Simulate AI generation request
-    setTimeout(() => {
-      // AI would generate content here...
-      setContent("AI đã tạo nội dung cho trò chơi. Bấm Tạo trò chơi để tiếp tục.");
-      setIsGenerating(false);
+    try {
+      // Tạo prompt cho AI dựa trên loại game
+      const gameTypePrompt = `Tạo nội dung cho trò chơi ${getGameTypeName()} về chủ đề: ${topic}. Độ khó: ${difficulty}.`;
       
+      // Tạo settings tùy chỉnh dựa trên loại game
+      const settings = {
+        difficulty: difficulty,
+        questionCount: gameType === 'memory' ? 6 : gameType === 'pictionary' ? 5 : 10,
+        timePerQuestion: gameType === 'wordsearch' ? 180 : gameType === 'ordering' ? 60 : 30,
+        category: 'general',
+      };
+      
+      // Tạo nội dung game với AI
+      const gameData = await gameGenerator.generateMiniGame(`${gameTypePrompt} (${gameType})`, settings);
+      
+      if (gameData && gameData.content) {
+        // Trích xuất nội dung từ HTML (đơn giản hóa cho ví dụ)
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(gameData.content, 'text/html');
+        
+        // Trích xuất nội dung dựa theo loại game
+        let extractedContent = '';
+        
+        switch (gameType) {
+          case 'quiz':
+            const questions = doc.querySelectorAll('.question-item, .quiz-question');
+            if (questions.length > 0) {
+              Array.from(questions).forEach((q, index) => {
+                const questionText = q.querySelector('.question-text, h3')?.textContent;
+                const options = q.querySelectorAll('.option, li');
+                extractedContent += `${index + 1}. ${questionText}\n`;
+                Array.from(options).forEach((opt, optIndex) => {
+                  const optionChar = String.fromCharCode(97 + optIndex); // a, b, c, d...
+                  extractedContent += `${optionChar}) ${opt.textContent}\n`;
+                });
+                extractedContent += '\n';
+              });
+            } else {
+              extractedContent = `// AI đã tạo nội dung cho trò chơi ${getGameTypeName()} về chủ đề "${topic}"`;
+            }
+            break;
+            
+          case 'flashcards':
+            const cards = doc.querySelectorAll('.flashcard, .card');
+            if (cards.length > 0) {
+              Array.from(cards).forEach((card, index) => {
+                const front = card.querySelector('.front, .card-front')?.textContent;
+                const back = card.querySelector('.back, .card-back')?.textContent;
+                extractedContent += `Mặt trước: ${front}\nMặt sau: ${back}\n\n`;
+              });
+            } else {
+              extractedContent = `// AI đã tạo nội dung cho trò chơi ${getGameTypeName()} về chủ đề "${topic}"`;
+            }
+            break;
+            
+          default:
+            extractedContent = `// AI đã tạo nội dung cho trò chơi ${getGameTypeName()} về chủ đề "${topic}"`;
+        }
+        
+        setContent(extractedContent || gameData.content);
+        
+        toast({
+          title: "AI đã tạo nội dung",
+          description: `Nội dung cho chủ đề "${topic}" đã được tạo. ${!submitAfterGeneration ? 'Bạn có thể chỉnh sửa trước khi tạo trò chơi.' : ''}`,
+        });
+        
+        if (submitAfterGeneration) {
+          onGenerate(extractedContent || gameData.content);
+        }
+      } else {
+        throw new Error('Không thể tạo nội dung trò chơi');
+      }
+    } catch (error) {
+      console.error('Lỗi khi tạo nội dung với AI:', error);
       toast({
-        title: "AI đã tạo nội dung",
-        description: `Nội dung cho chủ đề "${topic}" đã được tạo. Bạn có thể chỉnh sửa trước khi tạo trò chơi.`,
+        title: "Lỗi tạo nội dung",
+        description: "Không thể tạo nội dung trò chơi. Vui lòng thử lại.",
+        variant: "destructive"
       });
-    }, 2000);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -149,7 +221,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={handleAIGenerate}
+                onClick={() => handleAIGenerate(false)}
                 disabled={isGenerating}
               >
                 <Wand className="h-4 w-4 mr-1" />

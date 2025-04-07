@@ -10,9 +10,10 @@ import { useNavigate } from 'react-router-dom';
 
 interface GameSelectorProps {
   onSelectGame: (gameType: string) => void;
+  onCustomGame: (gameType: string) => void;
 }
 
-const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
+const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onCustomGame }) => {
   const gameTypes = [
     { 
       id: 'quiz', 
@@ -73,7 +74,6 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
           <Card 
             key={game.id}
             className="p-4 hover:shadow-md transition-all hover:border-primary hover:bg-primary/5 cursor-pointer"
-            onClick={() => onSelectGame(game.id)}
           >
             <div className="flex flex-col items-center text-center gap-3">
               <div className="p-3 bg-primary/10 rounded-full">
@@ -83,13 +83,24 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                 <h3 className="font-bold">{game.name}</h3>
                 <p className="text-sm text-muted-foreground">{game.description}</p>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-2 w-full border-primary/30 hover:border-primary"
-              >
-                Bắt đầu
-              </Button>
+              <div className="flex gap-2 mt-2 w-full">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1 border-primary/30 hover:border-primary"
+                  onClick={() => onSelectGame(game.id)}
+                >
+                  Chơi ngay
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => onCustomGame(game.id)}
+                >
+                  Tùy chỉnh
+                </Button>
+              </div>
             </div>
           </Card>
         ))}
