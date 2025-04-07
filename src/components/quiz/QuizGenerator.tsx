@@ -8,7 +8,7 @@ import OpenAIKeyModal from './OpenAIKeyModal';
 import { GameSettingsData } from './types';
 import { getGameTypeByTopic } from './gameTypes';
 
-const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
+const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 interface QuizGeneratorProps {
   topic?: string;

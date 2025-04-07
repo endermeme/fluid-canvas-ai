@@ -47,7 +47,7 @@ import GameHeader from './GameHeader';
 import CustomGameForm from './CustomGameForm';
 import GameGrid from './GameGrid';
 
-const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
+const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 interface QuickGameSelectorProps {
   onGameRequest: (topic: string) => void;

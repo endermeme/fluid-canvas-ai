@@ -1,4 +1,3 @@
-
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -16,7 +15,7 @@ export class AIGameGenerator {
 
   constructor(apiKey: string, options?: { modelName?: string; canvasMode?: boolean }) {
     console.log("🚀 AIGameGenerator: Khởi tạo bộ tạo game AI");
-    this.modelName = options?.modelName || 'gemini-2.5-pro-preview-03-25';
+    this.modelName = options?.modelName || 'gemini-2.0-flash';
     
     // If there's no OpenAI key, automatically enable canvas mode
     const storedOpenAIKey = getOpenAIKey();
