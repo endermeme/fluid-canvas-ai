@@ -20,15 +20,6 @@ export const saveOpenAIKey = (key: string): boolean => {
   return false;
 };
 
-// OpenAI primary flag storage utils
-export const getUseOpenAIAsPrimary = (): boolean => {
-  return localStorage.getItem('use_openai_primary') === 'true';
-};
-
-export const saveUseOpenAIAsPrimary = (useAsPrimary: boolean): void => {
-  localStorage.setItem('use_openai_primary', useAsPrimary ? 'true' : 'false');
-};
-
 // Common logging utilities
 export const logInfo = (source: string, message: string) => {
   console.log(`${source}: ${message}`);

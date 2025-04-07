@@ -4,33 +4,20 @@ import { KeyRound, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import OpenAIKeyModal from '@/components/quiz/OpenAIKeyModal';
 import { useToast } from '@/hooks/use-toast';
-import { getUseOpenAIAsPrimary } from '@/components/quiz/generator/apiUtils';
 
 const APIKeyButton = () => {
   const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
   const { toast } = useToast();
-  const useOpenAIAsPrimary = getUseOpenAIAsPrimary();
 
-  const handleSaveOpenAIKey = (key: string, useAsPrimary: boolean = false) => {
+  const handleSaveOpenAIKey = (key: string) => {
     // Allow empty key (user wants to remove the key)
     localStorage.setItem('openai_api_key', key);
-    localStorage.setItem('use_openai_primary', useAsPrimary ? 'true' : 'false');
-    
-    // Log the key format for debugging (censored)
     if (key) {
-      const keyType = key.startsWith('sk-proj-') ? 'Project key' : 'Regular key';
-      const keyPreview = `${key.substring(0, 7)}...${key.substring(key.length - 4)}`;
-      console.log(`APIKeyButton: Saved OpenAI key - Type: ${keyType}, Format: ${keyPreview}`);
-      console.log(`APIKeyButton: Primary API set to: ${useAsPrimary ? 'OpenAI' : 'Gemini'}`);
-      
       toast({
         title: "API Key Đã Lưu",
-        description: useAsPrimary 
-          ? "OpenAI sẽ được sử dụng làm API chính với GPT-4o-mini" 
-          : "OpenAI API key của bạn đã được lưu thành công.",
+        description: "OpenAI API key của bạn đã được lưu thành công.",
       });
     } else {
-      console.log("APIKeyButton: API key has been removed");
       toast({
         title: "Đã Xóa API Key",
         description: "Đã chuyển sang chỉ sử dụng Gemini với chế độ Canvas.",
@@ -56,7 +43,6 @@ const APIKeyButton = () => {
         onSave={handleSaveOpenAIKey}
         currentKey={localStorage.getItem('openai_api_key')}
         allowEmpty={true}
-        useOpenAIAsPrimary={useOpenAIAsPrimary}
       />
     </>
   );

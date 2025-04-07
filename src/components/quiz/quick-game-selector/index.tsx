@@ -10,7 +10,6 @@ import GameSettings from '../GameSettings';
 import { GameSettingsData, GameType } from '../types';
 import OpenAIKeyModal from '../OpenAIKeyModal';
 import { gameTypes } from '../gameTypes';
-import { getUseOpenAIAsPrimary } from '../generator/apiUtils';
 import { 
   BrainCircuit, 
   Puzzle, 
@@ -43,6 +42,7 @@ import {
   Gamepad
 } from 'lucide-react';
 
+// Import our new components
 import GameHeader from './GameHeader';
 import CustomGameForm from './CustomGameForm';
 import GameGrid from './GameGrid';
@@ -66,7 +66,6 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   const [currentGameType, setCurrentGameType] = useState<GameType | null>(null);
   const [titleClickCount, setTitleClickCount] = useState(0);
   const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
-  const useOpenAIAsPrimary = getUseOpenAIAsPrimary();
 
   const handleTitleClick = () => {
     setTitleClickCount(prev => {
@@ -81,22 +80,8 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     });
   };
 
-  const handleSaveOpenAIKey = (key: string, useAsPrimary: boolean = false) => {
-    console.log("QuickGameSelector: Saving OpenAI key, useAsPrimary:", useAsPrimary);
-    gameGenerator.setOpenAIKey(key, useAsPrimary);
-    if (key) {
-      toast({
-        title: "API Key Đã Lưu",
-        description: useAsPrimary 
-          ? "OpenAI sẽ được sử dụng làm API chính với GPT-4o-mini" 
-          : "OpenAI API key của bạn đã được lưu thành công.",
-      });
-    } else {
-      toast({
-        title: "Đã Xóa API Key",
-        description: "Đã chuyển sang chỉ sử dụng Gemini với chế độ Canvas.",
-      });
-    }
+  const handleSaveOpenAIKey = (key: string) => {
+    gameGenerator.setOpenAIKey(key);
   };
 
   const getIconComponent = (iconName: string) => {
@@ -134,7 +119,6 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   };
 
   const handleTopicSelect = (gameType: GameType) => {
-    console.log("QuickGameSelector: Topic selected:", gameType.name);
     setSelectedTopic(gameType.description);
     setCurrentGameType(gameType);
     setShowSettings(true);
@@ -150,8 +134,6 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     
     setIsLoading(true);
     setErrorMessage(null);
-    
-    console.log("Starting game with settings:", settings);
     
     try {
       const game = await gameGenerator.generateMiniGame(selectedTopic, settings);
@@ -185,7 +167,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   };
 
   if (isLoading) {
-    return <GameLoading topic={selectedTopic || currentGameType?.name || "minigame"} />;
+    return <GameLoading />;
   }
 
   if (errorMessage) {
@@ -238,8 +220,6 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
         onClose={() => setShowOpenAIKeyModal(false)}
         onSave={handleSaveOpenAIKey}
         currentKey={localStorage.getItem('openai_api_key')}
-        useOpenAIAsPrimary={useOpenAIAsPrimary}
-        allowEmpty={true}
       />
     </div>
   );

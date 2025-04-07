@@ -10,13 +10,7 @@ import GameSettings from './GameSettings';
 import { GameSettingsData, GameType } from './types';
 import OpenAIKeyModal from './OpenAIKeyModal';
 import { gameTypes } from './gameTypes';
-import { getUseOpenAIAsPrimary } from './generator/apiUtils';
 import { animateBlockCreation } from '@/lib/animations';
-
-import GameHeader from './quick-game-selector/GameHeader';
-import CustomGameForm from './quick-game-selector/CustomGameForm';
-import GameGrid from './quick-game-selector/GameGrid';
-
 import { 
   BrainCircuit, 
   Puzzle, 
@@ -49,6 +43,10 @@ import {
   Gamepad
 } from 'lucide-react';
 
+import GameHeader from './quick-game-selector/GameHeader';
+import CustomGameForm from './quick-game-selector/CustomGameForm';
+import GameGrid from './quick-game-selector/GameGrid';
+
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
 interface QuickGameSelectorProps {
@@ -70,7 +68,6 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   const [currentGameType, setCurrentGameType] = useState<GameType | null>(null);
   const [titleClickCount, setTitleClickCount] = useState(0);
   const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
-  const useOpenAIAsPrimary = getUseOpenAIAsPrimary();
   
   useEffect(() => {
     const gameButtons = containerRef.current?.querySelectorAll('.game-button');
@@ -79,7 +76,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
         if (button instanceof HTMLElement) {
           animateBlockCreation(button);
         }
-      }, index * 40);
+      }, index * 40); // Faster animation for more items
     });
   }, []);
 
@@ -96,21 +93,8 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     });
   };
 
-  const handleSaveOpenAIKey = (key: string, useAsPrimary: boolean = false) => {
-    gameGenerator.setOpenAIKey(key, useAsPrimary);
-    if (key) {
-      toast({
-        title: "API Key Đã Lưu",
-        description: useAsPrimary 
-          ? "OpenAI sẽ được sử dụng làm API chính với GPT-4o-mini" 
-          : "OpenAI API key của bạn đã được lưu thành công.",
-      });
-    } else {
-      toast({
-        title: "Đã Xóa API Key",
-        description: "Đã chuyển sang chỉ sử dụng Gemini với chế độ Canvas.",
-      });
-    }
+  const handleSaveOpenAIKey = (key: string) => {
+    gameGenerator.setOpenAIKey(key);
   };
 
   const getIconComponent = (iconName: string) => {
@@ -229,9 +213,6 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
       <CustomGameForm 
         onCustomGameCreate={handleCustomGameCreate}
         onGameRequest={onGameRequest}
-        customTopic={customTopic}
-        setCustomTopic={setCustomTopic}
-        handleCustomTopicSubmit={handleCustomTopicSubmit}
       />
       
       <GameGrid 
@@ -259,7 +240,6 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
         onClose={() => setShowOpenAIKeyModal(false)}
         onSave={handleSaveOpenAIKey}
         currentKey={localStorage.getItem('openai_api_key')}
-        useOpenAIAsPrimary={useOpenAIAsPrimary}
       />
     </div>
   );

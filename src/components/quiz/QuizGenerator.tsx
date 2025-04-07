@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from './generator/AIGameGenerator';
@@ -8,7 +7,6 @@ import GameView from './GameView';
 import OpenAIKeyModal from './OpenAIKeyModal';
 import { GameSettingsData } from './types';
 import { getGameTypeByTopic } from './gameTypes';
-import { getUseOpenAIAsPrimary } from './generator/apiUtils';
 
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
@@ -29,7 +27,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
   const [titleClickCount, setTitleClickCount] = useState(0);
   const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
-  const useOpenAIAsPrimary = getUseOpenAIAsPrimary();
   
   const defaultSettings: GameSettingsData = {
     difficulty: 'medium',
@@ -109,16 +106,14 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     });
   };
 
-  const handleSaveOpenAIKey = (key: string, useAsPrimary: boolean = false) => {
+  const handleSaveOpenAIKey = (key: string) => {
     console.log("Saving OpenAI key...");
-    const success = gameGenerator.setOpenAIKey(key, useAsPrimary);
+    const success = gameGenerator.setOpenAIKey(key);
     if (success) {
       console.log("OpenAI key saved successfully");
       toast({
         title: "API Key Đã Lưu",
-        description: useAsPrimary 
-          ? "API key OpenAI đã được lưu. OpenAI sẽ được sử dụng làm API chính với GPT-4o-mini" 
-          : "API key OpenAI đã được lưu. Các minigame tiếp theo sẽ được cải thiện chất lượng.",
+        description: "API key OpenAI đã được lưu. Các minigame tiếp theo sẽ được cải thiện chất lượng.",
       });
     } else {
       console.log("Failed to save OpenAI key");
@@ -145,16 +140,11 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       if (game) {
         console.log("Minigame generated successfully:", game.title);
         setMiniGame(game);
-        
-        const toastDescription = gameGenerator.isOpenAIPrimary() 
-          ? `Đã tạo trực tiếp minigame về "${topic}" với GPT-4o-mini`
-          : gameGenerator.hasOpenAIKey() 
-            ? `Đã tạo và cải thiện minigame về "${topic}" với GPT-4o` 
-            : `Đã tạo minigame về "${topic}"`;
-            
         toast({
           title: "Minigame Đã Sẵn Sàng",
-          description: toastDescription,
+          description: gameGenerator.hasOpenAIKey() 
+            ? `Đã tạo và cải thiện minigame về "${topic}" với GPT-4o` 
+            : `Đã tạo minigame về "${topic}"`,
         });
       } else {
         throw new Error('Không thể tạo minigame');
@@ -200,7 +190,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
           onClose={() => setShowOpenAIKeyModal(false)}
           onSave={handleSaveOpenAIKey}
           currentKey={localStorage.getItem('openai_api_key')}
-          useOpenAIAsPrimary={useOpenAIAsPrimary}
         />
       </div>
     );
@@ -223,7 +212,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
         onClose={() => setShowOpenAIKeyModal(false)}
         onSave={handleSaveOpenAIKey}
         currentKey={localStorage.getItem('openai_api_key')}
-        useOpenAIAsPrimary={useOpenAIAsPrimary}
       />
     </>
   );

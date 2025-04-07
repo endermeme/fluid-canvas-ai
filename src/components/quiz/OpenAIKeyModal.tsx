@@ -6,15 +6,13 @@ import { Input } from "@/components/ui/input";
 import { X, Info } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 
 interface OpenAIKeyModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (key: string, useOpenAIAsPrimary?: boolean) => void;
+  onSave: (key: string) => void;
   currentKey: string | null;
   allowEmpty?: boolean;
-  useOpenAIAsPrimary?: boolean;
 }
 
 const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({ 
@@ -22,20 +20,10 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({
   onClose, 
   onSave, 
   currentKey,
-  allowEmpty = false,
-  useOpenAIAsPrimary = false
+  allowEmpty = false 
 }) => {
   const [apiKey, setApiKey] = useState<string>(currentKey || '');
-  const [isPrimaryAPI, setIsPrimaryAPI] = useState<boolean>(useOpenAIAsPrimary);
   const { toast } = useToast();
-
-  useEffect(() => {
-    console.log("OpenAIKeyModal: Current settings:", {
-      currentKey: currentKey ? "Set" : "Not set",
-      useOpenAIAsPrimary: useOpenAIAsPrimary
-    });
-    setIsPrimaryAPI(useOpenAIAsPrimary);
-  }, [currentKey, useOpenAIAsPrimary]);
 
   const handleSave = () => {
     if (!apiKey.trim() && !allowEmpty) {
@@ -47,29 +35,23 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({
       return;
     }
 
-    // Update validation to accept both sk- and sk-proj- keys
-    if (apiKey.trim() && !(apiKey.startsWith('sk-') || apiKey.startsWith('sk-proj-'))) {
+    if (apiKey.trim() && !apiKey.startsWith('sk-')) {
       toast({
         title: "API Key Không Hợp Lệ",
-        description: "API key OpenAI phải bắt đầu bằng sk- hoặc sk-proj-",
+        description: "API key OpenAI phải bắt đầu bằng sk-",
         variant: "destructive",
       });
       return;
     }
 
-    console.log("OpenAIKeyModal: Saving settings:", {
-      hasKey: apiKey ? "Yes" : "No",
-      isPrimaryAPI
-    });
-    
-    onSave(apiKey, isPrimaryAPI);
+    onSave(apiKey);
     onClose();
   };
   
   const handleRemoveKey = () => {
     if (allowEmpty) {
       setApiKey('');
-      onSave('', false);
+      onSave('');
       onClose();
     }
   };
@@ -93,35 +75,11 @@ const OpenAIKeyModal: React.FC<OpenAIKeyModalProps> = ({
             <Label htmlFor="apiKey">API Key</Label>
             <Input
               id="apiKey"
-              placeholder="sk-... hoặc sk-proj-..."
+              placeholder="sk-..."
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               className="bg-background/50 border-white/20"
             />
-            
-            {apiKey.trim() && (
-              <div className="flex items-center space-x-2 mt-4">
-                <Switch 
-                  id="use-openai-primary"
-                  checked={isPrimaryAPI}
-                  onCheckedChange={setIsPrimaryAPI}
-                />
-                <Label htmlFor="use-openai-primary" className="cursor-pointer">
-                  Sử dụng OpenAI làm API chính thay vì Gemini
-                </Label>
-              </div>
-            )}
-            
-            {isPrimaryAPI && apiKey.trim() && (
-              <div className="flex items-start gap-2 mt-3 p-2 rounded border border-primary/20 bg-primary/5">
-                <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <p className="text-xs text-muted-foreground">
-                  Khi bật chế độ này, hệ thống sẽ sử dụng mô hình GPT-4o Mini của OpenAI để tạo game trực tiếp thay vì dùng Gemini.
-                  OpenAI sẽ tạo HTML và JavaScript dựa trên prompt tương tự với Gemini.
-                </p>
-              </div>
-            )}
-            
             {allowEmpty && (
               <div className="flex items-start gap-2 mt-2 p-2 rounded border border-yellow-500/20 bg-yellow-500/5">
                 <Info className="h-5 w-5 text-yellow-500 shrink-0 mt-0.5" />
