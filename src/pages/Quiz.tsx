@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
 import QuickGameSelector from '@/components/quiz/quick-game-selector';
+import PresetGameManager from '@/components/quiz/preset-games/PresetGameManager';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
@@ -13,6 +14,9 @@ const Quiz = () => {
   const [topic, setTopic] = useState('');
   const [isManualMode, setIsManualMode] = useState(false);
   const [showChatInterface, setShowChatInterface] = useState(false);
+  
+  // New state for preset games
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   
   const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
   const { addBlock } = useCanvasState();
@@ -28,8 +32,16 @@ const Quiz = () => {
     const queryParams = new URLSearchParams(location.search);
     const topicParam = queryParams.get('topic');
     const autoStart = queryParams.get('autostart');
+    const presetParam = queryParams.get('preset');
     
-    if (topicParam) {
+    if (presetParam) {
+      // If a preset is specified, use the preset game manager
+      setSelectedPreset(presetParam);
+      if (topicParam) {
+        setTopic(topicParam);
+      }
+    } else if (topicParam) {
+      // Use regular topic-based generation
       setTopic(topicParam);
       setIsManualMode(true);
       
@@ -100,12 +112,23 @@ const Quiz = () => {
     setShowChatInterface(!showChatInterface);
   };
 
+  const handleBackFromPreset = () => {
+    setSelectedPreset(null);
+    setTopic('');
+  };
+
   return (
     <div className="min-h-screen flex flex-col w-full overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 bg-background overflow-hidden p-0 relative">
           <div ref={mainContentRef} className="h-full relative">
-            {isManualMode ? (
+            {selectedPreset ? (
+              <PresetGameManager 
+                gameType={selectedPreset} 
+                initialTopic={topic}
+                onBack={handleBackFromPreset}
+              />
+            ) : isManualMode ? (
               <QuizGenerator 
                 ref={quizGeneratorRef} 
                 topic={topic}
