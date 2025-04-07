@@ -134,7 +134,11 @@ const GamePresets: React.FC<GamePresetsProps> = ({ onSelectPreset, onCancel }) =
               <Card>
                 <CardHeader>
                   <div className="flex items-center gap-2">
-                    {selectedPreset && React.createElement(selectedPreset.icon, { className: "text-primary" })}
+                    {selectedPreset && (
+                      <div className="text-primary">
+                        {React.createElement(selectedPreset.icon)}
+                      </div>
+                    )}
                     <CardTitle>
                       {selectedPreset?.name || "Mẫu trò chơi"}
                     </CardTitle>
