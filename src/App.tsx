@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from './components/ui/theme-provider';
 import { Toaster } from './components/ui/toaster';
 import { cleanupExpiredGames } from './utils/gameExport';
-import APIKeyButton from './components/APIKeyButton';
 
 // Lazy load các trang để tối ưu hiệu suất
 const Index = lazy(() => import('./pages/Index'));
@@ -36,7 +35,6 @@ const AppContent = () => {
 
   return (
     <div className="relative flex flex-col min-h-screen w-full overflow-hidden">
-      <APIKeyButton />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<Quiz />} />

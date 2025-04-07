@@ -9,7 +9,6 @@ import GameView from '../GameView';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import GameSettings from '../GameSettings';
 import { GameSettingsData, GameType } from '../types';
-import OpenAIKeyModal from '../OpenAIKeyModal';
 import { gameTypes } from '../gameTypes';
 import { 
   BrainCircuit, 
@@ -65,25 +64,6 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentGameType, setCurrentGameType] = useState<GameType | null>(null);
-  const [titleClickCount, setTitleClickCount] = useState(0);
-  const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
-
-  const handleTitleClick = () => {
-    setTitleClickCount(prev => {
-      const newCount = prev + 1;
-      if (newCount === 3) {
-        setTimeout(() => {
-          setShowOpenAIKeyModal(true);
-          return 0;
-        }, 100);
-      }
-      return newCount;
-    });
-  };
-
-  const handleSaveOpenAIKey = (key: string) => {
-    gameGenerator.setOpenAIKey(key);
-  };
 
   const getIconComponent = (iconName: string) => {
     switch(iconName) {
@@ -189,7 +169,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
 
   return (
     <div ref={containerRef} className="flex flex-col items-center h-full w-full bg-gradient-to-b from-background to-background/80 p-4 md:p-6 overflow-auto">
-      <GameHeader onTitleClick={handleTitleClick} />
+      <GameHeader onTitleClick={() => {}} />
       
       <CustomGameForm 
         onCustomGameCreate={handleCustomGameCreate}
@@ -218,12 +198,6 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
         </DialogContent>
       </Dialog>
 
-      <OpenAIKeyModal 
-        isOpen={showOpenAIKeyModal}
-        onClose={() => setShowOpenAIKeyModal(false)}
-        onSave={handleSaveOpenAIKey}
-        currentKey={localStorage.getItem('openai_api_key')}
-      />
     </div>
   );
 };

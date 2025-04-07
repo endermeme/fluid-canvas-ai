@@ -1,8 +1,7 @@
 
 import React, { useState } from 'react';
-import { PlusCircle, Image, FileText, Code, Download, X, Star } from 'lucide-react';
+import { PlusCircle, Image, FileText, Code, Download, X } from 'lucide-react';
 import { BlockType } from '@/lib/block-utils';
-import OpenAIKeyModal from '@/components/quiz/OpenAIKeyModal';
 import { useToast } from '@/hooks/use-toast';
 
 interface FloatingToolbarProps {
@@ -15,18 +14,7 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
   onExport
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showOpenAIKeyModal, setShowOpenAIKeyModal] = useState(false);
   const { toast } = useToast();
-  
-  const handleSaveOpenAIKey = (key: string) => {
-    if (key) {
-      localStorage.setItem('gemini_api_key', key);
-      toast({
-        title: "API Key Đã Lưu",
-        description: "Gemini API key của bạn đã được lưu thành công.",
-      });
-    }
-  };
   
   return (
     <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30">
@@ -100,27 +88,7 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
           <Download size={20} />
           <span className="text-sm">Export</span>
         </button>
-
-        {/* Separator */}
-        <div className="h-6 w-px bg-border"></div>
-        
-        {/* API Key Button */}
-        <button
-          className="p-2 rounded-full hover:bg-primary/10 transition-colors flex items-center space-x-1"
-          onClick={() => setShowOpenAIKeyModal(true)}
-          aria-label="Set API Key"
-        >
-          <Star size={20} />
-          <span className="text-sm">API Key</span>
-        </button>
       </div>
-      
-      <OpenAIKeyModal 
-        isOpen={showOpenAIKeyModal}
-        onClose={() => setShowOpenAIKeyModal(false)}
-        onSave={handleSaveOpenAIKey}
-        currentKey={localStorage.getItem('gemini_api_key')}
-      />
     </div>
   );
 };

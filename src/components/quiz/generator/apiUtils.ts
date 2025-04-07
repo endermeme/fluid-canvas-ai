@@ -1,36 +1,14 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// API key cứng
+const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
+
 // Gemini client creation
-export const createGeminiClient = (apiKey: string) => {
-  const genAI = new GoogleGenerativeAI(apiKey);
+export const createGeminiClient = (apiKey: string = API_KEY) => {
+  // Luôn sử dụng API_KEY cứng
+  const genAI = new GoogleGenerativeAI(API_KEY);
   return genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-};
-
-// OpenAI API key utils
-export const getOpenAIKey = (): string | null => {
-  return localStorage.getItem('openai_api_key');
-};
-
-export const saveOpenAIKey = (key: string): boolean => {
-  if (key && key.trim() !== '') {
-    localStorage.setItem('openai_api_key', key);
-    return true;
-  }
-  return false;
-};
-
-// Validate OpenAI API key format
-export const validateOpenAIKey = (key: string): boolean => {
-  if (!key || key.trim() === '') return false;
-  
-  // Accept both "sk-" and "sk-proj-" formats, also accept raw keys for testing
-  const isStandardFormat = (key.startsWith('sk-') && key.length > 20) || 
-                          (key.startsWith('sk-proj-') && key.length > 30);
-  
-  console.log(`🔑 Key validation: Format check ${isStandardFormat ? 'passed' : 'failed'} for key: ${key.substring(0, 5)}...${key.substring(key.length - 4)}`);
-  
-  return isStandardFormat;
 };
 
 // Common logging utilities

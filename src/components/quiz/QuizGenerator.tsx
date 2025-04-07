@@ -8,6 +8,7 @@ import GameView from './GameView';
 import { GameSettingsData } from './types';
 import { getGameTypeByTopic } from './gameTypes';
 
+// API key cứng
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 interface QuizGeneratorProps {
