@@ -15,7 +15,7 @@ export class AIGameGenerator {
 
   constructor(apiKey: string, options?: { modelName?: string; canvasMode?: boolean }) {
     console.log("🚀 AIGameGenerator: Initializing AI game generator");
-    this.modelName = options?.modelName || 'gemini-2.0-flash';
+    this.modelName = options?.modelName || 'gemini-2.5-pro-preview-03-25';
     
     // If there's no OpenAI key, automatically enable canvas mode
     const storedOpenAIKey = getOpenAIKey();
