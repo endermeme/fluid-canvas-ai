@@ -44,6 +44,31 @@ export const generateWithGemini = async (
 };
 
 /**
+ * Generates a game using Google's Gemini API with a custom prompt
+ * @param model Gemini model instance
+ * @param customPrompt The custom prompt to use
+ * @returns MiniGame object or null if generation fails
+ */
+export const generateWithGeminiPrompt = async (
+  model: any,
+  customPrompt: string
+): Promise<MiniGame | null> => {
+  console.log(`🔷 Gemini: Starting game generation with custom prompt`);
+  
+  try {
+    console.log("🔷 Gemini: Sending request to Gemini API with custom prompt...");
+    const result = await model.generateContent(customPrompt);
+    const response = result.response;
+    const text = response.text();
+    
+    return parseGeminiResponse(text, "custom");
+  } catch (error) {
+    console.error("❌ Gemini: Error generating with custom prompt:", error);
+    throw error;
+  }
+};
+
+/**
  * Attempts to generate a game with Gemini, with retries on failure
  * @param model Gemini model instance
  * @param topic Topic for the game

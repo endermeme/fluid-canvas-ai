@@ -7,6 +7,8 @@ import GameError from './GameError';
 import GameView from './GameView';
 import { GameSettingsData } from './types';
 import { getGameTypeByTopic } from './gameTypes';
+import { getPresetById } from './presets/gamePresetData';
+import { buildPresetPrompt } from './presets/presetPromptBuilder';
 
 // API key cứng
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
@@ -16,7 +18,12 @@ interface QuizGeneratorProps {
   onQuizComplete?: () => void;
 }
 
-const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: GameSettingsData) => void }, QuizGeneratorProps>(({ 
+interface QuizSettings extends GameSettingsData {
+  presetId?: string;
+  customContent?: string;
+}
+
+const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: QuizSettings) => void }, QuizGeneratorProps>(({ 
   topic = "Minigame tương tác",
   onQuizComplete,
 }, ref) => {
@@ -45,7 +52,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   }, [gameGenerator]);
 
   useImperativeHandle(ref, () => ({
-    generateQuiz: (topic: string, settings?: GameSettingsData) => {
+    generateQuiz: (topic: string, settings?: QuizSettings) => {
       if (topic.trim()) {
         setCurrentTopic(topic);
         generateMiniGame(topic, settings || getSettingsFromTopic(topic));
@@ -102,7 +109,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     return settings;
   };
 
-  const generateMiniGame = async (topic: string, settings: GameSettingsData = defaultSettings) => {
+  const generateMiniGame = async (topic: string, settings: QuizSettings = defaultSettings) => {
     setIsLoading(true);
     setErrorMessage(null);
     setMiniGame(null);
@@ -111,18 +118,45 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     console.log("Starting minigame generation for topic:", topic);
     console.log("Starting game with settings:", settings);
 
-    try {      
-      const game = await gameGenerator.generateMiniGame(topic, settings);
-      
-      if (game) {
-        console.log("Minigame generated successfully:", game.title);
-        setMiniGame(game);
-        toast({
-          title: "Minigame Đã Sẵn Sàng",
-          description: `Đã tạo minigame về "${topic}" với Gemini`,
-        });
+    try {
+      // Check if we're using a preset
+      if (settings.presetId && settings.customContent) {
+        const preset = getPresetById(settings.presetId);
+        if (preset) {
+          // Build preset-specific prompt
+          const presetPrompt = buildPresetPrompt(preset, settings.customContent);
+          console.log("Using preset prompt for game generation");
+          
+          // Generate game with preset prompt
+          const game = await gameGenerator.generateMiniGameWithPrompt(presetPrompt);
+          
+          if (game) {
+            console.log("Preset minigame generated successfully:", game.title);
+            setMiniGame(game);
+            toast({
+              title: "Minigame Đã Sẵn Sàng",
+              description: `Đã tạo minigame "${preset.name}" về "${settings.customContent}"`,
+            });
+          } else {
+            throw new Error('Không thể tạo minigame từ mẫu');
+          }
+        } else {
+          throw new Error('Không tìm thấy mẫu trò chơi');
+        }
       } else {
-        throw new Error('Không thể tạo minigame');
+        // Regular game generation without preset
+        const game = await gameGenerator.generateMiniGame(topic, settings);
+        
+        if (game) {
+          console.log("Minigame generated successfully:", game.title);
+          setMiniGame(game);
+          toast({
+            title: "Minigame Đã Sẵn Sàng",
+            description: `Đã tạo minigame về "${topic}" với Gemini`,
+          });
+        } else {
+          throw new Error('Không thể tạo minigame');
+        }
       }
     } catch (error) {
       console.error('Lỗi Tạo Minigame:', error);
