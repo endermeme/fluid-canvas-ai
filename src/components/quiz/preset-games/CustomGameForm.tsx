@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,18 +6,22 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SparklesIcon, Brain, PenTool, BookOpen, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { AIGameGenerator, MiniGame } from '../generator/AIGameGenerator';
 
 interface CustomGameFormProps {
   gameType: string;
-  onGenerate: (content: string) => void;
+  onGenerate: (content: string, game: MiniGame) => void;
   onCancel: () => void;
 }
+
+const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, onCancel }) => {
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [difficulty, setDifficulty] = useState('medium');
   const { toast } = useToast();
+  const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
 
   const getGameTypeName = () => {
     switch (gameType) {
@@ -53,7 +56,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!content.trim()) {
       toast({
         title: "Lỗi",
@@ -65,20 +68,41 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
 
     setIsGenerating(true);
     
-    // This would be replaced with actual AI generation later
-    setTimeout(() => {
-      onGenerate(content);
-      setIsGenerating(false);
+    try {
+      const settings = {
+        difficulty: difficulty,
+        questionCount: 10,
+        timePerQuestion: 30,
+        category: 'general'
+      };
       
+      console.log("Tạo game với chủ đề:", content);
+      const game = await gameGenerator.generateMiniGame(content, settings);
+      
+      if (game) {
+        toast({
+          title: "Đã tạo trò chơi",
+          description: `Trò chơi ${getGameTypeName()} đã được tạo thành công với AI.`,
+        });
+        
+        onGenerate(content, game);
+      } else {
+        throw new Error("Không thể tạo game");
+      }
+    } catch (error) {
+      console.error("Lỗi khi tạo game:", error);
       toast({
-        title: "Đã tạo trò chơi",
-        description: `Trò chơi ${getGameTypeName()} đã được tạo thành công với AI.`,
+        title: "Lỗi tạo game",
+        description: "Có lỗi xảy ra khi tạo game. Vui lòng thử lại.",
+        variant: "destructive"
       });
-    }, 2000);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto w-full">
       <Card className="bg-background/60 backdrop-blur-sm border-primary/20 shadow-lg p-6">
         <div className="mb-6">
           <h2 className="text-2xl font-bold flex items-center gap-2">
