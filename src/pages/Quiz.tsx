@@ -35,7 +35,8 @@ const Quiz = () => {
       
       // If autostart is set, generate the quiz automatically
       if (autoStart === 'true') {
-        // Will be handled by QuizGenerator
+        // Will be handled by CustomGameForm
+        setCurrentTopic(topicParam);
       }
     }
   }, [location.search]);
@@ -48,9 +49,16 @@ const Quiz = () => {
   }, []);
 
   const handleGameGeneration = (content: string, game: MiniGame) => {
+    console.log("Game generated:", game.title);
     setCurrentTopic(content);
     setCurrentGame(game);
     setShowForm(false);
+    setIsGenerating(false);
+    
+    toast({
+      title: "Trò chơi đã sẵn sàng",
+      description: `Trò chơi "${game.title || content}" đã được tạo thành công.`,
+    });
   };
 
   const handleCancelCustomGame = () => {

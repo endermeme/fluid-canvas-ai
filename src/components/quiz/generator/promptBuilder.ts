@@ -39,15 +39,21 @@ export const buildGeminiPrompt = (
     - **Script DOM Ready:** Đặt tất cả code JavaScript trong event listener 'DOMContentLoaded'.
     - **Tương thích trình duyệt:** Sử dụng các tính năng JavaScript được hỗ trợ rộng rãi.
     - **Tối ưu hiệu suất:** Tránh vòng lặp lồng nhau phức tạp và DOM manipulation không cần thiết.
-    - **Xử lý hình ảnh:** Nếu trò chơi cần hình ảnh, sử dụng các dịch vụ hình ảnh miễn phí như đã nêu.
 
-    ## Xử lý hình ảnh đặc biệt
-    - **Đảm bảo hình ảnh hoạt động:** Luôn sử dụng URL hình ảnh cố định, không dùng API ngẫu nhiên
-    - **Có nhiều nguồn ảnh dự phòng:** Nếu một URL không hoạt động, hiển thị ảnh dự phòng
-    - **SVG Fallback:** Tạo SVG đơn giản làm dự phòng cuối cùng
-    - **Xử lý lỗi hình ảnh:** Luôn thêm thuộc tính onerror cho thẻ img
-    - **Preload images:** Tải trước hình ảnh để tránh độ trễ khi chơi
-    - **Hướng dẫn chi tiết:** Cho trò chơi hình ảnh, hãy bổ sung hướng dẫn cách chơi rõ ràng
+    ## Yêu cầu đặc biệt về nội dung trò chơi
+    - **Chính xác về nội dung:** Đảm bảo tất cả thông tin, câu hỏi, câu trả lời đều chính xác về mặt học thuật và lịch sử.
+    - **Đáp án rõ ràng:** Mỗi câu hỏi phải có một đáp án đúng duy nhất được đánh dấu rõ ràng.
+    - **Thông báo rõ ràng:** Người chơi phải biết rõ khi họ trả lời đúng hoặc sai.
+    - **Hiển thị đáp án đúng:** Luôn hiển thị đáp án đúng sau khi người chơi đã trả lời.
+    - **Điểm số:** Theo dõi và hiển thị điểm số của người chơi.
+    - **Đánh giá kết quả:** Hiển thị tỷ lệ phần trăm đúng và nhận xét về kết quả người chơi khi kết thúc trò chơi.
+
+    ## Xử lý đặc biệt cho Quiz và Trắc nghiệm
+    - **Đánh dấu đáp án đúng rõ ràng:** Trong mã HTML, đánh dấu đáp án đúng bằng thuộc tính 'data-correct="true"' hoặc class "correct".
+    - **Tránh hiện đáp án trước:** Đảm bảo người chơi không thể nhìn thấy đáp án đúng trước khi chọn.
+    - **Đáp án phải ngẫu nhiên:** Xáo trộn thứ tự đáp án mỗi khi trò chơi bắt đầu.
+    - **Kiểm tra tham khảo đáp án:** Đáp án đúng phải được lưu trữ trong biến JavaScript, không chỉ trong HTML.
+    - **Phản hồi tức thời:** Ngay lập tức hiển thị phản hồi khi người chơi chọn đáp án.
 
     ## Phòng tránh lỗi phổ biến
     - **Tránh click handlers không hoạt động:** Đảm bảo event listeners được đính kèm đúng cách.

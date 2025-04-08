@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -57,6 +58,24 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     }
   };
 
+  // Process content to improve topic quality
+  const processContentForPrompt = (rawContent: string): string => {
+    // Add specific prefixes based on game type to help Gemini generate better content
+    const gamePrefix = gameType === 'quiz' ? 'Quiz trắc nghiệm: ' : 
+                       gameType === 'flashcards' ? 'Thẻ ghi nhớ: ' :
+                       gameType === 'matching' ? 'Trò chơi ghép cặp: ' :
+                       gameType === 'memory' ? 'Trò chơi trí nhớ: ' :
+                       gameType === 'wordsearch' ? 'Tìm từ: ' :
+                       gameType === 'truefalse' ? 'Câu hỏi đúng/sai: ' : '';
+    
+    // If content doesn't have the game type indicator, add it
+    if (!rawContent.toLowerCase().includes(gamePrefix.toLowerCase()) && gamePrefix) {
+      return gamePrefix + rawContent;
+    }
+    
+    return rawContent;
+  };
+
   const handleSubmit = async () => {
     if (!content.trim()) {
       toast({
@@ -77,8 +96,11 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
         category: 'general'
       };
       
-      console.log("Tạo game với chủ đề:", content);
-      const game = await gameGenerator.generateMiniGame(content, settings);
+      // Process content for better prompt quality
+      const processedContent = processContentForPrompt(content);
+      console.log("Tạo game với chủ đề:", processedContent);
+      
+      const game = await gameGenerator.generateMiniGame(processedContent, settings);
       
       if (game) {
         toast({
@@ -86,7 +108,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
           description: `Trò chơi ${getGameTypeName()} đã được tạo thành công với AI.`,
         });
         
-        onGenerate(content, game);
+        onGenerate(processedContent, game);
       } else {
         throw new Error("Không thể tạo game");
       }

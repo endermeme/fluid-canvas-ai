@@ -57,16 +57,14 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
     }
   };
 
-  // Handle returning to home - fixed to use absolute path
+  // Handle returning to home
   const handleBackToHome = () => {
-    // Force navigation to the root path with window.location
     window.location.href = '/';
   };
 
-  // Apply game optimization code when iframe loads
+  // Apply game optimization and fix script errors when iframe loads
   const handleIframeLoad = () => {
     try {
-      // Use a more cautious approach to access the iframe content
       if (!iframeRef.current) return;
       
       // Reset any previous errors
@@ -74,9 +72,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
 
       const iframe = iframeRef.current;
       
-      // Safely try to access the iframe document - this might throw cross-origin errors
       try {
-        // Access contentDocument with try/catch to handle potential cross-origin issues
         const iframeDoc = iframe.contentDocument;
         
         if (!iframeDoc) {
@@ -95,6 +91,30 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
             width: 100% !important;
             height: 100% !important;
           }
+          
+          /* Prevent answer spoilers in HTML comments */
+          .comment, comment, [class*="comment"] {
+            display: none !important;
+            visibility: hidden !important;
+          }
+          
+          /* Fix for potentially incorrect game logic */
+          .incorrect.answer-chosen {
+            background-color: #FFDDDD !important;
+            border-color: #FF0000 !important;
+          }
+          
+          .correct.answer-chosen {
+            background-color: #DDFFDD !important;
+            border-color: #00AA00 !important;
+          }
+          
+          /* Ensure proper answer highlight */
+          .answer.correct {
+            background-color: #DDFFDD !important;
+            border-color: #00AA00 !important;
+          }
+          
           h1, h2, h3, h4, h5, h6, header, .header, [class*="header"], [id*="header"], 
           [class*="title"], [id*="title"], .title-container, .game-title {
             display: none !important;
@@ -128,7 +148,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         `;
         iframeDoc.head.appendChild(styleElement);
         
-        // Add JavaScript to prevent scrolling and remove headers - with try/catch for safety
+        // Add JavaScript to fix game logic and prevent scrolling
         try {
           const scriptElement = iframeDoc.createElement('script');
           scriptElement.textContent = `
@@ -136,45 +156,53 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
             document.body.style.overflow = 'hidden';
             document.documentElement.style.overflow = 'hidden';
             
-            // Remove all header elements
-            function removeHeaders() {
-              const selectors = [
-                'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', '.header', 
-                '[class*="header"]', '[id*="header"]', '[class*="title"]', 
-                '[id*="title"]', '.title-container', '.game-title'
-              ];
-              
-              selectors.forEach(selector => {
-                const elements = document.querySelectorAll(selector);
-                elements.forEach(el => {
-                  el.style.display = 'none';
-                  el.style.visibility = 'hidden';
-                  el.style.height = '0';
-                  el.style.overflow = 'hidden';
-                });
+            // Fix potential quiz logic issues
+            function fixQuizLogic() {
+              // Fix click handlers if they're not working
+              document.querySelectorAll('.answer, .option, .choice, button[data-option]').forEach(element => {
+                if (!element.onclick) {
+                  element.onclick = function() {
+                    const isCorrect = this.classList.contains('correct') || 
+                                     this.getAttribute('data-correct') === 'true' ||
+                                     this.getAttribute('data-answer') === 'correct';
+                    
+                    // Mark selected answer
+                    this.classList.add('answer-chosen');
+                    
+                    // Show correct answer if not already visible
+                    if (!isCorrect) {
+                      document.querySelectorAll('.correct, [data-correct="true"], [data-answer="correct"]').forEach(el => {
+                        el.classList.add('highlight-correct');
+                        el.style.backgroundColor = '#DDFFDD';
+                        el.style.borderColor = '#00AA00';
+                      });
+                    }
+                  };
+                }
               });
               
-              // Fix potentially blocked images
+              // Fix images that might be blocked
               document.querySelectorAll('img').forEach(img => {
                 img.onerror = function() {
-                  this.style.border = '1px dashed red';
+                  this.style.border = '1px dashed #999';
                   this.style.padding = '10px';
                   this.style.width = '100px';
                   this.style.height = '100px';
                   this.alt = 'Hình ảnh không thể tải';
-                  this.src = 'data:image/svg+xml;charset=utf-8,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%22100%22 height%3D%22100%22%3E%3Ctext x%3D%2250%25%22 y%3D%2250%25%22 text-anchor%3D%22middle%22 fill%3D%22red%22%3EHình ảnh bị chặn%3C%2Ftext%3E%3C%2Fsvg%3E';
+                  this.src = 'data:image/svg+xml;charset=utf-8,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%22100%22 height%3D%22100%22%3E%3Ctext x%3D%2250%25%22 y%3D%2250%25%22 text-anchor%3D%22middle%22 fill%3D%22%23999%22%3EHình ảnh bị thiếu%3C%2Ftext%3E%3C%2Fsvg%3E';
                 };
               });
             }
             
-            // Remove headers immediately
-            removeHeaders();
+            // Wait for DOM to be fully loaded then fix quiz logic
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', fixQuizLogic);
+            } else {
+              fixQuizLogic();
+            }
             
-            // And also observe DOM changes to remove headers when they appear
-            const observer = new MutationObserver(() => {
-              removeHeaders();
-            });
-            
+            // Also observe DOM changes to fix logic when content changes
+            const observer = new MutationObserver(fixQuizLogic);
             observer.observe(document.body, {
               childList: true,
               subtree: true
@@ -196,8 +224,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         }
       } catch (crossOriginError) {
         console.warn("Cross-origin restriction prevented accessing iframe content:", crossOriginError);
-        
-        // We're facing a cross-origin issue - set error state
         setIframeError("Không thể tương tác với minigame do hạn chế bảo mật. Vui lòng thử tải lại trang.");
       }
     } catch (e) {
@@ -206,12 +232,25 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
     }
   };
 
-  // Pre-process HTML content to handle potential cross-origin image issues
+  // Pre-process HTML content to fix potential issues and improve game logic
   const processHtmlContent = (html: string): string => {
     if (!html) return '';
     
-    // Add image error handling directly into the HTML content
-    return html.replace(/<img\s+/gi, '<img crossorigin="anonymous" onerror="this.onerror=null; this.style.border=\'1px dashed red\'; this.alt=\'Hình ảnh không thể tải\'; this.style.width=\'100px\'; this.style.height=\'100px\';" ');
+    // Fix common issues in Gemini-generated content
+    let processedHtml = html
+      // Fix image handling
+      .replace(/<img\s+/gi, '<img crossorigin="anonymous" onerror="this.onerror=null; this.style.border=\'1px dashed #999\'; this.alt=\'Hình ảnh không thể tải\'; this.style.width=\'100px\'; this.style.height=\'100px\';" ')
+      
+      // Ensure scripts run in the right order
+      .replace(/<\/body>/i, '<script>document.addEventListener("DOMContentLoaded", function() { if(typeof initGame === "function") initGame(); });</script></body>')
+      
+      // Fix broken JSON that might cause logic issues
+      .replace(/JSON\.parse\(['"](.+?)['"]\)/g, function(match, p1) {
+        // Properly escape JSON string
+        return 'JSON.parse(\'' + p1.replace(/'/g, "\\'").replace(/\\"/g, '\\\\"') + '\')';
+      });
+    
+    return processedHtml;
   };
 
   if (!miniGame || !miniGame.content) {
