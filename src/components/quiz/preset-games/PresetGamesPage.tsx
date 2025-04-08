@@ -3,31 +3,20 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import GameSelector from './GameSelector';
-import PresetGameManager from './PresetGameManager';
-import CustomGameForm from './CustomGameForm';
+import CustomGameForm from '../CustomGameForm';
 
 const PresetGamesPage = () => {
-  const [state, setState] = useState<'select' | 'play' | 'custom'>('select');
-  const [gameType, setGameType] = useState<string>('');
+  const [gameContent, setGameContent] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleGameSelect = (type: string) => {
-    setGameType(type);
-    setState('custom');
-  };
-
   const handleBack = () => {
-    if (state === 'play' || state === 'custom') {
-      setState('select');
-    } else {
-      navigate('/');
-    }
+    navigate('/');
   };
 
   const handleCustomGameGenerate = (content: string) => {
-    // After generating custom content, switch to play mode
-    setState('play');
+    setGameContent(content);
+    // You would typically process the generated content here
+    console.log("Generated game content:", content);
   };
 
   return (
@@ -35,29 +24,15 @@ const PresetGamesPage = () => {
       <div className="border-b p-4 bg-background/80 backdrop-blur-sm">
         <Button variant="ghost" size="sm" onClick={handleBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          {state === 'select' ? 'Quay lại trang chủ' : 'Quay lại chọn trò chơi'}
+          Quay lại trang chủ
         </Button>
       </div>
       
       <div className="flex-grow overflow-auto">
-        {state === 'select' && (
-          <GameSelector onSelectGame={handleGameSelect} />
-        )}
-        
-        {state === 'custom' && (
-          <CustomGameForm 
-            gameType={gameType} 
-            onGenerate={handleCustomGameGenerate}
-            onCancel={() => setState('select')}
-          />
-        )}
-        
-        {state === 'play' && (
-          <PresetGameManager 
-            gameType={gameType}
-            onBack={() => setState('select')}
-          />
-        )}
+        <CustomGameForm 
+          onGenerate={handleCustomGameGenerate}
+          onCancel={handleBack}
+        />
       </div>
     </div>
   );

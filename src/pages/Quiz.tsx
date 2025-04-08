@@ -1,24 +1,25 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
-import QuickGameSelector from '@/components/quiz/quick-game-selector';
-import ChatInterface from '@/components/chat/ChatInterface';
+import SimpleChatInterface from '@/components/chat/SimpleChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { animateContentHighlight } from '@/lib/animations';
+import { Button } from '@/components/ui/button';
+import { PlusCircle, Brain } from 'lucide-react';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
-  const [isManualMode, setIsManualMode] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [showChatInterface, setShowChatInterface] = useState(false);
   
   const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
   const { addBlock } = useCanvasState();
   const { toast } = useToast();
-  const [isGenerating, setIsGenerating] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const mainContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,7 +32,6 @@ const Quiz = () => {
     
     if (topicParam) {
       setTopic(topicParam);
-      setIsManualMode(true);
       
       // If autostart is set, generate the quiz automatically
       if (autoStart === 'true') {
@@ -75,9 +75,6 @@ const Quiz = () => {
       return;
     }
     
-    // Switch to manual mode when a chat request comes in
-    setIsManualMode(true);
-    
     // Directly generate the game
     setTopic(requestedTopic);
     setIsGenerating(true);
@@ -100,21 +97,53 @@ const Quiz = () => {
     setShowChatInterface(!showChatInterface);
   };
 
+  const goToCreateGame = () => {
+    navigate('/create-game');
+  };
+
+  const renderEmptyState = () => (
+    <div className="h-full flex flex-col items-center justify-center p-6">
+      <div className="max-w-md w-full text-center space-y-6">
+        <div className="mb-4">
+          <Brain className="h-16 w-16 mx-auto text-primary/70" />
+        </div>
+        <h2 className="text-2xl font-bold">Tạo Minigame Với AI</h2>
+        <p className="text-muted-foreground">
+          Tạo các trò chơi học tập tương tác với trí tuệ nhân tạo Gemini. Nhập chủ đề và AI sẽ tạo trò chơi cho bạn.
+        </p>
+        <div className="pt-4 flex flex-col gap-3">
+          <Button 
+            className="w-full bg-primary"
+            onClick={goToCreateGame}
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Tạo Trò Chơi Mới
+          </Button>
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            onClick={toggleChatInterface}
+          >
+            <Brain className="mr-2 h-4 w-4" />
+            Chat Với AI
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen flex flex-col w-full overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 bg-background overflow-hidden p-0 relative">
           <div ref={mainContentRef} className="h-full relative">
-            {isManualMode ? (
+            {topic ? (
               <QuizGenerator 
                 ref={quizGeneratorRef} 
                 topic={topic}
               />
             ) : (
-              <QuickGameSelector 
-                onGameRequest={handleGameRequest}
-                onToggleChat={toggleChatInterface}
-              />
+              renderEmptyState()
             )}
           </div>
         </div>
@@ -134,10 +163,9 @@ const Quiz = () => {
               </button>
             </div>
             <div className="h-[60vh]">
-              <ChatInterface 
-                onCreateBlock={handleCreateFromPrompt} 
+              <SimpleChatInterface 
                 onQuizRequest={handleGameRequest}
-                onCloseChatInterface={toggleChatInterface}
+                onClose={toggleChatInterface}
               />
             </div>
           </div>

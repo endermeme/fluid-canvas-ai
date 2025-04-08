@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Quiz from './pages/Quiz';
@@ -11,7 +12,7 @@ function AppContent() {
       <Route path="/" element={<Home />} />
       <Route path="/quiz" element={<Quiz />} />
       <Route path="/quiz/shared/:gameId" element={<SharedGame />} />
-      <Route path="/preset-games" element={<PresetGamesPage />} />
+      <Route path="/create-game" element={<PresetGamesPage />} />
     </Routes>
   );
 }
