@@ -3,19 +3,30 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import GameSelector from './GameSelector';
+import PresetGameManager from './PresetGameManager';
 import CustomGameForm from './CustomGameForm';
 
 const PresetGamesPage = () => {
-  const [state, setState] = useState<'custom' | 'play'>('custom');
-  const [gameContent, setGameContent] = useState<string>('');
+  const [state, setState] = useState<'select' | 'play' | 'custom'>('select');
+  const [gameType, setGameType] = useState<string>('');
   const navigate = useNavigate();
 
+  const handleGameSelect = (type: string) => {
+    setGameType(type);
+    setState('custom');
+  };
+
   const handleBack = () => {
-    navigate('/');
+    if (state === 'play' || state === 'custom') {
+      setState('select');
+    } else {
+      navigate('/');
+    }
   };
 
   const handleCustomGameGenerate = (content: string) => {
-    setGameContent(content);
+    // After generating custom content, switch to play mode
     setState('play');
   };
 
@@ -24,26 +35,28 @@ const PresetGamesPage = () => {
       <div className="border-b p-4 bg-background/80 backdrop-blur-sm">
         <Button variant="ghost" size="sm" onClick={handleBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Quay lại trang chủ
+          {state === 'select' ? 'Quay lại trang chủ' : 'Quay lại chọn trò chơi'}
         </Button>
       </div>
       
       <div className="flex-grow overflow-auto">
+        {state === 'select' && (
+          <GameSelector onSelectGame={handleGameSelect} />
+        )}
+        
         {state === 'custom' && (
           <CustomGameForm 
+            gameType={gameType} 
             onGenerate={handleCustomGameGenerate}
-            onCancel={handleBack}
+            onCancel={() => setState('select')}
           />
         )}
         
         {state === 'play' && (
-          <div className="p-6 text-center">
-            <h2 className="text-2xl font-bold mb-4">Game đã được tạo thành công!</h2>
-            <p className="mb-4 text-muted-foreground">{gameContent}</p>
-            <Button onClick={() => setState('custom')}>
-              Tạo game mới
-            </Button>
-          </div>
+          <PresetGameManager 
+            gameType={gameType}
+            onBack={() => setState('select')}
+          />
         )}
       </div>
     </div>
