@@ -1,12 +1,10 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { 
   Brain, BookOpen, Puzzle, Dices, Footprints, 
-  Image, CheckSquare, Layers, ArrowRightLeft, Search, RefreshCw
+  Image, CheckSquare, Layers, ArrowRightLeft, Search, Sparkles
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 interface GameSelectorProps {
   onSelectGame: (gameType: string) => void;
@@ -66,7 +64,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6 text-center">Chọn loại trò chơi</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">Chọn loại trò chơi để tạo với AI</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {gameTypes.map((game) => (
@@ -83,13 +81,10 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                 <h3 className="font-bold">{game.name}</h3>
                 <p className="text-sm text-muted-foreground">{game.description}</p>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-2 w-full border-primary/30 hover:border-primary"
-              >
-                Bắt đầu
-              </Button>
+              <div className="mt-2 flex items-center justify-center w-full px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm font-medium">
+                <Sparkles className="h-4 w-4 mr-1" />
+                Tạo với AI
+              </div>
             </div>
           </Card>
         ))}

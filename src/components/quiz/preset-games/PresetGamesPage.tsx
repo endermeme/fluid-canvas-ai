@@ -14,11 +14,6 @@ const PresetGamesPage = () => {
 
   const handleGameSelect = (type: string) => {
     setGameType(type);
-    setState('play');
-  };
-
-  const handleCustomGameSelect = (type: string) => {
-    setGameType(type);
     setState('custom');
   };
 
@@ -31,8 +26,7 @@ const PresetGamesPage = () => {
   };
 
   const handleCustomGameGenerate = (content: string) => {
-    // In a real app, this would process the custom content
-    // For now, just switch to play mode
+    // After generating custom content, switch to play mode
     setState('play');
   };
 
