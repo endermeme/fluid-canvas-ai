@@ -20,9 +20,9 @@ const PresetGamesPage = () => {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="border-b p-4 bg-background/80 backdrop-blur-sm">
-        <Button variant="ghost" size="sm" onClick={handleBack}>
+    <div className="h-full flex flex-col bg-gradient-to-b from-background/60 to-background">
+      <div className="border-b p-4 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+        <Button variant="ghost" size="sm" onClick={handleBack} className="flex items-center text-primary">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Quay lại trang chủ
         </Button>
@@ -37,12 +37,19 @@ const PresetGamesPage = () => {
         )}
         
         {state === 'play' && (
-          <div className="p-6 text-center">
-            <h2 className="text-2xl font-bold mb-4">Game đã được tạo thành công!</h2>
-            <p className="mb-4 text-muted-foreground">{gameContent}</p>
-            <Button onClick={() => setState('custom')}>
-              Tạo game mới
-            </Button>
+          <div className="p-6 max-w-3xl mx-auto bg-background/80 backdrop-blur-sm border rounded-lg shadow-lg mt-6">
+            <h2 className="text-2xl font-bold mb-4 text-primary">Game đã được tạo thành công!</h2>
+            <div className="border rounded-md p-4 mb-6 bg-background/60 max-h-[50vh] overflow-auto">
+              <pre className="text-sm whitespace-pre-wrap font-mono">{gameContent}</pre>
+            </div>
+            <div className="flex gap-4 justify-end">
+              <Button variant="outline" onClick={() => setState('custom')}>
+                Tạo game mới
+              </Button>
+              <Button onClick={() => navigator.clipboard.writeText(gameContent)} className="bg-primary">
+                Sao chép nội dung
+              </Button>
+            </div>
           </div>
         )}
       </div>
