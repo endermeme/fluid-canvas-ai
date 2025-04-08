@@ -1,7 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
-import QuickGameSelector from '@/components/quiz/quick-game-selector';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
@@ -111,10 +110,21 @@ const Quiz = () => {
                 topic={topic}
               />
             ) : (
-              <QuickGameSelector 
-                onGameRequest={handleGameRequest}
-                onToggleChat={toggleChatInterface}
-              />
+              <div className="flex flex-col items-center justify-center h-full p-6">
+                <div className="w-full max-w-md mx-auto text-center space-y-8">
+                  <h1 className="text-3xl font-bold text-primary">Minigame Tương Tác</h1>
+                  <p className="text-lg text-foreground/80">
+                    Tạo trò chơi tương tác với AI. Nhập chủ đề của bạn và AI sẽ tạo một trò chơi ngay lập tức.
+                  </p>
+                  
+                  <button
+                    onClick={toggleChatInterface}
+                    className="bg-gradient-to-r from-primary to-primary/80 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 w-full"
+                  >
+                    Tạo Game Tùy Chỉnh
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>
