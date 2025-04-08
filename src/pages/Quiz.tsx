@@ -1,27 +1,32 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import QuizGenerator from '@/components/quiz/QuizGenerator';
-import ChatInterface from '@/components/chat/ChatInterface';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
 import { animateContentHighlight } from '@/lib/animations';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Sparkles, Brain, PenTool, BookOpen, Info, Send } from 'lucide-react';
 
 const Quiz = () => {
   const [topic, setTopic] = useState('');
-  const [isManualMode, setIsManualMode] = useState(false);
-  const [showChatInterface, setShowChatInterface] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [hasGeneratedGame, setHasGeneratedGame] = useState(false);
+  const [canvasMode, setCanvasMode] = useState(true); // Canvas mode always on by default
   
   const quizGeneratorRef = useRef<{ generateQuiz: (topic: string) => void }>(null);
   const { addBlock } = useCanvasState();
   const { toast } = useToast();
-  const [isGenerating, setIsGenerating] = useState(false);
   const location = useLocation();
   const mainContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.title = 'Minigame Tương Tác';
+    // Always enable canvas mode
+    localStorage.setItem('canvas_mode', 'true');
     
     // Parse URL parameters for direct game creation
     const queryParams = new URLSearchParams(location.search);
@@ -30,16 +35,12 @@ const Quiz = () => {
     
     if (topicParam) {
       setTopic(topicParam);
-      setIsManualMode(true);
       
       // If autostart is set, generate the quiz automatically
       if (autoStart === 'true') {
         setIsGenerating(true);
         setTimeout(() => {
-          if (quizGeneratorRef.current) {
-            quizGeneratorRef.current.generateQuiz(topicParam);
-          }
-          setIsGenerating(false);
+          handleGameGeneration(topicParam);
         }, 100);
       }
     }
@@ -64,8 +65,8 @@ const Quiz = () => {
     addBlock(type, position, canvasRect as DOMRect);
   };
 
-  const handleGameRequest = (requestedTopic: string) => {
-    if (!requestedTopic.trim()) {
+  const handleGameGeneration = (gameTopic: string) => {
+    if (!gameTopic.trim()) {
       toast({
         title: "Chủ Đề Trống",
         description: "Vui lòng cung cấp chủ đề cho minigame",
@@ -74,16 +75,12 @@ const Quiz = () => {
       return;
     }
     
-    // Switch to manual mode when a chat request comes in
-    setIsManualMode(true);
-    
-    // Directly generate the game
-    setTopic(requestedTopic);
     setIsGenerating(true);
     
     setTimeout(() => {
       if (quizGeneratorRef.current) {
-        quizGeneratorRef.current.generateQuiz(requestedTopic);
+        quizGeneratorRef.current.generateQuiz(gameTopic);
+        setHasGeneratedGame(true);
       } else {
         toast({
           title: "Lỗi Hệ Thống",
@@ -95,64 +92,112 @@ const Quiz = () => {
     }, 100);
   };
 
-  const toggleChatInterface = () => {
-    setShowChatInterface(!showChatInterface);
+  const renderGameCreator = () => {
+    return (
+      <div className="p-6 max-w-4xl mx-auto w-full">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-primary">Minigame Tương Tác</h1>
+          <p className="text-lg text-muted-foreground mt-2">
+            Tạo trò chơi học tập tương tác với AI. Nhập chủ đề và nhận ngay trò chơi của bạn!
+          </p>
+        </div>
+        
+        <Card className="bg-background/60 backdrop-blur-sm border-primary/20 shadow-lg">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-start gap-2">
+                <Brain className="w-5 h-5 text-primary mt-1" />
+                <div>
+                  <h3 className="font-medium">Nhập Chủ Đề Của Bạn</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Mô tả chi tiết chủ đề hoặc loại trò chơi bạn muốn tạo
+                  </p>
+                </div>
+              </div>
+              
+              <Textarea
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="Ví dụ: Tạo một trò chơi trắc nghiệm về lịch sử Việt Nam với 10 câu hỏi..."
+                className="min-h-[120px] text-base border-primary/20 focus:border-primary/40"
+              />
+              
+              <div className="flex flex-col gap-4 mt-2">
+                <div className="flex items-start gap-2">
+                  <Info className="w-4 h-4 text-primary mt-1" />
+                  <p className="text-sm text-muted-foreground">
+                    Chế độ Canvas <span className="text-primary font-medium">đã được bật</span> để tạo giao diện trò chơi đẹp mắt hơn.
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+                  <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
+                    <PenTool className="w-6 h-6 text-primary mb-2" />
+                    <h4 className="text-sm font-medium">Tùy chỉnh chi tiết</h4>
+                    <p className="text-xs text-muted-foreground">Càng chi tiết càng tốt</p>
+                  </div>
+                  
+                  <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
+                    <BookOpen className="w-6 h-6 text-primary mb-2" />
+                    <h4 className="text-sm font-medium">Nêu chủ đề học tập</h4>
+                    <p className="text-xs text-muted-foreground">Lịch sử, toán học, ngôn ngữ...</p>
+                  </div>
+                  
+                  <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
+                    <Sparkles className="w-6 h-6 text-primary mb-2" />
+                    <h4 className="text-sm font-medium">Trò chơi tương tác</h4>
+                    <p className="text-xs text-muted-foreground">Quiz, ghép cặp, sắp xếp...</p>
+                  </div>
+                </div>
+              </div>
+              
+              <Button
+                onClick={() => handleGameGeneration(topic)}
+                disabled={!topic.trim() || isGenerating}
+                className="w-full mt-2 bg-gradient-to-r from-primary to-primary/80 text-white py-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 group"
+                size="lg"
+              >
+                {isGenerating ? (
+                  <>
+                    <div className="animate-spin h-5 w-5 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
+                    Đang tạo trò chơi...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                    Tạo Trò Chơi Ngay
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <div className="mt-4 flex justify-center">
+          <p className="text-xs text-muted-foreground italic">
+            Powered by AI • Mọi trò chơi được tạo hoàn toàn với trí tuệ nhân tạo
+          </p>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="min-h-screen flex flex-col w-full overflow-hidden">
+    <div className="min-h-screen flex flex-col w-full bg-gradient-to-b from-background to-background/95 overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 bg-background overflow-hidden p-0 relative">
+        <div className="flex-1 overflow-hidden p-0 relative">
           <div ref={mainContentRef} className="h-full relative">
-            {isManualMode ? (
+            {hasGeneratedGame ? (
               <QuizGenerator 
                 ref={quizGeneratorRef} 
                 topic={topic}
               />
             ) : (
-              <div className="flex flex-col items-center justify-center h-full p-6">
-                <div className="w-full max-w-md mx-auto text-center space-y-8">
-                  <h1 className="text-3xl font-bold text-primary">Minigame Tương Tác</h1>
-                  <p className="text-lg text-foreground/80">
-                    Tạo trò chơi tương tác với AI. Nhập chủ đề của bạn và AI sẽ tạo một trò chơi ngay lập tức.
-                  </p>
-                  
-                  <button
-                    onClick={toggleChatInterface}
-                    className="bg-gradient-to-r from-primary to-primary/80 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 w-full"
-                  >
-                    Tạo Game Tùy Chỉnh
-                  </button>
-                </div>
-              </div>
+              renderGameCreator()
             )}
           </div>
         </div>
       </div>
-      
-      {/* Floating Chat Interface */}
-      {showChatInterface && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 flex justify-center items-center">
-          <div className="bg-background rounded-lg shadow-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <h2 className="text-xl font-bold">Tạo Game Tùy Chỉnh</h2>
-              <button 
-                className="text-foreground/70 hover:text-foreground"
-                onClick={toggleChatInterface}
-              >
-                ✕
-              </button>
-            </div>
-            <div className="h-[60vh]">
-              <ChatInterface 
-                onCreateBlock={handleCreateFromPrompt} 
-                onQuizRequest={handleGameRequest}
-                onCloseChatInterface={toggleChatInterface}
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SparklesIcon, Brain } from 'lucide-react';
+import { SparklesIcon, Brain, PenTool, BookOpen, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface CustomGameFormProps {
@@ -78,8 +78,8 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   };
 
   return (
-    <div className="p-6">
-      <Card className="max-w-2xl mx-auto p-6">
+    <div className="p-6 max-w-4xl mx-auto">
+      <Card className="bg-background/60 backdrop-blur-sm border-primary/20 shadow-lg p-6">
         <div className="mb-6">
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Brain className="h-6 w-6 text-primary" />
@@ -118,6 +118,35 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
             />
           </div>
           
+          <div className="flex flex-col gap-4 mt-2">
+            <div className="flex items-start gap-2">
+              <Info className="w-4 h-4 text-primary mt-1" />
+              <p className="text-sm text-muted-foreground">
+                Chế độ Canvas <span className="text-primary font-medium">đã được bật</span> để tạo giao diện trò chơi đẹp mắt hơn.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+              <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
+                <PenTool className="w-6 h-6 text-primary mb-2" />
+                <h4 className="text-sm font-medium">Tùy chỉnh chi tiết</h4>
+                <p className="text-xs text-muted-foreground">Càng chi tiết càng tốt</p>
+              </div>
+              
+              <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
+                <BookOpen className="w-6 h-6 text-primary mb-2" />
+                <h4 className="text-sm font-medium">Nêu chủ đề học tập</h4>
+                <p className="text-xs text-muted-foreground">Lịch sử, toán học, ngôn ngữ...</p>
+              </div>
+              
+              <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
+                <SparklesIcon className="w-6 h-6 text-primary mb-2" />
+                <h4 className="text-sm font-medium">Trò chơi tương tác</h4>
+                <p className="text-xs text-muted-foreground">Quiz, ghép cặp, sắp xếp...</p>
+              </div>
+            </div>
+          </div>
+          
           <div className="flex justify-between pt-4">
             <Button 
               variant="outline" 
@@ -128,7 +157,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
             <Button 
               onClick={handleSubmit}
               disabled={isGenerating}
-              className="bg-primary"
+              className="bg-gradient-to-r from-primary to-primary/80"
             >
               {isGenerating ? (
                 <>
