@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SparklesIcon, Brain, PenTool, BookOpen, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from '../generator/AIGameGenerator';
+import { GameSettingsData } from '../types';
 
 interface CustomGameFormProps {
   gameType: string;
@@ -19,7 +20,7 @@ const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, onCancel }) => {
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [difficulty, setDifficulty] = useState('medium');
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const { toast } = useToast();
   const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
 
@@ -69,7 +70,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     setIsGenerating(true);
     
     try {
-      const settings = {
+      const settings: GameSettingsData = {
         difficulty: difficulty,
         questionCount: 10,
         timePerQuestion: 30,
@@ -117,7 +118,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
             <Label htmlFor="difficulty">Độ khó</Label>
             <Select 
               value={difficulty} 
-              onValueChange={setDifficulty}
+              onValueChange={(value: 'easy' | 'medium' | 'hard') => setDifficulty(value)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Chọn độ khó" />

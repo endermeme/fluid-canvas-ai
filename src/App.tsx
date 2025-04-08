@@ -1,24 +1,26 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import Quiz from './pages/Quiz';
 import SharedGame from './pages/SharedGame';
 import Home from './pages/Home';
 
-function AppContent() {
-  return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/quiz" element={<Quiz />} />
-      <Route path="/quiz/shared/:gameId" element={<SharedGame />} />
-    </Routes>
-  );
-}
+// Create a browser router instead of using BrowserRouter component
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Home />
+  },
+  {
+    path: "/quiz",
+    element: <Quiz />
+  },
+  {
+    path: "/quiz/shared/:gameId",
+    element: <SharedGame />
+  }
+]);
 
 export default function App() {
-  return (
-    <Router>
-      <AppContent />
-    </Router>
-  );
+  return <RouterProvider router={router} />;
 }

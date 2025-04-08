@@ -1,8 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import QuizGenerator from '@/components/quiz/QuizGenerator';
 import { useCanvasState } from '@/hooks/useCanvasState';
-import { BlockType } from '@/lib/block-utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
 import { animateContentHighlight } from '@/lib/animations';
