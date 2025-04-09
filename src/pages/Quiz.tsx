@@ -10,11 +10,15 @@ import GameView from '@/components/quiz/GameView';
 import CustomGameForm from '@/components/quiz/preset-games/CustomGameForm';
 import GameLoading from '@/components/quiz/GameLoading';
 
+// Game play count storage key
+const GAME_PLAY_COUNT_KEY = 'lovable_game_play_count';
+
 const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showForm, setShowForm] = useState(true);
   const [currentGame, setCurrentGame] = useState<MiniGame | null>(null);
   const [currentTopic, setCurrentTopic] = useState('');
+  const [gamePlayCount, setGamePlayCount] = useState<number>(0);
   
   const { toast } = useToast();
   const location = useLocation();
@@ -22,7 +26,7 @@ const Quiz = () => {
   const mainContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    document.title = 'Minigame Tương Tác';
+    document.title = 'Interactive Game';
     // Always enable canvas mode
     localStorage.setItem('canvas_mode', 'true');
     
@@ -40,6 +44,16 @@ const Quiz = () => {
         setCurrentTopic(topicParam);
       }
     }
+    
+    // Load game play count
+    try {
+      const savedCount = localStorage.getItem(GAME_PLAY_COUNT_KEY);
+      if (savedCount) {
+        setGamePlayCount(parseInt(savedCount, 10));
+      }
+    } catch (err) {
+      console.error("Error loading game count:", err);
+    }
   }, [location.search]);
 
   useEffect(() => {
@@ -56,9 +70,19 @@ const Quiz = () => {
     setShowForm(false);
     setIsGenerating(false);
     
+    // Increment game play count
+    try {
+      const newCount = gamePlayCount + 1;
+      localStorage.setItem(GAME_PLAY_COUNT_KEY, newCount.toString());
+      setGamePlayCount(newCount);
+      console.log(`Game play count updated: ${newCount}`);
+    } catch (err) {
+      console.error("Error updating game count:", err);
+    }
+    
     toast({
-      title: "Trò chơi đã sẵn sàng",
-      description: `Trò chơi "${game.title || content}" đã được tạo thành công.`,
+      title: "Game Ready",
+      description: `The game "${game.title || content}" has been created successfully.`,
     });
   };
 
@@ -81,6 +105,11 @@ const Quiz = () => {
     <div className="min-h-screen flex flex-col w-full bg-gradient-to-b from-background to-background/95 overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 overflow-hidden p-0 relative">
+          {gamePlayCount > 0 && (
+            <div className="absolute top-4 right-4 bg-primary/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium z-50">
+              Games played: {gamePlayCount}
+            </div>
+          )}
           <div ref={mainContentRef} className="h-full w-full relative">
             {isGenerating ? (
               <GameLoading topic={currentTopic} />
@@ -93,7 +122,7 @@ const Quiz = () => {
                     variant="secondary"
                     className="bg-primary/10"
                   >
-                    Tạo Game Mới
+                    New Game
                   </Button>
                 </div>
               </div>
@@ -109,14 +138,14 @@ const Quiz = () => {
                   onClick={() => setShowForm(true)}
                   className="bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg"
                 >
-                  Tạo Game Mới
+                  Create New Game
                 </Button>
                 <Button 
                   onClick={handleBackToHome}
                   variant="outline"
                   className="mt-4"
                 >
-                  Quay Lại Trang Chủ
+                  Return to Homepage
                 </Button>
               </div>
             )}

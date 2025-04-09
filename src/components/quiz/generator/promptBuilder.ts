@@ -34,21 +34,39 @@ export const buildGeminiPrompt = (
     - Valid HTML5 structure
     - JavaScript must run after \`DOMContentLoaded\`
     - Use \`try-catch\` and validate all inputs
+    - **Include a timer** for the game (both per question and total game time)
+    - **Track player score** and provide final results
 
     ---
 
     ## 🎓 Game Logic
-    - Multiple-choice quiz format
-    - One correct answer per question
-    - Shuffle answer options randomly on load
-    - Do **not** show correct answers before selection
-    - Mark the correct answer with \`data-correct="true"\` or \`.correct\`
+    - Consider multiple formats: quiz, flashcards, matching, memory, ordering, word search, etc.
+    - Provide clear instructions to players
+    - Implement proper time management (countdown timers)
     - Show **instant feedback** (right/wrong + highlight correct)
     - Track score and display final result with a performance message
+    - Allow players to restart the game
 
     ---
 
     ${gameSpecificInstructions}
+
+    ---
+
+    ## ⏱️ Time Management Requirements
+    - Include per-question timer where appropriate (e.g., quiz, pictionary)
+    - Include total game timer for all games
+    - Add time settings in the JSON output:
+      \`\`\`json
+      "settings": {
+        "timePerQuestion": 30,
+        "totalTime": 300,
+        "timeLimit": 180,
+        "bonusTimePerCorrect": 5
+      }
+      \`\`\`
+    - Adjust timer difficulty based on game type and settings
+    - Show remaining time visually to the player
 
     ---
 
@@ -81,6 +99,7 @@ export const buildGeminiPrompt = (
     - Always handle errors with \`try-catch\`
     - Escape all special characters properly in JSON output
     - NEVER include actual image URLs in your response
+    - Don't forget to implement both per-question and total game timers
 
     ---
 
