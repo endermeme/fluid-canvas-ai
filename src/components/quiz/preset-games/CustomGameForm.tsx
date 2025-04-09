@@ -12,7 +12,7 @@ import { GameSettingsData } from '../types';
 
 interface CustomGameFormProps {
   gameType: string;
-  onGenerate: (content: string, game: MiniGame) => void;
+  onGenerate: (content: string, game?: MiniGame) => void; // Đã thay đổi game thành tham số tùy chọn
   onCancel: () => void;
 }
 
@@ -89,6 +89,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
           description: `Trò chơi ${getGameTypeName()} đã được tạo thành công với AI.`,
         });
         
+        // Truyền cả game và content
         onGenerate(content, game);
       } else {
         throw new Error("Không thể tạo game");
@@ -100,6 +101,8 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
         description: "Có lỗi xảy ra khi tạo game. Vui lòng thử lại.",
         variant: "destructive"
       });
+      // Trong trường hợp lỗi, vẫn gọi onGenerate với content mà không có game
+      onGenerate(content);
     } finally {
       setIsGenerating(false);
     }

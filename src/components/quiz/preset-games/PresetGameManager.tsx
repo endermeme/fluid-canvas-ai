@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -29,7 +30,13 @@ const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-const PresetGameManager = ({ gameType, onBack, initialTopic = "Học tiếng Việt" }) => {
+interface PresetGameManagerProps {
+  gameType: string;
+  onBack: () => void;
+  initialTopic?: string;
+}
+
+const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack, initialTopic = "Học tiếng Việt" }) => {
   const [loading, setLoading] = useState(true);
   const [gameContent, setGameContent] = useState(null);
   const [error, setError] = useState(null);
@@ -157,19 +164,20 @@ const PresetGameManager = ({ gameType, onBack, initialTopic = "Học tiếng Vi�
   };
 
   useEffect(() => {
-    // Get game content from URL params if available
-    const urlParams = new URLSearchParams(window.location.search);
-    const aiPrompt = urlParams.get('prompt');
+    // Sử dụng initialTopic từ props nếu có
+    const aiPrompt = initialTopic;
     
-    if (aiPrompt) {
-      // If we have a prompt in URL, use AI to generate content
+    if (aiPrompt && aiPrompt.trim() !== "") {
+      // Sử dụng AI để tạo nội dung nếu có prompt
+      console.log(`Tạo game ${gameType} với prompt: "${aiPrompt}"`);
       generateAIContent(aiPrompt, gameType);
     } else {
-      // Otherwise use sample data for testing/development
+      // Ngược lại sử dụng dữ liệu mẫu cho dev/test
+      console.log(`Tải dữ liệu mẫu cho game ${gameType}`);
       loadSampleData(gameType);
       setLoading(false);
     }
-  }, [gameType]);
+  }, [gameType, initialTopic]);
 
   // Render appropriate template based on game type
   const renderGameTemplate = () => {

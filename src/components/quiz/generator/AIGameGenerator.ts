@@ -58,7 +58,7 @@ export class AIGameGenerator {
       
       // Generate with Gemini
       console.log(`🚀 AIGameGenerator: Starting game generation with ${this.modelName}...`);
-      // Fix: Pass the correct parameters to tryGeminiGeneration - remove the requiresImages boolean parameter
+      // Sửa: Bỏ tham số requiresImages không cần thiết và không đúng kiểu 
       const geminiResult = await tryGeminiGeneration(this.model, topic, settings);
       
       const geminiTime = ((Date.now() - startTime) / 1000).toFixed(2);

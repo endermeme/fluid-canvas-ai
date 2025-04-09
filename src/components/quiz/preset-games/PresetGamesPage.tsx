@@ -6,10 +6,12 @@ import { useNavigate } from 'react-router-dom';
 import GameSelector from './GameSelector';
 import PresetGameManager from './PresetGameManager';
 import CustomGameForm from './CustomGameForm';
+import { MiniGame } from '../generator/AIGameGenerator';
 
 const PresetGamesPage = () => {
   const [state, setState] = useState<'select' | 'play' | 'custom'>('select');
   const [gameType, setGameType] = useState<string>('');
+  const [customPrompt, setCustomPrompt] = useState<string>('');
   const navigate = useNavigate();
 
   const handleGameSelect = (type: string) => {
@@ -25,8 +27,11 @@ const PresetGamesPage = () => {
     }
   };
 
-  const handleCustomGameGenerate = (content: string) => {
-    // After generating custom content, switch to play mode
+  const handleCustomGameGenerate = (content: string, game?: MiniGame) => {
+    // Lưu prompt của người dùng cho PresetGameManager
+    setCustomPrompt(content);
+    
+    // Sau khi đã có nội dung, chuyển sang chế độ chơi
     setState('play');
   };
 
@@ -56,6 +61,7 @@ const PresetGamesPage = () => {
           <PresetGameManager 
             gameType={gameType}
             onBack={() => setState('select')}
+            initialTopic={customPrompt}
           />
         )}
       </div>
