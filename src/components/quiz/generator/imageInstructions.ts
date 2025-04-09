@@ -5,32 +5,31 @@
  */
 export const getImageInstructions = (): string => {
   return `
-    ## Hình ảnh
-    - LUÔN sử dụng Pixabay API với định dạng: https://pixabay.com/api/?key=49691613-4d92ecd39a474575561ea2695&q=[search_term]&image_type=photo
-    - Thay thế [search_term] bằng từ khóa tìm kiếm chi tiết liên quan đến nội dung
-    - Sử dụng từ khóa tìm kiếm bằng tiếng Anh để có kết quả tốt nhất
-    - Từ khóa nên chi tiết, ví dụ: "strawberry fruit fresh" thay vì chỉ "strawberry"
-    - Sử dụng trường "webformatURL" từ kết quả API để lấy URL hình ảnh
-    - Luôn thêm alt text và onerror cho các thẻ <img>
-    - TUYỆT ĐỐI KHÔNG sử dụng nguồn hình ảnh khác như Unsplash, imgur, v.v.
-    - Chỉ chấp nhận hình ảnh từ Pixabay với domain cdn.pixabay.com
+    ## Image Guidelines
+    - ONLY provide detailed search terms for images - NEVER actual URLs
+    - Search terms should be specific and descriptive (e.g., "fresh red strawberry fruit" instead of just "strawberry")
+    - Use English search terms for better results, even for non-English games
+    - For each image, provide a clear search term that will yield good results on Pixabay
+    - Our system will handle converting your search terms to actual images using the Pixabay API
+    - Format example for an image question:
+      "imageSearchTerm": "ripe yellow banana fruit close up"
   `;
 };
 
 /**
- * Chuyển một đề tài thành mô tả hình ảnh
- * @param topic Chủ đề cần mô tả
- * @returns Mô tả hình ảnh
+ * Convert a topic into an image description
+ * @param topic The topic to describe
+ * @returns The image description
  */
 export const topicToImageDescription = (topic: string): string => {
-  return `Một hình ảnh minh họa cho ${topic}`;
+  return `${topic} detailed illustration`;
 };
 
 /**
- * Tạo URL Pixabay để tìm kiếm hình ảnh
- * @param keyword Từ khóa tìm kiếm
- * @param safeSearch Tìm kiếm hình ảnh an toàn cho mọi lứa tuổi 
- * @returns URL tìm kiếm hình ảnh từ Pixabay
+ * Generate a Pixabay search URL
+ * @param keyword Search keyword
+ * @param safeSearch Use safe search
+ * @returns Pixabay API search URL
  */
 export const generatePixabaySearchUrl = (keyword: string, safeSearch: boolean = true): string => {
   const encodedKeyword = encodeURIComponent(keyword);
@@ -38,9 +37,9 @@ export const generatePixabaySearchUrl = (keyword: string, safeSearch: boolean = 
 };
 
 /**
- * Tạo URL hình ảnh trực tiếp từ response của Pixabay
- * @param searchTerm Từ khóa tìm kiếm
- * @returns URL hình ảnh
+ * Generate a Pixabay image URL from a search term
+ * @param searchTerm Search term
+ * @returns Image URL
  */
 export const generatePixabayImage = async (searchTerm: string): Promise<string> => {
   try {
@@ -48,38 +47,66 @@ export const generatePixabayImage = async (searchTerm: string): Promise<string> 
     const data = await response.json();
     
     if (data.hits && data.hits.length > 0) {
-      // Lấy URL ảnh từ kết quả đầu tiên
+      // Get the image URL from the first result
       return data.hits[0].webformatURL;
     }
     
-    // Nếu không tìm thấy ảnh, trả về URL placeholder
+    // If no image is found, return a placeholder
     return generatePlaceholderImage(400, 300, searchTerm);
   } catch (error) {
-    console.error("Không thể lấy hình ảnh từ Pixabay:", error);
+    console.error("Failed to fetch image from Pixabay:", error);
     return generatePlaceholderImage(400, 300, searchTerm);
   }
 };
 
 /**
- * Tạo URL placeholder cho hình ảnh
- * @param width Chiều rộng hình ảnh
- * @param height Chiều cao hình ảnh
- * @param text Văn bản hiển thị trên hình ảnh
- * @returns URL hình ảnh placeholder
+ * Generate a placeholder image
+ * @param width Image width
+ * @param height Image height
+ * @param text Text to display on the image
+ * @returns Placeholder image URL
  */
 export const generatePlaceholderImage = (width: number = 400, height: number = 300, text: string = "Image"): string => {
-  // Sử dụng hình ảnh mặc định từ Pixabay thay vì placeholder
+  // Use a default image from Pixabay as placeholder
   return `https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png`;
 };
 
 /**
- * Xử lý lỗi tải hình ảnh
- * @param event Sự kiện lỗi
+ * Handle image loading errors
+ * @param event Error event
  */
 export const handleImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>): void => {
   const img = event.currentTarget;
   const topic = img.alt || "image";
-  // Sử dụng ảnh mặc định từ Pixabay
+  // Use a default image from Pixabay
   img.src = `https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png`;
   img.alt = `Failed to load image: ${topic}`;
+};
+
+/**
+ * Process response from Gemini to ensure all images are from Pixabay
+ * @param content HTML content from Gemini
+ * @returns Processed HTML content with Pixabay images
+ */
+export const processImagesToPixabay = async (content: any): Promise<any> => {
+  // If the content has items with imageSearchTerm instead of imageUrl
+  if (content && content.items && Array.isArray(content.items)) {
+    for (let i = 0; i < content.items.length; i++) {
+      const item = content.items[i];
+      
+      // If we have a search term but no URL, fetch the image
+      if (item.imageSearchTerm && !item.imageUrl) {
+        console.log(`Converting search term to Pixabay image: "${item.imageSearchTerm}"`);
+        item.imageUrl = await generatePixabayImage(item.imageSearchTerm);
+      }
+      // If we have a non-Pixabay URL, replace it
+      else if (item.imageUrl && !item.imageUrl.includes('pixabay.com')) {
+        console.log(`Replacing non-Pixabay URL with Pixabay image`);
+        const searchTerm = item.answer || 'image';
+        item.imageUrl = await generatePixabayImage(searchTerm);
+      }
+    }
+  }
+  
+  return content;
 };

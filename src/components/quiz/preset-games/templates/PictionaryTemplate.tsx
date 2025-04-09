@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, ChevronRight, HelpCircle, Clock, Image } from 'lucide-react';
-import { generatePlaceholderImage, handleImageError } from '../../generator/imageInstructions';
+import { generatePixabayImage, handleImageError, generatePlaceholderImage } from '../../generator/imageInstructions';
 
 interface PictionaryTemplateProps {
   content: any;
@@ -22,20 +22,65 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
   const [timerRunning, setTimerRunning] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [processedItems, setProcessedItems] = useState<any[]>([]);
+  const [isProcessing, setIsProcessing] = useState(true);
   const { toast } = useToast();
 
-  const items = content?.items || [];
+  const rawItems = content?.items || [];
+
+  // Process items to ensure they have Pixabay image URLs
+  useEffect(() => {
+    const processItems = async () => {
+      setIsProcessing(true);
+      const processed = [...rawItems];
+      
+      for (let i = 0; i < processed.length; i++) {
+        const item = processed[i];
+        
+        // If there's a search term but no image URL, fetch from Pixabay
+        if (item.imageSearchTerm && !item.imageUrl) {
+          try {
+            item.imageUrl = await generatePixabayImage(item.imageSearchTerm);
+          } catch (error) {
+            console.error("Error fetching image:", error);
+            item.imageUrl = generatePlaceholderImage(400, 300, item.answer || topic);
+          }
+        }
+        // If URL is not from Pixabay, replace it
+        else if (item.imageUrl && !item.imageUrl.includes('pixabay.com')) {
+          try {
+            const searchTerm = item.answer || topic;
+            item.imageUrl = await generatePixabayImage(searchTerm);
+          } catch (error) {
+            console.error("Error replacing non-Pixabay image:", error);
+            item.imageUrl = generatePlaceholderImage(400, 300, item.answer || topic);
+          }
+        }
+        // Ensure there's always an image URL
+        else if (!item.imageUrl) {
+          item.imageUrl = generatePlaceholderImage(400, 300, item.answer || topic);
+        }
+      }
+      
+      setProcessedItems(processed);
+      setIsProcessing(false);
+    };
+    
+    processItems();
+  }, [content]);
+
+  const items = processedItems;
   const isLastItem = currentItem === items.length - 1;
 
   // Timer countdown
   useEffect(() => {
-    if (timeLeft > 0 && timerRunning) {
+    if (timeLeft > 0 && timerRunning && !isProcessing) {
       const timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
       
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && timerRunning) {
+    } else if (timeLeft === 0 && timerRunning && !isProcessing) {
       handleNextItem();
       toast({
         title: "Hết thời gian!",
@@ -43,10 +88,10 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
         variant: "destructive",
       });
     }
-  }, [timeLeft, timerRunning, toast]);
+  }, [timeLeft, timerRunning, isProcessing, toast]);
 
   const handleOptionSelect = (option: string) => {
-    if (selectedOption !== null) return;
+    if (selectedOption !== null || isProcessing) return;
     
     setSelectedOption(option);
     setTimerRunning(false);
@@ -109,18 +154,25 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
     setImageError(false);
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    // Custom error handler using the imported function
+  const handleImageErrorEvent = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     setImageError(true);
     setImageLoaded(true);
     const img = e.currentTarget;
     const itemAnswer = items[currentItem]?.answer || topic;
-    img.src = generatePlaceholderImage(600, 400, `${itemAnswer}`);
+    img.src = generatePlaceholderImage(600, 400, itemAnswer);
     img.alt = `Không thể tải hình ảnh: ${itemAnswer}`;
   };
 
-  if (!content || !items.length) {
-    return <div className="p-4">Không có dữ liệu hình ảnh</div>;
+  if (!content || !items.length || isProcessing) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg font-medium">Đang tải hình ảnh từ Pixabay...</p>
+          <p className="text-sm text-muted-foreground mt-2">Vui lòng đợi trong giây lát</p>
+        </div>
+      </div>
+    );
   }
 
   if (showResult) {
@@ -195,7 +247,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
               alt={`Hình ảnh: ${item.answer}`}
               className={`w-full h-full object-contain ${imageLoaded ? 'opacity-100' : 'opacity-0'}`} 
               onLoad={handleImageLoad}
-              onError={handleImageError}
+              onError={handleImageErrorEvent}
             />
           )}
         </div>

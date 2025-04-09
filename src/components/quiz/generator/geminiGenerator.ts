@@ -4,6 +4,7 @@ import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { buildGeminiPrompt } from './promptBuilder';
 import { parseGeminiResponse } from './responseParser';
+import { processImagesToPixabay } from './imageInstructions';
 
 /**
  * Generates a game using Google's Gemini API
@@ -44,8 +45,13 @@ export const generateWithGemini = async (
     // Parse the response
     let parsedResponse = await parseGeminiResponse(text, topic);
     
-    // Process the response to convert any non-Pixabay image URLs to Pixabay format
-    if (parsedResponse && parsedResponse.content) {
+    // Process the game content for images if it's a structured game (not HTML)
+    if (parsedResponse && !parsedResponse.content && parsedResponse.items) {
+      console.log("🔷 Gemini: Processing image search terms to Pixabay URLs...");
+      parsedResponse = await processImagesToPixabay(parsedResponse);
+    }
+    // Process the response to convert any non-Pixabay image URLs to Pixabay format in HTML content
+    else if (parsedResponse && parsedResponse.content) {
       parsedResponse.content = replaceNonPixabayImageUrls(parsedResponse.content, topic);
     }
     
