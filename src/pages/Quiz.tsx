@@ -7,7 +7,7 @@ import { animateContentHighlight } from '@/lib/animations';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '@/components/quiz/generator/AIGameGenerator';
 import GameView from '@/components/quiz/GameView';
-import CustomGameForm from '@/components/quiz/preset-games/CustomGameForm';
+import CustomGameForm from '@/components/quiz/custom-games/CustomGameForm';
 import GameLoading from '@/components/quiz/GameLoading';
 
 // Game play count storage key

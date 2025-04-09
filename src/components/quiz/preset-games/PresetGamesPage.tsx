@@ -5,7 +5,7 @@ import { ArrowLeft, Home, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import GameSelector from './GameSelector';
 import PresetGameManager from './PresetGameManager';
-import CustomGameForm from './CustomGameForm';
+import CustomGameForm from '../custom-games/CustomGameForm';
 import { MiniGame } from '../generator/AIGameGenerator';
 
 const PresetGamesPage = () => {
@@ -32,10 +32,10 @@ const PresetGamesPage = () => {
   };
 
   const handleCustomGameGenerate = (content: string, game?: MiniGame) => {
-    // Lưu prompt của người dùng cho PresetGameManager
+    // Save the user's prompt for PresetGameManager
     setCustomPrompt(content);
     
-    // Sau khi đã có nội dung, chuyển sang chế độ chơi
+    // After content is available, switch to play mode
     setState('play');
   };
 
@@ -44,17 +44,17 @@ const PresetGamesPage = () => {
       <div className="border-b p-4 bg-background/80 backdrop-blur-sm flex justify-between items-center">
         <Button variant="ghost" size="sm" onClick={handleBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          {state === 'select' ? 'Quay lại trang chủ' : 'Quay lại chọn trò chơi'}
+          {state === 'select' ? 'Back to home' : 'Back to game selection'}
         </Button>
         
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>
             <RefreshCw className="h-4 w-4 mr-2" />
-            Làm mới
+            Refresh
           </Button>
           <Button variant="ghost" size="sm" onClick={handleHomeClick}>
             <Home className="h-4 w-4 mr-2" />
-            Trang chủ
+            Home
           </Button>
         </div>
       </div>

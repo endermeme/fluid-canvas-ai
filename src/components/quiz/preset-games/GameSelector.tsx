@@ -14,57 +14,57 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
   const gameTypes = [
     { 
       id: 'quiz', 
-      name: 'Trắc Nghiệm', 
-      description: 'Trả lời câu hỏi trắc nghiệm',
+      name: 'Quiz', 
+      description: 'Answer multiple-choice questions',
       icon: <Brain className="h-8 w-8 text-primary" />
     },
     { 
       id: 'flashcards', 
-      name: 'Thẻ Ghi Nhớ', 
-      description: 'Học qua thẻ hai mặt',
+      name: 'Flashcards', 
+      description: 'Learn with two-sided cards',
       icon: <BookOpen className="h-8 w-8 text-primary" />
     },
     { 
       id: 'matching', 
-      name: 'Nối Từ', 
-      description: 'Ghép các cặp từ có liên quan',
+      name: 'Matching', 
+      description: 'Match related pairs of items',
       icon: <ArrowRightLeft className="h-8 w-8 text-primary" />
     },
     { 
       id: 'memory', 
-      name: 'Trò Chơi Ghi Nhớ', 
-      description: 'Tìm các cặp thẻ giống nhau',
+      name: 'Memory Game', 
+      description: 'Find matching pairs of cards',
       icon: <Dices className="h-8 w-8 text-primary" />
     },
     { 
       id: 'ordering', 
-      name: 'Sắp Xếp Câu', 
-      description: 'Sắp xếp các từ thành câu hoàn chỉnh',
+      name: 'Sentence Ordering', 
+      description: 'Arrange words to form complete sentences',
       icon: <Layers className="h-8 w-8 text-primary" />
     },
     { 
       id: 'wordsearch', 
-      name: 'Tìm Từ', 
-      description: 'Tìm các từ ẩn trong bảng chữ cái',
+      name: 'Word Search', 
+      description: 'Find hidden words in a grid',
       icon: <Search className="h-8 w-8 text-primary" />
     },
     { 
       id: 'pictionary', 
-      name: 'Đoán Hình', 
-      description: 'Đoán từ qua hình ảnh',
+      name: 'Pictionary', 
+      description: 'Guess words from pictures',
       icon: <Image className="h-8 w-8 text-primary" />
     },
     { 
       id: 'truefalse', 
-      name: 'Đúng hay Sai', 
-      description: 'Xác định các phát biểu đúng hay sai',
+      name: 'True or False', 
+      description: 'Determine if statements are true or false',
       icon: <CheckSquare className="h-8 w-8 text-primary" />
     }
   ];
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6 text-center">Chọn loại trò chơi để tạo với AI</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">Choose a game type to create with AI</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {gameTypes.map((game) => (
@@ -83,7 +83,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
               </div>
               <div className="mt-2 flex items-center justify-center w-full px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm font-medium">
                 <Sparkles className="h-4 w-4 mr-1" />
-                Tạo với AI
+                Create with AI
               </div>
             </div>
           </Card>
