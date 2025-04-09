@@ -52,6 +52,15 @@ export const buildGeminiPrompt = (
 
     ---
 
+    ## 🖼️ Image Instructions (IMPORTANT)
+    - For ALL images, use Unsplash API with format: https://source.unsplash.com/random/?[search_term]
+    - Example: https://source.unsplash.com/random/800x600/?apple for an apple image
+    - Always include detailed search terms for best results (e.g., "red apple fruit" instead of just "apple")
+    - For pictionary or image-based games, ensure each image clearly shows the subject
+    - Include appropriate width and height parameters (recommended: 800x600)
+    - Specify image dimensions in the URL like: https://source.unsplash.com/random/800x600/?[search_term]
+    - DO NOT use any other image sources like imgur, etc.
+
     ${imageInstructions}
 
     ---

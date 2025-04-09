@@ -2,38 +2,68 @@
 import { generateUnsplashImage } from "../../generator/imageInstructions";
 
 export const pictionarySampleData = {
-  title: "Đoán hình - Danh lam thắng cảnh Việt Nam",
-  description: "Đoán tên các danh lam thắng cảnh của Việt Nam qua hình ảnh",
+  title: "Đoán hình - Hoa quả",
+  description: "Đoán tên các loại hoa quả qua hình ảnh",
   items: [
     {
-      imageUrl: generateUnsplashImage("ha long bay vietnam", 800, 600),
-      answer: "Vịnh Hạ Long",
-      hint: "Di sản thiên nhiên thế giới ở Quảng Ninh",
-      options: ["Vịnh Hạ Long", "Phong Nha Kẻ Bàng", "Tràng An", "Phú Quốc"]
+      imageUrl: generateUnsplashImage("red apple fruit", 800, 600),
+      answer: "Táo",
+      hint: "Loại quả biểu tượng cho sức khỏe",
+      options: ["Chuối", "Táo", "Cam", "Lê"]
     },
     {
-      imageUrl: generateUnsplashImage("hue imperial city vietnam", 800, 600),
-      answer: "Kinh thành Huế",
-      hint: "Cố đô của Việt Nam thời nhà Nguyễn",
-      options: ["Kinh thành Huế", "Hội An", "Lăng Bác", "Thăng Long"]
+      imageUrl: generateUnsplashImage("banana fruit bunch", 800, 600),
+      answer: "Chuối",
+      hint: "Loại quả có vỏ vàng, thường được khỉ thích",
+      options: ["Chuối", "Dâu tây", "Nho", "Xoài"]
     },
     {
-      imageUrl: generateUnsplashImage("one pillar pagoda hanoi", 800, 600),
-      answer: "Chùa Một Cột",
-      hint: "Công trình kiến trúc độc đáo ở Hà Nội",
-      options: ["Chùa Một Cột", "Chùa Thiên Mụ", "Chùa Bái Đính", "Chùa Hương"]
+      imageUrl: generateUnsplashImage("orange fruit", 800, 600),
+      answer: "Cam",
+      hint: "Giàu vitamin C, có múi",
+      options: ["Cam", "Bưởi", "Quýt", "Chanh"]
     },
     {
-      imageUrl: generateUnsplashImage("hoi an ancient town vietnam", 800, 600),
-      answer: "Phố cổ Hội An",
-      hint: "Di sản văn hóa thế giới ở Quảng Nam",
-      options: ["Phố cổ Hội An", "Phố cổ Hà Nội", "Đà Lạt", "Nha Trang"]
+      imageUrl: generateUnsplashImage("strawberry fruit", 800, 600),
+      answer: "Dâu tây",
+      hint: "Quả nhỏ, màu đỏ, thường dùng làm bánh",
+      options: ["Dâu tây", "Mâm xôi", "Việt quất", "Cherry"]
     },
     {
-      imageUrl: generateUnsplashImage("son doong cave vietnam", 800, 600),
-      answer: "Hang Sơn Đoòng",
-      hint: "Hang động lớn nhất thế giới ở Quảng Bình",
-      options: ["Hang Sơn Đoòng", "Động Phong Nha", "Động Thiên Đường", "Động Hương Tích"]
+      imageUrl: generateUnsplashImage("mango fruit", 800, 600),
+      answer: "Xoài",
+      hint: "Quả ngọt, có hạt lớn, vỏ vàng khi chín",
+      options: ["Xoài", "Đu đủ", "Mít", "Dứa"]
+    },
+    {
+      imageUrl: generateUnsplashImage("watermelon fruit", 800, 600),
+      answer: "Dưa hấu",
+      hint: "Quả to, vỏ xanh, ruột đỏ, nhiều nước",
+      options: ["Dưa hấu", "Dưa lưới", "Dưa gang", "Bí ngô"]
+    },
+    {
+      imageUrl: generateUnsplashImage("grape fruit bunch", 800, 600),
+      answer: "Nho",
+      hint: "Quả nhỏ, mọc thành chùm",
+      options: ["Nho", "Mận", "Sung", "Kiwi"]
+    },
+    {
+      imageUrl: generateUnsplashImage("pineapple fruit", 800, 600),
+      answer: "Dứa",
+      hint: "Vỏ xù xì, có mắt, vị chua ngọt",
+      options: ["Dứa", "Ổi", "Thanh long", "Khế"]
+    },
+    {
+      imageUrl: generateUnsplashImage("pear fruit", 800, 600),
+      answer: "Lê",
+      hint: "Quả có hình dáng thon dài, vị ngọt mát",
+      options: ["Lê", "Táo", "Mận", "Đào"]
+    },
+    {
+      imageUrl: generateUnsplashImage("pomegranate fruit", 800, 600),
+      answer: "Lựu",
+      hint: "Quả có nhiều hạt đỏ mọng bên trong",
+      options: ["Lựu", "Chanh dây", "Bơ", "Sầu riêng"]
     }
   ],
   settings: {

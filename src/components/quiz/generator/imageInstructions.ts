@@ -6,12 +6,13 @@
 export const getImageInstructions = (): string => {
   return `
     ## Hình ảnh
-    - Ưu tiên sử dụng Unsplash API với định dạng: https://source.unsplash.com/random/?[search_term]
-    - Thay thế [search_term] bằng từ khóa tìm kiếm liên quan đến nội dung
-    - Cũng hỗ trợ các loại URL hình ảnh: wikipedia, pixabay, placeholder
-    - Sử dụng SVG và base64 cho hình ảnh nhỏ khi cần thiết
+    - LUÔN sử dụng Unsplash API với định dạng: https://source.unsplash.com/random/[width]x[height]/?[search_term]
+    - Thay thế [search_term] bằng từ khóa tìm kiếm chi tiết liên quan đến nội dung
+    - Sử dụng từ khóa tìm kiếm bằng tiếng Anh để có kết quả tốt nhất
+    - Thêm kích thước hình ảnh: 800x600 là kích thước khuyến nghị
+    - Từ khóa nên chi tiết, ví dụ: "strawberry fruit fresh" thay vì chỉ "strawberry"
+    - KHÔNG sử dụng các nguồn hình ảnh khác như imgur, pixabay, v.v.
     - Luôn thêm alt text và onerror cho các thẻ <img>
-    - Mô tả chi tiết khi cần hình ảnh
   `;
 };
 
@@ -58,4 +59,3 @@ export const handleImageError = (event: React.SyntheticEvent<HTMLImageElement, E
   img.src = generatePlaceholderImage(400, 300, `${topic} - Not Found`);
   img.alt = `Failed to load image: ${topic}`;
 };
-
