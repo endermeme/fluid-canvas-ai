@@ -25,6 +25,8 @@ import { trueFalseSampleData } from './data/trueFalseSampleData';
 
 // Import Gemini API 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { tryGeminiGeneration } from '../generator/geminiGenerator';
+import { GameSettingsData } from '../types';
 
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 const genAI = new GoogleGenerativeAI(API_KEY);
@@ -42,78 +44,48 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
   const [error, setError] = useState(null);
   const { toast } = useToast();
 
-  const generateAIContent = async (prompt, type) => {
+  const generateAIContent = async (topic, type) => {
     setLoading(true);
     setError(null);
     
     try {
-      const generationConfig = {
-        temperature: 0.7,
-        topK: 1,
-        topP: 0.95,
-        maxOutputTokens: 8000,
+      // Create game settings based on type and difficulty
+      const settings: GameSettingsData = {
+        difficulty: 'medium',
+        questionCount: 10,
+        timePerQuestion: type === 'matching' || type === 'memory' ? 60 : 
+                         type === 'wordsearch' ? 300 : 30,
+        category: 'general'
       };
       
-      let gamePrompt = `Tạo nội dung cho trò chơi ${type} với yêu cầu sau: ${prompt}. Đầu ra phải là JSON hợp lệ. `;
-      
-      switch(type) {
-        case 'quiz':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "questions": [{"question": "câu hỏi", "options": ["lựa chọn 1", "lựa chọn 2", "lựa chọn 3", "lựa chọn 4"], "correctAnswer": số_index_đáp_án_đúng, "explanation": "giải thích"}], "settings": {"timePerQuestion": 30} }`;
-          break;
-        case 'flashcards':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "cards": [{"front": "mặt trước", "back": "mặt sau", "hint": "gợi ý (nếu có)"}], "settings": {"autoFlip": true, "flipTime": 5} }`;
-          break;
-        case 'matching':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "pairs": [{"left": "nội dung bên trái", "right": "nội dung bên phải"}], "settings": {"timeLimit": 60} }`;
-          break;
-        case 'memory':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "cards": [{"id": số_id, "content": "nội dung", "matched": false, "flipped": false}], "settings": {"timeLimit": 120, "allowHints": true} }`;
-          break;
-        case 'ordering':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "sentences": [{"words": ["từ 1", "từ 2", "từ 3"], "correctOrder": [0, 1, 2]}], "settings": {"timeLimit": 180, "showHints": true} }`;
-          break;
-        case 'wordsearch':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "words": [{"word": "từ 1", "found": false}, {"word": "từ 2", "found": false}], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "settings": {"timeLimit": 300, "showWordList": true} }`;
-          break;
-        case 'pictionary':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "items": [{"imageUrl": "URL hình ảnh", "answer": "đáp án", "options": ["lựa chọn 1", "lựa chọn 2", "lựa chọn 3", "lựa chọn 4"], "hint": "gợi ý"}], "settings": {"timePerQuestion": 20, "showHints": true} }`;
-          break;
-        case 'truefalse':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "questions": [{"statement": "phát biểu", "isTrue": true/false, "explanation": "giải thích"}], "settings": {"timePerQuestion": 15, "showExplanation": true} }`;
-          break;
+      // Adjust settings based on game type
+      if (type === 'flashcards') {
+        settings.questionCount = 8;
+        settings.timePerQuestion = 5;
+      } else if (type === 'matching' || type === 'memory') {
+        settings.questionCount = 8;
+      } else if (type === 'ordering') {
+        settings.questionCount = 5;
+        settings.timePerQuestion = 45;
+      } else if (type === 'wordsearch') {
+        settings.questionCount = 8;
+        settings.timePerQuestion = 300;
       }
       
-      gamePrompt += " Chỉ trả về JSON, không có văn bản phụ.";
+      console.log(`Generating ${type} game with topic "${topic}" and settings:`, settings);
       
-      console.log("Sending prompt to Gemini:", gamePrompt);
+      // Use optimized Gemini generation approach
+      const game = await tryGeminiGeneration(model, topic, settings);
       
-      const result = await model.generateContent(gamePrompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      console.log("Received response from Gemini:", text);
-      
-      try {
-        // Extract JSON if wrapped in backticks
-        const jsonStr = text.includes('```json') 
-          ? text.split('```json')[1].split('```')[0].trim() 
-          : text.includes('```') 
-            ? text.split('```')[1].split('```')[0].trim() 
-            : text;
-            
-        console.log("Parsed JSON string:", jsonStr);
-        
-        const parsedContent = JSON.parse(jsonStr);
-        setGameContent(parsedContent);
-        return parsedContent;
-      } catch (parseError) {
-        console.error("Error parsing AI response:", parseError);
+      if (game) {
+        console.log(`Successfully generated ${type} game:`, game);
+        setGameContent(game);
         toast({
-          title: "Lỗi định dạng",
-          description: "AI tạo phản hồi không đúng định dạng. Vui lòng thử lại.",
-          variant: "destructive"
+          title: "Đã tạo trò chơi",
+          description: `Trò chơi ${getGameTypeName(type)} đã được tạo với AI.`,
         });
-        throw new Error('Lỗi định dạng phản hồi AI');
+      } else {
+        throw new Error("Không thể tạo nội dung game");
       }
     } catch (err) {
       console.error("AI Error:", err);
@@ -128,6 +100,20 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
       loadSampleData(type);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getGameTypeName = (type) => {
+    switch (type) {
+      case 'quiz': return 'Trắc Nghiệm';
+      case 'flashcards': return 'Thẻ Ghi Nhớ';
+      case 'matching': return 'Nối Từ';
+      case 'memory': return 'Trò Chơi Ghi Nhớ';
+      case 'ordering': return 'Sắp Xếp Câu';
+      case 'wordsearch': return 'Tìm Từ';
+      case 'pictionary': return 'Đoán Hình';
+      case 'truefalse': return 'Đúng hay Sai';
+      default: return 'Trò Chơi';
     }
   };
 

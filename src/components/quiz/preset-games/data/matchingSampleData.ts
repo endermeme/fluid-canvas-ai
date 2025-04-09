@@ -39,6 +39,17 @@ export const matchingSampleData = {
   settings: {
     timeLimit: 60,
     shuffleItems: true,
-    difficulty: "medium" // easy, medium, hard
+    difficulty: "medium", // easy, medium, hard
+    maxCharLength: 20,    // Maximum characters per item to prevent wrapping
+    gridSize: {           // Responsive grid size based on difficulty
+      rows: 4,
+      columns: 2
+    },
+    spacing: "medium",    // Spacing between items: small, medium, large
+    scoreSystem: {        // Points system
+      correct: 10,
+      incorrect: -2,
+      timeBonus: true
+    }
   }
 };
