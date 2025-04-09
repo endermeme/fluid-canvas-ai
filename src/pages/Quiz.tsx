@@ -9,6 +9,7 @@ import { MiniGame } from '@/components/quiz/generator/AIGameGenerator';
 import GameView from '@/components/quiz/GameView';
 import CustomGameForm from '@/components/quiz/custom-games/CustomGameForm';
 import GameLoading from '@/components/quiz/GameLoading';
+import { Home, RefreshCw, Trophy } from 'lucide-react';
 
 // Game play count storage key
 const GAME_PLAY_COUNT_KEY = 'lovable_game_play_count';
@@ -26,7 +27,7 @@ const Quiz = () => {
   const mainContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    document.title = 'Interactive Game';
+    document.title = 'Minigame Tương Tác';
     // Always enable canvas mode
     localStorage.setItem('canvas_mode', 'true');
     
@@ -81,8 +82,8 @@ const Quiz = () => {
     }
     
     toast({
-      title: "Game Ready",
-      description: `The game "${game.title || content}" has been created successfully.`,
+      title: "Trò Chơi Đã Sẵn Sàng",
+      description: `Trò chơi "${game.title || content}" đã được tạo thành công.`,
     });
   };
 
@@ -100,36 +101,73 @@ const Quiz = () => {
   const handleBackToHome = () => {
     navigate('/');
   };
+  
+  // Function to reload page
+  const handleReload = () => {
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen flex flex-col w-full bg-gradient-to-b from-background to-background/95 overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 overflow-hidden p-0 relative">
           {gamePlayCount > 0 && (
-            <div className="absolute top-4 right-4 bg-primary/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium z-50">
-              Games played: {gamePlayCount}
+            <div className="absolute top-4 right-4 bg-primary/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium z-50 flex items-center gap-1.5">
+              <Trophy className="h-3.5 w-3.5 text-primary" />
+              <span>Đã chơi: {gamePlayCount}</span>
             </div>
           )}
+          
+          {!isGenerating && !currentGame && (
+            <div className="absolute top-4 left-4 z-50 flex space-x-2">
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="bg-primary/5"
+                onClick={handleBackToHome}
+              >
+                <Home className="h-4 w-4 mr-1" />
+                Trang Chủ
+              </Button>
+              
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="bg-primary/5"
+                onClick={handleReload}
+              >
+                <RefreshCw className="h-4 w-4 mr-1" />
+                Tải Lại
+              </Button>
+            </div>
+          )}
+          
           <div ref={mainContentRef} className="h-full w-full relative">
             {isGenerating ? (
               <GameLoading topic={currentTopic} />
             ) : currentGame ? (
               <div className="w-full h-full">
                 <GameView miniGame={currentGame} />
-                <div className="absolute bottom-4 left-4 z-50">
+                <div className="absolute bottom-24 left-4 z-50">
                   <Button 
                     onClick={handleNewGame} 
                     variant="secondary"
                     className="bg-primary/10"
                   >
-                    New Game
+                    Trò Chơi Mới
                   </Button>
                 </div>
               </div>
             ) : showForm ? (
               <CustomGameForm 
                 gameType="quiz" 
-                onGenerate={handleGameGeneration}
+                onGenerate={(content, game) => {
+                  if (game) {
+                    setIsGenerating(true);
+                    // Small delay to show the loading screen
+                    setTimeout(() => handleGameGeneration(content, game), 800);
+                  }
+                }}
                 onCancel={handleCancelCustomGame}
               />
             ) : (
@@ -138,14 +176,14 @@ const Quiz = () => {
                   onClick={() => setShowForm(true)}
                   className="bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg"
                 >
-                  Create New Game
+                  Tạo Trò Chơi Mới
                 </Button>
                 <Button 
                   onClick={handleBackToHome}
                   variant="outline"
                   className="mt-4"
                 >
-                  Return to Homepage
+                  Về Trang Chủ
                 </Button>
               </div>
             )}

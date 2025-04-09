@@ -6,7 +6,8 @@ import GameView from '../GameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home } from 'lucide-react';
+import { ArrowLeft, Home, RefreshCw } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface GameControllerProps {
   initialTopic?: string;
@@ -22,6 +23,7 @@ const GameController: React.FC<GameControllerProps> = ({
   const [currentTopic, setCurrentTopic] = useState<string>(initialTopic);
   const [showForm, setShowForm] = useState(!currentGame);
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const handleGameGeneration = (content: string, game?: MiniGame) => {
     setCurrentTopic(content);
@@ -33,6 +35,11 @@ const GameController: React.FC<GameControllerProps> = ({
       if (onGameGenerated) {
         onGameGenerated(game);
       }
+      
+      toast({
+        title: "Minigame Đã Sẵn Sàng",
+        description: `Minigame "${game.title || content}" đã được tạo thành công.`,
+      });
     }
     
     setIsGenerating(false);
@@ -51,19 +58,27 @@ const GameController: React.FC<GameControllerProps> = ({
     setCurrentGame(null);
     setShowForm(true);
   };
+  
+  const handleReloadPage = () => {
+    window.location.reload();
+  };
 
   return (
     <div className="h-full flex flex-col">
       <div className="border-b p-4 bg-background/80 backdrop-blur-sm flex justify-between items-center">
         <Button variant="ghost" size="sm" onClick={handleBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          {currentGame ? 'Back to Form' : 'Back to Home'}
+          {currentGame ? 'Quay Lại Form' : 'Về Trang Chủ'}
         </Button>
         
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={handleReloadPage}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Tải Lại
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
             <Home className="h-4 w-4 mr-2" />
-            Home
+            Trang Chủ
           </Button>
         </div>
       </div>
@@ -74,20 +89,23 @@ const GameController: React.FC<GameControllerProps> = ({
         ) : currentGame ? (
           <div className="relative h-full">
             <GameView miniGame={currentGame} />
-            <div className="absolute bottom-4 left-4 z-50">
+            <div className="absolute bottom-24 left-4 z-50">
               <Button 
                 onClick={handleNewGame} 
                 variant="secondary"
                 className="bg-primary/10"
               >
-                New Game
+                Trò Chơi Mới
               </Button>
             </div>
           </div>
         ) : showForm ? (
           <CustomGameForm 
             gameType="custom" 
-            onGenerate={handleGameGeneration}
+            onGenerate={(content, game) => {
+              setIsGenerating(true);
+              setTimeout(() => handleGameGeneration(content, game), 500);
+            }}
             onCancel={() => navigate('/')}
           />
         ) : null}

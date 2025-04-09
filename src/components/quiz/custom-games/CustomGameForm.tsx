@@ -4,12 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SparklesIcon, Brain, PenTool, Info } from 'lucide-react';
+import { SparklesIcon, Brain, PenTool, Info, Globe, GraduationCap, Gamepad2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { AIGameGenerator, MiniGame } from '../generator/AIGameGenerator';
 import { GameSettingsData } from '../types';
+import GameLoading from '../GameLoading';
 
 interface CustomGameFormProps {
   gameType: string;
@@ -22,7 +22,6 @@ const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, onCancel }) => {
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -31,42 +30,42 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
 
   const getGameTypeName = () => {
     switch (gameType) {
-      case 'quiz': return 'Quiz';
-      case 'flashcards': return 'Flashcards';
-      case 'matching': return 'Matching';
-      case 'memory': return 'Memory Game';
-      case 'ordering': return 'Sentence Ordering';
-      case 'wordsearch': return 'Word Search';
-      case 'pictionary': return 'Pictionary';
-      case 'truefalse': return 'True or False';
-      default: return 'Interactive Game';
+      case 'quiz': return 'Trắc Nghiệm';
+      case 'flashcards': return 'Thẻ Ghi Nhớ';
+      case 'matching': return 'Nối Từ';
+      case 'memory': return 'Trò Chơi Ghi Nhớ';
+      case 'ordering': return 'Sắp Xếp Câu';
+      case 'wordsearch': return 'Tìm Từ';
+      case 'pictionary': return 'Đoán Hình';
+      case 'truefalse': return 'Đúng hay Sai';
+      default: return 'Trò Chơi';
     }
   };
 
   const getPlaceholderText = () => {
     switch (gameType) {
       case 'quiz':
-        return 'Enter instructions for AI to create quiz questions.\n\nExample: "Create 10 multiple choice questions about Ancient Egypt history with 4 options each."';
+        return 'Nhập yêu cầu để AI tạo câu hỏi trắc nghiệm.\n\nVí dụ: "Tạo 10 câu hỏi trắc nghiệm về lịch sử Việt Nam thời kỳ phong kiến, mỗi câu có 4 lựa chọn."';
       
       case 'flashcards':
-        return 'Enter instructions for AI to create flashcards.\n\nExample: "Create 15 flashcards for learning Spanish vocabulary related to food, with Spanish term, English meaning, and example sentence."';
+        return 'Nhập yêu cầu để AI tạo thẻ ghi nhớ.\n\nVí dụ: "Tạo 15 thẻ ghi nhớ từ vựng tiếng Anh về chủ đề công nghệ, mỗi thẻ có từ tiếng Anh, nghĩa tiếng Việt và ví dụ."';
       
       case 'matching':
-        return 'Enter instructions for AI to create a matching game.\n\nExample: "Create 12 pairs of synonyms for a matching game, medium difficulty, literature theme."';
+        return 'Nhập yêu cầu để AI tạo trò chơi nối từ.\n\nVí dụ: "Tạo 12 cặp từ đồng nghĩa tiếng Việt để ghép nối, chủ đề văn học."';
       
       case 'truefalse':
-        return 'Enter instructions for AI to create true/false questions.\n\nExample: "Create 10 true/false statements about high school biology, with equal numbers of true and false statements."';
+        return 'Nhập yêu cầu để AI tạo câu hỏi đúng/sai.\n\nVí dụ: "Tạo 10 câu phát biểu đúng/sai về sinh học, đảm bảo số lượng câu đúng và sai cân bằng."';
       
       default:
-        return 'Enter detailed instructions for AI to create game content. Specify topic, difficulty, quantity, and any special requirements.';
+        return 'Nhập yêu cầu chi tiết để AI tạo nội dung trò chơi. Hãy mô tả cụ thể chủ đề, mong muốn về số lượng câu hỏi, độ khó và bất kỳ yêu cầu đặc biệt nào.';
     }
   };
 
   const handleSubmit = async () => {
     if (!content.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter content instructions for the game",
+        title: "Lỗi",
+        description: "Vui lòng nhập yêu cầu nội dung cho trò chơi",
         variant: "destructive"
       });
       return;
@@ -76,31 +75,32 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     
     try {
       const settings: GameSettingsData = {
-        difficulty: difficulty,
+        difficulty: 'medium',
         questionCount: 10,
         timePerQuestion: 30,
-        category: 'general'
+        category: 'general',
+        useTimer: true
       };
       
-      console.log("Creating game with topic:", content);
+      console.log("Tạo game với chủ đề:", content);
       
       const game = await gameGenerator.generateMiniGame(content, settings);
       
       if (game) {
         toast({
-          title: "Game Created",
-          description: `${getGameTypeName()} game successfully created with AI.`,
+          title: "Đã tạo trò chơi",
+          description: `Trò chơi ${getGameTypeName()} đã được tạo thành công với AI.`,
         });
         
         onGenerate(content, game);
       } else {
-        throw new Error("Could not create game");
+        throw new Error("Không thể tạo game");
       }
     } catch (error) {
-      console.error("Error creating game:", error);
+      console.error("Lỗi khi tạo game:", error);
       toast({
-        title: "Game Creation Error",
-        description: "An error occurred while creating the game. Please try again.",
+        title: "Lỗi tạo game",
+        description: "Có lỗi xảy ra khi tạo game. Vui lòng thử lại.",
         variant: "destructive"
       });
       onGenerate(content);
@@ -117,59 +117,64 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     }
   };
 
+  if (isGenerating) {
+    return <GameLoading topic={content} />;
+  }
+
   return (
     <div className="p-6 max-w-4xl mx-auto w-full">
-      <Card className="bg-background/60 backdrop-blur-sm border-primary/20 shadow-lg p-6">
+      <Card className="bg-background/70 backdrop-blur-sm border-primary/20 shadow-lg p-6">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Brain className="h-6 w-6 text-primary" />
-            Create {getGameTypeName()} with AI
+          <h2 className="text-2xl font-bold flex items-center gap-2 text-primary">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Brain className="h-6 w-6 text-primary" />
+            </div>
+            Tạo trò chơi {getGameTypeName()} với AI
           </h2>
-          <p className="text-muted-foreground">Describe what you want the AI to create for your game</p>
+          <p className="text-muted-foreground">Mô tả yêu cầu của bạn để AI tạo nội dung trò chơi phù hợp</p>
         </div>
         
         <div className="space-y-4">
           <div>
-            <Label htmlFor="difficulty">Difficulty</Label>
-            <Select 
-              value={difficulty} 
-              onValueChange={(value: 'easy' | 'medium' | 'hard') => setDifficulty(value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select difficulty" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="easy">Easy</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="hard">Hard</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="content">Content Instructions</Label>
+            <Label htmlFor="content" className="flex items-center gap-2 text-base">
+              <SparklesIcon className="h-4 w-4 text-primary" /> 
+              Yêu cầu nội dung
+            </Label>
             <Textarea
               id="content"
               placeholder={getPlaceholderText()}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={10}
-              className="font-mono text-sm"
+              className="font-mono text-sm mt-2 border-primary/20 focus-visible:ring-primary/30"
             />
           </div>
           
           <div className="flex flex-col gap-4 mt-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+            <div className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg">
+              <Info className="w-4 h-4 text-primary mt-1" />
+              <p className="text-sm text-muted-foreground">
+                Chế độ Canvas <span className="text-primary font-medium">đã được bật</span> để tạo giao diện trò chơi đẹp mắt hơn.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
               <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
                 <PenTool className="w-6 h-6 text-primary mb-2" />
-                <h4 className="text-sm font-medium">Detailed Instructions</h4>
-                <p className="text-xs text-muted-foreground">The more specific, the better</p>
+                <h4 className="text-sm font-medium">Tùy chỉnh chi tiết</h4>
+                <p className="text-xs text-muted-foreground">Càng chi tiết càng tốt</p>
               </div>
               
               <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
-                <SparklesIcon className="w-6 h-6 text-primary mb-2" />
-                <h4 className="text-sm font-medium">Interactive Games</h4>
-                <p className="text-xs text-muted-foreground">Quiz, matching, ordering, and more</p>
+                <Globe className="w-6 h-6 text-primary mb-2" />
+                <h4 className="text-sm font-medium">Đa dạng chủ đề</h4>
+                <p className="text-xs text-muted-foreground">Lịch sử, khoa học, văn hóa...</p>
+              </div>
+              
+              <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
+                <Gamepad2 className="w-6 h-6 text-primary mb-2" />
+                <h4 className="text-sm font-medium">Tương tác cao</h4>
+                <p className="text-xs text-muted-foreground">Trải nghiệm người dùng tốt</p>
               </div>
             </div>
           </div>
@@ -178,25 +183,17 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
             <Button 
               variant="outline" 
               onClick={handleCancel}
+              className="border-primary/20 hover:border-primary/30 hover:bg-primary/5"
             >
-              Cancel
+              Hủy
             </Button>
             <Button 
               onClick={handleSubmit}
-              disabled={isGenerating}
-              className="bg-gradient-to-r from-primary to-primary/80"
+              disabled={!content.trim() || isGenerating}
+              className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90"
             >
-              {isGenerating ? (
-                <>
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <SparklesIcon className="h-4 w-4 mr-2" />
-                  Create with AI
-                </>
-              )}
+              <SparklesIcon className="h-4 w-4 mr-2" />
+              Tạo với AI
             </Button>
           </div>
         </div>
