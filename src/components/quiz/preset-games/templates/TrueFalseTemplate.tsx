@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, RefreshCw, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle, RefreshCw, AlertCircle, Clock } from 'lucide-react';
 
 interface TrueFalseTemplateProps {
   content: any;
@@ -14,14 +14,35 @@ interface TrueFalseTemplateProps {
 const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Array<boolean | null>>([]);
+  const [score, setScore] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
   const [timeLeft, setTimeLeft] = useState(content?.settings?.timePerQuestion || 15);
+  const [timerRunning, setTimerRunning] = useState(true);
   const [showResult, setShowResult] = useState(false);
   const { toast } = useToast();
 
   const questions = content?.questions || [];
   const isLastQuestion = currentQuestion === questions.length - 1;
   const currentAnswer = userAnswers[currentQuestion];
+
+  // Timer countdown
+  useEffect(() => {
+    if (timeLeft > 0 && timerRunning) {
+      const timer = setTimeout(() => {
+        setTimeLeft(timeLeft - 1);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    } else if (timeLeft === 0 && timerRunning) {
+      setTimerRunning(false);
+      
+      toast({
+        title: "Hết thời gian!",
+        description: "Bạn đã hết thời gian trả lời câu hỏi này.",
+        variant: "destructive",
+      });
+    }
+  }, [timeLeft, timerRunning, toast]);
 
   const handleAnswer = (answer: boolean) => {
     if (currentAnswer !== null) return;
@@ -30,12 +51,14 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic })
     newAnswers[currentQuestion] = answer;
     setUserAnswers(newAnswers);
     setShowExplanation(content?.settings?.showExplanation ?? true);
+    setTimerRunning(false);
 
     const isCorrect = answer === questions[currentQuestion].isTrue;
     
     if (isCorrect) {
+      setScore(score + 1);
       toast({
-        title: "Chính xác!",
+        title: "Chính xác! +1 điểm",
         description: "Bạn đã trả lời đúng.",
         variant: "default",
       });
@@ -55,15 +78,18 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic })
       setCurrentQuestion(currentQuestion + 1);
       setShowExplanation(false);
       setTimeLeft(content?.settings?.timePerQuestion || 15);
+      setTimerRunning(true);
     }
   };
 
   const handleRestart = () => {
     setCurrentQuestion(0);
     setUserAnswers([]);
+    setScore(0);
     setShowExplanation(false);
     setShowResult(false);
     setTimeLeft(content?.settings?.timePerQuestion || 15);
+    setTimerRunning(true);
   };
 
   if (!content || !questions.length) {
@@ -111,14 +137,20 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic })
 
   return (
     <div className="flex flex-col p-4 h-full">
-      {/* Header with progress */}
+      {/* Header with progress and timer */}
       <div className="mb-4">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium">
             Câu hỏi {currentQuestion + 1}/{questions.length}
           </div>
-          <div className="text-sm font-medium">
-            Đúng/Sai
+          <div className="text-sm font-medium flex items-center gap-4">
+            <div className="flex items-center">
+              <Clock className="h-4 w-4 mr-1" />
+              {timeLeft}s
+            </div>
+            <div>
+              Điểm: <span className="font-bold">{score}</span>
+            </div>
           </div>
         </div>
         <Progress value={progress} className="h-2" />

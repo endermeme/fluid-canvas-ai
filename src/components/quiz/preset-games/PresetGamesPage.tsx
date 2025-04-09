@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Home, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import GameSelector from './GameSelector';
 import PresetGameManager from './PresetGameManager';
@@ -27,6 +27,10 @@ const PresetGamesPage = () => {
     }
   };
 
+  const handleHomeClick = () => {
+    navigate('/');
+  };
+
   const handleCustomGameGenerate = (content: string, game?: MiniGame) => {
     // Lưu prompt của người dùng cho PresetGameManager
     setCustomPrompt(content);
@@ -37,11 +41,22 @@ const PresetGamesPage = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="border-b p-4 bg-background/80 backdrop-blur-sm">
+      <div className="border-b p-4 bg-background/80 backdrop-blur-sm flex justify-between items-center">
         <Button variant="ghost" size="sm" onClick={handleBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           {state === 'select' ? 'Quay lại trang chủ' : 'Quay lại chọn trò chơi'}
         </Button>
+        
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Làm mới
+          </Button>
+          <Button variant="ghost" size="sm" onClick={handleHomeClick}>
+            <Home className="h-4 w-4 mr-2" />
+            Trang chủ
+          </Button>
+        </div>
       </div>
       
       <div className="flex-grow overflow-auto">

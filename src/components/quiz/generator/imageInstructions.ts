@@ -21,3 +21,25 @@ export const getImageInstructions = (): string => {
 export const topicToImageDescription = (topic: string): string => {
   return `Một hình ảnh minh họa cho ${topic}`;
 };
+
+/**
+ * Tạo URL placeholder cho hình ảnh
+ * @param width Chiều rộng hình ảnh
+ * @param height Chiều cao hình ảnh
+ * @param text Văn bản hiển thị trên hình ảnh
+ * @returns URL hình ảnh placeholder
+ */
+export const generatePlaceholderImage = (width: number = 400, height: number = 300, text: string = "Image"): string => {
+  const encodedText = encodeURIComponent(text);
+  return `https://via.placeholder.com/${width}x${height}?text=${encodedText}`;
+};
+
+/**
+ * Xử lý lỗi tải hình ảnh
+ * @param event Sự kiện lỗi
+ */
+export const handleImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>): void => {
+  const img = event.currentTarget;
+  img.src = "https://via.placeholder.com/400x300?text=Image+Not+Found";
+  img.alt = "Failed to load image";
+};

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, RefreshCw } from 'lucide-react';
 import gameTemplates from './templates';
 import QuizTemplate from './templates/QuizTemplate';
 import FlashcardsTemplate from './templates/FlashcardsTemplate';
@@ -58,28 +58,28 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
       
       switch(type) {
         case 'quiz':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "questions": [{"question": "câu hỏi", "options": ["lựa chọn 1", "lựa chọn 2", "lựa chọn 3", "lựa chọn 4"], "correctIndex": số_index_đáp_án_đúng, "explanation": "giải thích"}] }`;
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "questions": [{"question": "câu hỏi", "options": ["lựa chọn 1", "lựa chọn 2", "lựa chọn 3", "lựa chọn 4"], "correctAnswer": số_index_đáp_án_đúng, "explanation": "giải thích"}], "settings": {"timePerQuestion": 30} }`;
           break;
         case 'flashcards':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "cards": [{"front": "mặt trước", "back": "mặt sau", "hint": "gợi ý (nếu có)"}] }`;
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "cards": [{"front": "mặt trước", "back": "mặt sau", "hint": "gợi ý (nếu có)"}], "settings": {"autoFlip": true, "flipTime": 5} }`;
           break;
         case 'matching':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "pairs": [{"left": "nội dung bên trái", "right": "nội dung bên phải"}] }`;
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "pairs": [{"left": "nội dung bên trái", "right": "nội dung bên phải"}], "settings": {"timeLimit": 60} }`;
           break;
         case 'memory':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "pairs": [{"text": "nội dung", "id": "id duy nhất"}] }`;
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "cards": [{"id": số_id, "content": "nội dung", "matched": false, "flipped": false}], "settings": {"timeLimit": 120, "allowHints": true} }`;
           break;
         case 'ordering':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "sentences": [{"original": "câu gốc", "words": ["từ 1", "từ 2", "từ 3"]}] }`;
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "sentences": [{"words": ["từ 1", "từ 2", "từ 3"], "correctOrder": [0, 1, 2]}], "settings": {"timeLimit": 180, "showHints": true} }`;
           break;
         case 'wordsearch':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "words": ["từ 1", "từ 2", "từ 3"], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "solution": [{"word": "từ", "start": {"row": 0, "col": 0}, "end": {"row": 0, "col": 2}}] }`;
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "words": [{"word": "từ 1", "found": false}, {"word": "từ 2", "found": false}], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "settings": {"timeLimit": 300, "showWordList": true} }`;
           break;
         case 'pictionary':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "items": [{"word": "từ cần đoán", "clue": "gợi ý", "imageDescription": "mô tả chi tiết hình ảnh"}] }`;
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "items": [{"imageUrl": "URL hình ảnh", "answer": "đáp án", "options": ["lựa chọn 1", "lựa chọn 2", "lựa chọn 3", "lựa chọn 4"], "hint": "gợi ý"}], "settings": {"timePerQuestion": 20, "showHints": true} }`;
           break;
         case 'truefalse':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "statements": [{"text": "phát biểu", "isTrue": true/false, "explanation": "giải thích"}] }`;
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "questions": [{"statement": "phát biểu", "isTrue": true/false, "explanation": "giải thích"}], "settings": {"timePerQuestion": 15, "showExplanation": true} }`;
           break;
       }
       
@@ -163,6 +163,14 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
     }
   };
 
+  const handleRetry = () => {
+    if (initialTopic && initialTopic.trim() !== "") {
+      generateAIContent(initialTopic, gameType);
+    } else {
+      loadSampleData(gameType);
+    }
+  };
+
   useEffect(() => {
     // Sử dụng initialTopic từ props nếu có
     const aiPrompt = initialTopic;
@@ -224,7 +232,13 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
         <div className="text-center">
           <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
           <p className="text-gray-500 mb-4">{error}</p>
-          <Button onClick={onBack}>Quay lại</Button>
+          <div className="flex gap-2">
+            <Button onClick={onBack}>Quay lại</Button>
+            <Button onClick={handleRetry} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Thử lại
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -232,13 +246,6 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
 
   return (
     <div className="flex flex-col h-full">
-      <div className="bg-background/80 p-2 border-b flex items-center">
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Quay lại
-        </Button>
-      </div>
-      
       <div className="flex-grow overflow-auto">
         {gameContent ? renderGameTemplate() : (
           <div className="flex items-center justify-center h-full">

@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, RefreshCw, Check, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RefreshCw, Check, X, Clock } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface FlashcardsTemplateProps {
   content: any;
@@ -16,9 +17,12 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
   const [cardsState, setCardsState] = useState<Array<'unreviewed' | 'known' | 'unknown'>>([]);
   const [autoFlip, setAutoFlip] = useState(content?.settings?.autoFlip || false);
   const [flipTimer, setFlipTimer] = useState<NodeJS.Timeout | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const { toast } = useToast();
 
   const cards = content?.cards || [];
   const progress = ((currentCard + 1) / cards.length) * 100;
+  const flipTime = content?.settings?.flipTime || 5;
 
   // Initialize cards state
   useEffect(() => {
@@ -30,18 +34,39 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
   // Handle auto flip timer
   useEffect(() => {
     if (autoFlip && !isFlipped) {
+      setTimeRemaining(flipTime);
+      const countdownTimer = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev <= 1) {
+            clearInterval(countdownTimer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
       const timer = setTimeout(() => {
         setIsFlipped(true);
-      }, (content?.settings?.flipTime || 5) * 1000);
+        clearInterval(countdownTimer);
+      }, flipTime * 1000);
+      
       setFlipTimer(timer);
+      
+      return () => {
+        clearTimeout(timer);
+        clearInterval(countdownTimer);
+      };
     }
 
     return () => {
       if (flipTimer) clearTimeout(flipTimer);
     };
-  }, [currentCard, isFlipped, autoFlip, content?.settings?.flipTime]);
+  }, [currentCard, isFlipped, autoFlip, flipTime]);
 
   const handleFlip = () => {
+    if (flipTimer) {
+      clearTimeout(flipTimer);
+    }
     setIsFlipped(!isFlipped);
   };
 
@@ -64,6 +89,21 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
     newCardsState[currentCard] = status;
     setCardsState(newCardsState);
     
+    // Show toast notification
+    if (status === 'known') {
+      toast({
+        title: "Đã thuộc!",
+        description: "Đã đánh dấu thẻ này là đã thuộc.",
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "Chưa thuộc!",
+        description: "Đã đánh dấu thẻ này là chưa thuộc.",
+        variant: "destructive",
+      });
+    }
+    
     // Move to next card if not at the end
     if (currentCard < cards.length - 1) {
       handleNextCard();
@@ -74,6 +114,20 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
     setCurrentCard(0);
     setIsFlipped(false);
     setCardsState(new Array(cards.length).fill('unreviewed'));
+    toast({
+      title: "Làm lại từ đầu",
+      description: "Đã đặt lại tất cả thẻ ghi nhớ.",
+      variant: "default",
+    });
+  };
+
+  const toggleAutoFlip = () => {
+    setAutoFlip(!autoFlip);
+    toast({
+      title: autoFlip ? "Đã tắt tự động lật" : "Đã bật tự động lật",
+      description: autoFlip ? "Thẻ sẽ không tự động lật." : `Thẻ sẽ tự động lật sau ${flipTime} giây.`,
+      variant: "default",
+    });
   };
 
   if (!content || !cards.length) {
@@ -103,19 +157,45 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
       </div>
 
       {/* Flashcard */}
-      <div className="flex-grow flex items-center justify-center mb-4">
+      <div className="flex-grow flex items-center justify-center mb-4 perspective-1000">
         <div 
-          className={`w-full max-w-md aspect-[3/2] cursor-pointer perspective-1000 transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotateY-180' : ''}`}
+          className={`w-full max-w-md aspect-[3/2] cursor-pointer relative ${isFlipped ? 'rotate-y-180' : ''}`}
           onClick={handleFlip}
+          style={{
+            transformStyle: 'preserve-3d',
+            transition: 'transform 0.6s',
+            transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+          }}
         >
-          <Card className={`absolute inset-0 flex items-center justify-center p-6 backface-hidden ${isFlipped ? 'hidden' : ''} bg-background border-2 border-primary/30`}>
+          {/* Front of card */}
+          <Card 
+            className="absolute inset-0 flex items-center justify-center p-6 bg-background border-2 border-primary/30 backface-hidden"
+            style={{
+              backfaceVisibility: 'hidden'
+            }}
+          >
             <div className="text-center">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Nhấn để lật thẻ</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                Nhấn để lật thẻ
+                {autoFlip && !isFlipped && (
+                  <div className="mt-1 flex items-center justify-center">
+                    <Clock className="h-3 w-3 mr-1" />
+                    <span>Tự động lật sau {timeRemaining}s</span>
+                  </div>
+                )}
+              </div>
               <div className="text-2xl font-bold">{cards[currentCard].front}</div>
             </div>
           </Card>
           
-          <Card className={`absolute inset-0 flex items-center justify-center p-6 backface-hidden ${isFlipped ? '' : 'hidden'} bg-primary/10 border-2 border-primary/30`}>
+          {/* Back of card */}
+          <Card 
+            className="absolute inset-0 flex items-center justify-center p-6 bg-primary/10 border-2 border-primary/30 backface-hidden"
+            style={{
+              backfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg)'
+            }}
+          >
             <div className="text-center">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Mặt sau</div>
               <div className="text-xl">{cards[currentCard].back}</div>
@@ -164,15 +244,26 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
         </Button>
       </div>
 
-      {/* Restart button */}
-      <Button
-        variant="ghost"
-        className="mt-4"
-        onClick={handleRestart}
-      >
-        <RefreshCw className="mr-2 h-4 w-4" />
-        Làm lại từ đầu
-      </Button>
+      {/* Settings */}
+      <div className="mt-4 grid grid-cols-2 gap-4">
+        <Button
+          variant={autoFlip ? "default" : "outline"}
+          className="flex-1"
+          onClick={toggleAutoFlip}
+        >
+          <Clock className="mr-2 h-4 w-4" />
+          {autoFlip ? "Tắt tự động lật" : "Bật tự động lật"}
+        </Button>
+        
+        <Button
+          variant="ghost"
+          className="flex-1"
+          onClick={handleRestart}
+        >
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Làm lại từ đầu
+        </Button>
+      </div>
     </div>
   );
 };
