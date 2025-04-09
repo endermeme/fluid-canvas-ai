@@ -58,7 +58,8 @@ export class AIGameGenerator {
       
       // Generate with Gemini
       console.log(`🚀 AIGameGenerator: Starting game generation with ${this.modelName}...`);
-      const geminiResult = await tryGeminiGeneration(this.model, topic, settings, requiresImages);
+      // Fix: Pass the correct parameters to tryGeminiGeneration - remove the requiresImages boolean parameter
+      const geminiResult = await tryGeminiGeneration(this.model, topic, settings);
       
       const geminiTime = ((Date.now() - startTime) / 1000).toFixed(2);
       console.log(`🚀 AIGameGenerator: Gemini generation completed in ${geminiTime}s`);
