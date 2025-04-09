@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -23,7 +22,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   const [isGenerating, setIsGenerating] = useState(false);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const { toast } = useToast();
-  const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
+  
+  // Use the singleton pattern
+  const gameGenerator = AIGameGenerator.getInstance(API_KEY);
 
   const getGameTypeName = () => {
     switch (gameType) {

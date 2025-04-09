@@ -1,4 +1,3 @@
-
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -10,12 +9,28 @@ import { createFallbackGame } from './fallbackGenerator';
 // Sử dụng API key cứng
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
+// Singleton instance
+let instance: AIGameGenerator | null = null;
+
 export class AIGameGenerator {
   private model: any;
   private modelName: string;
   private canvasMode: boolean = true;
+  private initialized: boolean = false;
 
   constructor(apiKey: string = API_KEY, options?: { modelName?: string; canvasMode?: boolean }) {
+    // Singleton pattern - return existing instance if available
+    if (instance) {
+      return instance;
+    }
+    
+    this.initialize(apiKey, options);
+    instance = this;
+  }
+
+  private initialize(apiKey: string, options?: { modelName?: string; canvasMode?: boolean }): void {
+    if (this.initialized) return;
+    
     console.log("🚀 AIGameGenerator: Initializing AI game generator");
     this.modelName = options?.modelName || 'gemini-2.0-flash';
     this.canvasMode = options?.canvasMode || true;
@@ -25,6 +40,7 @@ export class AIGameGenerator {
     
     // Luôn sử dụng API_KEY cứng thay vì tham số apiKey
     this.model = createGeminiClient(API_KEY);
+    this.initialized = true;
   }
 
   setCanvasMode(enabled: boolean): void {
@@ -147,6 +163,14 @@ export class AIGameGenerator {
                                  lowerTopic.includes('trí nhớ');
     
     return containsImageKeyword || isImageBasedGameType;
+  }
+  
+  // Static method to get the instance
+  static getInstance(apiKey: string = API_KEY, options?: { modelName?: string; canvasMode?: boolean }): AIGameGenerator {
+    if (!instance) {
+      instance = new AIGameGenerator(apiKey, options);
+    }
+    return instance;
   }
 }
 

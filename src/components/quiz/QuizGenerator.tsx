@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from './generator/AIGameGenerator';
@@ -25,7 +24,10 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [currentTopic, setCurrentTopic] = useState<string>(topic);
   const { toast } = useToast();
-  const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
+  
+  // Use the singleton instance
+  const gameGenerator = AIGameGenerator.getInstance(API_KEY);
+  
   const [canvasMode, setCanvasMode] = useState<boolean>(
     localStorage.getItem('canvas_mode') === 'true'
   );

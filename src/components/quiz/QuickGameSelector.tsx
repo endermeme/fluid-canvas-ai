@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from './generator/AIGameGenerator';
@@ -59,10 +58,11 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<string>("");
-  const [customTopic, setCustomTopic] = useState<string>("");
   const [showSettings, setShowSettings] = useState(false);
   const { toast } = useToast();
-  const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
+  
+  const gameGenerator = AIGameGenerator.getInstance(API_KEY);
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentGameType, setCurrentGameType] = useState<GameType | null>(null);
   
@@ -150,13 +150,6 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleCustomTopicSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (customTopic.trim()) {
-      onGameRequest(customTopic.trim());
     }
   };
 

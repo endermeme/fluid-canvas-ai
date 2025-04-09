@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, BrainCircuit, Star, GraduationCap, History, BookmarkCheck, PenTool, Layers } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -7,6 +6,7 @@ import { BlockType } from '@/lib/block-utils';
 import { useNavigate } from 'react-router-dom';
 import HistoryPanel from '@/components/history/HistoryPanel';
 import { Switch } from '@/components/ui/switch';
+import { AIGameGenerator } from '@/components/quiz/generator/AIGameGenerator';
 
 interface Message {
   role: 'user' | 'ai';
@@ -21,6 +21,9 @@ interface ChatInterfaceProps {
   onCloseChatInterface?: () => void;
   isSidebarOpen?: boolean;
 }
+
+const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
+const gameGenerator = AIGameGenerator.getInstance(API_KEY);
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
   onCreateBlock, 
@@ -48,7 +51,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }, [conversation]);
   
   useEffect(() => {
-    // Save canvas mode setting to localStorage
     localStorage.setItem('canvas_mode', canvasMode.toString());
   }, [canvasMode]);
   
@@ -67,7 +69,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         aiResponse += " (Chế độ Canvas đã bật!)";
       }
       
-      // Sử dụng toàn bộ nội dung tin nhắn làm chủ đề
+      gameGenerator.setCanvasMode(canvasMode);
+      
       const topic = message.trim();
       
       const aiMessage = {
@@ -79,14 +82,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       setConversation(prev => [...prev, aiMessage]);
       setIsLoading(false);
       
-      // Directly navigate to quiz page with the topic (skip settings)
       if (window.location.pathname.includes('/quiz')) {
-        // We're already on the quiz page, just notify the parent
         if (onQuizRequest) {
           onQuizRequest(topic);
         }
       } else {
-        // Navigate to quiz page with the topic
         navigate(`/quiz?topic=${encodeURIComponent(topic)}&autostart=true&canvas=${canvasMode}`);
       }
     }, 500);
@@ -117,6 +117,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   
   const toggleCanvasMode = () => {
     setCanvasMode(!canvasMode);
+    gameGenerator.setCanvasMode(!canvasMode);
+    
     toast({
       title: `Chế độ Canvas ${!canvasMode ? 'BẬT' : 'TẮT'}`,
       description: !canvasMode 
