@@ -26,7 +26,7 @@ export const generateWithGemini = async (
   // Check if the game might require images
   const mightRequireImages = checkIfGameRequiresImages(topic);
   if (mightRequireImages) {
-    console.log("🔷 Gemini: This game likely requires images. Adding image generation instructions.");
+    console.log("🔷 Gemini: This game likely requires images. Adding Pixabay image instructions.");
   }
   
   // Build the complete prompt with image instructions if needed
@@ -41,8 +41,13 @@ export const generateWithGemini = async (
     console.log("🔷 Gemini: Response received, extracting JSON...");
     console.log(`🔷 Gemini: Response length: ${text.length}`);
     
-    // If this is an image-based game, replace any non-Unsplash image URLs with Unsplash
+    // Replace any non-Pixabay image URLs with Pixabay format if needed
     let parsedResponse = await parseGeminiResponse(text, topic);
+    
+    // Process the response to convert any invalid image URLs to Pixabay format
+    if (parsedResponse && parsedResponse.content) {
+      parsedResponse.content = replaceNonPixabayImageUrls(parsedResponse.content, topic);
+    }
     
     // Return the generated game
     return parsedResponse;
@@ -101,4 +106,65 @@ function checkIfGameRequiresImages(topic: string): boolean {
   
   const lowerTopic = topic.toLowerCase();
   return imageRelatedKeywords.some(keyword => lowerTopic.includes(keyword));
+}
+
+/**
+ * Replace non-Pixabay image URLs with Pixabay URLs in HTML content
+ * @param content HTML content string
+ * @param topic The game topic for fallback search
+ * @returns Updated HTML content string
+ */
+function replaceNonPixabayImageUrls(content: string, topic: string): string {
+  // Detect non-Pixabay image URLs in the content
+  // This regex looks for image URLs that don't contain pixabay.com
+  const nonPixabayImageRegex = /(src=["'])(https?:\/\/(?!.*pixabay\.com).+?)(["'])/gi;
+  
+  // Replace with Pixabay URLs
+  const updatedContent = content.replace(nonPixabayImageRegex, (match, prefix, url, suffix) => {
+    // Extract possible search term from URL
+    let searchTerm = extractSearchTermFromUrl(url) || topic;
+    // Sanitize the search term
+    searchTerm = searchTerm.replace(/[^\w\s]/g, ' ').trim();
+    
+    // Use a direct Pixabay image URL from their CDN as a fallback
+    // This is a static image that should exist
+    const fallbackPixabayImage = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png';
+    
+    return `${prefix}${fallbackPixabayImage}${suffix} data-search-term="${searchTerm}"`;
+  });
+  
+  return updatedContent;
+}
+
+/**
+ * Extract possible search terms from a URL
+ * @param url The URL to analyze
+ * @returns Possible search term or null if not found
+ */
+function extractSearchTermFromUrl(url: string): string | null {
+  try {
+    // Try to extract search terms from various URL patterns
+    const patterns = [
+      // Extract from URL path segments
+      /\/([a-z0-9-]+)[-_][0-9]+\.[a-z]+$/i,
+      // Extract from query parameters
+      /[?&]q=([^&]+)/i,
+      /[?&]query=([^&]+)/i,
+      /[?&]search=([^&]+)/i,
+      // Extract from filename
+      /\/([a-z0-9-]+)\.[a-z]+$/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        return decodeURIComponent(match[1]).replace(/[_-]/g, ' ');
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error extracting search term from URL:', error);
+    return null;
+  }
 }

@@ -53,13 +53,13 @@ export const buildGeminiPrompt = (
     ---
 
     ## 🖼️ Image Instructions (IMPORTANT)
-    - For ALL images, use Unsplash API with format: https://source.unsplash.com/random/?[search_term]
-    - Example: https://source.unsplash.com/random/800x600/?apple for an apple image
+    - For ALL images, use Pixabay API with format: https://pixabay.com/api/?key=49691613-4d92ecd39a474575561ea2695&q=[search_term]&image_type=photo
+    - You need to extract the "webformatURL" from the API response and use that as the image source
+    - If making a dynamic game, provide example of how to fetch the images from Pixabay API
     - Always include detailed search terms for best results (e.g., "red apple fruit" instead of just "apple")
     - For pictionary or image-based games, ensure each image clearly shows the subject
-    - Include appropriate width and height parameters (recommended: 800x600)
-    - Specify image dimensions in the URL like: https://source.unsplash.com/random/800x600/?[search_term]
-    - DO NOT use any other image sources like imgur, etc.
+    - Always use English search terms for best results
+    - DO NOT use any other image sources like Unsplash, imgur, etc.
 
     ${imageInstructions}
 
