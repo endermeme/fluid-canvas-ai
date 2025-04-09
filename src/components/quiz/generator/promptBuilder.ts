@@ -1,7 +1,5 @@
 
 import { GameSettingsData } from '../types';
-import { getGameSpecificInstructions, getSettingsPrompt } from './gameInstructions';
-import { getImageInstructions } from './imageInstructions';
 
 /**
  * Builds a complete prompt for the Gemini API based on game parameters
@@ -15,68 +13,58 @@ export const buildGeminiPrompt = (
   gameTypeId: string | undefined, 
   settings?: GameSettingsData
 ): string => {
-  const gameSpecificInstructions = getGameSpecificInstructions(gameTypeId, topic);
   const settingsPrompt = getSettingsPrompt(settings);
-  const imageInstructions = getImageInstructions();
 
   return `
-    # Interactive Educational Game Generator – All-in-One HTML File
+    # Interactive Game Generator – Complete HTML File
 
     ## Objective
-    Generate a fully self-contained interactive educational game based on the topic: "${topic}".
+    Generate a fully self-contained interactive game based on the topic: "${topic}".
 
     ---
 
-    ## Core Requirements
-    - All in **one HTML file** (HTML, CSS, JS inline)
-    - **No external libraries**, only **Vanilla JavaScript**
-    - Responsive layout (works on desktop & mobile)
-    - Valid HTML5 structure
-    - JavaScript must run after \`DOMContentLoaded\`
-    - Use \`try-catch\` and validate all inputs
+    ## Technical Requirements
+    - All code must be in **one HTML file** (HTML, CSS, JS inline)
+    - Use only **Vanilla JavaScript** without external libraries
+    - Create responsive layout that works on all devices
+    - Use valid HTML5 structure
+    - JavaScript should run after DOMContentLoaded
+    - Handle errors and validate all inputs
 
     ---
 
-    ## Game Logic
-    - Interactive game format with clear instructions
-    - Track score and display final result with a performance message
-    - Ensure responsive design works on all devices
-    - Provide feedback to user actions
-    - Create an engaging and educational experience
+    ## Game Design Guidelines
+    - Create an engaging, interactive experience related to "${topic}"
+    - Include clear instructions for the player
+    - Track score or progress and show final results
+    - Provide feedback for user actions
+    - Design for both desktop and mobile devices
+    - Focus on educational value and entertainment
 
     ---
 
-    ${gameSpecificInstructions}
-
-    ---
-
-    ## Image Instructions
-    - NEVER include actual image URLs in your response
-    - For games requiring images, ONLY provide specific search terms for each item
-    - DO NOT use 'imageUrl' in your JSON - instead use 'imageSearchTerm'
-    - Example format for image questions:
+    ## Image Guidelines
+    - For images, use 'imageSearchTerm' format in your data
+    - Make search terms specific (e.g., "red apple fruit detailed" not just "apple")
+    - Example format for questions with images:
       \`\`\`json
       {
         "imageSearchTerm": "red apple fruit detailed",
         "answer": "Apple",
-        "options": ["Banana", "Apple", "Orange", "Grape"],
-        "hint": "Keeps the doctor away"
+        "options": ["Banana", "Apple", "Orange", "Grape"]
       }
       \`\`\`
-    - Make search terms very specific (e.g., "red apple fruit" not just "apple")
-    - Our system will handle all image fetching using your search terms
-
-    ${imageInstructions}
+    - Our system will handle all image fetching automatically
 
     ---
 
-    ## Common Mistakes to Avoid
-    - Don't use broken or undefined variables
-    - Ensure all event listeners are properly attached
-    - Avoid unnecessary DOM manipulation or deeply nested loops
-    - Prevent layout overflow or broken UI on small screens
-    - Always handle errors with \`try-catch\`
-    - Escape all special characters properly in JSON output
+    ## Technical Best Practices
+    - Avoid undefined variables or broken references
+    - Ensure proper event listener attachment
+    - Create efficient code without deep nesting
+    - Prevent UI overflow on small screens
+    - Handle errors gracefully
+    - Escape special characters properly
 
     ---
 
@@ -94,5 +82,22 @@ export const buildGeminiPrompt = (
       "content": "A full, escaped HTML document string (\\\\", \\\\\\\\ escaped properly)"
     }
     \`\`\`
+  `;
+};
+
+/**
+ * Generates settings prompt based on game settings
+ * @param settings The game settings
+ * @returns string with settings prompt
+ */
+const getSettingsPrompt = (settings?: GameSettingsData): string => {
+  if (!settings) return '';
+  
+  return `
+    Create with these settings:
+    - Difficulty: ${settings.difficulty}
+    - Number of items/challenges: ${settings.questionCount}
+    - Time per action: ${settings.timePerQuestion} seconds
+    - Category: ${settings.category}
   `;
 };

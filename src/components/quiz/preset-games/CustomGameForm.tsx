@@ -29,21 +29,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   // Use the singleton pattern
   const gameGenerator = AIGameGenerator.getInstance(API_KEY);
 
-  const getGameTypeName = () => {
-    switch (gameType) {
-      case 'quiz': return 'Quiz';
-      case 'flashcards': return 'Flashcards';
-      case 'matching': return 'Matching';
-      case 'memory': return 'Memory Game';
-      case 'ordering': return 'Sentence Ordering';
-      case 'wordsearch': return 'Word Search';
-      case 'pictionary': return 'Pictionary';
-      case 'truefalse': return 'True or False';
-      case 'interactive': return 'Interactive Game';
-      default: return 'Game';
-    }
-  };
-
   const getPlaceholderText = () => {
     return "Describe the interactive game you want to create. Be as specific as possible about the topic, difficulty, and format.\n\nExamples:\n- Create a quiz about world capitals with 10 questions\n- Make a memory game with famous paintings\n- Generate a word search puzzle about animals";
   };
@@ -75,7 +60,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
       if (game) {
         toast({
           title: "Game Created",
-          description: `${getGameTypeName()} has been successfully generated with AI.`,
+          description: `Interactive game has been successfully generated with AI.`,
         });
         
         onGenerate(content, game);
@@ -109,7 +94,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
         <div className="mb-6">
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Brain className="h-6 w-6 text-primary" />
-            Create an AI-Generated {getGameTypeName()}
+            Create an AI-Generated Interactive Game
           </h2>
           <p className="text-muted-foreground">Describe what you want and our AI will create a custom interactive game</p>
         </div>

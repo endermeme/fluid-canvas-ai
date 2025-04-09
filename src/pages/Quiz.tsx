@@ -1,6 +1,5 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useCanvasState } from '@/hooks/useCanvasState';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { animateContentHighlight } from '@/lib/animations';
@@ -22,7 +21,7 @@ const Quiz = () => {
   const mainContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    document.title = 'Interactive Mini Games';
+    document.title = 'Interactive Game Creator';
     
     // Parse URL parameters for direct game creation
     const queryParams = new URLSearchParams(location.search);
@@ -61,7 +60,7 @@ const Quiz = () => {
   };
 
   const handleCancelCustomGame = () => {
-    // Simply navigate to home page when cancel is clicked
+    // Navigate to home page when cancel is clicked
     navigate('/');
   };
 
