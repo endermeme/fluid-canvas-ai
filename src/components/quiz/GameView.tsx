@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
@@ -15,42 +16,29 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [iframeError, setIframeError] = useState<string | null>(null);
-  const [savedToHistory, setSavedToHistory] = useState(false);
 
   // Save the game to history when it loads
   useEffect(() => {
-    if (miniGame && miniGame.content && !savedToHistory) {
+    if (miniGame && miniGame.content) {
       try {
-        console.log("Saving game to history", miniGame.title);
         // Save game to local storage for history
         saveGameForSharing(
           miniGame.title || "Minigame tương tác", 
-          miniGame.description || "", // Use description if available
+          "", // Empty description
           miniGame.content
         );
-        setSavedToHistory(true);
       } catch (e) {
         console.error("Error saving game to history:", e);
       }
     }
-  }, [miniGame, savedToHistory]);
+  }, [miniGame]);
 
   // Handle sharing the game
   const handleShare = () => {
-    if (!miniGame || !miniGame.content) {
-      toast({
-        title: "Lỗi Chia Sẻ",
-        description: "Không thể chia sẻ trò chơi trống.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
-      console.log("Sharing game", miniGame.title);
       const shareUrl = saveGameForSharing(
         miniGame.title || "Minigame tương tác",
-        miniGame.description || "",
+        "", // Empty description
         miniGame.content
       );
       
@@ -61,7 +49,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         description: "Đã sao chép liên kết vào clipboard. Link có hiệu lực trong 48 giờ.",
       });
     } catch (error) {
-      console.error("Error sharing game:", error);
       toast({
         title: "Lỗi Chia Sẻ",
         description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
@@ -72,10 +59,10 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
 
   // Handle returning to home
   const handleBackToHome = () => {
-    navigate('/');
+    window.location.href = '/';
   };
 
-  // Handle iframe load
+  // Apply game optimization and fix script errors when iframe loads
   const handleIframeLoad = () => {
     try {
       if (!iframeRef.current) return;
@@ -245,7 +232,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
     }
   };
 
-  // Pre-process HTML content
+  // Pre-process HTML content to fix potential issues and improve game logic
   const processHtmlContent = (html: string): string => {
     if (!html) return '';
     
