@@ -50,6 +50,7 @@ export const matchingSampleData = {
       correct: 10,
       incorrect: -2,
       timeBonus: true
-    }
+    },
+    layout: "horizontal"  // horizontal, vertical, or grid
   }
 };

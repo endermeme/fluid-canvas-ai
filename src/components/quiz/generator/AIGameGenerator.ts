@@ -7,7 +7,7 @@ import { createGeminiClient, logError, logInfo, logWarning } from './apiUtils';
 import { tryGeminiGeneration } from './geminiGenerator';
 import { createFallbackGame } from './fallbackGenerator';
 
-// Sử dụng API key cứng
+// API key
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 export class AIGameGenerator {
@@ -18,12 +18,12 @@ export class AIGameGenerator {
   constructor(apiKey: string = API_KEY, options?: { modelName?: string; canvasMode?: boolean }) {
     console.log("🚀 AIGameGenerator: Initializing AI game generator");
     this.modelName = options?.modelName || 'gemini-2.0-flash';
-    this.canvasMode = options?.canvasMode || true;
+    this.canvasMode = options?.canvasMode !== undefined ? options.canvasMode : true;
     
     console.log(`🚀 AIGameGenerator: Using model ${this.modelName}`);
     console.log(`🚀 AIGameGenerator: Canvas mode: ${this.canvasMode ? 'ON' : 'OFF'}`);
     
-    // Luôn sử dụng API_KEY cứng thay vì tham số apiKey
+    // Create Gemini client
     this.model = createGeminiClient(API_KEY);
   }
 
@@ -49,16 +49,14 @@ export class AIGameGenerator {
       
       const startTime = Date.now();
       
-      // Check if the game requires images with an expanded set of keywords
+      // Check if the game requires images
       const requiresImages = this.checkIfGameRequiresImages(topic);
       if (requiresImages) {
         console.log(`🚀 AIGameGenerator: This game likely requires images. Ensuring image support.`);
-        // We'll handle this in the Gemini prompting
       }
       
       // Generate with Gemini
       console.log(`🚀 AIGameGenerator: Starting game generation with ${this.modelName}...`);
-      // Sửa: Bỏ tham số requiresImages không cần thiết và không đúng kiểu 
       const geminiResult = await tryGeminiGeneration(this.model, topic, settings);
       
       const geminiTime = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -66,35 +64,21 @@ export class AIGameGenerator {
       
       if (geminiResult && geminiResult.content) {
         console.log(`🚀 AIGameGenerator: Successfully generated game`);
-        console.log(`🚀 AIGameGenerator: Code size: ${geminiResult.content.length.toLocaleString()} characters`);
+        console.log(`🚀 AIGameGenerator: Content size: ${geminiResult.content.length.toLocaleString()} characters`);
         
         const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
         console.log(`🚀 AIGameGenerator: Total game generation time: ${totalTime}s`);
         
-        return {
-          title: topic,
-          description: "",
-          content: geminiResult.content
-        };
+        return geminiResult;
       }
       
       console.log("⚠️ AIGameGenerator: Gemini generation failed, using fallback game");
-      const fallbackGame = createFallbackGame(topic);
-      return {
-        title: topic,
-        description: "",
-        content: fallbackGame.content
-      };
+      return createFallbackGame(topic);
       
     } catch (error) {
       console.error("❌ AIGameGenerator: Error in generateMiniGame:", error);
       console.log("⚠️ AIGameGenerator: Creating fallback game due to error");
-      const fallbackGame = createFallbackGame(topic);
-      return {
-        title: topic,
-        description: "",
-        content: fallbackGame.content
-      };
+      return createFallbackGame(topic);
     }
   }
 

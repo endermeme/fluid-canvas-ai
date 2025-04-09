@@ -30,7 +30,15 @@ import { GameSettingsData } from '../types';
 
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const model = genAI.getGenerativeModel({ 
+  model: "gemini-2.0-flash",
+  generationConfig: {
+    temperature: 0.7,
+    topP: 0.8,
+    topK: 40,
+    maxOutputTokens: 8192,
+  }
+});
 
 interface PresetGameManagerProps {
   gameType: string;
@@ -55,7 +63,8 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
         questionCount: 10,
         timePerQuestion: type === 'matching' || type === 'memory' ? 60 : 
                          type === 'wordsearch' ? 300 : 30,
-        category: 'general'
+        category: 'general',
+        layout: type === 'matching' ? 'horizontal' : undefined
       };
       
       // Adjust settings based on game type
@@ -77,9 +86,30 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
       // Use optimized Gemini generation approach
       const game = await tryGeminiGeneration(model, topic, settings);
       
-      if (game) {
+      if (game && (game.content || Object.keys(game).length > 0)) {
         console.log(`Successfully generated ${type} game:`, game);
-        setGameContent(game);
+        
+        // Handle direct JSON objects for certain game types
+        if (typeof game.content === 'string') {
+          if (game.content.trim().startsWith('{') && (
+            type === 'matching' || type === 'quiz' || 
+            type === 'flashcards' || type === 'wordsearch'
+          )) {
+            try {
+              // Try to parse the JSON
+              const parsedContent = JSON.parse(game.content);
+              setGameContent(parsedContent);
+            } catch (e) {
+              console.error("Failed to parse game content as JSON:", e);
+              setGameContent(game);
+            }
+          } else {
+            setGameContent(game);
+          }
+        } else {
+          setGameContent(game);
+        }
+        
         toast({
           title: "Đã tạo trò chơi",
           description: `Trò chơi ${getGameTypeName(type)} đã được tạo với AI.`,
@@ -92,7 +122,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
       setError('Không thể tạo nội dung với AI. Vui lòng thử lại sau.');
       toast({
         title: "Lỗi AI",
-        description: "Không thể tạo nội dung. Vui lòng thử lại sau.",
+        description: "Không thể tạo nội dung. Đang chuyển sang dùng dữ liệu mẫu.",
         variant: "destructive"
       });
       
