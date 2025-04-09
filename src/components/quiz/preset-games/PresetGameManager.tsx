@@ -19,7 +19,7 @@ import { flashcardsSampleData } from './data/flashcardsSampleData';
 import { matchingSampleData } from './data/matchingSampleData';
 import { memorySampleData } from './data/memorySampleData';
 import { orderingSampleData } from './data/orderingSampleData';
-import { wordSearchSampleData } from './data/wordSearchSampleData';
+import { wordSearchSampleData, easyWordSearchData, hardWordSearchData } from './data/wordSearchSampleData';
 import { pictionarySampleData } from './data/pictionarySampleData';
 import { trueFalseSampleData } from './data/trueFalseSampleData';
 
@@ -73,7 +73,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
           gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "sentences": [{"words": ["từ 1", "từ 2", "từ 3"], "correctOrder": [0, 1, 2]}], "settings": {"timeLimit": 180, "showHints": true} }`;
           break;
         case 'wordsearch':
-          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "words": [{"word": "từ 1", "found": false}, {"word": "từ 2", "found": false}], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "settings": {"timeLimit": 300, "showWordList": true} }`;
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "description": "mô tả", "words": [{"word": "từ 1", "found": false}, {"word": "từ 2", "found": false}], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "settings": {"timeLimit": 300, "allowDiagonalWords": true, "showWordList": true} }`;
           break;
         case 'pictionary':
           gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "items": [{"imageUrl": "URL hình ảnh", "answer": "đáp án", "options": ["lựa chọn 1", "lựa chọn 2", "lựa chọn 3", "lựa chọn 4"], "hint": "gợi ý"}], "settings": {"timePerQuestion": 20, "showHints": true} }`;
@@ -150,7 +150,14 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
         setGameContent(orderingSampleData);
         break;
       case 'wordsearch':
-        setGameContent(wordSearchSampleData);
+        // Choose difficulty based on topic keyword if present
+        if (initialTopic?.toLowerCase().includes('dễ') || initialTopic?.toLowerCase().includes('easy')) {
+          setGameContent(easyWordSearchData);
+        } else if (initialTopic?.toLowerCase().includes('khó') || initialTopic?.toLowerCase().includes('hard')) {
+          setGameContent(hardWordSearchData);
+        } else {
+          setGameContent(wordSearchSampleData);
+        }
         break;
       case 'pictionary':
         setGameContent(pictionarySampleData);

@@ -132,14 +132,15 @@ export const getGameSpecificInstructions = (gameTypeId: string | undefined, topi
       return `
       ## Hướng dẫn cho trò chơi Tìm từ ẩn
       
-      - Tạo bảng chữ cái kích thước vừa phải (không quá 10x10)
-      - Sử dụng tối đa 8 từ liên quan đến chủ đề "${topic}"
-      - Các từ chỉ được sắp xếp theo chiều ngang hoặc dọc (không có chéo)
+      - Tạo bảng chữ cái kích thước phù hợp (8x8 cho dễ, 12x12 cho trung bình, 15x15 cho khó)
+      - Sử dụng 7-15 từ liên quan đến chủ đề "${topic}"
+      - Các từ được sắp xếp theo nhiều hướng: ngang, dọc và chéo (chéo tùy theo độ khó)
       - Hiển thị danh sách các từ cần tìm ở bên cạnh bảng
       - Cho phép đánh dấu từ bằng cách click vào ô đầu và ô cuối
-      - Từ được tìm thấy sẽ được tô màu hoặc gạch ngang
+      - Từ được tìm thấy sẽ được tô màu xanh và gạch ngang trong danh sách
+      - Tạo JSON trả về có cấu trúc rõ ràng với từ khóa settings có thuộc tính allowDiagonalWords: true/false
       - Đảm bảo khoảng cách giữa các ô đủ lớn cho thiết bị cảm ứng
-      - Sử dụng JavaScript đơn giản để xử lý tương tác
+      - Trả về JSON hợp lệ để có thể parse thành JavaScript object
       `;
     
     case 'categorizing':

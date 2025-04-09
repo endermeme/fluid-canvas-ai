@@ -32,6 +32,9 @@ export const generateWithGemini = async (
     const response = result.response;
     const text = response.text();
     
+    console.log("🔷 Gemini: Response received, extracting JSON...");
+    console.log(`🔷 Gemini: Response length: ${text.length}`);
+    
     return parseGeminiResponse(text, topic);
   } catch (error) {
     console.error("❌ Gemini: Error generating with Gemini:", error);
