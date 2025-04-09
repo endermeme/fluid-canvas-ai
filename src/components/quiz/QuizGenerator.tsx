@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from './generator/AIGameGenerator';
@@ -7,7 +8,7 @@ import GameView from './GameView';
 import { GameSettingsData } from './types';
 import { getGameTypeByTopic } from './gameTypes';
 
-// API key cứng
+// API key
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 interface QuizGeneratorProps {
@@ -153,9 +154,14 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
 
   if (!miniGame) {
     return (
-      <div className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10">
-        <p className="text-lg">Vui lòng nhập chủ đề vào thanh chat để tạo minigame</p>
-        <h3 className="text-xl font-bold cursor-pointer select-none">
+      <div className="flex flex-col items-center justify-center h-full w-full space-y-6 py-10 bg-gradient-to-b from-background to-background/80">
+        <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+          <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-primary/30 animate-pulse"></div>
+          </div>
+        </div>
+        <p className="text-lg text-center max-w-md px-4">Vui lòng nhập chủ đề vào thanh chat để tạo minigame</p>
+        <h3 className="text-xl font-bold cursor-pointer select-none text-primary">
           Trợ Lý Tạo Web
         </h3>
       </div>

@@ -1,32 +1,37 @@
 
 import React from 'react';
-import { School } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 interface GameHeaderProps {
-  onTitleClick: () => void;
+  title: string;
+  subtitle?: string;
+  onBackClick?: () => void;
 }
 
-const GameHeader: React.FC<GameHeaderProps> = ({ onTitleClick }) => {
+const GameHeader: React.FC<GameHeaderProps> = ({ 
+  title, 
+  subtitle,
+  onBackClick
+}) => {
   return (
-    <>
-      <div className="text-primary mb-4 animate-float-in">
-        <div className="relative">
-          <div className="absolute inset-0 blur-xl bg-primary/20 rounded-full animate-pulse-soft"></div>
-          <School size={56} className="relative z-10 text-primary" />
-        </div>
+    <div className="flex items-center gap-4 mb-6">
+      {onBackClick && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onBackClick}
+          className="mr-2 hover:bg-primary/10 text-primary/80"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+      )}
+      
+      <div>
+        <h1 className="text-2xl font-bold text-primary">{title}</h1>
+        {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
       </div>
-      
-      <h2 
-        className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-fade-in cursor-pointer"
-        onClick={onTitleClick}
-      >
-        Trò Chơi Giáo Dục
-      </h2>
-      
-      <p className="text-muted-foreground mb-6 text-center max-w-md animate-fade-in delay-100">
-        Trải nghiệm học tập qua nhiều trò chơi tương tác khác nhau với AI tạo nội dung theo yêu cầu.
-      </p>
-    </>
+    </div>
   );
 };
 

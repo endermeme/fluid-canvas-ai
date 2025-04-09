@@ -141,25 +141,25 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
   };
 
   return (
-    <div className="flex flex-col p-4 h-full">
+    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
       {/* Header with progress */}
       <div className="mb-4">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium">
+          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
             Thẻ {currentCard + 1}/{cards.length}
           </div>
           <div className="text-sm font-medium flex space-x-3">
-            <span className="text-green-600">Đã thuộc: {stats.known}</span>
-            <span className="text-red-600">Chưa thuộc: {stats.unknown}</span>
+            <span className="px-3 py-1 bg-green-100/30 text-green-600 rounded-full">Đã thuộc: {stats.known}</span>
+            <span className="px-3 py-1 bg-red-100/30 text-red-600 rounded-full">Chưa thuộc: {stats.unknown}</span>
           </div>
         </div>
-        <Progress value={progress} className="h-2" />
+        <Progress value={progress} className="h-2 bg-secondary" />
       </div>
 
       {/* Flashcard */}
       <div className="flex-grow flex items-center justify-center mb-4 perspective-1000">
         <div 
-          className={`w-full max-w-md aspect-[3/2] cursor-pointer relative ${isFlipped ? 'rotate-y-180' : ''}`}
+          className="w-full max-w-md aspect-[3/2] cursor-pointer relative group"
           onClick={handleFlip}
           style={{
             transformStyle: 'preserve-3d',
@@ -169,7 +169,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
         >
           {/* Front of card */}
           <Card 
-            className="absolute inset-0 flex items-center justify-center p-6 bg-background border-2 border-primary/30 backface-hidden"
+            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-2 border-primary/20 shadow-lg group-hover:shadow-xl transition-all duration-300"
             style={{
               backfaceVisibility: 'hidden'
             }}
@@ -179,18 +179,18 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
                 Nhấn để lật thẻ
                 {autoFlip && !isFlipped && (
                   <div className="mt-1 flex items-center justify-center">
-                    <Clock className="h-3 w-3 mr-1" />
+                    <Clock className="h-3 w-3 mr-1 text-primary/60" />
                     <span>Tự động lật sau {timeRemaining}s</span>
                   </div>
                 )}
               </div>
-              <div className="text-2xl font-bold">{cards[currentCard].front}</div>
+              <div className="text-3xl font-bold text-primary/90">{cards[currentCard].front}</div>
             </div>
           </Card>
           
           {/* Back of card */}
           <Card 
-            className="absolute inset-0 flex items-center justify-center p-6 bg-primary/10 border-2 border-primary/30 backface-hidden"
+            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm border-2 border-primary/30 shadow-lg"
             style={{
               backfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)'
@@ -198,7 +198,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
           >
             <div className="text-center">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Mặt sau</div>
-              <div className="text-xl">{cards[currentCard].back}</div>
+              <div className="text-2xl text-primary/90">{cards[currentCard].back}</div>
             </div>
           </Card>
         </div>
@@ -210,6 +210,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
           variant="outline"
           onClick={handlePrevCard}
           disabled={currentCard === 0}
+          className="bg-gradient-to-r from-background to-secondary/30 border-primary/20 hover:bg-secondary/20"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Thẻ trước
@@ -218,6 +219,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
           variant="outline"
           onClick={handleNextCard}
           disabled={currentCard === cards.length - 1}
+          className="bg-gradient-to-r from-secondary/30 to-background border-primary/20 hover:bg-secondary/20"
         >
           Thẻ sau
           <ArrowRight className="ml-2 h-4 w-4" />
@@ -228,7 +230,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
       <div className="grid grid-cols-2 gap-4">
         <Button
           variant="outline"
-          className="border-red-500 text-red-500 hover:bg-red-50"
+          className="border-red-500 text-red-500 hover:bg-red-50 bg-gradient-to-r from-red-100/10 to-background"
           onClick={() => handleMarkCard('unknown')}
         >
           <X className="mr-2 h-4 w-4" />
@@ -236,7 +238,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
         </Button>
         <Button
           variant="outline"
-          className="border-green-500 text-green-500 hover:bg-green-50"
+          className="border-green-500 text-green-500 hover:bg-green-50 bg-gradient-to-r from-green-100/10 to-background"
           onClick={() => handleMarkCard('known')}
         >
           <Check className="mr-2 h-4 w-4" />
@@ -248,7 +250,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
       <div className="mt-4 grid grid-cols-2 gap-4">
         <Button
           variant={autoFlip ? "default" : "outline"}
-          className="flex-1"
+          className={`flex-1 ${autoFlip ? 'bg-primary' : 'bg-gradient-to-r from-primary/10 to-background border-primary/20'}`}
           onClick={toggleAutoFlip}
         >
           <Clock className="mr-2 h-4 w-4" />
@@ -257,7 +259,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
         
         <Button
           variant="ghost"
-          className="flex-1"
+          className="flex-1 hover:bg-secondary/20"
           onClick={handleRestart}
         >
           <RefreshCw className="mr-2 h-4 w-4" />
