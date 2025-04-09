@@ -53,13 +53,14 @@ export const buildGeminiPrompt = (
     ---
 
     ## 🖼️ Image Instructions (IMPORTANT)
-    - For ALL images, use Pixabay API with format: https://pixabay.com/api/?key=49691613-4d92ecd39a474575561ea2695&q=[search_term]&image_type=photo
-    - You need to extract the "webformatURL" from the API response and use that as the image source
+    - For ALL images, ONLY use Pixabay API with format: https://pixabay.com/api/?key=49691613-4d92ecd39a474575561ea2695&q=[search_term]&image_type=photo
+    - You MUST extract the "webformatURL" from the API response and use that as the image source
     - If making a dynamic game, provide example of how to fetch the images from Pixabay API
     - Always include detailed search terms for best results (e.g., "red apple fruit" instead of just "apple")
     - For pictionary or image-based games, ensure each image clearly shows the subject
     - Always use English search terms for best results
-    - DO NOT use any other image sources like Unsplash, imgur, etc.
+    - NEVER use any other image sources like Unsplash, imgur, etc.
+    - ONLY use URLs with domain cdn.pixabay.com for all images
 
     ${imageInstructions}
 
@@ -72,6 +73,7 @@ export const buildGeminiPrompt = (
     - Prevent layout overflow or broken UI on small screens
     - Always handle errors with \`try-catch\`
     - Escape all special characters properly in JSON output
+    - ONLY use Pixabay for images (domain: cdn.pixabay.com)
 
     ---
 

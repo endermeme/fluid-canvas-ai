@@ -12,7 +12,8 @@ export const getImageInstructions = (): string => {
     - Từ khóa nên chi tiết, ví dụ: "strawberry fruit fresh" thay vì chỉ "strawberry"
     - Sử dụng trường "webformatURL" từ kết quả API để lấy URL hình ảnh
     - Luôn thêm alt text và onerror cho các thẻ <img>
-    - KHÔNG sử dụng nguồn hình ảnh khác như Unsplash, imgur, v.v.
+    - TUYỆT ĐỐI KHÔNG sử dụng nguồn hình ảnh khác như Unsplash, imgur, v.v.
+    - Chỉ chấp nhận hình ảnh từ Pixabay với domain cdn.pixabay.com
   `;
 };
 
@@ -67,8 +68,8 @@ export const generatePixabayImage = async (searchTerm: string): Promise<string> 
  * @returns URL hình ảnh placeholder
  */
 export const generatePlaceholderImage = (width: number = 400, height: number = 300, text: string = "Image"): string => {
-  const encodedText = encodeURIComponent(text);
-  return `https://via.placeholder.com/${width}x${height}?text=${encodedText}`;
+  // Sử dụng hình ảnh mặc định từ Pixabay thay vì placeholder
+  return `https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png`;
 };
 
 /**
@@ -78,6 +79,7 @@ export const generatePlaceholderImage = (width: number = 400, height: number = 3
 export const handleImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>): void => {
   const img = event.currentTarget;
   const topic = img.alt || "image";
-  img.src = generatePlaceholderImage(400, 300, `${topic} - Not Found`);
+  // Sử dụng ảnh mặc định từ Pixabay
+  img.src = `https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png`;
   img.alt = `Failed to load image: ${topic}`;
 };

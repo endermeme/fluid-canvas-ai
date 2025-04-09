@@ -41,10 +41,10 @@ export const generateWithGemini = async (
     console.log("🔷 Gemini: Response received, extracting JSON...");
     console.log(`🔷 Gemini: Response length: ${text.length}`);
     
-    // Replace any non-Pixabay image URLs with Pixabay format if needed
+    // Parse the response
     let parsedResponse = await parseGeminiResponse(text, topic);
     
-    // Process the response to convert any invalid image URLs to Pixabay format
+    // Process the response to convert any non-Pixabay image URLs to Pixabay format
     if (parsedResponse && parsedResponse.content) {
       parsedResponse.content = replaceNonPixabayImageUrls(parsedResponse.content, topic);
     }
@@ -116,8 +116,8 @@ function checkIfGameRequiresImages(topic: string): boolean {
  */
 function replaceNonPixabayImageUrls(content: string, topic: string): string {
   // Detect non-Pixabay image URLs in the content
-  // This regex looks for image URLs that don't contain pixabay.com
-  const nonPixabayImageRegex = /(src=["'])(https?:\/\/(?!.*pixabay\.com).+?)(["'])/gi;
+  // This regex looks for image URLs that don't contain pixabay.com or cdn.pixabay.com
+  const nonPixabayImageRegex = /(src=["'])(https?:\/\/(?!.*pixabay\.com|.*cdn\.pixabay\.com).+?)(["'])/gi;
   
   // Replace with Pixabay URLs
   const updatedContent = content.replace(nonPixabayImageRegex, (match, prefix, url, suffix) => {
@@ -129,6 +129,8 @@ function replaceNonPixabayImageUrls(content: string, topic: string): string {
     // Use a direct Pixabay image URL from their CDN as a fallback
     // This is a static image that should exist
     const fallbackPixabayImage = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png';
+    
+    console.log(`🔄 Gemini: Replacing non-Pixabay image URL with Pixabay fallback. Original URL: ${url}`);
     
     return `${prefix}${fallbackPixabayImage}${suffix} data-search-term="${searchTerm}"`;
   });
