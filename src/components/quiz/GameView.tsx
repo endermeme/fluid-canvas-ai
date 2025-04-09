@@ -200,7 +200,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         ) : (
           <iframe
             ref={iframeRef}
-            srcdoc={miniGame.content}
+            srcDoc={miniGame.content}
             className="w-full h-full border-0 mx-auto"
             sandbox="allow-scripts allow-popups allow-same-origin"
             onLoad={handleIframeLoad}
