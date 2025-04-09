@@ -1,6 +1,7 @@
 
 import { GameSettingsData } from '../types';
 import { getGameSpecificInstructions, getSettingsPrompt } from './gameInstructions';
+import { getImageInstructions } from './imageInstructions';
 
 /**
  * Builds a complete prompt for the Gemini API based on game parameters
@@ -16,6 +17,7 @@ export const buildGeminiPrompt = (
 ): string => {
   const gameSpecificInstructions = getGameSpecificInstructions(gameTypeId, topic);
   const settingsPrompt = getSettingsPrompt(settings);
+  const imageInstructions = getImageInstructions();
 
   return `
     # 🎮 Interactive Education Game Generator – All-in-One HTML File
@@ -47,6 +49,10 @@ export const buildGeminiPrompt = (
     ---
 
     ${gameSpecificInstructions}
+
+    ---
+
+    ${imageInstructions}
 
     ---
 

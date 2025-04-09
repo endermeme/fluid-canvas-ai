@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, ChevronRight, HelpCircle, Clock, Image } from 'lucide-react';
+import { generatePlaceholderImage, handleImageError } from '../../generator/imageInstructions';
 
 interface PictionaryTemplateProps {
   content: any;
@@ -108,9 +109,14 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
     setImageError(false);
   };
 
-  const handleImageError = () => {
-    setImageLoaded(true);
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    // Custom error handler using the imported function
     setImageError(true);
+    setImageLoaded(true);
+    const img = e.currentTarget;
+    const itemAnswer = items[currentItem]?.answer || topic;
+    img.src = generatePlaceholderImage(600, 400, `${itemAnswer}`);
+    img.alt = `Không thể tải hình ảnh: ${itemAnswer}`;
   };
 
   if (!content || !items.length) {
@@ -186,7 +192,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
           ) : (
             <img 
               src={item.imageUrl} 
-              alt="Đoán hình ảnh"
+              alt={`Hình ảnh: ${item.answer}`}
               className={`w-full h-full object-contain ${imageLoaded ? 'opacity-100' : 'opacity-0'}`} 
               onLoad={handleImageLoad}
               onError={handleImageError}
