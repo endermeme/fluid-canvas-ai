@@ -43,6 +43,11 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
       setLeftItems(shuffledLeftItems);
       setRightItems(shuffledRightItems);
       setTimeLeft(content?.settings?.timeLimit || 60);
+      setMatchedPairs(0);
+      setGameOver(false);
+      setGameWon(false);
+      setSelectedLeft(null);
+      setSelectedRight(null);
     }
   }, [pairs, content?.settings?.timeLimit]);
 
@@ -64,9 +69,9 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
     }
   }, [timeLeft, gameOver, gameWon, toast]);
 
-  // Check if all pairs are matched
+  // Check if all pairs are matched - Fixed to avoid infinite loop
   useEffect(() => {
-    if (matchedPairs === totalPairs && totalPairs > 0) {
+    if (matchedPairs === totalPairs && totalPairs > 0 && !gameWon) {
       setGameWon(true);
       toast({
         title: "Chúc mừng!",
@@ -74,7 +79,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
         variant: "default",
       });
     }
-  }, [matchedPairs, totalPairs, toast]);
+  }, [matchedPairs, totalPairs, gameWon, toast]);
 
   const handleLeftItemClick = (id: number) => {
     if (gameOver || gameWon) return;
@@ -94,40 +99,54 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
     setSelectedRight(id);
   };
 
-  // Check if selected items match
+  // Check if selected items match - Fixed to avoid infinite loop
   useEffect(() => {
+    // Only run this effect when both items are selected
     if (selectedLeft !== null && selectedRight !== null) {
-      if (selectedLeft === selectedRight) {
-        // Match found
-        setLeftItems(leftItems.map(item => 
-          item.id === selectedLeft ? {...item, matched: true} : item
-        ));
-        setRightItems(rightItems.map(item => 
-          item.id === selectedRight ? {...item, matched: true} : item
-        ));
-        setMatchedPairs(matchedPairs + 1);
-        
-        toast({
-          title: "Tuyệt vời!",
-          description: "Bạn đã ghép đúng một cặp.",
-          variant: "default",
-        });
-      } else {
-        // No match
-        toast({
-          title: "Không khớp",
-          description: "Hãy thử lại với cặp khác.",
-          variant: "destructive",
-        });
-      }
+      const checkMatch = () => {
+        if (selectedLeft === selectedRight) {
+          // Match found
+          setLeftItems(prevLeftItems => 
+            prevLeftItems.map(item => 
+              item.id === selectedLeft ? {...item, matched: true} : item
+            )
+          );
+          
+          setRightItems(prevRightItems => 
+            prevRightItems.map(item => 
+              item.id === selectedRight ? {...item, matched: true} : item
+            )
+          );
+          
+          setMatchedPairs(prev => prev + 1);
+          
+          toast({
+            title: "Tuyệt vời!",
+            description: "Bạn đã ghép đúng một cặp.",
+            variant: "default",
+          });
+        } else {
+          // No match
+          toast({
+            title: "Không khớp",
+            description: "Hãy thử lại với cặp khác.",
+            variant: "destructive",
+          });
+        }
+      };
+      
+      // Execute match check only once
+      checkMatch();
       
       // Reset selections after a short delay
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setSelectedLeft(null);
         setSelectedRight(null);
       }, 1000);
+      
+      return () => clearTimeout(timer);
     }
-  }, [selectedLeft, selectedRight, leftItems, rightItems, matchedPairs, toast]);
+  }, [selectedLeft, selectedRight, toast]); // Remove dependencies that cause infinite loop
 
   const handleRestart = () => {
     if (pairs.length > 0) {
