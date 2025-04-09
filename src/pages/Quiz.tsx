@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useCanvasState } from '@/hooks/useCanvasState';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { animateContentHighlight } from '@/lib/animations';
@@ -21,7 +22,9 @@ const Quiz = () => {
   const mainContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    document.title = 'Interactive Game Creator';
+    document.title = 'Minigame Tương Tác';
+    // Always enable canvas mode
+    localStorage.setItem('canvas_mode', 'true');
     
     // Parse URL parameters for direct game creation
     const queryParams = new URLSearchParams(location.search);
@@ -54,13 +57,13 @@ const Quiz = () => {
     setIsGenerating(false);
     
     toast({
-      title: "Game Ready",
-      description: `"${game.title || content}" has been successfully created.`,
+      title: "Trò chơi đã sẵn sàng",
+      description: `Trò chơi "${game.title || content}" đã được tạo thành công.`,
     });
   };
 
   const handleCancelCustomGame = () => {
-    // Navigate to home page when cancel is clicked
+    // Simply navigate to home page when cancel is clicked
     navigate('/');
   };
 
@@ -90,13 +93,13 @@ const Quiz = () => {
                     variant="secondary"
                     className="bg-primary/10"
                   >
-                    Create New Game
+                    Tạo Game Mới
                   </Button>
                 </div>
               </div>
             ) : showForm ? (
               <CustomGameForm 
-                gameType="interactive" 
+                gameType="quiz" 
                 onGenerate={handleGameGeneration}
                 onCancel={handleCancelCustomGame}
               />
@@ -106,14 +109,14 @@ const Quiz = () => {
                   onClick={() => setShowForm(true)}
                   className="bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg"
                 >
-                  Create New Game
+                  Tạo Game Mới
                 </Button>
                 <Button 
                   onClick={handleBackToHome}
                   variant="outline"
                   className="mt-4"
                 >
-                  Back to Home
+                  Quay Lại Trang Chủ
                 </Button>
               </div>
             )}

@@ -1,6 +1,7 @@
 
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
+import { getGameTypeByTopic } from '../gameTypes';
 import { buildGeminiPrompt } from './promptBuilder';
 import { parseGeminiResponse } from './responseParser';
 import { processImagesToPixabay } from './imageInstructions';
@@ -17,7 +18,10 @@ export const generateWithGemini = async (
   topic: string, 
   settings?: GameSettingsData
 ): Promise<MiniGame | null> => {
-  console.log(`🔷 Gemini: Starting game generation for "${topic}"`);
+  // Get game type from topic to provide better context for the AI
+  const gameType = getGameTypeByTopic(topic);
+  
+  console.log(`🔷 Gemini: Starting game generation for "${topic}" - Type: ${gameType?.name || "Not specified"}`);
   console.log(`🔷 Gemini: Settings: ${JSON.stringify(settings || {})}`);
   
   // Check if the game might require images
@@ -27,7 +31,7 @@ export const generateWithGemini = async (
   }
   
   // Build the complete prompt with image instructions if needed
-  const prompt = buildGeminiPrompt(topic, undefined, settings);
+  const prompt = buildGeminiPrompt(topic, gameType?.id, settings);
 
   try {
     console.log("🔷 Gemini: Sending request to Gemini API...");
