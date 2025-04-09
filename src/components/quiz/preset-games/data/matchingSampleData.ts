@@ -38,6 +38,7 @@ export const matchingSampleData = {
   ],
   settings: {
     timeLimit: 60,
-    shuffleItems: true
+    shuffleItems: true,
+    difficulty: "medium" // easy, medium, hard
   }
 };
