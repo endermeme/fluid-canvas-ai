@@ -1,4 +1,3 @@
-
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -211,6 +210,50 @@ JSON Format Example:
 }
 
 Return ONLY valid JSON without additional text. Ensure all cards have both front and back content.
+`;
+
+    case 'memory':
+      return `
+Create a memory matching game about "${topic}" with the following specifications:
+
+1. Cards:
+   - Create ${difficulty === 'easy' ? '6-8' : difficulty === 'medium' ? '8-12' : '12-16'} pairs of matching cards
+   - Each card should have a distinct content (emoji, symbol, or short text)
+   - Content should be related to "${topic}" when possible
+   - Keep content simple and visually distinct
+
+2. Difficulty:
+   - ${difficulty === 'easy' ? 'Use simple, easily recognizable items' : difficulty === 'medium' ? 'Use moderately complex items' : 'Use more challenging items that require careful attention'}
+   - ${difficulty === 'easy' ? '6-8 pairs (12-16 cards total)' : difficulty === 'medium' ? '8-12 pairs (16-24 cards total)' : '12-16 pairs (24-32 cards total)'}
+   - Time limit: ${timeLimit} seconds
+
+3. Game Mechanics:
+   - Cards start face down
+   - Player flips two cards at a time
+   - If cards match, they stay face up
+   - If cards don't match, they flip back face down
+   - Game ends when all pairs are found or time expires
+   - Score based on pairs found and time remaining
+
+JSON Format Example:
+{
+  "title": "Memory Game: ${topic}",
+  "description": "Find matching pairs related to ${topic}",
+  "cards": [
+    { "id": 1, "content": "🍎", "matched": false },
+    { "id": 2, "content": "🍎", "matched": false },
+    { "id": 3, "content": "🍌", "matched": false },
+    { "id": 4, "content": "🍌", "matched": false }
+  ],
+  "settings": {
+    "timeLimit": ${timeLimit},
+    "showTimeLimit": true,
+    "allowHints": ${difficulty !== 'hard'},
+    "difficulty": "${difficulty}"
+  }
+}
+
+IMPORTANT: Each content value MUST appear exactly twice (as a pair). Return ONLY valid JSON without additional text.
 `;
 
     // Add more game types as needed

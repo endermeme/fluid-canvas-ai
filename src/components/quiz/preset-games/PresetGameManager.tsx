@@ -50,8 +50,11 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
     if (type === 'flashcards') {
       settings.questionCount = 8;
       settings.timePerQuestion = 5;
-    } else if (type === 'matching' || type === 'memory') {
+    } else if (type === 'matching') {
       settings.questionCount = 8;
+    } else if (type === 'memory') {
+      settings.questionCount = 12; // 6 pairs
+      settings.timePerQuestion = 120; // 2 minutes game time
     } else if (type === 'ordering') {
       settings.questionCount = 5;
       settings.timePerQuestion = 45;
@@ -67,6 +70,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
       type,
       settings,
       (generatedContent) => {
+        console.log("Generated content:", generatedContent);
         setGameContent(generatedContent);
         toast({
           title: "Đã tạo trò chơi",

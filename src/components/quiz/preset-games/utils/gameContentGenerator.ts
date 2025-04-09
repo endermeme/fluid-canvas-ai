@@ -14,6 +14,8 @@ export const generateGameContent = async (
   loadSampleData: (type: string) => void
 ) => {
   try {
+    console.log(`Starting generation for ${gameType} with topic "${topic}"`);
+    
     // Use optimized Gemini generation approach
     const game = await tryGeminiGeneration(defaultGeminiModel, topic, settings);
     
@@ -24,11 +26,13 @@ export const generateGameContent = async (
       if (typeof game.content === 'string') {
         if (game.content.trim().startsWith('{') && (
           gameType === 'matching' || gameType === 'quiz' || 
-          gameType === 'flashcards' || gameType === 'wordsearch'
+          gameType === 'flashcards' || gameType === 'wordsearch' ||
+          gameType === 'memory'
         )) {
           try {
             // Try to parse the JSON
             const parsedContent = JSON.parse(game.content);
+            console.log(`Parsed ${gameType} content:`, parsedContent);
             onSuccess(parsedContent);
           } catch (e) {
             console.error("Failed to parse game content as JSON:", e);
