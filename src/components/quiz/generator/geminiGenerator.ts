@@ -45,8 +45,8 @@ export const generateWithGemini = async (
     // Parse the response
     let parsedResponse = await parseGeminiResponse(text, topic);
     
-    // Process the game content for images if it's a structured game (not HTML)
-    if (parsedResponse && !parsedResponse.content && parsedResponse.items) {
+    // Process the game content for images if it contains items array
+    if (parsedResponse && parsedResponse.items && Array.isArray(parsedResponse.items)) {
       console.log("🔷 Gemini: Processing image search terms to Pixabay URLs...");
       parsedResponse = await processImagesToPixabay(parsedResponse);
     }
