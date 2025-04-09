@@ -19,17 +19,15 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
     if (jsonMatch && jsonMatch[0]) {
       try {
         // Try to parse the JSON directly
-        const jsonContent = jsonMatch[0].trim();
-        const gameData = JSON.parse(jsonContent);
+        const gameData = JSON.parse(jsonMatch[0]);
         
         console.log("🔷 Gemini: Successfully parsed JSON directly");
         console.log(`🔷 Gemini: Game title: "${gameData.title || 'No title'}"`);
         
-        // Ensure the correct content field exists
         return {
           title: gameData.title || topic,
           description: gameData.description || "",
-          content: gameData.content || jsonContent
+          content: gameData.content || ''
         };
       } catch (parseError) {
         console.log("🔷 Gemini: Direct JSON parse failed, trying with sanitization:", parseError.message);
@@ -50,20 +48,10 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
           return {
             title: gameData.title || topic,
             description: gameData.description || "",
-            content: gameData.content || sanitizedJson
+            content: gameData.content || ''
           };
         } catch (secondParseError) {
           console.log("🔷 Gemini: Sanitized JSON parse failed, moving to manual extraction:", secondParseError.message);
-          
-          // If we still can't parse it but it looks like JSON, return it as-is
-          if (jsonMatch[0].includes('"title"') && (jsonMatch[0].includes('"questions"') || 
-              jsonMatch[0].includes('"pairs"') || jsonMatch[0].includes('"cards"'))) {
-            return {
-              title: topic,
-              description: "",
-              content: jsonMatch[0]
-            };
-          }
         }
       }
     }
@@ -93,16 +81,6 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
         title: topic,
         description: "",
         content: htmlContent
-      };
-    }
-    
-    // Last attempt: Just take the raw text if it contains anything useful
-    if (text.trim().length > 0) {
-      console.log("🔷 Gemini: Using raw text response as content");
-      return {
-        title: topic,
-        description: "Generated content",
-        content: text
       };
     }
     

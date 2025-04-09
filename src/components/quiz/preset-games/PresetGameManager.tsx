@@ -1,14 +1,34 @@
 
 import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, RefreshCw } from 'lucide-react';
+import gameTemplates from './templates';
+import QuizTemplate from './templates/QuizTemplate';
+import FlashcardsTemplate from './templates/FlashcardsTemplate';
+import MatchingTemplate from './templates/MatchingTemplate';
+import MemoryTemplate from './templates/MemoryTemplate';
+import OrderingTemplate from './templates/OrderingTemplate';
+import WordSearchTemplate from './templates/WordSearchTemplate';
+import PictionaryTemplate from './templates/PictionaryTemplate';
+import TrueFalseTemplate from './templates/TrueFalseTemplate';
 import { useToast } from '@/hooks/use-toast';
-import { GameSettingsData } from '../types';
 
-// Import new components and utilities
-import GameLoading from './components/GameLoading';
-import GameError from './components/GameError';
-import GameTemplateRenderer from './components/GameTemplateRenderer';
-import { generateGameContent, getGameTypeName } from './utils/gameContentGenerator';
-import { loadSampleData } from './utils/sampleDataLoader';
+// Import sample data for testing/development
+import { quizSampleData } from './data/quizSampleData';
+import { flashcardsSampleData } from './data/flashcardsSampleData';
+import { matchingSampleData } from './data/matchingSampleData';
+import { memorySampleData } from './data/memorySampleData';
+import { orderingSampleData } from './data/orderingSampleData';
+import { wordSearchSampleData } from './data/wordSearchSampleData';
+import { pictionarySampleData } from './data/pictionarySampleData';
+import { trueFalseSampleData } from './data/trueFalseSampleData';
+
+// Import Gemini API 
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
+const genAI = new GoogleGenerativeAI(API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 interface PresetGameManagerProps {
   gameType: string;
@@ -16,85 +36,138 @@ interface PresetGameManagerProps {
   initialTopic?: string;
 }
 
-const PresetGameManager: React.FC<PresetGameManagerProps> = ({ 
-  gameType, 
-  onBack, 
-  initialTopic = "Học tiếng Việt" 
-}) => {
+const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack, initialTopic = "Học tiếng Việt" }) => {
   const [loading, setLoading] = useState(true);
   const [gameContent, setGameContent] = useState(null);
   const [error, setError] = useState(null);
   const { toast } = useToast();
 
-  const handleLoadSampleData = (type: string) => {
-    const sampleData = loadSampleData(type);
-    setGameContent(sampleData);
-    setLoading(false);
-  };
-
-  const handleGenerateAIContent = async (topic: string, type: string) => {
+  const generateAIContent = async (prompt, type) => {
     setLoading(true);
     setError(null);
     
-    // Create game settings based on type and difficulty
-    const settings: GameSettingsData = {
-      difficulty: 'medium',
-      questionCount: 10,
-      timePerQuestion: type === 'matching' || type === 'memory' ? 60 : 
-                       type === 'wordsearch' ? 300 : 30,
-      category: 'general',
-      layout: type === 'matching' ? 'horizontal' : undefined
-    };
-    
-    // Adjust settings based on game type
-    if (type === 'flashcards') {
-      settings.questionCount = 8;
-      settings.timePerQuestion = 5;
-    } else if (type === 'matching') {
-      settings.questionCount = 8;
-    } else if (type === 'memory') {
-      settings.questionCount = 12; // 6 pairs
-      settings.timePerQuestion = 120; // 2 minutes game time
-    } else if (type === 'ordering') {
-      settings.questionCount = 5;
-      settings.timePerQuestion = 45;
-    } else if (type === 'wordsearch') {
-      settings.questionCount = 8;
-      settings.timePerQuestion = 300;
-    }
-    
-    console.log(`Generating ${type} game with topic "${topic}" and settings:`, settings);
-    
-    const success = await generateGameContent(
-      topic,
-      type,
-      settings,
-      (generatedContent) => {
-        console.log("Generated content:", generatedContent);
-        setGameContent(generatedContent);
+    try {
+      const generationConfig = {
+        temperature: 0.7,
+        topK: 1,
+        topP: 0.95,
+        maxOutputTokens: 8000,
+      };
+      
+      let gamePrompt = `Tạo nội dung cho trò chơi ${type} với yêu cầu sau: ${prompt}. Đầu ra phải là JSON hợp lệ. `;
+      
+      switch(type) {
+        case 'quiz':
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "questions": [{"question": "câu hỏi", "options": ["lựa chọn 1", "lựa chọn 2", "lựa chọn 3", "lựa chọn 4"], "correctAnswer": số_index_đáp_án_đúng, "explanation": "giải thích"}], "settings": {"timePerQuestion": 30} }`;
+          break;
+        case 'flashcards':
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "cards": [{"front": "mặt trước", "back": "mặt sau", "hint": "gợi ý (nếu có)"}], "settings": {"autoFlip": true, "flipTime": 5} }`;
+          break;
+        case 'matching':
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "pairs": [{"left": "nội dung bên trái", "right": "nội dung bên phải"}], "settings": {"timeLimit": 60} }`;
+          break;
+        case 'memory':
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "cards": [{"id": số_id, "content": "nội dung", "matched": false, "flipped": false}], "settings": {"timeLimit": 120, "allowHints": true} }`;
+          break;
+        case 'ordering':
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "sentences": [{"words": ["từ 1", "từ 2", "từ 3"], "correctOrder": [0, 1, 2]}], "settings": {"timeLimit": 180, "showHints": true} }`;
+          break;
+        case 'wordsearch':
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "words": [{"word": "từ 1", "found": false}, {"word": "từ 2", "found": false}], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "settings": {"timeLimit": 300, "showWordList": true} }`;
+          break;
+        case 'pictionary':
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "items": [{"imageUrl": "URL hình ảnh", "answer": "đáp án", "options": ["lựa chọn 1", "lựa chọn 2", "lựa chọn 3", "lựa chọn 4"], "hint": "gợi ý"}], "settings": {"timePerQuestion": 20, "showHints": true} }`;
+          break;
+        case 'truefalse':
+          gamePrompt += `JSON có định dạng: { "title": "tiêu đề", "questions": [{"statement": "phát biểu", "isTrue": true/false, "explanation": "giải thích"}], "settings": {"timePerQuestion": 15, "showExplanation": true} }`;
+          break;
+      }
+      
+      gamePrompt += " Chỉ trả về JSON, không có văn bản phụ.";
+      
+      console.log("Sending prompt to Gemini:", gamePrompt);
+      
+      const result = await model.generateContent(gamePrompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      console.log("Received response from Gemini:", text);
+      
+      try {
+        // Extract JSON if wrapped in backticks
+        const jsonStr = text.includes('```json') 
+          ? text.split('```json')[1].split('```')[0].trim() 
+          : text.includes('```') 
+            ? text.split('```')[1].split('```')[0].trim() 
+            : text;
+            
+        console.log("Parsed JSON string:", jsonStr);
+        
+        const parsedContent = JSON.parse(jsonStr);
+        setGameContent(parsedContent);
+        return parsedContent;
+      } catch (parseError) {
+        console.error("Error parsing AI response:", parseError);
         toast({
-          title: "Đã tạo trò chơi",
-          description: `Trò chơi ${getGameTypeName(type)} đã được tạo với AI.`,
-        });
-        setLoading(false);
-      },
-      (errorMessage) => {
-        setError(errorMessage);
-        toast({
-          title: "Lỗi AI",
-          description: "Không thể tạo nội dung. Đang chuyển sang dùng dữ liệu mẫu.",
+          title: "Lỗi định dạng",
+          description: "AI tạo phản hồi không đúng định dạng. Vui lòng thử lại.",
           variant: "destructive"
         });
-      },
-      handleLoadSampleData
-    );
+        throw new Error('Lỗi định dạng phản hồi AI');
+      }
+    } catch (err) {
+      console.error("AI Error:", err);
+      setError('Không thể tạo nội dung với AI. Vui lòng thử lại sau.');
+      toast({
+        title: "Lỗi AI",
+        description: "Không thể tạo nội dung. Vui lòng thử lại sau.",
+        variant: "destructive"
+      });
+      
+      // Fall back to sample data
+      loadSampleData(type);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadSampleData = (type) => {
+    // Fallback to sample data if AI fails
+    switch(type) {
+      case 'quiz':
+        setGameContent(quizSampleData);
+        break;
+      case 'flashcards':
+        setGameContent(flashcardsSampleData);
+        break;
+      case 'matching':
+        setGameContent(matchingSampleData);
+        break;
+      case 'memory':
+        setGameContent(memorySampleData);
+        break;
+      case 'ordering':
+        setGameContent(orderingSampleData);
+        break;
+      case 'wordsearch':
+        setGameContent(wordSearchSampleData);
+        break;
+      case 'pictionary':
+        setGameContent(pictionarySampleData);
+        break;
+      case 'truefalse':
+        setGameContent(trueFalseSampleData);
+        break;
+      default:
+        setGameContent(quizSampleData);
+    }
   };
 
   const handleRetry = () => {
     if (initialTopic && initialTopic.trim() !== "") {
-      handleGenerateAIContent(initialTopic, gameType);
+      generateAIContent(initialTopic, gameType);
     } else {
-      handleLoadSampleData(gameType);
+      loadSampleData(gameType);
     }
   };
 
@@ -105,33 +178,76 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
     if (aiPrompt && aiPrompt.trim() !== "") {
       // Sử dụng AI để tạo nội dung nếu có prompt
       console.log(`Tạo game ${gameType} với prompt: "${aiPrompt}"`);
-      handleGenerateAIContent(aiPrompt, gameType);
+      generateAIContent(aiPrompt, gameType);
     } else {
       // Ngược lại sử dụng dữ liệu mẫu cho dev/test
       console.log(`Tải dữ liệu mẫu cho game ${gameType}`);
-      handleLoadSampleData(gameType);
+      loadSampleData(gameType);
       setLoading(false);
     }
   }, [gameType, initialTopic]);
 
+  // Render appropriate template based on game type
+  const renderGameTemplate = () => {
+    const topic = initialTopic || "Chủ đề chung";
+    
+    switch(gameType) {
+      case 'quiz':
+        return <QuizTemplate content={gameContent} topic={topic} />;
+      case 'flashcards':
+        return <FlashcardsTemplate content={gameContent} topic={topic} />;
+      case 'matching':
+        return <MatchingTemplate content={gameContent} topic={topic} />;
+      case 'memory':
+        return <MemoryTemplate content={gameContent} topic={topic} />;
+      case 'ordering':
+        return <OrderingTemplate content={gameContent} topic={topic} />;
+      case 'wordsearch':
+        return <WordSearchTemplate content={gameContent} topic={topic} />;
+      case 'pictionary':
+        return <PictionaryTemplate content={gameContent} topic={topic} />;
+      case 'truefalse':
+        return <TrueFalseTemplate content={gameContent} topic={topic} />;
+      default:
+        const DefaultTemplate = gameTemplates[gameType] || QuizTemplate;
+        return <DefaultTemplate content={gameContent} topic={topic} />;
+    }
+  };
+
   if (loading) {
-    return <GameLoading />;
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg font-medium">Đang tạo trò chơi với AI...</p>
+          <p className="text-sm text-muted-foreground mt-2">Việc này có thể mất vài giây</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <GameError error={error} onBack={onBack} onRetry={handleRetry} />;
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <div className="text-center">
+          <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
+          <p className="text-gray-500 mb-4">{error}</p>
+          <div className="flex gap-2">
+            <Button onClick={onBack}>Quay lại</Button>
+            <Button onClick={handleRetry} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Thử lại
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex-grow overflow-auto">
-        {gameContent ? (
-          <GameTemplateRenderer 
-            gameType={gameType} 
-            gameContent={gameContent} 
-            topic={initialTopic || "Chủ đề chung"} 
-          />
-        ) : (
+        {gameContent ? renderGameTemplate() : (
           <div className="flex items-center justify-center h-full">
             <p>Không có nội dung trò chơi</p>
           </div>
