@@ -22,9 +22,7 @@ const Quiz = () => {
   const mainContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    document.title = 'Minigame Tương Tác';
-    // Always enable canvas mode
-    localStorage.setItem('canvas_mode', 'true');
+    document.title = 'Interactive Mini Games';
     
     // Parse URL parameters for direct game creation
     const queryParams = new URLSearchParams(location.search);
@@ -57,8 +55,8 @@ const Quiz = () => {
     setIsGenerating(false);
     
     toast({
-      title: "Trò chơi đã sẵn sàng",
-      description: `Trò chơi "${game.title || content}" đã được tạo thành công.`,
+      title: "Game Ready",
+      description: `"${game.title || content}" has been successfully created.`,
     });
   };
 
@@ -93,13 +91,13 @@ const Quiz = () => {
                     variant="secondary"
                     className="bg-primary/10"
                   >
-                    Tạo Game Mới
+                    Create New Game
                   </Button>
                 </div>
               </div>
             ) : showForm ? (
               <CustomGameForm 
-                gameType="quiz" 
+                gameType="interactive" 
                 onGenerate={handleGameGeneration}
                 onCancel={handleCancelCustomGame}
               />
@@ -109,14 +107,14 @@ const Quiz = () => {
                   onClick={() => setShowForm(true)}
                   className="bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg"
                 >
-                  Tạo Game Mới
+                  Create New Game
                 </Button>
                 <Button 
                   onClick={handleBackToHome}
                   variant="outline"
                   className="mt-4"
                 >
-                  Quay Lại Trang Chủ
+                  Back to Home
                 </Button>
               </div>
             )}
