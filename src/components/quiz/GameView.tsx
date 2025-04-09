@@ -91,7 +91,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
       iframeRef.current.src = 'about:blank';
       setTimeout(() => {
         if (iframeRef.current) {
-          iframeRef.current.srcDoc = miniGame.content;
+          iframeRef.current.srcdoc = miniGame.content;
         }
       }, 100);
       setGameStats({});
@@ -200,7 +200,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         ) : (
           <iframe
             ref={iframeRef}
-            srcDoc={miniGame.content}
+            srcdoc={miniGame.content}
             className="w-full h-full border-0 mx-auto"
             sandbox="allow-scripts allow-popups allow-same-origin"
             onLoad={handleIframeLoad}

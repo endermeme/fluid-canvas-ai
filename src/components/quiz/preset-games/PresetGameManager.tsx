@@ -3,6 +3,9 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import gameTemplates from './templates';
 import { useToast } from '@/hooks/use-toast';
+import GameSettings from '../GameSettings';
+import GameLoading from '../GameLoading';
+import { GameSettingsData } from '../types';
 
 // Import Gemini API 
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -21,11 +24,23 @@ interface PresetGameManagerProps {
 }
 
 const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack, initialTopic = "Learn interactively" }) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [gameContent, setGameContent] = useState(null);
   const [error, setError] = useState(null);
   const [gameStartTime, setGameStartTime] = useState<number | null>(null);
   const [gamePlayCount, setGamePlayCount] = useState<number>(0);
+  const [showSettings, setShowSettings] = useState(true);
+  const [settings, setSettings] = useState<GameSettingsData>({
+    difficulty: 'medium',
+    questionCount: 10,
+    timePerQuestion: 30,
+    category: 'general',
+    totalTime: 0,
+    bonusTime: 5,
+    useTimer: true
+  });
+  const [generationProgress, setGenerationProgress] = useState(0);
   const { toast } = useToast();
 
   // Load and increment game play count
@@ -55,10 +70,21 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
     }
   }, [loading, gameContent, gameStartTime]);
 
-  const generateAIContent = async (prompt, type) => {
-    setLoading(true);
+  const generateAIContent = async (prompt, type, gameSettings: GameSettingsData) => {
+    setGenerating(true);
     setError(null);
     setGameStartTime(null); // Reset game start time
+    
+    // Simulate progress
+    const progressInterval = setInterval(() => {
+      setGenerationProgress(prev => {
+        if (prev >= 95) {
+          clearInterval(progressInterval);
+          return prev;
+        }
+        return prev + Math.random() * 4 + 1;
+      });
+    }, 300);
     
     try {
       const generationConfig = {
@@ -68,32 +94,49 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
         maxOutputTokens: 8000,
       };
       
-      let gamePrompt = `Create content for a ${type} game with the following requirements: ${prompt}. Output must be valid JSON. `;
+      // Incorporate settings into the prompt
+      const difficultyLevel = gameSettings.difficulty;
+      const questionCount = gameSettings.questionCount;
+      const timePerQuestion = gameSettings.timePerQuestion;
+      const category = gameSettings.category;
+      const totalTime = gameSettings.totalTime;
+      const bonusTime = gameSettings.bonusTime;
+      
+      let gamePrompt = `Create content for a ${type} game with the following requirements:
+- Topic: ${prompt}
+- Difficulty: ${difficultyLevel}
+- Number of items: ${questionCount}
+- Time per item: ${timePerQuestion} seconds
+- Category: ${category}
+- Total time limit: ${totalTime || 'not specified'} seconds
+- Bonus time: ${bonusTime || 'not specified'} seconds
+
+Output must be valid JSON. `;
       
       switch(type) {
         case 'quiz':
-          gamePrompt += `JSON format: { "title": "title", "questions": [{"question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "explanation": "explanation"}], "settings": {"timePerQuestion": 30, "totalTime": 300, "bonusTimePerCorrect": 5} }`;
+          gamePrompt += `JSON format: { "title": "title", "questions": [{"question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 5}} }`;
           break;
         case 'flashcards':
-          gamePrompt += `JSON format: { "title": "title", "cards": [{"front": "front", "back": "back", "hint": "hint (if any)"}], "settings": {"autoFlip": true, "flipTime": 5, "totalTime": 180} }`;
+          gamePrompt += `JSON format: { "title": "title", "cards": [{"front": "front", "back": "back", "hint": "hint (if any)"}], "settings": {"autoFlip": true, "flipTime": ${timePerQuestion}, "totalTime": ${totalTime || 180}} }`;
           break;
         case 'matching':
-          gamePrompt += `JSON format: { "title": "title", "pairs": [{"left": "left content", "right": "right content"}], "settings": {"timeLimit": 60, "bonusTimePerMatch": 5} }`;
+          gamePrompt += `JSON format: { "title": "title", "pairs": [{"left": "left content", "right": "right content"}], "settings": {"timeLimit": ${totalTime || 60}, "bonusTimePerMatch": ${bonusTime || 5}} }`;
           break;
         case 'memory':
-          gamePrompt += `JSON format: { "title": "title", "cards": [{"id": id_number, "content": "content", "matched": false, "flipped": false}], "settings": {"timeLimit": 120, "allowHints": true, "hintPenalty": 5} }`;
+          gamePrompt += `JSON format: { "title": "title", "cards": [{"id": id_number, "content": "content", "matched": false, "flipped": false}], "settings": {"timeLimit": ${totalTime || 120}, "allowHints": true, "hintPenalty": ${bonusTime || 5}} }`;
           break;
         case 'ordering':
-          gamePrompt += `JSON format: { "title": "title", "sentences": [{"words": ["word 1", "word 2", "word 3"], "correctOrder": [0, 1, 2]}], "settings": {"timeLimit": 180, "showHints": true, "bonusTimePerCorrect": 10} }`;
+          gamePrompt += `JSON format: { "title": "title", "sentences": [{"words": ["word 1", "word 2", "word 3"], "correctOrder": [0, 1, 2]}], "settings": {"timeLimit": ${totalTime || 180}, "showHints": true, "bonusTimePerCorrect": ${bonusTime || 10}} }`;
           break;
         case 'wordsearch':
-          gamePrompt += `JSON format: { "title": "title", "description": "description", "words": [{"word": "word 1", "found": false}, {"word": "word 2", "found": false}], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "settings": {"timeLimit": 300, "allowDiagonalWords": true, "showWordList": true, "bonusTimePerWord": 15} }`;
+          gamePrompt += `JSON format: { "title": "title", "description": "description", "words": [{"word": "word 1", "found": false}, {"word": "word 2", "found": false}], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "settings": {"timeLimit": ${totalTime || 300}, "allowDiagonalWords": true, "showWordList": true, "bonusTimePerWord": ${bonusTime || 15}} }`;
           break;
         case 'pictionary':
-          gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "image URL", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": 20, "showHints": true, "totalTime": 240} }`;
+          gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "image URL", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }`;
           break;
         case 'truefalse':
-          gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": 15, "showExplanation": true, "totalTime": 150, "bonusTimePerCorrect": 3} }`;
+          gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
           break;
       }
       
@@ -119,63 +162,81 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
         
         const parsedContent = JSON.parse(jsonStr);
         
-        // Ensure time settings are present
+        // Ensure time settings are present and match user settings
         if (!parsedContent.settings) {
           parsedContent.settings = {};
         }
         
-        // Apply default time settings if not provided
+        // Apply settings from user input
         switch(type) {
           case 'quiz':
-            if (!parsedContent.settings.timePerQuestion) parsedContent.settings.timePerQuestion = 30;
-            if (!parsedContent.settings.totalTime) parsedContent.settings.totalTime = parsedContent.questions.length * parsedContent.settings.timePerQuestion;
-            if (!parsedContent.settings.bonusTimePerCorrect) parsedContent.settings.bonusTimePerCorrect = 5;
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
+            parsedContent.settings.bonusTimePerCorrect = bonusTime || 5;
             break;
           case 'flashcards':
-            if (!parsedContent.settings.flipTime) parsedContent.settings.flipTime = 5;
-            if (!parsedContent.settings.totalTime) parsedContent.settings.totalTime = 180;
+            parsedContent.settings.flipTime = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || 180;
             break;
           case 'matching':
           case 'memory':
+            parsedContent.settings.timeLimit = totalTime || 120;
+            break;
           case 'ordering':
+            parsedContent.settings.timeLimit = totalTime || 180;
+            parsedContent.settings.bonusTimePerCorrect = bonusTime || 10;
+            break;
           case 'wordsearch':
-            if (!parsedContent.settings.timeLimit) parsedContent.settings.timeLimit = 120;
+            parsedContent.settings.timeLimit = totalTime || 300;
+            parsedContent.settings.bonusTimePerWord = bonusTime || 15;
             break;
           case 'pictionary':
-            if (!parsedContent.settings.timePerQuestion) parsedContent.settings.timePerQuestion = 15;
-            if (!parsedContent.settings.totalTime) parsedContent.settings.totalTime = parsedContent.items.length * parsedContent.settings.timePerQuestion;
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
             break;
           case 'truefalse':
-            if (!parsedContent.settings.timePerQuestion) parsedContent.settings.timePerQuestion = 15;
-            if (!parsedContent.settings.totalTime) parsedContent.settings.totalTime = parsedContent.questions.length * parsedContent.settings.timePerQuestion;
-            if (!parsedContent.settings.bonusTimePerCorrect) parsedContent.settings.bonusTimePerCorrect = 3;
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
+            parsedContent.settings.bonusTimePerCorrect = bonusTime || 3;
             break;
         }
         
-        setGameContent(parsedContent);
+        // Clear generation progress interval and set to 100%
+        clearInterval(progressInterval);
+        setGenerationProgress(100);
+        
+        // Delay a bit to show 100% before completing
+        setTimeout(() => {
+          setGenerating(false);
+          setLoading(false);
+          setGameContent(parsedContent);
+        }, 500);
+        
         return parsedContent;
       } catch (parseError) {
         console.error("Error parsing AI response:", parseError);
+        clearInterval(progressInterval);
         toast({
-          title: "Format Error",
-          description: "AI generated an invalid response format. Please try again.",
+          title: "Lỗi định dạng",
+          description: "AI tạo phản hồi không hợp lệ. Vui lòng thử lại.",
           variant: "destructive"
         });
         throw new Error('AI response format error');
       }
     } catch (err) {
       console.error("AI Error:", err);
-      setError('Unable to generate content with AI. Please try again later.');
+      clearInterval(progressInterval);
+      setError('Không thể tạo nội dung với AI. Vui lòng thử lại sau.');
       toast({
-        title: "AI Error",
-        description: "Unable to generate content. Please try again later.",
+        title: "Lỗi AI",
+        description: "Không thể tạo nội dung. Vui lòng thử lại sau.",
         variant: "destructive"
       });
       
       // Fall back to sample data
       loadSampleData(type);
     } finally {
-      setLoading(false);
+      setGenerating(false);
     }
   };
 
@@ -198,73 +259,86 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
         data = module.default || module[`${type}SampleData`];
       }
       
-      // Ensure time settings are present in sample data
-      if (data && !data.settings) {
-        data.settings = {};
+      // Apply user settings to sample data
+      if (data) {
+        if (!data.settings) {
+          data.settings = {};
+        }
+        
+        // Apply settings from user input
+        switch(type) {
+          case 'quiz':
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
+            data.settings.bonusTimePerCorrect = settings.bonusTime || 5;
+            break;
+          case 'flashcards':
+            data.settings.flipTime = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || 180;
+            break;
+          case 'matching':
+          case 'memory':
+            data.settings.timeLimit = settings.totalTime || 120;
+            break;
+          case 'ordering':
+            data.settings.timeLimit = settings.totalTime || 180;
+            data.settings.bonusTimePerCorrect = settings.bonusTime || 10;
+            break;
+          case 'wordsearch':
+            data.settings.timeLimit = settings.totalTime || 300;
+            data.settings.bonusTimePerWord = settings.bonusTime || 15;
+            break;
+          case 'pictionary':
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
+            break;
+          case 'truefalse':
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
+            data.settings.bonusTimePerCorrect = settings.bonusTime || 3;
+            break;
+        }
       }
       
-      // Add default time settings to sample data if missing
-      switch(type) {
-        case 'quiz':
-          if (!data.settings.timePerQuestion) data.settings.timePerQuestion = 30;
-          if (!data.settings.totalTime) data.settings.totalTime = data.questions.length * data.settings.timePerQuestion;
-          if (!data.settings.bonusTimePerCorrect) data.settings.bonusTimePerCorrect = 5;
-          break;
-        case 'flashcards':
-          if (!data.settings.flipTime) data.settings.flipTime = 5;
-          if (!data.settings.totalTime) data.settings.totalTime = 180;
-          break;
-        case 'matching':
-        case 'memory':
-        case 'ordering':
-        case 'wordsearch':
-          if (!data.settings.timeLimit) data.settings.timeLimit = 120;
-          break;
-        case 'pictionary':
-          if (!data.settings.timePerQuestion) data.settings.timePerQuestion = 15;
-          if (!data.settings.totalTime) data.settings.totalTime = data.items ? data.items.length * data.settings.timePerQuestion : 180;
-          break;
-        case 'truefalse':
-          if (!data.settings.timePerQuestion) data.settings.timePerQuestion = 15;
-          if (!data.settings.totalTime) data.settings.totalTime = data.questions ? data.questions.length * data.settings.timePerQuestion : 150;
-          if (!data.settings.bonusTimePerCorrect) data.settings.bonusTimePerCorrect = 3;
-          break;
-      }
-      
+      setLoading(false);
       setGameContent(data);
     }).catch(err => {
       console.error(`Error loading sample data for ${type}:`, err);
-      setError(`Unable to load sample data for ${type}. Please try again.`);
+      setError(`Không thể tải dữ liệu mẫu cho ${type}. Vui lòng thử lại.`);
+      setLoading(false);
     });
   };
 
   const handleRetry = () => {
     if (initialTopic && initialTopic.trim() !== "") {
-      generateAIContent(initialTopic, gameType);
+      generateAIContent(initialTopic, gameType, settings);
     } else {
       loadSampleData(gameType);
     }
   };
 
-  useEffect(() => {
+  const handleStartGame = (gameSettings: GameSettingsData) => {
+    setSettings(gameSettings);
+    setShowSettings(false);
+    setLoading(true);
+    
     // Use initialTopic from props if available
     const aiPrompt = initialTopic;
     
     if (aiPrompt && aiPrompt.trim() !== "") {
       // Use AI to generate content if prompt exists
-      console.log(`Creating ${gameType} game with prompt: "${aiPrompt}"`);
-      generateAIContent(aiPrompt, gameType);
+      console.log(`Creating ${gameType} game with prompt: "${aiPrompt}" and settings:`, gameSettings);
+      generateAIContent(aiPrompt, gameType, gameSettings);
     } else {
       // Otherwise use sample data for dev/test
-      console.log(`Loading sample data for ${gameType} game`);
+      console.log(`Loading sample data for ${gameType} game with settings:`, gameSettings);
       loadSampleData(gameType);
-      setLoading(false);
     }
-  }, [gameType, initialTopic]);
+  };
 
   // Render appropriate template based on game type
   const renderGameTemplate = () => {
-    const topic = initialTopic || "General Topic";
+    const topic = initialTopic || "Chủ đề chung";
     const Template = gameTemplates[gameType];
     
     if (Template) {
@@ -273,18 +347,97 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
     
     return (
       <div className="flex items-center justify-center h-full">
-        <p>Template not found for game type: {gameType}</p>
+        <p>Không tìm thấy mẫu cho loại game: {gameType}</p>
       </div>
     );
   };
+
+  // Map game types to game type objects for settings
+  const getGameTypeObject = () => {
+    const gameTypeMap = {
+      'quiz': {
+        id: 'quiz',
+        name: 'Trắc Nghiệm',
+        description: 'Trò chơi trắc nghiệm với nhiều lựa chọn',
+        icon: 'brain-circuit',
+        defaultSettings: settings
+      },
+      'flashcards': {
+        id: 'flashcards',
+        name: 'Thẻ Ghi Nhớ',
+        description: 'Thẻ lật hai mặt để học và ghi nhớ thông tin',
+        icon: 'light-bulb',
+        defaultSettings: settings
+      },
+      'matching': {
+        id: 'matching',
+        name: 'Nối Từ',
+        description: 'Nối các cặp từ tương ứng với nhau',
+        icon: 'puzzle-piece',
+        defaultSettings: settings
+      },
+      'memory': {
+        id: 'memory',
+        name: 'Trò Chơi Ghi Nhớ',
+        description: 'Lật và ghép cặp các thẻ giống nhau',
+        icon: 'brain-circuit',
+        defaultSettings: settings
+      },
+      'ordering': {
+        id: 'ordering',
+        name: 'Sắp Xếp Câu',
+        description: 'Sắp xếp các từ theo thứ tự đúng',
+        icon: 'dices',
+        defaultSettings: settings
+      },
+      'wordsearch': {
+        id: 'wordsearch',
+        name: 'Tìm Từ',
+        description: 'Tìm các từ ẩn trong bảng chữ cái',
+        icon: 'pen-tool',
+        defaultSettings: settings
+      },
+      'pictionary': {
+        id: 'pictionary', 
+        name: 'Đoán Hình',
+        description: 'Chọn đáp án đúng dựa trên hình ảnh',
+        icon: 'heart-handshake',
+        defaultSettings: settings
+      },
+      'truefalse': {
+        id: 'truefalse',
+        name: 'Đúng hay Sai',
+        description: 'Kiểm tra kiến thức với các câu hỏi đúng/sai',
+        icon: 'clock',
+        defaultSettings: settings
+      }
+    };
+    
+    return gameTypeMap[gameType] || null;
+  };
+
+  if (showSettings) {
+    return (
+      <GameSettings
+        onStart={handleStartGame}
+        topic={initialTopic || ""}
+        initialSettings={settings}
+        gameType={getGameTypeObject()}
+      />
+    );
+  }
+
+  if (generating) {
+    return <GameLoading topic={initialTopic || ""} progress={generationProgress} />;
+  }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg font-medium">Creating game with AI...</p>
-          <p className="text-sm text-muted-foreground mt-2">This may take a few seconds</p>
+          <p className="text-lg font-medium">Đang tạo trò chơi với AI...</p>
+          <p className="text-sm text-muted-foreground mt-2">Quá trình này có thể mất vài giây</p>
         </div>
       </div>
     );
@@ -294,13 +447,13 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
     return (
       <div className="flex flex-col items-center justify-center h-full">
         <div className="text-center">
-          <h3 className="text-xl font-bold mb-2">An error occurred</h3>
+          <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
           <p className="text-gray-500 mb-4">{error}</p>
           <div className="flex gap-2">
-            <Button onClick={onBack}>Go back</Button>
+            <Button onClick={onBack}>Quay lại</Button>
             <Button onClick={handleRetry} variant="outline">
               <RefreshCw className="h-4 w-4 mr-2" />
-              Try again
+              Thử lại
             </Button>
           </div>
         </div>
@@ -312,13 +465,13 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
     <div className="flex flex-col h-full">
       {gamePlayCount > 0 && (
         <div className="absolute top-2 right-4 bg-primary/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium z-10">
-          Games played: {gamePlayCount}
+          Số trò chơi đã chơi: {gamePlayCount}
         </div>
       )}
       <div className="flex-grow overflow-auto">
         {gameContent ? renderGameTemplate() : (
           <div className="flex items-center justify-center h-full">
-            <p>No game content available</p>
+            <p>Không có nội dung trò chơi</p>
           </div>
         )}
       </div>

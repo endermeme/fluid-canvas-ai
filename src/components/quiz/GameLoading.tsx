@@ -5,13 +5,35 @@ import { Sparkles, Crown, Brain } from 'lucide-react';
 
 interface GameLoadingProps {
   topic: string;
+  progress?: number;
 }
 
-const GameLoading: React.FC<GameLoadingProps> = ({ topic }) => {
+const GameLoading: React.FC<GameLoadingProps> = ({ topic, progress: externalProgress }) => {
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState('Khởi tạo minigame...');
   
   useEffect(() => {
+    // If external progress is provided, use it instead of internal progress
+    if (externalProgress !== undefined) {
+      setProgress(externalProgress);
+      
+      // Update status text based on progress
+      if (externalProgress < 20) {
+        setStatusText('Đang phân tích chủ đề...');
+      } else if (externalProgress < 40) {
+        setStatusText('Đang thiết kế câu hỏi và nội dung...');
+      } else if (externalProgress < 60) {
+        setStatusText('Đang tạo giao diện trò chơi...');
+      } else if (externalProgress < 80) {
+        setStatusText('Đang tối ưu hóa trải nghiệm người chơi...');
+      } else {
+        setStatusText('Hoàn thiện trò chơi...');
+      }
+      
+      return;
+    }
+    
+    // If no external progress is provided, simulate progress
     const timer = setInterval(() => {
       setProgress(prevProgress => {
         if (prevProgress >= 95) {
@@ -38,7 +60,7 @@ const GameLoading: React.FC<GameLoadingProps> = ({ topic }) => {
     }, 400);
     
     return () => clearInterval(timer);
-  }, []);
+  }, [externalProgress]);
 
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gradient-to-b from-background to-background/90 p-6">

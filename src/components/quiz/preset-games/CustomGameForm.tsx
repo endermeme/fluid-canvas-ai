@@ -1,10 +1,10 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SparklesIcon, Brain, PenTool, Info } from 'lucide-react';
+import { SparklesIcon, Brain, PenTool, Info, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { AIGameGenerator, MiniGame } from '../generator/AIGameGenerator';
@@ -21,7 +21,6 @@ const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, onCancel }) => {
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -45,19 +44,19 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   const getPlaceholderText = () => {
     switch (gameType) {
       case 'quiz':
-        return 'Nhập yêu cầu để AI tạo câu hỏi trắc nghiệm.\n\nVí dụ: "Tạo 10 câu hỏi trắc nghiệm về lịch sử Việt Nam thời kỳ phong kiến, mỗi câu có 4 lựa chọn."';
+        return 'Nhập yêu cầu để AI tạo câu hỏi trắc nghiệm.\n\nVí dụ: "Tạo 10 câu hỏi trắc nghiệm về lịch sử Việt Nam thời kỳ phong kiến, mỗi câu có 4 lựa chọn. Độ khó trung bình, phù hợp với học sinh lớp 10."';
       
       case 'flashcards':
-        return 'Nhập yêu cầu để AI tạo thẻ ghi nhớ.\n\nVí dụ: "Tạo 15 thẻ ghi nhớ từ vựng tiếng Anh về chủ đề công nghệ, mỗi thẻ có từ tiếng Anh, nghĩa tiếng Việt và ví dụ."';
+        return 'Nhập yêu cầu để AI tạo thẻ ghi nhớ.\n\nVí dụ: "Tạo 15 thẻ ghi nhớ từ vựng tiếng Anh về chủ đề công nghệ, mỗi thẻ có từ tiếng Anh, nghĩa tiếng Việt và ví dụ. Độ khó dễ, dành cho người mới học."';
       
       case 'matching':
-        return 'Nhập yêu cầu để AI tạo trò chơi nối từ.\n\nVí dụ: "Tạo 12 cặp từ đồng nghĩa tiếng Việt để ghép nối, độ khó trung bình, chủ đề văn học."';
+        return 'Nhập yêu cầu để AI tạo trò chơi nối từ.\n\nVí dụ: "Tạo 12 cặp từ đồng nghĩa tiếng Việt để ghép nối, độ khó trung bình, chủ đề văn học. Dành cho học sinh phổ thông."';
       
       case 'truefalse':
-        return 'Nhập yêu cầu để AI tạo câu hỏi đúng/sai.\n\nVí dụ: "Tạo 10 câu phát biểu đúng/sai về sinh học cấp 3, đủ độ khó, đảm bảo số lượng câu đúng và sai cân bằng."';
+        return 'Nhập yêu cầu để AI tạo câu hỏi đúng/sai.\n\nVí dụ: "Tạo 10 câu phát biểu đúng/sai về sinh học cấp 3, đủ độ khó cao, đảm bảo số lượng câu đúng và sai cân bằng. Mỗi câu có giải thích chi tiết."';
       
       default:
-        return 'Nhập yêu cầu chi tiết để AI tạo nội dung trò chơi. Hãy mô tả cụ thể chủ đề, độ khó, số lượng và bất kỳ yêu cầu đặc biệt nào.';
+        return 'Nhập yêu cầu chi tiết để AI tạo nội dung trò chơi. Hãy mô tả cụ thể chủ đề, độ khó, số lượng và bất kỳ yêu cầu đặc biệt nào.\n\nVí dụ: "Tạo trò chơi với chủ đề toán học cho học sinh lớp 5, độ khó trung bình, tập trung vào phép nhân và chia."';
     }
   };
 
@@ -75,7 +74,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     
     try {
       const settings: GameSettingsData = {
-        difficulty: difficulty,
+        difficulty: 'medium',
         questionCount: 10,
         timePerQuestion: 30,
         category: 'general'
@@ -116,6 +115,29 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     }
   };
 
+  const generateSamplePrompt = () => {
+    let samplePrompt = '';
+    
+    switch (gameType) {
+      case 'quiz':
+        samplePrompt = 'Tạo 8 câu hỏi trắc nghiệm về các địa danh nổi tiếng ở Việt Nam, mỗi câu có 4 lựa chọn. Độ khó vừa phải, phù hợp với học sinh cấp 2.';
+        break;
+      case 'flashcards':
+        samplePrompt = 'Tạo 10 thẻ ghi nhớ về các công thức Vật lý quan trọng trong chương trình THPT, mỗi thẻ có công thức và ý nghĩa của công thức.';
+        break;
+      case 'memory':
+        samplePrompt = 'Tạo trò chơi ghi nhớ với chủ đề động vật, 8 cặp thẻ, mỗi thẻ có tên và hình ảnh động vật.';
+        break;
+      case 'matching':
+        samplePrompt = 'Tạo 12 cặp từ tiếng Anh - tiếng Việt về chủ đề thể thao, độ khó trung bình, phù hợp cho học sinh cấp 2.';
+        break;
+      default:
+        samplePrompt = 'Tạo trò chơi với chủ đề khoa học vũ trụ cho học sinh cấp 3, độ khó trung bình, tập trung vào các hành tinh trong hệ mặt trời, 10 câu hỏi.';
+    }
+    
+    setContent(samplePrompt);
+  };
+
   return (
     <div className="p-6 max-w-4xl mx-auto w-full">
       <Card className="bg-background/60 backdrop-blur-sm border-primary/20 shadow-lg p-6">
@@ -129,31 +151,24 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
         
         <div className="space-y-4">
           <div>
-            <Label htmlFor="difficulty">Độ khó</Label>
-            <Select 
-              value={difficulty} 
-              onValueChange={(value: 'easy' | 'medium' | 'hard') => setDifficulty(value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Chọn độ khó" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="easy">Dễ</SelectItem>
-                <SelectItem value="medium">Trung bình</SelectItem>
-                <SelectItem value="hard">Khó</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="content">Yêu cầu nội dung</Label>
+            <div className="flex justify-between items-center">
+              <Label htmlFor="content" className="text-base font-medium">Yêu cầu nội dung</Label>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={generateSamplePrompt}
+                className="text-xs h-6 px-2 py-0 flex items-center gap-1 hover:bg-primary/5"
+              >
+                <Wand2 className="h-3.5 w-3.5" /> Gợi ý
+              </Button>
+            </div>
             <Textarea
               id="content"
               placeholder={getPlaceholderText()}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={10}
-              className="font-mono text-sm"
+              className="font-mono text-sm mt-1.5"
             />
           </div>
           
@@ -161,7 +176,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
             <div className="flex items-start gap-2">
               <Info className="w-4 h-4 text-primary mt-1" />
               <p className="text-sm text-muted-foreground">
-                Chế độ Canvas <span className="text-primary font-medium">đã được bật</span> để tạo giao diện trò chơi đẹp mắt hơn.
+                Viết yêu cầu chi tiết giúp AI hiểu rõ nội dung bạn muốn tạo. Hãy nêu rõ chủ đề, độ khó, đối tượng người chơi và các yêu cầu đặc biệt.
               </p>
             </div>
             
@@ -169,13 +184,13 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
               <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
                 <PenTool className="w-6 h-6 text-primary mb-2" />
                 <h4 className="text-sm font-medium">Tùy chỉnh chi tiết</h4>
-                <p className="text-xs text-muted-foreground">Càng chi tiết càng tốt</p>
+                <p className="text-xs text-muted-foreground">Mô tả càng chi tiết càng tốt để AI hiểu đúng ý bạn</p>
               </div>
               
               <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
                 <SparklesIcon className="w-6 h-6 text-primary mb-2" />
                 <h4 className="text-sm font-medium">Trò chơi tương tác</h4>
-                <p className="text-xs text-muted-foreground">Quiz, ghép cặp, sắp xếp...</p>
+                <p className="text-xs text-muted-foreground">AI sẽ tạo trò chơi tương tác đẹp mắt theo yêu cầu của bạn</p>
               </div>
             </div>
           </div>
