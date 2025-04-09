@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SparklesIcon, Brain, PenTool, BookOpen, Info } from 'lucide-react';
+import { SparklesIcon, Brain, PenTool, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from '../generator/AIGameGenerator';
 import { GameSettingsData } from '../types';
@@ -58,24 +58,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     }
   };
 
-  // Process content to improve topic quality
-  const processContentForPrompt = (rawContent: string): string => {
-    // Add specific prefixes based on game type to help Gemini generate better content
-    const gamePrefix = gameType === 'quiz' ? 'Quiz trắc nghiệm: ' : 
-                       gameType === 'flashcards' ? 'Thẻ ghi nhớ: ' :
-                       gameType === 'matching' ? 'Trò chơi ghép cặp: ' :
-                       gameType === 'memory' ? 'Trò chơi trí nhớ: ' :
-                       gameType === 'wordsearch' ? 'Tìm từ: ' :
-                       gameType === 'truefalse' ? 'Câu hỏi đúng/sai: ' : '';
-    
-    // If content doesn't have the game type indicator, add it
-    if (!rawContent.toLowerCase().includes(gamePrefix.toLowerCase()) && gamePrefix) {
-      return gamePrefix + rawContent;
-    }
-    
-    return rawContent;
-  };
-
   const handleSubmit = async () => {
     if (!content.trim()) {
       toast({
@@ -96,11 +78,10 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
         category: 'general'
       };
       
-      // Process content for better prompt quality
-      const processedContent = processContentForPrompt(content);
-      console.log("Tạo game với chủ đề:", processedContent);
+      // Pass user content directly to Gemini without processing
+      console.log("Tạo game với chủ đề:", content);
       
-      const game = await gameGenerator.generateMiniGame(processedContent, settings);
+      const game = await gameGenerator.generateMiniGame(content, settings);
       
       if (game) {
         toast({
@@ -108,7 +89,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
           description: `Trò chơi ${getGameTypeName()} đã được tạo thành công với AI.`,
         });
         
-        onGenerate(processedContent, game);
+        onGenerate(content, game);
       } else {
         throw new Error("Không thể tạo game");
       }
@@ -173,17 +154,11 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
               <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
                 <PenTool className="w-6 h-6 text-primary mb-2" />
                 <h4 className="text-sm font-medium">Tùy chỉnh chi tiết</h4>
                 <p className="text-xs text-muted-foreground">Càng chi tiết càng tốt</p>
-              </div>
-              
-              <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
-                <BookOpen className="w-6 h-6 text-primary mb-2" />
-                <h4 className="text-sm font-medium">Nêu chủ đề học tập</h4>
-                <p className="text-xs text-muted-foreground">Lịch sử, toán học, ngôn ngữ...</p>
               </div>
               
               <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
