@@ -6,12 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SparklesIcon, Brain, PenTool, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import { AIGameGenerator, MiniGame } from '../generator/AIGameGenerator';
 import { GameSettingsData } from '../types';
 
 interface CustomGameFormProps {
   gameType: string;
-  onGenerate: (content: string, game?: MiniGame) => void; // Đã thay đổi game thành tham số tùy chọn
+  onGenerate: (content: string, game?: MiniGame) => void;
   onCancel: () => void;
 }
 
@@ -22,6 +23,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   const [isGenerating, setIsGenerating] = useState(false);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Use the singleton pattern
   const gameGenerator = AIGameGenerator.getInstance(API_KEY);
@@ -79,7 +81,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
         category: 'general'
       };
       
-      // Pass user content directly to Gemini without processing
       console.log("Tạo game với chủ đề:", content);
       
       const game = await gameGenerator.generateMiniGame(content, settings);
@@ -90,7 +91,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
           description: `Trò chơi ${getGameTypeName()} đã được tạo thành công với AI.`,
         });
         
-        // Truyền cả game và content
         onGenerate(content, game);
       } else {
         throw new Error("Không thể tạo game");
@@ -102,10 +102,17 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
         description: "Có lỗi xảy ra khi tạo game. Vui lòng thử lại.",
         variant: "destructive"
       });
-      // Trong trường hợp lỗi, vẫn gọi onGenerate với content mà không có game
       onGenerate(content);
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (window.location.pathname === '/quiz' && !window.location.search) {
+      navigate('/');
+    } else {
+      onCancel();
     }
   };
 
@@ -176,7 +183,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
           <div className="flex justify-between pt-4">
             <Button 
               variant="outline" 
-              onClick={onCancel}
+              onClick={handleCancel}
             >
               Hủy
             </Button>

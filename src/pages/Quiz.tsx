@@ -63,7 +63,8 @@ const Quiz = () => {
   };
 
   const handleCancelCustomGame = () => {
-    setShowForm(false);
+    // Simply navigate to home page when cancel is clicked
+    navigate('/');
   };
 
   const handleNewGame = () => {
