@@ -29,7 +29,8 @@ const GameLoading: React.FC<GameLoadingProps> = ({ topic }) => {
           <div className="h-full bg-primary rounded-full animate-progress"></div>
         </div>
         
-        <style jsx global>{`
+        <style>
+          {`
           @keyframes progress {
             0% { width: 0%; }
             50% { width: 70%; }
@@ -39,7 +40,8 @@ const GameLoading: React.FC<GameLoadingProps> = ({ topic }) => {
           .animate-progress {
             animation: progress 3s ease-in-out infinite;
           }
-        `}</style>
+          `}
+        </style>
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from '../generator/AIGameGenerator';
@@ -148,7 +147,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   };
 
   if (isLoading) {
-    return <GameLoading />;
+    return <GameLoading topic={selectedTopic || "minigame"} />;
   }
 
   if (errorMessage) {
