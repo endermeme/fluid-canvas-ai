@@ -46,7 +46,7 @@ const SharedGame = () => {
   }, [id, game]);
 
   const handleCreateNewGame = () => {
-    // Navigate to root path
+    // Navigate to root path using react-router
     navigate('/');
   };
 
@@ -67,12 +67,10 @@ const SharedGame = () => {
         <p className="text-muted-foreground text-center max-w-md">
           Liên kết này có thể đã hết hạn hoặc không tồn tại. Trò chơi chỉ có hiệu lực trong 48 giờ.
         </p>
-        <Link to="/quiz">
-          <Button>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Quay lại màn hình chính
-          </Button>
-        </Link>
+        <Button onClick={() => navigate('/')}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Quay lại màn hình chính
+        </Button>
       </div>
     );
   }
@@ -82,12 +80,10 @@ const SharedGame = () => {
       <div className="flex flex-col items-center justify-center h-screen space-y-6 p-4">
         <AlertTriangle className="text-destructive h-16 w-16" />
         <h1 className="text-2xl font-bold">Trò chơi không tìm thấy</h1>
-        <Link to="/quiz">
-          <Button>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Tạo trò chơi mới
-          </Button>
-        </Link>
+        <Button onClick={() => navigate('/')}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Tạo trò chơi mới
+        </Button>
       </div>
     );
   }
@@ -95,12 +91,10 @@ const SharedGame = () => {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <header className="bg-background border-b p-3 flex justify-between items-center">
-        <Link to="/quiz">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Quay lại
-          </Button>
-        </Link>
+        <Button variant="outline" size="sm" onClick={() => navigate('/')}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Quay lại
+        </Button>
         
         <div className="flex items-center text-sm text-muted-foreground">
           <Clock className="h-4 w-4 mr-1" />

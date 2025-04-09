@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useCanvasState } from '@/hooks/useCanvasState';
 import { useToast } from '@/hooks/use-toast';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { animateContentHighlight } from '@/lib/animations';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '@/components/quiz/generator/AIGameGenerator';
@@ -18,6 +18,7 @@ const Quiz = () => {
   
   const { toast } = useToast();
   const location = useLocation();
+  const navigate = useNavigate();
   const mainContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,6 +71,11 @@ const Quiz = () => {
     setShowForm(true);
   };
 
+  // Function to go back to home
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen flex flex-col w-full bg-gradient-to-b from-background to-background/95 overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
@@ -103,6 +109,13 @@ const Quiz = () => {
                   className="bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg"
                 >
                   Tạo Game Mới
+                </Button>
+                <Button 
+                  onClick={handleBackToHome}
+                  variant="outline"
+                  className="mt-4"
+                >
+                  Quay Lại Trang Chủ
                 </Button>
               </div>
             )}

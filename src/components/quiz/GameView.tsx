@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Share2, Home } from 'lucide-react';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface GameViewProps {
   miniGame: MiniGame;
@@ -15,6 +16,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   const { toast } = useToast();
   const [iframeError, setIframeError] = useState<string | null>(null);
   const [shareInProgress, setShareInProgress] = useState(false);
+  const navigate = useNavigate();
 
   // Save the game to history when it loads
   useEffect(() => {
@@ -68,7 +70,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
 
   // Handle returning to home
   const handleBackToHome = () => {
-    window.location.href = '/';
+    navigate('/');
   };
 
   // Apply game optimization when iframe loads
