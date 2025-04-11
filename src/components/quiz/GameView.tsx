@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
@@ -19,18 +18,15 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   const [gameStats, setGameStats] = useState<{score?: number; completed?: boolean; totalTime?: number}>({});
   const navigate = useNavigate();
 
-  // Save the game to history when it loads
   useEffect(() => {
     if (miniGame && miniGame.content) {
       try {
-        // Save game to local storage for history
         saveGameForSharing(
           miniGame.title || "Minigame tương tác", 
           "", // Empty description
           miniGame.content
         );
         
-        // Record game play in local storage
         try {
           const GAME_PLAY_COUNT_KEY = 'lovable_game_play_count';
           const savedCount = localStorage.getItem(GAME_PLAY_COUNT_KEY);
@@ -46,7 +42,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
     }
   }, [miniGame]);
 
-  // Handle sharing the game
   const handleShare = () => {
     if (shareInProgress) return;
     
@@ -80,19 +75,16 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
     }
   };
 
-  // Handle returning to home
   const handleBackToHome = () => {
     navigate('/');
   };
   
-  // Handle reloading the game
   const handleReloadGame = () => {
     if (iframeRef.current) {
       iframeRef.current.src = 'about:blank';
       setTimeout(() => {
         if (iframeRef.current) {
-          // Using srcDoc (capitalized) as that's the correct React TypeScript property
-          iframeRef.current.srcDoc = miniGame.content;
+          iframeRef.current.srcdoc = miniGame.content;
         }
       }, 100);
       setGameStats({});
@@ -100,12 +92,10 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
     }
   };
 
-  // Apply game optimization when iframe loads
   const handleIframeLoad = () => {
     try {
       if (!iframeRef.current) return;
       
-      // Reset any previous errors
       setIframeError(null);
 
       const iframe = iframeRef.current;
@@ -118,7 +108,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
           return;
         }
         
-        // Add CSS to fix the game display
         const styleElement = iframeDoc.createElement('style');
         styleElement.textContent = `
           body {
@@ -130,10 +119,8 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
             height: 100% !important;
           }
           
-          /* Basic styling fixes */
           html { overflow: hidden !important; }
           
-          /* Game container */
           main, .main, #main, .game, #game, .game-container {
             position: fixed !important;
             top: 0 !important;
@@ -146,7 +133,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         `;
         iframeDoc.head.appendChild(styleElement);
         
-        // Setup message listener for game events
         window.addEventListener('message', (event) => {
           try {
             const data = event.data;
@@ -154,7 +140,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
               if (data.type === 'gameStats' && data.payload) {
                 setGameStats(data.payload);
                 
-                // Show toast notification for game completion
                 if (data.payload.completed) {
                   toast({
                     title: "Trò chơi đã hoàn thành!",
@@ -201,7 +186,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         ) : (
           <iframe
             ref={iframeRef}
-            // Using srcDoc (capitalized) as that's the correct React TypeScript property
             srcDoc={miniGame.content}
             className="w-full h-full border-0 mx-auto"
             sandbox="allow-scripts allow-popups allow-same-origin"
@@ -212,7 +196,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         )}
       </div>
       
-      {/* Game title and stats */}
       {miniGame.title && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
           <div className="px-4 py-2 bg-background/80 backdrop-blur-sm rounded-full border border-primary/20 shadow-md">
@@ -221,7 +204,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         </div>
       )}
       
-      {/* Game stats */}
       {gameStats.score !== undefined && (
         <div className="absolute top-4 right-4 z-10">
           <div className="px-3 py-1.5 bg-primary/10 backdrop-blur-sm rounded-full border border-primary/20 shadow-md flex items-center gap-1.5">
@@ -231,7 +213,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         </div>
       )}
       
-      {/* Control buttons */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
         <Button 
           size="sm" 
