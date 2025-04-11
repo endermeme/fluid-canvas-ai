@@ -30,6 +30,10 @@ const GameController: React.FC<GameControllerProps> = ({
     setCurrentTopic(content);
     
     if (game) {
+      // Force HTML content for testing if needed
+      // Uncomment the next line for testing HTML game container
+      // game.content = `<html><body><h1>Test HTML Game</h1><script>document.write('Dynamic content!')</script></body></html>`;
+      
       setCurrentGame(game);
       setShowForm(false);
       

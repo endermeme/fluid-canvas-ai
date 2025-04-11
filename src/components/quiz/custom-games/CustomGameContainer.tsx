@@ -151,6 +151,19 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
     });
   };
 
+  const handleGameReload = () => {
+    if (iframeRef.current) {
+      const iframe = iframeRef.current;
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      
+      if (iframeDoc) {
+        iframeDoc.open();
+        iframeDoc.write(generateHtmlContent());
+        iframeDoc.close();
+      }
+    }
+  };
+
   return (
     <div className="relative h-full w-full flex flex-col">
       {/* Top bar with title and main controls */}
@@ -192,7 +205,7 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => window.location.reload()}
+            onClick={handleGameReload}
             className="h-8 w-8 p-0 flex items-center justify-center"
             title="Tải lại"
           >

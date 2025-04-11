@@ -17,15 +17,21 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   onNewGame,
   extraButton 
 }) => {
-  // Check if the content is HTML/JS
-  const isHtmlJsContent = miniGame.content.includes('<html>') || 
-                          miniGame.content.includes('<script>') || 
-                          miniGame.content.includes('<body>');
+  // Improved detection for HTML/JS content
+  const isHtmlJsContent = 
+    miniGame.content.includes('<html>') || 
+    miniGame.content.includes('<script>') || 
+    miniGame.content.includes('<body>') ||
+    miniGame.content.includes('document.') ||
+    miniGame.content.includes('window.') ||
+    miniGame.content.includes('<canvas>') ||
+    miniGame.content.includes('function(') ||
+    miniGame.content.includes('addEventListener');
 
   if (isHtmlJsContent) {
     return (
       <CustomGameContainer 
-        title={miniGame.title || "Trò Chơi Tùy Chỉnh"}
+        title={miniGame.title || "Trò Chơi Tương Tác"}
         content={miniGame.content}
         onBack={onBack}
         onNewGame={onNewGame}

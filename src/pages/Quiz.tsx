@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { animateContentHighlight } from '@/lib/animations';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '@/components/quiz/generator/AIGameGenerator';
-import GameView from '@/components/quiz/GameView';
+import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import CustomGameForm from '@/components/quiz/custom-games/CustomGameForm';
 import GameLoading from '@/components/quiz/GameLoading';
 import { Home, RefreshCw } from 'lucide-react';
@@ -116,7 +116,11 @@ const Quiz = () => {
               <GameLoading topic={currentTopic} />
             ) : currentGame ? (
               <div className="w-full h-full">
-                <GameView miniGame={currentGame} />
+                <EnhancedGameView 
+                  miniGame={currentGame} 
+                  onBack={handleBackToHome}
+                  onNewGame={handleNewGame}
+                />
                 <div className="absolute bottom-24 left-4 z-50">
                   <Button 
                     onClick={handleNewGame} 
@@ -132,6 +136,10 @@ const Quiz = () => {
                 gameType="quiz" 
                 onGenerate={(content, game) => {
                   if (game) {
+                    // Force HTML content for testing if needed
+                    // Uncomment the next line for testing HTML game container
+                    // game.content = `<html><body><h1>Test Game</h1><script>console.log('Game loaded!');</script></body></html>`;
+                    
                     setIsGenerating(true);
                     // Small delay to show the loading screen
                     setTimeout(() => handleGameGeneration(content, game), 800);
