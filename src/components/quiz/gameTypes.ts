@@ -12,6 +12,12 @@ export const gameTypes: GameType[] = [
       questionCount: 10,
       timePerQuestion: 30,
       category: 'general',
+      totalTime: 300,
+      bonusTime: 5,
+      useTimer: true,
+      showExplanation: true,
+      shuffleQuestions: true,
+      shuffleOptions: true
     }
   },
   {
@@ -24,6 +30,11 @@ export const gameTypes: GameType[] = [
       questionCount: 12,
       timePerQuestion: 20,
       category: 'general',
+      totalTime: 240,
+      autoFlip: false,
+      shuffleCards: true,
+      allowHints: true,
+      showProgress: true
     }
   },
   {
@@ -36,6 +47,10 @@ export const gameTypes: GameType[] = [
       questionCount: 8,
       timePerQuestion: 40,
       category: 'general',
+      totalTime: 320,
+      bonusTime: 10,
+      showHints: true,
+      progressiveHints: true
     }
   },
   {
@@ -48,6 +63,10 @@ export const gameTypes: GameType[] = [
       questionCount: 10,
       timePerQuestion: 30,
       category: 'general',
+      totalTime: 300,
+      caseSensitive: false,
+      allowSynonyms: true,
+      showHints: true
     }
   },
   {
@@ -60,6 +79,11 @@ export const gameTypes: GameType[] = [
       questionCount: 15,
       timePerQuestion: 10,
       category: 'general',
+      totalTime: 150,
+      bonusTime: 3,
+      showExplanation: true,
+      progressiveScoring: true,
+      shuffleQuestions: true
     }
   },
   {
@@ -72,6 +96,11 @@ export const gameTypes: GameType[] = [
       questionCount: 10,
       timePerQuestion: 30,
       category: 'math',
+      totalTime: 300,
+      bonusTime: 5,
+      allowCalculator: false,
+      roundingPrecision: 2,
+      showSteps: true
     }
   },
   {
@@ -84,6 +113,10 @@ export const gameTypes: GameType[] = [
       questionCount: 8,
       timePerQuestion: 60,
       category: 'general',
+      totalTime: 480,
+      hintCount: 3,
+      hintPenalty: 10,
+      allowSkip: true
     }
   },
   {
@@ -96,6 +129,11 @@ export const gameTypes: GameType[] = [
       questionCount: 10,
       timePerQuestion: 40,
       category: 'general',
+      totalTime: 120,
+      shuffleItems: true,
+      allowPartialMatching: false,
+      bonusTimePerMatch: 5,
+      showHints: true
     }
   },
   {
@@ -108,6 +146,11 @@ export const gameTypes: GameType[] = [
       questionCount: 8,
       timePerQuestion: 30,
       category: 'general',
+      totalTime: 240,
+      showHints: true,
+      hintPenalty: 5,
+      allowMultipleAttempts: true,
+      autoAdvance: false
     }
   },
   {
@@ -120,6 +163,11 @@ export const gameTypes: GameType[] = [
       questionCount: 8,
       timePerQuestion: 60,
       category: 'general',
+      totalTime: 300,
+      gridSize: 10,
+      allowDiagonalWords: true,
+      showWordList: true,
+      bonusTimePerWord: 15
     }
   },
   {
@@ -132,6 +180,11 @@ export const gameTypes: GameType[] = [
       questionCount: 8,
       timePerQuestion: 40,
       category: 'general',
+      totalTime: 320,
+      categoryCount: 3,
+      itemsPerCategory: 5,
+      allowMultipleCategories: false,
+      showCategoryHints: true
     }
   }
 ];

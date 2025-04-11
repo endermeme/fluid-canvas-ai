@@ -56,8 +56,8 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
       setIsAnswered(true);
       
       toast({
-        title: "Time's up!",
-        description: "You've run out of time for this question.",
+        title: "Hết thời gian!",
+        description: "Bạn đã không trả lời kịp thời.",
         variant: "destructive",
       });
     }
@@ -76,8 +76,8 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
       setShowResult(true);
       
       toast({
-        title: "Game Over",
-        description: "Total time has expired. Let's see your results.",
+        title: "Trò chơi kết thúc",
+        description: "Đã hết thời gian. Hãy xem kết quả của bạn.",
         variant: "destructive",
       });
     }
@@ -99,21 +99,21 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
         setTotalTimeLeft(prev => prev + bonusTime);
         
         toast({
-          title: "Correct! +1 point",
-          description: `Your answer is correct. +${bonusTime}s bonus time added.`,
+          title: "Chính xác! +1 điểm",
+          description: `Câu trả lời của bạn đúng. +${bonusTime}s thời gian thưởng.`,
           variant: "default",
         });
       } else {
         toast({
-          title: "Correct! +1 point",
-          description: "Your answer is correct.",
+          title: "Chính xác! +1 điểm",
+          description: "Câu trả lời của bạn đúng.",
           variant: "default",
         });
       }
     } else {
       toast({
-        title: "Incorrect!",
-        description: `The correct answer is: ${questions[currentQuestion].options[questions[currentQuestion].correctAnswer]}`,
+        title: "Không chính xác!",
+        description: `Đáp án đúng là: ${questions[currentQuestion].options[questions[currentQuestion].correctAnswer]}`,
         variant: "destructive",
       });
     }
@@ -144,7 +144,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
   };
 
   if (!content || !questions.length) {
-    return <div className="p-4">No question data available</div>;
+    return <div className="p-4">Không có dữ liệu câu hỏi</div>;
   }
 
   if (showResult) {
@@ -153,14 +153,14 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
         <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
-          <h2 className="text-3xl font-bold mb-4 text-primary">Results</h2>
+          <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả</h2>
           <p className="text-lg mb-4">
-            Topic: <span className="font-semibold">{content.title || topic}</span>
+            Chủ đề: <span className="font-semibold">{content.title || topic}</span>
           </p>
           
           <div className="mb-6">
             <div className="flex justify-between mb-2">
-              <span>Your score</span>
+              <span>Điểm của bạn</span>
               <span className="font-bold">{percentage}%</span>
             </div>
             <Progress value={percentage} className="h-3 bg-secondary" />
@@ -171,12 +171,12 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
           </div>
           
           <div className="text-sm mb-4 text-muted-foreground">
-            Time remaining: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
+            Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
           </div>
           
           <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary">
             <RefreshCw className="mr-2 h-4 w-4" />
-            Play Again
+            Chơi Lại
           </Button>
         </Card>
       </div>
@@ -197,7 +197,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
       <div className="mb-4">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
-            Question {currentQuestion + 1}/{questions.length}
+            Câu hỏi {currentQuestion + 1}/{questions.length}
           </div>
           <div className="text-sm font-medium flex items-center gap-4">
             <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full">
@@ -209,7 +209,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
               {formattedTotalTime}
             </div>
             <div className="px-3 py-1 bg-primary/10 rounded-full">
-              Score: <span className="font-bold">{score}</span>
+              Điểm: <span className="font-bold">{score}</span>
             </div>
           </div>
         </div>
@@ -264,7 +264,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
           disabled={!isAnswered}
           className={`w-full ${isAnswered ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary' : 'bg-primary/50'}`}
         >
-          {isLastQuestion ? 'View Results' : 'Next Question'}
+          {isLastQuestion ? 'Xem Kết Quả' : 'Câu Tiếp Theo'}
         </Button>
       </div>
     </div>
