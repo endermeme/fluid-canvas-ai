@@ -1,85 +1,63 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Home, RefreshCw } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import GameSelector from './GameSelector';
 import PresetGameManager from './PresetGameManager';
-import CustomGameForm from '../custom-games/CustomGameForm';
-import { MiniGame } from '../generator/AIGameGenerator';
+import { GameSettingsData } from '../types';
+import { useToast } from '@/hooks/use-toast';
 
-const PresetGamesPage = () => {
-  const [state, setState] = useState<'select' | 'play' | 'custom'>('select');
-  const [gameType, setGameType] = useState<string>('');
-  const [customPrompt, setCustomPrompt] = useState<string>('');
+const PresetGamesPage: React.FC = () => {
+  const [selectedGameType, setSelectedGameType] = useState<string | null>(null);
+  const [gameTopic, setGameTopic] = useState<string>('');
   const navigate = useNavigate();
-
-  const handleGameSelect = (type: string) => {
-    setGameType(type);
-    setState('custom');
-  };
-
-  const handleBack = () => {
-    if (state === 'play' || state === 'custom') {
-      setState('select');
-    } else {
-      navigate('/');
+  const location = useLocation();
+  const { toast } = useToast();
+  
+  // Extract topic from URL if provided
+  const searchParams = new URLSearchParams(location.search);
+  const topicFromUrl = searchParams.get('topic');
+  
+  // Use URL topic if present and no game topic is set yet
+  React.useEffect(() => {
+    if (topicFromUrl && !gameTopic) {
+      setGameTopic(topicFromUrl);
     }
-  };
+  }, [topicFromUrl, gameTopic]);
 
-  const handleHomeClick = () => {
-    navigate('/');
+  const handleSelectGame = (gameType: string) => {
+    setSelectedGameType(gameType);
   };
-
-  const handleCustomGameGenerate = (content: string, game?: MiniGame) => {
-    // Save the user's prompt for PresetGameManager
-    setCustomPrompt(content);
+  
+  const handleBackToSelector = () => {
+    setSelectedGameType(null);
+    setGameTopic('');
+    navigate('/preset-games', { replace: true });
+  };
+  
+  const handleQuickStart = (gameType: string, prompt: string, settings: GameSettingsData) => {
+    setSelectedGameType(gameType);
+    setGameTopic(prompt);
     
-    // After content is available, switch to play mode
-    setState('play');
+    toast({
+      title: "Trò chơi đang được tạo",
+      description: `Đang tạo trò chơi ${gameType} với chủ đề "${prompt}"`,
+    });
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="border-b p-4 bg-background/80 backdrop-blur-sm flex justify-between items-center">
-        <Button variant="ghost" size="sm" onClick={handleBack}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          {state === 'select' ? 'Back to home' : 'Back to game selection'}
-        </Button>
-        
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-          <Button variant="ghost" size="sm" onClick={handleHomeClick}>
-            <Home className="h-4 w-4 mr-2" />
-            Home
-          </Button>
-        </div>
-      </div>
-      
-      <div className="flex-grow overflow-auto">
-        {state === 'select' && (
-          <GameSelector onSelectGame={handleGameSelect} />
-        )}
-        
-        {state === 'custom' && (
-          <CustomGameForm 
-            gameType={gameType} 
-            onGenerate={handleCustomGameGenerate}
-            onCancel={() => setState('select')}
-          />
-        )}
-        
-        {state === 'play' && (
-          <PresetGameManager 
-            gameType={gameType}
-            onBack={() => setState('select')}
-            initialTopic={customPrompt}
-          />
-        )}
-      </div>
+    <div className="h-full flex flex-col overflow-auto">
+      {selectedGameType ? (
+        <PresetGameManager 
+          gameType={selectedGameType} 
+          onBack={handleBackToSelector}
+          initialTopic={gameTopic}
+        />
+      ) : (
+        <GameSelector 
+          onSelectGame={handleSelectGame} 
+          onQuickStart={handleQuickStart}
+        />
+      )}
     </div>
   );
 };
