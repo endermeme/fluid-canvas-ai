@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
-import { Share2, Home, RefreshCw, Download, Trophy } from 'lucide-react';
+import { Share2, Home, RefreshCw, Trophy } from 'lucide-react';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -91,7 +91,8 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
       iframeRef.current.src = 'about:blank';
       setTimeout(() => {
         if (iframeRef.current) {
-          iframeRef.current.srcdoc = miniGame.content;
+          // Note: Changed srcdoc to srcDoc to fix the TypeScript error
+          iframeRef.current.srcDoc = miniGame.content;
         }
       }, 100);
       setGameStats({});

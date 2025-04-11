@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
@@ -6,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import GameSettings from '../GameSettings';
 import GameLoading from '../GameLoading';
 import { GameSettingsData } from '../types';
+import { Card } from '@/components/ui/card';
 
 // Import Gemini API 
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -328,11 +330,29 @@ Output must be valid JSON. `;
     if (aiPrompt && aiPrompt.trim() !== "") {
       // Use AI to generate content if prompt exists
       console.log(`Creating ${gameType} game with prompt: "${aiPrompt}" and settings:`, gameSettings);
+      toast({
+        title: "Đang tạo trò chơi",
+        description: `Đang tạo trò chơi dạng ${getGameTypeName()} với các cài đặt đã chọn.`,
+      });
       generateAIContent(aiPrompt, gameType, gameSettings);
     } else {
       // Otherwise use sample data for dev/test
       console.log(`Loading sample data for ${gameType} game with settings:`, gameSettings);
       loadSampleData(gameType);
+    }
+  };
+
+  const getGameTypeName = () => {
+    switch (gameType) {
+      case 'quiz': return 'Trắc Nghiệm';
+      case 'flashcards': return 'Thẻ Ghi Nhớ';
+      case 'matching': return 'Nối Từ';
+      case 'memory': return 'Trò Chơi Ghi Nhớ';
+      case 'ordering': return 'Sắp Xếp Câu';
+      case 'wordsearch': return 'Tìm Từ';
+      case 'pictionary': return 'Đoán Hình';
+      case 'truefalse': return 'Đúng hay Sai';
+      default: return 'Trò Chơi';
     }
   };
 
@@ -347,7 +367,10 @@ Output must be valid JSON. `;
     
     return (
       <div className="flex items-center justify-center h-full">
-        <p>Không tìm thấy mẫu cho loại game: {gameType}</p>
+        <Card className="p-6 max-w-md">
+          <p>Không tìm thấy mẫu cho loại game: {gameType}</p>
+          <Button onClick={onBack} className="mt-4">Quay lại</Button>
+        </Card>
       </div>
     );
   };
@@ -418,12 +441,16 @@ Output must be valid JSON. `;
 
   if (showSettings) {
     return (
-      <GameSettings
-        onStart={handleStartGame}
-        topic={initialTopic || ""}
-        initialSettings={settings}
-        gameType={getGameTypeObject()}
-      />
+      <div className="p-4">
+        <h2 className="text-2xl font-bold mb-4 text-center">Cài đặt trò chơi {getGameTypeName()}</h2>
+        <GameSettings
+          onStart={handleStartGame}
+          topic={initialTopic || ""}
+          initialSettings={settings}
+          gameType={getGameTypeObject()}
+          onCancel={onBack}
+        />
+      </div>
     );
   }
 
@@ -436,7 +463,7 @@ Output must be valid JSON. `;
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg font-medium">Đang tạo trò chơi với AI...</p>
+          <p className="text-lg font-medium">Đang tạo trò chơi {getGameTypeName()}...</p>
           <p className="text-sm text-muted-foreground mt-2">Quá trình này có thể mất vài giây</p>
         </div>
       </div>
@@ -446,17 +473,19 @@ Output must be valid JSON. `;
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
-        <div className="text-center">
-          <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
-          <p className="text-gray-500 mb-4">{error}</p>
-          <div className="flex gap-2">
-            <Button onClick={onBack}>Quay lại</Button>
-            <Button onClick={handleRetry} variant="outline">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Thử lại
-            </Button>
+        <Card className="p-6 max-w-md">
+          <div className="text-center">
+            <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
+            <p className="text-gray-500 mb-4">{error}</p>
+            <div className="flex gap-2">
+              <Button onClick={onBack}>Quay lại</Button>
+              <Button onClick={handleRetry} variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Thử lại
+              </Button>
+            </div>
           </div>
-        </div>
+        </Card>
       </div>
     );
   }
@@ -471,7 +500,12 @@ Output must be valid JSON. `;
       <div className="flex-grow overflow-auto">
         {gameContent ? renderGameTemplate() : (
           <div className="flex items-center justify-center h-full">
-            <p>Không có nội dung trò chơi</p>
+            <Card className="p-6 max-w-md">
+              <p className="text-center">Không có nội dung trò chơi</p>
+              <div className="flex justify-center mt-4">
+                <Button onClick={onBack}>Quay lại</Button>
+              </div>
+            </Card>
           </div>
         )}
       </div>

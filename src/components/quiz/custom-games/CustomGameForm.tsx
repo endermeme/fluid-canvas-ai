@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { SparklesIcon, Brain, PenTool, Info, Globe, GraduationCap, Gamepad2 } from 'lucide-react';
+import { SparklesIcon, Brain, PenTool, Info, Globe, Gamepad2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { AIGameGenerator, MiniGame } from '../generator/AIGameGenerator';
@@ -28,37 +28,8 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   // Use the singleton pattern
   const gameGenerator = AIGameGenerator.getInstance(API_KEY);
 
-  const getGameTypeName = () => {
-    switch (gameType) {
-      case 'quiz': return 'Trắc Nghiệm';
-      case 'flashcards': return 'Thẻ Ghi Nhớ';
-      case 'matching': return 'Nối Từ';
-      case 'memory': return 'Trò Chơi Ghi Nhớ';
-      case 'ordering': return 'Sắp Xếp Câu';
-      case 'wordsearch': return 'Tìm Từ';
-      case 'pictionary': return 'Đoán Hình';
-      case 'truefalse': return 'Đúng hay Sai';
-      default: return 'Trò Chơi';
-    }
-  };
-
   const getPlaceholderText = () => {
-    switch (gameType) {
-      case 'quiz':
-        return 'Nhập yêu cầu để AI tạo câu hỏi trắc nghiệm.\n\nVí dụ: "Tạo 10 câu hỏi trắc nghiệm về lịch sử Việt Nam thời kỳ phong kiến, mỗi câu có 4 lựa chọn."';
-      
-      case 'flashcards':
-        return 'Nhập yêu cầu để AI tạo thẻ ghi nhớ.\n\nVí dụ: "Tạo 15 thẻ ghi nhớ từ vựng tiếng Anh về chủ đề công nghệ, mỗi thẻ có từ tiếng Anh, nghĩa tiếng Việt và ví dụ."';
-      
-      case 'matching':
-        return 'Nhập yêu cầu để AI tạo trò chơi nối từ.\n\nVí dụ: "Tạo 12 cặp từ đồng nghĩa tiếng Việt để ghép nối, chủ đề văn học."';
-      
-      case 'truefalse':
-        return 'Nhập yêu cầu để AI tạo câu hỏi đúng/sai.\n\nVí dụ: "Tạo 10 câu phát biểu đúng/sai về sinh học, đảm bảo số lượng câu đúng và sai cân bằng."';
-      
-      default:
-        return 'Nhập yêu cầu chi tiết để AI tạo nội dung trò chơi. Hãy mô tả cụ thể chủ đề, mong muốn về số lượng câu hỏi, độ khó và bất kỳ yêu cầu đặc biệt nào.';
-    }
+    return 'Nhập yêu cầu chi tiết để AI tạo nội dung trò chơi. Hãy mô tả cụ thể chủ đề, mong muốn về số lượng câu hỏi, độ khó và bất kỳ yêu cầu đặc biệt nào.\n\nVí dụ: "Tạo 10 câu hỏi trắc nghiệm về lịch sử Việt Nam thời kỳ phong kiến, mỗi câu có 4 lựa chọn."';
   };
 
   const handleSubmit = async () => {
@@ -79,7 +50,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
         questionCount: 10,
         timePerQuestion: 30,
         category: 'general',
-        useTimer: true
+        useTimer: true,
+        bonusTime: 5,
+        totalTime: 300
       };
       
       console.log("Tạo game với chủ đề:", content);
@@ -89,7 +62,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
       if (game) {
         toast({
           title: "Đã tạo trò chơi",
-          description: `Trò chơi ${getGameTypeName()} đã được tạo thành công với AI.`,
+          description: "Trò chơi đã được tạo thành công với AI.",
         });
         
         onGenerate(content, game);
@@ -129,7 +102,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
             <div className="p-2 rounded-lg bg-primary/10">
               <Brain className="h-6 w-6 text-primary" />
             </div>
-            Tạo trò chơi {getGameTypeName()} với AI
+            Tạo trò chơi tùy chỉnh với AI
           </h2>
           <p className="text-muted-foreground">Mô tả yêu cầu của bạn để AI tạo nội dung trò chơi phù hợp</p>
         </div>
@@ -154,14 +127,14 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
             <div className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg">
               <Info className="w-4 h-4 text-primary mt-1" />
               <p className="text-sm text-muted-foreground">
-                Chế độ Canvas <span className="text-primary font-medium">đã được bật</span> để tạo giao diện trò chơi đẹp mắt hơn.
+                Trò chơi sẽ được tạo theo yêu cầu của bạn với các cài đặt mặc định (độ khó trung bình, 10 câu hỏi, 30 giây mỗi câu).
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
               <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
                 <PenTool className="w-6 h-6 text-primary mb-2" />
-                <h4 className="text-sm font-medium">Tùy chỉnh chi tiết</h4>
+                <h4 className="text-sm font-medium">Mô tả chi tiết</h4>
                 <p className="text-xs text-muted-foreground">Càng chi tiết càng tốt</p>
               </div>
               

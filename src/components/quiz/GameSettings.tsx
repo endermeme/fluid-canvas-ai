@@ -13,6 +13,7 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 import { animateToolbarAppear } from '@/lib/animations';
 import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 
 interface GameSettingsProps {
   onStart: (settings: GameSettingsData) => void;
@@ -151,7 +152,7 @@ const GameSettings = ({
       ref={containerRef} 
       className={`${inDrawer || inModal ? '' : 'h-full w-full'} flex flex-col items-center justify-center py-4 ${inModal ? 'px-1' : 'px-4'}`}
     >
-      <div className="w-full max-w-md">
+      <Card className="w-full max-w-md bg-background/60 backdrop-blur-sm border-primary/20 p-6 shadow-lg">
         <div className="flex flex-col items-center mb-6 relative">
           <div className="absolute inset-0 blur-2xl bg-primary/10 rounded-full opacity-70"></div>
           <div className="z-10 flex flex-col items-center">
@@ -175,7 +176,7 @@ const GameSettings = ({
           </div>
         )}
 
-        <div className="space-y-6 backdrop-blur-sm bg-card/30 rounded-xl p-5 border border-primary/10">
+        <div className="space-y-6">
           <div className="space-y-3">
             <Label htmlFor="difficulty" className="flex items-center gap-2 text-base font-medium">
               <Trophy className="h-4 w-4 text-primary" /> Độ Khó
@@ -321,7 +322,7 @@ const GameSettings = ({
             </Button>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };
