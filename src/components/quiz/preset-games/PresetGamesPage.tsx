@@ -5,6 +5,8 @@ import GameSelector from './GameSelector';
 import PresetGameManager from './PresetGameManager';
 import { GameSettingsData } from '../types';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { BarChart3, History } from 'lucide-react';
 
 const PresetGamesPage: React.FC = () => {
   const [selectedGameType, setSelectedGameType] = useState<string | null>(null);
@@ -50,8 +52,26 @@ const PresetGamesPage: React.FC = () => {
     });
   };
 
+  const viewGameHistory = () => {
+    navigate('/game-history');
+  };
+
   return (
-    <div className="h-full flex flex-col overflow-auto">
+    <div className="h-full flex flex-col overflow-auto relative">
+      {!selectedGameType && (
+        <div className="absolute top-4 right-4 z-10">
+          <Button 
+            onClick={viewGameHistory}
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-1.5 bg-background/80 backdrop-blur-sm shadow-sm"
+          >
+            <History size={16} />
+            <span>Lịch sử game</span>
+          </Button>
+        </div>
+      )}
+      
       {selectedGameType ? (
         <PresetGameManager 
           gameType={selectedGameType} 

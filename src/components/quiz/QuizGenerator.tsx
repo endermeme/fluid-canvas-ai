@@ -7,6 +7,10 @@ import GameError from './GameError';
 import GameView from './GameView';
 import { GameSettingsData } from './types';
 import { getGameTypeByTopic } from './gameTypes';
+import { useNavigate } from 'react-router-dom';
+import { createGameSession } from '@/utils/gameParticipation';
+import { Button } from '@/components/ui/button';
+import { Share2 } from 'lucide-react';
 
 // API key
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
@@ -25,6 +29,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [currentTopic, setCurrentTopic] = useState<string>(topic);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Use the singleton instance
   const gameGenerator = AIGameGenerator.getInstance(API_KEY);
@@ -140,6 +145,24 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     }
   };
 
+  const handleShareGame = () => {
+    if (!miniGame) return;
+    
+    // Create a shareable game session
+    const gameSession = createGameSession(
+      miniGame.title || "Minigame tương tác",
+      miniGame.content
+    );
+    
+    // Navigate to the share page
+    navigate(`/game/${gameSession.id}`);
+    
+    toast({
+      title: "Game đã được chia sẻ",
+      description: "Bạn có thể gửi link cho người khác để họ tham gia.",
+    });
+  };
+
   if (isLoading) {
     return <GameLoading topic={currentTopic} />;
   }
@@ -170,7 +193,20 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
 
   return (
     <>
-      <GameView miniGame={miniGame} />
+      <GameView 
+        miniGame={miniGame} 
+        extraButton={
+          <Button 
+            size="sm" 
+            variant="secondary"
+            className="ml-2 bg-background/80 backdrop-blur-sm border border-primary/20 shadow-md" 
+            onClick={handleShareGame}
+          >
+            <Share2 size={14} className="mr-1" />
+            Chia Sẻ & Theo Dõi
+          </Button>
+        }
+      />
       <div className="absolute top-4 right-4">
         <h3 className="text-sm font-medium text-primary/60 cursor-pointer select-none">
           Trợ Lý Tạo Web
