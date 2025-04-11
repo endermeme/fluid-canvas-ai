@@ -9,7 +9,8 @@ import { MiniGame } from '@/components/quiz/generator/AIGameGenerator';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import CustomGameForm from '@/components/quiz/custom-games/CustomGameForm';
 import GameLoading from '@/components/quiz/GameLoading';
-import { Home, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import QuizContainer from '@/components/quiz/QuizContainer';
 
 const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -83,88 +84,97 @@ const Quiz = () => {
     window.location.reload();
   };
 
+  // Content to render
+  const renderContent = () => {
+    if (isGenerating) {
+      return <GameLoading topic={currentTopic} />;
+    }
+    
+    if (currentGame) {
+      return (
+        <EnhancedGameView 
+          miniGame={currentGame} 
+          onBack={handleBackToHome}
+          onNewGame={handleNewGame}
+        />
+      );
+    }
+    
+    if (showForm) {
+      return (
+        <CustomGameForm 
+          gameType="quiz" 
+          onGenerate={(content, game) => {
+            if (game) {
+              // Force HTML content for testing if needed
+              // Uncomment the next line for testing HTML game container
+              // game.content = `<html><body><h1>Test Game</h1><script>console.log('Game loaded!');</script></body></html>`;
+              
+              setIsGenerating(true);
+              // Small delay to show the loading screen
+              setTimeout(() => handleGameGeneration(content, game), 800);
+            }
+          }}
+          onCancel={handleCancelCustomGame}
+        />
+      );
+    }
+    
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-6">
+        <Button 
+          onClick={() => setShowForm(true)}
+          className="bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg"
+        >
+          Tạo Trò Chơi Mới
+        </Button>
+        <Button 
+          onClick={handleBackToHome}
+          variant="outline"
+          className="mt-4"
+        >
+          Về Trang Chủ
+        </Button>
+      </div>
+    );
+  };
+
+  // Determine title based on current state
+  const getContainerTitle = () => {
+    if (isGenerating) {
+      return `Đang tạo game: ${currentTopic}`;
+    }
+    if (currentGame) {
+      return currentGame.title || "Trò Chơi Tương Tác";
+    }
+    return "Tạo Trò Chơi Mới";
+  };
+
   return (
     <div className="min-h-screen flex flex-col w-full bg-gradient-to-b from-background to-background/95 overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 overflow-hidden p-0 relative">
-          {!isGenerating && !currentGame && (
-            <div className="absolute top-4 left-4 z-50 flex space-x-2">
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                className="bg-primary/5"
-                onClick={handleBackToHome}
-              >
-                <Home className="h-4 w-4 mr-1" />
-                Trang Chủ
-              </Button>
-              
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                className="bg-primary/5"
-                onClick={handleReload}
-              >
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Tải Lại
-              </Button>
-            </div>
-          )}
-          
-          <div ref={mainContentRef} className="h-full w-full relative">
-            {isGenerating ? (
-              <GameLoading topic={currentTopic} />
-            ) : currentGame ? (
-              <div className="w-full h-full">
-                <EnhancedGameView 
-                  miniGame={currentGame} 
-                  onBack={handleBackToHome}
-                  onNewGame={handleNewGame}
-                />
-                <div className="absolute bottom-24 left-4 z-50">
-                  <Button 
-                    onClick={handleNewGame} 
-                    variant="secondary"
-                    className="bg-primary/10"
-                  >
-                    Trò Chơi Mới
-                  </Button>
-                </div>
-              </div>
-            ) : showForm ? (
-              <CustomGameForm 
-                gameType="quiz" 
-                onGenerate={(content, game) => {
-                  if (game) {
-                    // Force HTML content for testing if needed
-                    // Uncomment the next line for testing HTML game container
-                    // game.content = `<html><body><h1>Test Game</h1><script>console.log('Game loaded!');</script></body></html>`;
-                    
-                    setIsGenerating(true);
-                    // Small delay to show the loading screen
-                    setTimeout(() => handleGameGeneration(content, game), 800);
-                  }
-                }}
-                onCancel={handleCancelCustomGame}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full">
+        <div ref={mainContentRef} className="flex-1 overflow-hidden p-4 relative">
+          <QuizContainer 
+            title={getContainerTitle()}
+            showBackButton={true}
+            showHomeButton={!isGenerating && !currentGame}
+            showRefreshButton={!isGenerating && !currentGame}
+            onBack={currentGame ? handleNewGame : handleBackToHome}
+            onRefresh={handleReload}
+            footerContent={currentGame ? (
+              <div className="flex justify-between items-center">
                 <Button 
-                  onClick={() => setShowForm(true)}
-                  className="bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg"
+                  onClick={handleNewGame} 
+                  variant="secondary"
+                  className="bg-primary/10"
                 >
-                  Tạo Trò Chơi Mới
-                </Button>
-                <Button 
-                  onClick={handleBackToHome}
-                  variant="outline"
-                  className="mt-4"
-                >
-                  Về Trang Chủ
+                  Trò Chơi Mới
                 </Button>
               </div>
-            )}
-          </div>
+            ) : null}
+          >
+            {renderContent()}
+          </QuizContainer>
         </div>
       </div>
     </div>

@@ -6,9 +6,10 @@ import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home, RefreshCw, Share2 } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createGameSession } from '@/utils/gameParticipation';
+import QuizContainer from '../QuizContainer';
 
 interface GameControllerProps {
   initialTopic?: string;
@@ -82,54 +83,101 @@ const GameController: React.FC<GameControllerProps> = ({
     });
   };
 
-  return (
-    <div className="h-full flex flex-col">
-      <div className="flex-grow overflow-auto">
-        {isGenerating ? (
-          <GameLoading topic={currentTopic} />
-        ) : currentGame ? (
-          <div className="relative h-full">
-            <EnhancedGameView 
-              miniGame={currentGame} 
-              onBack={handleBack}
-              onNewGame={handleNewGame}
-              extraButton={
-                <Button 
-                  size="sm" 
-                  variant="secondary"
-                  className="ml-2 bg-background/80 backdrop-blur-sm border border-primary/20 shadow-md" 
-                  onClick={handleShareGame}
-                >
-                  <Share2 size={14} className="mr-1" />
-                  Chia Sẻ & Theo Dõi
-                </Button>
-              }
-            />
-          </div>
-        ) : showForm ? (
-          <div className="relative">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate('/')} 
-              className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Quay lại</span>
-            </Button>
-            
-            <CustomGameForm 
-              gameType="custom" 
-              onGenerate={(content, game) => {
-                setIsGenerating(true);
-                setTimeout(() => handleGameGeneration(content, game), 500);
-              }}
-              onCancel={() => navigate('/')}
-            />
-          </div>
-        ) : null}
-      </div>
+  // Determine container title based on state
+  const getContainerTitle = () => {
+    if (isGenerating) {
+      return `Đang tạo game: ${currentTopic}`;
+    }
+    if (currentGame) {
+      return currentGame.title || "Minigame Tương Tác";
+    }
+    return "Tạo Game Tùy Chỉnh";
+  };
+
+  const extraButton = currentGame ? (
+    <Button 
+      size="sm" 
+      variant="secondary"
+      className="ml-2 bg-background/80 backdrop-blur-sm border border-primary/20 shadow-md" 
+      onClick={handleShareGame}
+    >
+      <Share2 size={14} className="mr-1" />
+      Chia Sẻ & Theo Dõi
+    </Button>
+  ) : null;
+
+  // Render footer actions based on state
+  const footerActions = currentGame ? (
+    <div className="flex justify-between items-center">
+      <Button 
+        onClick={handleNewGame} 
+        variant="secondary"
+        className="bg-primary/10"
+      >
+        Tạo Game Mới
+      </Button>
+      
+      <Button 
+        variant="default" 
+        className="bg-gradient-to-r from-primary to-primary/80"
+        onClick={handleShareGame}
+      >
+        <Share2 size={14} className="mr-1" />
+        Chia Sẻ Game
+      </Button>
     </div>
+  ) : null;
+
+  // Main content based on state
+  const renderContent = () => {
+    if (isGenerating) {
+      return <GameLoading topic={currentTopic} />;
+    } 
+    
+    if (currentGame) {
+      return (
+        <EnhancedGameView 
+          miniGame={currentGame} 
+          onBack={handleBack}
+          onNewGame={handleNewGame}
+          extraButton={extraButton}
+        />
+      );
+    } 
+    
+    if (showForm) {
+      return (
+        <CustomGameForm 
+          gameType="custom" 
+          onGenerate={(content, game) => {
+            setIsGenerating(true);
+            setTimeout(() => handleGameGeneration(content, game), 500);
+          }}
+          onCancel={() => navigate('/')}
+        />
+      );
+    }
+    
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-6">
+        <p>Không có nội dung trò chơi. Vui lòng tạo mới.</p>
+        <Button onClick={handleNewGame} className="mt-4">Tạo Game Mới</Button>
+      </div>
+    );
+  };
+
+  return (
+    <QuizContainer
+      title={getContainerTitle()}
+      showBackButton={true}
+      onBack={handleBack}
+      showSettingsButton={currentGame !== null}
+      footerContent={footerActions}
+    >
+      <div className="h-full w-full">
+        {renderContent()}
+      </div>
+    </QuizContainer>
   );
 };
 

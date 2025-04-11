@@ -6,16 +6,15 @@ import {
   RefreshCw, 
   Share2, 
   Expand, 
-  MinusCircle, 
   Play, 
   Pause, 
   Download, 
-  Settings, 
   Gamepad
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createGameSession } from '@/utils/gameParticipation';
 import { useToast } from '@/hooks/use-toast';
+import QuizContainer from '../QuizContainer';
 
 interface CustomGameContainerProps {
   title?: string;
@@ -164,58 +163,83 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
     }
   };
 
-  return (
-    <div className="relative h-full w-full flex flex-col">
-      {/* Top bar with title and main controls */}
-      <div className="absolute top-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-md p-2 flex justify-between items-center border-b border-primary/10">
-        <div className="flex items-center gap-2">
+  // Custom header controls for game
+  const headerControls = (
+    <>
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        onClick={togglePause}
+        className="h-8 w-8 p-0 flex items-center justify-center"
+        title={isPaused ? "Tiếp tục" : "Tạm dừng"}
+      >
+        {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+      </Button>
+      
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        onClick={toggleFullscreen}
+        className="h-8 w-8 p-0 flex items-center justify-center"
+        title="Toàn màn hình"
+      >
+        <Expand className="h-4 w-4" />
+      </Button>
+    </>
+  );
+
+  // Footer actions
+  const footerActions = (
+    <div className="flex justify-between items-center">
+      <div>
+        {onNewGame && (
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="sm" 
-            onClick={onBack}
-            className="h-8 w-8 p-0 flex items-center justify-center"
+            onClick={onNewGame}
+            className="border-primary/20 bg-primary/5"
           >
-            <Home className="h-4 w-4" />
+            <Gamepad className="h-4 w-4 mr-1.5" />
+            Trò Chơi Mới
           </Button>
-          
-          <h2 className="text-sm font-medium truncate max-w-[200px]">{title}</h2>
-        </div>
-        
-        <div className="flex items-center gap-1">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={togglePause}
-            className="h-8 w-8 p-0 flex items-center justify-center"
-            title={isPaused ? "Tiếp tục" : "Tạm dừng"}
-          >
-            {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={toggleFullscreen}
-            className="h-8 w-8 p-0 flex items-center justify-center"
-            title="Toàn màn hình"
-          >
-            <Expand className="h-4 w-4" />
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleGameReload}
-            className="h-8 w-8 p-0 flex items-center justify-center"
-            title="Tải lại"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </Button>
-        </div>
+        )}
       </div>
       
-      {/* Main game content */}
-      <div className="flex-1 pt-12 pb-16">
+      <div className="flex items-center gap-2">
+        <Button 
+          variant="secondary" 
+          size="sm" 
+          onClick={handleShareGame}
+          className="bg-primary/10 border border-primary/20 shadow-sm"
+        >
+          <Share2 className="h-4 w-4 mr-1.5" />
+          Chia Sẻ
+        </Button>
+        
+        <Button 
+          variant="default" 
+          size="sm"
+          className="bg-gradient-to-r from-primary to-primary/80"
+        >
+          <Download className="h-4 w-4 mr-1.5" />
+          Lưu
+        </Button>
+      </div>
+    </div>
+  );
+
+  return (
+    <QuizContainer
+      title={title}
+      showBackButton={true}
+      showHomeButton={false}
+      showRefreshButton={false}
+      onBack={onBack}
+      onRefresh={handleGameReload}
+      headerRight={headerControls}
+      footerContent={footerActions}
+    >
+      <div className="w-full h-full">
         <iframe 
           ref={iframeRef}
           className="w-full h-full border-none"
@@ -223,45 +247,7 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
           sandbox="allow-scripts allow-same-origin"
         />
       </div>
-      
-      {/* Bottom action bar */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-md p-3 border-t border-primary/10 flex justify-between items-center">
-        <div>
-          {onNewGame && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onNewGame}
-              className="border-primary/20 bg-primary/5"
-            >
-              <Gamepad className="h-4 w-4 mr-1.5" />
-              Trò Chơi Mới
-            </Button>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            onClick={handleShareGame}
-            className="bg-primary/10 border border-primary/20 shadow-sm"
-          >
-            <Share2 className="h-4 w-4 mr-1.5" />
-            Chia Sẻ
-          </Button>
-          
-          <Button 
-            variant="default" 
-            size="sm"
-            className="bg-gradient-to-r from-primary to-primary/80"
-          >
-            <Download className="h-4 w-4 mr-1.5" />
-            Lưu
-          </Button>
-        </div>
-      </div>
-    </div>
+    </QuizContainer>
   );
 };
 

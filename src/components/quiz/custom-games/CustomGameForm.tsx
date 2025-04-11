@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { AIGameGenerator, MiniGame } from '../generator/AIGameGenerator';
 import { GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
+import QuizContainer from '../QuizContainer';
 
 interface CustomGameFormProps {
   gameType: string;
@@ -94,8 +95,28 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     return <GameLoading topic={content} />;
   }
 
+  const footerActions = (
+    <div className="flex justify-between">
+      <Button 
+        variant="outline" 
+        onClick={handleCancel}
+        className="border-primary/20 hover:border-primary/30 hover:bg-primary/5"
+      >
+        Hủy
+      </Button>
+      <Button 
+        onClick={handleSubmit}
+        disabled={!content.trim() || isGenerating}
+        className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90"
+      >
+        <SparklesIcon className="h-4 w-4 mr-2" />
+        Tạo với AI
+      </Button>
+    </div>
+  );
+
   return (
-    <div className="p-6 max-w-4xl mx-auto w-full">
+    <div className="p-4 max-w-4xl mx-auto w-full">
       <Card className="bg-background/70 backdrop-blur-sm border-primary/20 shadow-lg p-6">
         <div className="mb-6">
           <h2 className="text-2xl font-bold flex items-center gap-2 text-primary">
@@ -150,24 +171,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
                 <p className="text-xs text-muted-foreground">Trải nghiệm người dùng tốt</p>
               </div>
             </div>
-          </div>
-          
-          <div className="flex justify-between pt-4">
-            <Button 
-              variant="outline" 
-              onClick={handleCancel}
-              className="border-primary/20 hover:border-primary/30 hover:bg-primary/5"
-            >
-              Hủy
-            </Button>
-            <Button 
-              onClick={handleSubmit}
-              disabled={!content.trim() || isGenerating}
-              className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90"
-            >
-              <SparklesIcon className="h-4 w-4 mr-2" />
-              Tạo với AI
-            </Button>
           </div>
         </div>
       </Card>
