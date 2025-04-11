@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/AIGameGenerator';
-import GameView from '../GameView';
+import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
@@ -85,9 +85,10 @@ const GameController: React.FC<GameControllerProps> = ({
           <GameLoading topic={currentTopic} />
         ) : currentGame ? (
           <div className="relative h-full">
-            <GameView 
+            <EnhancedGameView 
               miniGame={currentGame} 
               onBack={handleBack}
+              onNewGame={handleNewGame}
               extraButton={
                 <Button 
                   size="sm" 

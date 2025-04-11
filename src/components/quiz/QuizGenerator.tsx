@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from './generator/AIGameGenerator';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
-import GameView from './GameView';
+import EnhancedGameView from './custom-games/EnhancedGameView';
 import { GameSettingsData } from './types';
 import { getGameTypeByTopic } from './gameTypes';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +11,6 @@ import { createGameSession } from '@/utils/gameParticipation';
 import { Button } from '@/components/ui/button';
 import { Share2 } from 'lucide-react';
 
-// API key
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 interface QuizGeneratorProps {
@@ -31,7 +29,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Use the singleton instance
   const gameGenerator = AIGameGenerator.getInstance(API_KEY);
   
   const [canvasMode, setCanvasMode] = useState<boolean>(
@@ -45,7 +42,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     category: 'general',
   };
   
-  // Set canvas mode based on localStorage
   useEffect(() => {
     const storedCanvasMode = localStorage.getItem('canvas_mode') === 'true';
     gameGenerator.setCanvasMode(storedCanvasMode);
@@ -148,13 +144,11 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const handleShareGame = () => {
     if (!miniGame) return;
     
-    // Create a shareable game session
     const gameSession = createGameSession(
       miniGame.title || "Minigame tương tác",
       miniGame.content
     );
     
-    // Navigate to the share page
     navigate(`/game/${gameSession.id}`);
     
     toast({
@@ -193,7 +187,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
 
   return (
     <>
-      <GameView 
+      <EnhancedGameView 
         miniGame={miniGame} 
         extraButton={
           <Button 

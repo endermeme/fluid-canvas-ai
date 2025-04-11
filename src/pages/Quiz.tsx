@@ -9,17 +9,13 @@ import { MiniGame } from '@/components/quiz/generator/AIGameGenerator';
 import GameView from '@/components/quiz/GameView';
 import CustomGameForm from '@/components/quiz/custom-games/CustomGameForm';
 import GameLoading from '@/components/quiz/GameLoading';
-import { Home, RefreshCw, Trophy } from 'lucide-react';
-
-// Game play count storage key
-const GAME_PLAY_COUNT_KEY = 'lovable_game_play_count';
+import { Home, RefreshCw } from 'lucide-react';
 
 const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showForm, setShowForm] = useState(true);
   const [currentGame, setCurrentGame] = useState<MiniGame | null>(null);
   const [currentTopic, setCurrentTopic] = useState('');
-  const [gamePlayCount, setGamePlayCount] = useState<number>(0);
   
   const { toast } = useToast();
   const location = useLocation();
@@ -45,16 +41,6 @@ const Quiz = () => {
         setCurrentTopic(topicParam);
       }
     }
-    
-    // Load game play count
-    try {
-      const savedCount = localStorage.getItem(GAME_PLAY_COUNT_KEY);
-      if (savedCount) {
-        setGamePlayCount(parseInt(savedCount, 10));
-      }
-    } catch (err) {
-      console.error("Error loading game count:", err);
-    }
   }, [location.search]);
 
   useEffect(() => {
@@ -70,16 +56,6 @@ const Quiz = () => {
     setCurrentGame(game);
     setShowForm(false);
     setIsGenerating(false);
-    
-    // Increment game play count
-    try {
-      const newCount = gamePlayCount + 1;
-      localStorage.setItem(GAME_PLAY_COUNT_KEY, newCount.toString());
-      setGamePlayCount(newCount);
-      console.log(`Game play count updated: ${newCount}`);
-    } catch (err) {
-      console.error("Error updating game count:", err);
-    }
     
     toast({
       title: "Trò Chơi Đã Sẵn Sàng",
@@ -111,13 +87,6 @@ const Quiz = () => {
     <div className="min-h-screen flex flex-col w-full bg-gradient-to-b from-background to-background/95 overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 overflow-hidden p-0 relative">
-          {gamePlayCount > 0 && (
-            <div className="absolute top-4 right-4 bg-primary/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium z-50 flex items-center gap-1.5">
-              <Trophy className="h-3.5 w-3.5 text-primary" />
-              <span>Đã chơi: {gamePlayCount}</span>
-            </div>
-          )}
-          
           {!isGenerating && !currentGame && (
             <div className="absolute top-4 left-4 z-50 flex space-x-2">
               <Button 
