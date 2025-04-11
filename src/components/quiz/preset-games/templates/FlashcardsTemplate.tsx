@@ -3,8 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, RefreshCw, Check, X, Clock } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RefreshCw, Check, X, Clock, Shuffle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Toggle } from '@/components/ui/toggle';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface FlashcardsTemplateProps {
   content: any;
@@ -204,67 +206,70 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
         </div>
       </div>
 
-      {/* Navigation controls */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <Button
-          variant="outline"
-          onClick={handlePrevCard}
-          disabled={currentCard === 0}
-          className="bg-gradient-to-r from-background to-secondary/30 border-primary/20 hover:bg-secondary/20"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Thẻ trước
-        </Button>
-        <Button
-          variant="outline"
-          onClick={handleNextCard}
-          disabled={currentCard === cards.length - 1}
-          className="bg-gradient-to-r from-secondary/30 to-background border-primary/20 hover:bg-secondary/20"
-        >
-          Thẻ sau
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Memorization controls */}
-      <div className="grid grid-cols-2 gap-4">
-        <Button
-          variant="outline"
-          className="border-red-500 text-red-500 hover:bg-red-50 bg-gradient-to-r from-red-100/10 to-background"
-          onClick={() => handleMarkCard('unknown')}
-        >
-          <X className="mr-2 h-4 w-4" />
-          Chưa thuộc
-        </Button>
-        <Button
-          variant="outline"
-          className="border-green-500 text-green-500 hover:bg-green-50 bg-gradient-to-r from-green-100/10 to-background"
-          onClick={() => handleMarkCard('known')}
-        >
-          <Check className="mr-2 h-4 w-4" />
-          Đã thuộc
-        </Button>
-      </div>
-
-      {/* Settings */}
-      <div className="mt-4 grid grid-cols-2 gap-4">
-        <Button
-          variant={autoFlip ? "default" : "outline"}
-          className={`flex-1 ${autoFlip ? 'bg-primary' : 'bg-gradient-to-r from-primary/10 to-background border-primary/20'}`}
-          onClick={toggleAutoFlip}
-        >
-          <Clock className="mr-2 h-4 w-4" />
-          {autoFlip ? "Tắt tự động lật" : "Bật tự động lật"}
-        </Button>
+      {/* Simplified Controls */}
+      <div className="flex flex-col gap-4">
+        {/* Navigation control row */}
+        <div className="flex justify-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handlePrevCard}
+            disabled={currentCard === 0}
+            className="bg-background/70 border-primary/20"
+            size="sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            variant={autoFlip ? "default" : "outline"}
+            size="sm"
+            className={`${autoFlip ? 'bg-primary/90' : 'bg-background/70 border-primary/20'}`}
+            onClick={toggleAutoFlip}
+          >
+            <Clock className="h-4 w-4 mr-1" />
+            {autoFlip ? "Tắt lật tự động" : "Bật lật tự động"}
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRestart}
+            className="bg-background/70 border-primary/20"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={handleNextCard}
+            disabled={currentCard === cards.length - 1}
+            className="bg-background/70 border-primary/20"
+            size="sm"
+          >
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
         
-        <Button
-          variant="ghost"
-          className="flex-1 hover:bg-secondary/20"
-          onClick={handleRestart}
-        >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Làm lại từ đầu
-        </Button>
+        {/* Knowledge status row */}
+        <ToggleGroup type="single" className="justify-center">
+          <ToggleGroupItem
+            value="unknown"
+            onClick={() => handleMarkCard('unknown')}
+            className="border border-red-300 text-red-600 data-[state=on]:bg-red-100 data-[state=on]:text-red-700"
+          >
+            <X className="mr-2 h-4 w-4" />
+            Chưa thuộc
+          </ToggleGroupItem>
+          
+          <ToggleGroupItem
+            value="known"
+            onClick={() => handleMarkCard('known')}
+            className="border border-green-300 text-green-600 data-[state=on]:bg-green-100 data-[state=on]:text-green-700"
+          >
+            <Check className="mr-2 h-4 w-4" />
+            Đã thuộc
+          </ToggleGroupItem>
+        </ToggleGroup>
       </div>
     </div>
   );
