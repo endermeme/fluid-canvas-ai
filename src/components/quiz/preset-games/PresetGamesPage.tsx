@@ -46,7 +46,7 @@ const PresetGamesPage: React.FC = () => {
     
     toast({
       title: "Trò chơi đang được tạo",
-      description: `Đang tạo trò chơi ${gameType} với chủ đề "${prompt}"`,
+      description: `Đang tạo trò chơi ${gameType} với nội dung "${prompt}"`,
     });
   };
 

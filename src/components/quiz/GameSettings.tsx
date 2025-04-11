@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -8,12 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { 
   Gamepad, BrainCircuit, Puzzle, Lightbulb, Clock4, Dices, 
-  HeartHandshake, PenTool, Timer, Trophy, Clock, Medal
+  HeartHandshake, PenTool, Timer, Trophy, Clock, Medal, Type
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { animateToolbarAppear } from '@/lib/animations';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 
 interface GameSettingsProps {
   onStart: (settings: GameSettingsData) => void;
@@ -43,6 +43,7 @@ const GameSettings = ({
     totalTime: 0,
     bonusTime: 0,
     useTimer: true,
+    prompt: topic || ''
   });
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -51,6 +52,13 @@ const GameSettings = ({
       setSettings(initialSettings);
     }
   }, [initialSettings]);
+
+  useEffect(() => {
+    // Update prompt in settings when topic changes
+    if (topic && topic !== settings.prompt) {
+      setSettings(prev => ({ ...prev, prompt: topic }));
+    }
+  }, [topic, settings.prompt]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -71,9 +79,13 @@ const GameSettings = ({
   };
 
   const handleInputChange = (name: keyof GameSettingsData, value: string) => {
-    const numValue = parseInt(value);
-    if (!isNaN(numValue)) {
-      setSettings(prev => ({ ...prev, [name]: numValue }));
+    if (name === 'prompt') {
+      setSettings(prev => ({ ...prev, prompt: value }));
+    } else {
+      const numValue = parseInt(value);
+      if (!isNaN(numValue)) {
+        setSettings(prev => ({ ...prev, [name]: numValue }));
+      }
     }
   };
 
@@ -165,18 +177,21 @@ const GameSettings = ({
           </div>
         </div>
 
-        {topic && (
-          <div className="mb-6 text-center">
-            <div className="inline-block px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/20 to-primary/5 backdrop-blur-sm">
-              <h3 className="text-lg font-medium">{topic}</h3>
-            </div>
-            {gameType?.description && (
-              <p className="text-sm text-muted-foreground mt-2">{gameType.description}</p>
-            )}
-          </div>
-        )}
-
         <div className="space-y-6">
+          {/* Prompt Input - Replace Category */}
+          <div className="space-y-3">
+            <Label htmlFor="prompt" className="flex items-center gap-2 text-base font-medium">
+              <Type className="h-4 w-4 text-primary" /> Nội dung trò chơi
+            </Label>
+            <Textarea
+              id="prompt"
+              value={settings.prompt || ''}
+              onChange={(e) => handleInputChange('prompt', e.target.value)}
+              placeholder="Nhập nội dung chi tiết cho trò chơi (ví dụ: Từ vựng tiếng Anh về động vật)"
+              className="min-h-[100px] border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          
           <div className="space-y-3">
             <Label htmlFor="difficulty" className="flex items-center gap-2 text-base font-medium">
               <Trophy className="h-4 w-4 text-primary" /> Độ Khó
@@ -277,31 +292,6 @@ const GameSettings = ({
                 </div>
               </div>
             </>
-          )}
-
-          {(!gameType || !(gameType.id === 'memory' || gameType.id === 'drawing' || gameType.id === 'reflex')) && (
-            <div className="space-y-3">
-              <Label htmlFor="category" className="flex items-center gap-2 text-base font-medium">
-                <BrainCircuit className="h-4 w-4 text-primary" /> Thể Loại
-              </Label>
-              <Select 
-                value={settings.category} 
-                onValueChange={(value) => handleSelectChange('category', value)}
-              >
-                <SelectTrigger className="rounded-lg border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20">
-                  <SelectValue placeholder="Chọn thể loại" />
-                </SelectTrigger>
-                <SelectContent className="rounded-lg border-primary/20 bg-white/95 backdrop-blur-lg shadow-lg">
-                  <SelectItem value="general" className="cursor-pointer focus:bg-primary/10">Kiến thức chung</SelectItem>
-                  <SelectItem value="history" className="cursor-pointer focus:bg-primary/10">Lịch sử</SelectItem>
-                  <SelectItem value="science" className="cursor-pointer focus:bg-primary/10">Khoa học</SelectItem>
-                  <SelectItem value="geography" className="cursor-pointer focus:bg-primary/10">Địa lý</SelectItem>
-                  <SelectItem value="arts" className="cursor-pointer focus:bg-primary/10">Nghệ thuật</SelectItem>
-                  <SelectItem value="sports" className="cursor-pointer focus:bg-primary/10">Thể thao</SelectItem>
-                  <SelectItem value="math" className="cursor-pointer focus:bg-primary/10">Toán học</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           )}
 
           <div className="pt-4 flex gap-3">
