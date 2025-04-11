@@ -9,7 +9,7 @@ import { MiniGame } from '@/components/quiz/generator/AIGameGenerator';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import CustomGameForm from '@/components/quiz/custom-games/CustomGameForm';
 import GameLoading from '@/components/quiz/GameLoading';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, PlusCircle } from 'lucide-react';
 import QuizContainer from '@/components/quiz/QuizContainer';
 
 const Quiz = () => {
@@ -124,8 +124,9 @@ const Quiz = () => {
       <div className="flex flex-col items-center justify-center h-full p-6">
         <Button 
           onClick={() => setShowForm(true)}
-          className="bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg"
+          className="bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg flex items-center gap-2"
         >
+          <PlusCircle className="h-5 w-5" />
           Tạo Trò Chơi Mới
         </Button>
         <Button 
@@ -159,8 +160,10 @@ const Quiz = () => {
             showBackButton={true}
             showHomeButton={!isGenerating && !currentGame}
             showRefreshButton={!isGenerating && !currentGame}
+            showCreateButton={!isGenerating && !showForm} 
             onBack={currentGame ? handleNewGame : handleBackToHome}
             onRefresh={handleReload}
+            onCreate={() => setShowForm(true)}
             footerContent={currentGame ? (
               <div className="flex justify-between items-center">
                 <Button 
@@ -168,6 +171,7 @@ const Quiz = () => {
                   variant="secondary"
                   className="bg-primary/10"
                 >
+                  <PlusCircle className="mr-2 h-4 w-4" />
                   Trò Chơi Mới
                 </Button>
               </div>

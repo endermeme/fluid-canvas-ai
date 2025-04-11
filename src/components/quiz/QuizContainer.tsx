@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Home, RefreshCw, Settings, ArrowLeft } from 'lucide-react';
+import { Home, RefreshCw, Settings, ArrowLeft, PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface QuizContainerProps {
@@ -11,9 +11,11 @@ interface QuizContainerProps {
   showHomeButton?: boolean;
   showRefreshButton?: boolean;
   showSettingsButton?: boolean;
+  showCreateButton?: boolean;
   onBack?: () => void;
   onRefresh?: () => void;
   onSettings?: () => void;
+  onCreate?: () => void;
   footerContent?: React.ReactNode;
   headerRight?: React.ReactNode;
 }
@@ -25,9 +27,11 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
   showHomeButton = true,
   showRefreshButton = true,
   showSettingsButton = false,
+  showCreateButton = false,
   onBack,
   onRefresh,
   onSettings,
+  onCreate,
   footerContent,
   headerRight
 }) => {
@@ -46,6 +50,14 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
       onRefresh();
     } else {
       window.location.reload();
+    }
+  };
+
+  const handleCreate = () => {
+    if (onCreate) {
+      onCreate();
+    } else {
+      navigate('/quiz?create=true');
     }
   };
 
@@ -83,6 +95,19 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
         
         <div className="flex items-center gap-2">
           {headerRight}
+          
+          {showCreateButton && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleCreate}
+              className="h-8 px-3 flex items-center justify-center border-primary/20 hover:bg-primary/5"
+              title="Tạo mới"
+            >
+              <PlusCircle className="h-3.5 w-3.5 mr-1" />
+              <span className="text-xs">Tạo mới</span>
+            </Button>
+          )}
           
           {showRefreshButton && (
             <Button 

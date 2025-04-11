@@ -6,7 +6,7 @@ import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
-import { Share2 } from 'lucide-react';
+import { Share2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createGameSession } from '@/utils/gameParticipation';
 import QuizContainer from '../QuizContainer';
@@ -112,8 +112,9 @@ const GameController: React.FC<GameControllerProps> = ({
       <Button 
         onClick={handleNewGame} 
         variant="secondary"
-        className="bg-primary/10"
+        className="bg-primary/10 flex items-center"
       >
+        <PlusCircle className="h-4 w-4 mr-2" />
         Tạo Game Mới
       </Button>
       
@@ -161,7 +162,13 @@ const GameController: React.FC<GameControllerProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-full p-6">
         <p>Không có nội dung trò chơi. Vui lòng tạo mới.</p>
-        <Button onClick={handleNewGame} className="mt-4">Tạo Game Mới</Button>
+        <Button 
+          onClick={handleNewGame} 
+          className="mt-4 flex items-center gap-2"
+        >
+          <PlusCircle className="h-5 w-5" />
+          Tạo Game Mới
+        </Button>
       </div>
     );
   };
@@ -172,6 +179,8 @@ const GameController: React.FC<GameControllerProps> = ({
       showBackButton={true}
       onBack={handleBack}
       showSettingsButton={currentGame !== null}
+      showCreateButton={!isGenerating && !showForm}
+      onCreate={handleNewGame}
       footerContent={footerActions}
     >
       <div className="h-full w-full">

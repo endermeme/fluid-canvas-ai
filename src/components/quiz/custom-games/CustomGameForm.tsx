@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { SparklesIcon, Brain, PenTool, Info, Globe, Gamepad2 } from 'lucide-react';
+import { SparklesIcon, Brain, PenTool, Info, Globe, Gamepad2, Wand2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { AIGameGenerator, MiniGame } from '../generator/AIGameGenerator';
@@ -30,7 +30,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
   const gameGenerator = AIGameGenerator.getInstance(API_KEY);
 
   const getPlaceholderText = () => {
-    return 'Nhập yêu cầu chi tiết để AI tạo nội dung trò chơi. Hãy mô tả cụ thể chủ đề, mong muốn về số lượng câu hỏi, độ khó và bất kỳ yêu cầu đặc biệt nào.\n\nVí dụ: "Tạo 10 câu hỏi trắc nghiệm về lịch sử Việt Nam thời kỳ phong kiến, mỗi câu có 4 lựa chọn."';
+    return 'Nhập yêu cầu chi tiết để AI tạo nội dung trò chơi. Hãy mô tả cụ thể chủ đề, độ khó, số lượng và bất kỳ yêu cầu đặc biệt nào.\n\nVí dụ: "Tạo 10 câu hỏi trắc nghiệm về lịch sử Việt Nam thời kỳ phong kiến, mỗi câu có 4 lựa chọn."';
   };
 
   const handleSubmit = async () => {
@@ -91,29 +91,32 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
     }
   };
 
+  const generateSamplePrompt = () => {
+    let samplePrompt = '';
+    
+    switch (gameType) {
+      case 'quiz':
+        samplePrompt = 'Tạo 8 câu hỏi trắc nghiệm về các địa danh nổi tiếng ở Việt Nam, mỗi câu có 4 lựa chọn. Độ khó vừa phải, phù hợp với học sinh cấp 2.';
+        break;
+      case 'flashcards':
+        samplePrompt = 'Tạo 10 thẻ ghi nhớ về các công thức Vật lý quan trọng trong chương trình THPT, mỗi thẻ có công thức và ý nghĩa của công thức.';
+        break;
+      case 'memory':
+        samplePrompt = 'Tạo trò chơi ghi nhớ với chủ đề động vật, 8 cặp thẻ, mỗi thẻ có tên và hình ảnh động vật.';
+        break;
+      case 'matching':
+        samplePrompt = 'Tạo 12 cặp từ tiếng Anh - tiếng Việt về chủ đề thể thao, độ khó trung bình, phù hợp cho học sinh cấp 2.';
+        break;
+      default:
+        samplePrompt = 'Tạo trò chơi với chủ đề khoa học vũ trụ cho học sinh cấp 3, độ khó trung bình, tập trung vào các hành tinh trong hệ mặt trời, 10 câu hỏi.';
+    }
+    
+    setContent(samplePrompt);
+  };
+
   if (isGenerating) {
     return <GameLoading topic={content} />;
   }
-
-  const footerActions = (
-    <div className="flex justify-between">
-      <Button 
-        variant="outline" 
-        onClick={handleCancel}
-        className="border-primary/20 hover:border-primary/30 hover:bg-primary/5"
-      >
-        Hủy
-      </Button>
-      <Button 
-        onClick={handleSubmit}
-        disabled={!content.trim() || isGenerating}
-        className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90"
-      >
-        <SparklesIcon className="h-4 w-4 mr-2" />
-        Tạo với AI
-      </Button>
-    </div>
-  );
 
   return (
     <div className="p-4 max-w-4xl mx-auto w-full">
@@ -130,18 +133,39 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
         
         <div className="space-y-4">
           <div>
-            <Label htmlFor="content" className="flex items-center gap-2 text-base">
-              <SparklesIcon className="h-4 w-4 text-primary" /> 
-              Yêu cầu nội dung
-            </Label>
-            <Textarea
-              id="content"
-              placeholder={getPlaceholderText()}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={10}
-              className="font-mono text-sm mt-2 border-primary/20 focus-visible:ring-primary/30"
-            />
+            <div className="flex justify-between items-center">
+              <Label htmlFor="content" className="flex items-center gap-2 text-base">
+                <SparklesIcon className="h-4 w-4 text-primary" /> 
+                Yêu cầu nội dung
+              </Label>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={generateSamplePrompt}
+                className="text-xs h-6 px-2 py-0 flex items-center gap-1 hover:bg-primary/5"
+              >
+                <Wand2 className="h-3.5 w-3.5" /> Gợi ý
+              </Button>
+            </div>
+            <div className="mt-2 flex gap-2">
+              <Textarea
+                id="content"
+                placeholder={getPlaceholderText()}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={6}
+                className="font-mono text-sm border-primary/20 focus-visible:ring-primary/30 flex-1"
+              />
+              <Button 
+                onClick={handleSubmit}
+                disabled={!content.trim() || isGenerating}
+                className="bg-primary h-auto py-3 px-4"
+                variant="default"
+              >
+                <PlusCircle className="mr-2 h-5 w-5" />
+                Tạo
+              </Button>
+            </div>
           </div>
           
           <div className="flex flex-col gap-4 mt-2">
@@ -171,6 +195,24 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, o
                 <p className="text-xs text-muted-foreground">Trải nghiệm người dùng tốt</p>
               </div>
             </div>
+          </div>
+          
+          <div className="flex justify-between pt-4">
+            <Button 
+              variant="outline" 
+              onClick={handleCancel}
+              className="border-primary/20 hover:border-primary/30 hover:bg-primary/5"
+            >
+              Hủy
+            </Button>
+            <Button 
+              onClick={handleSubmit}
+              disabled={isGenerating || !content.trim()}
+              className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90"
+            >
+              <SparklesIcon className="h-4 w-4 mr-2" />
+              Tạo với AI
+            </Button>
           </div>
         </div>
       </Card>
