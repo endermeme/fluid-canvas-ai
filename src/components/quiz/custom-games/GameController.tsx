@@ -6,8 +6,9 @@ import GameView from '../GameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Home, RefreshCw, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { createGameSession } from '@/utils/gameParticipation';
 
 interface GameControllerProps {
   initialTopic?: string;
@@ -58,6 +59,24 @@ const GameController: React.FC<GameControllerProps> = ({
     setCurrentGame(null);
     setShowForm(true);
   };
+  
+  const handleShareGame = () => {
+    if (!currentGame) return;
+    
+    // Create a shareable game session
+    const gameSession = createGameSession(
+      currentGame.title || "Minigame tương tác",
+      currentGame.content
+    );
+    
+    // Navigate to the share page
+    navigate(`/game/${gameSession.id}`);
+    
+    toast({
+      title: "Game đã được chia sẻ",
+      description: "Bạn có thể gửi link cho người khác để họ tham gia.",
+    });
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -66,7 +85,21 @@ const GameController: React.FC<GameControllerProps> = ({
           <GameLoading topic={currentTopic} />
         ) : currentGame ? (
           <div className="relative h-full">
-            <GameView miniGame={currentGame} onBack={handleBack} />
+            <GameView 
+              miniGame={currentGame} 
+              onBack={handleBack}
+              extraButton={
+                <Button 
+                  size="sm" 
+                  variant="secondary"
+                  className="ml-2 bg-background/80 backdrop-blur-sm border border-primary/20 shadow-md" 
+                  onClick={handleShareGame}
+                >
+                  <Share2 size={14} className="mr-1" />
+                  Chia Sẻ & Theo Dõi
+                </Button>
+              }
+            />
           </div>
         ) : showForm ? (
           <div className="relative">

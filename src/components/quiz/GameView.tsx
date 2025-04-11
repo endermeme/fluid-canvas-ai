@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
@@ -9,9 +10,10 @@ import { useNavigate } from 'react-router-dom';
 interface GameViewProps {
   miniGame: MiniGame;
   onBack?: () => void;
+  extraButton?: React.ReactNode;
 }
 
-const GameView: React.FC<GameViewProps> = ({ miniGame, onBack }) => {
+const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { toast } = useToast();
   const [iframeError, setIframeError] = useState<string | null>(null);
@@ -240,6 +242,8 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack }) => {
           <Share2 size={14} className="mr-1" />
           Chia Sẻ
         </Button>
+        
+        {extraButton}
       </div>
     </div>
   );
