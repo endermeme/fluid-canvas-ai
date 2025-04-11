@@ -91,8 +91,8 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
       iframeRef.current.src = 'about:blank';
       setTimeout(() => {
         if (iframeRef.current) {
-          // Using srcdoc (lowercase) as that's the correct DOM property
-          iframeRef.current.srcdoc = miniGame.content;
+          // Using srcDoc (capitalized) as that's the correct React TypeScript property
+          iframeRef.current.srcDoc = miniGame.content;
         }
       }, 100);
       setGameStats({});
@@ -201,8 +201,8 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
         ) : (
           <iframe
             ref={iframeRef}
-            // Using srcdoc (lowercase) as that's the correct DOM property
-            srcdoc={miniGame.content}
+            // Using srcDoc (capitalized) as that's the correct React TypeScript property
+            srcDoc={miniGame.content}
             className="w-full h-full border-0 mx-auto"
             sandbox="allow-scripts allow-popups allow-same-origin"
             onLoad={handleIframeLoad}
@@ -269,4 +269,3 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
 };
 
 export default GameView;
-
