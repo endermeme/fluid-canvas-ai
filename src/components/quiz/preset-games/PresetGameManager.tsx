@@ -15,9 +15,6 @@ const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-// Game play count storage key
-const GAME_PLAY_COUNT_KEY = 'lovable_game_play_count';
-
 interface PresetGameManagerProps {
   gameType: string;
   onBack: () => void;
@@ -30,7 +27,6 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
   const [gameContent, setGameContent] = useState(null);
   const [error, setError] = useState(null);
   const [gameStartTime, setGameStartTime] = useState<number | null>(null);
-  const [gamePlayCount, setGamePlayCount] = useState<number>(0);
   const [showSettings, setShowSettings] = useState(true);
   const [settings, setSettings] = useState<GameSettingsData>({
     difficulty: 'medium',
@@ -44,26 +40,6 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
   });
   const [generationProgress, setGenerationProgress] = useState(0);
   const { toast } = useToast();
-
-  // Load and increment game play count
-  useEffect(() => {
-    // Load current count from localStorage
-    try {
-      const savedCount = localStorage.getItem(GAME_PLAY_COUNT_KEY);
-      const currentCount = savedCount ? parseInt(savedCount, 10) : 0;
-      setGamePlayCount(currentCount);
-      
-      // Increment count only when a game is loaded
-      if (!loading && gameContent) {
-        const newCount = currentCount + 1;
-        localStorage.setItem(GAME_PLAY_COUNT_KEY, newCount.toString());
-        setGamePlayCount(newCount);
-        console.log(`Game play count: ${newCount}`);
-      }
-    } catch (err) {
-      console.error("Error tracking game count:", err);
-    }
-  }, [loading, gameContent]);
 
   // Track game start time
   useEffect(() => {
@@ -491,11 +467,6 @@ Output must be valid JSON. `;
 
   return (
     <div className="flex flex-col h-full">
-      {gamePlayCount > 0 && (
-        <div className="absolute top-2 right-4 bg-primary/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium z-10">
-          Số trò chơi đã chơi: {gamePlayCount}
-        </div>
-      )}
       <div className="flex-grow overflow-auto">
         {gameContent ? renderGameTemplate() : (
           <div className="flex items-center justify-center h-full">
