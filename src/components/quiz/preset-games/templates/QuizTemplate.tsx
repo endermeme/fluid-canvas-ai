@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, RefreshCw, Clock, ArrowLeft } from 'lucide-react';
+import { CheckCircle, XCircle, RefreshCw, Clock, ArrowLeft, ChevronRight } from 'lucide-react';
 
 interface QuizTemplateProps {
   content: any;
@@ -214,7 +215,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic, onBack }) =
           <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
             Câu hỏi {currentQuestion + 1}/{questions.length}
           </div>
-          <div className="text-sm font-medium flex items-center gap-4">
+          <div className="text-sm font-medium flex items-center gap-2">
             <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full">
               <Clock className="h-4 w-4 mr-1 text-primary" />
               {timeLeft}s
@@ -271,13 +272,25 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic, onBack }) =
         </div>
       </Card>
 
-      <div className="mt-auto">
+      <div className="mt-auto flex space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRestart}
+          className="bg-background/70 border-primary/20 flex-1"
+        >
+          <RefreshCw className="h-4 w-4 mr-1" />
+          Làm lại
+        </Button>
+        
         <Button 
           onClick={handleNextQuestion} 
           disabled={!isAnswered}
-          className={`w-full ${isAnswered ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary' : 'bg-primary/50'}`}
+          className={`flex-1 ${isAnswered ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary' : 'bg-primary/50'}`}
+          size="sm"
         >
           {isLastQuestion ? 'Xem Kết Quả' : 'Câu Tiếp Theo'}
+          <ChevronRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
     </div>

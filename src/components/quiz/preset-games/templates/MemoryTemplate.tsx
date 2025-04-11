@@ -194,16 +194,12 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
 
       <div className="mb-4 mt-12">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium flex items-center gap-2">
-            <span className="px-3 py-1 bg-primary/10 rounded-full">
-              Cặp đã ghép: {matchedPairs}/{totalPairs}
-            </span>
+          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+            Cặp đã ghép: {matchedPairs}/{totalPairs}
           </div>
-          <div className="text-sm font-medium flex items-center gap-2">
-            <span className="px-3 py-1 bg-primary/10 rounded-full flex items-center">
-              <Clock className="h-4 w-4 mr-1 text-primary" />
-              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-            </span>
+          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full flex items-center">
+            <Clock className="h-4 w-4 mr-1 text-primary" />
+            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
           </div>
         </div>
         <Progress value={progressPercentage} className="h-2 bg-secondary" />
@@ -247,44 +243,45 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
                 onClick={() => handleCardClick(index)}
               >
                 {(card.flipped || card.matched) ? (
-                  <div className="text-3xl font-bold text-primary/90">{card.content}</div>
+                  <div className="text-2xl font-bold text-primary/90">{card.content}</div>
                 ) : (
-                  <div className="text-3xl font-bold text-secondary/80">?</div>
+                  <div className="text-2xl font-bold text-secondary/80">?</div>
                 )}
               </div>
             ))}
           </div>
           
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center justify-between mt-3">
             <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
               Lượt đã chơi: {moves}
             </div>
             
-            {content?.settings?.allowHints && (
+            <div className="flex gap-2">
+              {content?.settings?.allowHints && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleHint}
+                  className="bg-gradient-to-r from-primary/10 to-background border-primary/20"
+                >
+                  <Lightbulb className="h-4 w-4 mr-1 text-yellow-500" />
+                  Gợi ý (-10s)
+                </Button>
+              )}
+              
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleHint}
-                className="bg-gradient-to-r from-primary/10 to-background border-primary/20"
+                onClick={handleRestart}
+                className="bg-gradient-to-r from-secondary/50 to-background border-primary/20"
               >
-                <Lightbulb className="h-4 w-4 mr-1 text-yellow-500" />
-                Gợi ý (-10s)
+                <RefreshCw className="h-4 w-4 mr-1" />
+                Làm lại
               </Button>
-            )}
+            </div>
           </div>
         </div>
       )}
-
-      <div className="mt-4">
-        <Button 
-          variant="outline" 
-          onClick={handleRestart}
-          className="w-full bg-gradient-to-r from-secondary/50 to-background border-primary/20 hover:bg-secondary/30"
-        >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Chơi lại
-        </Button>
-      </div>
     </div>
   );
 };

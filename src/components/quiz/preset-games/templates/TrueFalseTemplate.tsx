@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, RefreshCw, AlertCircle, Clock, ArrowLeft } from 'lucide-react';
+import { CheckCircle, XCircle, RefreshCw, AlertCircle, Clock, ArrowLeft, ChevronRight } from 'lucide-react';
 
 interface TrueFalseTemplateProps {
   content: any;
@@ -209,16 +210,16 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic, o
           <div className="text-sm font-medium">
             Câu hỏi {currentQuestion + 1}/{questions.length}
           </div>
-          <div className="text-sm font-medium flex items-center gap-4">
-            <div className="flex items-center">
+          <div className="text-sm font-medium flex items-center gap-2">
+            <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full">
               <Clock className="h-4 w-4 mr-1" />
               {timeLeft}s
             </div>
-            <div className="flex items-center text-primary/80">
+            <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full text-primary/80">
               <Clock className="h-4 w-4 mr-1" />
               {formattedTotalTime}
             </div>
-            <div>
+            <div className="px-3 py-1 bg-primary/10 rounded-full">
               Điểm: <span className="font-bold">{score}</span>
             </div>
           </div>
@@ -226,7 +227,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic, o
         <Progress value={progress} className="h-2" />
       </div>
 
-      <Card className="p-6 mb-4">
+      <Card className="p-6 mb-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
         <h2 className="text-xl font-semibold mb-6">{question.statement}</h2>
         
         <div className="grid grid-cols-2 gap-4 mb-4">
@@ -241,7 +242,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic, o
             onClick={() => handleAnswer(true)}
             disabled={currentAnswer !== null}
           >
-            <CheckCircle className="h-8 w-8 mr-2" />
+            <CheckCircle className="h-7 w-7 mr-2" />
             <span className="text-lg font-medium">Đúng</span>
           </Button>
           
@@ -256,7 +257,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic, o
             onClick={() => handleAnswer(false)}
             disabled={currentAnswer !== null}
           >
-            <XCircle className="h-8 w-8 mr-2" />
+            <XCircle className="h-7 w-7 mr-2" />
             <span className="text-lg font-medium">Sai</span>
           </Button>
         </div>
@@ -274,13 +275,25 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic, o
         )}
       </Card>
 
-      <div className="mt-auto">
+      <div className="mt-auto flex gap-2">
+        <Button 
+          variant="outline"
+          size="sm"
+          onClick={handleRestart} 
+          className="flex-1 bg-background/70 border-primary/20"
+        >
+          <RefreshCw className="h-4 w-4 mr-1" />
+          Làm lại
+        </Button>
+        
         <Button 
           onClick={handleNextQuestion} 
           disabled={currentAnswer === null}
-          className="w-full"
+          className="flex-1"
+          size="sm"
         >
           {isLastQuestion ? 'Xem Kết Quả' : 'Câu Tiếp Theo'}
+          <ChevronRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
     </div>

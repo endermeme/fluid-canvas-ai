@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -27,14 +26,12 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
   const progress = ((currentCard + 1) / cards.length) * 100;
   const flipTime = content?.settings?.flipTime || 5;
 
-  // Initialize cards state
   useEffect(() => {
     if (cards.length > 0) {
       setCardsState(new Array(cards.length).fill('unreviewed'));
     }
   }, [cards.length]);
 
-  // Handle auto flip timer
   useEffect(() => {
     if (autoFlip && !isFlipped) {
       setTimeRemaining(flipTime);
@@ -92,7 +89,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
     newCardsState[currentCard] = status;
     setCardsState(newCardsState);
     
-    // Show toast notification
     if (status === 'known') {
       toast({
         title: "Đã thuộc!",
@@ -107,7 +103,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
       });
     }
     
-    // Move to next card if not at the end
     if (currentCard < cards.length - 1) {
       handleNextCard();
     }
@@ -145,7 +140,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
 
   return (
     <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
-      {/* Back button */}
       {onBack && (
         <Button 
           variant="ghost" 
@@ -158,7 +152,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
         </Button>
       )}
 
-      {/* Header with progress */}
       <div className="mb-4 mt-12">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
@@ -172,7 +165,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
         <Progress value={progress} className="h-2 bg-secondary" />
       </div>
 
-      {/* Flashcard */}
       <div className="flex-grow flex items-center justify-center mb-4 perspective-1000">
         <div 
           className="w-full max-w-md aspect-[3/2] cursor-pointer relative group"
@@ -183,7 +175,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
             transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
           }}
         >
-          {/* Front of card */}
           <Card 
             className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-2 border-primary/20 shadow-lg group-hover:shadow-xl transition-all duration-300"
             style={{
@@ -204,7 +195,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
             </div>
           </Card>
           
-          {/* Back of card */}
           <Card 
             className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm border-2 border-primary/30 shadow-lg"
             style={{
@@ -220,10 +210,8 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
         </div>
       </div>
 
-      {/* Simplified Controls */}
-      <div className="flex flex-col gap-4">
-        {/* Navigation control row */}
-        <div className="flex justify-center gap-2">
+      <div className="flex flex-col gap-3 bg-background/40 p-3 rounded-lg backdrop-blur-sm border border-primary/10 shadow-sm">
+        <div className="grid grid-cols-4 gap-2">
           <Button
             variant="outline"
             onClick={handlePrevCard}
@@ -231,13 +219,36 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
             className="bg-background/70 border-primary/20"
             size="sm"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Trước
           </Button>
           
           <Button
+            variant="outline"
+            onClick={handleFlip}
+            className="col-span-2 bg-background/70 border-primary/20"
+            size="sm"
+          >
+            {isFlipped ? "Xem mặt trước" : "Lật thẻ"}
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={handleNextCard}
+            disabled={currentCard === cards.length - 1}
+            className="bg-background/70 border-primary/20"
+            size="sm"
+          >
+            Tiếp
+            <ArrowRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
+        
+        <div className="flex gap-2 justify-between">
+          <Button
             variant={autoFlip ? "default" : "outline"}
             size="sm"
-            className={`${autoFlip ? 'bg-primary/90' : 'bg-background/70 border-primary/20'}`}
+            className={`flex-1 ${autoFlip ? 'bg-primary/90' : 'bg-background/70 border-primary/20'}`}
             onClick={toggleAutoFlip}
           >
             <Clock className="h-4 w-4 mr-1" />
@@ -248,24 +259,14 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
             variant="outline"
             size="sm"
             onClick={handleRestart}
-            className="bg-background/70 border-primary/20"
+            className="bg-background/70 border-primary/20 flex-1"
           >
-            <RefreshCw className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            variant="outline"
-            onClick={handleNextCard}
-            disabled={currentCard === cards.length - 1}
-            className="bg-background/70 border-primary/20"
-            size="sm"
-          >
-            <ArrowRight className="h-4 w-4" />
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Làm lại
           </Button>
         </div>
         
-        {/* Knowledge status row */}
-        <ToggleGroup type="single" className="justify-center">
+        <ToggleGroup type="single" variant="outline" className="grid grid-cols-2">
           <ToggleGroupItem
             value="unknown"
             onClick={() => handleMarkCard('unknown')}

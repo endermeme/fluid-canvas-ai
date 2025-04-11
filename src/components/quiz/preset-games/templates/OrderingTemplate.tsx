@@ -1,17 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, ArrowUp, ArrowDown, Check, Clock, Shuffle, Lightbulb } from 'lucide-react';
+import { RefreshCw, ArrowUp, ArrowDown, Check, Clock, Shuffle, Lightbulb, ArrowLeft } from 'lucide-react';
 
 interface OrderingTemplateProps {
   content: any;
   topic: string;
+  onBack?: () => void;
 }
 
-const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) => {
+const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onBack }) => {
   const [currentSentence, setCurrentSentence] = useState(0);
   const [shuffledWords, setShuffledWords] = useState<string[]>([]);
   const [orderedWords, setOrderedWords] = useState<string[]>([]);
@@ -26,7 +26,6 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
   const sentences = content?.sentences || [];
   const isLastSentence = currentSentence === sentences.length - 1;
 
-  // Initialize the current sentence
   useEffect(() => {
     if (sentences[currentSentence]) {
       const currentWords = [...sentences[currentSentence].words];
@@ -38,7 +37,6 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
     }
   }, [currentSentence, sentences]);
 
-  // Timer countdown
   useEffect(() => {
     if (timeLeft > 0 && timerRunning) {
       const timer = setTimeout(() => {
@@ -60,7 +58,6 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
   const handleWordSelect = (word: string, index: number) => {
     if (isChecking) return;
     
-    // Remove from shuffled and add to ordered
     const newShuffled = [...shuffledWords];
     newShuffled.splice(index, 1);
     setShuffledWords(newShuffled);
@@ -71,7 +68,6 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
   const handleWordRemove = (word: string, index: number) => {
     if (isChecking) return;
     
-    // Remove from ordered and add back to shuffled
     const newOrdered = [...orderedWords];
     newOrdered.splice(index, 1);
     setOrderedWords(newOrdered);
@@ -97,7 +93,6 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
     
     setIsChecking(true);
     
-    // Check if the order is correct
     const correctOrder = sentences[currentSentence].correctOrder;
     const originalWords = sentences[currentSentence].words;
     
@@ -124,7 +119,6 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
       });
     }
     
-    // Show correct order briefly
     setTimeout(() => {
       if (isLastSentence) {
         setShowResult(true);
@@ -137,31 +131,24 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
   const handleHint = () => {
     if (isChecking || hasShownHint) return;
     
-    // Show the first word in correct position
     const correctOrder = sentences[currentSentence].correctOrder;
     const originalWords = sentences[currentSentence].words;
     
-    // Find the first correct word
     const firstCorrectWordIndex = correctOrder[0];
     const firstCorrectWord = originalWords[firstCorrectWordIndex];
     
-    // If it's already in ordered words at correct position, find next
     if (orderedWords[0] === firstCorrectWord) {
-      // Find the next word that's not in correct position
       for (let i = 1; i < correctOrder.length; i++) {
         const correctWordIndex = correctOrder[i];
         const correctWord = originalWords[correctWordIndex];
         
         if (orderedWords[i] !== correctWord) {
-          // Remove it from shuffled if it's there
           const shuffledIndex = shuffledWords.indexOf(correctWord);
           if (shuffledIndex !== -1) {
             const newShuffled = [...shuffledWords];
             newShuffled.splice(shuffledIndex, 1);
             
-            // Update ordered words to place this word at correct position
             const newOrdered = [...orderedWords];
-            // If this position already has a word, move it to shuffled
             if (i < newOrdered.length) {
               newShuffled.push(newOrdered[i]);
             }
@@ -174,16 +161,12 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
         }
       }
     } else {
-      // First word is not in correct position
-      // Remove it from shuffled if it's there
       const shuffledIndex = shuffledWords.indexOf(firstCorrectWord);
       if (shuffledIndex !== -1) {
         const newShuffled = [...shuffledWords];
         newShuffled.splice(shuffledIndex, 1);
         
-        // Update ordered words to place this word at position 0
         const newOrdered = [...orderedWords];
-        // If position 0 already has a word, move it to shuffled
         if (newOrdered.length > 0) {
           newShuffled.push(newOrdered[0]);
         }
@@ -195,7 +178,6 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
     }
     
     setHasShownHint(true);
-    // Penalty: reduce time
     setTimeLeft(Math.max(10, timeLeft - 30));
     
     toast({
@@ -213,7 +195,6 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
     setTimerRunning(true);
     setIsChecking(false);
     
-    // Reset current sentence
     if (sentences[0]) {
       const currentWords = [...sentences[0].words];
       const shuffled = [...currentWords].sort(() => Math.random() - 0.5);
@@ -262,13 +243,24 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
 
   return (
     <div className="flex flex-col p-4 h-full">
-      {/* Header with progress and timer */}
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium">
+      <div className="mb-4 relative">
+        {onBack && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onBack} 
+            className="absolute top-0 left-0 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Quay lại</span>
+          </Button>
+        )}
+        
+        <div className="flex justify-between items-center mb-2 mt-12">
+          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
             Câu {currentSentence + 1}/{sentences.length}
           </div>
-          <div className="text-sm font-medium flex items-center">
+          <div className="text-sm font-medium flex items-center px-3 py-1 bg-primary/10 rounded-full">
             <Clock className="h-4 w-4 mr-1" />
             {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
           </div>
@@ -276,16 +268,13 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
         <Progress value={progress} className="h-2" />
       </div>
 
-      {/* Game content */}
       <div className="flex-grow">
-        {/* Instructions */}
         <div className="mb-4 text-center">
           <h3 className="text-lg font-medium mb-1">Sắp xếp lại từng từ để tạo thành câu hoàn chỉnh</h3>
           <p className="text-muted-foreground text-sm">Chọn từ theo đúng thứ tự</p>
         </div>
         
-        {/* Ordered words (result) */}
-        <Card className="p-4 mb-4 min-h-[100px] flex flex-wrap gap-2 items-start content-start border-2 border-dashed border-primary/30">
+        <Card className="p-4 mb-4 min-h-[100px] flex flex-wrap gap-2 items-start content-start border border-primary/30 bg-background/80">
           {orderedWords.map((word, index) => (
             <button
               key={`ordered-${index}`}
@@ -309,8 +298,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
           )}
         </Card>
         
-        {/* Shuffled words (available options) */}
-        <div className="p-4 bg-secondary/20 rounded-lg mb-4 flex flex-wrap gap-2">
+        <div className="p-4 bg-secondary/20 rounded-lg mb-4 flex flex-wrap gap-2 border border-primary/10">
           {shuffledWords.map((word, index) => (
             <button
               key={`shuffled-${index}`}
@@ -323,14 +311,14 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
           ))}
         </div>
         
-        {/* Controls */}
         <div className="grid grid-cols-3 gap-2">
           <Button
             variant="outline"
             onClick={handleShuffleWords}
             disabled={isChecking || shuffledWords.length === 0}
+            size="sm"
           >
-            <Shuffle className="h-4 w-4 mr-2" />
+            <Shuffle className="h-4 w-4 mr-1" />
             Xáo trộn
           </Button>
           
@@ -340,8 +328,9 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
               onClick={handleHint}
               disabled={isChecking || hasShownHint}
               className={hasShownHint ? 'opacity-50' : ''}
+              size="sm"
             >
-              <Lightbulb className="h-4 w-4 mr-2" />
+              <Lightbulb className="h-4 w-4 mr-1" />
               Gợi ý
             </Button>
           )}
@@ -350,12 +339,23 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
             onClick={handleCheck}
             disabled={orderedWords.length !== sentences[currentSentence].words.length || isChecking}
             className={orderedWords.length !== sentences[currentSentence].words.length ? 'opacity-50' : ''}
+            size="sm"
           >
-            <Check className="h-4 w-4 mr-2" />
+            <Check className="h-4 w-4 mr-1" />
             Kiểm tra
           </Button>
         </div>
       </div>
+      
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleRestart}
+        className="mt-3 w-full bg-background/70 border-primary/20"
+      >
+        <RefreshCw className="h-4 w-4 mr-1" />
+        Làm lại
+      </Button>
     </div>
   );
 };

@@ -233,25 +233,29 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
   return (
     <div className="flex flex-col p-4 h-full">
       {/* Header with navigation, progress and timer */}
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center gap-2">
-            {onBack && (
-              <Button variant="ghost" size="sm" onClick={onBack} className="mr-2">
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Quay lại
-              </Button>
-            )}
-            <div className="text-sm font-medium">
-              Đã ghép: {matchedPairs}/{totalPairs}
-            </div>
+      <div className="relative mb-4">
+        {onBack && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onBack} 
+            className="absolute top-0 left-0 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Quay lại</span>
+          </Button>
+        )}
+        
+        <div className="flex justify-between items-center mb-2 mt-12">
+          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+            Đã ghép: {matchedPairs}/{totalPairs}
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center text-sm font-medium">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
               <Trophy className="h-4 w-4 mr-1 text-yellow-500" />
               Điểm: {score}
             </div>
-            <div className="text-sm font-medium flex items-center">
+            <div className="text-sm font-medium flex items-center px-3 py-1 bg-primary/10 rounded-full">
               <Clock className="h-4 w-4 mr-1" />
               {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
             </div>
@@ -289,46 +293,50 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
       ) : (
         <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Left column */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium mb-2 text-center">Cột A</h3>
-            {leftItems.map((item) => (
-              <button
-                key={`left-${item.id}`}
-                className={`w-full p-3 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
-                  item.matched 
-                    ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
-                    : selectedLeft === item.id
-                      ? 'bg-primary/20 border-primary border'
-                      : 'bg-secondary hover:bg-secondary/80 border-transparent border'
-                }`}
-                onClick={() => handleLeftItemClick(item.id)}
-                disabled={item.matched}
-              >
-                <span className="line-clamp-2">{item.text}</span>
-              </button>
-            ))}
-          </div>
+          <Card className="p-3 bg-background/50 border border-primary/10">
+            <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột A</h3>
+            <div className="space-y-2">
+              {leftItems.map((item) => (
+                <button
+                  key={`left-${item.id}`}
+                  className={`w-full p-3 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
+                    item.matched 
+                      ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
+                      : selectedLeft === item.id
+                        ? 'bg-primary/20 border-primary border'
+                        : 'bg-secondary hover:bg-secondary/80 border-transparent border'
+                  }`}
+                  onClick={() => handleLeftItemClick(item.id)}
+                  disabled={item.matched}
+                >
+                  <span className="line-clamp-2">{item.text}</span>
+                </button>
+              ))}
+            </div>
+          </Card>
           
           {/* Right column */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium mb-2 text-center">Cột B</h3>
-            {rightItems.map((item) => (
-              <button
-                key={`right-${item.id}`}
-                className={`w-full p-3 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
-                  item.matched 
-                    ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
-                    : selectedRight === item.id
-                      ? 'bg-primary/20 border-primary border'
-                      : 'bg-secondary hover:bg-secondary/80 border-transparent border'
-                }`}
-                onClick={() => handleRightItemClick(item.id)}
-                disabled={item.matched}
-              >
-                <span className="line-clamp-2">{item.text}</span>
-              </button>
-            ))}
-          </div>
+          <Card className="p-3 bg-background/50 border border-primary/10">
+            <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột B</h3>
+            <div className="space-y-2">
+              {rightItems.map((item) => (
+                <button
+                  key={`right-${item.id}`}
+                  className={`w-full p-3 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
+                    item.matched 
+                      ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
+                      : selectedRight === item.id
+                        ? 'bg-primary/20 border-primary border'
+                        : 'bg-secondary hover:bg-secondary/80 border-transparent border'
+                  }`}
+                  onClick={() => handleRightItemClick(item.id)}
+                  disabled={item.matched}
+                >
+                  <span className="line-clamp-2">{item.text}</span>
+                </button>
+              ))}
+            </div>
+          </Card>
         </div>
       )}
 
@@ -337,7 +345,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
         <Button 
           variant="outline" 
           onClick={handleRestart}
-          className="w-full"
+          className="w-full bg-gradient-to-r from-secondary/30 to-background/90 border-primary/20"
+          size="sm"
         >
           <RefreshCw className="mr-2 h-4 w-4" />
           Làm lại

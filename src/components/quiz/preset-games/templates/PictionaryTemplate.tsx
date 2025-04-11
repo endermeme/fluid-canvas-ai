@@ -242,10 +242,10 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic,
 
       <div className="mb-4 mt-12">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium">
+          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
             Hình ảnh {currentItem + 1}/{items.length}
           </div>
-          <div className="text-sm font-medium flex items-center">
+          <div className="text-sm font-medium flex items-center px-3 py-1 bg-primary/10 rounded-full">
             <Clock className="h-4 w-4 mr-1" />
             {timeLeft}s
           </div>
@@ -254,7 +254,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic,
       </div>
 
       <div className="flex-grow flex flex-col items-center justify-center mb-4">
-        <div className="relative w-full max-w-md aspect-video mb-4 bg-secondary/30 rounded-lg overflow-hidden">
+        <Card className="relative w-full max-w-md aspect-video mb-4 bg-secondary/30 rounded-lg overflow-hidden border border-primary/20">
           {!imageLoaded && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -275,7 +275,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic,
               onError={handleImageErrorEvent}
             />
           )}
-        </div>
+        </Card>
         
         {showHint && (
           <div className="mb-4 p-3 bg-primary/10 rounded-lg text-center max-w-md">
@@ -284,12 +284,12 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic,
           </div>
         )}
         
-        <div className="w-full max-w-md space-y-2">
+        <div className="w-full max-w-md grid grid-cols-2 gap-2">
           {options.map((option: string, index: number) => (
             <button
               key={index}
               onClick={() => handleOptionSelect(option)}
-              className={`w-full p-3 text-left rounded-lg transition-colors ${
+              className={`w-full p-3 text-center rounded-lg transition-colors ${
                 selectedOption === option 
                   ? selectedOption === item.answer
                     ? 'bg-green-100 border-green-500 border'
@@ -306,26 +306,39 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic,
         </div>
       </div>
 
-      <div className="mt-auto grid grid-cols-2 gap-2">
+      <div className="flex gap-2 items-center">
         {content?.settings?.showHints && !showHint && selectedOption === null && (
           <Button 
             variant="outline"
             onClick={handleShowHint}
+            size="sm"
+            className="flex-1"
           >
             <HelpCircle className="mr-2 h-4 w-4" />
-            Hiện gợi ý
+            Gợi ý
           </Button>
         )}
         
         <Button 
           onClick={handleNextItem}
-          className={showHint && selectedOption === null ? "col-span-1" : (selectedOption === null ? "col-span-2" : "col-span-2")}
+          size="sm"
+          className={`${(showHint && selectedOption === null) || (content?.settings?.showHints && !showHint && selectedOption === null) ? "flex-1" : "w-full"}`}
           disabled={timerRunning && selectedOption === null && !isLastItem}
         >
           {isLastItem ? 'Xem kết quả' : 'Tiếp theo'}
           <ChevronRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
+      
+      <Button
+        variant="outline"
+        onClick={handleRestart}
+        size="sm"
+        className="mt-2 w-full bg-background/70 border-primary/20"
+      >
+        <RefreshCw className="mr-2 h-4 w-4" />
+        Làm lại
+      </Button>
     </div>
   );
 };
