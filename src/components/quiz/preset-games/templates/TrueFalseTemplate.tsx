@@ -1,17 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, RefreshCw, AlertCircle, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, RefreshCw, AlertCircle, Clock, ArrowLeft } from 'lucide-react';
 
 interface TrueFalseTemplateProps {
   content: any;
   topic: string;
+  onBack?: () => void;
 }
 
-const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic }) => {
+const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic, onBack }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Array<boolean | null>>([]);
   const [score, setScore] = useState(0);
@@ -27,12 +27,10 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic })
   const isLastQuestion = currentQuestion === questions.length - 1;
   const currentAnswer = userAnswers[currentQuestion];
 
-  // Initialize the game
   useEffect(() => {
     if (!gameStarted && questions.length > 0) {
       setGameStarted(true);
       
-      // Initialize timeLeft with proper settings
       const questionTime = content?.settings?.timePerQuestion || 15;
       const totalTime = content?.settings?.totalTime || (questions.length * questionTime);
       
@@ -43,7 +41,6 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic })
     }
   }, [content, questions, gameStarted]);
 
-  // Question timer countdown
   useEffect(() => {
     if (timeLeft > 0 && timerRunning) {
       const timer = setTimeout(() => {
@@ -62,7 +59,6 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic })
     }
   }, [timeLeft, timerRunning, toast]);
 
-  // Total game timer countdown
   useEffect(() => {
     if (totalTimeLeft > 0 && gameStarted && !showResult) {
       const timer = setTimeout(() => {
@@ -71,7 +67,6 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic })
       
       return () => clearTimeout(timer);
     } else if (totalTimeLeft === 0 && gameStarted && !showResult) {
-      // Time's up - show results
       setShowResult(true);
       
       toast({
@@ -144,7 +139,19 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic })
     const percentage = Math.round((correctAnswers / questions.length) * 100);
     
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6">
+      <div className="flex flex-col items-center justify-center h-full p-6 relative">
+        {onBack && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onBack} 
+            className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Quay lại</span>
+          </Button>
+        )}
+
         <Card className="max-w-md w-full p-6 text-center">
           <h2 className="text-2xl font-bold mb-4">Kết Quả</h2>
           <p className="text-lg mb-4">
@@ -179,15 +186,25 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic })
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   
-  // Format total time remaining as mm:ss
   const minutesLeft = Math.floor(totalTimeLeft / 60);
   const secondsLeft = totalTimeLeft % 60;
   const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
 
   return (
-    <div className="flex flex-col p-4 h-full">
-      {/* Header with progress and timer */}
-      <div className="mb-4">
+    <div className="flex flex-col p-4 h-full relative">
+      {onBack && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onBack} 
+          className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Quay lại</span>
+        </Button>
+      )}
+
+      <div className="mb-4 mt-12">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium">
             Câu hỏi {currentQuestion + 1}/{questions.length}
@@ -209,7 +226,6 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic })
         <Progress value={progress} className="h-2" />
       </div>
 
-      {/* Question */}
       <Card className="p-6 mb-4">
         <h2 className="text-xl font-semibold mb-6">{question.statement}</h2>
         
@@ -258,7 +274,6 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic })
         )}
       </Card>
 
-      {/* Controls */}
       <div className="mt-auto">
         <Button 
           onClick={handleNextQuestion} 

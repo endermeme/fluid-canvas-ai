@@ -1,18 +1,18 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, ChevronRight, HelpCircle, Clock, Image } from 'lucide-react';
+import { RefreshCw, ChevronRight, HelpCircle, Clock, Image, ArrowLeft } from 'lucide-react';
 import { generatePixabayImage, handleImageError, generatePlaceholderImage } from '../../generator/imageInstructions';
 
 interface PictionaryTemplateProps {
   content: any;
   topic: string;
+  onBack?: () => void;
 }
 
-const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic }) => {
+const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic, onBack }) => {
   const [currentItem, setCurrentItem] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [score, setScore] = useState(0);
@@ -28,7 +28,6 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
 
   const rawItems = content?.items || [];
 
-  // Process items to ensure they have Pixabay image URLs
   useEffect(() => {
     const processItems = async () => {
       setIsProcessing(true);
@@ -37,7 +36,6 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
       for (let i = 0; i < processed.length; i++) {
         const item = processed[i];
         
-        // If there's a search term but no image URL, fetch from Pixabay
         if (item.imageSearchTerm && !item.imageUrl) {
           try {
             item.imageUrl = await generatePixabayImage(item.imageSearchTerm);
@@ -45,9 +43,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
             console.error("Error fetching image:", error);
             item.imageUrl = generatePlaceholderImage(400, 300, item.answer || topic);
           }
-        }
-        // If URL is not from Pixabay, replace it
-        else if (item.imageUrl && !item.imageUrl.includes('pixabay.com')) {
+        } else if (item.imageUrl && !item.imageUrl.includes('pixabay.com')) {
           try {
             const searchTerm = item.answer || topic;
             item.imageUrl = await generatePixabayImage(searchTerm);
@@ -55,9 +51,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
             console.error("Error replacing non-Pixabay image:", error);
             item.imageUrl = generatePlaceholderImage(400, 300, item.answer || topic);
           }
-        }
-        // Ensure there's always an image URL
-        else if (!item.imageUrl) {
+        } else if (!item.imageUrl) {
           item.imageUrl = generatePlaceholderImage(400, 300, item.answer || topic);
         }
       }
@@ -72,7 +66,6 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
   const items = processedItems;
   const isLastItem = currentItem === items.length - 1;
 
-  // Timer countdown
   useEffect(() => {
     if (timeLeft > 0 && timerRunning && !isProcessing) {
       const timer = setTimeout(() => {
@@ -128,7 +121,6 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
 
   const handleShowHint = () => {
     setShowHint(true);
-    // Penalty for using hint: reduce time
     setTimeLeft(Math.max(5, timeLeft - 5));
     toast({
       title: "Đã hiện gợi ý",
@@ -165,7 +157,18 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
 
   if (!content || !items.length || isProcessing) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full relative">
+        {onBack && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onBack} 
+            className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Quay lại</span>
+          </Button>
+        )}
         <div className="text-center">
           <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-lg font-medium">Đang tải hình ảnh từ Pixabay...</p>
@@ -179,7 +182,19 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
     const percentage = Math.round((score / items.length) * 100);
     
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6">
+      <div className="flex flex-col items-center justify-center h-full p-6 relative">
+        {onBack && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onBack} 
+            className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Quay lại</span>
+          </Button>
+        )}
+
         <Card className="max-w-md w-full p-6 text-center">
           <h2 className="text-2xl font-bold mb-4">Kết quả</h2>
           <p className="text-lg mb-4">
@@ -212,9 +227,20 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
   const options = item.options || [];
 
   return (
-    <div className="flex flex-col p-4 h-full">
-      {/* Header with progress and timer */}
-      <div className="mb-4">
+    <div className="flex flex-col p-4 h-full relative">
+      {onBack && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onBack} 
+          className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Quay lại</span>
+        </Button>
+      )}
+
+      <div className="mb-4 mt-12">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium">
             Hình ảnh {currentItem + 1}/{items.length}
@@ -227,7 +253,6 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
         <Progress value={progress} className="h-2" />
       </div>
 
-      {/* Image display */}
       <div className="flex-grow flex flex-col items-center justify-center mb-4">
         <div className="relative w-full max-w-md aspect-video mb-4 bg-secondary/30 rounded-lg overflow-hidden">
           {!imageLoaded && (
@@ -259,7 +284,6 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
           </div>
         )}
         
-        {/* Options */}
         <div className="w-full max-w-md space-y-2">
           {options.map((option: string, index: number) => (
             <button
@@ -282,7 +306,6 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic 
         </div>
       </div>
 
-      {/* Controls */}
       <div className="mt-auto grid grid-cols-2 gap-2">
         {content?.settings?.showHints && !showHint && selectedOption === null && (
           <Button 

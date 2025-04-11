@@ -11,9 +11,10 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 interface FlashcardsTemplateProps {
   content: any;
   topic: string;
+  onBack?: () => void;
 }
 
-const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic }) => {
+const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic, onBack }) => {
   const [currentCard, setCurrentCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [cardsState, setCardsState] = useState<Array<'unreviewed' | 'known' | 'unknown'>>([]);
@@ -143,9 +144,22 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
   };
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
+    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
+      {/* Back button */}
+      {onBack && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onBack} 
+          className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Quay lại</span>
+        </Button>
+      )}
+
       {/* Header with progress */}
-      <div className="mb-4">
+      <div className="mb-4 mt-12">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
             Thẻ {currentCard + 1}/{cards.length}

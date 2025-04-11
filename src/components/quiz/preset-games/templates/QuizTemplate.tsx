@@ -1,17 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, RefreshCw, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, RefreshCw, Clock, ArrowLeft } from 'lucide-react';
 
 interface QuizTemplateProps {
   content: any;
   topic: string;
+  onBack?: () => void;
 }
 
-const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
+const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic, onBack }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -26,12 +26,10 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
   const questions = content?.questions || [];
   const isLastQuestion = currentQuestion === questions.length - 1;
 
-  // Initialize the game
   useEffect(() => {
     if (!gameStarted && questions.length > 0) {
       setGameStarted(true);
       
-      // Initialize timeLeft with proper settings
       const questionTime = content?.settings?.timePerQuestion || 30;
       const totalTime = content?.settings?.totalTime || (questions.length * questionTime);
       
@@ -42,7 +40,6 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
     }
   }, [content, questions, gameStarted]);
 
-  // Question timer countdown
   useEffect(() => {
     if (timeLeft > 0 && timerRunning && !isAnswered) {
       const timer = setTimeout(() => {
@@ -51,7 +48,6 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
       
       return () => clearTimeout(timer);
     } else if (timeLeft === 0 && timerRunning && !isAnswered) {
-      // Auto-move to next question if time runs out
       setTimerRunning(false);
       setIsAnswered(true);
       
@@ -63,7 +59,6 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
     }
   }, [timeLeft, timerRunning, isAnswered, toast]);
 
-  // Total game timer countdown
   useEffect(() => {
     if (totalTimeLeft > 0 && gameStarted && !showResult) {
       const timer = setTimeout(() => {
@@ -72,7 +67,6 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
       
       return () => clearTimeout(timer);
     } else if (totalTimeLeft === 0 && gameStarted && !showResult) {
-      // Time's up - show results
       setShowResult(true);
       
       toast({
@@ -93,14 +87,13 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
     if (optionIndex === questions[currentQuestion].correctAnswer) {
       setScore(score + 1);
       
-      // Add bonus time if specified in settings
       if (content?.settings?.bonusTimePerCorrect) {
         const bonusTime = content.settings.bonusTimePerCorrect;
         setTotalTimeLeft(prev => prev + bonusTime);
         
         toast({
           title: "Chính xác! +1 điểm",
-          description: `Câu trả lời của bạn đúng. +${bonusTime}s thời gian thưởng.`,
+          description: `Câu trả lời của bạn đúng. +${bonusTime}s thời gian thư��ng.`,
           variant: "default",
         });
       } else {
@@ -151,7 +144,19 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
     const percentage = Math.round((score / questions.length) * 100);
     
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
+      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80 relative">
+        {onBack && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onBack} 
+            className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Quay lại</span>
+          </Button>
+        )}
+
         <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
           <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả</h2>
           <p className="text-lg mb-4">
@@ -186,15 +191,25 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   
-  // Format total time remaining as mm:ss
   const minutesLeft = Math.floor(totalTimeLeft / 60);
   const secondsLeft = totalTimeLeft % 60;
   const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
-      {/* Header with progress and timer */}
-      <div className="mb-4">
+    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
+      {onBack && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onBack} 
+          className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Quay lại</span>
+        </Button>
+      )}
+
+      <div className="mb-4 mt-12">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
             Câu hỏi {currentQuestion + 1}/{questions.length}
@@ -216,7 +231,6 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
         <Progress value={progress} className="h-2 bg-secondary" />
       </div>
 
-      {/* Question */}
       <Card className="p-6 mb-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
         <h2 className="text-xl font-semibold mb-6 text-primary">{question.question}</h2>
         
@@ -257,7 +271,6 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
         </div>
       </Card>
 
-      {/* Controls */}
       <div className="mt-auto">
         <Button 
           onClick={handleNextQuestion} 

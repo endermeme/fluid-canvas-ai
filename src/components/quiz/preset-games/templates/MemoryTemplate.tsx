@@ -1,17 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Clock, Trophy, Lightbulb } from 'lucide-react';
+import { RefreshCw, Clock, Trophy, Lightbulb, ArrowLeft } from 'lucide-react';
 
 interface MemoryTemplateProps {
   content: any;
   topic: string;
+  onBack?: () => void;
 }
 
-const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
+const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack }) => {
   const [cards, setCards] = useState<Array<{id: number, content: string, matched: boolean, flipped: boolean}>>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [matchedPairs, setMatchedPairs] = useState<number>(0);
@@ -25,10 +25,8 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   const memoryCards = content?.cards || [];
   const totalPairs = memoryCards.length / 2;
 
-  // Initialize the game
   useEffect(() => {
     if (memoryCards.length > 0) {
-      // Shuffle the cards
       const shuffledCards = [...memoryCards].sort(() => Math.random() - 0.5).map(card => ({
         ...card,
         flipped: false
@@ -44,7 +42,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
     }
   }, [memoryCards, content?.settings?.timeLimit]);
 
-  // Timer countdown
   useEffect(() => {
     if (timeLeft > 0 && !gameOver && !gameWon) {
       const timer = setTimeout(() => {
@@ -62,7 +59,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
     }
   }, [timeLeft, gameOver, gameWon, toast]);
 
-  // Check if all pairs are matched
   useEffect(() => {
     if (matchedPairs === totalPairs && totalPairs > 0) {
       setGameWon(true);
@@ -74,7 +70,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
     }
   }, [matchedPairs, totalPairs, toast]);
 
-  // Check for matches
   useEffect(() => {
     if (flippedCards.length === 2) {
       setCanFlip(false);
@@ -82,7 +77,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
       const [firstIndex, secondIndex] = flippedCards;
       
       if (cards[firstIndex].content === cards[secondIndex].content) {
-        // Match found
         setCards(cards.map((card, idx) => 
           idx === firstIndex || idx === secondIndex 
             ? {...card, matched: true} 
@@ -98,7 +92,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
           variant: "default",
         });
       } else {
-        // No match, flip back after delay
         setTimeout(() => {
           setCards(cards.map((card, idx) => 
             idx === firstIndex || idx === secondIndex 
@@ -110,7 +103,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
         }, 1000);
       }
       
-      // Increment moves counter
       setMoves(moves + 1);
     }
   }, [flippedCards, cards, matchedPairs, moves, toast]);
@@ -120,37 +112,30 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
       return;
     }
     
-    // Flip the card
     setCards(cards.map((card, idx) => 
       idx === index ? {...card, flipped: true} : card
     ));
     
-    // Add to flipped cards
     setFlippedCards([...flippedCards, index]);
   };
 
   const handleHint = () => {
-    // Find an unmatched, unflipped card
     const unmatchedCards = cards.filter(card => !card.matched && !card.flipped);
     
     if (unmatchedCards.length > 0) {
-      // Get a random unmatched card
       const randomCard = unmatchedCards[Math.floor(Math.random() * unmatchedCards.length)];
       const randomCardIndex = cards.findIndex(card => card.id === randomCard.id);
       
-      // Find its matching pair
       const matchingCardIndex = cards.findIndex((card, idx) => 
         card.content === randomCard.content && idx !== randomCardIndex
       );
       
-      // Flash both cards briefly
       setCards(cards.map((card, idx) => 
         idx === randomCardIndex || idx === matchingCardIndex 
           ? {...card, flipped: true} 
           : card
       ));
       
-      // Flip back after a brief delay
       setTimeout(() => {
         setCards(cards.map((card, idx) => 
           (idx === randomCardIndex || idx === matchingCardIndex) && !card.matched 
@@ -159,7 +144,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
         ));
       }, 1000);
       
-      // Penalty: reduce time
       setTimeLeft(Math.max(0, timeLeft - 10));
       
       toast({
@@ -172,7 +156,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
 
   const handleRestart = () => {
     if (memoryCards.length > 0) {
-      // Shuffle the cards
       const shuffledCards = [...memoryCards].sort(() => Math.random() - 0.5).map(card => ({
         ...card,
         flipped: false,
@@ -196,9 +179,20 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   const progressPercentage = (matchedPairs / totalPairs) * 100;
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
-      {/* Header with progress and timer */}
-      <div className="mb-4">
+    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
+      {onBack && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onBack} 
+          className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Quay lại</span>
+        </Button>
+      )}
+
+      <div className="mb-4 mt-12">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium flex items-center gap-2">
             <span className="px-3 py-1 bg-primary/10 rounded-full">
@@ -215,7 +209,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
         <Progress value={progressPercentage} className="h-2 bg-secondary" />
       </div>
 
-      {/* Game content */}
       {gameWon ? (
         <div className="flex-grow flex items-center justify-center">
           <Card className="p-8 text-center max-w-md bg-gradient-to-br from-primary/5 to-secondary/20 backdrop-blur-sm border-primary/20">
@@ -282,7 +275,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
         </div>
       )}
 
-      {/* Controls */}
       <div className="mt-4">
         <Button 
           variant="outline" 

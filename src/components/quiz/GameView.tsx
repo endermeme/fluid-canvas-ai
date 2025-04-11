@@ -2,16 +2,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
-import { Share2, Home, RefreshCw, Trophy } from 'lucide-react';
+import { Share2, Home, RefreshCw, Trophy, ArrowLeft } from 'lucide-react';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
 interface GameViewProps {
   miniGame: MiniGame;
+  onBack?: () => void;
 }
 
-const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
+const GameView: React.FC<GameViewProps> = ({ miniGame, onBack }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { toast } = useToast();
   const [iframeError, setIframeError] = useState<string | null>(null);
@@ -27,16 +28,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
           "", // Empty description
           miniGame.content
         );
-        
-        try {
-          const GAME_PLAY_COUNT_KEY = 'lovable_game_play_count';
-          const savedCount = localStorage.getItem(GAME_PLAY_COUNT_KEY);
-          const newCount = savedCount ? parseInt(savedCount, 10) + 1 : 1;
-          localStorage.setItem(GAME_PLAY_COUNT_KEY, newCount.toString());
-          console.log(`Game play count updated: ${newCount}`);
-        } catch (err) {
-          console.error("Error updating game count:", err);
-        }
       } catch (e) {
         console.error("Error saving game to history:", e);
       }
@@ -77,7 +68,11 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
   };
 
   const handleBackToHome = () => {
-    navigate('/');
+    if (onBack) {
+      onBack();
+    } else {
+      navigate('/');
+    }
   };
   
   const handleReloadGame = () => {
@@ -195,6 +190,17 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
             style={{ maxWidth: '100%', height: '100%', margin: '0 auto' }}
           />
         )}
+
+        {/* Back button overlay */}
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={handleBackToHome} 
+          className="absolute top-4 left-4 z-20 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Quay lại</span>
+        </Button>
       </div>
       
       {miniGame.title && (
@@ -215,16 +221,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame }) => {
       )}
       
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-        <Button 
-          size="sm" 
-          variant="secondary"
-          className="bg-background/80 backdrop-blur-sm border border-primary/20 shadow-md" 
-          onClick={handleBackToHome}
-        >
-          <Home size={14} className="mr-1" />
-          Trang Chủ
-        </Button>
-        
         <Button 
           size="sm" 
           variant="secondary"

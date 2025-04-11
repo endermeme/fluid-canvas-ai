@@ -338,7 +338,7 @@ Output must be valid JSON. `;
     const Template = gameTemplates[gameType];
     
     if (Template) {
-      return <Template content={gameContent} topic={topic} />;
+      return <Template content={gameContent} topic={topic} onBack={onBack} />;
     }
     
     return (

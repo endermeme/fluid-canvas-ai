@@ -65,30 +65,12 @@ const GameController: React.FC<GameControllerProps> = ({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="border-b p-4 bg-background/80 backdrop-blur-sm flex justify-between items-center">
-        <Button variant="ghost" size="sm" onClick={handleBack}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          {currentGame ? 'Quay Lại Form' : 'Về Trang Chủ'}
-        </Button>
-        
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={handleReloadPage}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Tải Lại
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
-            <Home className="h-4 w-4 mr-2" />
-            Trang Chủ
-          </Button>
-        </div>
-      </div>
-      
       <div className="flex-grow overflow-auto">
         {isGenerating ? (
           <GameLoading topic={currentTopic} />
         ) : currentGame ? (
           <div className="relative h-full">
-            <GameView miniGame={currentGame} />
+            <GameView miniGame={currentGame} onBack={handleBack} />
             <div className="absolute bottom-24 left-4 z-50">
               <Button 
                 onClick={handleNewGame} 
