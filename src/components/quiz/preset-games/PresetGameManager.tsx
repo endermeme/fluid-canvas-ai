@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
@@ -40,7 +39,8 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
     category: 'general',
     totalTime: 0,
     bonusTime: 5,
-    useTimer: true
+    useTimer: true,
+    prompt: initialTopic || "Learn interactively"
   });
   const [generationProgress, setGenerationProgress] = useState(0);
   const { toast } = useToast();
@@ -103,9 +103,10 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
       const category = gameSettings.category;
       const totalTime = gameSettings.totalTime;
       const bonusTime = gameSettings.bonusTime;
+      const promptContent = gameSettings.prompt || prompt;
       
       let gamePrompt = `Create content for a ${type} game with the following requirements:
-- Topic: ${prompt}
+- Topic: ${promptContent}
 - Difficulty: ${difficultyLevel}
 - Number of items: ${questionCount}
 - Time per item: ${timePerQuestion} seconds
@@ -324,8 +325,8 @@ Output must be valid JSON. `;
     setShowSettings(false);
     setLoading(true);
     
-    // Use initialTopic from props if available
-    const aiPrompt = initialTopic;
+    // Use prompt from settings
+    const aiPrompt = gameSettings.prompt || initialTopic;
     
     if (aiPrompt && aiPrompt.trim() !== "") {
       // Use AI to generate content if prompt exists
@@ -356,7 +357,6 @@ Output must be valid JSON. `;
     }
   };
 
-  // Render appropriate template based on game type
   const renderGameTemplate = () => {
     const topic = initialTopic || "Chủ đề chung";
     const Template = gameTemplates[gameType];
@@ -375,7 +375,6 @@ Output must be valid JSON. `;
     );
   };
 
-  // Map game types to game type objects for settings
   const getGameTypeObject = () => {
     const gameTypeMap = {
       'quiz': {

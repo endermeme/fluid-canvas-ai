@@ -35,6 +35,12 @@ const PresetGamesPage: React.FC = () => {
   };
   
   const handleQuickStart = (gameType: string, prompt: string, settings: GameSettingsData) => {
+    // Update settings to include the prompt
+    const updatedSettings = {
+      ...settings,
+      prompt: prompt
+    };
+    
     setSelectedGameType(gameType);
     setGameTopic(prompt);
     

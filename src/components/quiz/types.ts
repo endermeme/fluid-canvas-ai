@@ -15,6 +15,7 @@ export interface GameSettingsData {
   totalTime?: number;
   bonusTime?: number;
   useTimer?: boolean;
+  prompt?: string; // Add prompt field to settings
   
   // Quiz game settings
   showExplanation?: boolean;
