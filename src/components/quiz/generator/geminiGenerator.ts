@@ -1,12 +1,10 @@
+
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
-import { buildGeminiPrompt } from './promptBuilder';
-import { parseGeminiResponse } from './responseParser';
-import { processImagesToPixabay } from './imageInstructions';
 import { 
   logInfo, logError, logWarning, logSuccess, 
-  measureExecutionTime, formatLogObject 
+  measureExecutionTime
 } from './apiUtils';
 
 const SOURCE = "GEMINI";
@@ -31,21 +29,24 @@ export const generateWithGemini = async (
     settings: settings || {}
   });
   
-  // Check if the game might require images
-  const mightRequireImages = checkIfGameRequiresImages(topic);
-  if (mightRequireImages) {
-    logInfo(SOURCE, "This game likely requires images. Adding Pixabay image instructions.");
-  }
-  
-  // Build the complete prompt with image instructions if needed
-  const prompt = buildGeminiPrompt(topic, gameType?.id, settings);
+  // Simple prompt for HTML game generation
+  const prompt = `
+Create an HTML game based on this topic: "${topic}"
+
+Requirements:
+- Create a fun, interactive game that works in a browser
+- Use HTML, CSS, and JavaScript only (no external libraries)
+- The game should be fully self-contained in a single HTML file
+- Make the game visually appealing and user-friendly
+- Include a title, instructions, and scoring system
+- Handle all user interactions and game logic
+- Make sure the game is responsive and works on different screen sizes
+- Add appropriate error handling
+
+Return only the complete HTML code with inline CSS and JavaScript.
+`;
 
   try {
-    // Detailed logging for better debugging
-    console.groupCollapsed(`%c ${SOURCE} %c Detailed Prompt`, 'background: #6f42c1; color: white;', '');
-    console.log(prompt);
-    console.groupEnd();
-    
     logInfo(SOURCE, "Sending request to Gemini API");
     
     const startTime = Date.now();
@@ -57,31 +58,29 @@ export const generateWithGemini = async (
     const response = result.response;
     const text = response.text();
     
-    logInfo(SOURCE, `Response length: ${text.length} characters`, {
-      preview: text.substring(0, 200) + (text.length > 200 ? '...' : '')
-    });
+    logInfo(SOURCE, `Response length: ${text.length} characters`);
     
-    // Parse the response
-    logInfo(SOURCE, "Parsing response JSON");
-    let parsedResponse = await parseGeminiResponse(text, topic);
+    // Extract title from HTML
+    let title = topic;
+    const titleMatch = text.match(/<title>(.*?)<\/title>/i) || 
+                      text.match(/<h1[^>]*>(.*?)<\/h1>/i);
     
-    // Process the game content for images if it contains items array
-    if (parsedResponse && parsedResponse.items && Array.isArray(parsedResponse.items)) {
-      logInfo(SOURCE, "Processing image search terms to Pixabay URLs");
-      parsedResponse = await processImagesToPixabay(parsedResponse);
-    }
-    // Process the response to convert any non-Pixabay image URLs to Pixabay format in HTML content
-    else if (parsedResponse && parsedResponse.content) {
-      parsedResponse.content = replaceNonPixabayImageUrls(parsedResponse.content, topic);
+    if (titleMatch && titleMatch[1]) {
+      title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
     }
     
-    // Return the generated game
+    // Create MiniGame object
+    const game: MiniGame = {
+      title: title,
+      content: text
+    };
+    
     logSuccess(SOURCE, "Game generated successfully", {
-      title: parsedResponse?.title || topic,
-      contentSize: parsedResponse?.content?.length || 0
+      title: title,
+      contentSize: text.length
     });
     
-    return parsedResponse;
+    return game;
   } catch (error) {
     logError(SOURCE, "Error generating with Gemini", error);
     throw error;
@@ -102,7 +101,7 @@ export const tryGeminiGeneration = async (
   settings?: GameSettingsData,
   retryCount = 0
 ): Promise<MiniGame | null> => {
-  const maxRetries = 3; // Reduced number of retries
+  const maxRetries = 3;
   
   if (retryCount >= maxRetries) {
     logWarning(SOURCE, `Reached maximum retries (${maxRetries})`);
@@ -130,94 +129,3 @@ export const tryGeminiGeneration = async (
     return tryGeminiGeneration(model, topic, settings, retryCount + 1);
   }
 };
-
-/**
- * Helper function to determine if a game likely requires images
- * @param topic The game topic
- * @returns Boolean indicating if images might be required
- */
-function checkIfGameRequiresImages(topic: string): boolean {
-  const imageRelatedKeywords = [
-    'pictionary', 'picture', 'image', 'photo', 'hình', 'ảnh', 'đoán hình',
-    'memory', 'matching', 'flashcard', 'thẻ nhớ', 'ghép hình', 'thẻ hình',
-    'fruit', 'hoa quả', 'cây', 'animal', 'động vật', 'landmark', 'place',
-    'địa danh', 'thắng cảnh'
-  ];
-  
-  const lowerTopic = topic.toLowerCase();
-  return imageRelatedKeywords.some(keyword => lowerTopic.includes(keyword));
-}
-
-/**
- * Replace non-Pixabay image URLs with Pixabay URLs in HTML content
- * @param content HTML content string
- * @param topic The game topic for fallback search
- * @returns Updated HTML content string
- */
-function replaceNonPixabayImageUrls(content: string, topic: string): string {
-  // Detect non-Pixabay image URLs in the content
-  // This regex looks for image URLs that don't contain pixabay.com or cdn.pixabay.com
-  const nonPixabayImageRegex = /(src=["'])(https?:\/\/(?!.*pixabay\.com|.*cdn\.pixabay\.com).+?)(["'])/gi;
-  
-  let replacementCount = 0;
-  
-  // Replace with Pixabay URLs
-  const updatedContent = content.replace(nonPixabayImageRegex, (match, prefix, url, suffix) => {
-    // Extract possible search term from URL
-    let searchTerm = extractSearchTermFromUrl(url) || topic;
-    // Sanitize the search term
-    searchTerm = searchTerm.replace(/[^\w\s]/g, ' ').trim();
-    
-    // Use a direct Pixabay image URL from their CDN as a fallback
-    // This is a static image that should exist
-    const fallbackPixabayImage = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png';
-    
-    replacementCount++;
-    logInfo(SOURCE, `Replacing non-Pixabay image URL (${replacementCount})`, {
-      originalUrl: url,
-      searchTerm,
-      replacement: fallbackPixabayImage
-    });
-    
-    return `${prefix}${fallbackPixabayImage}${suffix} data-search-term="${searchTerm}"`;
-  });
-  
-  if (replacementCount > 0) {
-    logInfo(SOURCE, `Replaced ${replacementCount} non-Pixabay image URLs`);
-  }
-  
-  return updatedContent;
-}
-
-/**
- * Extract possible search terms from a URL
- * @param url The URL to analyze
- * @returns Possible search term or null if not found
- */
-function extractSearchTermFromUrl(url: string): string | null {
-  try {
-    // Try to extract search terms from various URL patterns
-    const patterns = [
-      // Extract from URL path segments
-      /\/([a-z0-9-]+)[-_][0-9]+\.[a-z]+$/i,
-      // Extract from query parameters
-      /[?&]q=([^&]+)/i,
-      /[?&]query=([^&]+)/i,
-      /[?&]search=([^&]+)/i,
-      // Extract from filename
-      /\/([a-z0-9-]+)\.[a-z]+$/i
-    ];
-    
-    for (const pattern of patterns) {
-      const match = url.match(pattern);
-      if (match && match[1]) {
-        return decodeURIComponent(match[1]).replace(/[_-]/g, ' ');
-      }
-    }
-    
-    return null;
-  } catch (error) {
-    logError(SOURCE, 'Error extracting search term from URL', error);
-    return null;
-  }
-}

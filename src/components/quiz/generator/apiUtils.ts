@@ -1,202 +1,104 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// API key cứng
-const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
+/**
+ * Utility functions for API communication and logging
+ */
 
-// Styles for console messages
-const styles = {
-  info: 'background: #0366d6; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-  success: 'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-  warning: 'background: #f9a825; color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-  error: 'background: #d73a49; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-  api: 'background: #6f42c1; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-  timer: 'background: #586069; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-  network: 'background: #e36209; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;'
-};
+export const SOURCE = "CUSTOM_GAME_GENERATOR";
 
-// Gemini client creation with custom headers
-export const createGeminiClient = (apiKey: string = API_KEY) => {
-  console.log(`%c API %c Initializing Gemini client`, styles.api, '');
+/**
+ * Log information to the console with proper formatting
+ * @param context The logging context/source
+ * @param message The message to log
+ * @param data Optional data to log
+ */
+export function logInfo(context: string, message: string, data?: any) {
+  console.log(
+    `%c ${context} INFO %c ${message}`,
+    'background: #0366d6; color: white; padding: 2px 6px; border-radius: 4px;',
+    'color: #0366d6; font-weight: bold;'
+  );
   
-  // Add custom headers for network debugging
-  const transport = {
-    async fetch(request: any) {
-      // Clone the request to avoid modifying the original
-      const customRequest = structuredClone(request);
-      
-      // Add custom headers for better visibility in network tab
-      if (customRequest.headers) {
-        customRequest.headers['X-Debug-Method'] = 'GeminiAPI.generateContent';
-        customRequest.headers['X-Debug-Source'] = 'AIGameCreator';
-        customRequest.headers['X-Debug-Timestamp'] = new Date().toISOString();
-        customRequest.headers['X-Debug-RequestID'] = `gemini-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
-      }
-      
-      // Log detailed network request
-      console.groupCollapsed(`%c NETWORK REQUEST %c ${customRequest.method} ${new URL(customRequest.url).pathname}`, styles.network, '');
-      console.log('URL:', customRequest.url);
-      console.log('Method:', customRequest.method);
-      console.log('Headers:', customRequest.headers);
-      
-      // Safely log body if it exists and is readable
-      if (customRequest.body) {
-        try {
-          // Try to parse the body if it's JSON
-          if (typeof customRequest.body === 'string') {
-            const bodyData = JSON.parse(customRequest.body);
-            console.log('Body:', bodyData);
-          } else {
-            console.log('Body:', customRequest.body);
-          }
-        } catch (e) {
-          console.log('Body: [Unreadable body content]');
-        }
-      }
-      console.groupEnd();
-      
-      const startTime = Date.now();
-      
-      try {
-        const response = await fetch(customRequest.url, {
-          method: customRequest.method,
-          headers: customRequest.headers,
-          body: customRequest.body
-        });
-        
-        const duration = Date.now() - startTime;
-        const statusStyle = response.ok ? styles.success : styles.error;
-        
-        // Clone response to be able to read it twice
-        const clonedResponse = response.clone();
-        let responseData;
-        
-        try {
-          // Try to get the response data
-          responseData = await clonedResponse.text();
-          try {
-            // Try to parse as JSON if possible
-            responseData = JSON.parse(responseData);
-          } catch { /* Continue with text if not JSON */ }
-        } catch (e) {
-          responseData = '[Không thể đọc response data]';
-        }
-        
-        // Log detailed response
-        console.groupCollapsed(`%c NETWORK RESPONSE %c ${response.status} ${new URL(customRequest.url).pathname} (${duration}ms)`, statusStyle, '');
-        console.log('Status:', response.status, response.statusText);
-        console.log('Duration:', `${duration}ms`);
-        console.log('Headers:', Object.fromEntries([...response.headers.entries()]));
-        console.log('Response Data:', responseData);
-        console.groupEnd();
-        
-        // Clone response to keep original intact
-        return response;
-      } catch (error) {
-        const duration = Date.now() - startTime;
-        console.groupCollapsed(`%c NETWORK ERROR %c ${customRequest.method} ${new URL(customRequest.url).pathname} (${duration}ms)`, styles.error, '');
-        console.error('Error Object:', error);
-        console.error('Stack:', error.stack);
-        console.groupEnd();
-        throw error;
-      }
-    }
-  };
+  if (data) {
+    console.log('%c 📊 Data:', 'color: #0366d6;', data);
+  }
+}
 
-  // Luôn sử dụng API_KEY cứng
-  const genAI = new GoogleGenerativeAI(API_KEY, { transport });
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+/**
+ * Log success to the console with proper formatting
+ * @param context The logging context/source
+ * @param message The message to log
+ * @param data Optional data to log
+ */
+export function logSuccess(context: string, message: string, data?: any) {
+  console.log(
+    `%c ${context} SUCCESS %c ${message}`,
+    'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px;',
+    'color: #2ea44f; font-weight: bold;'
+  );
   
-  console.log(`%c API %c Gemini client initialized with model: gemini-2.0-flash`, styles.success, '');
-  return model;
-};
-
-// Enhanced logging utilities
-export const logInfo = (source: string, message: string, data?: any) => {
   if (data) {
-    console.log(`%c ${source} %c ${message}`, styles.info, '', data);
-  } else {
-    console.log(`%c ${source} %c ${message}`, styles.info, '');
+    console.log('%c 📊 Data:', 'color: #2ea44f;', data);
   }
-};
+}
 
-export const logSuccess = (source: string, message: string, data?: any) => {
-  if (data) {
-    console.log(`%c ${source} %c ${message}`, styles.success, '', data);
-  } else {
-    console.log(`%c ${source} %c ${message}`, styles.success, '');
-  }
-};
-
-export const logError = (source: string, message: string, error?: any) => {
-  console.groupCollapsed(`%c ${source} ERROR %c ${message}`, styles.error, '');
-  console.error(error || 'No error details provided');
-  console.trace('Stack trace:');
-  console.groupEnd();
-};
-
-export const logWarning = (source: string, message: string, data?: any) => {
-  if (data) {
-    console.log(`%c ${source} WARNING %c ${message}`, styles.warning, '', data);
-  } else {
-    console.log(`%c ${source} WARNING %c ${message}`, styles.warning, '');
-  }
-};
-
-export const measureExecutionTime = (startTime: number): { seconds: string, ms: number } => {
-  const ms = Date.now() - startTime;
-  return { 
-    seconds: (ms / 1000).toFixed(2),
-    ms
-  };
-};
-
-// Format object để log dễ đọc
-export const formatLogObject = (obj: any): string => {
-  if (!obj) return 'undefined';
+/**
+ * Log warning to the console with proper formatting
+ * @param context The logging context/source
+ * @param message The message to log
+ * @param data Optional data to log
+ */
+export function logWarning(context: string, message: string, data?: any) {
+  console.log(
+    `%c ${context} WARNING %c ${message}`,
+    'background: #f9a825; color: black; padding: 2px 6px; border-radius: 4px;',
+    'color: #f9a825; font-weight: bold;'
+  );
   
+  if (data) {
+    console.log('%c 📊 Data:', 'color: #f9a825;', data);
+  }
+}
+
+/**
+ * Log error to the console with proper formatting
+ * @param context The logging context/source
+ * @param message The message to log
+ * @param error Optional error object
+ */
+export function logError(context: string, message: string, error?: any) {
+  console.error(
+    `%c ${context} ERROR %c ${message}`,
+    'background: #d73a49; color: white; padding: 2px 6px; border-radius: 4px;',
+    'color: #d73a49; font-weight: bold;'
+  );
+  
+  if (error) {
+    console.error(error);
+  }
+}
+
+/**
+ * Format an object for logging
+ * @param obj Object to format
+ * @returns Formatted object for logging
+ */
+export function formatLogObject(obj: any): string {
   try {
-    const result = JSON.stringify(obj, (key, value) => {
-      // Xử lý các trường hợp đặc biệt
-      if (value instanceof Error) {
-        return {
-          name: value.name,
-          message: value.message,
-          stack: value.stack
-        };
-      }
-      // Giới hạn độ dài của chuỗi
-      if (typeof value === 'string' && value.length > 500) {
-        return value.substring(0, 500) + '... [Nội dung dài]';
-      }
-      return value;
-    }, 2);
-    
-    return result;
-  } catch (e) {
-    return `[Object không thể serialize: ${typeof obj}]`;
+    if (typeof obj === 'string') return obj;
+    return JSON.stringify(obj, null, 2);
+  } catch (error) {
+    return 'Unable to stringify object for logging';
   }
-};
+}
 
-// Debug API request/response
-export const logApiRequest = (method: string, url: string, data?: any) => {
-  console.groupCollapsed(`%c API REQUEST %c ${method} ${new URL(url).pathname}`, styles.api, '');
-  console.log('URL:', url);
-  console.log('Method:', method);
-  console.log('Timestamp:', new Date().toISOString());
-  console.log('Request ID:', `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`);
-  if (data) console.log('Data:', data);
-  console.trace('Request stack:');
-  console.groupEnd();
-};
-
-export const logApiResponse = (url: string, status: number, data: any, duration: number) => {
-  const statusStyle = status >= 200 && status < 300 ? styles.success : styles.error;
-  console.groupCollapsed(`%c API RESPONSE %c ${status} ${new URL(url).pathname} (${duration}ms)`, statusStyle, '');
-  console.log('Status:', status);
-  console.log('Duration:', `${duration}ms`);
-  console.log('Timestamp:', new Date().toISOString());
-  console.log('Response Size:', typeof data === 'string' ? `${data.length} chars` : 
-    (data instanceof Object ? `${JSON.stringify(data).length} chars` : 'Unknown'));
-  console.log('Data:', data);
-  console.groupEnd();
-};
+/**
+ * Measure execution time
+ * @param startTime Start time in milliseconds
+ * @returns Object with execution time in milliseconds and seconds
+ */
+export function measureExecutionTime(startTime: number) {
+  const endTime = Date.now();
+  const ms = endTime - startTime;
+  const seconds = (ms / 1000).toFixed(2);
+  return { ms, seconds };
+}
