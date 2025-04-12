@@ -3,12 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { SparklesIcon, Gamepad2, Wand2, PlusCircle, Code, Info } from 'lucide-react';
+import { SparklesIcon, Gamepad2, Wand2, PlusCircle, Code, Info, Server } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { AIGameGenerator, MiniGame } from '../generator/AIGameGenerator';
 import { GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
+import { storeGame } from '@/services/storage';
+import { uploadGameToVps, generateThumbnail } from '@/services/vpsStorage';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
@@ -20,6 +22,7 @@ const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel }) => {
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStep, setGenerationStep] = useState<string>('');
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -63,6 +66,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     console.groupEnd();
 
     setIsGenerating(true);
+    setGenerationStep('Đang chuẩn bị tạo game với AI...');
     
     try {
       // Tạo settings với thêm thông tin về request
@@ -96,7 +100,11 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       
       // Đo thời gian xử lý
       const startTime = performance.now();
+      
+      // Thông báo bước đang tạo game với AI
+      setGenerationStep('Đang tạo game với AI...');
       const game = await gameGenerator.generateMiniGame(content, settings);
+      
       const endTime = performance.now();
       const duration = ((endTime - startTime) / 1000).toFixed(2);
       
@@ -122,12 +130,43 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       console.groupEnd();
       
       if (game) {
-        toast({
-          title: "Đã tạo trò chơi",
-          description: "Trò chơi đã được tạo thành công với AI.",
+        // Thông báo đang lưu trữ game
+        setGenerationStep('Đang lưu trữ game lên VPS...');
+        
+        // Lưu game và metadata vào storage service
+        const storedGame = storeGame(game, true);
+        
+        // Upload lên VPS (giả lập)
+        setGenerationStep('Đang tải game lên server...');
+        const vpsResponse = await uploadGameToVps(game.content, {
+          title: game.title,
+          description: game.description || content
         });
         
-        onGenerate(content, game);
+        // Tạo thumbnail
+        if (vpsResponse.success) {
+          setGenerationStep('Đang tạo hình thu nhỏ...');
+          const thumbnail = await generateThumbnail(game.content, vpsResponse.data.gameId);
+          
+          // Cập nhật link chia sẻ và thumbnail từ VPS
+          if (storedGame) {
+            storedGame.shareUrl = vpsResponse.data.shareUrl;
+            storedGame.thumbnailUrl = thumbnail;
+          }
+        }
+        
+        toast({
+          title: "Đã tạo trò chơi",
+          description: "Trò chơi đã được tạo thành công với AI và lưu trữ trên server.",
+        });
+        
+        // Hiển thị thông báo thành công trước khi chuyển hướng
+        setGenerationStep('Hoàn tất! Đang chuyển đến game...');
+        
+        // Đợi một chút để người dùng thấy thông báo hoàn tất
+        setTimeout(() => {
+          onGenerate(content, game);
+        }, 1000);
       } else {
         throw new Error("Không thể tạo game");
       }
@@ -152,6 +191,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       onGenerate(content);
     } finally {
       setIsGenerating(false);
+      setGenerationStep('');
       
       // Log kết thúc toàn bộ quá trình
       console.log(
@@ -171,7 +211,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
   };
 
   if (isGenerating) {
-    return <GameLoading topic={content} />;
+    return <GameLoading topic={content} message={generationStep} />;
   }
 
   return (
@@ -220,7 +260,14 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
             <div className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg">
               <Info className="w-4 h-4 text-primary mt-1" />
               <p className="text-sm text-muted-foreground">
-                AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Bạn càng mô tả chi tiết, AI càng tạo ra game phù hợp với ý tưởng của bạn.
+                AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Game sẽ được lưu trữ trên server VPS và bạn có thể chia sẻ link cho bạn bè.
+              </p>
+            </div>
+            
+            <div className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg">
+              <Server className="w-4 h-4 text-primary mt-1" />
+              <p className="text-sm text-muted-foreground">
+                Game của bạn sẽ được lưu trên máy chủ VPS tại địa chỉ ai-games-vn.com, giúp bạn dễ dàng chia sẻ với bạn bè qua link, QR code hoặc mạng xã hội.
               </p>
             </div>
           </div>

@@ -179,6 +179,18 @@ const DropdownMenuShortcut = ({
 }
 DropdownMenuShortcut.displayName = "DropdownMenuShortcut"
 
+const DropdownMenuFooter = React.forwardRef<
+  React.ElementRef<"div">,
+  React.ComponentPropsWithoutRef<"div">
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("px-2 py-1.5 text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+DropdownMenuFooter.displayName = "DropdownMenuFooter"
+
 export {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -195,4 +207,5 @@ export {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
+  DropdownMenuFooter
 }

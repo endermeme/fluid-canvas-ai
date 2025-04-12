@@ -1,13 +1,12 @@
-
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getGameById, formatRemainingTime, SharedGame as GameType } from '@/services/storage';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, AlertTriangle, Plus } from 'lucide-react';
 
 const SharedGame = () => {
   const { id } = useParams<{ id: string }>();
-  const [game, setGame] = useState<StoredGame | null>(null);
+  const [game, setGame] = useState<GameType | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
@@ -21,11 +20,13 @@ const SharedGame = () => {
     }
 
     const loadGame = () => {
-      const loadedGame = getSharedGame(id);
+      const loadedGame = getGameById(id);
       setGame(loadedGame);
       
       if (loadedGame) {
-        setTimeLeft(getRemainingTime(loadedGame.expiresAt));
+        // Giả sử game hết hạn sau 30 ngày kể từ ngày tạo
+        const expirationDate = loadedGame.createdAt + (30 * 24 * 60 * 60 * 1000);
+        setTimeLeft(formatRemainingTime(expirationDate));
       } else {
         setError('Trò chơi không tồn tại hoặc đã hết hạn');
       }
@@ -38,12 +39,13 @@ const SharedGame = () => {
     // Update remaining time every minute
     const intervalId = setInterval(() => {
       if (game) {
-        setTimeLeft(getRemainingTime(game.expiresAt));
+        const expirationDate = game.createdAt + (30 * 24 * 60 * 60 * 1000);
+        setTimeLeft(formatRemainingTime(expirationDate));
       }
     }, 60000);
     
     return () => clearInterval(intervalId);
-  }, [id, game]);
+  }, [id]);
 
   const handleCreateNewGame = () => {
     // Navigate to root path using react-router
@@ -65,7 +67,7 @@ const SharedGame = () => {
         <AlertTriangle className="text-destructive h-16 w-16" />
         <h1 className="text-2xl font-bold">{error}</h1>
         <p className="text-muted-foreground text-center max-w-md">
-          Liên kết này có thể đã hết hạn hoặc không tồn tại. Trò chơi chỉ có hiệu lực trong 48 giờ.
+          Liên kết này có thể đã hết hạn hoặc không tồn tại. Trò chơi chỉ có hiệu lực trong 30 ngày.
         </p>
         <Button onClick={() => navigate('/')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -104,7 +106,7 @@ const SharedGame = () => {
       
       <main className="flex-1 overflow-hidden flex items-center justify-center">
         <iframe
-          srcDoc={game.htmlContent}
+          srcDoc={game.content}
           sandbox="allow-scripts allow-same-origin"
           className="w-full h-full border-none mx-auto"
           style={{ 
