@@ -10,7 +10,8 @@ const styles = {
   warning: 'background: #f9a825; color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
   error: 'background: #d73a49; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
   api: 'background: #6f42c1; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-  timer: 'background: #586069; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;'
+  timer: 'background: #586069; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
+  network: 'background: #e36209; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;'
 };
 
 // Gemini client creation with custom headers
@@ -27,11 +28,31 @@ export const createGeminiClient = (apiKey: string = API_KEY) => {
       if (customRequest.headers) {
         customRequest.headers['X-Debug-Method'] = 'GeminiAPI.generateContent';
         customRequest.headers['X-Debug-Source'] = 'AIGameCreator';
+        customRequest.headers['X-Debug-Timestamp'] = new Date().toISOString();
+        customRequest.headers['X-Debug-RequestID'] = `gemini-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
       }
       
-      // Log network request for debugging
-      console.log(`%c API REQUEST %c ${customRequest.method} ${customRequest.url}`, 
-        styles.api, '', customRequest);
+      // Log detailed network request
+      console.groupCollapsed(`%c NETWORK REQUEST %c ${customRequest.method} ${new URL(customRequest.url).pathname}`, styles.network, '');
+      console.log('URL:', customRequest.url);
+      console.log('Method:', customRequest.method);
+      console.log('Headers:', customRequest.headers);
+      
+      // Safely log body if it exists and is readable
+      if (customRequest.body) {
+        try {
+          // Try to parse the body if it's JSON
+          if (typeof customRequest.body === 'string') {
+            const bodyData = JSON.parse(customRequest.body);
+            console.log('Body:', bodyData);
+          } else {
+            console.log('Body:', customRequest.body);
+          }
+        } catch (e) {
+          console.log('Body: [Unreadable body content]');
+        }
+      }
+      console.groupEnd();
       
       const startTime = Date.now();
       
@@ -43,13 +64,39 @@ export const createGeminiClient = (apiKey: string = API_KEY) => {
         });
         
         const duration = Date.now() - startTime;
-        console.log(`%c API RESPONSE %c Status: ${response.status} (${duration}ms)`, 
-          styles.api, '', response.ok ? 'Success' : 'Failed');
+        const statusStyle = response.ok ? styles.success : styles.error;
+        
+        // Clone response to be able to read it twice
+        const clonedResponse = response.clone();
+        let responseData;
+        
+        try {
+          // Try to get the response data
+          responseData = await clonedResponse.text();
+          try {
+            // Try to parse as JSON if possible
+            responseData = JSON.parse(responseData);
+          } catch { /* Continue with text if not JSON */ }
+        } catch (e) {
+          responseData = '[Không thể đọc response data]';
+        }
+        
+        // Log detailed response
+        console.groupCollapsed(`%c NETWORK RESPONSE %c ${response.status} ${new URL(customRequest.url).pathname} (${duration}ms)`, statusStyle, '');
+        console.log('Status:', response.status, response.statusText);
+        console.log('Duration:', `${duration}ms`);
+        console.log('Headers:', Object.fromEntries([...response.headers.entries()]));
+        console.log('Response Data:', responseData);
+        console.groupEnd();
         
         // Clone response to keep original intact
         return response;
       } catch (error) {
-        console.error(`%c API ERROR %c Request failed`, styles.error, '', error);
+        const duration = Date.now() - startTime;
+        console.groupCollapsed(`%c NETWORK ERROR %c ${customRequest.method} ${new URL(customRequest.url).pathname} (${duration}ms)`, styles.error, '');
+        console.error('Error Object:', error);
+        console.error('Stack:', error.stack);
+        console.groupEnd();
         throw error;
       }
     }
@@ -108,7 +155,23 @@ export const formatLogObject = (obj: any): string => {
   if (!obj) return 'undefined';
   
   try {
-    return JSON.stringify(obj, null, 2);
+    const result = JSON.stringify(obj, (key, value) => {
+      // Xử lý các trường hợp đặc biệt
+      if (value instanceof Error) {
+        return {
+          name: value.name,
+          message: value.message,
+          stack: value.stack
+        };
+      }
+      // Giới hạn độ dài của chuỗi
+      if (typeof value === 'string' && value.length > 500) {
+        return value.substring(0, 500) + '... [Nội dung dài]';
+      }
+      return value;
+    }, 2);
+    
+    return result;
   } catch (e) {
     return `[Object không thể serialize: ${typeof obj}]`;
   }
@@ -119,7 +182,10 @@ export const logApiRequest = (method: string, url: string, data?: any) => {
   console.groupCollapsed(`%c API REQUEST %c ${method} ${new URL(url).pathname}`, styles.api, '');
   console.log('URL:', url);
   console.log('Method:', method);
+  console.log('Timestamp:', new Date().toISOString());
+  console.log('Request ID:', `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`);
   if (data) console.log('Data:', data);
+  console.trace('Request stack:');
   console.groupEnd();
 };
 
@@ -128,6 +194,9 @@ export const logApiResponse = (url: string, status: number, data: any, duration:
   console.groupCollapsed(`%c API RESPONSE %c ${status} ${new URL(url).pathname} (${duration}ms)`, statusStyle, '');
   console.log('Status:', status);
   console.log('Duration:', `${duration}ms`);
+  console.log('Timestamp:', new Date().toISOString());
+  console.log('Response Size:', typeof data === 'string' ? `${data.length} chars` : 
+    (data instanceof Object ? `${JSON.stringify(data).length} chars` : 'Unknown'));
   console.log('Data:', data);
   console.groupEnd();
 };
