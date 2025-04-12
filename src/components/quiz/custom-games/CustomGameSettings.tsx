@@ -1,12 +1,12 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Sparkles, Code } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { GameSettingsData } from '../types';
 
 interface CustomGameSettingsProps {
-  onGenerate: (prompt: string, settings: GameSettingsData) => void;
+  onGenerate: (prompt: string) => void;
   initialPrompt?: string;
   isGenerating?: boolean;
 }
@@ -20,30 +20,8 @@ const CustomGameSettings: React.FC<CustomGameSettingsProps> = ({
 
   const handleSubmit = () => {
     if (prompt.trim()) {
-      // Debug logging
-      console.groupCollapsed('%c GAME REQUEST %c ' + prompt.substring(0, 30) + '...', 
-        'background: #6f42c1; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;', 
-        'font-weight: bold;');
-      console.log('Prompt:', prompt);
-      console.log('Timestamp:', new Date().toISOString());
-      console.log('Request ID:', Date.now().toString(36) + Math.random().toString(36).substring(2, 5));
-      console.groupEnd();
-      
-      // Tạo settings cơ bản nhất
-      const defaultSettings: GameSettingsData = {
-        difficulty: 'medium',
-        questionCount: 10,
-        timePerQuestion: 30,
-        category: 'general',
-        prompt: prompt
-      };
-      
-      // Log settings
-      console.log('%c GAME SETTINGS %c Using defaults', 
-        'background: #0366d6; color: white; padding: 2px 6px; border-radius: 4px;', 
-        '', defaultSettings);
-      
-      onGenerate(prompt, defaultSettings);
+      console.log('Prompt submitted:', prompt);
+      onGenerate(prompt);
     }
   };
 
@@ -60,7 +38,7 @@ const CustomGameSettings: React.FC<CustomGameSettingsProps> = ({
               Tạo Game Tương Tác Với AI
             </h2>
             <p className="text-sm text-muted-foreground mt-2 text-center max-w-md">
-              Mô tả chi tiết game bạn muốn tạo và AI sẽ tạo toàn bộ code HTML, CSS, JavaScript
+              Mô tả chi tiết game bạn muốn tạo và hệ thống sẽ tạo demo game
             </p>
           </div>
         </div>
@@ -69,7 +47,7 @@ const CustomGameSettings: React.FC<CustomGameSettingsProps> = ({
           <Textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Mô tả chi tiết trò chơi bạn muốn tạo (ví dụ: Tạo trò chơi xếp hình với 9 mảnh ghép về hệ mặt trời, có hiệu ứng âm thanh khi hoàn thành)"
+            placeholder="Mô tả chi tiết trò chơi bạn muốn tạo (ví dụ: Tạo trò chơi xếp hình với 9 mảnh ghép về hệ mặt trời)"
             className="min-h-[180px] border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20 text-base"
           />
 
@@ -80,13 +58,13 @@ const CustomGameSettings: React.FC<CustomGameSettingsProps> = ({
               disabled={!prompt.trim() || isGenerating}
             >
               <Sparkles className="mr-2 h-5 w-5" />
-              {isGenerating ? 'Đang tạo game...' : 'Tạo game với AI'}
+              {isGenerating ? 'Đang tạo game...' : 'Tạo game demo'}
             </Button>
           </div>
           
           <div className="mt-4 text-sm text-muted-foreground">
             <p className="text-center italic">
-              Ví dụ: "Tạo trò chơi memory với 8 cặp thẻ về các biểu tượng văn hoá", "Tạo trò chơi xoay vòng may mắn với 10 phần thưởng ngẫu nhiên", "Tạo trò chơi đố vui về động vật với hình ảnh và âm thanh"
+              Ví dụ: "Tạo trò chơi memory với 8 cặp thẻ", "Tạo trò chơi xoay vòng may mắn với 10 phần thưởng", "Tạo trò chơi đố vui về động vật"
             </p>
           </div>
         </div>

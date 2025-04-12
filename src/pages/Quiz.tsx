@@ -1,15 +1,12 @@
-import React, { useState, useRef } from 'react';
+
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import QuizContainer from '@/components/quiz/QuizContainer';
-import { AIGameGenerator } from '@/components/quiz/generator/AIGameGenerator';
 import GameLoading from '@/components/quiz/GameLoading';
 import CustomGameSettings from '@/components/quiz/custom-games/CustomGameSettings';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
-import { GameSettingsData } from '@/components/quiz/types';
-
-const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -20,10 +17,7 @@ const Quiz = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Initialize game generator
-  const gameGenerator = AIGameGenerator.getInstance(API_KEY);
-
-  const handleGenerate = async (promptText: string, settings: GameSettingsData) => {
+  const handleGenerate = async (promptText: string) => {
     if (!promptText.trim()) {
       toast({
         title: "Lỗi",
@@ -39,34 +33,96 @@ const Quiz = () => {
     setGameContent(null);
     setMiniGame(null);
     
-    try {
-      const game = await gameGenerator.generateMiniGame(promptText, settings);
-      
-      if (game && game.content) {
-        setGameContent(game.content);
-        setGameTitle(game.title || `Game: ${promptText.substring(0, 40)}...`);
-        setMiniGame({
-          title: game.title || `Game: ${promptText.substring(0, 40)}...`,
-          content: game.content
-        });
-        
-        toast({
-          title: "Trò chơi đã được tạo",
-          description: "Trò chơi đã được tạo thành công với AI",
-        });
-      } else {
-        throw new Error("Không thể tạo trò chơi");
-      }
-    } catch (error) {
-      console.error("Lỗi khi tạo trò chơi:", error);
-      toast({
-        title: "Lỗi tạo trò chơi",
-        description: "Có lỗi xảy ra khi tạo trò chơi. Vui lòng thử lại.",
-        variant: "destructive"
+    // Simulate API call with setTimeout
+    setTimeout(() => {
+      // Create a placeholder HTML game
+      const placeholderHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Game Demo</title>
+          <style>
+            body { 
+              font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+              max-width: 800px;
+              margin: 0 auto;
+              padding: 20px;
+              text-align: center;
+              background-color: #f9fafb;
+              color: #111827;
+            }
+            .container {
+              background-color: white;
+              border-radius: 8px;
+              padding: 20px;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            h1 { color: #4f46e5; }
+            button {
+              background-color: #4f46e5;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              border-radius: 4px;
+              cursor: pointer;
+              font-size: 16px;
+              margin: 10px 5px;
+            }
+            button:hover { background-color: #4338ca; }
+            .game-content {
+              margin-top: 20px;
+              min-height: 200px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Demo Game: ${promptText}</h1>
+            <p>This is a demonstration of the game interface without the AI generation.</p>
+            <div class="game-content">
+              <p>Your game would appear here based on your prompt:</p>
+              <p><em>"${promptText}"</em></p>
+              <p>Score: <span id="score">0</span></p>
+              <button onclick="increaseScore()">Play</button>
+              <button onclick="resetScore()">Reset</button>
+            </div>
+          </div>
+          <script>
+            let score = 0;
+            const scoreElement = document.getElementById('score');
+            
+            function increaseScore() {
+              score += 10;
+              scoreElement.textContent = score;
+            }
+            
+            function resetScore() {
+              score = 0;
+              scoreElement.textContent = score;
+            }
+          </script>
+        </body>
+        </html>
+      `;
+
+      setGameContent(placeholderHTML);
+      setGameTitle(`Game: ${promptText.substring(0, 40)}...`);
+      setMiniGame({
+        title: `Game: ${promptText.substring(0, 40)}...`,
+        content: placeholderHTML
       });
-    } finally {
+      
+      toast({
+        title: "Trò chơi đã được tạo",
+        description: "Trò chơi mẫu đã được tạo thành công",
+      });
+      
       setIsGenerating(false);
-    }
+    }, 1500); // Simulate loading for 1.5 seconds
   };
 
   const handleReset = () => {
@@ -77,7 +133,6 @@ const Quiz = () => {
   };
 
   const handleShare = () => {
-    // Basic implementation of sharing functionality
     try {
       if (gameContent) {
         const shareUrl = window.location.origin + '/quiz?shared=true';
@@ -127,7 +182,7 @@ const Quiz = () => {
   return (
     <div className="h-screen w-full bg-gradient-to-b from-background to-background/95">
       <QuizContainer
-        title={miniGame ? miniGame.title : "Tạo Game Tùy Chỉnh với AI"}
+        title={miniGame ? miniGame.title : "Tạo Game Tùy Chỉnh"}
         showBackButton={true}
         showRefreshButton={false}
         showHomeButton={true}
