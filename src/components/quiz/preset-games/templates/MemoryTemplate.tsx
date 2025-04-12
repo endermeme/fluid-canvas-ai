@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Clock, Trophy, Lightbulb, ArrowLeft } from 'lucide-react';
+import { RefreshCw, Clock, Trophy, Lightbulb, ArrowLeft, Share2 } from 'lucide-react';
+import { saveGameForSharing } from '@/utils/gameExport';
 
 interface MemoryTemplateProps {
   content: any;
@@ -172,6 +173,223 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
     }
   };
 
+  const handleShare = () => {
+    try {
+      const gameContent = `
+        <html>
+        <head>
+          <title>${content.title || "Trò chơi ghi nhớ"}</title>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 20px; background: #f9f9ff; }
+            .container { max-width: 800px; margin: 0 auto; }
+            .game-title { text-align: center; margin-bottom: 20px; }
+            .game-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+            @media (min-width: 640px) { .game-board { grid-template-columns: repeat(4, 1fr); } }
+            .card { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: linear-gradient(to bottom right, #818cf8, #6366f1); border-radius: 8px; cursor: pointer; font-size: 20px; font-weight: bold; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: transform 0.3s; }
+            .card:hover { transform: scale(1.05); }
+            .card.flipped { background: white; color: #6366f1; border: 2px solid #6366f1; }
+            .card.matched { background: #d1fae5; color: #059669; border: 2px solid #059669; }
+            .stats { display: flex; justify-content: space-between; margin-bottom: 15px; }
+            .stat { padding: 8px 16px; background: white; border-radius: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+            .progress { height: 8px; background: #eee; border-radius: 4px; margin-bottom: 15px; overflow: hidden; }
+            .progress-bar { height: 100%; background: #6366f1; transition: width 0.3s; }
+            .controls { display: flex; justify-content: center; }
+            .button { padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+            .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 100; }
+            .modal-content { background: white; padding: 20px; border-radius: 8px; text-align: center; max-width: 400px; width: 90%; }
+            .modal.visible { display: flex; }
+            .footer { margin-top: 20px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2 class="game-title">${content.title || topic}</h2>
+            
+            <div class="stats">
+              <div class="stat" id="pairs-stat">Cặp: 0/${memoryCards.length / 2}</div>
+              <div class="stat" id="timer">Thời gian: ${content?.settings?.timeLimit || 120}s</div>
+            </div>
+            
+            <div class="progress">
+              <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+            </div>
+            
+            <div class="game-board" id="game-board">
+              ${memoryCards.map((card: any, index: number) => 
+                `<div class="card" data-index="${index}">${card.content}</div>`
+              ).join('')}
+            </div>
+            
+            <div class="footer">
+              <div>Trò chơi ghi nhớ - Chia sẻ bởi QuizWhiz</div>
+            </div>
+          </div>
+          
+          <div class="modal" id="win-modal">
+            <div class="modal-content">
+              <h2>Chúc mừng!</h2>
+              <p>Bạn đã hoàn thành trò chơi.</p>
+              <p id="final-score"></p>
+              <button class="button" id="restart-btn">Chơi lại</button>
+            </div>
+          </div>
+          
+          <div class="modal" id="lose-modal">
+            <div class="modal-content">
+              <h2>Hết thời gian!</h2>
+              <p id="final-result"></p>
+              <button class="button" id="restart-btn-lose">Chơi lại</button>
+            </div>
+          </div>
+          
+          <script>
+            document.addEventListener('DOMContentLoaded', function() {
+              const cards = Array.from(document.querySelectorAll('.card'));
+              const pairsStat = document.getElementById('pairs-stat');
+              const timerElement = document.getElementById('timer');
+              const progressBar = document.getElementById('progress-bar');
+              const winModal = document.getElementById('win-modal');
+              const loseModal = document.getElementById('lose-modal');
+              const finalScore = document.getElementById('final-score');
+              const finalResult = document.getElementById('final-result');
+              const restartBtn = document.getElementById('restart-btn');
+              const restartBtnLose = document.getElementById('restart-btn-lose');
+              
+              let flippedCards = [];
+              let matchedPairs = 0;
+              let totalPairs = ${memoryCards.length / 2};
+              let timeLeft = ${content?.settings?.timeLimit || 120};
+              let timer;
+              let gameOver = false;
+              
+              // Initialize cards
+              cards.forEach(card => {
+                card.textContent = '?';
+                card.addEventListener('click', handleCardClick);
+              });
+              
+              // Start timer
+              startTimer();
+              
+              function handleCardClick() {
+                if (gameOver || flippedCards.length >= 2 || this.classList.contains('flipped') || this.classList.contains('matched')) {
+                  return;
+                }
+                
+                const index = parseInt(this.dataset.index);
+                this.textContent = ${JSON.stringify(memoryCards)}[index].content;
+                this.classList.add('flipped');
+                flippedCards.push({ index, element: this });
+                
+                if (flippedCards.length === 2) {
+                  checkForMatch();
+                }
+              }
+              
+              function checkForMatch() {
+                const [first, second] = flippedCards;
+                const firstCard = ${JSON.stringify(memoryCards)}[first.index];
+                const secondCard = ${JSON.stringify(memoryCards)}[second.index];
+                
+                if (firstCard.content === secondCard.content) {
+                  // Match found
+                  first.element.classList.add('matched');
+                  second.element.classList.add('matched');
+                  matchedPairs++;
+                  pairsStat.textContent = \`Cặp: \${matchedPairs}/\${totalPairs}\`;
+                  progressBar.style.width = \`\${(matchedPairs / totalPairs) * 100}%\`;
+                  
+                  if (matchedPairs === totalPairs) {
+                    clearInterval(timer);
+                    gameOver = true;
+                    finalScore.textContent = \`Thời gian còn lại: \${timeLeft}s\`;
+                    winModal.classList.add('visible');
+                  }
+                  
+                  flippedCards = [];
+                } else {
+                  // No match
+                  setTimeout(() => {
+                    first.element.textContent = '?';
+                    second.element.textContent = '?';
+                    first.element.classList.remove('flipped');
+                    second.element.classList.remove('flipped');
+                    flippedCards = [];
+                  }, 1000);
+                }
+              }
+              
+              function startTimer() {
+                timer = setInterval(() => {
+                  timeLeft--;
+                  timerElement.textContent = \`Thời gian: \${timeLeft}s\`;
+                  
+                  if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    gameOver = true;
+                    finalResult.textContent = \`Bạn đã tìm được \${matchedPairs} trong tổng số \${totalPairs} cặp thẻ.\`;
+                    loseModal.classList.add('visible');
+                  }
+                }, 1000);
+              }
+              
+              function restart() {
+                flippedCards = [];
+                matchedPairs = 0;
+                timeLeft = ${content?.settings?.timeLimit || 120};
+                gameOver = false;
+                
+                pairsStat.textContent = \`Cặp: 0/\${totalPairs}\`;
+                timerElement.textContent = \`Thời gian: \${timeLeft}s\`;
+                progressBar.style.width = '0%';
+                
+                cards.forEach(card => {
+                  card.textContent = '?';
+                  card.classList.remove('flipped', 'matched');
+                });
+                
+                clearInterval(timer);
+                startTimer();
+                
+                winModal.classList.remove('visible');
+                loseModal.classList.remove('visible');
+              }
+              
+              restartBtn.addEventListener('click', restart);
+              restartBtnLose.addEventListener('click', restart);
+            });
+          </script>
+        </body>
+        </html>
+      `;
+      
+      const shareUrl = saveGameForSharing(
+        content.title || "Trò chơi ghi nhớ", 
+        topic, 
+        gameContent
+      );
+      
+      if (shareUrl) {
+        navigator.clipboard.writeText(shareUrl);
+        toast({
+          title: "Link chia sẻ đã được sao chép",
+          description: "Đã sao chép liên kết vào clipboard. Link có hiệu lực trong 48 giờ.",
+        });
+      } else {
+        throw new Error("Không thể tạo URL chia sẻ");
+      }
+    } catch (error) {
+      console.error("Lỗi khi chia sẻ:", error);
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!content || !memoryCards.length) {
     return <div className="p-4">Không có dữ liệu trò chơi ghi nhớ</div>;
   }
@@ -212,10 +430,16 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
             <h2 className="text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
             <p className="mb-2 text-lg">Bạn đã hoàn thành trò chơi với {moves} lượt.</p>
             <p className="mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
-            <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Chơi lại
+              </Button>
+              <Button onClick={handleShare} variant="outline" className="w-full bg-gradient-to-r from-primary/10 to-background border-primary/20">
+                <Share2 className="mr-2 h-4 w-4" />
+                Chia sẻ
+              </Button>
+            </div>
           </Card>
         </div>
       ) : gameOver ? (
@@ -223,10 +447,16 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
           <Card className="p-8 text-center max-w-md bg-gradient-to-br from-destructive/5 to-background backdrop-blur-sm border-destructive/20">
             <h2 className="text-3xl font-bold mb-4 text-destructive">Hết thời gian!</h2>
             <p className="mb-4 text-lg">Bạn đã tìm được {matchedPairs} trong tổng số {totalPairs} cặp thẻ.</p>
-            <Button onClick={handleRestart} className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <Button onClick={handleRestart} className="w-full">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Chơi lại
+              </Button>
+              <Button onClick={handleShare} variant="outline" className="w-full">
+                <Share2 className="mr-2 h-4 w-4" />
+                Chia sẻ
+              </Button>
+            </div>
           </Card>
         </div>
       ) : (
@@ -268,6 +498,16 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
                   Gợi ý (-10s)
                 </Button>
               )}
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShare}
+                className="bg-gradient-to-r from-primary/10 to-background border-primary/20"
+              >
+                <Share2 className="h-4 w-4 mr-1" />
+                Chia sẻ
+              </Button>
               
               <Button
                 variant="outline"

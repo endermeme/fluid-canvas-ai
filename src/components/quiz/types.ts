@@ -39,6 +39,7 @@ export interface GameSettingsData {
   itemsPerCategory?: number;
   allowMultipleCategories?: boolean;
   showCategoryHints?: boolean;
+  allowMultipleAttempts?: boolean;
   requestMetadata?: {
     requestId: string;
     timestamp: string;
