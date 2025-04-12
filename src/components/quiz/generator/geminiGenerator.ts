@@ -1,10 +1,15 @@
-
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { buildGeminiPrompt } from './promptBuilder';
 import { parseGeminiResponse } from './responseParser';
 import { processImagesToPixabay } from './imageInstructions';
+import { 
+  logInfo, logError, logWarning, logSuccess, 
+  measureExecutionTime, formatLogObject 
+} from './apiUtils';
+
+const SOURCE = "GEMINI";
 
 /**
  * Generates a game using Google's Gemini API
@@ -21,33 +26,48 @@ export const generateWithGemini = async (
   // Get game type from topic to provide better context for the AI
   const gameType = getGameTypeByTopic(topic);
   
-  console.log(`🔷 Gemini: Starting game generation for "${topic}" - Type: ${gameType?.name || "Not specified"}`);
-  console.log(`🔷 Gemini: Settings: ${JSON.stringify(settings || {})}`);
+  logInfo(SOURCE, `Starting game generation for "${topic}"`, {
+    type: gameType?.name || "Not specified",
+    settings: settings || {}
+  });
   
   // Check if the game might require images
   const mightRequireImages = checkIfGameRequiresImages(topic);
   if (mightRequireImages) {
-    console.log("🔷 Gemini: This game likely requires images. Adding Pixabay image instructions.");
+    logInfo(SOURCE, "This game likely requires images. Adding Pixabay image instructions.");
   }
   
   // Build the complete prompt with image instructions if needed
   const prompt = buildGeminiPrompt(topic, gameType?.id, settings);
 
   try {
-    console.log("🔷 Gemini: Sending request to Gemini API...");
+    // Detailed logging for better debugging
+    console.groupCollapsed(`%c ${SOURCE} %c Detailed Prompt`, 'background: #6f42c1; color: white;', '');
+    console.log(prompt);
+    console.groupEnd();
+    
+    logInfo(SOURCE, "Sending request to Gemini API");
+    
+    const startTime = Date.now();
     const result = await model.generateContent(prompt);
+    const duration = measureExecutionTime(startTime);
+    
+    logSuccess(SOURCE, `Response received in ${duration.seconds}s (${duration.ms}ms)`);
+    
     const response = result.response;
     const text = response.text();
     
-    console.log("🔷 Gemini: Response received, extracting JSON...");
-    console.log(`🔷 Gemini: Response length: ${text.length}`);
+    logInfo(SOURCE, `Response length: ${text.length} characters`, {
+      preview: text.substring(0, 200) + (text.length > 200 ? '...' : '')
+    });
     
     // Parse the response
+    logInfo(SOURCE, "Parsing response JSON");
     let parsedResponse = await parseGeminiResponse(text, topic);
     
     // Process the game content for images if it contains items array
     if (parsedResponse && parsedResponse.items && Array.isArray(parsedResponse.items)) {
-      console.log("🔷 Gemini: Processing image search terms to Pixabay URLs...");
+      logInfo(SOURCE, "Processing image search terms to Pixabay URLs");
       parsedResponse = await processImagesToPixabay(parsedResponse);
     }
     // Process the response to convert any non-Pixabay image URLs to Pixabay format in HTML content
@@ -56,9 +76,14 @@ export const generateWithGemini = async (
     }
     
     // Return the generated game
+    logSuccess(SOURCE, "Game generated successfully", {
+      title: parsedResponse?.title || topic,
+      contentSize: parsedResponse?.content?.length || 0
+    });
+    
     return parsedResponse;
   } catch (error) {
-    console.error("❌ Gemini: Error generating with Gemini:", error);
+    logError(SOURCE, "Error generating with Gemini", error);
     throw error;
   }
 };
@@ -80,19 +105,28 @@ export const tryGeminiGeneration = async (
   const maxRetries = 3; // Reduced number of retries
   
   if (retryCount >= maxRetries) {
-    console.log(`⚠️ Gemini: Reached maximum retries (${maxRetries})`);
+    logWarning(SOURCE, `Reached maximum retries (${maxRetries})`);
     return null;
   }
   
   try {
-    console.log(`⏳ Gemini: Attempt ${retryCount + 1} for topic: "${topic}"`);
+    logInfo(SOURCE, `Attempt ${retryCount + 1} for topic: "${topic}"`);
     return await generateWithGemini(model, topic, settings);
   } catch (error) {
-    console.error(`❌ Gemini: Attempt ${retryCount + 1} failed:`, error);
+    logError(SOURCE, `Attempt ${retryCount + 1} failed`, error);
+    
     // Wait a bit before retrying
     const waitTime = (retryCount + 1) * 1500;
-    console.log(`⏳ Gemini: Waiting ${waitTime/1000} seconds before retrying...`);
+    logInfo(SOURCE, `Waiting ${waitTime/1000} seconds before retrying...`);
     await new Promise(resolve => setTimeout(resolve, waitTime));
+    
+    // Display retry information
+    console.log(
+      `%c ${SOURCE} RETRY %c Attempt ${retryCount + 2}/${maxRetries+1}`,
+      'background: #f9a825; color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
+      ''
+    );
+    
     return tryGeminiGeneration(model, topic, settings, retryCount + 1);
   }
 };
@@ -125,6 +159,8 @@ function replaceNonPixabayImageUrls(content: string, topic: string): string {
   // This regex looks for image URLs that don't contain pixabay.com or cdn.pixabay.com
   const nonPixabayImageRegex = /(src=["'])(https?:\/\/(?!.*pixabay\.com|.*cdn\.pixabay\.com).+?)(["'])/gi;
   
+  let replacementCount = 0;
+  
   // Replace with Pixabay URLs
   const updatedContent = content.replace(nonPixabayImageRegex, (match, prefix, url, suffix) => {
     // Extract possible search term from URL
@@ -136,10 +172,19 @@ function replaceNonPixabayImageUrls(content: string, topic: string): string {
     // This is a static image that should exist
     const fallbackPixabayImage = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png';
     
-    console.log(`🔄 Gemini: Replacing non-Pixabay image URL with Pixabay fallback. Original URL: ${url}`);
+    replacementCount++;
+    logInfo(SOURCE, `Replacing non-Pixabay image URL (${replacementCount})`, {
+      originalUrl: url,
+      searchTerm,
+      replacement: fallbackPixabayImage
+    });
     
     return `${prefix}${fallbackPixabayImage}${suffix} data-search-term="${searchTerm}"`;
   });
+  
+  if (replacementCount > 0) {
+    logInfo(SOURCE, `Replaced ${replacementCount} non-Pixabay image URLs`);
+  }
   
   return updatedContent;
 }
@@ -172,7 +217,7 @@ function extractSearchTermFromUrl(url: string): string | null {
     
     return null;
   } catch (error) {
-    console.error('Error extracting search term from URL:', error);
+    logError(SOURCE, 'Error extracting search term from URL', error);
     return null;
   }
 }

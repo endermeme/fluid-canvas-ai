@@ -1,22 +1,53 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import {
+  GoogleGenerativeAI,
+  GoogleGenerativeAIResponseError,
+  HarmBlockThreshold,
+  HarmCategory,
+} from '@google/generative-ai';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { MiniGame, AIGameGeneratorOptions } from './types';
-import { createGeminiClient, logError, logInfo, logWarning } from './apiUtils';
+import { 
+  createGeminiClient, 
+  logInfo, 
+  logError, 
+  logWarning, 
+  logSuccess, 
+  measureExecutionTime 
+} from './apiUtils';
 import { tryGeminiGeneration } from './geminiGenerator';
 import { createFallbackGame } from './fallbackGenerator';
 
 // Sử dụng API key cứng
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
+const SOURCE = "AI_GENERATOR";
 
 // Singleton instance
 let instance: AIGameGenerator | null = null;
 
+const MODEL_NAME = "gemini-1.5-pro";
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1500;
+
+const REQUIRES_IMAGES_KEYWORDS = [
+  'memory card',
+  'memory match',
+  'memory game',
+  'matching pairs',
+  'find the pair',
+  'match the cards',
+  'matching game',
+  'picture matching',
+  'image pairing',
+];
+
 export class AIGameGenerator {
+  private genAI: GoogleGenerativeAI;
   private model: any;
   private modelName: string;
   private canvasMode: boolean = true;
   private initialized: boolean = false;
+  private apiKey: string;
 
   constructor(apiKey: string = API_KEY, options?: { modelName?: string; canvasMode?: boolean }) {
     // Singleton pattern - return existing instance if available
@@ -24,28 +55,83 @@ export class AIGameGenerator {
       return instance;
     }
     
-    this.initialize(apiKey, options);
+    this.apiKey = apiKey;
+    this.initialize(options);
     instance = this;
   }
 
-  private initialize(apiKey: string, options?: { modelName?: string; canvasMode?: boolean }): void {
+  private initialize(options?: { modelName?: string; canvasMode?: boolean }): void {
     if (this.initialized) return;
     
-    console.log("🚀 AIGameGenerator: Initializing AI game generator");
+    logInfo(SOURCE, "Initializing AI game generator");
     this.modelName = options?.modelName || 'gemini-2.0-flash';
     this.canvasMode = options?.canvasMode || true;
     
-    console.log(`🚀 AIGameGenerator: Using model ${this.modelName}`);
-    console.log(`🚀 AIGameGenerator: Canvas mode: ${this.canvasMode ? 'ON' : 'OFF'}`);
+    logInfo(SOURCE, `Using model ${this.modelName}`);
+    logInfo(SOURCE, `Canvas mode: ${this.canvasMode ? 'ON' : 'OFF'}`);
     
-    // Luôn sử dụng API_KEY cứng thay vì tham số apiKey
-    this.model = createGeminiClient(API_KEY);
-    this.initialized = true;
+    try {
+      this.genAI = new GoogleGenerativeAI(this.apiKey);
+      this.model = this.genAI.getGenerativeModel({
+        model: MODEL_NAME,
+        safetySettings: [
+          {
+            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+        ],
+        generationConfig: {
+          temperature: 0.9,
+          topK: 1,
+          topP: 1,
+          maxOutputTokens: 8192,
+        },
+      });
+      this.initialized = true;
+      
+      console.log(
+        `%c 🤖 AI GENERATOR INITIALIZED %c ${MODEL_NAME}`,
+        'background: #4285f4; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
+        'font-weight: bold; color: #4285f4;'
+      );
+      console.log('%c 📚 Model', 'font-weight: bold; color: #4285f4;', MODEL_NAME);
+      console.log('%c ⚙️ Config', 'font-weight: bold; color: #4285f4;', {
+        temperature: 0.9,
+        topK: 1,
+        topP: 1,
+        maxOutputTokens: 8192,
+        maxRetries: MAX_RETRIES,
+        retryDelay: `${RETRY_DELAY}ms`
+      });
+    } catch (error) {
+      console.group(
+        '%c ❌ AI GENERATOR INITIALIZATION ERROR',
+        'background: #d73a49; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;'
+      );
+      console.error('%c 🚨 Error Details', 'font-weight: bold; color: #d73a49;', error);
+      console.error('%c 🔍 Stack Trace', 'font-weight: bold; color: #d73a49;', error instanceof Error ? error.stack : 'No stack trace available');
+      console.groupEnd();
+      
+      this.initialized = false;
+      throw new Error("Failed to initialize AI Generator");
+    }
   }
 
   setCanvasMode(enabled: boolean): void {
     this.canvasMode = enabled;
-    console.log(`🚀 AIGameGenerator: Canvas mode ${enabled ? 'ENABLED' : 'DISABLED'}`);
+    logInfo(SOURCE, `Canvas mode ${enabled ? 'ENABLED' : 'DISABLED'}`);
   }
 
   isCanvasModeEnabled(): boolean {
@@ -53,14 +139,24 @@ export class AIGameGenerator {
   }
 
   async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
+    // Create a unique ID for this generation request to track it in logs
+    const requestId = Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
+    
     try {
-      console.log(`🚀 AIGameGenerator: Starting game generation for topic: "${topic}"`);
-      console.log(`🚀 AIGameGenerator: Settings:`, settings);
-      console.log(`🚀 AIGameGenerator: Canvas mode: ${this.canvasMode ? 'ON' : 'OFF'}`);
+      // Group all logs for this request
+      console.groupCollapsed(
+        `%c ${SOURCE} REQUEST ${requestId} %c ${topic.substring(0, 50)}${topic.length > 50 ? '...' : ''}`,
+        'background: #0366d6; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
+        'font-weight: bold;'
+      );
+      
+      logInfo(SOURCE, `Starting game generation for topic: "${topic}"`);
+      logInfo(SOURCE, `Settings:`, settings);
+      logInfo(SOURCE, `Canvas mode: ${this.canvasMode ? 'ON' : 'OFF'}`);
       
       const gameType = getGameTypeByTopic(topic);
       if (gameType) {
-        console.log(`🚀 AIGameGenerator: Determined game type: ${gameType.name}`);
+        logInfo(SOURCE, `Determined game type: ${gameType.name}`);
       }
       
       const startTime = Date.now();
@@ -68,24 +164,24 @@ export class AIGameGenerator {
       // Check if the game requires images with an expanded set of keywords
       const requiresImages = this.checkIfGameRequiresImages(topic);
       if (requiresImages) {
-        console.log(`🚀 AIGameGenerator: This game likely requires images. Ensuring image support.`);
-        // We'll handle this in the Gemini prompting
+        logInfo(SOURCE, `This game likely requires images. Ensuring image support.`);
       }
       
       // Generate with Gemini
-      console.log(`🚀 AIGameGenerator: Starting game generation with ${this.modelName}...`);
+      logInfo(SOURCE, `Starting game generation with ${this.modelName}...`);
+      
       // Sửa: Bỏ tham số requiresImages không cần thiết và không đúng kiểu 
       const geminiResult = await tryGeminiGeneration(this.model, topic, settings);
       
-      const geminiTime = ((Date.now() - startTime) / 1000).toFixed(2);
-      console.log(`🚀 AIGameGenerator: Gemini generation completed in ${geminiTime}s`);
+      const duration = measureExecutionTime(startTime);
+      logSuccess(SOURCE, `Gemini generation completed in ${duration.seconds}s (${duration.ms}ms)`);
       
       if (geminiResult && geminiResult.content) {
-        console.log(`🚀 AIGameGenerator: Successfully generated game`);
-        console.log(`🚀 AIGameGenerator: Code size: ${geminiResult.content.length.toLocaleString()} characters`);
+        logSuccess(SOURCE, `Successfully generated game`);
+        logInfo(SOURCE, `Code size: ${geminiResult.content.length.toLocaleString()} characters`);
         
-        const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
-        console.log(`🚀 AIGameGenerator: Total game generation time: ${totalTime}s`);
+        // Close the group before returning
+        console.groupEnd();
         
         return {
           title: topic,
@@ -94,8 +190,12 @@ export class AIGameGenerator {
         };
       }
       
-      console.log("⚠️ AIGameGenerator: Gemini generation failed, using fallback game");
+      logWarning(SOURCE, "Gemini generation failed, using fallback game");
       const fallbackGame = createFallbackGame(topic);
+      
+      // Close the group before returning
+      console.groupEnd();
+      
       return {
         title: topic,
         description: "",
@@ -103,8 +203,12 @@ export class AIGameGenerator {
       };
       
     } catch (error) {
-      console.error("❌ AIGameGenerator: Error in generateMiniGame:", error);
-      console.log("⚠️ AIGameGenerator: Creating fallback game due to error");
+      logError(SOURCE, "Error in generateMiniGame", error);
+      logWarning(SOURCE, "Creating fallback game due to error");
+      
+      // Close any open group
+      try { console.groupEnd(); } catch (e) {}
+      
       const fallbackGame = createFallbackGame(topic);
       return {
         title: topic,
@@ -162,7 +266,17 @@ export class AIGameGenerator {
                                  lowerTopic.includes('thẻ nhớ') ||
                                  lowerTopic.includes('trí nhớ');
     
-    return containsImageKeyword || isImageBasedGameType;
+    const result = containsImageKeyword || isImageBasedGameType;
+    
+    // Log keyword matches for debugging
+    if (result) {
+      const matchedKeywords = imageRelatedKeywords.filter(keyword => lowerTopic.includes(keyword));
+      logInfo(SOURCE, `Image detection: ${result ? 'YES' : 'NO'}`, { 
+        matchedKeywords: matchedKeywords.length > 0 ? matchedKeywords : 'game type based detection'
+      });
+    }
+    
+    return result;
   }
   
   // Static method to get the instance
