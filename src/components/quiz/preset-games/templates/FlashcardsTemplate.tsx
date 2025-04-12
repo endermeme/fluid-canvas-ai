@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, RefreshCw, Check, X, Clock, Shuffle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RefreshCw, Check, X, Clock, Shuffle, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Toggle } from '@/components/ui/toggle';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { saveGameForSharing } from '@/utils/gameExport';
 
 interface FlashcardsTemplateProps {
   content: any;
@@ -126,6 +127,169 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
       description: autoFlip ? "Thẻ sẽ không tự động lật." : `Thẻ sẽ tự động lật sau ${flipTime} giây.`,
       variant: "default",
     });
+  };
+
+  const handleShare = () => {
+    try {
+      const gameContent = `
+        <html>
+        <head>
+          <title>${content.title || "Thẻ ghi nhớ"}</title>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 20px; background: #f9f9ff; }
+            .container { max-width: 800px; margin: 0 auto; }
+            .game-title { text-align: center; margin-bottom: 20px; }
+            .card-container { perspective: 1000px; width: 100%; max-width: 500px; margin: 0 auto 20px; }
+            .card { position: relative; width: 100%; height: 300px; transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer; }
+            .card.flipped { transform: rotateY(180deg); }
+            .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 8px; padding: 20px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+            .card-front { background: linear-gradient(to bottom right, rgba(99, 102, 241, 0.05), rgba(99, 102, 241, 0.2)); border: 2px solid rgba(99, 102, 241, 0.2); }
+            .card-back { background: linear-gradient(to bottom right, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05)); border: 2px solid rgba(99, 102, 241, 0.3); transform: rotateY(180deg); }
+            .card-content { text-align: center; font-size: 24px; font-weight: bold; color: #333; }
+            .instructions { text-align: center; margin-bottom: 20px; color: #666; }
+            .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+            .button { padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+            .button:hover { background: #f0f0f0; }
+            .progress { height: 8px; background: #eee; border-radius: 4px; margin-bottom: 10px; overflow: hidden; }
+            .progress-bar { height: 100%; background: #6366f1; transition: width 0.3s; }
+            .card-navigation { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+            .card-counter { padding: 8px 16px; background: rgba(99, 102, 241, 0.1); border-radius: 20px; }
+            .footer { margin-top: 20px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2 class="game-title">${content.title || topic}</h2>
+            
+            <div class="progress">
+              <div class="progress-bar" id="progress-bar" style="width: ${100 / cards.length}%;"></div>
+            </div>
+            
+            <div class="card-navigation">
+              <span class="card-counter">Thẻ <span id="current-card">1</span>/${cards.length}</span>
+            </div>
+            
+            <p class="instructions">Nhấn vào thẻ để lật</p>
+            
+            <div class="card-container">
+              <div class="card" id="flashcard">
+                <div class="card-face card-front">
+                  <div class="card-content" id="front-content">${cards[0]?.front || ''}</div>
+                </div>
+                <div class="card-face card-back">
+                  <div class="card-content" id="back-content">${cards[0]?.back || ''}</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="controls">
+              <button class="button" id="prev-btn" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                Trước
+              </button>
+              
+              <button class="button" id="flip-btn">
+                Lật thẻ
+              </button>
+              
+              <button class="button" id="next-btn">
+                Tiếp
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </div>
+            
+            <div class="footer">
+              <div>Thẻ ghi nhớ - Chia sẻ bởi QuizWhiz</div>
+            </div>
+          </div>
+          
+          <script>
+            document.addEventListener('DOMContentLoaded', function() {
+              const cards = ${JSON.stringify(cards)};
+              let currentCardIndex = 0;
+              let isFlipped = false;
+              
+              const flashcard = document.getElementById('flashcard');
+              const frontContent = document.getElementById('front-content');
+              const backContent = document.getElementById('back-content');
+              const prevBtn = document.getElementById('prev-btn');
+              const nextBtn = document.getElementById('next-btn');
+              const flipBtn = document.getElementById('flip-btn');
+              const progressBar = document.getElementById('progress-bar');
+              const currentCardElement = document.getElementById('current-card');
+              
+              function updateCard() {
+                const card = cards[currentCardIndex];
+                frontContent.textContent = card.front;
+                backContent.textContent = card.back;
+                isFlipped = false;
+                flashcard.classList.remove('flipped');
+                
+                currentCardElement.textContent = currentCardIndex + 1;
+                progressBar.style.width = \`\${((currentCardIndex + 1) / cards.length) * 100}%\`;
+                
+                // Update button states
+                prevBtn.disabled = currentCardIndex === 0;
+                nextBtn.disabled = currentCardIndex === cards.length - 1;
+              }
+              
+              flashcard.addEventListener('click', function() {
+                isFlipped = !isFlipped;
+                flashcard.classList.toggle('flipped');
+              });
+              
+              flipBtn.addEventListener('click', function() {
+                isFlipped = !isFlipped;
+                flashcard.classList.toggle('flipped');
+              });
+              
+              prevBtn.addEventListener('click', function() {
+                if (currentCardIndex > 0) {
+                  currentCardIndex--;
+                  updateCard();
+                }
+              });
+              
+              nextBtn.addEventListener('click', function() {
+                if (currentCardIndex < cards.length - 1) {
+                  currentCardIndex++;
+                  updateCard();
+                }
+              });
+              
+              // Initialize
+              updateCard();
+            });
+          </script>
+        </body>
+        </html>
+      `;
+      
+      const shareUrl = saveGameForSharing(
+        content.title || "Thẻ ghi nhớ", 
+        topic, 
+        gameContent
+      );
+      
+      if (shareUrl) {
+        navigator.clipboard.writeText(shareUrl);
+        toast({
+          title: "Link chia sẻ đã được sao chép",
+          description: "Đã sao chép liên kết vào clipboard. Link có hiệu lực trong 48 giờ.",
+        });
+      } else {
+        throw new Error("Không thể tạo URL chia sẻ");
+      }
+    } catch (error) {
+      console.error("Lỗi khi chia sẻ:", error);
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!content || !cards.length) {
@@ -258,33 +422,45 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
           <Button
             variant="outline"
             size="sm"
-            onClick={handleRestart}
+            onClick={handleShare}
             className="bg-background/70 border-primary/20 flex-1"
+          >
+            <Share2 className="h-4 w-4 mr-1" />
+            Chia sẻ
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRestart}
+            className="bg-background/70 border-primary/20"
           >
             <RefreshCw className="h-4 w-4 mr-1" />
             Làm lại
           </Button>
-        </div>
-        
-        <ToggleGroup type="single" variant="outline" className="grid grid-cols-2">
-          <ToggleGroupItem
-            value="unknown"
-            onClick={() => handleMarkCard('unknown')}
-            className="border border-red-300 text-red-600 data-[state=on]:bg-red-100 data-[state=on]:text-red-700"
-          >
-            <X className="mr-2 h-4 w-4" />
-            Chưa thuộc
-          </ToggleGroupItem>
           
-          <ToggleGroupItem
-            value="known"
-            onClick={() => handleMarkCard('known')}
-            className="border border-green-300 text-green-600 data-[state=on]:bg-green-100 data-[state=on]:text-green-700"
-          >
-            <Check className="mr-2 h-4 w-4" />
-            Đã thuộc
-          </ToggleGroupItem>
-        </ToggleGroup>
+          <ToggleGroup type="single" variant="outline" className="grid grid-cols-2">
+            <ToggleGroupItem
+              value="unknown"
+              onClick={() => handleMarkCard('unknown')}
+              className="border border-red-300 text-red-600 data-[state=on]:bg-red-100 data-[state=on]:text-red-700"
+            >
+              <X className="mr-2 h-4 w-4" />
+              Chưa thuộc
+            </ToggleGroupItem>
+            
+            <ToggleGroupItem
+              value="known"
+              onClick={() => handleMarkCard('known')}
+              className="border border-green-300 text-green-600 data-[state=on]:bg-green-100 data-[state=on]:text-green-700"
+            >
+              <Check className="mr-2 h-4 w-4" />
+              Đã thuộc
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
       </div>
     </div>
   );

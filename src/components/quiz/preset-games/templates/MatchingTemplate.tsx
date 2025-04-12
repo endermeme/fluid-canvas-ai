@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Clock, ArrowLeft, Trophy } from 'lucide-react';
+import { RefreshCw, Clock, ArrowLeft, Trophy, Share2 } from 'lucide-react';
+import { saveGameForSharing } from '@/utils/gameExport';
 
 interface MatchingTemplateProps {
   content: any;
@@ -34,7 +34,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
   const totalPairs = pairs.length;
   const difficulty = content?.settings?.difficulty || "medium";
 
-  // Initialize the game
   useEffect(() => {
     if (pairs.length > 0) {
       const shuffledLeftItems = pairs.map((pair: any, index: number) => ({
@@ -61,7 +60,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
     }
   }, [pairs, content?.settings?.timeLimit]);
 
-  // Timer countdown
   useEffect(() => {
     if (timeLeft > 0 && !gameOver && !gameWon) {
       const timer = setTimeout(() => {
@@ -79,7 +77,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
     }
   }, [timeLeft, gameOver, gameWon, toast]);
 
-  // Check if all pairs are matched
   useEffect(() => {
     if (matchedPairs === totalPairs && totalPairs > 0 && !gameWon) {
       setGameWon(true);
@@ -95,13 +92,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
   }, [matchedPairs, totalPairs, gameWon, toast]);
 
   const calculateFinalScore = () => {
-    // Base score from matched pairs
     const baseScore = matchedPairs * 10;
-    
-    // Time bonus - more time left = more bonus
     const timeBonus = Math.floor(timeLeft / 5);
-    
-    // Difficulty multiplier
     let difficultyMultiplier = 1;
     switch (difficulty) {
       case "easy": difficultyMultiplier = 1; break;
@@ -116,7 +108,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
   const handleLeftItemClick = (id: number) => {
     if (gameOver || gameWon) return;
     
-    // If the item is already matched, do nothing
     if (leftItems.find(item => item.id === id)?.matched) return;
     
     setSelectedLeft(id);
@@ -125,19 +116,15 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
   const handleRightItemClick = (id: number) => {
     if (gameOver || gameWon) return;
     
-    // If the item is already matched, do nothing
     if (rightItems.find(item => item.id === id)?.matched) return;
     
     setSelectedRight(id);
   };
 
-  // Check if selected items match
   useEffect(() => {
-    // Only run this effect when both items are selected
     if (selectedLeft !== null && selectedRight !== null) {
       const checkMatch = () => {
         if (selectedLeft === selectedRight) {
-          // Match found
           setLeftItems(prevLeftItems => 
             prevLeftItems.map(item => 
               item.id === selectedLeft ? {...item, matched: true} : item
@@ -152,7 +139,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
           
           setMatchedPairs(prev => prev + 1);
           
-          // Update score immediately for feedback
           setScore(prev => prev + 10);
           
           toast({
@@ -161,7 +147,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
             variant: "default",
           });
         } else {
-          // No match - penalty for wrong matches
           setScore(prev => Math.max(0, prev - 2));
           
           toast({
@@ -172,10 +157,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
         }
       };
       
-      // Execute match check only once
       checkMatch();
       
-      // Reset selections after a short delay
       const timer = setTimeout(() => {
         setSelectedLeft(null);
         setSelectedRight(null);
@@ -183,7 +166,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
       
       return () => clearTimeout(timer);
     }
-  }, [selectedLeft, selectedRight, toast]); // Remove dependencies that cause infinite loop
+  }, [selectedLeft, selectedRight, toast]);
 
   const handleRestart = () => {
     if (pairs.length > 0) {
@@ -211,18 +194,156 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
     }
   };
 
+  const handleShare = () => {
+    try {
+      const gameContent = `
+        <html>
+        <head>
+          <title>${content.title || "Trò chơi nối từ"}</title>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 20px; background: #f9f9ff; }
+            .container { max-width: 800px; margin: 0 auto; }
+            .game-title { text-align: center; margin-bottom: 20px; }
+            .columns { display: flex; flex-direction: column; gap: 15px; }
+            @media (min-width: 768px) { .columns { flex-direction: row; } }
+            .column { flex: 1; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .column h3 { text-align: center; margin-top: 0; padding: 5px; background: rgba(99, 102, 241, 0.1); border-radius: 4px; }
+            .item { margin-bottom: 8px; padding: 10px; border-radius: 4px; background: #f0f0f8; cursor: pointer; }
+            .item.matched { background: #d1fae5; }
+            .item.selected { background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.8); }
+            .footer { margin-top: 20px; text-align: center; }
+            .score { display: inline-block; padding: 8px 16px; background: #fff; border-radius: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2 class="game-title">${content.title || topic}</h2>
+            <div class="columns">
+              <div class="column">
+                <h3>Cột A</h3>
+                <div id="left-items">
+                  ${pairs.map((pair: any, index: number) => 
+                    `<div class="item" data-id="${index}">${pair.left}</div>`
+                  ).join('')}
+                </div>
+              </div>
+              <div class="column">
+                <h3>Cột B</h3>
+                <div id="right-items">
+                  ${pairs.map((pair: any, index: number) => 
+                    `<div class="item" data-id="${index}">${pair.right}</div>`
+                  ).join('')}
+                </div>
+              </div>
+            </div>
+            <div class="footer">
+              <div class="score">Trò chơi nối từ - Chia sẻ bởi QuizWhiz</div>
+            </div>
+          </div>
+          <script>
+            document.addEventListener('DOMContentLoaded', function() {
+              const leftItems = document.querySelectorAll('#left-items .item');
+              const rightItems = document.querySelectorAll('#right-items .item');
+              
+              let selectedLeft = null;
+              let selectedRight = null;
+              let matchedPairs = 0;
+              
+              leftItems.forEach(item => {
+                item.addEventListener('click', function() {
+                  if (this.classList.contains('matched')) return;
+                  
+                  leftItems.forEach(i => i.classList.remove('selected'));
+                  this.classList.add('selected');
+                  selectedLeft = this.dataset.id;
+                  
+                  checkForMatch();
+                });
+              });
+              
+              rightItems.forEach(item => {
+                item.addEventListener('click', function() {
+                  if (this.classList.contains('matched')) return;
+                  
+                  rightItems.forEach(i => i.classList.remove('selected'));
+                  this.classList.add('selected');
+                  selectedRight = this.dataset.id;
+                  
+                  checkForMatch();
+                });
+              });
+              
+              function checkForMatch() {
+                if (selectedLeft !== null && selectedRight !== null) {
+                  if (selectedLeft === selectedRight) {
+                    const matchedLeftItem = document.querySelector(\`#left-items .item[data-id="\${selectedLeft}"]\`);
+                    const matchedRightItem = document.querySelector(\`#right-items .item[data-id="\${selectedRight}"]\`);
+                    
+                    matchedLeftItem.classList.add('matched');
+                    matchedRightItem.classList.add('matched');
+                    
+                    matchedLeftItem.classList.remove('selected');
+                    matchedRightItem.classList.remove('selected');
+                    
+                    matchedPairs++;
+                    
+                    if (matchedPairs === ${pairs.length}) {
+                      alert('Chúc mừng! Bạn đã hoàn thành trò chơi.');
+                    }
+                  } else {
+                    setTimeout(() => {
+                      leftItems.forEach(i => i.classList.remove('selected'));
+                      rightItems.forEach(i => i.classList.remove('selected'));
+                    }, 1000);
+                  }
+                  
+                  selectedLeft = null;
+                  selectedRight = null;
+                }
+              }
+            });
+          </script>
+        </body>
+        </html>
+      `;
+      
+      const shareUrl = saveGameForSharing(
+        content.title || "Trò chơi nối từ", 
+        topic, 
+        gameContent
+      );
+      
+      if (shareUrl) {
+        navigator.clipboard.writeText(shareUrl);
+        toast({
+          title: "Link chia sẻ đã được sao chép",
+          description: "Đã sao chép liên kết vào clipboard. Link có hiệu lực trong 48 giờ.",
+        });
+      } else {
+        throw new Error("Không thể tạo URL chia sẻ");
+      }
+    } catch (error) {
+      console.error("Lỗi khi chia sẻ:", error);
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!content || !pairs.length) {
     return <div className="p-4">Không có dữ liệu trò chơi nối từ</div>;
   }
 
   const progressPercentage = (matchedPairs / totalPairs) * 100;
 
-  // Determine item size based on content length and difficulty
   const getItemSize = (text: string) => {
     if (difficulty === "hard") return "min-h-14 text-sm";
     if (difficulty === "easy") return "min-h-16 text-lg";
     
-    // Default medium difficulty sizing
     return text.length > 15 
       ? "min-h-16 text-sm" 
       : text.length > 8 
@@ -232,7 +353,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
 
   return (
     <div className="flex flex-col p-4 h-full">
-      {/* Header with navigation, progress and timer */}
       <div className="relative mb-4">
         {onBack && (
           <Button 
@@ -264,7 +384,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
         <Progress value={progressPercentage} className="h-2" />
       </div>
 
-      {/* Game content */}
       {gameWon ? (
         <div className="flex-grow flex items-center justify-center">
           <Card className="p-6 text-center max-w-md">
@@ -272,10 +391,16 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
             <p className="mb-2">Bạn đã hoàn thành trò chơi với {totalPairs} cặp từ.</p>
             <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
             <p className="mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
-            <Button onClick={handleRestart}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
+            <div className="grid grid-cols-2 gap-2">
+              <Button onClick={handleRestart}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Chơi lại
+              </Button>
+              <Button onClick={handleShare} variant="outline">
+                <Share2 className="mr-2 h-4 w-4" />
+                Chia sẻ
+              </Button>
+            </div>
           </Card>
         </div>
       ) : gameOver ? (
@@ -284,15 +409,20 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
             <h2 className="text-2xl font-bold mb-4">Hết thời gian!</h2>
             <p className="mb-2">Bạn đã ghép được {matchedPairs} trong tổng số {totalPairs} cặp từ.</p>
             <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
-            <Button onClick={handleRestart}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
+            <div className="grid grid-cols-2 gap-2">
+              <Button onClick={handleRestart}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Chơi lại
+              </Button>
+              <Button onClick={handleShare} variant="outline">
+                <Share2 className="mr-2 h-4 w-4" />
+                Chia sẻ
+              </Button>
+            </div>
           </Card>
         </div>
       ) : (
         <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Left column */}
           <Card className="p-3 bg-background/50 border border-primary/10">
             <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột A</h3>
             <div className="space-y-2">
@@ -315,7 +445,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
             </div>
           </Card>
           
-          {/* Right column */}
           <Card className="p-3 bg-background/50 border border-primary/10">
             <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột B</h3>
             <div className="space-y-2">
@@ -340,16 +469,24 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
         </div>
       )}
 
-      {/* Controls */}
-      <div className="mt-4">
+      <div className="mt-4 flex gap-2">
         <Button 
           variant="outline" 
           onClick={handleRestart}
-          className="w-full bg-gradient-to-r from-secondary/30 to-background/90 border-primary/20"
+          className="w-1/2 bg-gradient-to-r from-secondary/30 to-background/90 border-primary/20"
           size="sm"
         >
           <RefreshCw className="mr-2 h-4 w-4" />
           Làm lại
+        </Button>
+        <Button 
+          variant="outline" 
+          onClick={handleShare}
+          className="w-1/2 bg-gradient-to-r from-primary/10 to-background/90 border-primary/20"
+          size="sm"
+        >
+          <Share2 className="mr-2 h-4 w-4" />
+          Chia sẻ
         </Button>
       </div>
     </div>
