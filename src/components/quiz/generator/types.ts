@@ -14,6 +14,11 @@ export interface MiniGame {
   content: string;
   
   /**
+   * Description of the mini-game
+   */
+  description?: string;
+  
+  /**
    * Additional meta data
    */
   meta?: Record<string, any>;

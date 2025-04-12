@@ -5,7 +5,7 @@ import { GameSettingsData } from '../types';
 import { generateWithGemini, tryGeminiGeneration } from './geminiGenerator';
 import { logInfo, logError } from './apiUtils';
 
-export { MiniGame };
+export type { MiniGame };
 
 /**
  * API client for generating minigames with AI
