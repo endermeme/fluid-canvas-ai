@@ -14,7 +14,7 @@ const GameSharePage: React.FC = () => {
   const game = gameId ? getSharedGame(gameId) : null;
   
   const handleBack = () => {
-    navigate('/preset-games');
+    navigate('/custom-game');
   };
   
   if (!game) {
@@ -49,7 +49,7 @@ const GameSharePage: React.FC = () => {
             size="sm" 
             variant="outline" 
             className="ml-2"
-            onClick={() => navigate('/preset-games')}
+            onClick={() => navigate('/custom-game')}
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Tạo Game Mới

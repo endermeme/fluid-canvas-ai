@@ -32,14 +32,14 @@ const GameHistoryPage: React.FC = () => {
   };
   
   const handleCreateNew = () => {
-    navigate('/preset-games');
+    navigate('/custom-game');
   };
   
   return (
     <QuizContainer
       title="Lịch Sử Game"
       showBackButton={true}
-      onBack={() => navigate('/preset-games')}
+      onBack={() => navigate('/')}
     >
       <div className="p-4 h-full overflow-auto">
         {games.length === 0 ? (

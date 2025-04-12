@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { SparklesIcon, Code, Wand2, Info } from 'lucide-react';
+import { SparklesIcon, Code, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator, MiniGame } from '../generator/AIGameGenerator';
 import GameLoading from '../GameLoading';
@@ -23,7 +23,6 @@ const CustomGameCreator: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Use the singleton pattern
   const gameGenerator = AIGameGenerator.getInstance(API_KEY);
 
   const handleGenerate = async () => {
@@ -63,7 +62,7 @@ const CustomGameCreator: React.FC = () => {
           setMiniGame(game);
           toast({
             title: "Trò chơi đã sẵn sàng",
-            description: "Trò chơi tùy chỉnh đã được tạo thành công với AI.",
+            description: "Trò chơi của bạn đã được tạo thành công",
           });
         } else {
           throw new Error("Không thể tạo trò chơi");
@@ -107,7 +106,7 @@ const CustomGameCreator: React.FC = () => {
   const getExamples = () => [
     "Tạo một trò chơi xếp hình với 9 mảnh ghép về vũ trụ",
     "Tạo một trò chơi bắn súng đơn giản, người chơi di chuyển để tránh chướng ngại vật",
-    "Tạo một trò chơi câu đố toán học cho học sinh lớp 5",
+    "Tạo một trò chơi vòng quay may mắn với các phần thưởng khác nhau",
     "Tạo một trò chơi ghi nhớ với các con vật hoang dã"
   ];
 
@@ -161,21 +160,21 @@ const CustomGameCreator: React.FC = () => {
 
   return (
     <QuizContainer
-      title="Tạo Trò Chơi Tùy Chỉnh"
+      title="Tạo Trò Chơi HTML"
       showBackButton={true}
       onBack={() => navigate('/')}
     >
       <div className="p-4 md:p-6 max-w-4xl mx-auto">
         <Card className="bg-background/70 backdrop-blur-sm border-primary/20 shadow-lg p-6">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold flex items-center gap-2 text-primary">
+          <div className="mb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2 text-primary">
               <div className="p-2 rounded-lg bg-primary/10">
-                <Code className="h-6 w-6 text-primary" />
+                <Code className="h-5 w-5 text-primary" />
               </div>
-              Tạo Trò Chơi HTML với AI
+              Tạo Trò Chơi với AI
             </h2>
-            <p className="text-muted-foreground">
-              Mô tả trò chơi bạn muốn tạo và AI sẽ tạo một trò chơi HTML/CSS/JavaScript tương tác
+            <p className="text-sm text-muted-foreground">
+              Mô tả trò chơi bạn muốn tạo và AI sẽ tạo một trò chơi tương tác
             </p>
           </div>
           
@@ -186,10 +185,10 @@ const CustomGameCreator: React.FC = () => {
               </Label>
               <Textarea
                 id="prompt"
-                placeholder="Mô tả chi tiết trò chơi bạn muốn tạo. Ví dụ: Tạo một trò chơi xếp hình với 9 mảnh ghép hình ảnh về vũ trụ, có âm thanh khi hoàn thành..."
+                placeholder="Mô tả chi tiết trò chơi bạn muốn tạo. Ví dụ: Tạo một trò chơi xếp hình với 9 mảnh ghép..."
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                rows={6}
+                rows={5}
                 className="font-mono text-sm mt-2 border-primary/20 focus-visible:ring-primary/30"
               />
             </div>
@@ -210,13 +209,6 @@ const CustomGameCreator: React.FC = () => {
               </div>
             </div>
             
-            <div className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg">
-              <Info className="w-4 h-4 text-primary mt-1" />
-              <p className="text-sm text-muted-foreground">
-                AI sẽ tạo một trò chơi hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Trò chơi sẽ chạy trực tiếp trong trình duyệt và có thể chia sẻ với người khác.
-              </p>
-            </div>
-            
             <div className="flex justify-end pt-4">
               <Button 
                 onClick={handleGenerate}
@@ -224,7 +216,7 @@ const CustomGameCreator: React.FC = () => {
                 className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90"
               >
                 <SparklesIcon className="h-4 w-4 mr-2" />
-                Tạo Trò Chơi với AI
+                Tạo Trò Chơi
               </Button>
             </div>
           </div>
