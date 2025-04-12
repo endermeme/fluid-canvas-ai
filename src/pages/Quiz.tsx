@@ -40,10 +40,10 @@ const Quiz = () => {
     
     try {
       const settings = {
-        difficulty: 'medium',
+        difficulty: 'medium' as 'easy' | 'medium' | 'hard',
         questionCount: 10,
         timePerQuestion: 30,
-        category: 'general'
+        category: 'general' as 'general' | 'history' | 'science' | 'geography' | 'arts' | 'sports' | 'math'
       };
       
       const game = await gameGenerator.generateMiniGame(prompt, settings);
@@ -153,9 +153,11 @@ const Quiz = () => {
         onRefresh={() => {
           if (iframeRef.current) {
             const iframe = iframeRef.current;
-            iframe.src = 'about:blank';
+            iframe.srcdoc = '';
             setTimeout(() => {
-              iframe.srcDoc = gameContent;
+              if (iframe && gameContent) {
+                iframe.srcdoc = gameContent;
+              }
             }, 100);
           }
         }}
