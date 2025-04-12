@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/AIGameGenerator';
 import EnhancedGameView from './EnhancedGameView';
-import CustomGameForm from './CustomGameForm';
+import CustomGameForm from '../preset-games/CustomGameForm';  // Update the import path
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
 import { Share2, PlusCircle } from 'lucide-react';
@@ -138,7 +137,10 @@ const GameController: React.FC<GameControllerProps> = ({
     if (currentGame) {
       return (
         <EnhancedGameView 
-          miniGame={currentGame} 
+          miniGame={{
+            title: currentGame.title || "Minigame Tương Tác",
+            content: currentGame.content || ""
+          }} 
           onBack={handleBack}
           onNewGame={handleNewGame}
           extraButton={extraButton}

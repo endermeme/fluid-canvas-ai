@@ -6,7 +6,7 @@ import { RefreshCw, Maximize } from 'lucide-react';
 
 interface EnhancedGameViewProps {
   miniGame: {
-    title: string;
+    title?: string;  // Changed to optional to match MiniGame type
     content: string;
   };
   extraButton?: React.ReactNode;
