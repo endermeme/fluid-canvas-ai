@@ -1,100 +1,140 @@
 
-# AI Game Creator - Cấu Trúc Dự Án
+# AI Game Creator - Tài Liệu Dự Án
 
-Ứng dụng web cho phép người dùng tạo và chia sẻ game giáo dục tương tác bằng AI.
+Ứng dụng tạo trò chơi giáo dục tương tác bằng AI, cho phép người dùng tạo và chia sẻ trò chơi một cách nhanh chóng và dễ dàng.
 
-## Cấu Trúc Dự Án
+## Tính Năng Chính
 
-### 1. Trang Chính
-- `src/pages/Home.tsx` - Trang chủ giới thiệu ứng dụng
-- `src/pages/Quiz.tsx` - Trang tạo game với AI
-- `src/pages/SharedGame.tsx` - Trang xem game đã chia sẻ
-- `src/pages/NotFound.tsx` - Trang 404
+### 1. Tạo Game Với AI
+- **Tạo game từ prompt**: Nhập yêu cầu và AI sẽ tạo trò chơi hoàn chỉnh
+- **Hiển thị trong iframe**: Game được hiển thị trực tiếp trong ứng dụng
+- **Công nghệ sử dụng**: HTML, CSS, JavaScript thuần, tất cả trong một file HTML duy nhất
+- **Hỗ trợ đa dạng game**: Quiz, ghép cặp, trí nhớ, xếp hình, câu đố, v.v.
 
-### 2. Hệ Thống Game
-#### Tạo Game & Hiển Thị
-- `src/components/quiz/GameView.tsx` - Hiển thị game ở chế độ toàn màn hình
-- `src/components/quiz/GameLoading.tsx` - Màn hình loading khi đang tạo game
-- `src/components/quiz/GameError.tsx` - Hiển thị khi có lỗi xảy ra
+### 2. Chia Sẻ & Theo Dõi
+- **Chia sẻ qua liên kết**: Tạo liên kết để chia sẻ game với người khác
+- **Theo dõi người tham gia**: Xem danh sách người chơi và điểm số
+- **Lưu trữ tạm thời**: Game được lưu trong localStorage và hết hạn sau 48 giờ
 
-#### Tạo Game Tùy Chỉnh
-- `src/components/quiz/custom-games/CustomGameForm.tsx` - Form tạo game tùy chỉnh
-- `src/components/quiz/custom-games/GameController.tsx` - Điều khiển luồng tạo game
+### 3. Tùy Chỉnh Game
+- **Chọn độ khó**: Dễ, trung bình, khó
+- **Số lượng câu hỏi**: Tùy chỉnh số lượng câu hỏi/thẻ trong game
+- **Thời gian**: Điều chỉnh thời gian cho mỗi câu hỏi
+- **Thể loại**: Lựa chọn chủ đề (lịch sử, khoa học, địa lý, v.v.)
 
-#### Game Mẫu
-- `src/components/quiz/preset-games/PresetGamesPage.tsx` - Trang chọn game mẫu
-- `src/components/quiz/preset-games/GameSelector.tsx` - Chọn loại game mẫu
-- `src/components/quiz/preset-games/templates/*` - Các mẫu game khác nhau
+## Giao Diện Người Dùng
 
-### 3. Hệ Thống Chia Sẻ & Theo Dõi
-#### Chia Sẻ Game
-- `src/components/quiz/share/ShareGamePage.tsx` - Trang chia sẻ game với người chơi
-- `src/components/quiz/share/GameDashboard.tsx` - Bảng điều khiển theo dõi người tham gia
-- `src/components/quiz/share/GameHistory.tsx` - Lịch sử các game đã tạo
+### Trang Chính (/)
+- **Chat AI**: Giao diện chat để giao tiếp với AI
+- **Khu vực Canvas**: Nơi hiển thị các block tương tác
+- **Thanh sidebar**: Chứa các tùy chọn và công cụ
 
-#### Tiện Ích Hỗ Trợ
-- `src/utils/gameParticipation.ts` - Quản lý người tham gia và chống gian lận
-- `src/utils/gameExport.ts` - Xuất và chia sẻ game
+### Trang Tạo Game (/quiz)
+- **Form nhập prompt**: Nhập yêu cầu cho trò chơi
+- **Nút tạo game**: Gửi yêu cầu đến AI để tạo game
+- **Iframe hiển thị game**: Hiển thị game được tạo
+- **Các nút điều khiển**: Tạo mới, tải lại, chia sẻ, quay lại
 
-### 4. Tạo Game Với AI
-- `src/components/quiz/generator/AIGameGenerator.ts` - Lớp tạo game AI chính
-- `src/components/quiz/generator/geminiGenerator.ts` - Tích hợp Gemini AI
-- `src/components/quiz/generator/promptBuilder.ts` - Xây dựng prompt cho AI
-- `src/components/quiz/generator/responseParser.ts` - Phân tích phản hồi AI
+### Trang Game Đã Chia Sẻ (/game/:id)
+- **Màn hình nhập tên**: Yêu cầu người chơi nhập tên trước khi tham gia
+- **Game view**: Hiển thị game đầy đủ màn hình
+- **Bảng điểm**: Hiển thị điểm số và thứ hạng
 
-## Luồng Người Dùng
+## Luồng Hoạt Động
 
-### 1. Tạo Game
-1. Chọn loại game (tùy chỉnh hoặc mẫu có sẵn)
-2. Nhập chủ đề và cấu hình game
-3. AI tạo nội dung game
-4. Game được hiển thị và có thể chơi ngay
+### Tạo Game
+1. Người dùng nhập prompt mô tả trò chơi mong muốn
+2. Hệ thống gửi prompt đến Gemini API kèm theo cấu hình
+3. AI tạo một file HTML hoàn chỉnh với game tương tác
+4. Game được hiển thị trong iframe cho người dùng
+5. Người dùng có thể tạo mới, làm mới hoặc chia sẻ game
 
-### 2. Chia Sẻ Game & Theo Dõi Người Chơi
-1. Tạo game mới và nhấn nút "Chia sẻ"
-2. Sao chép liên kết chia sẻ hoặc vào trang dashboard
-3. Người chơi nhập tên để tham gia game
-4. Người tạo xem thống kê và danh sách người tham gia
-5. Có thể xuất dữ liệu người chơi ra file CSV
+### Chia Sẻ Game
+1. Người dùng nhấn nút "Chia sẻ game"
+2. Hệ thống tạo một ID duy nhất và lưu game vào localStorage
+3. Tạo liên kết chia sẻ dựa trên ID
+4. Người dùng chia sẻ liên kết cho người khác
+5. Game tự động hết hạn sau 48 giờ
 
-### 3. Xem Lịch Sử Game
-1. Vào trang "Lịch sử game"
-2. Xem danh sách các game đã tạo
-3. Mở dashboard hoặc xem lại game bất kỳ
+## Thành Phần Kỹ Thuật
 
-## Tính Năng Nổi Bật
+### 1. Tạo Game Với Gemini AI
+- `AIGameGenerator.ts`: Class chính để tạo game với AI
+- `geminiGenerator.ts`: Tích hợp với Google Gemini API
+- `promptBuilder.ts`: Xây dựng prompt chuyên biệt cho AI
 
-### Tạo Game Bằng AI
-- Tạo nội dung game dựa trên chủ đề người dùng nhập
-- Hỗ trợ nhiều loại game: quiz, trí nhớ, ghép cặp, v.v.
-- Giao diện đơn giản, dễ sử dụng
+### 2. Hiển Thị Game
+- `Quiz.tsx`: Trang chính để tạo và hiển thị game
+- `QuizContainer.tsx`: Container bao quanh game với các điều khiển
+- `GameLoading.tsx`: Hiển thị khi đang tạo game
 
-### Chia Sẻ & Theo Dõi
-- Chia sẻ game qua liên kết
-- Ghi nhận thông tin người tham gia
-- Chống gian lận bằng kiểm soát IP
-- Dashboard quản lý và thống kê
-- Xuất dữ liệu người tham gia
+### 3. Quản Lý Người Chơi
+- `gameParticipation.ts`: Quản lý thông tin người tham gia
+- `gameExport.ts`: Lưu trữ và chia sẻ game
 
-### Trải Nghiệm Người Dùng
-- Giao diện responsive
-- Các game tương tác trực quan
-- Dễ dàng chơi lại hoặc tạo game mới
+## Mô Hình Dữ Liệu
 
-## Cập Nhật Mới
+### Game
+```typescript
+interface MiniGame {
+  title: string;
+  description?: string;
+  content: string; // HTML content
+  items?: any[];
+}
+```
 
-### Hệ Thống Chia Sẻ & Theo Dõi Người Chơi
-- Thêm trang chia sẻ game yêu cầu tên người tham gia
-- Theo dõi IP để kiểm soát gian lận
-- Dashboard hiển thị danh sách người tham gia
-- Trang lịch sử game để dễ dàng quản lý
+### Game Settings
+```typescript
+interface GameSettingsData {
+  difficulty: 'easy' | 'medium' | 'hard';
+  questionCount: number;
+  timePerQuestion: number;
+  category: 'general' | 'history' | 'science' | 'geography' | 'arts' | 'sports' | 'math';
+}
+```
 
-### Cải Tiến Giao Diện
-- Nút điều hướng nhất quán ở các trang
-- Bố cục gọn gàng, khoa học hơn
-- Hiển thị thông tin game rõ ràng
+### Stored Game
+```typescript
+interface StoredGame {
+  id: string;
+  title: string;
+  description: string;
+  htmlContent: string;
+  createdAt: number;
+  expiresAt: number;
+}
+```
 
-### Tối Ưu Hóa
-- Tái cấu trúc mã nguồn để dễ bảo trì
-- Chia nhỏ các component để nâng cao hiệu suất
-- Cải thiện hệ thống routing
+## Xử Lý Đặc Biệt
+
+### Xử Lý Hình Ảnh
+- Hệ thống yêu cầu AI chỉ cung cấp từ khóa tìm kiếm cho hình ảnh
+- Sử dụng Pixabay API để lấy hình ảnh thực tế
+- Thay thế URL hình ảnh không phải Pixabay bằng URL Pixabay
+
+### An Toàn Cho Iframe
+- Sử dụng thuộc tính sandbox để giới hạn quyền của iframe
+- Xử lý giao tiếp giữa iframe và trang chính qua postMessage
+
+### Hiệu Suất
+- Game hoạt động hoàn toàn trong trình duyệt, không cần backend
+- Sử dụng localStorage để lưu trữ game đã chia sẻ
+- Tự động dọn dẹp game hết hạn
+
+## Hướng Dẫn Phát Triển
+
+### Thêm Loại Game Mới
+1. Tạo mẫu hướng dẫn trong gameInstructions.ts
+2. Thêm loại game vào gameTypes.ts
+3. Tùy chỉnh cài đặt mặc định cho loại game
+
+### Tối Ưu Prompt AI
+1. Nghiên cứu prompt hiện tại trong promptBuilder.ts
+2. Thử nghiệm và cải thiện cấu trúc prompt
+3. Thêm ví dụ và hướng dẫn cụ thể cho AI
+
+### Cải Thiện UI/UX
+1. Tối ưu giao diện người dùng trong Quiz.tsx
+2. Thêm hoạt ảnh và hiệu ứng cho loading state
+3. Cải thiện responsive design cho thiết bị di động
