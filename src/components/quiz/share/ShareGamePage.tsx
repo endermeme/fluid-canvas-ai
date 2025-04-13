@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -40,44 +41,7 @@ const ShareGamePage: React.FC = () => {
     
     const gameSession = getGameSession(gameId);
     if (gameSession) {
-      if (gameSession.htmlContent) {
-        const enhancedContent = gameSession.htmlContent.replace(
-          /<style>/i, 
-          `<style>
-            /* Enhanced styling for code and JavaScript display */
-            pre, code, script {
-              font-size: 16px !important;
-              line-height: 1.5 !important;
-              font-family: monospace !important;
-            }
-            
-            .code-block, .js-block, pre {
-              font-size: 16px !important;
-              padding: 15px !important;
-              border-radius: 8px !important;
-              background-color: #f8f8f8 !important;
-              border: 1px solid #e0e0e0 !important;
-              margin: 15px 0 !important;
-              overflow: auto !important;
-              max-height: 500px !important;
-            }
-            
-            .js-content, [data-lang="javascript"], [data-language="javascript"] {
-              display: block !important;
-              font-size: 16px !important;
-              font-family: monospace !important;
-              white-space: pre-wrap !important;
-            }
-          `
-        );
-        
-        setGame({
-          ...gameSession,
-          htmlContent: enhancedContent
-        });
-      } else {
-        setGame(gameSession);
-      }
+      setGame(gameSession);
     } else {
       toast({
         title: "Game không tồn tại",
@@ -92,6 +56,7 @@ const ShareGamePage: React.FC = () => {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (!gameId || !game) return;
     
+    // Simulate IP address (in a real app, this would come from the server)
     const fakeIp = getFakeIpAddress();
     
     const result = addParticipant(gameId, values.name, fakeIp);
@@ -109,6 +74,7 @@ const ShareGamePage: React.FC = () => {
         variant: "destructive",
       });
       
+      // If they've retried too many times but we want to let them in anyway
       if (result.participant && result.participant.retryCount <= 2) {
         setHasJoined(true);
       }

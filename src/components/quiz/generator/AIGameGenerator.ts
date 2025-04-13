@@ -107,8 +107,6 @@ IMPORTANT REQUIREMENTS:
 6. Handle edge cases and errors gracefully.
 7. Your HTML file should start with <!DOCTYPE html> and be fully functional.
 8. Add fallbacks for unsupported features.
-9. JavaScript code should have larger font-size (16px) and proper formatting for readability.
-10. Use CSS to style JavaScript/code sections with distinct background, padding and borders.
 
 ${this.useCanvas ? `
 CANVAS MODE REQUIREMENTS:
@@ -122,13 +120,6 @@ CANVAS MODE REQUIREMENTS:
 8. Implement collision detection if needed.
 ` : ''}
 
-CODE STYLING REQUIREMENTS:
-1. Display JavaScript code with font-size of at least 16px.
-2. Add proper code comments to explain logic.
-3. Include CSS that makes code blocks stand out.
-4. Format JavaScript neatly with proper indentation.
-5. If you display source code, wrap it in properly styled <pre> tags with clear labels.
-
 RESPOND ONLY WITH THE HTML CODE. NO EXPLANATIONS OR MARKDOWN FORMATTING.
 `;
 
@@ -141,41 +132,10 @@ RESPOND ONLY WITH THE HTML CODE. NO EXPLANATIONS OR MARKDOWN FORMATTING.
       const response = await result.response;
       const htmlContent = response.text();
       
-      // Add CSS to enhance JavaScript display in the HTML content
-      const enhancedHtmlContent = htmlContent.replace(
-        /<style>/i, 
-        `<style>
-          /* Enhanced styling for code and JavaScript display */
-          pre, code, script {
-            font-size: 16px !important;
-            line-height: 1.5 !important;
-            font-family: monospace !important;
-          }
-          
-          .code-block, .js-block, pre {
-            font-size: 16px !important;
-            padding: 15px !important;
-            border-radius: 8px !important;
-            background-color: #f8f8f8 !important;
-            border: 1px solid #e0e0e0 !important;
-            margin: 15px 0 !important;
-            overflow: auto !important;
-            max-height: 500px !important;
-          }
-          
-          .js-content, [data-lang="javascript"], [data-language="javascript"] {
-            display: block !important;
-            font-size: 16px !important;
-            font-family: monospace !important;
-            white-space: pre-wrap !important;
-          }
-        `
-      );
-      
       // Extract a title from the HTML (first h1 or title tag)
       let gameTitle = prompt;
-      const titleMatch = enhancedHtmlContent.match(/<title>(.*?)<\/title>/i) || 
-                        enhancedHtmlContent.match(/<h1[^>]*>(.*?)<\/h1>/i);
+      const titleMatch = htmlContent.match(/<title>(.*?)<\/title>/i) || 
+                        htmlContent.match(/<h1[^>]*>(.*?)<\/h1>/i);
       
       if (titleMatch && titleMatch[1]) {
         gameTitle = titleMatch[1].replace(/<[^>]*>/g, '').trim(); // Remove any HTML tags inside the title
@@ -184,12 +144,12 @@ RESPOND ONLY WITH THE HTML CODE. NO EXPLANATIONS OR MARKDOWN FORMATTING.
       // Create the game object
       const game: MiniGame = {
         title: gameTitle,
-        content: enhancedHtmlContent
+        content: htmlContent
       };
       
       logInfo('AIGameGenerator', 'Custom HTML game generated successfully', {
         title: gameTitle,
-        contentLength: enhancedHtmlContent.length
+        contentLength: htmlContent.length
       });
       
       return game;
