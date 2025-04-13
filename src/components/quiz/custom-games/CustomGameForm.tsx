@@ -1,16 +1,17 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { SparklesIcon, Gamepad2, Wand2, PlusCircle, Code, Info } from 'lucide-react';
+import { SparklesIcon, Info, Code } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { AIGameGenerator } from '../generator/AIGameGenerator';
 import { MiniGame } from '../generator/types';
 import { GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
-import { GEMINI_API_KEY, GEMINI_MODELS, API_VERSION } from '@/constants/api-constants';
+import { GEMINI_API_KEY, GEMINI_MODELS, API_VERSION, API_BASE_URL } from '@/constants/api-constants';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
@@ -20,6 +21,7 @@ interface CustomGameFormProps {
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel }) => {
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [useCanvas, setUseCanvas] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -56,6 +58,8 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     console.log('%c 📊 Content Length', 'font-weight: bold; color: #6f42c1;', content.length, 'characters');
     console.log('%c 🤖 Model', 'font-weight: bold; color: #6f42c1;', GEMINI_MODELS.DEFAULT);
     console.log('%c 🤖 API Version', 'font-weight: bold; color: #6f42c1;', API_VERSION);
+    console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #6f42c1;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.DEFAULT}:generateContent`);
+    console.log('%c 🎨 Canvas Mode', 'font-weight: bold; color: #6f42c1;', useCanvas ? 'Enabled' : 'Disabled');
     console.log('%c 🌐 Browser Info', 'font-weight: bold; color: #6f42c1;', {
       userAgent: navigator.userAgent,
       language: navigator.language,
@@ -67,6 +71,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     setIsGenerating(true);
     
     try {
+      // Set canvas mode according to the toggle
+      gameGenerator.setCanvasMode(useCanvas);
+      
       // Tạo settings với thêm thông tin về request
       const settings: GameSettingsData = {
         difficulty: 'medium',
@@ -77,7 +84,8 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
           requestId,
           timestamp,
           contentLength: content.length,
-          source: 'custom-game-form'
+          source: 'custom-game-form',
+          useCanvas: useCanvas
         }
       };
       
@@ -92,8 +100,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
         'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
         'font-weight: bold;'
       );
-      console.log('%c 📋 Request Content', 'font-weight: bold; color: #2ea44f;', content.substring(0, 500) + (content.length > 500 ? '...' : ''));
+      console.log('%c 📋 User Prompt', 'font-weight: bold; color: #2ea44f;', content);
       console.log('%c 🤖 Model', 'font-weight: bold; color: #2ea44f;', GEMINI_MODELS.DEFAULT);
+      console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #2ea44f;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.DEFAULT}:generateContent`);
       console.log('%c ⏳ Request Start Time', 'font-weight: bold; color: #2ea44f;', new Date().toISOString());
       console.groupEnd();
       
@@ -197,26 +206,25 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
                 <SparklesIcon className="h-4 w-4 text-primary" /> 
                 Mô tả game của bạn
               </Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="use-canvas" className="text-sm cursor-pointer">Canvas mode</Label>
+                <input
+                  id="use-canvas"
+                  type="checkbox"
+                  checked={useCanvas}
+                  onChange={(e) => setUseCanvas(e.target.checked)}
+                  className="h-4 w-4 accent-primary cursor-pointer"
+                />
+              </div>
             </div>
-            <div className="mt-2 flex gap-2">
-              <Textarea
-                id="content"
-                placeholder={getPlaceholderText()}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                rows={6}
-                className="font-mono text-sm border-primary/20 focus-visible:ring-primary/30 flex-1"
-              />
-              <Button 
-                onClick={handleSubmit}
-                disabled={!content.trim() || isGenerating}
-                className="bg-primary h-auto py-3 px-4"
-                variant="default"
-              >
-                <PlusCircle className="mr-2 h-5 w-5" />
-                Tạo
-              </Button>
-            </div>
+            <Textarea
+              id="content"
+              placeholder={getPlaceholderText()}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={6}
+              className="mt-2 font-mono text-sm border-primary/20 focus-visible:ring-primary/30 w-full"
+            />
           </div>
           
           <div className="flex flex-col gap-4 mt-2">
@@ -224,6 +232,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
               <Info className="w-4 h-4 text-primary mt-1" />
               <p className="text-sm text-muted-foreground">
                 AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Bạn càng mô tả chi tiết, AI càng tạo ra game phù hợp với ý tưởng của bạn.
+                {useCanvas && " Canvas mode sẽ tạo game sử dụng HTML5 Canvas cho hiệu ứng đồ họa tốt hơn."}
               </p>
             </div>
           </div>

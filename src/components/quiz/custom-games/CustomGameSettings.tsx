@@ -21,9 +21,10 @@ const CustomGameSettings: React.FC<CustomGameSettingsProps> = ({
 
   const handleSubmit = () => {
     if (prompt.trim()) {
-      console.log('Prompt submitted:', prompt);
+      console.log('User prompt submitted:', prompt);
       console.log('Using model:', GEMINI_MODELS.DEFAULT);
       console.log('API version:', API_VERSION);
+      console.log('API endpoint:', 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODELS.DEFAULT + ':generateContent');
       onGenerate(prompt);
     }
   };

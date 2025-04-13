@@ -123,6 +123,12 @@ CANVAS MODE REQUIREMENTS:
 RESPOND ONLY WITH THE HTML CODE. NO EXPLANATIONS OR MARKDOWN FORMATTING.
 `;
 
+      console.log('User request prompt:', prompt);
+      console.log('Using model:', GEMINI_MODELS.DEFAULT);
+      console.log('API version:', API_VERSION);
+      console.log('System instructions:', htmlPrompt.substring(0, 200) + '...');
+      console.log('API endpoint:', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.DEFAULT}:generateContent`);
+
       // Generate the game content with Gemini
       const result = await this.model.generateContent({
         contents: [{
