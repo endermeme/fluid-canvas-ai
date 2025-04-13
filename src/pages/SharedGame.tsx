@@ -1,12 +1,13 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getGameById, formatRemainingTime, SharedGame as GameType } from '@/services/storage';
+import { getSharedGame, formatRemainingTime, StoredGame } from '@/utils/gameExport';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, AlertTriangle, Plus } from 'lucide-react';
 
 const SharedGame = () => {
   const { id } = useParams<{ id: string }>();
-  const [game, setGame] = useState<GameType | null>(null);
+  const [game, setGame] = useState<StoredGame | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +21,7 @@ const SharedGame = () => {
     }
 
     const loadGame = () => {
-      const loadedGame = getGameById(id);
+      const loadedGame = getSharedGame(id);
       setGame(loadedGame);
       
       if (loadedGame) {
@@ -106,7 +107,7 @@ const SharedGame = () => {
       
       <main className="flex-1 overflow-hidden flex items-center justify-center">
         <iframe
-          srcDoc={game.content}
+          srcDoc={game.htmlContent}
           sandbox="allow-scripts allow-same-origin"
           className="w-full h-full border-none mx-auto"
           style={{ 

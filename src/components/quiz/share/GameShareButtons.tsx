@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Share2, Copy, Facebook, Twitter, Download, 
-  Laptop, QrCode, Link, Check, Loader2 
+  Laptop, Link, Check, Loader2 
 } from 'lucide-react';
 import { 
   Dialog,
@@ -22,7 +23,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { getShortenedUrl } from '@/services/vpsStorage';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface GameShareButtonsProps {
   gameId: string;
@@ -183,7 +184,7 @@ const GameShareButtons: React.FC<GameShareButtonsProps> = ({
             
             <div className="border rounded-lg p-4 flex flex-col items-center">
               <p className="text-sm font-medium mb-2">Quét QR Code</p>
-              <QRCode 
+              <QRCodeSVG 
                 id="game-qr-code"
                 value={shareUrl} 
                 size={150} 
@@ -215,4 +216,4 @@ const GameShareButtons: React.FC<GameShareButtonsProps> = ({
   );
 };
 
-export default GameShareButtons; 
+export default GameShareButtons;
