@@ -45,6 +45,7 @@ export interface GameSettingsData {
     timestamp: string;
     contentLength: number;
     source: string;
+    useCanvas?: boolean;
   };
 }
 
