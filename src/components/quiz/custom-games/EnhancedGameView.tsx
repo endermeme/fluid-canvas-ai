@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
@@ -27,13 +26,77 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   useEffect(() => {
     // Set the iframe content when the component mounts or miniGame changes
     if (iframeRef.current && miniGame?.content) {
-      iframeRef.current.srcdoc = miniGame.content;
+      // Add custom styling to make JS content display larger
+      const enhancedContent = miniGame.content.replace(
+        /<style>/i, 
+        `<style>
+          /* Larger font for code blocks and JavaScript */
+          pre, code, script {
+            font-size: 16px !important;
+            line-height: 1.5 !important;
+          }
+          
+          /* Make JavaScript sections more prominent */
+          .code-block, .js-block, pre {
+            font-size: 16px !important;
+            padding: 15px !important;
+            border-radius: 8px !important;
+            background-color: #f8f8f8 !important;
+            border: 1px solid #e0e0e0 !important;
+            margin: 15px 0 !important;
+            overflow: auto !important;
+            max-height: 500px !important;
+          }
+          
+          /* Style JavaScript content */
+          .js-content, [data-lang="javascript"], [data-language="javascript"] {
+            display: block !important;
+            font-size: 16px !important;
+            font-family: monospace !important;
+            white-space: pre-wrap !important;
+          }
+        `
+      );
+      
+      iframeRef.current.srcdoc = enhancedContent;
     }
   }, [miniGame]);
 
   const refreshGame = () => {
     if (iframeRef.current && miniGame?.content) {
-      iframeRef.current.srcdoc = miniGame.content;
+      // Apply the same enhancements when refreshing
+      const enhancedContent = miniGame.content.replace(
+        /<style>/i, 
+        `<style>
+          /* Larger font for code blocks and JavaScript */
+          pre, code, script {
+            font-size: 16px !important;
+            line-height: 1.5 !important;
+          }
+          
+          /* Make JavaScript sections more prominent */
+          .code-block, .js-block, pre {
+            font-size: 16px !important;
+            padding: 15px !important;
+            border-radius: 8px !important;
+            background-color: #f8f8f8 !important;
+            border: 1px solid #e0e0e0 !important;
+            margin: 15px 0 !important;
+            overflow: auto !important;
+            max-height: 500px !important;
+          }
+          
+          /* Style JavaScript content */
+          .js-content, [data-lang="javascript"], [data-language="javascript"] {
+            display: block !important;
+            font-size: 16px !important;
+            font-family: monospace !important;
+            white-space: pre-wrap !important;
+          }
+        `
+      );
+      
+      iframeRef.current.srcdoc = enhancedContent;
     }
   };
 

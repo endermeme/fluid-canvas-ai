@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
@@ -78,10 +77,41 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
   
   const handleReloadGame = () => {
     if (iframeRef.current) {
+      const enhancedContent = miniGame.content.replace(
+        /<style>/i, 
+        `<style>
+          /* Larger font for code blocks and JavaScript */
+          pre, code, script {
+            font-size: 16px !important;
+            line-height: 1.5 !important;
+          }
+          
+          /* Make JavaScript sections more prominent */
+          .code-block, .js-block, pre {
+            font-size: 16px !important;
+            padding: 15px !important;
+            border-radius: 8px !important;
+            background-color: #f8f8f8 !important;
+            border: 1px solid #e0e0e0 !important;
+            margin: 15px 0 !important;
+            overflow: auto !important;
+            max-height: 500px !important;
+          }
+          
+          /* Style JavaScript content */
+          .js-content, [data-lang="javascript"], [data-language="javascript"] {
+            display: block !important;
+            font-size: 16px !important;
+            font-family: monospace !important;
+            white-space: pre-wrap !important;
+          }
+        `
+      );
+      
       iframeRef.current.src = 'about:blank';
       setTimeout(() => {
         if (iframeRef.current) {
-          iframeRef.current.srcdoc = miniGame.content;
+          iframeRef.current.srcdoc = enhancedContent;
         }
       }, 100);
       setGameStats({});
@@ -127,6 +157,32 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
             padding: 0 !important;
             margin: 0 !important;
           }
+          
+          /* Larger font for code blocks and JavaScript */
+          pre, code, script {
+            font-size: 16px !important;
+            line-height: 1.5 !important;
+          }
+          
+          /* Make JavaScript sections more prominent */
+          .code-block, .js-block, pre {
+            font-size: 16px !important;
+            padding: 15px !important;
+            border-radius: 8px !important;
+            background-color: #f8f8f8 !important;
+            border: 1px solid #e0e0e0 !important;
+            margin: 15px 0 !important;
+            overflow: auto !important;
+            max-height: 500px !important;
+          }
+          
+          /* Style JavaScript content */
+          .js-content, [data-lang="javascript"], [data-language="javascript"] {
+            display: block !important;
+            font-size: 16px !important;
+            font-family: monospace !important;
+            white-space: pre-wrap !important;
+          }
         `;
         iframeDoc.head.appendChild(styleElement);
         
@@ -166,6 +222,37 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
     return <div>Không thể tải minigame</div>;
   }
 
+  const enhancedContent = miniGame.content.replace(
+    /<style>/i, 
+    `<style>
+      /* Larger font for code blocks and JavaScript */
+      pre, code, script {
+        font-size: 16px !important;
+        line-height: 1.5 !important;
+      }
+      
+      /* Make JavaScript sections more prominent */
+      .code-block, .js-block, pre {
+        font-size: 16px !important;
+        padding: 15px !important;
+        border-radius: 8px !important;
+        background-color: #f8f8f8 !important;
+        border: 1px solid #e0e0e0 !important;
+        margin: 15px 0 !important;
+        overflow: auto !important;
+        max-height: 500px !important;
+      }
+      
+      /* Style JavaScript content */
+      .js-content, [data-lang="javascript"], [data-language="javascript"] {
+        display: block !important;
+        font-size: 16px !important;
+        font-family: monospace !important;
+        white-space: pre-wrap !important;
+      }
+    `
+  );
+
   return (
     <div className="flex flex-col h-full w-full items-center justify-center overflow-hidden">
       <div className="flex-1 relative w-full h-full overflow-hidden flex items-center justify-center">
@@ -183,7 +270,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
         ) : (
           <iframe
             ref={iframeRef}
-            srcDoc={miniGame.content}
+            srcDoc={enhancedContent}
             className="w-full h-full border-0 mx-auto"
             sandbox="allow-scripts allow-popups allow-same-origin"
             onLoad={handleIframeLoad}
