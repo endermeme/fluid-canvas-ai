@@ -1,8 +1,8 @@
 
 export interface GameSettingsData {
-  difficulty: 'easy' | 'medium' | 'hard';
-  questionCount: number;
-  timePerQuestion: number;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  questionCount?: number;
+  timePerQuestion?: number;
   category: string;
   prompt?: string;
   // Adding missing properties that are used in the codebase

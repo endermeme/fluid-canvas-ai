@@ -74,12 +74,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       // Set canvas mode according to the toggle
       gameGenerator.setCanvasMode(useCanvas);
       
-      // Tạo settings với thêm thông tin về request
+      // Simplified settings with only the necessary metadata
       const settings: GameSettingsData = {
-        difficulty: 'medium',
-        questionCount: 10,
-        timePerQuestion: 30,
-        category: 'general',
+        category: 'custom',
         requestMetadata: {
           requestId,
           timestamp,
@@ -89,12 +86,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
         }
       };
       
-      // Log thông tin cài đặt game
-      console.group('%c 🎲 GAME SETTINGS', 'background: #0366d6; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;');
-      console.table(settings);
-      console.groupEnd();
-      
-      // Log khi bắt đầu gửi request
+      // Log when starting the API request
       console.group(
         `%c 🚀 API REQUEST ${requestId} %c Generating game`,
         'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
@@ -106,13 +98,13 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       console.log('%c ⏳ Request Start Time', 'font-weight: bold; color: #2ea44f;', new Date().toISOString());
       console.groupEnd();
       
-      // Đo thời gian xử lý
+      // Measure processing time
       const startTime = performance.now();
       const game = await gameGenerator.generateMiniGame(content, settings);
       const endTime = performance.now();
       const duration = ((endTime - startTime) / 1000).toFixed(2);
       
-      // Log kết quả API
+      // Log API results
       console.group(
         `%c ✅ API RESPONSE ${requestId} %c Completed in ${duration}s`,
         'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
@@ -126,7 +118,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
         timestamp: new Date().toISOString()
       });
       
-      // Log mẫu code (nếu có, chỉ hiển thị 200 ký tự đầu tiên)
+      // Log code sample (if any, only showing first 200 characters)
       if (game?.content) {
         console.log('%c 🧩 Code Sample', 'font-weight: bold; color: #2ea44f;', 
           game.content.substring(0, 200) + (game.content.length > 200 ? '...' : ''));
@@ -136,7 +128,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       if (game) {
         toast({
           title: "Đã tạo trò chơi",
-          description: `Trò chơi đã được tạo thành công với ${GEMINI_MODELS.DEFAULT}.`,
+          description: `Trò chơi đã được tạo thành công với HTML, CSS và JavaScript.`,
         });
         
         onGenerate(content, game);
@@ -144,7 +136,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
         throw new Error("Không thể tạo game");
       }
     } catch (error) {
-      // Log lỗi với nhiều thông tin hơn
+      // Log error with more information
       console.group(
         `%c ❌ API ERROR ${requestId} %c Generation failed`,
         'background: #d73a49; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
@@ -165,7 +157,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     } finally {
       setIsGenerating(false);
       
-      // Log kết thúc toàn bộ quá trình
+      // Log end of the entire process
       console.log(
         `%c 🏁 REQUEST COMPLETE ${requestId} %c ${new Date().toISOString()}`,
         'background: #6f42c1; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
