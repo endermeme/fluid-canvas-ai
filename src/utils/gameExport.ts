@@ -45,7 +45,7 @@ export const getRemainingTime = (expiresAt: number): string => {
  * @param title Game title
  * @param description Game description
  * @param htmlContent HTML content of the game
- * @returns URL for accessing the shared game
+ * @returns Promise that resolves to the URL for accessing the shared game
  */
 export const saveGameForSharing = async (
   title: string,

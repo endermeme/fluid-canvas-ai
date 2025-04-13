@@ -173,7 +173,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     try {
       const gameContent = `
         <html>
@@ -365,7 +365,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
         </html>
       `;
       
-      const shareUrl = saveGameForSharing(
+      const shareUrl = await saveGameForSharing(
         content.title || "Trò chơi ghi nhớ", 
         topic, 
         gameContent

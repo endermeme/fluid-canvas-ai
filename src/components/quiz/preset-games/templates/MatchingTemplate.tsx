@@ -194,7 +194,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     try {
       const gameContent = `
         <html>
@@ -309,7 +309,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
         </html>
       `;
       
-      const shareUrl = saveGameForSharing(
+      const shareUrl = await saveGameForSharing(
         content.title || "Trò chơi nối từ", 
         topic, 
         gameContent

@@ -129,7 +129,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
     });
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     try {
       const gameContent = `
         <html>
@@ -267,7 +267,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
         </html>
       `;
       
-      const shareUrl = saveGameForSharing(
+      const shareUrl = await saveGameForSharing(
         content.title || "Thẻ ghi nhớ", 
         topic, 
         gameContent

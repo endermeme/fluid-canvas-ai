@@ -204,7 +204,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     try {
       const gameContent = `
         <html>
@@ -477,7 +477,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
         </html>
       `;
       
-      const shareUrl = saveGameForSharing(
+      const shareUrl = await saveGameForSharing(
         content.title || "Trò chơi sắp xếp thứ tự", 
         topic, 
         gameContent
