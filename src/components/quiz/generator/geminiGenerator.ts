@@ -13,6 +13,7 @@ import {
   DEFAULT_GENERATION_SETTINGS 
 } from '@/constants/api-constants';
 import { buildGeminiPrompt } from './promptBuilder';
+import { parseGeminiResponse } from './responseParser';
 
 const SOURCE = "GEMINI";
 
@@ -45,16 +46,18 @@ export const generateWithGemini = async (
     
     const startTime = Date.now();
     
-    // Create payload
+    // Create payload with optimized settings for JSON output
     const payload = {
       contents: [{
         parts: [{text: prompt}]
       }],
       generationConfig: {
         ...DEFAULT_GENERATION_SETTINGS,
-        temperature: 0.7, // Slightly higher for more creative games
+        temperature: 0.7,           // Balanced creativity
         topK: 40,
-        topP: 0.95
+        topP: 0.95,
+        maxOutputTokens: 8192,      // Ensure enough tokens for complete game
+        responseFormat: { "type": "JSON" }  // Request JSON format explicitly if supported
       }
     };
     
@@ -85,50 +88,12 @@ export const generateWithGemini = async (
     logSuccess(SOURCE, `Response received in ${duration.seconds}s (${duration.ms}ms)`);
     logInfo(SOURCE, `Response length: ${text.length} characters`);
     
-    // Extract title from JSON or HTML
-    let title = topic;
-    let content = text;
-    
-    // Try to parse as JSON first
-    try {
-      // Find JSON object in response
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch && jsonMatch[0]) {
-        const parsedJson = JSON.parse(jsonMatch[0]);
-        if (parsedJson.title) {
-          title = parsedJson.title;
-        }
-        if (parsedJson.content) {
-          content = parsedJson.content;
-        }
-      }
-    } catch (err) {
-      // If JSON parsing fails, look for HTML title
-      const titleMatch = text.match(/<title>(.*?)<\/title>/i) || 
-                        text.match(/<h1[^>]*>(.*?)<\/h1>/i);
-      
-      if (titleMatch && titleMatch[1]) {
-        title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
-      }
-      
-      // Extract HTML if it's not JSON
-      const htmlMatch = text.match(/<!DOCTYPE html>[\s\S]*<\/html>/i) || 
-                        text.match(/<html[\s\S]*<\/html>/i);
-      
-      if (htmlMatch) {
-        content = htmlMatch[0];
-      }
-    }
-    
-    // Create MiniGame object
-    const game: MiniGame = {
-      title: title,
-      content: content
-    };
+    // Use the improved parser to extract the game content
+    const game = parseGeminiResponse(text, topic);
     
     logSuccess(SOURCE, "Game generated successfully", {
-      title: title,
-      contentSize: content.length
+      title: game.title,
+      contentSize: game.content.length
     });
     
     return game;
