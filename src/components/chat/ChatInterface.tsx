@@ -23,7 +23,7 @@ interface ChatInterfaceProps {
 }
 
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
-const gameGenerator = AIGameGenerator.getInstance(API_KEY);
+const gameGenerator = AIGameGenerator.getInstance();
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
   onCreateBlock, 

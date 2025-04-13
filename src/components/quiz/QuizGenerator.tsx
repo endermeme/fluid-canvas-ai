@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from './generator/AIGameGenerator';
@@ -30,7 +29,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const gameGenerator = AIGameGenerator.getInstance(GEMINI_API_KEY);
+  const gameGenerator = AIGameGenerator.getInstance();
   
   const [canvasMode, setCanvasMode] = useState<boolean>(
     localStorage.getItem('canvas_mode') === 'true'

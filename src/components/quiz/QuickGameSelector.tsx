@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from './generator/AIGameGenerator';
@@ -62,7 +61,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   const [showSettings, setShowSettings] = useState(false);
   const { toast } = useToast();
   
-  const gameGenerator = AIGameGenerator.getInstance(API_KEY);
+  const gameGenerator = AIGameGenerator.getInstance();
   
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentGameType, setCurrentGameType] = useState<GameType | null>(null);
