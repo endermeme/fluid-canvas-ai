@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface EnhancedGameViewProps {
   miniGame: {
@@ -31,13 +32,14 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     }
   }, [miniGame]);
 
-  // Enhanced iframe content - completely removes any constraints
+  // Enhanced iframe content to provide optimal display
   const enhanceIframeContent = (content: string): string => {
-    // Remove any existing style tags to prevent conflicts
-    let processedContent = content;
+    // Safely sanitize content by removing markdown-style code blocks
+    let processedContent = content.replace(/```html|```/g, '');
+    processedContent = processedContent.replace(/`/g, '');
     
-    // Add our new style definitions - simplified and focused on maximizing display area
-    const fullDisplayStyles = `
+    // Add optimized styles for full display
+    const optimizedStyles = `
       <style>
         html, body {
           margin: 0 !important;
@@ -45,20 +47,31 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           width: 100% !important;
           height: 100% !important;
           overflow: hidden !important;
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+        }
+        
+        body {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%) !important;
         }
         
         *, *::before, *::after {
           box-sizing: border-box !important;
         }
         
-        body > div, main, #root, #app, .container, .game-container, #game, .game {
+        #game-container, #root, #app, .container, .game-container, #game, .game, main, [class*="container"] {
           width: 100% !important;
           height: 100% !important;
-          margin: 0 !important;
+          margin: 0 auto !important;
           padding: 0 !important;
-          overflow: auto !important;
           display: flex !important;
           flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          max-width: 100% !important;
         }
         
         canvas {
@@ -69,26 +82,41 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           object-fit: contain !important;
         }
         
-        pre, code {
-          white-space: pre-wrap !important;
-          word-break: break-word !important;
-          max-width: 100% !important;
-          margin: 0 !important;
-          padding: 8px !important;
-          background: rgba(0,0,0,0.05) !important;
+        h1, h2, h3, h4, h5, h6 {
+          margin: 0.5em 0 !important;
+          text-align: center !important;
+        }
+        
+        button {
+          cursor: pointer !important;
+          padding: 8px 16px !important;
+          margin: 8px !important;
+          background: #4f46e5 !important;
+          color: white !important;
+          border: none !important;
           border-radius: 4px !important;
+          font-size: 16px !important;
+          transition: background 0.2s !important;
+        }
+        
+        button:hover {
+          background: #4338ca !important;
+        }
+        
+        pre, code {
+          display: none !important;
         }
       </style>
     `;
     
-    // Insert our styles at the beginning of head or create a head if none exists
+    // Insert styles and ensure proper HTML structure
     if (processedContent.includes('<head>')) {
-      processedContent = processedContent.replace('<head>', `<head>${fullDisplayStyles}`);
+      processedContent = processedContent.replace('<head>', `<head>${optimizedStyles}`);
     } else if (processedContent.includes('<html>')) {
-      processedContent = processedContent.replace('<html>', `<html><head>${fullDisplayStyles}</head>`);
+      processedContent = processedContent.replace('<html>', `<html><head>${optimizedStyles}</head>`);
     } else {
       // If no html structure, add complete html wrapper
-      processedContent = `<!DOCTYPE html><html><head>${fullDisplayStyles}</head><body>${processedContent}</body></html>`;
+      processedContent = `<!DOCTYPE html><html><head>${optimizedStyles}</head><body>${processedContent}</body></html>`;
     }
     
     return processedContent;
@@ -117,53 +145,53 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
 
   return (
     <div className="w-full h-full flex flex-col">
-      {/* Game Controls - Minimized */}
-      <div className="flex justify-between items-center p-1 bg-background/70 backdrop-blur-sm z-10">
-        <div className="flex items-center gap-2">
+      {/* Streamlined Controls Bar */}
+      <div className="flex justify-between items-center p-2 bg-background/80 backdrop-blur-md border-b border-primary/10 z-10">
+        <div className="flex items-center">
           {onBack && (
             <Button 
-              variant="outline" 
+              variant="ghost" 
               size="sm" 
               onClick={onBack} 
-              className="h-7 text-xs border-primary/20"
+              className="gap-1 text-xs"
             >
-              <ArrowLeft className="h-3 w-3 mr-1" />
+              <ArrowLeft className="h-3.5 w-3.5" />
               Quay lại
             </Button>
           )}
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={refreshGame} 
-            className="h-7 text-xs border-primary/20"
-          >
-            <RefreshCw className="h-3 w-3 mr-1" />
-            Tải lại
-          </Button>
         </div>
         
-        <div className="flex items-center gap-2">
-          {extraButton && extraButton}
+        <div className="flex items-center gap-1.5">
+          {extraButton}
           
           <Button 
-            variant="outline" 
+            variant="ghost" 
+            size="sm" 
+            onClick={refreshGame} 
+            className="w-8 h-8 p-0"
+            title="Tải lại"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+          </Button>
+          
+          <Button 
+            variant="ghost" 
             size="sm" 
             onClick={toggleFullscreen} 
-            className="h-7 text-xs border-primary/20"
+            className="w-8 h-8 p-0"
+            title="Toàn màn hình"
           >
-            <Maximize className="h-3 w-3 mr-1" />
-            Toàn màn hình
+            <Maximize className="h-3.5 w-3.5" />
           </Button>
           
           {onNewGame && (
             <Button 
-              variant="secondary" 
+              variant="outline" 
               size="sm" 
               onClick={onNewGame} 
-              className="h-7 text-xs"
+              className="ml-1 text-xs"
             >
-              <PlusCircle className="h-3 w-3 mr-1" />
+              <PlusCircle className="h-3.5 w-3.5 mr-1" />
               Game mới
             </Button>
           )}
@@ -173,29 +201,27 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
               variant="default" 
               size="sm" 
               onClick={onShare} 
-              className="h-7 text-xs"
+              className="ml-1 text-xs"
             >
-              <Share2 className="h-3 w-3 mr-1" />
+              <Share2 className="h-3.5 w-3.5 mr-1" />
               Chia sẻ
             </Button>
           )}
         </div>
       </div>
       
-      {/* Game Container - Maximized */}
-      <div className="flex-1 relative w-full h-full overflow-hidden">
+      {/* Game Display */}
+      <div className="flex-1 relative overflow-hidden">
         <iframe
           ref={iframeRef}
-          className="w-full h-full border-0"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-modals"
-          title={miniGame.title}
+          className="w-full h-full"
+          sandbox="allow-same-origin allow-scripts allow-forms"
+          title={miniGame.title || "Minigame"}
           style={{
-            width: '100%',
-            height: '100%',
-            display: 'block',
             border: 'none',
-            margin: 0,
-            padding: 0
+            display: 'block',
+            width: '100%',
+            height: '100%'
           }}
         />
       </div>
