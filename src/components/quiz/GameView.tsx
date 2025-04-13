@@ -111,8 +111,8 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
           display: flex !important;
           flex-direction: column !important;
           align-items: center !important;
-          justify-content: center !important;
-          background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%) !important;
+          justify-content: flex-start !important;
+          background: #ffffff !important;
         }
         
         *, *::before, *::after {
@@ -121,22 +121,18 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
         
         #game-container, #root, #app, .container, .game-container, #game, .game, main, [class*="container"] {
           width: 100% !important;
-          height: 100% !important;
+          max-width: 100% !important;
           margin: 0 auto !important;
           padding: 0 !important;
-          display: flex !important;
-          flex-direction: column !important;
-          align-items: center !important;
-          justify-content: center !important;
-          max-width: 100% !important;
+          overflow: visible !important;
         }
         
         canvas {
           display: block !important;
           max-width: 100% !important;
-          max-height: 100% !important;
-          margin: 0 auto !important;
           object-fit: contain !important;
+          margin: 0 auto !important;
+          touch-action: manipulation !important;
         }
         
         h1, h2, h3, h4, h5, h6 {
@@ -154,6 +150,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
           border-radius: 4px !important;
           font-size: 16px !important;
           transition: background 0.2s !important;
+          touch-action: manipulation !important;
         }
         
         button:hover {
@@ -223,17 +220,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
       {/* Controls Bar */}
-      <div className="flex justify-between items-center p-2 bg-background/80 backdrop-blur-md border-b border-primary/10 z-10">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={handleBackToHome} 
-          className="gap-1 text-xs"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Quay lại
-        </Button>
-          
+      <div className="flex justify-end items-center p-2 bg-background/80 backdrop-blur-md border-b border-primary/10 z-10">
         <div className="flex items-center gap-1.5">
           {gameStats.score !== undefined && (
             <div className="px-2 py-1 bg-primary/10 rounded-full text-xs font-medium flex items-center">
@@ -285,7 +272,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
             ref={iframeRef}
             srcDoc={enhancedContent}
             className="w-full h-full"
-            sandbox="allow-scripts allow-popups allow-same-origin"
+            sandbox="allow-scripts allow-same-origin"
             onLoad={handleIframeLoad}
             title={miniGame.title || "Minigame"}
             style={{ 

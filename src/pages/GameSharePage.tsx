@@ -35,6 +35,7 @@ const GameSharePage: React.FC = () => {
     );
   }
   
+  // Create simplified interface with just the game view
   return (
     <QuizContainer
       title={game.title}

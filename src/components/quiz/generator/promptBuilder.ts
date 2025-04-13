@@ -2,7 +2,7 @@
 import { GameSettingsData } from '../types';
 
 /**
- * Builds a simple prompt for generating HTML games
+ * Builds a prompt for generating games in JSON format
  * @param topic The topic of the game
  * @param useCanvas Whether to use canvas mode for HTML game generation
  * @returns Complete prompt string
@@ -14,14 +14,25 @@ export const buildGeminiPrompt = (
   return `
     Create an interactive HTML game based on this prompt: "${topic}"
 
-    Your response should be a complete HTML file that includes CSS and JavaScript.
-    
+    IMPORTANT: Return your response as a JSON object with this structure:
+    {
+      "title": "Game Title",
+      "content": "<!DOCTYPE html><html>... complete HTML code including all CSS and JavaScript ...</html>"
+    }
+
+    Guidelines for the HTML content:
+    - Create a fully functional, self-contained game with HTML, CSS, and JavaScript
+    - Make sure all JavaScript is properly wrapped in <script> tags
+    - Use proper event handling (addEventListener)
+    - Include all required CSS in <style> tags
+    - Ensure the game is responsive and works on different screen sizes
     ${useCanvas ? `
-    Please use HTML5 Canvas as the primary rendering approach for better graphics and animations.
-    Implement proper game loop with requestAnimationFrame and handle canvas responsiveness.
+    - Use HTML5 Canvas as the primary rendering approach for better graphics and animations
+    - Implement proper game loop with requestAnimationFrame
+    - Handle canvas responsiveness properly
     ` : ''}
     
-    RESPOND ONLY WITH THE HTML CODE.
+    RESPOND ONLY WITH VALID JSON matching the structure above. No markdown, no explanations.
   `;
 };
 

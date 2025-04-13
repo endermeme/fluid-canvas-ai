@@ -12,6 +12,7 @@ import {
   getApiEndpoint,
   DEFAULT_GENERATION_SETTINGS 
 } from '@/constants/api-constants';
+import { buildGeminiPrompt } from './promptBuilder';
 
 const SOURCE = "GEMINI";
 
@@ -35,22 +36,9 @@ export const generateWithGemini = async (
     settings: settings || {}
   });
   
-  // Simple prompt for HTML game generation
-  const prompt = `
-Create an HTML game based on this topic: "${topic}"
-
-Requirements:
-- Create a fun, interactive game that works in a browser
-- Use HTML, CSS, and JavaScript only (no external libraries)
-- The game should be fully self-contained in a single HTML file
-- Make the game visually appealing and user-friendly
-- Include a title, instructions, and scoring system
-- Handle all user interactions and game logic
-- Make sure the game is responsive and works on different screen sizes
-- Add appropriate error handling
-
-Return only the complete HTML code with inline CSS and JavaScript.
-`;
+  // Use the improved prompt builder
+  const useCanvas = settings?.category === 'canvas' || false;
+  const prompt = buildGeminiPrompt(topic, useCanvas);
 
   try {
     logInfo(SOURCE, `Sending request to Gemini API using model ${GEMINI_MODELS.DEFAULT} (${API_VERSION})`);
@@ -62,7 +50,12 @@ Return only the complete HTML code with inline CSS and JavaScript.
       contents: [{
         parts: [{text: prompt}]
       }],
-      generationConfig: DEFAULT_GENERATION_SETTINGS
+      generationConfig: {
+        ...DEFAULT_GENERATION_SETTINGS,
+        temperature: 0.7, // Slightly higher for more creative games
+        topK: 40,
+        topP: 0.95
+      }
     };
     
     // Make API call
@@ -92,24 +85,50 @@ Return only the complete HTML code with inline CSS and JavaScript.
     logSuccess(SOURCE, `Response received in ${duration.seconds}s (${duration.ms}ms)`);
     logInfo(SOURCE, `Response length: ${text.length} characters`);
     
-    // Extract title from HTML
+    // Extract title from JSON or HTML
     let title = topic;
-    const titleMatch = text.match(/<title>(.*?)<\/title>/i) || 
-                      text.match(/<h1[^>]*>(.*?)<\/h1>/i);
+    let content = text;
     
-    if (titleMatch && titleMatch[1]) {
-      title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
+    // Try to parse as JSON first
+    try {
+      // Find JSON object in response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch && jsonMatch[0]) {
+        const parsedJson = JSON.parse(jsonMatch[0]);
+        if (parsedJson.title) {
+          title = parsedJson.title;
+        }
+        if (parsedJson.content) {
+          content = parsedJson.content;
+        }
+      }
+    } catch (err) {
+      // If JSON parsing fails, look for HTML title
+      const titleMatch = text.match(/<title>(.*?)<\/title>/i) || 
+                        text.match(/<h1[^>]*>(.*?)<\/h1>/i);
+      
+      if (titleMatch && titleMatch[1]) {
+        title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
+      }
+      
+      // Extract HTML if it's not JSON
+      const htmlMatch = text.match(/<!DOCTYPE html>[\s\S]*<\/html>/i) || 
+                        text.match(/<html[\s\S]*<\/html>/i);
+      
+      if (htmlMatch) {
+        content = htmlMatch[0];
+      }
     }
     
     // Create MiniGame object
     const game: MiniGame = {
       title: title,
-      content: text
+      content: content
     };
     
     logSuccess(SOURCE, "Game generated successfully", {
       title: title,
-      contentSize: text.length
+      contentSize: content.length
     });
     
     return game;

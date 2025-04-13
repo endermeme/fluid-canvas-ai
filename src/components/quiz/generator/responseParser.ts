@@ -12,7 +12,7 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
   console.log("🔷 Gemini: Response length:", text.length);
   
   try {
-    // First approach: Try to extract JSON directly
+    // First approach: Try to extract JSON directly using a regex that matches JSON objects
     const jsonRegex = /\{[\s\S]*\}/g;
     const jsonMatch = text.match(jsonRegex);
     
@@ -24,11 +24,22 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
         console.log("🔷 Gemini: Successfully parsed JSON directly");
         console.log(`🔷 Gemini: Game title: "${gameData.title || 'No title'}"`);
         
-        return {
-          title: gameData.title || topic,
-          description: gameData.description || "",
-          content: gameData.content || ''
-        };
+        // Verify HTML content exists and is properly formatted
+        if (gameData.content && typeof gameData.content === 'string') {
+          // Ensure the HTML content has proper doctype
+          let htmlContent = gameData.content;
+          if (!htmlContent.includes('<!DOCTYPE html>')) {
+            htmlContent = `<!DOCTYPE html>${htmlContent}`;
+          }
+          
+          return {
+            title: gameData.title || topic,
+            description: gameData.description || "",
+            content: htmlContent
+          };
+        } else {
+          throw new Error("JSON parsed but no valid HTML content found");
+        }
       } catch (parseError) {
         console.log("🔷 Gemini: Direct JSON parse failed, trying with sanitization:", parseError.message);
         
@@ -45,11 +56,21 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
           const gameData = JSON.parse(sanitizedJson);
           console.log("🔷 Gemini: JSON parsed after sanitization");
           
-          return {
-            title: gameData.title || topic,
-            description: gameData.description || "",
-            content: gameData.content || ''
-          };
+          // Verify and process HTML content
+          if (gameData.content && typeof gameData.content === 'string') {
+            let htmlContent = gameData.content;
+            if (!htmlContent.includes('<!DOCTYPE html>')) {
+              htmlContent = `<!DOCTYPE html>${htmlContent}`;
+            }
+            
+            return {
+              title: gameData.title || topic,
+              description: gameData.description || "",
+              content: htmlContent
+            };
+          } else {
+            throw new Error("JSON parsed but no valid HTML content found after sanitization");
+          }
         } catch (secondParseError) {
           console.log("🔷 Gemini: Sanitized JSON parse failed, moving to manual extraction:", secondParseError.message);
         }
