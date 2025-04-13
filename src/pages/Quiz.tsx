@@ -1,31 +1,24 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { SparklesIcon, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import QuizContainer from '@/components/quiz/QuizContainer';
-import { AIGameGenerator } from '@/components/quiz/generator/AIGameGenerator';
 import GameLoading from '@/components/quiz/GameLoading';
-
-const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
+import CustomGameSettings from '@/components/quiz/custom-games/CustomGameSettings';
+import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 
 const Quiz = () => {
-  const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [gameContent, setGameContent] = useState<string | null>(null);
-  const [gameTitle, setGameTitle] = useState('Minigame Tương Tác');
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [gameTitle, setGameTitle] = useState('Game Tương Tác');
+  const [prompt, setPrompt] = useState('');
+  const [miniGame, setMiniGame] = useState<{ title: string, content: string } | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Initialize game generator
-  const gameGenerator = AIGameGenerator.getInstance(API_KEY);
-
-  const handleGenerate = async () => {
-    if (!prompt.trim()) {
+  const handleGenerate = async (promptText: string) => {
+    if (!promptText.trim()) {
       toast({
         title: "Lỗi",
         description: "Vui lòng nhập yêu cầu cho trò chơi",
@@ -34,50 +27,112 @@ const Quiz = () => {
       return;
     }
 
-    setGameTitle(`Minigame: ${prompt.substring(0, 40)}${prompt.length > 40 ? '...' : ''}`);
+    setPrompt(promptText);
+    setGameTitle(`Game: ${promptText.substring(0, 40)}${promptText.length > 40 ? '...' : ''}`);
     setIsGenerating(true);
     setGameContent(null);
+    setMiniGame(null);
     
-    try {
-      const settings = {
-        difficulty: 'medium' as 'easy' | 'medium' | 'hard',
-        questionCount: 10,
-        timePerQuestion: 30,
-        category: 'general' as 'general' | 'history' | 'science' | 'geography' | 'arts' | 'sports' | 'math'
-      };
-      
-      const game = await gameGenerator.generateMiniGame(prompt, settings);
-      
-      if (game && game.content) {
-        setGameContent(game.content);
-        setGameTitle(game.title || `Minigame: ${prompt.substring(0, 40)}...`);
-        
-        toast({
-          title: "Trò chơi đã được tạo",
-          description: "Trò chơi đã được tạo thành công với AI",
-        });
-      } else {
-        throw new Error("Không thể tạo trò chơi");
-      }
-    } catch (error) {
-      console.error("Lỗi khi tạo trò chơi:", error);
-      toast({
-        title: "Lỗi tạo trò chơi",
-        description: "Có lỗi xảy ra khi tạo trò chơi. Vui lòng thử lại.",
-        variant: "destructive"
+    // Simulate API call with setTimeout
+    setTimeout(() => {
+      // Create a placeholder HTML game
+      const placeholderHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Game Demo</title>
+          <style>
+            body { 
+              font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+              max-width: 800px;
+              margin: 0 auto;
+              padding: 20px;
+              text-align: center;
+              background-color: #f9fafb;
+              color: #111827;
+            }
+            .container {
+              background-color: white;
+              border-radius: 8px;
+              padding: 20px;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            h1 { color: #4f46e5; }
+            button {
+              background-color: #4f46e5;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              border-radius: 4px;
+              cursor: pointer;
+              font-size: 16px;
+              margin: 10px 5px;
+            }
+            button:hover { background-color: #4338ca; }
+            .game-content {
+              margin-top: 20px;
+              min-height: 200px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Demo Game: ${promptText}</h1>
+            <p>This is a demonstration of the game interface without the AI generation.</p>
+            <div class="game-content">
+              <p>Your game would appear here based on your prompt:</p>
+              <p><em>"${promptText}"</em></p>
+              <p>Score: <span id="score">0</span></p>
+              <button onclick="increaseScore()">Play</button>
+              <button onclick="resetScore()">Reset</button>
+            </div>
+          </div>
+          <script>
+            let score = 0;
+            const scoreElement = document.getElementById('score');
+            
+            function increaseScore() {
+              score += 10;
+              scoreElement.textContent = score;
+            }
+            
+            function resetScore() {
+              score = 0;
+              scoreElement.textContent = score;
+            }
+          </script>
+        </body>
+        </html>
+      `;
+
+      setGameContent(placeholderHTML);
+      setGameTitle(`Game: ${promptText.substring(0, 40)}...`);
+      setMiniGame({
+        title: `Game: ${promptText.substring(0, 40)}...`,
+        content: placeholderHTML
       });
-    } finally {
+      
+      toast({
+        title: "Trò chơi đã được tạo",
+        description: "Trò chơi mẫu đã được tạo thành công",
+      });
+      
       setIsGenerating(false);
-    }
+    }, 1500); // Simulate loading for 1.5 seconds
   };
 
   const handleReset = () => {
     setGameContent(null);
-    setGameTitle('Minigame Tương Tác');
+    setGameTitle('Game Tương Tác');
+    setPrompt('');
+    setMiniGame(null);
   };
 
   const handleShare = () => {
-    // Basic implementation of sharing functionality
     try {
       if (gameContent) {
         const shareUrl = window.location.origin + '/quiz?shared=true';
@@ -98,85 +153,48 @@ const Quiz = () => {
       return <GameLoading topic={prompt} />;
     }
     
-    if (gameContent) {
+    if (miniGame) {
       return (
-        <div className="w-full h-full">
-          <iframe
-            ref={iframeRef}
-            srcDoc={gameContent}
-            className="w-full h-full border-0"
-            sandbox="allow-scripts allow-same-origin"
-            title={gameTitle}
-          />
-        </div>
+        <EnhancedGameView 
+          miniGame={miniGame}
+          extraButton={
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={handleShare}
+              className="text-xs h-8"
+            >
+              Chia sẻ
+            </Button>
+          }
+        />
       );
     }
     
     return (
-      <div className="p-4 max-w-3xl mx-auto">
-        <div className="bg-background/50 backdrop-blur-md border border-primary/20 rounded-lg p-6 shadow-lg">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Tạo Minigame với AI</h2>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="prompt" className="text-sm font-medium">Nhập yêu cầu cho trò chơi</Label>
-              <Textarea
-                id="prompt"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Ví dụ: Tạo trò chơi vòng quay may mắn với 10 phần thưởng khác nhau"
-                className="h-32 mt-1"
-              />
-            </div>
-            
-            <Button 
-              onClick={handleGenerate} 
-              className="w-full bg-gradient-to-r from-primary to-primary/80"
-              disabled={!prompt.trim() || isGenerating}
-            >
-              <SparklesIcon className="mr-2 h-4 w-4" />
-              Tạo minigame với AI
-            </Button>
-          </div>
-        </div>
-      </div>
+      <CustomGameSettings 
+        onGenerate={handleGenerate}
+        isGenerating={isGenerating}
+      />
     );
   };
 
   return (
     <div className="h-screen w-full bg-gradient-to-b from-background to-background/95">
       <QuizContainer
-        title={gameTitle}
+        title={miniGame ? miniGame.title : "Tạo Game Tùy Chỉnh"}
         showBackButton={true}
-        showRefreshButton={gameContent !== null}
+        showRefreshButton={false}
         showHomeButton={true}
-        onBack={() => gameContent ? handleReset() : navigate('/')}
-        onRefresh={() => {
-          if (iframeRef.current) {
-            const iframe = iframeRef.current;
-            iframe.srcdoc = '';
-            setTimeout(() => {
-              if (iframe && gameContent) {
-                iframe.srcdoc = gameContent;
-              }
-            }, 100);
-          }
-        }}
-        footerContent={gameContent ? (
-          <div className="flex justify-between items-center">
+        onBack={() => miniGame ? handleReset() : navigate('/')}
+        footerContent={miniGame ? (
+          <div className="flex justify-between items-center w-full px-4 py-2">
             <Button 
               variant="outline" 
               onClick={handleReset}
               className="border-primary/20"
             >
-              Tạo minigame mới
-            </Button>
-            
-            <Button 
-              variant="default" 
-              onClick={handleShare}
-              className="bg-primary"
-            >
-              Chia sẻ minigame
+              Tạo game mới
             </Button>
           </div>
         ) : null}

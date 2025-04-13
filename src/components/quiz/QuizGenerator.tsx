@@ -188,7 +188,10 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   return (
     <>
       <EnhancedGameView 
-        miniGame={miniGame} 
+        miniGame={{
+          title: miniGame.title || "Minigame Tương Tác",
+          content: miniGame.content || ""
+        }} 
         extraButton={
           <Button 
             size="sm" 

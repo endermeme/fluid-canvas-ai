@@ -65,7 +65,7 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
       console.log("🔷 Gemini: Successfully extracted HTML content");
       return {
         title: topic,
-        description: "",
+        description: "Generated HTML content",
         content: htmlMatch[0]
       };
     }
@@ -79,7 +79,7 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
       const htmlContent = `<!DOCTYPE html>${fallbackHtmlMatch[0]}`;
       return {
         title: topic,
-        description: "",
+        description: "Generated HTML content with fallback method",
         content: htmlContent
       };
     }
