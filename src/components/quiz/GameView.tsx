@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
-import { Share2, Home, RefreshCw, Trophy, ArrowLeft } from 'lucide-react';
+import { Share2, RefreshCw, Trophy, ArrowLeft } from 'lucide-react';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -91,11 +91,12 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
 
   // Enhanced function to properly prepare the content
   const enhanceIframeContent = (content: string): string => {
-    // Remove any existing style tags to prevent conflicts
-    let processedContent = content;
+    // Safely sanitize content by removing markdown-style code blocks
+    let processedContent = content.replace(/```html|```/g, '');
+    processedContent = processedContent.replace(/`/g, '');
     
-    // Add our new style definitions - maximizing display area
-    const fullDisplayStyles = `
+    // Add optimized styles for full display
+    const optimizedStyles = `
       <style>
         html, body {
           margin: 0 !important;
@@ -103,20 +104,31 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
           width: 100% !important;
           height: 100% !important;
           overflow: hidden !important;
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+        }
+        
+        body {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%) !important;
         }
         
         *, *::before, *::after {
           box-sizing: border-box !important;
         }
         
-        body > div, main, #root, #app, .container, .game-container, #game, .game {
+        #game-container, #root, #app, .container, .game-container, #game, .game, main, [class*="container"] {
           width: 100% !important;
           height: 100% !important;
-          margin: 0 !important;
+          margin: 0 auto !important;
           padding: 0 !important;
-          overflow: auto !important;
           display: flex !important;
           flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          max-width: 100% !important;
         }
         
         canvas {
@@ -127,26 +139,41 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
           object-fit: contain !important;
         }
         
-        pre, code {
-          white-space: pre-wrap !important;
-          word-break: break-word !important;
-          max-width: 100% !important;
-          margin: 0 !important;
-          padding: 8px !important;
-          background: rgba(0,0,0,0.05) !important;
+        h1, h2, h3, h4, h5, h6 {
+          margin: 0.5em 0 !important;
+          text-align: center !important;
+        }
+        
+        button {
+          cursor: pointer !important;
+          padding: 8px 16px !important;
+          margin: 8px !important;
+          background: #4f46e5 !important;
+          color: white !important;
+          border: none !important;
           border-radius: 4px !important;
+          font-size: 16px !important;
+          transition: background 0.2s !important;
+        }
+        
+        button:hover {
+          background: #4338ca !important;
+        }
+        
+        pre, code {
+          display: none !important;
         }
       </style>
     `;
     
-    // Insert our styles at the beginning of head or create a head if none exists
+    // Insert styles and ensure proper HTML structure
     if (processedContent.includes('<head>')) {
-      processedContent = processedContent.replace('<head>', `<head>${fullDisplayStyles}`);
+      processedContent = processedContent.replace('<head>', `<head>${optimizedStyles}`);
     } else if (processedContent.includes('<html>')) {
-      processedContent = processedContent.replace('<html>', `<html><head>${fullDisplayStyles}</head>`);
+      processedContent = processedContent.replace('<html>', `<html><head>${optimizedStyles}</head>`);
     } else {
       // If no html structure, add complete html wrapper
-      processedContent = `<!DOCTYPE html><html><head>${fullDisplayStyles}</head><body>${processedContent}</body></html>`;
+      processedContent = `<!DOCTYPE html><html><head>${optimizedStyles}</head><body>${processedContent}</body></html>`;
     }
     
     return processedContent;
@@ -195,16 +222,62 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      <div className="flex-1 relative w-full h-full overflow-hidden">
+      {/* Controls Bar */}
+      <div className="flex justify-between items-center p-2 bg-background/80 backdrop-blur-md border-b border-primary/10 z-10">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={handleBackToHome} 
+          className="gap-1 text-xs"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Quay lại
+        </Button>
+          
+        <div className="flex items-center gap-1.5">
+          {gameStats.score !== undefined && (
+            <div className="px-2 py-1 bg-primary/10 rounded-full text-xs font-medium flex items-center">
+              <Trophy className="h-3 w-3 text-primary mr-1" />
+              {gameStats.score} điểm
+            </div>
+          )}
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleReloadGame}
+            className="w-8 h-8 p-0"
+            title="Chơi lại"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleShare}
+            disabled={shareInProgress}
+            className="gap-1 text-xs"
+          >
+            <Share2 className="h-3.5 w-3.5" />
+            Chia Sẻ
+          </Button>
+          
+          {extraButton}
+        </div>
+      </div>
+      
+      {/* Game Display */}
+      <div className="flex-1 relative overflow-hidden">
         {iframeError ? (
-          <div className="bg-destructive/10 text-destructive p-4 rounded-md flex flex-col items-center m-4">
-            <p>{iframeError}</p>
+          <div className="flex flex-col items-center justify-center h-full p-6 bg-destructive/10">
+            <p className="text-destructive mb-4">{iframeError}</p>
             <Button 
               variant="outline" 
-              className="mt-3" 
-              onClick={() => window.location.reload()}
+              onClick={handleReloadGame}
             >
-              Tải lại trang
+              <RefreshCw className="h-4 w-4 mr-1.5" />
+              Tải lại
             </Button>
           </div>
         ) : (
@@ -217,67 +290,12 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
             title={miniGame.title || "Minigame"}
             style={{ 
               border: 'none',
-              margin: 0,
-              padding: 0,
               width: '100%',
               height: '100%',
               display: 'block'
             }}
           />
         )}
-
-        {/* Back button overlay */}
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={handleBackToHome} 
-          className="absolute top-4 left-4 z-20 flex items-center gap-1 bg-background/70 hover:bg-background/80 backdrop-blur-sm shadow-sm"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Quay lại</span>
-        </Button>
-      </div>
-      
-      {miniGame.title && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
-          <div className="px-4 py-2 bg-background/70 backdrop-blur-sm rounded-full shadow-md">
-            <h2 className="text-sm font-medium text-center">{miniGame.title}</h2>
-          </div>
-        </div>
-      )}
-      
-      {gameStats.score !== undefined && (
-        <div className="absolute top-4 right-4 z-10">
-          <div className="px-3 py-1.5 bg-primary/10 backdrop-blur-sm rounded-full shadow-md flex items-center gap-1.5">
-            <Trophy className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-medium">{gameStats.score} điểm</span>
-          </div>
-        </div>
-      )}
-      
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-        <Button 
-          size="sm" 
-          variant="secondary"
-          className="bg-background/70 backdrop-blur-sm shadow-md" 
-          onClick={handleReloadGame}
-        >
-          <RefreshCw size={14} className="mr-1" />
-          Chơi Lại
-        </Button>
-        
-        <Button 
-          size="sm" 
-          variant="secondary"
-          className="bg-background/70 backdrop-blur-sm shadow-md" 
-          onClick={handleShare}
-          disabled={shareInProgress}
-        >
-          <Share2 size={14} className="mr-1" />
-          Chia Sẻ
-        </Button>
-        
-        {extraButton}
       </div>
     </div>
   );
