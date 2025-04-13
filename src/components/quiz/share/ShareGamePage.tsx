@@ -85,6 +85,51 @@ const ShareGamePage: React.FC = () => {
     navigate(`/game/${gameId}/dashboard`);
   };
 
+  // Hàm cải thiện HTML content để tránh hiển thị bị bóp méo
+  const enhanceHtmlContent = (content: string): string => {
+    const enhancementStyles = `
+      <style>
+        body, html {
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: auto !important;
+          width: 100% !important;
+          height: 100% !important;
+          box-sizing: border-box !important;
+        }
+        
+        body > div, .container, main, #game, .game, #app, #root {
+          width: 100% !important;
+          height: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          box-sizing: border-box !important;
+        }
+        
+        canvas {
+          display: block !important;
+          margin: 0 auto !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+        }
+        
+        pre, code {
+          white-space: pre-wrap !important;
+          overflow-wrap: break-word !important;
+          max-width: 100% !important;
+        }
+      </style>
+    `;
+    
+    // Insert our custom styles just before the closing </head> tag
+    if (content.includes('</head>')) {
+      return content.replace('</head>', `${enhancementStyles}</head>`);
+    } else {
+      // If no head tag, add styles at the beginning
+      return enhancementStyles + content;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen space-y-4">
@@ -107,14 +152,17 @@ const ShareGamePage: React.FC = () => {
   }
 
   if (hasJoined) {
+    // Tạo phiên bản cải tiến của HTML content
+    const enhancedContent = enhanceHtmlContent(game.htmlContent);
+    
     return (
       <div className="flex-1 relative w-full h-full overflow-hidden">
         <iframe
-          srcDoc={game.htmlContent}
-          className="w-full h-screen border-0 mx-auto"
+          srcDoc={enhancedContent}
+          className="w-full h-screen border-0"
           sandbox="allow-scripts allow-popups allow-same-origin"
           title={game.title}
-          style={{ maxWidth: '100%', height: '100%', margin: '0 auto' }}
+          style={{ width: '100%', height: '100%' }}
         />
         
         <Button 

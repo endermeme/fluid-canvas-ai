@@ -38,11 +38,44 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     // Add custom CSS for code display to make it larger and more readable
     const codeStylesCSS = `
       <style>
-        /* Enhanced Code Display Styles */
+        /* Đảm bảo nội dung đầy đủ không bị bóp méo */
+        body, html {
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: auto !important;
+          width: 100% !important;
+          height: 100% !important;
+          box-sizing: border-box !important;
+        }
+        
+        /* Đảm bảo tất cả container đều full-size */
+        body > div, 
+        .container, 
+        main, 
+        .game-container, 
+        #game,
+        .game,
+        #app,
+        #root {
+          width: 100% !important;
+          height: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          box-sizing: border-box !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        
+        /* Định dạng code để dễ đọc */
         pre, code, .code-block {
           font-size: 18px !important;
           line-height: 1.5 !important;
           font-family: Consolas, Monaco, 'Andale Mono', monospace !important;
+          white-space: pre-wrap !important;
+          overflow-wrap: break-word !important;
+          max-width: 100% !important;
         }
         
         pre {
@@ -52,35 +85,13 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           border-radius: 6px !important;
           overflow-x: auto !important;
           margin: 16px 0 !important;
-          white-space: pre-wrap !important;
         }
         
-        .code-section {
-          font-size: 18px !important;
-          background-color: #f0f8ff !important;
-          border: 1px solid #b8daff !important;
-          border-radius: 8px !important;
-          padding: 20px !important;
-          margin: 20px 0 !important;
-        }
-        
-        .code-label {
-          font-weight: bold !important;
-          font-size: 16px !important;
-          margin-bottom: 10px !important;
-          color: #0066cc !important;
-        }
-        
-        /* Make game container full size */
-        #game-container, .game-container {
-          width: 100% !important;
-          min-height: 400px !important;
-        }
-        
-        /* Make canvas more responsive */
         canvas {
+          display: block !important;
+          margin: 0 auto !important;
           max-width: 100% !important;
-          height: auto !important;
+          max-height: 100% !important;
         }
       </style>
     `;

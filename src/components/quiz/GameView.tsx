@@ -97,6 +97,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
 
       const iframe = iframeRef.current;
       
+      // Đảm bảo nội dung iframe được hiển thị đúng cách
       try {
         const iframeDoc = iframe.contentDocument;
         
@@ -107,25 +108,43 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
         
         const styleElement = iframeDoc.createElement('style');
         styleElement.textContent = `
-          body {
+          body, html {
             margin: 0 !important;
             padding: 0 !important;
             overflow: hidden !important;
-            position: fixed !important;
             width: 100% !important;
             height: 100% !important;
           }
           
-          html { overflow: hidden !important; }
-          
-          main, .main, #main, .game, #game, .game-container {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
+          /* Đảm bảo tất cả các container đều full-size */
+          body > div, 
+          .container, 
+          main, 
+          .game-container, 
+          #game,
+          .game,
+          #app,
+          #root {
             width: 100% !important;
             height: 100% !important;
-            padding: 0 !important;
             margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+            overflow: auto !important;
+          }
+          
+          /* Ngăn chặn hiển thị markdown mã thô */
+          pre, code {
+            white-space: pre-wrap !important;
+            overflow-wrap: break-word !important;
+            max-width: 100% !important;
+          }
+          
+          canvas {
+            display: block !important;
+            margin: 0 auto !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
           }
         `;
         iframeDoc.head.appendChild(styleElement);
@@ -168,7 +187,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
 
   return (
     <div className="flex flex-col h-full w-full items-center justify-center overflow-hidden">
-      <div className="flex-1 relative w-full h-full overflow-hidden flex items-center justify-center">
+      <div className="flex-1 relative w-full h-full overflow-hidden">
         {iframeError ? (
           <div className="bg-destructive/10 text-destructive p-4 rounded-md flex flex-col items-center m-4">
             <p>{iframeError}</p>
@@ -184,11 +203,10 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
           <iframe
             ref={iframeRef}
             srcDoc={miniGame.content}
-            className="w-full h-full border-0 mx-auto"
+            className="w-full h-full border-0"
             sandbox="allow-scripts allow-popups allow-same-origin"
             onLoad={handleIframeLoad}
             title={miniGame.title || "Minigame"}
-            style={{ maxWidth: '100%', height: '100%', margin: '0 auto' }}
           />
         )}
 

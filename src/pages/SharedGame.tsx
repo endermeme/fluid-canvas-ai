@@ -50,6 +50,51 @@ const SharedGame = () => {
     navigate('/');
   };
 
+  // Hàm cải thiện HTML content để tránh hiển thị bị bóp méo
+  const enhanceHtmlContent = (content: string): string => {
+    const enhancementStyles = `
+      <style>
+        body, html {
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: auto !important;
+          width: 100% !important;
+          height: 100% !important;
+          box-sizing: border-box !important;
+        }
+        
+        body > div, .container, main, #game, .game, #app, #root {
+          width: 100% !important;
+          height: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          box-sizing: border-box !important;
+        }
+        
+        canvas {
+          display: block !important;
+          margin: 0 auto !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+        }
+        
+        pre, code {
+          white-space: pre-wrap !important;
+          overflow-wrap: break-word !important;
+          max-width: 100% !important;
+        }
+      </style>
+    `;
+    
+    // Insert our custom styles just before the closing </head> tag
+    if (content.includes('</head>')) {
+      return content.replace('</head>', `${enhancementStyles}</head>`);
+    } else {
+      // If no head tag, add styles at the beginning
+      return enhancementStyles + content;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen space-y-4">
@@ -88,6 +133,9 @@ const SharedGame = () => {
     );
   }
 
+  // Tạo phiên bản cải tiến của HTML content
+  const enhancedContent = enhanceHtmlContent(game.htmlContent);
+
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <header className="bg-background border-b p-3 flex justify-between items-center">
@@ -102,16 +150,15 @@ const SharedGame = () => {
         </div>
       </header>
       
-      <main className="flex-1 overflow-hidden flex items-center justify-center">
+      <main className="flex-1 overflow-hidden">
         <iframe
-          srcDoc={game.htmlContent}
+          srcDoc={enhancedContent}
           sandbox="allow-scripts allow-same-origin"
-          className="w-full h-full border-none mx-auto"
+          className="w-full h-full border-none"
           style={{ 
             height: '100%', 
             width: '100%',
-            margin: '0 auto',
-            maxHeight: '100%'
+            margin: '0 auto'
           }}
         />
       </main>
