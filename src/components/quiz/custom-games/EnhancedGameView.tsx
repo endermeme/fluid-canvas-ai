@@ -1,24 +1,23 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { RefreshCw, Maximize } from 'lucide-react';
+import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
 
 interface EnhancedGameViewProps {
   miniGame: {
-    title?: string;  // Changed to optional to match MiniGame type
+    title?: string;
     content: string;
   };
-  extraButton?: React.ReactNode;
   onBack?: () => void;
   onNewGame?: () => void;
+  onShare?: () => void;
 }
 
 const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({ 
   miniGame, 
-  extraButton,
   onBack,
-  onNewGame
+  onNewGame,
+  onShare
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -53,8 +52,20 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   return (
     <div className="w-full h-full flex flex-col">
       {/* Game Controls */}
-      <div className="flex justify-between items-center px-4 py-2 bg-background/80 backdrop-blur-sm border-b border-primary/10">
+      <div className="flex justify-between items-center p-2 bg-background/80 backdrop-blur-sm border-b border-primary/10">
         <div className="flex items-center gap-2">
+          {onBack && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onBack} 
+              className="h-8 text-xs border-primary/20"
+            >
+              <ArrowLeft className="h-3 w-3 mr-1" />
+              Quay lại
+            </Button>
+          )}
+          
           <Button 
             variant="outline" 
             size="sm" 
@@ -64,7 +75,9 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
             <RefreshCw className="h-3 w-3 mr-1" />
             Tải lại
           </Button>
-          
+        </div>
+        
+        <div className="flex items-center gap-2">
           <Button 
             variant="outline" 
             size="sm" 
@@ -74,10 +87,30 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
             <Maximize className="h-3 w-3 mr-1" />
             Toàn màn hình
           </Button>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {extraButton}
+          
+          {onNewGame && (
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={onNewGame} 
+              className="h-8 text-xs"
+            >
+              <PlusCircle className="h-3 w-3 mr-1" />
+              Game mới
+            </Button>
+          )}
+          
+          {onShare && (
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={onShare} 
+              className="h-8 text-xs"
+            >
+              <Share2 className="h-3 w-3 mr-1" />
+              Chia sẻ
+            </Button>
+          )}
         </div>
       </div>
       

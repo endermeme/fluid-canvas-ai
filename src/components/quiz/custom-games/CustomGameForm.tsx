@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -11,13 +10,12 @@ import { AIGameGenerator } from '../generator/AIGameGenerator';
 import { MiniGame } from '../generator/types';
 import { GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
+import { GEMINI_API_KEY } from '@/constants/api-constants';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
   onCancel: () => void;
 }
-
-const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel }) => {
   const [content, setContent] = useState('');
@@ -26,7 +24,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
   const navigate = useNavigate();
   
   // Use the singleton pattern
-  const gameGenerator = AIGameGenerator.getInstance(API_KEY);
+  const gameGenerator = AIGameGenerator.getInstance();
 
   const getPlaceholderText = () => {
     return 'Mô tả chi tiết game bạn muốn tạo. Hãy bao gồm thể loại game, giao diện, cách chơi và bất kỳ yêu cầu đặc biệt nào.\n\nVí dụ: "Tạo một trò chơi xếp hình với 9 mảnh ghép hình ảnh về vũ trụ, có âm thanh khi hoàn thành và hiệu ứng ngôi sao khi người chơi thắng."';

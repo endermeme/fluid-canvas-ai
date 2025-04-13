@@ -41,12 +41,10 @@ import {
   Gamepad
 } from 'lucide-react';
 
-// Import our new components
 import GameHeader from './GameHeader';
 import CustomGameForm from './CustomGameForm';
 import GameGrid from './GameGrid';
-
-const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
+import { GEMINI_API_KEY } from '@/constants/api-constants';
 
 interface QuickGameSelectorProps {
   onGameRequest: (topic: string) => void;
@@ -60,7 +58,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   const [selectedTopic, setSelectedTopic] = useState<string>("");
   const [showSettings, setShowSettings] = useState(false);
   const { toast } = useToast();
-  const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator(API_KEY));
+  const [gameGenerator] = useState<AIGameGenerator>(new AIGameGenerator());
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentGameType, setCurrentGameType] = useState<GameType | null>(null);
 

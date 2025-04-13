@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
@@ -87,40 +88,6 @@ const GameController: React.FC<GameControllerProps> = ({
     return "Tạo Game Tùy Chỉnh";
   };
 
-  const extraButton = currentGame ? (
-    <Button 
-      size="sm" 
-      variant="secondary"
-      className="ml-2 bg-background/80 backdrop-blur-sm border border-primary/20 shadow-md" 
-      onClick={handleShareGame}
-    >
-      <Share2 size={14} className="mr-1" />
-      Chia Sẻ & Theo Dõi
-    </Button>
-  ) : null;
-
-  const footerActions = currentGame ? (
-    <div className="flex justify-between items-center">
-      <Button 
-        onClick={handleNewGame} 
-        variant="secondary"
-        className="bg-primary/10 flex items-center"
-      >
-        <PlusCircle className="h-4 w-4 mr-2" />
-        Tạo Game Mới
-      </Button>
-      
-      <Button 
-        variant="default" 
-        className="bg-gradient-to-r from-primary to-primary/80"
-        onClick={handleShareGame}
-      >
-        <Share2 size={14} className="mr-1" />
-        Chia Sẻ Game
-      </Button>
-    </div>
-  ) : null;
-
   const renderContent = () => {
     if (isGenerating) {
       return <GameLoading topic={currentTopic} />;
@@ -135,7 +102,7 @@ const GameController: React.FC<GameControllerProps> = ({
           }} 
           onBack={handleBack}
           onNewGame={handleNewGame}
-          extraButton={extraButton}
+          onShare={handleShareGame}
         />
       );
     } 
@@ -171,10 +138,9 @@ const GameController: React.FC<GameControllerProps> = ({
       title={getContainerTitle()}
       showBackButton={true}
       onBack={handleBack}
-      showSettingsButton={currentGame !== null}
+      showSettingsButton={false}
       showCreateButton={!isGenerating && !showForm}
       onCreate={handleNewGame}
-      footerContent={footerActions}
     >
       <div className="h-full w-full">
         {renderContent()}

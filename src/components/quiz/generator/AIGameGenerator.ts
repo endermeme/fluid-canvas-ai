@@ -4,6 +4,7 @@ import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { generateWithGemini, tryGeminiGeneration } from './geminiGenerator';
 import { logInfo, logError } from './apiUtils';
+import { GEMINI_API_KEY, GEMINI_MODELS } from '@/constants/api-constants';
 
 /**
  * API client for generating minigames with AI
@@ -18,9 +19,9 @@ export class AIGameGenerator {
    * Create a new AIGameGenerator
    * @param apiKey Google API key for Gemini
    */
-  constructor(apiKey: string) {
+  constructor(apiKey: string = GEMINI_API_KEY) {
     this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    this.model = this.genAI.getGenerativeModel({ model: GEMINI_MODELS.DEFAULT });
   }
 
   /**
@@ -28,7 +29,7 @@ export class AIGameGenerator {
    * @param apiKey Google API key for Gemini
    * @returns AIGameGenerator instance
    */
-  public static getInstance(apiKey: string): AIGameGenerator {
+  public static getInstance(apiKey: string = GEMINI_API_KEY): AIGameGenerator {
     if (!AIGameGenerator.instance) {
       AIGameGenerator.instance = new AIGameGenerator(apiKey);
     }
