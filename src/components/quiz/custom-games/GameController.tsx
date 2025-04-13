@@ -1,6 +1,8 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { MiniGame } from '../generator/AIGameGenerator';
+import { MiniGame } from '../generator/types';
+import { AIGameGenerator } from '../generator/AIGameGenerator';
 import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from '../preset-games/CustomGameForm';  // Update the import path
 import GameLoading from '../GameLoading';

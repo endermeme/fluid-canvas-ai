@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { AIGameGenerator, MiniGame } from './generator/AIGameGenerator';
+import { AIGameGenerator } from './generator/AIGameGenerator';
+import { MiniGame } from './generator/types';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
 import EnhancedGameView from './custom-games/EnhancedGameView';
