@@ -26,10 +26,7 @@ export class AIGameGenerator {
     // Configure the model with the correct API version and base URL
     this.model = this.genAI.getGenerativeModel({ 
       model: GEMINI_MODELS.DEFAULT,
-      apiVersion: API_VERSION,
-      generationConfig: {
-        apiEndpoint: API_BASE_URL
-      }
+      apiVersion: API_VERSION
     });
     
     logInfo('AIGameGenerator', `Initialized with model: ${GEMINI_MODELS.DEFAULT} on API version: ${API_VERSION}`);
