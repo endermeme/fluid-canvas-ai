@@ -3,8 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Clock, Trophy, Lightbulb, ArrowLeft, Share2 } from 'lucide-react';
-import { saveGameForSharing } from '@/services/storage';
+import { RefreshCw, Clock, Trophy, Lightbulb, ArrowLeft } from 'lucide-react';
 
 interface MemoryTemplateProps {
   content: any;
@@ -173,112 +172,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
     }
   };
 
-  const handleShare = async () => {
-    try {
-      const gameContent = `
-        <html>
-        <head>
-          <title>${content.title || "Trò chơi ghi nhớ"}</title>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 20px; background: #f9f9ff; }
-            .container { max-width: 800px; margin: 0 auto; }
-            .game-title { text-align: center; margin-bottom: 20px; }
-            .game-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-            @media (min-width: 640px) { .game-board { grid-template-columns: repeat(4, 1fr); } }
-            .card { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: linear-gradient(to bottom right, #818cf8, #6366f1); border-radius: 8px; cursor: pointer; font-size: 20px; font-weight: bold; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: transform 0.3s; }
-            .card:hover { transform: scale(1.05); }
-            .card.flipped { background: white; color: #6366f1; border: 2px solid #6366f1; }
-            .footer { margin-top: 20px; text-align: center; }
-            .score { display: inline-block; padding: 8px 16px; background: #fff; border-radius: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h2 class="game-title">${content.title || topic}</h2>
-            <div class="game-board" id="game-board">
-              ${memoryCards.map((card: any, index: number) => 
-                `<div class="card" data-id="${index}" data-content="${card.content}">&nbsp;</div>`
-              ).join('')}
-            </div>
-            <div class="footer">
-              <div class="score">Trò chơi ghi nhớ - Chia sẻ bởi QuizWhiz</div>
-            </div>
-          </div>
-          <script>
-            document.addEventListener('DOMContentLoaded', function() {
-              const cards = document.querySelectorAll('.card');
-              let flippedCards = [];
-              let matchedPairs = 0;
-              let canFlip = true;
-              
-              cards.forEach(card => {
-                card.addEventListener('click', function() {
-                  if (!canFlip || this.classList.contains('flipped')) return;
-                  
-                  this.textContent = this.dataset.content;
-                  this.classList.add('flipped');
-                  flippedCards.push(this);
-                  
-                  if (flippedCards.length === 2) {
-                    canFlip = false;
-                    const [first, second] = flippedCards;
-                    
-                    if (first.dataset.content === second.dataset.content) {
-                      matchedPairs++;
-                      flippedCards = [];
-                      canFlip = true;
-                      
-                      if (matchedPairs === ${memoryCards.length / 2}) {
-                        setTimeout(() => {
-                          alert('Chúc mừng! Bạn đã hoàn thành trò chơi.');
-                        }, 500);
-                      }
-                    } else {
-                      setTimeout(() => {
-                        first.textContent = '&nbsp;';
-                        second.textContent = '&nbsp;';
-                        first.classList.remove('flipped');
-                        second.classList.remove('flipped');
-                        flippedCards = [];
-                        canFlip = true;
-                      }, 1000);
-                    }
-                  }
-                });
-              });
-            });
-          </script>
-        </body>
-        </html>
-      `;
-      
-      const shareUrl = await saveGameForSharing(
-        content.title || `Trò chơi ghi nhớ - ${topic}`,
-        `Trò chơi ghi nhớ với chủ đề "${topic}". Ghép các cặp thẻ giống nhau.`,
-        gameContent
-      );
-      
-      if (shareUrl) {
-        navigator.clipboard.writeText(shareUrl);
-        toast({
-          title: "Đã chia sẻ!",
-          description: "Liên kết đã được sao chép vào clipboard.",
-        });
-      } else {
-        throw new Error("Không thể tạo liên kết chia sẻ");
-      }
-    } catch (error) {
-      console.error("Lỗi khi chia sẻ trò chơi:", error);
-      toast({
-        title: "Lỗi chia sẻ",
-        description: "Không thể chia sẻ trò chơi. Vui lòng thử lại sau.",
-        variant: "destructive"
-      });
-    }
-  };
-
   if (!content || !memoryCards.length) {
     return <div className="p-4">Không có dữ liệu trò chơi ghi nhớ</div>;
   }
@@ -319,16 +212,10 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
             <h2 className="text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
             <p className="mb-2 text-lg">Bạn đã hoàn thành trò chơi với {moves} lượt.</p>
             <p className="mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
-            <div className="grid grid-cols-2 gap-3">
-              <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary">
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Chơi lại
-              </Button>
-              <Button onClick={handleShare} variant="outline" className="w-full bg-gradient-to-r from-primary/10 to-background border-primary/20">
-                <Share2 className="mr-2 h-4 w-4" />
-                Chia sẻ
-              </Button>
-            </div>
+            <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Chơi lại
+            </Button>
           </Card>
         </div>
       ) : gameOver ? (
@@ -336,16 +223,10 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
           <Card className="p-8 text-center max-w-md bg-gradient-to-br from-destructive/5 to-background backdrop-blur-sm border-destructive/20">
             <h2 className="text-3xl font-bold mb-4 text-destructive">Hết thời gian!</h2>
             <p className="mb-4 text-lg">Bạn đã tìm được {matchedPairs} trong tổng số {totalPairs} cặp thẻ.</p>
-            <div className="grid grid-cols-2 gap-3">
-              <Button onClick={handleRestart} className="w-full">
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Chơi lại
-              </Button>
-              <Button onClick={handleShare} variant="outline" className="w-full">
-                <Share2 className="h-4 w-4 mr-1" />
-                Chia sẻ
-              </Button>
-            </div>
+            <Button onClick={handleRestart} className="w-full">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Chơi lại
+            </Button>
           </Card>
         </div>
       ) : (
@@ -387,16 +268,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
                   Gợi ý (-10s)
                 </Button>
               )}
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShare}
-                className="bg-gradient-to-r from-primary/10 to-background border-primary/20"
-              >
-                <Share2 className="h-4 w-4 mr-1" />
-                Chia sẻ
-              </Button>
               
               <Button
                 variant="outline"

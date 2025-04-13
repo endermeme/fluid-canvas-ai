@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/AIGameGenerator';
 import EnhancedGameView from './EnhancedGameView';
-import CustomGameForm from '../preset-games/CustomGameForm';  // Update the import path
+import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
-import { Share2, PlusCircle, Gamepad2 } from 'lucide-react';
+import { Share2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { createGameSession } from '@/services/gameParticipation';
+import { createGameSession } from '@/utils/gameParticipation';
 import QuizContainer from '../QuizContainer';
 
 interface GameControllerProps {
@@ -138,10 +138,7 @@ const GameController: React.FC<GameControllerProps> = ({
     if (currentGame) {
       return (
         <EnhancedGameView 
-          miniGame={{
-            title: currentGame.title || "Minigame Tương Tác",
-            content: currentGame.content || ""
-          }} 
+          miniGame={currentGame} 
           onBack={handleBack}
           onNewGame={handleNewGame}
           extraButton={extraButton}

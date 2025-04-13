@@ -1,139 +1,178 @@
-
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
-import { generateWithGemini, tryGeminiGeneration } from './geminiGenerator';
-import { logInfo, logError } from './apiUtils';
+import { getGameTypeByTopic } from '../gameTypes';
+import { MiniGame, AIGameGeneratorOptions } from './types';
+import { createGeminiClient, logError, logInfo, logWarning } from './apiUtils';
+import { tryGeminiGeneration } from './geminiGenerator';
+import { createFallbackGame } from './fallbackGenerator';
 
-// Correct the type re-export syntax
-export type { MiniGame };
+// Sử dụng API key cứng
+const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
-/**
- * API client for generating minigames with AI
- */
+// Singleton instance
+let instance: AIGameGenerator | null = null;
+
 export class AIGameGenerator {
-  private static instance: AIGameGenerator;
-  private genAI: GoogleGenerativeAI;
   private model: any;
-  private useCanvas: boolean = false;
+  private modelName: string;
+  private canvasMode: boolean = true;
+  private initialized: boolean = false;
 
-  /**
-   * Create a new AIGameGenerator
-   * @param apiKey Google API key for Gemini
-   */
-  constructor(apiKey: string) {
-    this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-  }
-
-  /**
-   * Get the singleton instance of AIGameGenerator
-   * @param apiKey Google API key for Gemini
-   * @returns AIGameGenerator instance
-   */
-  public static getInstance(apiKey: string): AIGameGenerator {
-    if (!AIGameGenerator.instance) {
-      AIGameGenerator.instance = new AIGameGenerator(apiKey);
+  constructor(apiKey: string = API_KEY, options?: { modelName?: string; canvasMode?: boolean }) {
+    // Singleton pattern - return existing instance if available
+    if (instance) {
+      return instance;
     }
-    return AIGameGenerator.instance;
+    
+    this.initialize(apiKey, options);
+    instance = this;
   }
 
-  /**
-   * Set canvas mode for HTML game generation
-   * @param useCanvas Whether to use canvas mode
-   */
-  public setCanvasMode(useCanvas: boolean): void {
-    this.useCanvas = useCanvas;
-    logInfo('AIGameGenerator', `Canvas mode ${useCanvas ? 'enabled' : 'disabled'}`);
+  private initialize(apiKey: string, options?: { modelName?: string; canvasMode?: boolean }): void {
+    if (this.initialized) return;
+    
+    console.log("🚀 AIGameGenerator: Initializing AI game generator");
+    this.modelName = options?.modelName || 'gemini-2.0-flash';
+    this.canvasMode = options?.canvasMode || true;
+    
+    console.log(`🚀 AIGameGenerator: Using model ${this.modelName}`);
+    console.log(`🚀 AIGameGenerator: Canvas mode: ${this.canvasMode ? 'ON' : 'OFF'}`);
+    
+    // Luôn sử dụng API_KEY cứng thay vì tham số apiKey
+    this.model = createGeminiClient(API_KEY);
+    this.initialized = true;
   }
 
-  /**
-   * Generate a minigame based on a topic
-   * @param topic Topic to generate game for
-   * @param settings Optional game settings
-   * @returns Promise with generated game or null
-   */
-  public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
+  setCanvasMode(enabled: boolean): void {
+    this.canvasMode = enabled;
+    console.log(`🚀 AIGameGenerator: Canvas mode ${enabled ? 'ENABLED' : 'DISABLED'}`);
+  }
+
+  isCanvasModeEnabled(): boolean {
+    return this.canvasMode;
+  }
+
+  async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
-      // Get custom HTML/JS/CSS game content
-      const htmlGame = await this.generateCustomHtmlGame(topic, settings);
+      console.log(`🚀 AIGameGenerator: Starting game generation for topic: "${topic}"`);
+      console.log(`🚀 AIGameGenerator: Settings:`, settings);
+      console.log(`🚀 AIGameGenerator: Canvas mode: ${this.canvasMode ? 'ON' : 'OFF'}`);
       
-      if (htmlGame) {
-        return htmlGame;
+      const gameType = getGameTypeByTopic(topic);
+      if (gameType) {
+        console.log(`🚀 AIGameGenerator: Determined game type: ${gameType.name}`);
       }
       
-      // If no custom game, try normal minigame generation
-      return await tryGeminiGeneration(this.model, topic, settings);
-    } catch (error) {
-      logError('AIGameGenerator', 'Error generating minigame', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Generate a custom HTML game with JavaScript and CSS
-   * @param prompt User prompt for game generation
-   * @param settings Optional game settings
-   * @returns Promise with generated game or null
-   */
-  private async generateCustomHtmlGame(prompt: string, settings?: GameSettingsData): Promise<MiniGame | null> {
-    try {
-      logInfo('AIGameGenerator', 'Generating custom HTML game', { prompt });
+      const startTime = Date.now();
       
-      // Build a prompt specifically for HTML/CSS/JS game generation
-      const htmlPrompt = `
-Create an interactive HTML game based on this prompt: "${prompt}"
-
-Your response must be valid, self-contained HTML that includes CSS and JavaScript.
-Include all required styles and scripts inline in the HTML.
-Make sure the game is completely playable and visually appealing.
-Use modern CSS and JavaScript features.
-Make sure to handle errors gracefully.
-Make the game responsive for different screen sizes.
-Do not reference external files or CDNs.
-
-IMPORTANT REQUIREMENTS:
-1. The entire game must be contained within a single HTML file.
-2. Add comments explaining any complex parts of your code.
-3. Include a title and simple instructions for the game.
-4. Include scoring or progress tracking if applicable.
-5. Make sure all variables are properly scoped to avoid global conflicts.
-6. Handle edge cases and errors gracefully.
-7. Your HTML file should start with <!DOCTYPE html> and be fully functional.
-8. Add fallbacks for unsupported features.
-
-RESPOND ONLY WITH THE HTML CODE. NO EXPLANATIONS OR MARKDOWN FORMATTING.
-`;
-
-      // Generate the game content with Gemini
-      const result = await this.model.generateContent(htmlPrompt);
-      const response = await result.response;
-      const htmlContent = response.text();
-      
-      // Extract a title from the HTML (first h1 or title tag)
-      let gameTitle = prompt;
-      const titleMatch = htmlContent.match(/<title>(.*?)<\/title>/i) || 
-                        htmlContent.match(/<h1[^>]*>(.*?)<\/h1>/i);
-      
-      if (titleMatch && titleMatch[1]) {
-        gameTitle = titleMatch[1].replace(/<[^>]*>/g, '').trim(); // Remove any HTML tags inside the title
+      // Check if the game requires images with an expanded set of keywords
+      const requiresImages = this.checkIfGameRequiresImages(topic);
+      if (requiresImages) {
+        console.log(`🚀 AIGameGenerator: This game likely requires images. Ensuring image support.`);
+        // We'll handle this in the Gemini prompting
       }
       
-      // Create the game object
-      const game: MiniGame = {
-        title: gameTitle,
-        content: htmlContent
+      // Generate with Gemini
+      console.log(`🚀 AIGameGenerator: Starting game generation with ${this.modelName}...`);
+      // Sửa: Bỏ tham số requiresImages không cần thiết và không đúng kiểu 
+      const geminiResult = await tryGeminiGeneration(this.model, topic, settings);
+      
+      const geminiTime = ((Date.now() - startTime) / 1000).toFixed(2);
+      console.log(`🚀 AIGameGenerator: Gemini generation completed in ${geminiTime}s`);
+      
+      if (geminiResult && geminiResult.content) {
+        console.log(`🚀 AIGameGenerator: Successfully generated game`);
+        console.log(`🚀 AIGameGenerator: Code size: ${geminiResult.content.length.toLocaleString()} characters`);
+        
+        const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
+        console.log(`🚀 AIGameGenerator: Total game generation time: ${totalTime}s`);
+        
+        return {
+          title: topic,
+          description: "",
+          content: geminiResult.content
+        };
+      }
+      
+      console.log("⚠️ AIGameGenerator: Gemini generation failed, using fallback game");
+      const fallbackGame = createFallbackGame(topic);
+      return {
+        title: topic,
+        description: "",
+        content: fallbackGame.content
       };
       
-      logInfo('AIGameGenerator', 'Custom HTML game generated successfully', {
-        title: gameTitle,
-        contentLength: htmlContent.length
-      });
-      
-      return game;
     } catch (error) {
-      logError('AIGameGenerator', 'Error generating custom HTML game', error);
-      return null;
+      console.error("❌ AIGameGenerator: Error in generateMiniGame:", error);
+      console.log("⚠️ AIGameGenerator: Creating fallback game due to error");
+      const fallbackGame = createFallbackGame(topic);
+      return {
+        title: topic,
+        description: "",
+        content: fallbackGame.content
+      };
     }
   }
+
+  // Enhanced method to determine if a game likely needs images with expanded keywords
+  private checkIfGameRequiresImages(topic: string): boolean {
+    const imageRelatedKeywords = [
+      // Original keywords
+      'ảnh', 'hình', 'hình ảnh', 'picture', 'image', 'photo', 'pictionary', 
+      'memory', 'card', 'trí nhớ', 'thẻ', 'matching', 'ghép hình', 'xếp hình',
+      'puzzle', 'jigsaw', 'geography', 'địa lý', 'bản đồ', 'map', 'art', 'nghệ thuật',
+      'drawing', 'vẽ', 'paint', 'visual', 'icon', 'biểu tượng', 'logo', 'nhận diện',
+      'recognition', 'identify', 'spotting', 'observation', 'quan sát',
+      
+      // New expanded keywords for more precise detection
+      'gallery', 'thư viện', 'bộ sưu tập', 'collection', 'portrait', 'chân dung',
+      'landscape', 'phong cảnh', 'photo album', 'album ảnh', 'photography', 'nhiếp ảnh',
+      'illustration', 'minh họa', 'graphics', 'đồ họa', 'design', 'thiết kế',
+      'camera', 'máy ảnh', 'snapshot', 'ảnh chụp', 'gallery', 'triển lãm',
+      'pixel', 'điểm ảnh', 'resolution', 'độ phân giải', 'color', 'màu sắc',
+      'filter', 'bộ lọc', 'edit', 'chỉnh sửa', 'crop', 'cắt xén',
+      'thumbnail', 'hình thu nhỏ', 'slideshow', 'trình chiếu', 'preview', 'xem trước',
+      'view', 'xem', 'display', 'hiển thị', 'show', 'trình bày',
+      'screen', 'màn hình', 'desktop', 'máy tính', 'monitor', 'màn hình',
+      'scan', 'quét', 'capture', 'chụp', 'upload', 'tải lên',
+      'download', 'tải về', 'share', 'chia sẻ', 'save', 'lưu',
+      'print', 'in', 'zoom', 'phóng to', 'flip', 'lật',
+      'rotate', 'xoay', 'adjust', 'điều chỉnh', 'enhance', 'tăng cường',
+      'sight', 'thị giác', 'eyes', 'mắt', 'look', 'nhìn',
+      'vision', 'tầm nhìn', 'scene', 'cảnh', 'sight', 'cảnh tượng',
+      'appearance', 'vẻ ngoài', 'visible', 'có thể nhìn thấy', 'invisible', 'không thể nhìn thấy',
+      'visible', 'hữu hình', 'invisible', 'vô hình', 'hidden', 'ẩn',
+      'show', 'hiện', 'hide', 'ẩn', 'reveal', 'tiết lộ',
+      'blur', 'mờ', 'sharp', 'sắc nét', 'focus', 'tập trung',
+    ];
+
+    const lowerTopic = topic.toLowerCase();
+    
+    // Enhanced detection logic: check if any of the keywords is in the topic
+    const containsImageKeyword = imageRelatedKeywords.some(keyword => lowerTopic.includes(keyword));
+    
+    // Game type specific detection
+    const isImageBasedGameType = lowerTopic.includes('pictionary') || 
+                                 lowerTopic.includes('memory card') || 
+                                 lowerTopic.includes('flashcard') || 
+                                 lowerTopic.includes('puzzle') || 
+                                 lowerTopic.includes('matching') ||
+                                 lowerTopic.includes('xếp hình') ||
+                                 lowerTopic.includes('ghép hình') ||
+                                 lowerTopic.includes('thẻ nhớ') ||
+                                 lowerTopic.includes('trí nhớ');
+    
+    return containsImageKeyword || isImageBasedGameType;
+  }
+  
+  // Static method to get the instance
+  static getInstance(apiKey: string = API_KEY, options?: { modelName?: string; canvasMode?: boolean }): AIGameGenerator {
+    if (!instance) {
+      instance = new AIGameGenerator(apiKey, options);
+    }
+    return instance;
+  }
 }
+
+// Re-export types for convenience
+export type { MiniGame };

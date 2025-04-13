@@ -1,14 +1,8 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Home, RefreshCw, Settings, ArrowLeft, PlusCircle, Gamepad2, History, SparklesIcon } from 'lucide-react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import GameSettings from './GameSettings';
-import GameView from './GameView';
-import QuizGenerator from './QuizGenerator';
-import { useToast } from '@/hooks/use-toast';
-import NotificationsMenu from './share/NotificationsMenu';
-import GameShareButtons from './share/GameShareButtons';
+import { Button } from '@/components/ui/button';
+import { Home, RefreshCw, Settings, ArrowLeft, PlusCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface QuizContainerProps {
   children: React.ReactNode;
@@ -42,7 +36,6 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
   headerRight
 }) => {
   const navigate = useNavigate();
-  const location = useLocation();
   
   const handleBack = () => {
     if (onBack) {
@@ -71,69 +64,76 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
   return (
     <div className="relative h-full w-full flex flex-col bg-gradient-to-b from-background to-background/95 shadow-lg rounded-lg overflow-hidden">
       {/* Header */}
-      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container flex h-14 max-w-screen-2xl items-center">
-          <div className="flex items-center gap-1 mr-4">
-            <Gamepad2 className="h-5 w-5 text-primary" />
-            <span className="font-semibold">AIGameCreator</span>
-          </div>
+      <div className="flex justify-between items-center bg-background/80 backdrop-blur-md p-3 border-b border-primary/10 shadow-sm">
+        <div className="flex items-center gap-2">
+          {showBackButton && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleBack}
+              className="h-8 w-8 p-0 flex items-center justify-center"
+              title="Quay lại"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          )}
           
-          <nav className="flex items-center space-x-1 text-sm lg:space-x-2 lg:text-base">
+          {showHomeButton && (
             <Button 
-              variant={location.pathname === '/preset-games' ? 'secondary' : 'ghost'} 
-              size="sm"
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate('/')}
+              className="h-8 w-8 p-0 flex items-center justify-center"
+              title="Trang chủ"
             >
-              <Link to="/preset-games" className="flex items-center gap-1.5">
-                <Home className="h-4 w-4" />
-                <span>Trang chủ</span>
-              </Link>
+              <Home className="h-4 w-4" />
             </Button>
-            
-            <Button 
-              variant={location.pathname === '/quiz' ? 'secondary' : 'ghost'} 
-              size="sm"
-            >
-              <Link to="/quiz" className="flex items-center gap-1.5">
-                <SparklesIcon className="h-4 w-4" />
-                <span>Tạo game</span>
-              </Link>
-            </Button>
-            
-            <Button 
-              variant={location.pathname === '/game-history' ? 'secondary' : 'ghost'} 
-              size="sm"
-            >
-              <Link to="/game-history" className="flex items-center gap-1.5">
-                <History className="h-4 w-4" />
-                <span>Lịch sử</span>
-              </Link>
-            </Button>
-          </nav>
+          )}
           
-          <div className="ml-auto flex items-center gap-2">
-            {/* Nút chia sẻ hiển thị nếu có URL trong query params */}
-            {location.search && location.search.includes('game=') && (
-              <GameShareButtons 
-                gameId="current-game"
-                title="Game hiện tại"
-                variant="icon"
-              />
-            )}
-            
-            <NotificationsMenu />
-            
+          <h2 className="text-sm font-medium truncate max-w-[200px] ml-2">{title}</h2>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          {headerRight}
+          
+          {showCreateButton && (
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => navigate('/settings')}
-              className="flex items-center gap-1.5"
+              onClick={handleCreate}
+              className="h-8 px-3 flex items-center justify-center border-primary/20 hover:bg-primary/5"
+              title="Tạo mới"
+            >
+              <PlusCircle className="h-3.5 w-3.5 mr-1" />
+              <span className="text-xs">Tạo mới</span>
+            </Button>
+          )}
+          
+          {showRefreshButton && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleRefresh}
+              className="h-8 w-8 p-0 flex items-center justify-center"
+              title="Tải lại"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          )}
+          
+          {showSettingsButton && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onSettings}
+              className="h-8 w-8 p-0 flex items-center justify-center"
+              title="Cài đặt"
             >
               <Settings className="h-4 w-4" />
-              <span className="hidden md:inline">Cài đặt</span>
             </Button>
-          </div>
+          )}
         </div>
-      </header>
+      </div>
       
       {/* Main content */}
       <div className="flex-1 overflow-auto p-0 relative">

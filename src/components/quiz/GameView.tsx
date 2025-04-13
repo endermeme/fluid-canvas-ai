@@ -1,8 +1,9 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
 import { Share2, Home, RefreshCw, Trophy, ArrowLeft } from 'lucide-react';
-import { saveGameForSharing } from '@/services/storage';
+import { saveGameForSharing } from '@/utils/gameExport';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,46 +24,44 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
   useEffect(() => {
     if (miniGame && miniGame.content) {
       try {
-        // Save game to history but don't need to await the result
         saveGameForSharing(
           miniGame.title || "Minigame tương tác", 
           "", // Empty description
           miniGame.content
-        ).catch(e => console.error("Error saving game to history:", e));
+        );
       } catch (e) {
         console.error("Error saving game to history:", e);
       }
     }
   }, [miniGame]);
 
-  const handleShare = async () => {
+  const handleShare = () => {
     if (shareInProgress) return;
     
     try {
       setShareInProgress(true);
-      const shareUrl = await saveGameForSharing(
+      const shareUrl = saveGameForSharing(
         miniGame.title || "Minigame tương tác",
         "", // Empty description
         miniGame.content
       );
       
-      if (shareUrl) {
-        navigator.clipboard.writeText(shareUrl);
-        
-        toast({
-          title: "Đã chia sẻ!",
-          description: "Liên kết đã được sao chép vào clipboard.",
-          variant: "default",
-        });
-      } else {
-        throw new Error("Không thể tạo liên kết chia sẻ");
+      if (!shareUrl) {
+        throw new Error("Không thể tạo URL chia sẻ");
       }
-    } catch (error) {
-      console.error("Lỗi khi chia sẻ game:", error);
+      
+      navigator.clipboard.writeText(shareUrl);
+      
       toast({
-        title: "Lỗi chia sẻ",
-        description: "Không thể chia sẻ game. Vui lòng thử lại sau.",
-        variant: "destructive"
+        title: "Link Chia Sẻ Đã Được Sao Chép",
+        description: "Đã sao chép liên kết vào clipboard. Link có hiệu lực trong 48 giờ.",
+      });
+    } catch (error) {
+      console.error("Share error:", error);
+      toast({
+        title: "Lỗi Chia Sẻ",
+        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
+        variant: "destructive",
       });
     } finally {
       setShareInProgress(false);

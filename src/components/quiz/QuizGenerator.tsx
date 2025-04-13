@@ -7,7 +7,7 @@ import EnhancedGameView from './custom-games/EnhancedGameView';
 import { GameSettingsData } from './types';
 import { getGameTypeByTopic } from './gameTypes';
 import { useNavigate } from 'react-router-dom';
-import { createGameSession } from '@/services/gameParticipation';
+import { createGameSession } from '@/utils/gameParticipation';
 import { Button } from '@/components/ui/button';
 import { Share2 } from 'lucide-react';
 
@@ -188,10 +188,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   return (
     <>
       <EnhancedGameView 
-        miniGame={{
-          title: miniGame.title || "Minigame Tương Tác",
-          content: miniGame.content || ""
-        }} 
+        miniGame={miniGame} 
         extraButton={
           <Button 
             size="sm" 

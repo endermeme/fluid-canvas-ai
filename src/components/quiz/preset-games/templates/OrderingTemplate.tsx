@@ -3,8 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, ArrowUp, ArrowDown, Check, Clock, Shuffle, Lightbulb, ArrowLeft, Share2 } from 'lucide-react';
-import { saveGameForSharing } from '@/services/storage';
+import { RefreshCw, ArrowUp, ArrowDown, Check, Clock, Shuffle, Lightbulb, ArrowLeft } from 'lucide-react';
 
 interface OrderingTemplateProps {
   content: any;
@@ -204,223 +203,6 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
     }
   };
 
-  const handleShare = async () => {
-    try {
-      const gameContent = `
-        <html>
-        <head>
-          <title>${content.title || "Sắp xếp thứ tự"}</title>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; background: #f5f7ff; }
-            .container { max-width: 800px; margin: 0 auto; }
-            .game-title { text-align: center; margin-bottom: 20px; }
-            .items-container { margin-bottom: 20px; }
-            .item { background: white; border: 2px solid #6366f1; border-radius: 8px; padding: 15px; margin-bottom: 10px; cursor: move; transition: transform 0.2s, box-shadow 0.2s; }
-            .item:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(0,0,0,0.1); }
-            .item.correct { border-color: #10b981; background: #d1fae5; }
-            .item.incorrect { border-color: #ef4444; background: #fee2e2; }
-            .controls { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
-            .button { padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-            .result-panel { background: white; border-radius: 10px; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none; }
-            .result-panel.visible { display: block; }
-            .trophy { width: 60px; height: 60px; margin: 0 auto 15px; color: #eab308; }
-            .message { font-size: 24px; font-weight: bold; margin-bottom: 15px; }
-            .score { font-size: 18px; margin-bottom: 20px; }
-            .dragging { opacity: 0.5; }
-            .drag-over { border-top: 2px dashed #6366f1; }
-            .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #6b7280; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h2 class="game-title">${content.title || topic}</h2>
-            
-            <div id="instructions" style="background: #e0e7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-              <p style="margin: 0;">${content?.instructions || "Kéo và thả các mục để sắp xếp chúng theo đúng thứ tự."}</p>
-            </div>
-            
-            <div class="items-container" id="items-container">
-              ${content.items.map((item, i) => 
-                `<div class="item" draggable="true" data-index="${i}">${item.content}</div>`
-              ).join('')}
-            </div>
-            
-            <div class="controls">
-              <button class="button" id="check-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                Kiểm tra
-              </button>
-              
-              <button class="button" id="reset-btn" style="background: #6b7280;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/></svg>
-                Làm lại
-              </button>
-            </div>
-            
-            <div class="result-panel" id="result-panel">
-              <svg xmlns="http://www.w3.org/2000/svg" class="trophy" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-              <div class="message" id="result-message">Chúc mừng!</div>
-              <div class="score" id="result-score">Bạn đã hoàn thành đúng thứ tự.</div>
-              <button class="button" id="play-again-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/></svg>
-                Chơi lại
-              </button>
-            </div>
-            
-            <div class="footer">
-              <div>Trò chơi sắp xếp thứ tự - Chia sẻ bởi QuizWhiz</div>
-            </div>
-          </div>
-          
-          <script>
-            document.addEventListener('DOMContentLoaded', function() {
-              const container = document.getElementById('items-container');
-              const items = Array.from(container.querySelectorAll('.item'));
-              const checkBtn = document.getElementById('check-btn');
-              const resetBtn = document.getElementById('reset-btn');
-              const resultPanel = document.getElementById('result-panel');
-              const resultMessage = document.getElementById('result-message');
-              const resultScore = document.getElementById('result-score');
-              const playAgainBtn = document.getElementById('play-again-btn');
-              
-              // Shuffle items on load
-              shuffleItems();
-              
-              // Set up drag and drop
-              items.forEach(item => {
-                item.addEventListener('dragstart', dragStart);
-                item.addEventListener('dragover', dragOver);
-                item.addEventListener('dragleave', dragLeave);
-                item.addEventListener('drop', drop);
-                item.addEventListener('dragend', dragEnd);
-              });
-              
-              // Check order button
-              checkBtn.addEventListener('click', checkOrder);
-              
-              // Reset button
-              resetBtn.addEventListener('click', resetGame);
-              
-              // Play again button
-              playAgainBtn.addEventListener('click', resetGame);
-              
-              let draggedItem = null;
-              
-              function dragStart() {
-                draggedItem = this;
-                setTimeout(() => this.classList.add('dragging'), 0);
-              }
-              
-              function dragOver(e) {
-                e.preventDefault();
-                this.classList.add('drag-over');
-              }
-              
-              function dragLeave() {
-                this.classList.remove('drag-over');
-              }
-              
-              function drop() {
-                this.classList.remove('drag-over');
-                if (this !== draggedItem) {
-                  const allItems = Array.from(container.querySelectorAll('.item'));
-                  const draggedIndex = allItems.indexOf(draggedItem);
-                  const targetIndex = allItems.indexOf(this);
-                  
-                  if (draggedIndex < targetIndex) {
-                    this.parentNode.insertBefore(draggedItem, this.nextSibling);
-                  } else {
-                    this.parentNode.insertBefore(draggedItem, this);
-                  }
-                }
-              }
-              
-              function dragEnd() {
-                this.classList.remove('dragging');
-              }
-              
-              function shuffleItems() {
-                const itemsArray = Array.from(items);
-                for (let i = itemsArray.length - 1; i > 0; i--) {
-                  const j = Math.floor(Math.random() * (i + 1));
-                  container.appendChild(itemsArray[j]);
-                }
-              }
-              
-              function checkOrder() {
-                const currentOrder = Array.from(container.querySelectorAll('.item'))
-                  .map(item => parseInt(item.dataset.index));
-                
-                const correctOrder = ${JSON.stringify(content.items.map((_, i) => i))};
-                let isCorrect = true;
-                
-                currentOrder.forEach((index, position) => {
-                  const item = container.querySelectorAll('.item')[position];
-                  
-                  if (index === correctOrder[position]) {
-                    item.classList.add('correct');
-                    item.classList.remove('incorrect');
-                  } else {
-                    item.classList.add('incorrect');
-                    item.classList.remove('correct');
-                    isCorrect = false;
-                  }
-                });
-                
-                if (isCorrect) {
-                  resultMessage.textContent = 'Chúc mừng!';
-                  resultScore.textContent = 'Bạn đã hoàn thành đúng thứ tự.';
-                } else {
-                  resultMessage.textContent = 'Chưa chính xác!';
-                  resultScore.textContent = 'Vui lòng kiểm tra lại các mục đang sai thứ tự.';
-                }
-                
-                resultPanel.classList.add('visible');
-              }
-              
-              function resetGame() {
-                const allItems = container.querySelectorAll('.item');
-                allItems.forEach(item => {
-                  item.classList.remove('correct', 'incorrect');
-                });
-                
-                shuffleItems();
-                resultPanel.classList.remove('visible');
-              }
-            });
-          </script>
-        </body>
-        </html>
-      `;
-      
-      const shareUrl = await saveGameForSharing(
-        content.title || `Trò chơi sắp xếp thứ tự - ${topic}`,
-        `Sắp xếp các mục theo đúng thứ tự với chủ đề "${topic}".`,
-        gameContent
-      );
-      
-      if (shareUrl) {
-        navigator.clipboard.writeText(shareUrl);
-        toast({
-          title: "Đã chia sẻ!",
-          description: "Liên kết đã được sao chép vào clipboard.",
-          variant: "default",
-        });
-      } else {
-        throw new Error("Không thể tạo liên kết chia sẻ");
-      }
-    } catch (error) {
-      console.error("Lỗi khi chia sẻ trò chơi:", error);
-      toast({
-        title: "Lỗi chia sẻ",
-        description: "Không thể chia sẻ trò chơi. Vui lòng thử lại sau.",
-        variant: "destructive"
-      });
-    }
-  };
-
   if (!content || !sentences.length) {
     return <div className="p-4">Không có dữ liệu câu</div>;
   }
@@ -448,16 +230,10 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
             {score} / {sentences.length}
           </div>
           
-          <div className="grid grid-cols-2 gap-3">
-            <Button onClick={handleRestart} className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Làm lại
-            </Button>
-            <Button onClick={handleShare} variant="outline" className="w-full">
-              <Share2 className="mr-2 h-4 w-4" />
-              Chia sẻ
-            </Button>
-          </div>
+          <Button onClick={handleRestart} className="w-full">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Làm lại
+          </Button>
         </Card>
       </div>
     );
@@ -571,27 +347,15 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
         </div>
       </div>
       
-      <div className="grid grid-cols-2 gap-2 mt-3">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRestart}
-          className="bg-background/70 border-primary/20"
-        >
-          <RefreshCw className="h-4 w-4 mr-1" />
-          Làm lại
-        </Button>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleShare}
-          className="bg-background/70 border-primary/20"
-        >
-          <Share2 className="h-4 w-4 mr-1" />
-          Chia sẻ
-        </Button>
-      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleRestart}
+        className="mt-3 w-full bg-background/70 border-primary/20"
+      >
+        <RefreshCw className="h-4 w-4 mr-1" />
+        Làm lại
+      </Button>
     </div>
   );
 };

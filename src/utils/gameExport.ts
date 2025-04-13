@@ -1,11 +1,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
-import { GameSession, createGameSession, getGameSession, getGameSessions } from './gameParticipation';
-import { saveGameToServer, saveGameWithFallback } from './serverStorage';
 
-/**
- * Interface for game data stored in localStorage
- */
 export interface StoredGame {
   id: string;
   title: string;
@@ -13,142 +8,120 @@ export interface StoredGame {
   htmlContent: string;
   createdAt: number;
   expiresAt: number;
-  viewCount: number;
 }
 
-/**
- * Calculate remaining time for game expiration in human-readable format
- * @param expiresAt Expiration timestamp
- * @returns Formatted time string
- */
-export const getRemainingTime = (expiresAt: number): string => {
-  const now = Date.now();
-  const remainingMs = expiresAt - now;
-  
-  if (remainingMs <= 0) return 'Đã hết hạn';
-  
-  const days = Math.floor(remainingMs / (24 * 60 * 60 * 1000));
-  const hours = Math.floor((remainingMs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
-  const minutes = Math.floor((remainingMs % (60 * 60 * 1000)) / (60 * 1000));
-  
-  if (days > 0) {
-    return `${days} ngày ${hours} giờ`;
-  } else if (hours > 0) {
-    return `${hours} giờ ${minutes} phút`;
-  } else {
-    return `${minutes} phút`;
-  }
+// Get the base URL for shared games
+const getBaseUrl = () => {
+  const url = window.location.origin;
+  return `${url}/quiz/shared`;
 };
 
-/**
- * Saves a game for sharing and returns the URL
- * @param title Game title
- * @param description Game description
- * @param htmlContent HTML content of the game
- * @returns Promise that resolves to the URL for accessing the shared game
- */
-export const saveGameForSharing = async (
-  title: string,
-  description: string,
-  htmlContent: string
-): Promise<string> => {
+// Save game to localStorage with 48-hour expiration
+export const saveGameForSharing = (title: string, description: string, htmlContent: string): string => {
   try {
-    // Thử lưu vào VPS trước
-    const serverResult = await saveGameWithFallback(title, description, htmlContent);
+    if (!htmlContent) {
+      console.error("Cannot save empty game content");
+      return "";
+    }
     
-    // Trả về URL có thể truy cập game
-    return serverResult.shareUrl;
-  } catch (error) {
-    console.error("Error saving game:", error);
+    const id = uuidv4();
+    const now = Date.now();
+    const expiresAt = now + (48 * 60 * 60 * 1000); // 48 hours in milliseconds
     
-    // Fallback to local storage only if everything else fails
-    const gameSession = createGameSession(title, htmlContent);
-    
-    // Cũng lưu vào shared_games để tương thích ngược
-    const storedGame: StoredGame = {
-      id: gameSession.id,
-      title: gameSession.title,
-      description,
-      htmlContent: gameSession.content,
-      createdAt: gameSession.createdAt,
-      expiresAt: gameSession.expiresAt,
-      viewCount: 0
+    const game: StoredGame = {
+      id,
+      title: title || "Minigame Tương tác",
+      description: description || "",
+      htmlContent,
+      createdAt: now,
+      expiresAt
     };
     
-    // Lưu trong localStorage
-    const gamesJSON = localStorage.getItem('shared_games');
-    const games = gamesJSON ? JSON.parse(gamesJSON) : [];
-    games.push(storedGame);
+    // Get existing games
+    const gamesJson = localStorage.getItem('shared_games');
+    let games: StoredGame[] = gamesJson ? JSON.parse(gamesJson) : [];
+    
+    // Remove expired games
+    games = games.filter(game => game.expiresAt > now);
+    
+    // Check for duplicate content to prevent multiple entries of same game
+    const existingGameIndex = games.findIndex(g => g.htmlContent === htmlContent);
+    
+    if (existingGameIndex >= 0) {
+      // Return URL of existing game instead of creating a duplicate
+      console.log("Game already exists, returning existing URL");
+      return `${getBaseUrl()}/${games[existingGameIndex].id}`;
+    }
+    
+    // Add new game
+    games.push(game);
+    
+    // Save back to localStorage
     localStorage.setItem('shared_games', JSON.stringify(games));
     
-    // Trả về URL có thể truy cập game
-    return `${window.location.origin}/game/${gameSession.id}`;
+    // Return the share URL
+    return `${getBaseUrl()}/${id}`;
+  } catch (error) {
+    console.error("Error saving game:", error);
+    return "";
   }
 };
 
-/**
- * Gets a shared game by ID
- * @param id Game ID
- * @returns Game data or null if not found
- */
+// Get a game by ID
 export const getSharedGame = (id: string): StoredGame | null => {
-  // Lưu ý: Hàm này vẫn giữ nguyên để tương thích ngược
-  // Trong thực tế, ta nên sử dụng getGameFromServer từ serverStorage.ts
-  
-  // Đầu tiên thử lấy từ gameSessions (triển khai gần đây hơn)
-  const gameSession = getGameSession(id);
-  if (gameSession) {
-    return {
-      id: gameSession.id,
-      title: gameSession.title,
-      description: '',
-      htmlContent: gameSession.content,
-      createdAt: gameSession.createdAt,
-      expiresAt: gameSession.expiresAt,
-      viewCount: 0
-    };
-  }
-  
-  // Nếu không, thử lấy từ shared_games
-  const gamesJSON = localStorage.getItem('shared_games');
-  if (!gamesJSON) return null;
-  
-  const games: StoredGame[] = JSON.parse(gamesJSON);
-  const game = games.find(g => g.id === id);
-  
-  if (!game) return null;
-  
-  // Kiểm tra xem đã hết hạn chưa
-  if (game.expiresAt < Date.now()) {
-    // Xóa game đã hết hạn
-    const updatedGames = games.filter(g => g.id !== id);
-    localStorage.setItem('shared_games', JSON.stringify(updatedGames));
+  try {
+    if (!id) return null;
+    
+    const gamesJson = localStorage.getItem('shared_games');
+    if (!gamesJson) return null;
+    
+    const games: StoredGame[] = JSON.parse(gamesJson);
+    const now = Date.now();
+    
+    // Find the game with matching ID and not expired
+    const game = games.find(g => g.id === id && g.expiresAt > now);
+    
+    return game || null;
+  } catch (error) {
+    console.error("Error getting shared game:", error);
     return null;
   }
-  
-  // Tăng số lượt xem
-  game.viewCount = (game.viewCount || 0) + 1;
-  localStorage.setItem('shared_games', JSON.stringify(games));
-  
-  return game;
 };
 
-/**
- * Cleans up expired games from localStorage
- */
+// Clean up expired games
 export const cleanupExpiredGames = (): void => {
-  // Dọn dẹp gameSessions
-  getGameSessions(); // Điều này đã thực hiện dọn dẹp nội bộ
-  
-  // Dọn dẹp shared_games
-  const gamesJSON = localStorage.getItem('shared_games');
-  if (!gamesJSON) return;
-  
-  const games: StoredGame[] = JSON.parse(gamesJSON);
-  const now = Date.now();
-  const validGames = games.filter(game => game.expiresAt > now);
-  
-  if (validGames.length !== games.length) {
-    localStorage.setItem('shared_games', JSON.stringify(validGames));
+  try {
+    const gamesJson = localStorage.getItem('shared_games');
+    if (!gamesJson) return;
+    
+    const games: StoredGame[] = JSON.parse(gamesJson);
+    const now = Date.now();
+    
+    // Filter out expired games
+    const validGames = games.filter(game => game.expiresAt > now);
+    
+    if (validGames.length !== games.length) {
+      localStorage.setItem('shared_games', JSON.stringify(validGames));
+    }
+  } catch (error) {
+    console.error("Error cleaning up expired games:", error);
+  }
+};
+
+// Get remaining time for a game in hours and minutes
+export const getRemainingTime = (expiresAt: number): string => {
+  try {
+    const now = Date.now();
+    const remainingMs = expiresAt - now;
+    
+    if (remainingMs <= 0) return 'Đã hết hạn';
+    
+    const hours = Math.floor(remainingMs / (60 * 60 * 1000));
+    const minutes = Math.floor((remainingMs % (60 * 60 * 1000)) / (60 * 1000));
+    
+    return `${hours} giờ ${minutes} phút`;
+  } catch (error) {
+    console.error("Error calculating remaining time:", error);
+    return "Không xác định";
   }
 };

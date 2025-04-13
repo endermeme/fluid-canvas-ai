@@ -1,104 +1,141 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-/**
- * Interface for game session data
- */
+export interface GameParticipant {
+  id: string;
+  name: string;
+  ipAddress: string;
+  timestamp: number;
+  retryCount: number;
+}
+
 export interface GameSession {
   id: string;
   title: string;
-  content: string;
+  htmlContent: string;
+  participants: GameParticipant[];
   createdAt: number;
-  expiresAt: number;
+  creatorId?: string;
 }
 
-/**
- * Creates a new game session with the provided content
- * @param title Game title
- * @param content HTML content for the game
- * @returns Game session object
- */
-export const createGameSession = (title: string, content: string): GameSession => {
+// Function to save a new game session
+export const createGameSession = (title: string, htmlContent: string): GameSession => {
   const id = uuidv4();
-  const createdAt = Date.now();
-  // Game sessions expire after 48 hours
-  const expiresAt = createdAt + (48 * 60 * 60 * 1000);
+  const now = Date.now();
   
   const gameSession: GameSession = {
     id,
     title,
-    content,
-    createdAt,
-    expiresAt
+    htmlContent,
+    participants: [],
+    createdAt: now,
   };
   
-  // Store game session in localStorage
-  const gameSessionsJSON = localStorage.getItem('gameSessions');
-  const gameSessions = gameSessionsJSON ? JSON.parse(gameSessionsJSON) : [];
-  gameSessions.push(gameSession);
-  localStorage.setItem('gameSessions', JSON.stringify(gameSessions));
+  // Save to localStorage
+  const sessionsJson = localStorage.getItem('game_sessions');
+  const sessions: GameSession[] = sessionsJson ? JSON.parse(sessionsJson) : [];
+  
+  sessions.push(gameSession);
+  localStorage.setItem('game_sessions', JSON.stringify(sessions));
   
   return gameSession;
 };
 
-/**
- * Gets a game session by ID
- * @param id Game session ID
- * @returns Game session object or null if not found
- */
+// Function to get all game sessions
+export const getAllGameSessions = (): GameSession[] => {
+  const sessionsJson = localStorage.getItem('game_sessions');
+  return sessionsJson ? JSON.parse(sessionsJson) : [];
+};
+
+// Function to get a specific game session
 export const getGameSession = (id: string): GameSession | null => {
-  const gameSessionsJSON = localStorage.getItem('gameSessions');
-  if (!gameSessionsJSON) return null;
-  
-  const gameSessions: GameSession[] = JSON.parse(gameSessionsJSON);
-  const gameSession = gameSessions.find(session => session.id === id);
-  
-  if (!gameSession) return null;
-  
-  // Check if game session has expired
-  if (gameSession.expiresAt < Date.now()) {
-    return null;
-  }
-  
-  return gameSession;
+  const sessions = getAllGameSessions();
+  return sessions.find(session => session.id === id) || null;
 };
 
-/**
- * Gets all game sessions
- * @returns Array of game sessions
- */
-export const getGameSessions = (): GameSession[] => {
-  const gameSessionsJSON = localStorage.getItem('gameSessions');
-  if (!gameSessionsJSON) return [];
+// Function to add a participant to a game session
+export const addParticipant = (gameId: string, name: string, ipAddress: string): { success: boolean; participant?: GameParticipant; message?: string } => {
+  const sessions = getAllGameSessions();
+  const sessionIndex = sessions.findIndex(s => s.id === gameId);
   
-  const gameSessions: GameSession[] = JSON.parse(gameSessionsJSON);
-  
-  // Remove expired game sessions
-  const validSessions = gameSessions.filter(session => session.expiresAt > Date.now());
-  
-  if (validSessions.length !== gameSessions.length) {
-    localStorage.setItem('gameSessions', JSON.stringify(validSessions));
+  if (sessionIndex === -1) {
+    return { success: false, message: "Game session not found" };
   }
   
-  return validSessions;
+  const session = sessions[sessionIndex];
+  
+  // Check if this IP has already participated
+  const existingParticipant = session.participants.find(p => p.ipAddress === ipAddress);
+  
+  if (existingParticipant) {
+    // Increment retry count
+    existingParticipant.retryCount += 1;
+    
+    // Update the session with the incremented retry count
+    sessions[sessionIndex] = {
+      ...session,
+      participants: [
+        ...session.participants.filter(p => p.id !== existingParticipant.id),
+        existingParticipant
+      ]
+    };
+    
+    localStorage.setItem('game_sessions', JSON.stringify(sessions));
+    
+    return { 
+      success: false, 
+      message: "You have already participated in this game session.",
+      participant: existingParticipant
+    };
+  }
+  
+  // Add new participant
+  const participant: GameParticipant = {
+    id: uuidv4(),
+    name,
+    ipAddress,
+    timestamp: Date.now(),
+    retryCount: 0
+  };
+  
+  session.participants.push(participant);
+  sessions[sessionIndex] = session;
+  
+  localStorage.setItem('game_sessions', JSON.stringify(sessions));
+  
+  return { success: true, participant };
 };
 
-/**
- * Deletes a game session by ID
- * @param id Game session ID
- * @returns true if successful, false otherwise
- */
-export const deleteGameSession = (id: string): boolean => {
-  const gameSessionsJSON = localStorage.getItem('gameSessions');
-  if (!gameSessionsJSON) return false;
-  
-  const gameSessions: GameSession[] = JSON.parse(gameSessionsJSON);
-  const newSessions = gameSessions.filter(session => session.id !== id);
-  
-  if (newSessions.length === gameSessions.length) {
-    return false;
-  }
-  
-  localStorage.setItem('gameSessions', JSON.stringify(newSessions));
-  return true;
+// Helper to get a random fake IP for demo purposes
+export const getFakeIpAddress = () => {
+  return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
 };
+
+// Export participant data to CSV
+export const exportParticipantsToCSV = (gameId: string): string => {
+  const session = getGameSession(gameId);
+  
+  if (!session) return '';
+  
+  const headers = ['Name', 'IP Address', 'Timestamp', 'Retry Count'];
+  const rows = session.participants.map(p => [
+    p.name,
+    p.ipAddress,
+    new Date(p.timestamp).toLocaleString(),
+    p.retryCount.toString()
+  ]);
+  
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.join(','))
+  ].join('\n');
+  
+  return csvContent;
+};
+
+// Function to mask IP address for privacy
+export const maskIpAddress = (ip: string): string => {
+  const parts = ip.split('.');
+  return `${parts[0]}.${parts[1]}.*.*`;
+};
+

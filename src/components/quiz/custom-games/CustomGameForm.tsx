@@ -1,29 +1,28 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { SparklesIcon, Gamepad2, Wand2, PlusCircle, Code, Info, Server } from 'lucide-react';
+import { SparklesIcon, Brain, PenTool, Info, Globe, Gamepad2, Wand2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { AIGameGenerator, MiniGame } from '../generator/AIGameGenerator';
 import { GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
-import { storeGame } from '@/services/storage';
-import { uploadGameToVps, generateThumbnail } from '@/services/vpsStorage';
-import { shareGameToVps } from '@/services/storage';
+import QuizContainer from '../QuizContainer';
 
 interface CustomGameFormProps {
+  gameType: string;
   onGenerate: (content: string, game?: MiniGame) => void;
   onCancel: () => void;
 }
 
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
-const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel }) => {
+const CustomGameForm: React.FC<CustomGameFormProps> = ({ gameType, onGenerate, onCancel }) => {
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationStep, setGenerationStep] = useState<string>('');
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -31,140 +30,48 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
   const gameGenerator = AIGameGenerator.getInstance(API_KEY);
 
   const getPlaceholderText = () => {
-    return 'Mô tả chi tiết game bạn muốn tạo. Hãy bao gồm thể loại game, giao diện, cách chơi và bất kỳ yêu cầu đặc biệt nào.\n\nVí dụ: "Tạo một trò chơi xếp hình với 9 mảnh ghép hình ảnh về vũ trụ, có âm thanh khi hoàn thành và hiệu ứng ngôi sao khi người chơi thắng."';
+    return 'Nhập yêu cầu chi tiết để AI tạo nội dung trò chơi. Hãy mô tả cụ thể chủ đề, độ khó, số lượng và bất kỳ yêu cầu đặc biệt nào.\n\nVí dụ: "Tạo 10 câu hỏi trắc nghiệm về lịch sử Việt Nam thời kỳ phong kiến, mỗi câu có 4 lựa chọn."';
   };
 
   const handleSubmit = async () => {
     if (!content.trim()) {
       toast({
         title: "Lỗi",
-        description: "Vui lòng mô tả game bạn muốn tạo",
+        description: "Vui lòng nhập yêu cầu nội dung cho trò chơi",
         variant: "destructive"
       });
       return;
     }
 
-    // Tạo requestId độc nhất với timestamp và random string
-    const requestId = Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
-    const timestamp = new Date().toISOString();
-    
-    // Log thông tin request trong console với styled console group
-    console.groupCollapsed(
-      `%c 🎮 GAME REQUEST ${requestId} %c ${content.substring(0, 40)}${content.length > 40 ? '...' : ''}`,
-      'background: #6f42c1; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-      'font-weight: bold;'
-    );
-    console.log('%c 📝 Content', 'font-weight: bold; color: #6f42c1;', content);
-    console.log('%c ⏱️ Timestamp', 'font-weight: bold; color: #6f42c1;', timestamp);
-    console.log('%c 🔑 Request ID', 'font-weight: bold; color: #6f42c1;', requestId);
-    console.log('%c 📊 Content Length', 'font-weight: bold; color: #6f42c1;', content.length, 'characters');
-    console.log('%c 🌐 Browser Info', 'font-weight: bold; color: #6f42c1;', {
-      userAgent: navigator.userAgent,
-      language: navigator.language,
-      platform: navigator.platform,
-      viewport: `${window.innerWidth}x${window.innerHeight}`
-    });
-    console.groupEnd();
-
     setIsGenerating(true);
-    setGenerationStep('Đang chuẩn bị tạo game với AI...');
     
     try {
-      // Tạo settings với thêm thông tin về request
       const settings: GameSettingsData = {
         difficulty: 'medium',
         questionCount: 10,
         timePerQuestion: 30,
         category: 'general',
-        requestMetadata: {
-          requestId,
-          timestamp,
-          contentLength: content.length,
-          source: 'custom-game-form'
-        }
+        useTimer: true,
+        bonusTime: 5,
+        totalTime: 300
       };
       
-      // Log thông tin cài đặt game
-      console.group('%c 🎲 GAME SETTINGS', 'background: #0366d6; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;');
-      console.table(settings);
-      console.groupEnd();
+      console.log("Tạo game với chủ đề:", content);
       
-      // Log khi bắt đầu gửi request
-      console.group(
-        `%c 🚀 API REQUEST ${requestId} %c Generating game`,
-        'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-        'font-weight: bold;'
-      );
-      console.log('%c 📋 Request Content', 'font-weight: bold; color: #2ea44f;', content.substring(0, 500) + (content.length > 500 ? '...' : ''));
-      console.log('%c ⏳ Request Start Time', 'font-weight: bold; color: #2ea44f;', new Date().toISOString());
-      console.groupEnd();
-      
-      // Đo thời gian xử lý
-      const startTime = performance.now();
-      
-      // Thông báo bước đang tạo game với AI
-      setGenerationStep('Đang tạo game với AI...');
       const game = await gameGenerator.generateMiniGame(content, settings);
       
-      const endTime = performance.now();
-      const duration = ((endTime - startTime) / 1000).toFixed(2);
-      
-      // Log kết quả API
-      console.group(
-        `%c ✅ API RESPONSE ${requestId} %c Completed in ${duration}s`,
-        'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-        'font-weight: bold;'
-      );
-      console.log('%c 📊 Result', 'font-weight: bold; color: #2ea44f;', {
-        success: !!game,
-        title: game?.title || 'N/A',
-        contentSize: game?.content?.length || 0,
-        processingTime: `${duration}s`,
-        timestamp: new Date().toISOString()
-      });
-      
-      // Log mẫu code (nếu có, chỉ hiển thị 200 ký tự đầu tiên)
-      if (game?.content) {
-        console.log('%c 🧩 Code Sample', 'font-weight: bold; color: #2ea44f;', 
-          game.content.substring(0, 200) + (game.content.length > 200 ? '...' : ''));
-      }
-      console.groupEnd();
-      
       if (game) {
-        // Thông báo đang lưu trữ game
-        setGenerationStep('Đang lưu trữ game trên VPS...');
-        
-        // Lưu game lên VPS sử dụng storage service mới
-        const savedGame = await shareGameToVps(game, 'custom', game.title);
-        
         toast({
           title: "Đã tạo trò chơi",
-          description: "Trò chơi đã được tạo thành công với AI và lưu trữ trên server.",
+          description: "Trò chơi đã được tạo thành công với AI.",
         });
         
-        // Hiển thị thông báo thành công trước khi chuyển hướng
-        setGenerationStep('Hoàn tất! Đang chuyển đến game...');
-        
-        // Đợi một chút để người dùng thấy thông báo hoàn tất
-        setTimeout(() => {
-          onGenerate(content, game);
-        }, 1000);
+        onGenerate(content, game);
       } else {
         throw new Error("Không thể tạo game");
       }
     } catch (error) {
-      // Log lỗi với nhiều thông tin hơn
-      console.group(
-        `%c ❌ API ERROR ${requestId} %c Generation failed`,
-        'background: #d73a49; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-        'font-weight: bold;'
-      );
-      console.log('%c 🚨 Error Details', 'font-weight: bold; color: #d73a49;', error);
-      console.log('%c 📝 Request Content', 'font-weight: bold; color: #d73a49;', content);
-      console.log('%c ⏱️ Error Time', 'font-weight: bold; color: #d73a49;', new Date().toISOString());
-      console.log('%c 🔍 Stack Trace', 'font-weight: bold; color: #d73a49;', error instanceof Error ? error.stack : 'No stack trace available');
-      console.groupEnd();
-      
+      console.error("Lỗi khi tạo game:", error);
       toast({
         title: "Lỗi tạo game",
         description: "Có lỗi xảy ra khi tạo game. Vui lòng thử lại.",
@@ -173,14 +80,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       onGenerate(content);
     } finally {
       setIsGenerating(false);
-      setGenerationStep('');
-      
-      // Log kết thúc toàn bộ quá trình
-      console.log(
-        `%c 🏁 REQUEST COMPLETE ${requestId} %c ${new Date().toISOString()}`,
-        'background: #6f42c1; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-        'font-weight: bold;'
-      );
     }
   };
 
@@ -192,8 +91,31 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     }
   };
 
+  const generateSamplePrompt = () => {
+    let samplePrompt = '';
+    
+    switch (gameType) {
+      case 'quiz':
+        samplePrompt = 'Tạo 8 câu hỏi trắc nghiệm về các địa danh nổi tiếng ở Việt Nam, mỗi câu có 4 lựa chọn. Độ khó vừa phải, phù hợp với học sinh cấp 2.';
+        break;
+      case 'flashcards':
+        samplePrompt = 'Tạo 10 thẻ ghi nhớ về các công thức Vật lý quan trọng trong chương trình THPT, mỗi thẻ có công thức và ý nghĩa của công thức.';
+        break;
+      case 'memory':
+        samplePrompt = 'Tạo trò chơi ghi nhớ với chủ đề động vật, 8 cặp thẻ, mỗi thẻ có tên và hình ảnh động vật.';
+        break;
+      case 'matching':
+        samplePrompt = 'Tạo 12 cặp từ tiếng Anh - tiếng Việt về chủ đề thể thao, độ khó trung bình, phù hợp cho học sinh cấp 2.';
+        break;
+      default:
+        samplePrompt = 'Tạo trò chơi với chủ đề khoa học vũ trụ cho học sinh cấp 3, độ khó trung bình, tập trung vào các hành tinh trong hệ mặt trời, 10 câu hỏi.';
+    }
+    
+    setContent(samplePrompt);
+  };
+
   if (isGenerating) {
-    return <GameLoading topic={content} message={generationStep} />;
+    return <GameLoading topic={content} />;
   }
 
   return (
@@ -202,11 +124,11 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
         <div className="mb-6">
           <h2 className="text-2xl font-bold flex items-center gap-2 text-primary">
             <div className="p-2 rounded-lg bg-primary/10">
-              <Code className="h-6 w-6 text-primary" />
+              <Brain className="h-6 w-6 text-primary" />
             </div>
             Tạo trò chơi tùy chỉnh với AI
           </h2>
-          <p className="text-muted-foreground">Mô tả chi tiết game bạn muốn tạo và AI sẽ xây dựng nó cho bạn</p>
+          <p className="text-muted-foreground">Mô tả yêu cầu của bạn để AI tạo nội dung trò chơi phù hợp</p>
         </div>
         
         <div className="space-y-4">
@@ -214,8 +136,16 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
             <div className="flex justify-between items-center">
               <Label htmlFor="content" className="flex items-center gap-2 text-base">
                 <SparklesIcon className="h-4 w-4 text-primary" /> 
-                Mô tả game của bạn
+                Yêu cầu nội dung
               </Label>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={generateSamplePrompt}
+                className="text-xs h-6 px-2 py-0 flex items-center gap-1 hover:bg-primary/5"
+              >
+                <Wand2 className="h-3.5 w-3.5" /> Gợi ý
+              </Button>
             </div>
             <div className="mt-2 flex gap-2">
               <Textarea
@@ -242,15 +172,28 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
             <div className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg">
               <Info className="w-4 h-4 text-primary mt-1" />
               <p className="text-sm text-muted-foreground">
-                AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Game sẽ được lưu trữ trên server VPS và bạn có thể chia sẻ link cho bạn bè.
+                Trò chơi sẽ được tạo theo yêu cầu của bạn với các cài đặt mặc định (độ khó trung bình, 10 câu hỏi, 30 giây mỗi câu).
               </p>
             </div>
             
-            <div className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg">
-              <Server className="w-4 h-4 text-primary mt-1" />
-              <p className="text-sm text-muted-foreground">
-                Game của bạn sẽ được lưu trên máy chủ VPS tại địa chỉ ai-games-vn.com, giúp bạn dễ dàng chia sẻ với bạn bè qua link, QR code hoặc mạng xã hội.
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+              <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
+                <PenTool className="w-6 h-6 text-primary mb-2" />
+                <h4 className="text-sm font-medium">Mô tả chi tiết</h4>
+                <p className="text-xs text-muted-foreground">Càng chi tiết càng tốt</p>
+              </div>
+              
+              <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
+                <Globe className="w-6 h-6 text-primary mb-2" />
+                <h4 className="text-sm font-medium">Đa dạng chủ đề</h4>
+                <p className="text-xs text-muted-foreground">Lịch sử, khoa học, văn hóa...</p>
+              </div>
+              
+              <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col items-center text-center">
+                <Gamepad2 className="w-6 h-6 text-primary mb-2" />
+                <h4 className="text-sm font-medium">Tương tác cao</h4>
+                <p className="text-xs text-muted-foreground">Trải nghiệm người dùng tốt</p>
+              </div>
             </div>
           </div>
           

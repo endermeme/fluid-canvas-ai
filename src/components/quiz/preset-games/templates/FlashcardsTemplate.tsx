@@ -1,156 +1,292 @@
-import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { ArrowLeft, ArrowRight, RefreshCw, Check, X, Clock, Shuffle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { saveGameForSharing } from '@/services/storage';
-import { PlusCircle } from 'lucide-react';
+import { Toggle } from '@/components/ui/toggle';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
-interface Flashcard {
-  term: string;
-  definition: string;
+interface FlashcardsTemplateProps {
+  content: any;
+  topic: string;
+  onBack?: () => void;
 }
 
-const FlashcardsTemplate: React.FC = () => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [flashcards, setFlashcards] = useState<Flashcard[]>([{ term: '', definition: '' }]);
+const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic, onBack }) => {
+  const [currentCard, setCurrentCard] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [cardsState, setCardsState] = useState<Array<'unreviewed' | 'known' | 'unknown'>>([]);
+  const [autoFlip, setAutoFlip] = useState(content?.settings?.autoFlip || false);
+  const [flipTimer, setFlipTimer] = useState<NodeJS.Timeout | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState(0);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
-  const addFlashcard = () => {
-    setFlashcards([...flashcards, { term: '', definition: '' }]);
-  };
+  const cards = content?.cards || [];
+  const progress = ((currentCard + 1) / cards.length) * 100;
+  const flipTime = content?.settings?.flipTime || 5;
 
-  const updateFlashcard = (index: number, field: string, value: string) => {
-    const updatedFlashcards = [...flashcards];
-    updatedFlashcards[index][field] = value;
-    setFlashcards(updatedFlashcards);
-  };
+  useEffect(() => {
+    if (cards.length > 0) {
+      setCardsState(new Array(cards.length).fill('unreviewed'));
+    }
+  }, [cards.length]);
 
-  const removeFlashcard = (index: number) => {
-    const updatedFlashcards = [...flashcards];
-    updatedFlashcards.splice(index, 1);
-    setFlashcards(updatedFlashcards);
-  };
+  useEffect(() => {
+    if (autoFlip && !isFlipped) {
+      setTimeRemaining(flipTime);
+      const countdownTimer = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev <= 1) {
+            clearInterval(countdownTimer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (!title.trim() || !description.trim() || flashcards.some(card => !card.term.trim() || !card.definition.trim())) {
-      toast({
-        title: "Lỗi",
-        description: "Vui lòng điền đầy đủ thông tin và đảm bảo không có flashcard nào bị bỏ trống.",
-        variant: "destructive",
-      });
-      return;
+      const timer = setTimeout(() => {
+        setIsFlipped(true);
+        clearInterval(countdownTimer);
+      }, flipTime * 1000);
+      
+      setFlipTimer(timer);
+      
+      return () => {
+        clearTimeout(timer);
+        clearInterval(countdownTimer);
+      };
     }
 
-    const flashcardsHtml = flashcards.map(card => `
-      <div class="flashcard">
-        <h3>${card.term}</h3>
-        <p>${card.definition}</p>
-      </div>
-    `).join('');
+    return () => {
+      if (flipTimer) clearTimeout(flipTimer);
+    };
+  }, [currentCard, isFlipped, autoFlip, flipTime]);
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${title}</title>
-        <style>
-          .flashcard { border: 1px solid #ccc; padding: 10px; margin: 10px; }
-        </style>
-      </head>
-      <body>
-        <h1>${title}</h1>
-        <p>${description}</p>
-        ${flashcardsHtml}
-      </body>
-      </html>
-    `;
+  const handleFlip = () => {
+    if (flipTimer) {
+      clearTimeout(flipTimer);
+    }
+    setIsFlipped(!isFlipped);
+  };
 
-    try {
-      const shareUrl = await saveGameForSharing(title, description, htmlContent);
+  const handlePrevCard = () => {
+    if (currentCard > 0) {
+      setCurrentCard(currentCard - 1);
+      setIsFlipped(false);
+    }
+  };
+
+  const handleNextCard = () => {
+    if (currentCard < cards.length - 1) {
+      setCurrentCard(currentCard + 1);
+      setIsFlipped(false);
+    }
+  };
+
+  const handleMarkCard = (status: 'known' | 'unknown') => {
+    const newCardsState = [...cardsState];
+    newCardsState[currentCard] = status;
+    setCardsState(newCardsState);
+    
+    if (status === 'known') {
       toast({
-        title: "Game đã được tạo",
-        description: "Đang chuyển hướng đến trang chia sẻ...",
+        title: "Đã thuộc!",
+        description: "Đã đánh dấu thẻ này là đã thuộc.",
+        variant: "default",
       });
-      navigate(shareUrl);
-    } catch (error: any) {
+    } else {
       toast({
-        title: "Lỗi",
-        description: error.message || "Không thể tạo game. Vui lòng thử lại sau.",
+        title: "Chưa thuộc!",
+        description: "Đã đánh dấu thẻ này là chưa thuộc.",
         variant: "destructive",
       });
     }
+    
+    if (currentCard < cards.length - 1) {
+      handleNextCard();
+    }
+  };
+
+  const handleRestart = () => {
+    setCurrentCard(0);
+    setIsFlipped(false);
+    setCardsState(new Array(cards.length).fill('unreviewed'));
+    toast({
+      title: "Làm lại từ đầu",
+      description: "Đã đặt lại tất cả thẻ ghi nhớ.",
+      variant: "default",
+    });
+  };
+
+  const toggleAutoFlip = () => {
+    setAutoFlip(!autoFlip);
+    toast({
+      title: autoFlip ? "Đã tắt tự động lật" : "Đã bật tự động lật",
+      description: autoFlip ? "Thẻ sẽ không tự động lật." : `Thẻ sẽ tự động lật sau ${flipTime} giây.`,
+      variant: "default",
+    });
+  };
+
+  if (!content || !cards.length) {
+    return <div className="p-4">Không có dữ liệu thẻ ghi nhớ</div>;
+  }
+
+  const stats = {
+    known: cardsState.filter(state => state === 'known').length,
+    unknown: cardsState.filter(state => state === 'unknown').length,
+    unreviewed: cardsState.filter(state => state === 'unreviewed').length
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Tạo Flashcards</CardTitle>
-        <CardDescription>Nhập thông tin chi tiết cho bộ flashcards của bạn.</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        <div className="grid gap-2">
-          <Label htmlFor="title">Tiêu đề</Label>
-          <Input
-            id="title"
-            placeholder="Ví dụ: Từ vựng tiếng Anh"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
+      {onBack && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onBack} 
+          className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Quay lại</span>
+        </Button>
+      )}
+
+      <div className="mb-4 mt-12">
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+            Thẻ {currentCard + 1}/{cards.length}
+          </div>
+          <div className="text-sm font-medium flex space-x-3">
+            <span className="px-3 py-1 bg-green-100/30 text-green-600 rounded-full">Đã thuộc: {stats.known}</span>
+            <span className="px-3 py-1 bg-red-100/30 text-red-600 rounded-full">Chưa thuộc: {stats.unknown}</span>
+          </div>
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor="description">Mô tả</Label>
-          <Textarea
-            id="description"
-            placeholder="Ví dụ: Bộ flashcards giúp học từ vựng tiếng Anh hiệu quả"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-        <div>
-          {flashcards.map((card, index) => (
-            <div key={index} className="grid gap-4 border rounded-md p-4 mb-4">
-              <div className="grid gap-2">
-                <Label htmlFor={`term-${index}`}>Thuật ngữ {index + 1}</Label>
-                <Input
-                  type="text"
-                  id={`term-${index}`}
-                  placeholder="Ví dụ: Hello"
-                  value={card.term}
-                  onChange={(e) => updateFlashcard(index, 'term', e.target.value)}
-                />
+        <Progress value={progress} className="h-2 bg-secondary" />
+      </div>
+
+      <div className="flex-grow flex items-center justify-center mb-4 perspective-1000">
+        <div 
+          className="w-full max-w-md aspect-[3/2] cursor-pointer relative group"
+          onClick={handleFlip}
+          style={{
+            transformStyle: 'preserve-3d',
+            transition: 'transform 0.6s',
+            transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+          }}
+        >
+          <Card 
+            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-2 border-primary/20 shadow-lg group-hover:shadow-xl transition-all duration-300"
+            style={{
+              backfaceVisibility: 'hidden'
+            }}
+          >
+            <div className="text-center">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                Nhấn để lật thẻ
+                {autoFlip && !isFlipped && (
+                  <div className="mt-1 flex items-center justify-center">
+                    <Clock className="h-3 w-3 mr-1 text-primary/60" />
+                    <span>Tự động lật sau {timeRemaining}s</span>
+                  </div>
+                )}
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor={`definition-${index}`}>Định nghĩa {index + 1}</Label>
-                <Textarea
-                  id={`definition-${index}`}
-                  placeholder="Ví dụ: Lời chào"
-                  value={card.definition}
-                  onChange={(e) => updateFlashcard(index, 'definition', e.target.value)}
-                />
-              </div>
-              <Button type="button" variant="destructive" size="sm" onClick={() => removeFlashcard(index)}>
-                Xóa
-              </Button>
+              <div className="text-3xl font-bold text-primary/90">{cards[currentCard].front}</div>
             </div>
-          ))}
-          <Button type="button" variant="outline" size="sm" className="mt-2 flex items-center" onClick={addFlashcard}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Thêm Flashcard
+          </Card>
+          
+          <Card 
+            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm border-2 border-primary/30 shadow-lg"
+            style={{
+              backfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg)'
+            }}
+          >
+            <div className="text-center">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Mặt sau</div>
+              <div className="text-2xl text-primary/90">{cards[currentCard].back}</div>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3 bg-background/40 p-3 rounded-lg backdrop-blur-sm border border-primary/10 shadow-sm">
+        <div className="grid grid-cols-4 gap-2">
+          <Button
+            variant="outline"
+            onClick={handlePrevCard}
+            disabled={currentCard === 0}
+            className="bg-background/70 border-primary/20"
+            size="sm"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Trước
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={handleFlip}
+            className="col-span-2 bg-background/70 border-primary/20"
+            size="sm"
+          >
+            {isFlipped ? "Xem mặt trước" : "Lật thẻ"}
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={handleNextCard}
+            disabled={currentCard === cards.length - 1}
+            className="bg-background/70 border-primary/20"
+            size="sm"
+          >
+            Tiếp
+            <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
-      </CardContent>
-      <CardFooter>
-        <Button onClick={handleSubmit}>Tạo Game</Button>
-      </CardFooter>
-    </Card>
+        
+        <div className="flex gap-2 justify-between">
+          <Button
+            variant={autoFlip ? "default" : "outline"}
+            size="sm"
+            className={`flex-1 ${autoFlip ? 'bg-primary/90' : 'bg-background/70 border-primary/20'}`}
+            onClick={toggleAutoFlip}
+          >
+            <Clock className="h-4 w-4 mr-1" />
+            {autoFlip ? "Tắt lật tự động" : "Bật lật tự động"}
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRestart}
+            className="bg-background/70 border-primary/20 flex-1"
+          >
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Làm lại
+          </Button>
+        </div>
+        
+        <ToggleGroup type="single" variant="outline" className="grid grid-cols-2">
+          <ToggleGroupItem
+            value="unknown"
+            onClick={() => handleMarkCard('unknown')}
+            className="border border-red-300 text-red-600 data-[state=on]:bg-red-100 data-[state=on]:text-red-700"
+          >
+            <X className="mr-2 h-4 w-4" />
+            Chưa thuộc
+          </ToggleGroupItem>
+          
+          <ToggleGroupItem
+            value="known"
+            onClick={() => handleMarkCard('known')}
+            className="border border-green-300 text-green-600 data-[state=on]:bg-green-100 data-[state=on]:text-green-700"
+          >
+            <Check className="mr-2 h-4 w-4" />
+            Đã thuộc
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+    </div>
   );
 };
 

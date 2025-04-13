@@ -1,11 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { StoredGame, getRemainingTime } from '@/utils/gameExport';
-import { getGameFromServer } from '@/utils/serverStorage';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Clock, AlertTriangle, Plus, Server, Wifi, WifiOff } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { ArrowLeft, Clock, AlertTriangle, Plus } from 'lucide-react';
 
 const SharedGame = () => {
   const { id } = useParams<{ id: string }>();
@@ -13,9 +11,7 @@ const SharedGame = () => {
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [isServerMode, setIsServerMode] = useState(true);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     if (!id) {
@@ -24,70 +20,33 @@ const SharedGame = () => {
       return;
     }
 
-    const loadGame = async () => {
-      try {
-        // Thử lấy game từ server trước
-        const response = await getGameFromServer(id);
-        
-        if (response.success && response.data) {
-          setGame(response.data);
-          setIsServerMode(true);
-          
-          // Tính thời gian còn lại
-          const expirationDate = response.data.createdAt + (30 * 24 * 60 * 60 * 1000); // 30 ngày
-          setTimeLeft(getRemainingTime(expirationDate));
-          
-          // Hiển thị toast thông báo
-          toast({
-            title: "Đã tải game từ server",
-            description: "Game đang được lưu trữ trên máy chủ AI Games VN",
-          });
-        } else {
-          // Nếu không tìm thấy trên server, thử từ localStorage
-          const gamesJSON = localStorage.getItem('shared_games');
-          if (gamesJSON) {
-            const games: StoredGame[] = JSON.parse(gamesJSON);
-            const localGame = games.find(g => g.id === id);
-            
-            if (localGame) {
-              setGame(localGame);
-              setIsServerMode(false);
-              setTimeLeft(getRemainingTime(localGame.expiresAt));
-              
-              toast({
-                title: "Đã tải game từ bộ nhớ cục bộ",
-                description: "Game này chỉ có thể truy cập trên thiết bị này",
-                variant: "destructive"
-              });
-            } else {
-              setError('Trò chơi không tồn tại hoặc đã hết hạn');
-            }
-          } else {
-            setError('Trò chơi không tồn tại hoặc đã hết hạn');
-          }
-        }
-      } catch (error) {
-        console.error('Error loading game:', error);
-        setError('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
-      } finally {
-        setLoading(false);
+    const loadGame = () => {
+      const loadedGame = getSharedGame(id);
+      setGame(loadedGame);
+      
+      if (loadedGame) {
+        setTimeLeft(getRemainingTime(loadedGame.expiresAt));
+      } else {
+        setError('Trò chơi không tồn tại hoặc đã hết hạn');
       }
+      
+      setLoading(false);
     };
 
     loadGame();
     
-    // Cập nhật thời gian còn lại mỗi phút
+    // Update remaining time every minute
     const intervalId = setInterval(() => {
       if (game) {
-        const expirationDate = game.createdAt + (30 * 24 * 60 * 60 * 1000); // 30 ngày
-        setTimeLeft(getRemainingTime(expirationDate));
+        setTimeLeft(getRemainingTime(game.expiresAt));
       }
     }, 60000);
     
     return () => clearInterval(intervalId);
-  }, [id, toast]);
+  }, [id, game]);
 
   const handleCreateNewGame = () => {
+    // Navigate to root path using react-router
     navigate('/');
   };
 
@@ -106,7 +65,7 @@ const SharedGame = () => {
         <AlertTriangle className="text-destructive h-16 w-16" />
         <h1 className="text-2xl font-bold">{error}</h1>
         <p className="text-muted-foreground text-center max-w-md">
-          Liên kết này có thể đã hết hạn hoặc không tồn tại. Trò chơi chỉ có hiệu lực trong 30 ngày.
+          Liên kết này có thể đã hết hạn hoặc không tồn tại. Trò chơi chỉ có hiệu lực trong 48 giờ.
         </p>
         <Button onClick={() => navigate('/')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -137,25 +96,9 @@ const SharedGame = () => {
           Quay lại
         </Button>
         
-        <div className="flex items-center gap-3">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Clock className="h-4 w-4 mr-1" />
-            <span>Còn lại: {timeLeft}</span>
-          </div>
-          
-          <div className="flex items-center text-sm">
-            {isServerMode ? (
-              <div className="flex items-center text-primary gap-1">
-                <Server className="h-4 w-4" />
-                <span className="text-xs">Server</span>
-              </div>
-            ) : (
-              <div className="flex items-center text-muted-foreground gap-1">
-                <WifiOff className="h-4 w-4" />
-                <span className="text-xs">Local</span>
-              </div>
-            )}
-          </div>
+        <div className="flex items-center text-sm text-muted-foreground">
+          <Clock className="h-4 w-4 mr-1" />
+          <span>Còn lại: {timeLeft}</span>
         </div>
       </header>
       

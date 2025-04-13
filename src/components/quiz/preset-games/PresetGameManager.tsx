@@ -7,7 +7,6 @@ import GameSettings from '../GameSettings';
 import GameLoading from '../GameLoading';
 import { GameSettingsData } from '../types';
 import { Card } from '@/components/ui/card';
-import GameShareButtons from '../share/GameShareButtons';
 
 // Import Gemini API 
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -469,19 +468,7 @@ Output must be valid JSON. `;
   return (
     <div className="flex flex-col h-full">
       <div className="flex-grow overflow-auto">
-        {gameContent ? (
-          <>
-            <div className="flex justify-end p-4">
-              <GameShareButtons 
-                gameId={`preset-${gameType}`}
-                title={`${getGameTypeName()} - ${initialTopic || "Chơi game"}`}
-                gameData={gameContent}
-                gameType={gameType}
-              />
-            </div>
-            {renderGameTemplate()}
-          </>
-        ) : (
+        {gameContent ? renderGameTemplate() : (
           <div className="flex items-center justify-center h-full">
             <Card className="p-6 max-w-md">
               <p className="text-center">Không có nội dung trò chơi</p>
