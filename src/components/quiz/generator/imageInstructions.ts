@@ -9,8 +9,8 @@ export const getImageInstructions = (): string => {
     - ONLY provide detailed search terms for images - NEVER actual URLs
     - Search terms should be specific and descriptive (e.g., "fresh red strawberry fruit" instead of just "strawberry")
     - Use English search terms for better results, even for non-English games
-    - For each image, provide a clear search term that will yield good results on Pixabay
-    - Our system will handle converting your search terms to actual images using the Pixabay API
+    - For each image, provide a clear search term that will yield good results
+    - Our system will handle converting your search terms to actual images using Wikipedia
     - Format example for an image question:
       "imageSearchTerm": "ripe yellow banana fruit close up"
   `;
@@ -26,7 +26,17 @@ export const topicToImageDescription = (topic: string): string => {
 };
 
 /**
- * Generate a Pixabay search URL
+ * Generate a Wikipedia search URL
+ * @param keyword Search keyword
+ * @returns Wikipedia API search URL for images
+ */
+export const generateWikipediaSearchUrl = (keyword: string): string => {
+  const encodedKeyword = encodeURIComponent(keyword);
+  return `https://en.wikipedia.org/w/api.php?action=query&titles=${encodedKeyword}&prop=pageimages&format=json&pithumbsize=500&origin=*`;
+};
+
+/**
+ * Generate a Pixabay search URL (fallback)
  * @param keyword Search keyword
  * @param safeSearch Use safe search
  * @returns Pixabay API search URL
@@ -37,24 +47,40 @@ export const generatePixabaySearchUrl = (keyword: string, safeSearch: boolean = 
 };
 
 /**
- * Generate a Pixabay image URL from a search term
+ * Generate an image URL from a search term
  * @param searchTerm Search term
  * @returns Image URL
  */
 export const generatePixabayImage = async (searchTerm: string): Promise<string> => {
   try {
-    const response = await fetch(generatePixabaySearchUrl(searchTerm));
-    const data = await response.json();
+    // First try Wikipedia API
+    const wikipediaResponse = await fetch(generateWikipediaSearchUrl(searchTerm));
+    const wikipediaData = await wikipediaResponse.json();
     
-    if (data.hits && data.hits.length > 0) {
+    // Extract image from Wikipedia response
+    const pages = wikipediaData.query?.pages;
+    if (pages) {
+      const pageId = Object.keys(pages)[0];
+      if (pages[pageId]?.thumbnail?.source) {
+        console.log("Found image on Wikipedia:", pages[pageId].thumbnail.source);
+        return pages[pageId].thumbnail.source;
+      }
+    }
+    
+    // Fallback to Pixabay if Wikipedia doesn't have an image
+    console.log("No Wikipedia image found, falling back to Pixabay");
+    const pixabayResponse = await fetch(generatePixabaySearchUrl(searchTerm));
+    const pixabayData = await pixabayResponse.json();
+    
+    if (pixabayData.hits && pixabayData.hits.length > 0) {
       // Get the image URL from the first result
-      return data.hits[0].webformatURL;
+      return pixabayData.hits[0].webformatURL;
     }
     
     // If no image is found, return a placeholder
     return generatePlaceholderImage(400, 300, searchTerm);
   } catch (error) {
-    console.error("Failed to fetch image from Pixabay:", error);
+    console.error("Failed to fetch image:", error);
     return generatePlaceholderImage(400, 300, searchTerm);
   }
 };
@@ -67,8 +93,8 @@ export const generatePixabayImage = async (searchTerm: string): Promise<string> 
  * @returns Placeholder image URL
  */
 export const generatePlaceholderImage = (width: number = 400, height: number = 300, text: string = "Image"): string => {
-  // Use a default image from Pixabay as placeholder
-  return `https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png`;
+  // Use a default image as placeholder
+  return `https://via.placeholder.com/${width}x${height}?text=${encodeURIComponent(text)}`;
 };
 
 /**
@@ -78,15 +104,15 @@ export const generatePlaceholderImage = (width: number = 400, height: number = 3
 export const handleImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>): void => {
   const img = event.currentTarget;
   const topic = img.alt || "image";
-  // Use a default image from Pixabay
-  img.src = `https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png`;
+  // Use a placeholder image
+  img.src = `https://via.placeholder.com/400x300?text=${encodeURIComponent(topic)}`;
   img.alt = `Failed to load image: ${topic}`;
 };
 
 /**
- * Process response from Gemini to ensure all images are from Pixabay
+ * Process response from Gemini to ensure all images are fetched properly
  * @param content HTML content from Gemini
- * @returns Processed HTML content with Pixabay images
+ * @returns Processed HTML content with proper images
  */
 export const processImagesToPixabay = async (content: any): Promise<any> => {
   // If the content has items with imageSearchTerm instead of imageUrl
@@ -96,12 +122,12 @@ export const processImagesToPixabay = async (content: any): Promise<any> => {
       
       // If we have a search term but no URL, fetch the image
       if (item.imageSearchTerm && !item.imageUrl) {
-        console.log(`Converting search term to Pixabay image: "${item.imageSearchTerm}"`);
+        console.log(`Converting search term to image: "${item.imageSearchTerm}"`);
         item.imageUrl = await generatePixabayImage(item.imageSearchTerm);
       }
-      // If we have a non-Pixabay URL, replace it
-      else if (item.imageUrl && !item.imageUrl.includes('pixabay.com')) {
-        console.log(`Replacing non-Pixabay URL with Pixabay image`);
+      // If we have a non-standard URL, replace it
+      else if (item.imageUrl && !item.imageUrl.includes('wikipedia.org') && !item.imageUrl.includes('pixabay.com')) {
+        console.log(`Replacing non-standard URL with a proper image`);
         const searchTerm = item.answer || 'image';
         item.imageUrl = await generatePixabayImage(searchTerm);
       }
