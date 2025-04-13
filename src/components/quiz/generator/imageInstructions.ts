@@ -46,6 +46,26 @@ export const generatePixabaySearchUrl = (keyword: string, safeSearch: boolean = 
   return `https://pixabay.com/api/?key=49691613-4d92ecd39a474575561ea2695&q=${encodedKeyword}&image_type=photo&safesearch=${safeSearch}`;
 };
 
+// Define interfaces for the Wikipedia API response
+interface WikipediaImageInfo {
+  url: string;
+}
+
+interface WikipediaImage {
+  title: string;
+}
+
+interface WikipediaPage {
+  images?: WikipediaImage[];
+  imageinfo?: WikipediaImageInfo[];
+}
+
+interface WikipediaQueryResponse {
+  query?: {
+    pages?: Record<string, WikipediaPage>;
+  };
+}
+
 /**
  * Generate an image URL from a search term using Wikipedia with Pixabay fallback
  * @param searchTerm Search term
@@ -55,7 +75,7 @@ export const generatePixabayImage = async (searchTerm: string): Promise<string> 
   try {
     // First try Wikipedia API
     const wikiResponse = await fetch(generateWikipediaSearchUrl(searchTerm));
-    const wikiData = await wikiResponse.json();
+    const wikiData = await wikiResponse.json() as WikipediaQueryResponse;
     
     if (wikiData.query && wikiData.query.pages) {
       const pages = Object.values(wikiData.query.pages);
@@ -65,7 +85,7 @@ export const generatePixabayImage = async (searchTerm: string): Promise<string> 
           const imageInfoUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(imageName)}&prop=imageinfo&iiprop=url&format=json&origin=*`;
           
           const imageInfoResponse = await fetch(imageInfoUrl);
-          const imageInfoData = await imageInfoResponse.json();
+          const imageInfoData = await imageInfoResponse.json() as WikipediaQueryResponse;
           
           if (imageInfoData.query && imageInfoData.query.pages) {
             const imagePages = Object.values(imageInfoData.query.pages);
@@ -118,6 +138,17 @@ export const handleImageError = (event: React.SyntheticEvent<HTMLImageElement, E
   img.alt = `Failed to load image: ${topic}`;
 };
 
+// Interface for content items with image search terms
+interface ContentItem {
+  imageSearchTerm?: string;
+  imageUrl?: string;
+  answer?: string;
+}
+
+interface ContentWithItems {
+  items?: ContentItem[];
+}
+
 /**
  * Process response from Gemini to ensure all images are properly fetched
  * @param content HTML content from Gemini
@@ -125,9 +156,11 @@ export const handleImageError = (event: React.SyntheticEvent<HTMLImageElement, E
  */
 export const processImagesToPixabay = async (content: any): Promise<any> => {
   // If the content has items with imageSearchTerm instead of imageUrl
-  if (content && content.items && Array.isArray(content.items)) {
-    for (let i = 0; i < content.items.length; i++) {
-      const item = content.items[i];
+  const typedContent = content as ContentWithItems;
+  
+  if (typedContent && typedContent.items && Array.isArray(typedContent.items)) {
+    for (let i = 0; i < typedContent.items.length; i++) {
+      const item = typedContent.items[i];
       
       // If we have a search term but no URL, fetch the image
       if (item.imageSearchTerm && !item.imageUrl) {
