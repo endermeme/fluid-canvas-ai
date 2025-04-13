@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Sparkles, Code } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { GEMINI_MODELS } from '@/constants/api-constants';
+import { GEMINI_MODELS, API_VERSION } from '@/constants/api-constants';
 
 interface CustomGameSettingsProps {
   onGenerate: (prompt: string) => void;
@@ -23,6 +23,7 @@ const CustomGameSettings: React.FC<CustomGameSettingsProps> = ({
     if (prompt.trim()) {
       console.log('Prompt submitted:', prompt);
       console.log('Using model:', GEMINI_MODELS.DEFAULT);
+      console.log('API version:', API_VERSION);
       onGenerate(prompt);
     }
   };

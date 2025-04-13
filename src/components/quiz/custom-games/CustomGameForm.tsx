@@ -10,7 +10,7 @@ import { AIGameGenerator } from '../generator/AIGameGenerator';
 import { MiniGame } from '../generator/types';
 import { GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
-import { GEMINI_API_KEY, GEMINI_MODELS } from '@/constants/api-constants';
+import { GEMINI_API_KEY, GEMINI_MODELS, API_VERSION } from '@/constants/api-constants';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
@@ -55,6 +55,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     console.log('%c 🔑 Request ID', 'font-weight: bold; color: #6f42c1;', requestId);
     console.log('%c 📊 Content Length', 'font-weight: bold; color: #6f42c1;', content.length, 'characters');
     console.log('%c 🤖 Model', 'font-weight: bold; color: #6f42c1;', GEMINI_MODELS.DEFAULT);
+    console.log('%c 🤖 API Version', 'font-weight: bold; color: #6f42c1;', API_VERSION);
     console.log('%c 🌐 Browser Info', 'font-weight: bold; color: #6f42c1;', {
       userAgent: navigator.userAgent,
       language: navigator.language,
