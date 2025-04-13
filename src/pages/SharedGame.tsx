@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getSharedGame, formatRemainingTime, StoredGame } from '@/utils/gameExport';
+import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, AlertTriangle, Plus } from 'lucide-react';
 
@@ -27,7 +27,7 @@ const SharedGame = () => {
       if (loadedGame) {
         // Giả sử game hết hạn sau 30 ngày kể từ ngày tạo
         const expirationDate = loadedGame.createdAt + (30 * 24 * 60 * 60 * 1000);
-        setTimeLeft(formatRemainingTime(expirationDate));
+        setTimeLeft(getRemainingTime(expirationDate));
       } else {
         setError('Trò chơi không tồn tại hoặc đã hết hạn');
       }
@@ -41,7 +41,7 @@ const SharedGame = () => {
     const intervalId = setInterval(() => {
       if (game) {
         const expirationDate = game.createdAt + (30 * 24 * 60 * 60 * 1000);
-        setTimeLeft(formatRemainingTime(expirationDate));
+        setTimeLeft(getRemainingTime(expirationDate));
       }
     }, 60000);
     

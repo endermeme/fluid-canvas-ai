@@ -8,6 +8,20 @@ import QuizTemplate from './QuizTemplate';
 import TrueFalseTemplate from './TrueFalseTemplate';
 import WordSearchTemplate from './WordSearchTemplate';
 
+// Create an object with all templates
+const gameTemplates = {
+  'quiz': QuizTemplate,
+  'flashcards': FlashcardsTemplate,
+  'matching': MatchingTemplate,
+  'memory': MemoryTemplate,
+  'ordering': OrderingTemplate,
+  'wordsearch': WordSearchTemplate,
+  'pictionary': PictionaryTemplate,
+  'truefalse': TrueFalseTemplate
+};
+
+export default gameTemplates;
+
 export {
   FlashcardsTemplate,
   MatchingTemplate,
