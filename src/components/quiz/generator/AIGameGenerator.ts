@@ -20,11 +20,18 @@ export class AIGameGenerator {
    * @param apiKey Google API key for Gemini
    */
   constructor(apiKey: string = GEMINI_API_KEY) {
-    this.genAI = new GoogleGenerativeAI(apiKey, {
+    // Initialize GoogleGenerativeAI with only the API key
+    this.genAI = new GoogleGenerativeAI(apiKey);
+    
+    // Configure the model with the correct API version and base URL
+    this.model = this.genAI.getGenerativeModel({ 
+      model: GEMINI_MODELS.DEFAULT,
       apiVersion: API_VERSION,
-      baseUrl: API_BASE_URL
+      generationConfig: {
+        apiEndpoint: API_BASE_URL
+      }
     });
-    this.model = this.genAI.getGenerativeModel({ model: GEMINI_MODELS.DEFAULT });
+    
     logInfo('AIGameGenerator', `Initialized with model: ${GEMINI_MODELS.DEFAULT} on API version: ${API_VERSION}`);
   }
 
