@@ -81,7 +81,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
           <nav className="flex items-center space-x-1 text-sm lg:space-x-2 lg:text-base">
             <Button 
               variant={location.pathname === '/preset-games' ? 'secondary' : 'ghost'} 
-              size="sm" asChild
+              size="sm"
             >
               <Link to="/preset-games" className="flex items-center gap-1.5">
                 <Home className="h-4 w-4" />
@@ -91,7 +91,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
             
             <Button 
               variant={location.pathname === '/quiz' ? 'secondary' : 'ghost'} 
-              size="sm" asChild
+              size="sm"
             >
               <Link to="/quiz" className="flex items-center gap-1.5">
                 <SparklesIcon className="h-4 w-4" />
@@ -101,7 +101,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
             
             <Button 
               variant={location.pathname === '/game-history' ? 'secondary' : 'ghost'} 
-              size="sm" asChild
+              size="sm"
             >
               <Link to="/game-history" className="flex items-center gap-1.5">
                 <History className="h-4 w-4" />
