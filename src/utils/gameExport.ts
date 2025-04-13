@@ -1,5 +1,7 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { GameSession, createGameSession, getGameSession, getGameSessions } from './gameParticipation';
+import { saveGameToServer, saveGameWithFallback } from './serverStorage';
 
 /**
  * Interface for game data stored in localStorage
@@ -45,33 +47,43 @@ export const getRemainingTime = (expiresAt: number): string => {
  * @param htmlContent HTML content of the game
  * @returns URL for accessing the shared game
  */
-export const saveGameForSharing = (
+export const saveGameForSharing = async (
   title: string,
   description: string,
   htmlContent: string
-): string => {
-  // Create new game session
-  const gameSession = createGameSession(title, htmlContent);
-  
-  // Also save it in the shared_games format for compatibility
-  const storedGame: StoredGame = {
-    id: gameSession.id,
-    title: gameSession.title,
-    description,
-    htmlContent: gameSession.content,
-    createdAt: gameSession.createdAt,
-    expiresAt: gameSession.expiresAt,
-    viewCount: 0
-  };
-  
-  // Save in localStorage
-  const gamesJSON = localStorage.getItem('shared_games');
-  const games = gamesJSON ? JSON.parse(gamesJSON) : [];
-  games.push(storedGame);
-  localStorage.setItem('shared_games', JSON.stringify(games));
-  
-  // Return the URL that can be used to access the game
-  return `${window.location.origin}/game/${gameSession.id}`;
+): Promise<string> => {
+  try {
+    // Thử lưu vào VPS trước
+    const serverResult = await saveGameWithFallback(title, description, htmlContent);
+    
+    // Trả về URL có thể truy cập game
+    return serverResult.shareUrl;
+  } catch (error) {
+    console.error("Error saving game:", error);
+    
+    // Fallback to local storage only if everything else fails
+    const gameSession = createGameSession(title, htmlContent);
+    
+    // Cũng lưu vào shared_games để tương thích ngược
+    const storedGame: StoredGame = {
+      id: gameSession.id,
+      title: gameSession.title,
+      description,
+      htmlContent: gameSession.content,
+      createdAt: gameSession.createdAt,
+      expiresAt: gameSession.expiresAt,
+      viewCount: 0
+    };
+    
+    // Lưu trong localStorage
+    const gamesJSON = localStorage.getItem('shared_games');
+    const games = gamesJSON ? JSON.parse(gamesJSON) : [];
+    games.push(storedGame);
+    localStorage.setItem('shared_games', JSON.stringify(games));
+    
+    // Trả về URL có thể truy cập game
+    return `${window.location.origin}/game/${gameSession.id}`;
+  }
 };
 
 /**
@@ -80,7 +92,10 @@ export const saveGameForSharing = (
  * @returns Game data or null if not found
  */
 export const getSharedGame = (id: string): StoredGame | null => {
-  // First try to get from gameSessions (more recent implementation)
+  // Lưu ý: Hàm này vẫn giữ nguyên để tương thích ngược
+  // Trong thực tế, ta nên sử dụng getGameFromServer từ serverStorage.ts
+  
+  // Đầu tiên thử lấy từ gameSessions (triển khai gần đây hơn)
   const gameSession = getGameSession(id);
   if (gameSession) {
     return {
@@ -94,7 +109,7 @@ export const getSharedGame = (id: string): StoredGame | null => {
     };
   }
   
-  // Otherwise try to get from shared_games
+  // Nếu không, thử lấy từ shared_games
   const gamesJSON = localStorage.getItem('shared_games');
   if (!gamesJSON) return null;
   
@@ -103,15 +118,15 @@ export const getSharedGame = (id: string): StoredGame | null => {
   
   if (!game) return null;
   
-  // Check if expired
+  // Kiểm tra xem đã hết hạn chưa
   if (game.expiresAt < Date.now()) {
-    // Remove expired game
+    // Xóa game đã hết hạn
     const updatedGames = games.filter(g => g.id !== id);
     localStorage.setItem('shared_games', JSON.stringify(updatedGames));
     return null;
   }
   
-  // Increment view count
+  // Tăng số lượt xem
   game.viewCount = (game.viewCount || 0) + 1;
   localStorage.setItem('shared_games', JSON.stringify(games));
   
@@ -122,10 +137,10 @@ export const getSharedGame = (id: string): StoredGame | null => {
  * Cleans up expired games from localStorage
  */
 export const cleanupExpiredGames = (): void => {
-  // Clean up gameSessions
-  getGameSessions(); // This already performs cleanup internally
+  // Dọn dẹp gameSessions
+  getGameSessions(); // Điều này đã thực hiện dọn dẹp nội bộ
   
-  // Clean up shared_games
+  // Dọn dẹp shared_games
   const gamesJSON = localStorage.getItem('shared_games');
   if (!gamesJSON) return;
   
