@@ -23,10 +23,10 @@ export class AIGameGenerator {
     // Initialize GoogleGenerativeAI with only the API key
     this.genAI = new GoogleGenerativeAI(apiKey);
     
-    // Configure the model with the correct API version and base URL
+    // Configure the model with the correct model name only
+    // The ModelParams type doesn't accept apiVersion as a property
     this.model = this.genAI.getGenerativeModel({ 
-      model: GEMINI_MODELS.DEFAULT,
-      apiVersion: API_VERSION
+      model: GEMINI_MODELS.DEFAULT
     });
     
     logInfo('AIGameGenerator', `Initialized with model: ${GEMINI_MODELS.DEFAULT} on API version: ${API_VERSION}`);
@@ -112,7 +112,11 @@ RESPOND ONLY WITH THE HTML CODE. NO EXPLANATIONS OR MARKDOWN FORMATTING.
 `;
 
       // Generate the game content with Gemini
-      const result = await this.model.generateContent(htmlPrompt);
+      const result = await this.model.generateContent({
+        contents: [{
+          parts: [{text: htmlPrompt}]
+        }]
+      });
       const response = await result.response;
       const htmlContent = response.text();
       
