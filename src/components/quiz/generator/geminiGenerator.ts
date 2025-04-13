@@ -12,6 +12,7 @@ import {
   getApiEndpoint,
   DEFAULT_GENERATION_SETTINGS 
 } from '@/constants/api-constants';
+import { buildGeminiPrompt } from './promptBuilder';
 
 const SOURCE = "GEMINI";
 
@@ -35,25 +36,11 @@ export const generateWithGemini = async (
     settings: settings || {}
   });
   
-  // Simple prompt for HTML game generation
-  const prompt = `
-Create an HTML game based on this topic: "${topic}"
-
-Requirements:
-- Create a fun, interactive game that works in a browser
-- Use HTML, CSS, and JavaScript only (no external libraries)
-- The game should be fully self-contained in a single HTML file
-- Make the game visually appealing and user-friendly
-- Include a title, instructions, and scoring system
-- Handle all user interactions and game logic
-- Make sure the game is responsive and works on different screen sizes
-- Add appropriate error handling
-
-Return only the complete HTML code with inline CSS and JavaScript.
-`;
+  // Use the prompt builder to create our prompt
+  const prompt = buildGeminiPrompt(topic, settings?.useCanvas);
 
   try {
-    logInfo(SOURCE, `Sending request to Gemini API using model ${GEMINI_MODELS.DEFAULT} (${API_VERSION})`);
+    logInfo(SOURCE, `Sending request to Gemini API using model ${GEMINI_MODELS.DEFAULT}`);
     
     const startTime = Date.now();
     
@@ -62,7 +49,13 @@ Return only the complete HTML code with inline CSS and JavaScript.
       contents: [{
         parts: [{text: prompt}]
       }],
-      generationConfig: DEFAULT_GENERATION_SETTINGS
+      generationConfig: {
+        ...DEFAULT_GENERATION_SETTINGS,
+        temperature: 0.7,
+        topP: 0.8,
+        topK: 40,
+        maxOutputTokens: 8192
+      }
     };
     
     // Make API call
@@ -89,27 +82,15 @@ Return only the complete HTML code with inline CSS and JavaScript.
     
     const duration = measureExecutionTime(startTime);
     
-    logSuccess(SOURCE, `Response received in ${duration.seconds}s (${duration.ms}ms)`);
-    logInfo(SOURCE, `Response length: ${text.length} characters`);
+    logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
     
-    // Extract title from HTML
-    let title = topic;
-    const titleMatch = text.match(/<title>(.*?)<\/title>/i) || 
-                      text.match(/<h1[^>]*>(.*?)<\/h1>/i);
-    
-    if (titleMatch && titleMatch[1]) {
-      title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
-    }
-    
-    // Create MiniGame object
-    const game: MiniGame = {
-      title: title,
-      content: text
-    };
+    // Parse the response to extract the game
+    const { parseGeminiResponse } = await import('./responseParser');
+    const game = parseGeminiResponse(text, topic);
     
     logSuccess(SOURCE, "Game generated successfully", {
-      title: title,
-      contentSize: text.length
+      title: game.title,
+      contentSize: game.content.length
     });
     
     return game;
@@ -121,11 +102,6 @@ Return only the complete HTML code with inline CSS and JavaScript.
 
 /**
  * Attempts to generate a game with Gemini, with retries on failure
- * @param model This parameter is no longer used but kept for compatibility
- * @param topic Topic for the game
- * @param settings Optional game settings
- * @param retryCount Current retry count (internal use)
- * @returns MiniGame object or null if all retries fail
  */
 export const tryGeminiGeneration = async (
   model: any,
@@ -133,7 +109,7 @@ export const tryGeminiGeneration = async (
   settings?: GameSettingsData,
   retryCount = 0
 ): Promise<MiniGame | null> => {
-  const maxRetries = 3;
+  const maxRetries = 2;
   
   if (retryCount >= maxRetries) {
     logWarning(SOURCE, `Reached maximum retries (${maxRetries})`);
@@ -150,13 +126,6 @@ export const tryGeminiGeneration = async (
     const waitTime = (retryCount + 1) * 1500;
     logInfo(SOURCE, `Waiting ${waitTime/1000} seconds before retrying...`);
     await new Promise(resolve => setTimeout(resolve, waitTime));
-    
-    // Display retry information
-    console.log(
-      `%c ${SOURCE} RETRY %c Attempt ${retryCount + 2}/${maxRetries+1}`,
-      'background: #f9a825; color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-      ''
-    );
     
     return tryGeminiGeneration(null, topic, settings, retryCount + 1);
   }

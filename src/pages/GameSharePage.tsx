@@ -1,12 +1,10 @@
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getSharedGame } from '@/utils/gameExport';
 import QuizContainer from '@/components/quiz/QuizContainer';
-import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import SimpleGameView from '@/components/quiz/custom-games/SimpleGameView';
 
 const GameSharePage: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -23,9 +21,8 @@ const GameSharePage: React.FC = () => {
         title="Game không tồn tại"
         showBackButton={true}
         onBack={handleBack}
-        className="p-0 overflow-hidden"
       >
-        <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
+        <div className="flex flex-col items-center justify-center h-full p-6">
           <div className="p-8 bg-background/90 rounded-xl shadow-lg border border-primary/10 max-w-md w-full">
             <p className="text-center mb-6 text-muted-foreground">Game đã hết hạn hoặc không tồn tại.</p>
             <Button onClick={handleBack} className="w-full">Quay lại</Button>
@@ -38,28 +35,12 @@ const GameSharePage: React.FC = () => {
   return (
     <QuizContainer
       title={game.title}
-      showBackButton={false}
-      showHomeButton={false}
-      showRefreshButton={false}
-      className="p-0 overflow-hidden"
+      showBackButton={true}
+      onBack={handleBack}
     >
-      <EnhancedGameView 
-        miniGame={{
-          title: game.title,
-          content: game.htmlContent
-        }}
-        onBack={handleBack}
-        extraButton={
-          <Button 
-            size="sm" 
-            variant="outline" 
-            className="text-xs"
-            onClick={() => navigate('/custom-game')}
-          >
-            <ArrowLeft className="h-3.5 w-3.5 mr-1" />
-            Tạo Game Mới
-          </Button>
-        }
+      <SimpleGameView 
+        gameHtml={game.htmlContent} 
+        gameTitle={game.title}
       />
     </QuizContainer>
   );

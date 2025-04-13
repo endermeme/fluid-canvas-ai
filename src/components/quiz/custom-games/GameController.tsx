@@ -2,15 +2,14 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
-import { AIGameGenerator } from '../generator/AIGameGenerator';
-import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
-import { Share2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createGameSession } from '@/utils/gameParticipation';
 import QuizContainer from '../QuizContainer';
+import SimpleGameView from './SimpleGameView';
+import { PlusCircle, Share2 } from 'lucide-react';
 
 interface GameControllerProps {
   initialTopic?: string;
@@ -23,14 +22,11 @@ const GameController: React.FC<GameControllerProps> = ({
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentGame, setCurrentGame] = useState<MiniGame | null>(null);
-  const [currentTopic, setCurrentTopic] = useState<string>(initialTopic);
   const [showForm, setShowForm] = useState(!currentGame);
   const navigate = useNavigate();
   const { toast } = useToast();
   
   const handleGameGeneration = (content: string, game?: MiniGame) => {
-    setCurrentTopic(content);
-    
     if (game) {
       setCurrentGame(game);
       setShowForm(false);
@@ -78,32 +74,38 @@ const GameController: React.FC<GameControllerProps> = ({
     });
   };
 
-  const getContainerTitle = () => {
-    if (isGenerating) {
-      return `Đang tạo game: ${currentTopic}`;
-    }
-    if (currentGame) {
-      return currentGame.title || "Minigame Tương Tác";
-    }
-    return "Tạo Game Tùy Chỉnh";
-  };
-
   const renderContent = () => {
     if (isGenerating) {
-      return <GameLoading topic={currentTopic} />;
+      return <GameLoading topic={initialTopic} />;
     } 
     
     if (currentGame) {
       return (
-        <div className="w-full h-full">
-          <EnhancedGameView 
-            miniGame={{
-              title: currentGame.title || "Minigame Tương Tác",
-              content: currentGame.content || ""
-            }} 
-            onBack={handleBack}
-            onNewGame={handleNewGame}
-            onShare={handleShareGame}
+        <div className="w-full h-full flex flex-col">
+          <div className="flex justify-end p-2 bg-background/80 border-b border-primary/10">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleNewGame}
+              className="mr-2"
+            >
+              <PlusCircle className="h-4 w-4 mr-1.5" />
+              Trò Chơi Mới
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleShareGame}
+            >
+              <Share2 className="h-4 w-4 mr-1.5" />
+              Chia Sẻ
+            </Button>
+          </div>
+          
+          <SimpleGameView 
+            gameHtml={currentGame.content} 
+            gameTitle={currentGame.title || "Minigame"} 
           />
         </div>
       );
@@ -122,7 +124,7 @@ const GameController: React.FC<GameControllerProps> = ({
     }
     
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
+      <div className="flex flex-col items-center justify-center h-full p-6">
         <div className="p-6 bg-background/90 rounded-xl shadow-lg border border-primary/10 max-w-md w-full">
           <p className="text-center mb-4">Không có nội dung trò chơi. Vui lòng tạo mới.</p>
           <Button 
@@ -139,13 +141,9 @@ const GameController: React.FC<GameControllerProps> = ({
 
   return (
     <QuizContainer
-      title={getContainerTitle()}
+      title={currentGame ? (currentGame.title || "Minigame Tương Tác") : "Tạo Game Tùy Chỉnh"}
       showBackButton={true}
       onBack={handleBack}
-      showSettingsButton={false}
-      showCreateButton={!isGenerating && !showForm}
-      onCreate={handleNewGame}
-      className="p-0 overflow-hidden"
     >
       <div className="h-full w-full overflow-hidden">
         {renderContent()}
