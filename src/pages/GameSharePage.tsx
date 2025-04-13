@@ -5,7 +5,7 @@ import { getSharedGame } from '@/utils/gameExport';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const GameSharePage: React.FC = () => {
@@ -23,25 +23,19 @@ const GameSharePage: React.FC = () => {
         title="Game không tồn tại"
         showBackButton={true}
         onBack={handleBack}
-        className="p-0 overflow-hidden"
       >
-        <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
-          <div className="p-8 bg-background/90 rounded-xl shadow-lg border border-primary/10 max-w-md w-full">
-            <p className="text-center mb-6 text-muted-foreground">Game đã hết hạn hoặc không tồn tại.</p>
-            <Button onClick={handleBack} className="w-full">Quay lại</Button>
-          </div>
+        <div className="flex flex-col items-center justify-center h-full p-6">
+          <p className="text-center mb-4">Game đã hết hạn hoặc không tồn tại.</p>
+          <Button onClick={handleBack}>Quay lại</Button>
         </div>
       </QuizContainer>
     );
   }
   
-  // Create simplified interface with just the game view
   return (
     <QuizContainer
       title={game.title}
       showBackButton={false}
-      showHomeButton={false}
-      showRefreshButton={false}
       className="p-0 overflow-hidden"
     >
       <EnhancedGameView 
@@ -54,10 +48,10 @@ const GameSharePage: React.FC = () => {
           <Button 
             size="sm" 
             variant="outline" 
-            className="text-xs"
+            className="ml-2"
             onClick={() => navigate('/custom-game')}
           >
-            <ArrowLeft className="h-3.5 w-3.5 mr-1" />
+            <ArrowLeft className="h-4 w-4 mr-1" />
             Tạo Game Mới
           </Button>
         }

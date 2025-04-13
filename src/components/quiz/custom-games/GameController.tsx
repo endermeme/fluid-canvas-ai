@@ -122,17 +122,15 @@ const GameController: React.FC<GameControllerProps> = ({
     }
     
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
-        <div className="p-6 bg-background/90 rounded-xl shadow-lg border border-primary/10 max-w-md w-full">
-          <p className="text-center mb-4">Không có nội dung trò chơi. Vui lòng tạo mới.</p>
-          <Button 
-            onClick={handleNewGame} 
-            className="w-full"
-          >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Tạo Game Mới
-          </Button>
-        </div>
+      <div className="flex flex-col items-center justify-center h-full p-6">
+        <p>Không có nội dung trò chơi. Vui lòng tạo mới.</p>
+        <Button 
+          onClick={handleNewGame} 
+          className="mt-4 flex items-center gap-2"
+        >
+          <PlusCircle className="h-5 w-5" />
+          Tạo Game Mới
+        </Button>
       </div>
     );
   };
