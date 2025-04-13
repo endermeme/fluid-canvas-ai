@@ -13,7 +13,6 @@ import { getGameById, addParticipant, getFakeIpAddress } from '@/services/storag
 import { loadGameFromVps } from '@/services/vpsStorage';
 import GameShareButtons from './GameShareButtons';
 
-// Form schema
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Tên phải có ít nhất 2 ký tự.",
@@ -47,8 +46,6 @@ const ShareGamePage: React.FC = () => {
       setLoadingMessage("Đang kết nối tới server...");
       
       try {
-        // Thử tải từ VPS trước
-        setLoadingMessage("Đang tải game từ server...");
         const vpsResponse = await loadGameFromVps(gameId);
         
         if (vpsResponse.success && vpsResponse.data.game) {
@@ -58,8 +55,6 @@ const ShareGamePage: React.FC = () => {
             description: "Game đã được tải từ server.",
           });
         } else {
-          // Nếu không tìm thấy trên VPS, thử tải từ bộ nhớ cục bộ
-          setLoadingMessage("Đang tìm kiếm trong bộ nhớ cục bộ...");
           const localGame = getGameById(gameId);
           
           if (localGame) {
@@ -96,14 +91,12 @@ const ShareGamePage: React.FC = () => {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (!gameId || !game) return;
     
-    // Lấy thông tin thiết bị người dùng
     const deviceInfo = {
       userAgent: navigator.userAgent,
       platform: navigator.platform,
       screenSize: `${window.screen.width}x${window.screen.height}`
     };
     
-    // Simulate IP address (in a real app, this would come from the server)
     const fakeIp = getFakeIpAddress();
     
     const result = addParticipant(gameId, values.name, fakeIp, deviceInfo);
@@ -121,7 +114,6 @@ const ShareGamePage: React.FC = () => {
         variant: "destructive",
       });
       
-      // If they've retried too many times but we want to let them in anyway
       if (result.participant && result.participant.retryCount <= 2) {
         setHasJoined(true);
       }
@@ -191,8 +183,7 @@ const ShareGamePage: React.FC = () => {
             </Button>
             
             <GameShareButtons
-              gameId={gameId}
-              shareUrl={game.shareUrl || `https://ai-games-vn.com/share/${gameId}`}
+              gameId={gameId || ''}
               title={game.title}
             />
           </div>

@@ -476,7 +476,7 @@ Output must be valid JSON. `;
                 gameId={`preset-${gameType}`}
                 title={`${getGameTypeName()} - ${initialTopic || "Chơi game"}`}
                 gameData={gameContent}
-                gameType="preset"
+                gameType={gameType}
               />
             </div>
             {renderGameTemplate()}

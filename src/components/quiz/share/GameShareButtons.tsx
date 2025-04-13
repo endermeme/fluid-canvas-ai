@@ -4,34 +4,62 @@ import { Button } from "@/components/ui/button";
 import { Copy, Share2, Link as LinkIcon, QrCode } from 'lucide-react';
 import { toast } from "sonner";
 import { copyToClipboard } from '@/utils/clipboard';
+import { saveGameForSharing } from '@/utils/gameExport';
 
 interface GameShareButtonsProps {
   gameId: string;
   title?: string;
   variant?: 'default' | 'icon';
   className?: string;
+  gameData?: any;
+  gameType?: string;
 }
 
 const GameShareButtons: React.FC<GameShareButtonsProps> = ({ 
   gameId, 
   title = 'Game', 
   variant = 'default',
-  className = ''
+  className = '',
+  gameData,
+  gameType
 }) => {
   const [showQR, setShowQR] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   
-  // Tạo URL chia sẻ
+  // Create share URL
   const shareUrl = `${window.location.origin}/game/${gameId}`;
   
-  // Xử lý copy link
+  // Handle copy link
   const handleCopyLink = () => {
     copyToClipboard(shareUrl);
     toast.success("Đã sao chép liên kết");
   };
   
-  // Xử lý chia sẻ
+  // Handle share
   const handleShare = async () => {
     try {
+      setIsSharing(true);
+      
+      // If we have gameData, we need to save it first
+      if (gameData && gameType) {
+        try {
+          // Use import.meta.env to store game data using the appropriate service
+          const savedGame = await saveGameForSharing(
+            title,
+            `Game ${gameType} tạo bởi AI`,
+            typeof gameData === 'string' ? gameData : JSON.stringify(gameData)
+          );
+          
+          // If successful, update the share URL
+          if (savedGame) {
+            toast.success("Đã lưu game thành công");
+          }
+        } catch (error) {
+          console.error("Error saving game:", error);
+          toast.error("Lỗi khi lưu game");
+        }
+      }
+      
       if (navigator.share) {
         await navigator.share({
           title: `Trò chơi: ${title}`,
@@ -45,10 +73,12 @@ const GameShareButtons: React.FC<GameShareButtonsProps> = ({
       console.error("Lỗi khi chia sẻ:", error);
       // Fallback to copy if share fails
       handleCopyLink();
+    } finally {
+      setIsSharing(false);
     }
   };
   
-  // Render dạng icon only
+  // Render icon only variant
   if (variant === 'icon') {
     return (
       <Button 
@@ -63,7 +93,7 @@ const GameShareButtons: React.FC<GameShareButtonsProps> = ({
     );
   }
   
-  // Render dạng mặc định
+  // Render default variant
   return (
     <div className={`flex gap-2 ${className}`}>
       <Button 
@@ -81,9 +111,10 @@ const GameShareButtons: React.FC<GameShareButtonsProps> = ({
         size="sm" 
         onClick={handleShare}
         className="flex items-center gap-1.5"
+        disabled={isSharing}
       >
         <Share2 className="h-4 w-4" />
-        <span>Chia sẻ</span>
+        <span>{isSharing ? "Đang chia sẻ..." : "Chia sẻ"}</span>
       </Button>
     </div>
   );

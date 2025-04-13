@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Bookmark } from 'lucide-react';
-import { StoredGame, cleanupExpiredGames, getRemainingTime } from '@/services/storage';
+import { StoredGame, cleanupExpiredGames, getRemainingTime } from '@/utils/gameExport';
 import { useNavigate } from 'react-router-dom';
 
 interface HistoryPanelProps {

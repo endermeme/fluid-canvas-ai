@@ -524,17 +524,22 @@ export const shareGameToVps = async (gameData: any, gameType: 'preset' | 'custom
     id: gameId,
     title,
     description,
-    content,
+    htmlContent: content,
+    originalContent: gameData.content || '',
+    thumbnailUrl: '',
     createdAt: now,
-    isPublic: true,
+    updatedAt: now,
     viewCount: 0,
     participants: [],
-    gameType,
+    isPublic: true,
     tags,
+    shareUrl: '',
     analytics: {
-      totalViews: 0,
-      popularityScore: 0,
-      deviceStats: {}
+      lastViewed: 0,
+      totalPlays: 0,
+      uniqueUsers: 0,
+      averagePlayTime: 0,
+      popularityScore: 0
     }
   };
   
@@ -602,4 +607,4 @@ export const saveGameForSharing = async (title: string, description: string, htm
     console.error("Error saving game:", error);
     return "";
   }
-}; 
+};

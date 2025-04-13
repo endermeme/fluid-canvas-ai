@@ -1,6 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getSharedGame } from '@/services/storage';
+import { getSharedGame } from '@/utils/gameExport';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,6 @@ import { ArrowLeft, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { PageLayout } from '@/components/layout/PageLayout';
 import { AlertTriangle, Clock } from 'lucide-react';
 
 const GameSharePage: React.FC = () => {

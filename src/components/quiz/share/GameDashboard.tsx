@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import { 
   Table, 
   TableBody, 
@@ -8,17 +8,17 @@ import {
   TableHead, 
   TableHeader, 
   TableRow 
-} from '@/components/ui/table';
-import { useToast } from '@/hooks/use-toast';
+} from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Eye, Download, RefreshCw, Clock, Globe, Copy, Share2 } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
+import { Progress } from "@/components/ui/progress";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger
-} from '@/components/ui/tooltip';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import { 
   Card, 
   CardContent, 
@@ -26,7 +26,7 @@ import {
   CardFooter, 
   CardHeader, 
   CardTitle 
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import { getGameById, exportParticipantsToCSV, maskIpAddress } from '@/services/storage';
 import { checkVpsStatus } from '@/services/vpsStorage';
 import GameShareButtons from './GameShareButtons';
@@ -173,7 +173,6 @@ const GameDashboard: React.FC = () => {
           
           <GameShareButtons 
             gameId={gameId || ''} 
-            shareUrl={game.shareUrl || `https://ai-games-vn.com/share/${gameId}`} 
             title={game.title}
           />
         </div>
