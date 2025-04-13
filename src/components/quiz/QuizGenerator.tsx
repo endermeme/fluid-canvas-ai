@@ -12,8 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { createGameSession } from '@/utils/gameParticipation';
 import { Button } from '@/components/ui/button';
 import { Share2 } from 'lucide-react';
-
-const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
+import { GEMINI_API_KEY, GEMINI_MODELS } from '@/constants/api-constants';
 
 interface QuizGeneratorProps {
   topic?: string;
@@ -31,7 +30,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const gameGenerator = AIGameGenerator.getInstance(API_KEY);
+  const gameGenerator = AIGameGenerator.getInstance(GEMINI_API_KEY);
   
   const [canvasMode, setCanvasMode] = useState<boolean>(
     localStorage.getItem('canvas_mode') === 'true'
@@ -116,6 +115,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
 
     console.log("Starting minigame generation for topic:", topic);
     console.log("Starting game with settings:", settings);
+    console.log("Using model:", GEMINI_MODELS.DEFAULT);
 
     try {      
       const game = await gameGenerator.generateMiniGame(topic, settings);
@@ -125,7 +125,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
         setMiniGame(game);
         toast({
           title: "Minigame Đã Sẵn Sàng",
-          description: `Đã tạo minigame về "${topic}" với Gemini`,
+          description: `Đã tạo minigame về "${topic}" với Gemini ${GEMINI_MODELS.DEFAULT}`,
         });
       } else {
         throw new Error('Không thể tạo minigame');

@@ -6,6 +6,7 @@ import {
   logInfo, logError, logWarning, logSuccess, 
   measureExecutionTime
 } from './apiUtils';
+import { GEMINI_MODELS } from '@/constants/api-constants';
 
 const SOURCE = "GEMINI";
 
@@ -24,7 +25,8 @@ export const generateWithGemini = async (
   // Get game type from topic to provide better context for the AI
   const gameType = getGameTypeByTopic(topic);
   
-  logInfo(SOURCE, `Starting game generation for "${topic}"`, {
+  logInfo(SOURCE, `Starting game generation for "${topic}" using ${GEMINI_MODELS.DEFAULT}`, {
+    model: GEMINI_MODELS.DEFAULT,
     type: gameType?.name || "Not specified",
     settings: settings || {}
   });
@@ -47,7 +49,7 @@ Return only the complete HTML code with inline CSS and JavaScript.
 `;
 
   try {
-    logInfo(SOURCE, "Sending request to Gemini API");
+    logInfo(SOURCE, `Sending request to Gemini API using model ${GEMINI_MODELS.DEFAULT}`);
     
     const startTime = Date.now();
     const result = await model.generateContent(prompt);
