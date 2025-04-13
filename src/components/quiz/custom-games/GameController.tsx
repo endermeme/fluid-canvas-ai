@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
 import { AIGameGenerator } from '../generator/AIGameGenerator';
 import EnhancedGameView from './EnhancedGameView';
-import CustomGameForm from '../preset-games/CustomGameForm';  // Update the import path
+import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
 import { Share2, PlusCircle } from 'lucide-react';
@@ -32,10 +31,6 @@ const GameController: React.FC<GameControllerProps> = ({
     setCurrentTopic(content);
     
     if (game) {
-      // Force HTML content for testing if needed
-      // Uncomment the next line for testing HTML game container
-      // game.content = `<html><body><h1>Test HTML Game</h1><script>document.write('Dynamic content!')</script></body></html>`;
-      
       setCurrentGame(game);
       setShowForm(false);
       
@@ -69,13 +64,11 @@ const GameController: React.FC<GameControllerProps> = ({
   const handleShareGame = () => {
     if (!currentGame) return;
     
-    // Create a shareable game session
     const gameSession = createGameSession(
       currentGame.title || "Minigame tương tác",
       currentGame.content
     );
     
-    // Navigate to the share page
     navigate(`/game/${gameSession.id}`);
     
     toast({
@@ -84,7 +77,6 @@ const GameController: React.FC<GameControllerProps> = ({
     });
   };
 
-  // Determine container title based on state
   const getContainerTitle = () => {
     if (isGenerating) {
       return `Đang tạo game: ${currentTopic}`;
@@ -107,7 +99,6 @@ const GameController: React.FC<GameControllerProps> = ({
     </Button>
   ) : null;
 
-  // Render footer actions based on state
   const footerActions = currentGame ? (
     <div className="flex justify-between items-center">
       <Button 
@@ -130,7 +121,6 @@ const GameController: React.FC<GameControllerProps> = ({
     </div>
   ) : null;
 
-  // Main content based on state
   const renderContent = () => {
     if (isGenerating) {
       return <GameLoading topic={currentTopic} />;
@@ -153,7 +143,6 @@ const GameController: React.FC<GameControllerProps> = ({
     if (showForm) {
       return (
         <CustomGameForm 
-          gameType="custom" 
           onGenerate={(content, game) => {
             setIsGenerating(true);
             setTimeout(() => handleGameGeneration(content, game), 500);

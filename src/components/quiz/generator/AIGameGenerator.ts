@@ -5,9 +5,6 @@ import { GameSettingsData } from '../types';
 import { generateWithGemini, tryGeminiGeneration } from './geminiGenerator';
 import { logInfo, logError } from './apiUtils';
 
-// Don't re-export MiniGame directly from here since we're already importing it
-// export { MiniGame };
-
 /**
  * API client for generating minigames with AI
  */
@@ -138,5 +135,5 @@ RESPOND ONLY WITH THE HTML CODE. NO EXPLANATIONS OR MARKDOWN FORMATTING.
   }
 }
 
-// Export MiniGame from this file too so other components importing it from here don't break
+// Export MiniGame type
 export type { MiniGame };
