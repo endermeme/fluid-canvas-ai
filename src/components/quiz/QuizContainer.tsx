@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Home, RefreshCw, Settings, ArrowLeft, PlusCircle, Gamepad2, History, SparklesIcon } from 'lucide-react';

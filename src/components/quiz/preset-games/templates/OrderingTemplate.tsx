@@ -33,14 +33,12 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
       }));
       setItems(initialItems);
       
-      // Tạo một mảng các chỉ số và xáo trộn nó
       const initialShuffledItems = Array.from({ length: content.items.length }, (_, i) => i);
       shuffleArray(initialShuffledItems);
       setShuffledItems(initialShuffledItems);
     }
   }, [content]);
 
-  // Hàm xáo trộn mảng (Fisher-Yates shuffle)
   const shuffleArray = (array: number[]) => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
