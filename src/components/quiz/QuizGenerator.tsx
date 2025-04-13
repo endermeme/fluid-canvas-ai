@@ -7,7 +7,7 @@ import EnhancedGameView from './custom-games/EnhancedGameView';
 import { GameSettingsData } from './types';
 import { getGameTypeByTopic } from './gameTypes';
 import { useNavigate } from 'react-router-dom';
-import { createGameSession } from '@/utils/gameParticipation';
+import { createGameSession } from '@/services/gameParticipation';
 import { Button } from '@/components/ui/button';
 import { Share2 } from 'lucide-react';
 

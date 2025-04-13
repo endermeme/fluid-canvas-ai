@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -11,7 +10,7 @@ import GameLoading from '../GameLoading';
 import EnhancedGameView from './EnhancedGameView';
 import QuizContainer from '../QuizContainer';
 import { useNavigate } from 'react-router-dom';
-import { createGameSession } from '@/utils/gameParticipation';
+import { createGameSession } from '@/services/gameParticipation';
 
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 

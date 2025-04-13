@@ -474,8 +474,9 @@ Output must be valid JSON. `;
             <div className="flex justify-end p-4">
               <GameShareButtons 
                 gameId={`preset-${gameType}`}
-                shareUrl={`${window.location.origin}/game/preset/${gameType}?topic=${encodeURIComponent(initialTopic || "")}`}
                 title={`${getGameTypeName()} - ${initialTopic || "Chơi game"}`}
+                gameData={gameContent}
+                gameType="preset"
               />
             </div>
             {renderGameTemplate()}

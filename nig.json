@@ -1,0 +1,158 @@
+{
+    "target": "suleco.vn",
+    "scan_date": "2025-04-13 09:07:43",
+    "vulnerabilities": [
+        {
+            "service": "HTTP",
+            "port": 80,
+            "vulnerability": "Server Info",
+            "severity": "info",
+            "details": "Status: 200, Server: Microsoft-IIS/10.0",
+            "exploitable": false
+        },
+        {
+            "service": "HTTP",
+            "port": 80,
+            "vulnerability": "Robots.txt found",
+            "severity": "low",
+            "details": "Robots.txt content available",
+            "exploitable": false
+        },
+        {
+            "service": "HTTP",
+            "port": 80,
+            "vulnerability": "Setup directory exposed",
+            "severity": "medium",
+            "details": "Setup directory is accessible",
+            "exploitable": true
+        },
+        {
+            "service": "POP3",
+            "port": 110,
+            "vulnerability": "POP3 Info",
+            "severity": "info",
+            "details": "+OK Welcome to MailEnable POP3 Server",
+            "exploitable": false
+        },
+        {
+            "service": "POP3",
+            "port": 110,
+            "vulnerability": "MailEnable POP3 Server",
+            "severity": "medium",
+            "details": "MailEnable POP3 server might have vulnerabilities",
+            "exploitable": true
+        },
+        {
+            "service": "IMAP",
+            "port": 143,
+            "vulnerability": "IMAP Info",
+            "severity": "info",
+            "details": "* OK IMAP4rev1 server ready at 04/13/25 09:07:38",
+            "exploitable": false
+        },
+        {
+            "service": "IMAP",
+            "port": 143,
+            "vulnerability": "IMAP4rev1 Server",
+            "severity": "low",
+            "details": "IMAP4rev1 server detected",
+            "exploitable": false
+        },
+        {
+            "service": "HTTP",
+            "port": 443,
+            "vulnerability": "Server Info",
+            "severity": "info",
+            "details": "Status: 200, Server: Microsoft-IIS/10.0",
+            "exploitable": false
+        },
+        {
+            "service": "HTTP",
+            "port": 443,
+            "vulnerability": "Robots.txt found",
+            "severity": "low",
+            "details": "Robots.txt content available",
+            "exploitable": false
+        },
+        {
+            "service": "HTTP",
+            "port": 443,
+            "vulnerability": "Setup directory exposed",
+            "severity": "medium",
+            "details": "Setup directory is accessible",
+            "exploitable": true
+        },
+        {
+            "service": "SMTP",
+            "port": 465,
+            "vulnerability": "Error testing SMTP service",
+            "severity": "info",
+            "details": "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1006)",
+            "exploitable": false
+        },
+        {
+            "service": "IMAP",
+            "port": 993,
+            "vulnerability": "IMAP Info",
+            "severity": "info",
+            "details": "* OK IMAP4rev1 server ready at 04/13/25 09:07:40",
+            "exploitable": false
+        },
+        {
+            "service": "IMAP",
+            "port": 993,
+            "vulnerability": "IMAP4rev1 Server",
+            "severity": "low",
+            "details": "IMAP4rev1 server detected",
+            "exploitable": false
+        },
+        {
+            "service": "POP3",
+            "port": 995,
+            "vulnerability": "POP3 Info",
+            "severity": "info",
+            "details": "+OK Welcome to MailEnable POP3 Server",
+            "exploitable": false
+        },
+        {
+            "service": "POP3",
+            "port": 995,
+            "vulnerability": "MailEnable POP3 Server",
+            "severity": "medium",
+            "details": "MailEnable POP3 server might have vulnerabilities",
+            "exploitable": true
+        },
+        {
+            "service": "MySQL",
+            "port": 3306,
+            "vulnerability": "MySQL Banner",
+            "severity": "info",
+            "details": "Banner: J\u0000\u0000\u0000\ufffdj\u0004Host '113.167.221.108' is not allowed to connect to this MariaDB server",
+            "exploitable": false
+        },
+        {
+            "service": "HTTP",
+            "port": 8443,
+            "vulnerability": "Server Info",
+            "severity": "info",
+            "details": "Status: 200, Server: Microsoft-IIS/10.0",
+            "exploitable": false
+        },
+        {
+            "service": "HTTP",
+            "port": 8443,
+            "vulnerability": "Robots.txt found",
+            "severity": "low",
+            "details": "Robots.txt content available",
+            "exploitable": false
+        },
+        {
+            "service": "HTTP",
+            "port": 8443,
+            "vulnerability": "Potential CSRF vulnerability",
+            "severity": "medium",
+            "details": "Form without proper CSRF protection detected",
+            "exploitable": true
+        }
+    ]
+}

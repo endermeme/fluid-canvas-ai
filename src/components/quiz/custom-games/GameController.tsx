@@ -7,7 +7,7 @@ import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
 import { Share2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { createGameSession } from '@/utils/gameParticipation';
+import { createGameSession } from '@/services/gameParticipation';
 import QuizContainer from '../QuizContainer';
 
 interface GameControllerProps {

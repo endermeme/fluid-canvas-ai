@@ -1,69 +1,77 @@
-# Welcome to your Lovable project
+# Vulnerability Exploitation Scripts
 
-## Project info
+Scripts để phát hiện và khai thác lỗ hổng bảo mật trên hệ thống.
 
-**URL**: https://lovable.dev/projects/1e7ed3d7-48a0-44cf-980d-3ec323cbe3b4
+## Nội dung
 
-## How can I edit this code?
+1. `pentest_script.py` - Script Python để quét lỗ hổng
+2. `exploit_vulnerabilities.sh` - Script Bash để thử khai thác các lỗ hổng đã phát hiện
 
-There are several ways of editing your application.
+## Cách sử dụng
 
-**Use Lovable**
+### Bước 1: Quét lỗ hổng với pentest_script.py
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1e7ed3d7-48a0-44cf-980d-3ec323cbe3b4) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+python pentest_script.py <target> -o scan_results.json
 ```
 
-**Edit a file directly in GitHub**
+Cài đặt các gói phụ thuộc trước khi chạy:
+```bash
+pip install -r requirements.txt
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Bước 2: Khai thác lỗ hổng với exploit_vulnerabilities.sh
 
-**Use GitHub Codespaces**
+```bash
+chmod +x exploit_vulnerabilities.sh
+./exploit_vulnerabilities.sh <target> exploit_results.json
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Yêu cầu
 
-## What technologies are used for this project?
+- Python 3.6+
+- Các công cụ Linux/Unix: curl, grep, sed
+- Tùy chọn (để có kết quả tốt hơn): mysql-client, openssl, nc/ncat
 
-This project is built with .
+## Lỗ hổng được kiểm tra
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. **Setup Directory Exposure** (Port 80, 443)
+   - Truy cập vào thư mục /setup/ và tìm thông tin nhạy cảm
 
-## How can I deploy this project?
+2. **MailEnable POP3 Vulnerabilities** (Port 110, 995)
+   - Dò tìm tài khoản hợp lệ
+   - Kiểm tra xác thực yếu
 
-Simply open [Lovable](https://lovable.dev/projects/1e7ed3d7-48a0-44cf-980d-3ec323cbe3b4) and click on Share -> Publish.
+3. **CSRF Vulnerability** (Port 8443)
+   - Tạo PoC form HTML để thử nghiệm tấn công CSRF
+   - Phân tích main.js để tìm targets
 
-## I want to use a custom domain - is that possible?
+4. **MariaDB Exploitation** (Port 3306)
+   - Thử mật khẩu mặc định/yếu
+   - Lấy thông tin banner
+   - Kiểm tra cơ chế kiểm soát truy cập
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## Lưu ý bảo mật
+
+⚠️ **CẢNH BÁO**: Chỉ sử dụng các scripts này trên hệ thống mà bạn có quyền kiểm thử. Việc thực hiện quét/khai thác trái phép có thể vi phạm luật bảo mật máy tính.
+
+## Kết quả
+
+Kết quả khai thác sẽ được lưu vào file JSON với cấu trúc:
+
+```json
+{
+  "target": "example.com",
+  "scan_date": "2025-04-13 10:00:00",
+  "exploitation_results": [
+    {
+      "vulnerability": "Setup Directory Exposure",
+      "port": 80,
+      "success": true,
+      "details": "Setup directory contains sensitive files...",
+      "exploit_commands": "curl -k http://example.com/setup/ -o setup_port80.html"
+    },
+    ...
+  ]
+}
+```

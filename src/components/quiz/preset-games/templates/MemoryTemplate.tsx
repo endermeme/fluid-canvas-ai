@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, Clock, Trophy, Lightbulb, ArrowLeft, Share2 } from 'lucide-react';
-import { saveGameForSharing } from '@/utils/gameExport';
+import { saveGameForSharing } from '@/services/storage';
 
 interface MemoryTemplateProps {
   content: any;
@@ -173,7 +173,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     try {
       const gameContent = `
         <html>
@@ -365,27 +365,27 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
         </html>
       `;
       
-      const shareUrl = saveGameForSharing(
-        content.title || "Trò chơi ghi nhớ", 
-        topic, 
+      const shareUrl = await saveGameForSharing(
+        content.title || `Trò chơi ghi nhớ - ${topic}`,
+        `Trò chơi ghi nhớ với chủ đề "${topic}". Ghép các cặp thẻ giống nhau.`,
         gameContent
       );
       
       if (shareUrl) {
         navigator.clipboard.writeText(shareUrl);
         toast({
-          title: "Link chia sẻ đã được sao chép",
-          description: "Đã sao chép liên kết vào clipboard. Link có hiệu lực trong 48 giờ.",
+          title: "Đã chia sẻ!",
+          description: "Liên kết đã được sao chép vào clipboard.",
         });
       } else {
-        throw new Error("Không thể tạo URL chia sẻ");
+        throw new Error("Không thể tạo liên kết chia sẻ");
       }
     } catch (error) {
-      console.error("Lỗi khi chia sẻ:", error);
+      console.error("Lỗi khi chia sẻ trò chơi:", error);
       toast({
         title: "Lỗi chia sẻ",
-        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
-        variant: "destructive",
+        description: "Không thể chia sẻ trò chơi. Vui lòng thử lại sau.",
+        variant: "destructive"
       });
     }
   };

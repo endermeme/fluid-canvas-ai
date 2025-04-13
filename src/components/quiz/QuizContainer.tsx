@@ -1,12 +1,13 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Home, RefreshCw, Settings, ArrowLeft, PlusCircle, GameController, History, SparklesIcon } from 'lucide-react';
+import { Home, RefreshCw, Settings, ArrowLeft, PlusCircle, GameController, History, SparklesIcon, Share } from 'lucide-react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import GameSettings from './GameSettings';
 import GameView from './GameView';
 import QuizGenerator from './QuizGenerator';
 import { useToast } from '@/hooks/use-toast';
 import NotificationsMenu from './share/NotificationsMenu';
+import GameShareButtons from './share/GameShareButtons';
 
 interface QuizContainerProps {
   children: React.ReactNode;
@@ -109,6 +110,15 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
           </nav>
           
           <div className="ml-auto flex items-center gap-2">
+            {/* Nút chia sẻ hiển thị nếu có URL trong query params */}
+            {location.search && location.search.includes('game=') && (
+              <GameShareButtons 
+                gameId="current-game"
+                title="Game hiện tại"
+                variant="icon"
+              />
+            )}
+            
             <NotificationsMenu />
             
             <Button 

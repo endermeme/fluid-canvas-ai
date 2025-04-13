@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, ArrowUp, ArrowDown, Check, Clock, Shuffle, Lightbulb, ArrowLeft, Share2 } from 'lucide-react';
-import { saveGameForSharing } from '@/utils/gameExport';
+import { saveGameForSharing } from '@/services/storage';
 
 interface OrderingTemplateProps {
   content: any;
@@ -204,69 +204,68 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     try {
       const gameContent = `
         <html>
         <head>
-          <title>${content.title || "Trò chơi sắp xếp thứ tự"}</title>
+          <title>${content.title || "Sắp xếp thứ tự"}</title>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
-            body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 20px; background: #f9f9ff; }
+            body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; background: #f5f7ff; }
             .container { max-width: 800px; margin: 0 auto; }
             .game-title { text-align: center; margin-bottom: 20px; }
-            .game-description { text-align: center; margin-bottom: 20px; color: #666; }
-            .ordered-area { min-height: 100px; padding: 15px; background: white; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px dashed #6366f1; }
-            .words-area { padding: 15px; background: #f0f0f8; border-radius: 8px; margin-bottom: 15px; }
-            .word { display: inline-block; margin: 5px; padding: 8px 16px; background: #6366f1; color: white; border-radius: 4px; cursor: pointer; }
-            .ordered-word { display: inline-block; margin: 5px; padding: 8px 16px; background: white; color: #6366f1; border: 1px solid #6366f1; border-radius: 4px; cursor: pointer; }
-            .controls { display: flex; justify-content: space-between; }
-            .button { padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-            .button:hover { background: #f0f0f0; }
-            .check-button { background: #6366f1; color: white; border: none; }
-            .check-button:hover { background: #5254c5; }
-            .progress { height: 8px; background: #eee; border-radius: 4px; margin-bottom: 15px; overflow: hidden; }
-            .progress-bar { height: 100%; background: #6366f1; transition: width 0.3s; }
-            .timer { padding: 8px 16px; background: white; border-radius: 20px; display: inline-block; margin-bottom: 15px; }
-            .result-screen { text-align: center; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin: 20px auto; max-width: 500px; }
-            .score { font-size: 24px; font-weight: bold; margin: 20px 0; }
-            .footer { margin-top: 20px; text-align: center; }
+            .items-container { margin-bottom: 20px; }
+            .item { background: white; border: 2px solid #6366f1; border-radius: 8px; padding: 15px; margin-bottom: 10px; cursor: move; transition: transform 0.2s, box-shadow 0.2s; }
+            .item:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(0,0,0,0.1); }
+            .item.correct { border-color: #10b981; background: #d1fae5; }
+            .item.incorrect { border-color: #ef4444; background: #fee2e2; }
+            .controls { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
+            .button { padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+            .result-panel { background: white; border-radius: 10px; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none; }
+            .result-panel.visible { display: block; }
+            .trophy { width: 60px; height: 60px; margin: 0 auto 15px; color: #eab308; }
+            .message { font-size: 24px; font-weight: bold; margin-bottom: 15px; }
+            .score { font-size: 18px; margin-bottom: 20px; }
+            .dragging { opacity: 0.5; }
+            .drag-over { border-top: 2px dashed #6366f1; }
+            .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #6b7280; }
           </style>
         </head>
         <body>
-          <div class="container" id="game-container">
+          <div class="container">
             <h2 class="game-title">${content.title || topic}</h2>
             
-            <div class="progress">
-              <div class="progress-bar" id="progress-bar" style="width: ${100 / sentences.length}%;"></div>
+            <div id="instructions" style="background: #e0e7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+              <p style="margin: 0;">${content?.instructions || "Kéo và thả các mục để sắp xếp chúng theo đúng thứ tự."}</p>
             </div>
             
-            <div class="timer" id="timer">
-              <span id="minutes">3</span>:<span id="seconds">00</span>
-            </div>
-            
-            <h3 class="game-description">Sắp xếp các từ theo đúng thứ tự</h3>
-            
-            <div class="ordered-area" id="ordered-area">
-              <!-- Ordered words will go here -->
-            </div>
-            
-            <div class="words-area" id="words-area">
-              ${sentences[0]?.words.map((word: string) => 
-                `<span class="word">${word}</span>`
+            <div class="items-container" id="items-container">
+              ${content.items.map((item, i) => 
+                `<div class="item" draggable="true" data-index="${i}">${item.content}</div>`
               ).join('')}
             </div>
             
             <div class="controls">
-              <button class="button" id="shuffle-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/><path d="m18 14 4 4-4 4"/></svg>
-                Xáo trộn
+              <button class="button" id="check-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                Kiểm tra
               </button>
               
-              <button class="button check-button" id="check-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                Kiểm tra
+              <button class="button" id="reset-btn" style="background: #6b7280;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/></svg>
+                Làm lại
+              </button>
+            </div>
+            
+            <div class="result-panel" id="result-panel">
+              <svg xmlns="http://www.w3.org/2000/svg" class="trophy" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+              <div class="message" id="result-message">Chúc mừng!</div>
+              <div class="score" id="result-score">Bạn đã hoàn thành đúng thứ tự.</div>
+              <button class="button" id="play-again-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/></svg>
+                Chơi lại
               </button>
             </div>
             
@@ -275,229 +274,149 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
             </div>
           </div>
           
-          <div id="result-container" style="display: none;">
-            <div class="result-screen">
-              <h2 id="result-title">Kết quả</h2>
-              <p>Chủ đề: <span class="font-semibold">${content.title || topic}</span></p>
-              
-              <div class="score">
-                <span id="score">0</span> / <span id="total">${sentences.length}</span>
-              </div>
-              
-              <div class="progress" style="margin-bottom: 30px;">
-                <div class="progress-bar" id="result-progress-bar" style="width: 0%;"></div>
-              </div>
-              
-              <button class="button check-button" id="restart-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
-                Làm lại
-              </button>
-            </div>
-          </div>
-          
           <script>
             document.addEventListener('DOMContentLoaded', function() {
-              const sentences = ${JSON.stringify(sentences)};
-              let currentSentence = 0;
-              let score = 0;
-              let orderedWords = [];
-              let timeLeft = ${content?.settings?.timeLimit || 180};
-              let timer;
-              
-              const orderedArea = document.getElementById('ordered-area');
-              const wordsArea = document.getElementById('words-area');
-              const progressBar = document.getElementById('progress-bar');
-              const shuffleBtn = document.getElementById('shuffle-btn');
+              const container = document.getElementById('items-container');
+              const items = Array.from(container.querySelectorAll('.item'));
               const checkBtn = document.getElementById('check-btn');
-              const minutesElement = document.getElementById('minutes');
-              const secondsElement = document.getElementById('seconds');
-              const gameContainer = document.getElementById('game-container');
-              const resultContainer = document.getElementById('result-container');
-              const scoreElement = document.getElementById('score');
-              const totalElement = document.getElementById('total');
-              const resultProgressBar = document.getElementById('result-progress-bar');
-              const restartBtn = document.getElementById('restart-btn');
+              const resetBtn = document.getElementById('reset-btn');
+              const resultPanel = document.getElementById('result-panel');
+              const resultMessage = document.getElementById('result-message');
+              const resultScore = document.getElementById('result-score');
+              const playAgainBtn = document.getElementById('play-again-btn');
               
-              // Initialize words
-              function initializeWords() {
-                // Update progress
-                progressBar.style.width = \`\${((currentSentence + 1) / sentences.length) * 100}%\`;
-                
-                // Clear areas
-                orderedArea.innerHTML = '';
-                wordsArea.innerHTML = '';
-                orderedWords = [];
-                
-                // Add words to the words area
-                sentences[currentSentence].words.forEach(word => {
-                  const wordElement = document.createElement('span');
-                  wordElement.className = 'word';
-                  wordElement.textContent = word;
-                  wordElement.addEventListener('click', function() {
-                    moveToOrdered(word, this);
-                  });
-                  wordsArea.appendChild(wordElement);
-                });
+              // Shuffle items on load
+              shuffleItems();
+              
+              // Set up drag and drop
+              items.forEach(item => {
+                item.addEventListener('dragstart', dragStart);
+                item.addEventListener('dragover', dragOver);
+                item.addEventListener('dragleave', dragLeave);
+                item.addEventListener('drop', drop);
+                item.addEventListener('dragend', dragEnd);
+              });
+              
+              // Check order button
+              checkBtn.addEventListener('click', checkOrder);
+              
+              // Reset button
+              resetBtn.addEventListener('click', resetGame);
+              
+              // Play again button
+              playAgainBtn.addEventListener('click', resetGame);
+              
+              let draggedItem = null;
+              
+              function dragStart() {
+                draggedItem = this;
+                setTimeout(() => this.classList.add('dragging'), 0);
               }
               
-              function moveToOrdered(word, element) {
-                element.remove();
-                
-                const orderedWordElement = document.createElement('span');
-                orderedWordElement.className = 'ordered-word';
-                orderedWordElement.textContent = word;
-                orderedWordElement.addEventListener('click', function() {
-                  moveToWords(word, this);
-                });
-                
-                orderedArea.appendChild(orderedWordElement);
-                orderedWords.push(word);
+              function dragOver(e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
               }
               
-              function moveToWords(word, element) {
-                element.remove();
-                
-                const wordElement = document.createElement('span');
-                wordElement.className = 'word';
-                wordElement.textContent = word;
-                wordElement.addEventListener('click', function() {
-                  moveToOrdered(word, this);
-                });
-                
-                wordsArea.appendChild(wordElement);
-                
-                // Remove from ordered words
-                const index = orderedWords.indexOf(word);
-                if (index !== -1) {
-                  orderedWords.splice(index, 1);
-                }
+              function dragLeave() {
+                this.classList.remove('drag-over');
               }
               
-              function shuffleWords() {
-                const words = Array.from(wordsArea.children);
-                for (let i = words.length - 1; i > 0; i--) {
-                  const j = Math.floor(Math.random() * (i + 1));
-                  wordsArea.appendChild(words[j]);
-                }
-              }
-              
-              function checkAnswer() {
-                if (orderedWords.length !== sentences[currentSentence].words.length) {
-                  alert('Hãy sắp xếp tất cả các từ trước khi kiểm tra.');
-                  return;
-                }
-                
-                const correctOrder = sentences[currentSentence].correctOrder;
-                const originalWords = sentences[currentSentence].words;
-                
-                let isCorrect = true;
-                for (let i = 0; i < correctOrder.length; i++) {
-                  if (orderedWords[i] !== originalWords[correctOrder[i]]) {
-                    isCorrect = false;
-                    break;
+              function drop() {
+                this.classList.remove('drag-over');
+                if (this !== draggedItem) {
+                  const allItems = Array.from(container.querySelectorAll('.item'));
+                  const draggedIndex = allItems.indexOf(draggedItem);
+                  const targetIndex = allItems.indexOf(this);
+                  
+                  if (draggedIndex < targetIndex) {
+                    this.parentNode.insertBefore(draggedItem, this.nextSibling);
+                  } else {
+                    this.parentNode.insertBefore(draggedItem, this);
                   }
                 }
+              }
+              
+              function dragEnd() {
+                this.classList.remove('dragging');
+              }
+              
+              function shuffleItems() {
+                const itemsArray = Array.from(items);
+                for (let i = itemsArray.length - 1; i > 0; i--) {
+                  const j = Math.floor(Math.random() * (i + 1));
+                  container.appendChild(itemsArray[j]);
+                }
+              }
+              
+              function checkOrder() {
+                const currentOrder = Array.from(container.querySelectorAll('.item'))
+                  .map(item => parseInt(item.dataset.index));
+                
+                const correctOrder = ${JSON.stringify(content.items.map((_, i) => i))};
+                let isCorrect = true;
+                
+                currentOrder.forEach((index, position) => {
+                  const item = container.querySelectorAll('.item')[position];
+                  
+                  if (index === correctOrder[position]) {
+                    item.classList.add('correct');
+                    item.classList.remove('incorrect');
+                  } else {
+                    item.classList.add('incorrect');
+                    item.classList.remove('correct');
+                    isCorrect = false;
+                  }
+                });
                 
                 if (isCorrect) {
-                  score++;
-                  alert('Chính xác!');
+                  resultMessage.textContent = 'Chúc mừng!';
+                  resultScore.textContent = 'Bạn đã hoàn thành đúng thứ tự.';
                 } else {
-                  alert('Chưa chính xác!');
+                  resultMessage.textContent = 'Chưa chính xác!';
+                  resultScore.textContent = 'Vui lòng kiểm tra lại các mục đang sai thứ tự.';
                 }
                 
-                // Move to next sentence or show results
-                setTimeout(() => {
-                  if (currentSentence < sentences.length - 1) {
-                    currentSentence++;
-                    initializeWords();
-                  } else {
-                    showResults();
-                  }
-                }, 500);
+                resultPanel.classList.add('visible');
               }
               
-              function updateTimer() {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
+              function resetGame() {
+                const allItems = container.querySelectorAll('.item');
+                allItems.forEach(item => {
+                  item.classList.remove('correct', 'incorrect');
+                });
                 
-                minutesElement.textContent = minutes;
-                secondsElement.textContent = seconds < 10 ? \`0\${seconds}\` : seconds;
-                
-                if (timeLeft <= 0) {
-                  clearInterval(timer);
-                  showResults();
-                } else {
-                  timeLeft--;
-                }
+                shuffleItems();
+                resultPanel.classList.remove('visible');
               }
-              
-              function showResults() {
-                clearInterval(timer);
-                
-                gameContainer.style.display = 'none';
-                resultContainer.style.display = 'block';
-                
-                const percentage = Math.round((score / sentences.length) * 100);
-                
-                scoreElement.textContent = score;
-                totalElement.textContent = sentences.length;
-                resultProgressBar.style.width = \`\${percentage}%\`;
-                
-                document.getElementById('result-title').textContent = percentage >= 70 
-                  ? 'Chúc mừng!' 
-                  : 'Kết quả';
-              }
-              
-              function restart() {
-                score = 0;
-                currentSentence = 0;
-                timeLeft = ${content?.settings?.timeLimit || 180};
-                
-                gameContainer.style.display = 'block';
-                resultContainer.style.display = 'none';
-                
-                initializeWords();
-                clearInterval(timer);
-                timer = setInterval(updateTimer, 1000);
-                updateTimer();
-              }
-              
-              // Set up event listeners
-              shuffleBtn.addEventListener('click', shuffleWords);
-              checkBtn.addEventListener('click', checkAnswer);
-              restartBtn.addEventListener('click', restart);
-              
-              // Initialize the game
-              initializeWords();
-              timer = setInterval(updateTimer, 1000);
-              updateTimer();
             });
           </script>
         </body>
         </html>
       `;
       
-      const shareUrl = saveGameForSharing(
-        content.title || "Trò chơi sắp xếp thứ tự", 
-        topic, 
+      const shareUrl = await saveGameForSharing(
+        content.title || `Trò chơi sắp xếp thứ tự - ${topic}`,
+        `Sắp xếp các mục theo đúng thứ tự với chủ đề "${topic}".`,
         gameContent
       );
       
       if (shareUrl) {
         navigator.clipboard.writeText(shareUrl);
         toast({
-          title: "Link chia sẻ đã được sao chép",
-          description: "Đã sao chép liên kết vào clipboard. Link có hiệu lực trong 48 giờ.",
+          title: "Đã chia sẻ!",
+          description: "Liên kết đã được sao chép vào clipboard.",
+          variant: "default",
         });
       } else {
-        throw new Error("Không thể tạo URL chia sẻ");
+        throw new Error("Không thể tạo liên kết chia sẻ");
       }
     } catch (error) {
-      console.error("Lỗi khi chia sẻ:", error);
+      console.error("Lỗi khi chia sẻ trò chơi:", error);
       toast({
         title: "Lỗi chia sẻ",
-        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
-        variant: "destructive",
+        description: "Không thể chia sẻ trò chơi. Vui lòng thử lại sau.",
+        variant: "destructive"
       });
     }
   };

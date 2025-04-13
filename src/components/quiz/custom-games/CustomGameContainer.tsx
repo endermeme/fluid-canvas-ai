@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -12,7 +11,7 @@ import {
   Gamepad
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { createGameSession } from '@/utils/gameParticipation';
+import { createGameSession } from '@/services/gameParticipation';
 import { useToast } from '@/hooks/use-toast';
 import QuizContainer from '../QuizContainer';
 

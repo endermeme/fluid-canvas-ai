@@ -11,6 +11,7 @@ import { GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
 import { storeGame } from '@/services/storage';
 import { uploadGameToVps, generateThumbnail } from '@/services/vpsStorage';
+import { shareGameToVps } from '@/services/storage';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
@@ -131,29 +132,10 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       
       if (game) {
         // Thông báo đang lưu trữ game
-        setGenerationStep('Đang lưu trữ game lên VPS...');
+        setGenerationStep('Đang lưu trữ game trên VPS...');
         
-        // Lưu game và metadata vào storage service
-        const storedGame = storeGame(game, true);
-        
-        // Upload lên VPS (giả lập)
-        setGenerationStep('Đang tải game lên server...');
-        const vpsResponse = await uploadGameToVps(game.content, {
-          title: game.title,
-          description: game.description || content
-        });
-        
-        // Tạo thumbnail
-        if (vpsResponse.success) {
-          setGenerationStep('Đang tạo hình thu nhỏ...');
-          const thumbnail = await generateThumbnail(game.content, vpsResponse.data.gameId);
-          
-          // Cập nhật link chia sẻ và thumbnail từ VPS
-          if (storedGame) {
-            storedGame.shareUrl = vpsResponse.data.shareUrl;
-            storedGame.thumbnailUrl = thumbnail;
-          }
-        }
+        // Lưu game lên VPS sử dụng storage service mới
+        const savedGame = await shareGameToVps(game, 'custom', game.title);
         
         toast({
           title: "Đã tạo trò chơi",

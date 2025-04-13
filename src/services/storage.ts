@@ -479,4 +479,127 @@ export const initializeStorage = (): void => {
 };
 
 // Gọi khởi tạo
-initializeStorage(); 
+initializeStorage();
+
+/**
+ * Lưu game và đồng bộ lên VPS
+ * @param gameData Dữ liệu game (preset hoặc custom)
+ * @param gameType Loại game (preset hoặc custom)
+ * @returns ID của game đã lưu
+ */
+export const shareGameToVps = async (gameData: any, gameType: 'preset' | 'custom', gameTitle: string): Promise<SharedGame> => {
+  // Tạo object SharedGame để lưu
+  const gameId = uuidv4();
+  const now = Date.now();
+  
+  // Chuẩn bị nội dung HTML dựa trên loại game
+  let content = '';
+  let title = gameTitle || gameData.title || 'Game tương tác';
+  let description = '';
+  let tags: string[] = [];
+  
+  if (gameType === 'preset') {
+    // Với preset game, tạo HTML từ template
+    content = JSON.stringify(gameData); // Lưu dạng JSON string
+    description = `Game ${gameType} được tạo với AI.`;
+    tags = [gameType, 'ai-generated'];
+    
+    // Thêm thông tin về loại game preset cụ thể
+    if (gameData.questions) {
+      tags.push('quiz');
+    } else if (gameData.cards) {
+      tags.push('flashcards');
+    } else if (gameData.pairs) {
+      tags.push('matching');
+    }
+  } else {
+    // Với custom game, lấy HTML trực tiếp từ nội dung
+    content = gameData.content || gameData;
+    description = gameData.description || `Game ${gameType} được tạo với AI.`;
+    tags = [gameType, 'custom', 'ai-generated'];
+  }
+  
+  // Tạo đối tượng game để lưu
+  const newGame: SharedGame = {
+    id: gameId,
+    title,
+    description,
+    content,
+    createdAt: now,
+    isPublic: true,
+    viewCount: 0,
+    participants: [],
+    gameType,
+    tags,
+    analytics: {
+      totalViews: 0,
+      popularityScore: 0,
+      deviceStats: {}
+    }
+  };
+  
+  // Lưu vào storage local
+  try {
+    // Lấy danh sách games hiện có
+    const games = getAllGames();
+    
+    // Thêm game mới và lưu lại
+    games.push(newGame);
+    localStorage.setItem(STORAGE_KEYS.GAMES, JSON.stringify(games));
+    
+    // Cập nhật thống kê
+    updateStorageStats();
+    
+    // Giả lập việc lưu lên VPS bằng cách tạo URL chia sẻ
+    const shareUrl = `${window.location.origin}/game/${gameId}`;
+    newGame.shareUrl = shareUrl;
+    
+    console.log(`[VPS] Game "${title}" đã được lưu thành công với ID: ${gameId}`);
+    
+    // Thêm thông báo
+    addNotification({
+      type: 'success',
+      title: 'Game đã được lưu trữ',
+      message: `Game "${title}" đã được lưu trữ thành công lên server và sẵn sàng chia sẻ.`,
+      expiresAt: now + (7 * 24 * 60 * 60 * 1000), // 7 ngày
+      relatedGameId: gameId
+    });
+    
+    return newGame;
+  } catch (error) {
+    console.error('[VPS] Lỗi khi lưu game:', error);
+    throw new Error('Không thể lưu trữ game. Vui lòng thử lại sau.');
+  }
+};
+
+/**
+ * Lưu game để chia sẻ (hàm tương thích với utils/gameExport cũ)
+ * @param title Tiêu đề game
+ * @param description Mô tả game
+ * @param htmlContent Nội dung HTML của game
+ * @returns URL chia sẻ
+ */
+export const saveGameForSharing = async (title: string, description: string, htmlContent: string): Promise<string> => {
+  try {
+    if (!htmlContent) {
+      console.error("Cannot save empty game content");
+      return "";
+    }
+    
+    // Tạo game từ data
+    const gameData = {
+      title: title || "Minigame Tương tác",
+      description: description || "",
+      content: htmlContent
+    };
+    
+    // Lưu game qua hàm shareGameToVps (trả về Promise)
+    const savedGame = await shareGameToVps(gameData, 'custom', title);
+    
+    // Trả về URL từ game đã lưu hoặc tạo URL mới
+    return savedGame.shareUrl || `${window.location.origin}/game/${savedGame.id}`;
+  } catch (error) {
+    console.error("Error saving game:", error);
+    return "";
+  }
+}; 

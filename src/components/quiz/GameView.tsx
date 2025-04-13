@@ -1,9 +1,8 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
 import { Share2, Home, RefreshCw, Trophy, ArrowLeft } from 'lucide-react';
-import { saveGameForSharing } from '@/utils/gameExport';
+import { saveGameForSharing } from '@/services/storage';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,33 +34,34 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
     }
   }, [miniGame]);
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (shareInProgress) return;
     
     try {
       setShareInProgress(true);
-      const shareUrl = saveGameForSharing(
+      const shareUrl = await saveGameForSharing(
         miniGame.title || "Minigame tương tác",
         "", // Empty description
         miniGame.content
       );
       
-      if (!shareUrl) {
-        throw new Error("Không thể tạo URL chia sẻ");
+      if (shareUrl) {
+        navigator.clipboard.writeText(shareUrl);
+        
+        toast({
+          title: "Đã chia sẻ!",
+          description: "Liên kết đã được sao chép vào clipboard.",
+          variant: "default",
+        });
+      } else {
+        throw new Error("Không thể tạo liên kết chia sẻ");
       }
-      
-      navigator.clipboard.writeText(shareUrl);
-      
-      toast({
-        title: "Link Chia Sẻ Đã Được Sao Chép",
-        description: "Đã sao chép liên kết vào clipboard. Link có hiệu lực trong 48 giờ.",
-      });
     } catch (error) {
-      console.error("Share error:", error);
+      console.error("Lỗi khi chia sẻ game:", error);
       toast({
-        title: "Lỗi Chia Sẻ",
-        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
-        variant: "destructive",
+        title: "Lỗi chia sẻ",
+        description: "Không thể chia sẻ game. Vui lòng thử lại sau.",
+        variant: "destructive"
       });
     } finally {
       setShareInProgress(false);
