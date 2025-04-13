@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Home, RefreshCw, Settings, ArrowLeft, PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { cn } from "@/lib/utils";
 
 interface QuizContainerProps {
   children: React.ReactNode;
@@ -18,6 +19,7 @@ interface QuizContainerProps {
   onCreate?: () => void;
   footerContent?: React.ReactNode;
   headerRight?: React.ReactNode;
+  className?: string;
 }
 
 const QuizContainer: React.FC<QuizContainerProps> = ({
@@ -33,7 +35,8 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
   onSettings,
   onCreate,
   footerContent,
-  headerRight
+  headerRight,
+  className
 }) => {
   const navigate = useNavigate();
   
@@ -62,7 +65,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
   };
 
   return (
-    <div className="relative h-full w-full flex flex-col bg-gradient-to-b from-background to-background/95 shadow-lg rounded-lg overflow-hidden">
+    <div className={cn("relative h-full w-full flex flex-col bg-gradient-to-b from-background to-background/95 shadow-lg rounded-lg overflow-hidden", className)}>
       {/* Header */}
       <div className="flex justify-between items-center bg-background/80 backdrop-blur-md p-3 border-b border-primary/10 shadow-sm">
         <div className="flex items-center gap-2">
