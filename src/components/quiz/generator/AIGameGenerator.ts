@@ -1,18 +1,22 @@
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
-import { generateWithGemini, tryGeminiGeneration } from './geminiGenerator';
+import { tryGeminiGeneration } from './geminiGenerator';
 import { logInfo, logError } from './apiUtils';
-import { GEMINI_API_KEY, GEMINI_MODELS, API_VERSION, API_BASE_URL } from '@/constants/api-constants';
+import { 
+  GEMINI_API_KEY, 
+  GEMINI_MODELS, 
+  API_VERSION, 
+  API_BASE_URL,
+  getApiEndpoint,
+  DEFAULT_GENERATION_SETTINGS
+} from '@/constants/api-constants';
 
 /**
  * API client for generating minigames with AI
  */
 export class AIGameGenerator {
   private static instance: AIGameGenerator;
-  private genAI: GoogleGenerativeAI;
-  private model: any;
   private useCanvas: boolean = false;
 
   /**
@@ -20,15 +24,6 @@ export class AIGameGenerator {
    * @param apiKey Google API key for Gemini
    */
   constructor(apiKey: string = GEMINI_API_KEY) {
-    // Initialize GoogleGenerativeAI with only the API key
-    this.genAI = new GoogleGenerativeAI(apiKey);
-    
-    // Configure the model with the correct model name only
-    // The ModelParams type doesn't accept apiVersion as a property
-    this.model = this.genAI.getGenerativeModel({ 
-      model: GEMINI_MODELS.DEFAULT
-    });
-    
     logInfo('AIGameGenerator', `Initialized with model: ${GEMINI_MODELS.DEFAULT} on API version: ${API_VERSION}`);
   }
 
@@ -68,11 +63,99 @@ export class AIGameGenerator {
         return htmlGame;
       }
       
-      // If no custom game, try normal minigame generation
-      return await tryGeminiGeneration(this.model, topic, settings);
+      // If no custom game, try normal minigame generation using the direct API
+      return await this.generateDirectApiGame(topic, settings);
     } catch (error) {
       logError('AIGameGenerator', 'Error generating minigame', error);
       throw error;
+    }
+  }
+
+  /**
+   * Generate a game directly using the Gemini API without libraries
+   * @param topic User topic for game generation
+   * @param settings Optional game settings
+   * @returns Promise with generated game or null
+   */
+  private async generateDirectApiGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
+    try {
+      const prompt = `
+Create an HTML game based on this topic: "${topic}"
+
+Requirements:
+- Create a fun, interactive game that works in a browser
+- Use HTML, CSS, and JavaScript only (no external libraries)
+- The game should be fully self-contained in a single HTML file
+- Make the game visually appealing and user-friendly
+- Include a title, instructions, and scoring system
+- Handle all user interactions and game logic
+- Make sure the game is responsive and works on different screen sizes
+- Add appropriate error handling
+
+Return only the complete HTML code with inline CSS and JavaScript.
+`;
+
+      // Log important information
+      console.log('User request prompt:', topic);
+      console.log('Using model:', GEMINI_MODELS.DEFAULT);
+      console.log('API version:', API_VERSION);
+      console.log('API endpoint:', getApiEndpoint());
+      
+      // Create request payload
+      const payload = {
+        contents: [{
+          parts: [{text: prompt}]
+        }],
+        generationConfig: DEFAULT_GENERATION_SETTINGS
+      };
+      
+      // Make direct API call using fetch
+      const response = await fetch(getApiEndpoint(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      // Check if response was successful
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+      
+      // Parse response
+      const result = await response.json();
+      const textContent = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      
+      if (!textContent) {
+        throw new Error('No content returned from API');
+      }
+      
+      // Extract title from HTML
+      let title = topic;
+      const titleMatch = textContent.match(/<title>(.*?)<\/title>/i) || 
+                        textContent.match(/<h1[^>]*>(.*?)<\/h1>/i);
+      
+      if (titleMatch && titleMatch[1]) {
+        title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
+      }
+      
+      // Create MiniGame object
+      const game: MiniGame = {
+        title: title,
+        content: textContent
+      };
+      
+      logInfo('AIGameGenerator', 'Game generated successfully', {
+        title: title,
+        contentSize: textContent.length
+      });
+      
+      return game;
+    } catch (error) {
+      logError('AIGameGenerator', 'Error generating with direct API call', error);
+      return null;
     }
   }
 
@@ -123,20 +206,42 @@ CANVAS MODE REQUIREMENTS:
 RESPOND ONLY WITH THE HTML CODE. NO EXPLANATIONS OR MARKDOWN FORMATTING.
 `;
 
+      // Log API request details for debugging
       console.log('User request prompt:', prompt);
       console.log('Using model:', GEMINI_MODELS.DEFAULT);
       console.log('API version:', API_VERSION);
       console.log('System instructions:', htmlPrompt.substring(0, 200) + '...');
-      console.log('API endpoint:', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.DEFAULT}:generateContent`);
-
-      // Generate the game content with Gemini
-      const result = await this.model.generateContent({
+      console.log('API endpoint:', getApiEndpoint());
+      
+      // Create payload
+      const payload = {
         contents: [{
           parts: [{text: htmlPrompt}]
-        }]
+        }],
+        generationConfig: DEFAULT_GENERATION_SETTINGS
+      };
+      
+      // Make API call
+      const response = await fetch(getApiEndpoint(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
       });
-      const response = await result.response;
-      const htmlContent = response.text();
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+      
+      // Parse response
+      const result = await response.json();
+      const htmlContent = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      
+      if (!htmlContent) {
+        throw new Error('No content returned from API');
+      }
       
       // Extract a title from the HTML (first h1 or title tag)
       let gameTitle = prompt;

@@ -6,19 +6,22 @@ import {
   logInfo, logError, logWarning, logSuccess, 
   measureExecutionTime
 } from './apiUtils';
-import { GEMINI_MODELS, API_VERSION } from '@/constants/api-constants';
+import { 
+  GEMINI_MODELS, 
+  API_VERSION, 
+  getApiEndpoint,
+  DEFAULT_GENERATION_SETTINGS 
+} from '@/constants/api-constants';
 
 const SOURCE = "GEMINI";
 
 /**
- * Generates a game using Google's Gemini API
- * @param model Gemini model instance
+ * Generates a game using direct API calls to Google's Gemini API
  * @param topic Topic for the game
  * @param settings Optional game settings
  * @returns MiniGame object or null if generation fails
  */
 export const generateWithGemini = async (
-  model: any, 
   topic: string, 
   settings?: GameSettingsData
 ): Promise<MiniGame | null> => {
@@ -53,18 +56,40 @@ Return only the complete HTML code with inline CSS and JavaScript.
     logInfo(SOURCE, `Sending request to Gemini API using model ${GEMINI_MODELS.DEFAULT} (${API_VERSION})`);
     
     const startTime = Date.now();
-    const result = await model.generateContent({
+    
+    // Create payload
+    const payload = {
       contents: [{
         parts: [{text: prompt}]
-      }]
+      }],
+      generationConfig: DEFAULT_GENERATION_SETTINGS
+    };
+    
+    // Make API call
+    const response = await fetch(getApiEndpoint(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload)
     });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    
+    // Parse response
+    const result = await response.json();
+    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    
+    if (!text) {
+      throw new Error('No content returned from API');
+    }
+    
     const duration = measureExecutionTime(startTime);
     
     logSuccess(SOURCE, `Response received in ${duration.seconds}s (${duration.ms}ms)`);
-    
-    const response = result.response;
-    const text = response.text();
-    
     logInfo(SOURCE, `Response length: ${text.length} characters`);
     
     // Extract title from HTML
@@ -96,7 +121,7 @@ Return only the complete HTML code with inline CSS and JavaScript.
 
 /**
  * Attempts to generate a game with Gemini, with retries on failure
- * @param model Gemini model instance
+ * @param model This parameter is no longer used but kept for compatibility
  * @param topic Topic for the game
  * @param settings Optional game settings
  * @param retryCount Current retry count (internal use)
@@ -117,7 +142,7 @@ export const tryGeminiGeneration = async (
   
   try {
     logInfo(SOURCE, `Attempt ${retryCount + 1} for topic: "${topic}"`);
-    return await generateWithGemini(model, topic, settings);
+    return await generateWithGemini(topic, settings);
   } catch (error) {
     logError(SOURCE, `Attempt ${retryCount + 1} failed`, error);
     
@@ -133,6 +158,6 @@ export const tryGeminiGeneration = async (
       ''
     );
     
-    return tryGeminiGeneration(model, topic, settings, retryCount + 1);
+    return tryGeminiGeneration(null, topic, settings, retryCount + 1);
   }
 };
