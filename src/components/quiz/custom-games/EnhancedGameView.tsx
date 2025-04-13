@@ -11,13 +11,15 @@ interface EnhancedGameViewProps {
   onBack?: () => void;
   onNewGame?: () => void;
   onShare?: () => void;
+  extraButton?: React.ReactNode; // Add support for custom button
 }
 
 const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({ 
   miniGame, 
   onBack,
   onNewGame,
-  onShare
+  onShare,
+  extraButton
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -78,6 +80,9 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         </div>
         
         <div className="flex items-center gap-2">
+          {/* Display the extraButton if provided */}
+          {extraButton && extraButton}
+          
           <Button 
             variant="outline" 
             size="sm" 
