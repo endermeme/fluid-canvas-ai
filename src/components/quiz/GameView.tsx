@@ -23,11 +23,12 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
   useEffect(() => {
     if (miniGame && miniGame.content) {
       try {
+        // Save game to history but don't need to await the result
         saveGameForSharing(
           miniGame.title || "Minigame tương tác", 
           "", // Empty description
           miniGame.content
-        );
+        ).catch(e => console.error("Error saving game to history:", e));
       } catch (e) {
         console.error("Error saving game to history:", e);
       }

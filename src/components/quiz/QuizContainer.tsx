@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Home, RefreshCw, Settings, ArrowLeft, PlusCircle, GameController, History, SparklesIcon, Share } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Home, RefreshCw, Settings, ArrowLeft, PlusCircle, Gamepad2, History, SparklesIcon } from 'lucide-react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import GameSettings from './GameSettings';
 import GameView from './GameView';
@@ -73,7 +73,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
       <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container flex h-14 max-w-screen-2xl items-center">
           <div className="flex items-center gap-1 mr-4">
-            <GameController className="h-5 w-5 text-primary" />
+            <Gamepad2 className="h-5 w-5 text-primary" />
             <span className="font-semibold">AIGameCreator</span>
           </div>
           
