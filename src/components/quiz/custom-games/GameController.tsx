@@ -95,15 +95,17 @@ const GameController: React.FC<GameControllerProps> = ({
     
     if (currentGame) {
       return (
-        <EnhancedGameView 
-          miniGame={{
-            title: currentGame.title || "Minigame Tương Tác",
-            content: currentGame.content || ""
-          }} 
-          onBack={handleBack}
-          onNewGame={handleNewGame}
-          onShare={handleShareGame}
-        />
+        <div className="w-full h-full">
+          <EnhancedGameView 
+            miniGame={{
+              title: currentGame.title || "Minigame Tương Tác",
+              content: currentGame.content || ""
+            }} 
+            onBack={handleBack}
+            onNewGame={handleNewGame}
+            onShare={handleShareGame}
+          />
+        </div>
       );
     } 
     
@@ -141,8 +143,9 @@ const GameController: React.FC<GameControllerProps> = ({
       showSettingsButton={false}
       showCreateButton={!isGenerating && !showForm}
       onCreate={handleNewGame}
+      className="p-0 overflow-hidden"
     >
-      <div className="h-full w-full">
+      <div className="h-full w-full overflow-hidden">
         {renderContent()}
       </div>
     </QuizContainer>

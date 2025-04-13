@@ -35,8 +35,8 @@ const GameSharePage: React.FC = () => {
   return (
     <QuizContainer
       title={game.title}
-      showBackButton={true}
-      onBack={handleBack}
+      showBackButton={false}
+      className="p-0 overflow-hidden"
     >
       <EnhancedGameView 
         miniGame={{

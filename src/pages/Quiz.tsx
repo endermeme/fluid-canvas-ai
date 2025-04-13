@@ -155,19 +155,22 @@ const Quiz = () => {
     
     if (miniGame) {
       return (
-        <EnhancedGameView 
-          miniGame={miniGame}
-          extraButton={
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={handleShare}
-              className="text-xs h-8"
-            >
-              Chia sẻ
-            </Button>
-          }
-        />
+        <div className="w-full h-full">
+          <EnhancedGameView 
+            miniGame={miniGame}
+            onBack={handleReset}
+            extraButton={
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={handleShare}
+                className="text-xs h-7"
+              >
+                Chia sẻ
+              </Button>
+            }
+          />
+        </div>
       );
     }
     
@@ -180,26 +183,18 @@ const Quiz = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-gradient-to-b from-background to-background/95">
+    <div className="h-screen w-full bg-gradient-to-b from-background to-background/95 overflow-hidden">
       <QuizContainer
         title={miniGame ? miniGame.title : "Tạo Game Tùy Chỉnh"}
         showBackButton={true}
         showRefreshButton={false}
         showHomeButton={true}
         onBack={() => miniGame ? handleReset() : navigate('/')}
-        footerContent={miniGame ? (
-          <div className="flex justify-between items-center w-full px-4 py-2">
-            <Button 
-              variant="outline" 
-              onClick={handleReset}
-              className="border-primary/20"
-            >
-              Tạo game mới
-            </Button>
-          </div>
-        ) : null}
+        className="p-0 overflow-hidden"
       >
-        {renderContent()}
+        <div className="w-full h-full overflow-hidden">
+          {renderContent()}
+        </div>
       </QuizContainer>
     </div>
   );

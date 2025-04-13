@@ -81,12 +81,75 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
       iframeRef.current.src = 'about:blank';
       setTimeout(() => {
         if (iframeRef.current) {
-          iframeRef.current.srcdoc = miniGame.content;
+          iframeRef.current.srcdoc = enhanceIframeContent(miniGame.content);
         }
       }, 100);
       setGameStats({});
       setIframeError(null);
     }
+  };
+
+  // Enhanced function to properly prepare the content
+  const enhanceIframeContent = (content: string): string => {
+    // Remove any existing style tags to prevent conflicts
+    let processedContent = content;
+    
+    // Add our new style definitions - maximizing display area
+    const fullDisplayStyles = `
+      <style>
+        html, body {
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+          overflow: hidden !important;
+        }
+        
+        *, *::before, *::after {
+          box-sizing: border-box !important;
+        }
+        
+        body > div, main, #root, #app, .container, .game-container, #game, .game {
+          width: 100% !important;
+          height: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: auto !important;
+          display: flex !important;
+          flex-direction: column !important;
+        }
+        
+        canvas {
+          display: block !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          margin: 0 auto !important;
+          object-fit: contain !important;
+        }
+        
+        pre, code {
+          white-space: pre-wrap !important;
+          word-break: break-word !important;
+          max-width: 100% !important;
+          margin: 0 !important;
+          padding: 8px !important;
+          background: rgba(0,0,0,0.05) !important;
+          border-radius: 4px !important;
+        }
+      </style>
+    `;
+    
+    // Insert our styles at the beginning of head or create a head if none exists
+    if (processedContent.includes('<head>')) {
+      processedContent = processedContent.replace('<head>', `<head>${fullDisplayStyles}`);
+    } else if (processedContent.includes('<html>')) {
+      processedContent = processedContent.replace('<html>', `<html><head>${fullDisplayStyles}</head>`);
+    } else {
+      // If no html structure, add complete html wrapper
+      processedContent = `<!DOCTYPE html><html><head>${fullDisplayStyles}</head><body>${processedContent}</body></html>`;
+    }
+    
+    return processedContent;
   };
 
   const handleIframeLoad = () => {
@@ -95,86 +158,28 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
       
       setIframeError(null);
 
-      const iframe = iframeRef.current;
-      
-      // Đảm bảo nội dung iframe được hiển thị đúng cách
-      try {
-        const iframeDoc = iframe.contentDocument;
-        
-        if (!iframeDoc) {
-          console.warn("Cannot access iframe content document - possible cross-origin restriction");
-          return;
-        }
-        
-        const styleElement = iframeDoc.createElement('style');
-        styleElement.textContent = `
-          body, html {
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow: hidden !important;
-            width: 100% !important;
-            height: 100% !important;
-          }
-          
-          /* Đảm bảo tất cả các container đều full-size */
-          body > div, 
-          .container, 
-          main, 
-          .game-container, 
-          #game,
-          .game,
-          #app,
-          #root {
-            width: 100% !important;
-            height: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            box-sizing: border-box !important;
-            overflow: auto !important;
-          }
-          
-          /* Ngăn chặn hiển thị markdown mã thô */
-          pre, code {
-            white-space: pre-wrap !important;
-            overflow-wrap: break-word !important;
-            max-width: 100% !important;
-          }
-          
-          canvas {
-            display: block !important;
-            margin: 0 auto !important;
-            max-width: 100% !important;
-            max-height: 100% !important;
-          }
-        `;
-        iframeDoc.head.appendChild(styleElement);
-        
-        window.addEventListener('message', (event) => {
-          try {
-            const data = event.data;
-            if (data && typeof data === 'object') {
-              if (data.type === 'gameStats' && data.payload) {
-                setGameStats(data.payload);
-                
-                if (data.payload.completed) {
-                  toast({
-                    title: "Trò chơi đã hoàn thành!",
-                    description: data.payload.score !== undefined 
-                      ? `Điểm số của bạn: ${data.payload.score}` 
-                      : "Chúc mừng bạn đã hoàn thành trò chơi!",
-                  });
-                }
+      // Set up message listener for game stats
+      window.addEventListener('message', (event) => {
+        try {
+          const data = event.data;
+          if (data && typeof data === 'object') {
+            if (data.type === 'gameStats' && data.payload) {
+              setGameStats(data.payload);
+              
+              if (data.payload.completed) {
+                toast({
+                  title: "Trò chơi đã hoàn thành!",
+                  description: data.payload.score !== undefined 
+                    ? `Điểm số của bạn: ${data.payload.score}` 
+                    : "Chúc mừng bạn đã hoàn thành trò chơi!",
+                });
               }
             }
-          } catch (err) {
-            console.error("Error processing iframe message:", err);
           }
-        });
-        
-      } catch (crossOriginError) {
-        console.warn("Cross-origin restriction prevented accessing iframe content:", crossOriginError);
-        setIframeError("Không thể tương tác với minigame do hạn chế bảo mật. Vui lòng thử tải lại trang.");
-      }
+        } catch (err) {
+          console.error("Error processing iframe message:", err);
+        }
+      });
     } catch (e) {
       console.error("General error in handleIframeLoad:", e);
       setIframeError("Lỗi khi tải minigame. Vui lòng thử lại.");
@@ -185,8 +190,11 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
     return <div>Không thể tải minigame</div>;
   }
 
+  // Enhanced content with proper styling
+  const enhancedContent = enhanceIframeContent(miniGame.content);
+
   return (
-    <div className="flex flex-col h-full w-full items-center justify-center overflow-hidden">
+    <div className="flex flex-col h-full w-full overflow-hidden">
       <div className="flex-1 relative w-full h-full overflow-hidden">
         {iframeError ? (
           <div className="bg-destructive/10 text-destructive p-4 rounded-md flex flex-col items-center m-4">
@@ -202,11 +210,19 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
         ) : (
           <iframe
             ref={iframeRef}
-            srcDoc={miniGame.content}
-            className="w-full h-full border-0"
+            srcDoc={enhancedContent}
+            className="w-full h-full"
             sandbox="allow-scripts allow-popups allow-same-origin"
             onLoad={handleIframeLoad}
             title={miniGame.title || "Minigame"}
+            style={{ 
+              border: 'none',
+              margin: 0,
+              padding: 0,
+              width: '100%',
+              height: '100%',
+              display: 'block'
+            }}
           />
         )}
 
@@ -215,7 +231,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
           variant="ghost" 
           size="sm" 
           onClick={handleBackToHome} 
-          className="absolute top-4 left-4 z-20 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+          className="absolute top-4 left-4 z-20 flex items-center gap-1 bg-background/70 hover:bg-background/80 backdrop-blur-sm shadow-sm"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Quay lại</span>
@@ -224,7 +240,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
       
       {miniGame.title && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
-          <div className="px-4 py-2 bg-background/80 backdrop-blur-sm rounded-full border border-primary/20 shadow-md">
+          <div className="px-4 py-2 bg-background/70 backdrop-blur-sm rounded-full shadow-md">
             <h2 className="text-sm font-medium text-center">{miniGame.title}</h2>
           </div>
         </div>
@@ -232,7 +248,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
       
       {gameStats.score !== undefined && (
         <div className="absolute top-4 right-4 z-10">
-          <div className="px-3 py-1.5 bg-primary/10 backdrop-blur-sm rounded-full border border-primary/20 shadow-md flex items-center gap-1.5">
+          <div className="px-3 py-1.5 bg-primary/10 backdrop-blur-sm rounded-full shadow-md flex items-center gap-1.5">
             <Trophy className="h-3.5 w-3.5 text-primary" />
             <span className="text-xs font-medium">{gameStats.score} điểm</span>
           </div>
@@ -243,7 +259,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
         <Button 
           size="sm" 
           variant="secondary"
-          className="bg-background/80 backdrop-blur-sm border border-primary/20 shadow-md" 
+          className="bg-background/70 backdrop-blur-sm shadow-md" 
           onClick={handleReloadGame}
         >
           <RefreshCw size={14} className="mr-1" />
@@ -253,7 +269,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
         <Button 
           size="sm" 
           variant="secondary"
-          className="bg-background/80 backdrop-blur-sm border border-primary/20 shadow-md" 
+          className="bg-background/70 backdrop-blur-sm shadow-md" 
           onClick={handleShare}
           disabled={shareInProgress}
         >

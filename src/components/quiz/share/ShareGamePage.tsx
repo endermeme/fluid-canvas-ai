@@ -85,49 +85,67 @@ const ShareGamePage: React.FC = () => {
     navigate(`/game/${gameId}/dashboard`);
   };
 
-  // Hàm cải thiện HTML content để tránh hiển thị bị bóp méo
-  const enhanceHtmlContent = (content: string): string => {
-    const enhancementStyles = `
+  // Enhanced function to properly prepare the content
+  const enhanceIframeContent = (content: string): string => {
+    // Remove any existing style tags to prevent conflicts
+    let processedContent = content;
+    
+    // Add our new style definitions - maximizing display area
+    const fullDisplayStyles = `
       <style>
-        body, html {
+        html, body {
           margin: 0 !important;
           padding: 0 !important;
-          overflow: auto !important;
           width: 100% !important;
           height: 100% !important;
+          overflow: hidden !important;
+        }
+        
+        *, *::before, *::after {
           box-sizing: border-box !important;
         }
         
-        body > div, .container, main, #game, .game, #app, #root {
+        body > div, main, #root, #app, .container, .game-container, #game, .game {
           width: 100% !important;
           height: 100% !important;
           margin: 0 !important;
           padding: 0 !important;
-          box-sizing: border-box !important;
+          overflow: auto !important;
+          display: flex !important;
+          flex-direction: column !important;
         }
         
         canvas {
           display: block !important;
-          margin: 0 auto !important;
           max-width: 100% !important;
           max-height: 100% !important;
+          margin: 0 auto !important;
+          object-fit: contain !important;
         }
         
         pre, code {
           white-space: pre-wrap !important;
-          overflow-wrap: break-word !important;
+          word-break: break-word !important;
           max-width: 100% !important;
+          margin: 0 !important;
+          padding: 8px !important;
+          background: rgba(0,0,0,0.05) !important;
+          border-radius: 4px !important;
         }
       </style>
     `;
     
-    // Insert our custom styles just before the closing </head> tag
-    if (content.includes('</head>')) {
-      return content.replace('</head>', `${enhancementStyles}</head>`);
+    // Insert our styles at the beginning of head or create a head if none exists
+    if (processedContent.includes('<head>')) {
+      processedContent = processedContent.replace('<head>', `<head>${fullDisplayStyles}`);
+    } else if (processedContent.includes('<html>')) {
+      processedContent = processedContent.replace('<html>', `<html><head>${fullDisplayStyles}</head>`);
     } else {
-      // If no head tag, add styles at the beginning
-      return enhancementStyles + content;
+      // If no html structure, add complete html wrapper
+      processedContent = `<!DOCTYPE html><html><head>${fullDisplayStyles}</head><body>${processedContent}</body></html>`;
     }
+    
+    return processedContent;
   };
 
   if (loading) {
@@ -152,24 +170,31 @@ const ShareGamePage: React.FC = () => {
   }
 
   if (hasJoined) {
-    // Tạo phiên bản cải tiến của HTML content
-    const enhancedContent = enhanceHtmlContent(game.htmlContent);
+    // Enhanced content with proper styling
+    const enhancedContent = enhanceIframeContent(game.htmlContent);
     
     return (
-      <div className="flex-1 relative w-full h-full overflow-hidden">
+      <div className="flex-1 relative w-full h-screen overflow-hidden">
         <iframe
           srcDoc={enhancedContent}
-          className="w-full h-screen border-0"
+          className="w-full h-full"
           sandbox="allow-scripts allow-popups allow-same-origin"
           title={game.title}
-          style={{ width: '100%', height: '100%' }}
+          style={{ 
+            border: 'none',
+            margin: 0,
+            padding: 0,
+            width: '100%',
+            height: '100%',
+            display: 'block'
+          }}
         />
         
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={() => navigate('/preset-games')} 
-          className="absolute top-4 left-4 z-20 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+          className="absolute top-4 left-4 z-20 flex items-center gap-1 bg-background/70 hover:bg-background/80 backdrop-blur-sm shadow-sm"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Quay lại</span>
