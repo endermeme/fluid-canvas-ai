@@ -108,6 +108,18 @@ IMPORTANT REQUIREMENTS:
 7. Your HTML file should start with <!DOCTYPE html> and be fully functional.
 8. Add fallbacks for unsupported features.
 
+${this.useCanvas ? `
+CANVAS MODE REQUIREMENTS:
+1. Use the HTML5 Canvas element as the primary rendering approach.
+2. Implement game logic using canvas drawing operations.
+3. Handle canvas responsiveness correctly.
+4. Implement proper animation frames.
+5. Ensure smooth rendering and performance optimization.
+6. Maintain a consistent game loop structure.
+7. Properly manage canvas context state.
+8. Implement collision detection if needed.
+` : ''}
+
 RESPOND ONLY WITH THE HTML CODE. NO EXPLANATIONS OR MARKDOWN FORMATTING.
 `;
 
