@@ -11,7 +11,7 @@ import { AIGameGenerator } from '../generator/AIGameGenerator';
 import { MiniGame } from '../generator/types';
 import { GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
-import { GEMINI_API_KEY, GEMINI_MODELS, API_VERSION, API_BASE_URL } from '@/constants/api-constants';
+import { GEMINI_MODELS, API_VERSION, API_BASE_URL } from '@/constants/api-constants';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
@@ -60,12 +60,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     console.log('%c 🤖 API Version', 'font-weight: bold; color: #6f42c1;', API_VERSION);
     console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #6f42c1;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.DEFAULT}:generateContent`);
     console.log('%c 🎨 Canvas Mode', 'font-weight: bold; color: #6f42c1;', useCanvas ? 'Enabled' : 'Disabled');
-    console.log('%c 🌐 Browser Info', 'font-weight: bold; color: #6f42c1;', {
-      userAgent: navigator.userAgent,
-      language: navigator.language,
-      platform: navigator.platform,
-      viewport: `${window.innerWidth}x${window.innerHeight}`
-    });
     console.groupEnd();
 
     setIsGenerating(true);
@@ -74,16 +68,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       // Set canvas mode according to the toggle
       gameGenerator.setCanvasMode(useCanvas);
       
-      // Simplified settings with only the necessary metadata
+      // Minimal settings
       const settings: GameSettingsData = {
-        category: 'custom',
-        requestMetadata: {
-          requestId,
-          timestamp,
-          contentLength: content.length,
-          source: 'custom-game-form',
-          useCanvas: useCanvas
-        }
+        category: 'custom'
       };
       
       // Log when starting the API request

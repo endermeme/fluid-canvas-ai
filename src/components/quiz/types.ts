@@ -41,10 +41,10 @@ export interface GameSettingsData {
   showCategoryHints?: boolean;
   allowMultipleAttempts?: boolean;
   requestMetadata?: {
-    requestId: string;
-    timestamp: string;
-    contentLength: number;
-    source: string;
+    requestId?: string;
+    timestamp?: string;
+    contentLength?: number;
+    source?: string;
     useCanvas?: boolean;
   };
 }
