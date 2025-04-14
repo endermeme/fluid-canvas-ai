@@ -31,9 +31,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   
   const gameGenerator = AIGameGenerator.getInstance();
   
-  const [canvasMode, setCanvasMode] = useState<boolean>(
-    localStorage.getItem('canvas_mode') === 'true'
-  );
+  const [canvasMode] = useState<boolean>(true);
   
   const defaultSettings: GameSettingsData = {
     difficulty: 'medium',
@@ -43,9 +41,8 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   };
   
   useEffect(() => {
-    const storedCanvasMode = localStorage.getItem('canvas_mode') === 'true';
-    gameGenerator.setCanvasMode(storedCanvasMode);
-    setCanvasMode(storedCanvasMode);
+    localStorage.setItem('canvas_mode', 'true');
+    gameGenerator.setCanvasMode(true);
   }, [gameGenerator]);
 
   useImperativeHandle(ref, () => ({
@@ -207,7 +204,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       />
       <div className="absolute top-4 right-4">
         <h3 className="text-sm font-medium text-primary/60 cursor-pointer select-none">
-          Trợ Lý Tạo Web
+          Tr��� Lý Tạo Web
         </h3>
       </div>
     </>

@@ -9,7 +9,7 @@ import { GameSettingsData } from '../types';
  */
 export const buildGeminiPrompt = (
   topic: string,
-  useCanvas: boolean = false
+  useCanvas: boolean = true // Changed default to true
 ): string => {
   return `
     Create an interactive HTML game based on this prompt: "${topic}"

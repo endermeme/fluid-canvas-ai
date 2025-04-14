@@ -41,7 +41,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
-  const [canvasMode, setCanvasMode] = useState(localStorage.getItem('canvas_mode') === 'true');
+  const [canvasMode, setCanvasMode] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -51,8 +51,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }, [conversation]);
   
   useEffect(() => {
-    localStorage.setItem('canvas_mode', canvasMode.toString());
-  }, [canvasMode]);
+    localStorage.setItem('canvas_mode', 'true');
+    gameGenerator.setCanvasMode(true);
+  }, []);
   
   const handleSendMessage = () => {
     if (!message.trim()) return;
@@ -116,14 +117,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
   
   const toggleCanvasMode = () => {
-    setCanvasMode(!canvasMode);
-    gameGenerator.setCanvasMode(!canvasMode);
+    setCanvasMode(true);
+    gameGenerator.setCanvasMode(true);
     
     toast({
-      title: `Chế độ Canvas ${!canvasMode ? 'BẬT' : 'TẮT'}`,
-      description: !canvasMode 
-        ? "Trò chơi sẽ được tạo với đồ họa canvas nâng cao." 
-        : "Trò chơi sẽ được tạo với HTML tiêu chuẩn.",
+      title: `Chế độ Canvas luôn BẬT`,
+      description: "Trò chơi sẽ được tạo với đồ họa canvas nâng cao.",
       duration: 3000,
     });
   };
@@ -163,9 +162,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <span className="text-sm">Chế độ Canvas</span>
         </div>
         <Switch 
-          checked={canvasMode}
+          checked={true}
           onCheckedChange={toggleCanvasMode}
           className="data-[state=checked]:bg-primary"
+          disabled={true}
         />
       </div>
       
