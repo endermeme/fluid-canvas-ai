@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -13,8 +14,6 @@ import GameLoading from '../GameLoading';
 import { Input } from '@/components/ui/input';
 import { tryOpenAIGeneration } from '../generator/openaiGenerator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import fs from 'fs';
-import path from 'path';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
@@ -71,18 +70,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     return key.trim().startsWith('sk-') && key.trim().length > 10;
   };
 
-  const saveApiKeyToEnv = (key: string) => {
-    try {
-      const envPath = path.resolve(process.cwd(), '.env.local');
-      const envContent = `VITE_OPENAI_API_KEY=${key}\n`;
-      
-      fs.writeFileSync(envPath, envContent);
-      console.log('API key saved to .env.local');
-    } catch (error) {
-      console.error('Error saving API key:', error);
-    }
-  };
-
   const saveApiKey = () => {
     setApiKeyError(null);
     
@@ -97,14 +84,12 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     }
     
     localStorage.setItem('openai_api_key', apiKey.trim());
-    saveApiKeyToEnv(apiKey.trim());  // Thêm dòng này
-    
     setShowApiKeyField(false);
     setApiKeyValidated(true);
     
     toast({
       title: "API Key đã được lưu",
-      description: "API Key của bạn đã được lưu vào trình duyệt và .env.local",
+      description: "API Key của bạn đã được lưu vào trình duyệt",
     });
     
     (window as any).OPENAI_API_KEY = apiKey.trim();
@@ -367,6 +352,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
               </div>
               <p className="text-xs text-muted-foreground mt-2">
                 API Key sẽ được lưu trong trình duyệt của bạn và không được gửi đến máy chủ của chúng tôi
+              </p>
+              <p className="text-xs text-primary/70 mt-2">
+                <strong>Lưu ý:</strong> Để lưu API Key vào biến môi trường, hãy tạo file .env.local ở thư mục gốc với nội dung: VITE_OPENAI_API_KEY=sk-your-key-here
               </p>
             </div>
           )}
