@@ -6,6 +6,7 @@ import {
   logInfo, logError, logWarning, logSuccess, 
   measureExecutionTime
 } from './apiUtils';
+import { AIGameGenerator } from './AIGameGenerator';
 
 const SOURCE = "OPENAI";
 const OPENAI_MODEL = "gpt-4o-mini";
@@ -55,8 +56,9 @@ export const generateWithOpenAI = async (
       max_tokens: 4000
     };
     
-    // Get the API key from the window object
-    const apiKey = (window as any).OPENAI_API_KEY;
+    // Get API key from environment first, then fallback to localStorage
+    const gameGenerator = AIGameGenerator.getInstance();
+    const apiKey = gameGenerator.getApiKey();
     
     if (!apiKey) {
       throw new Error('Không tìm thấy OpenAI API Key');

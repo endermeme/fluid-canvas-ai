@@ -59,8 +59,26 @@ export class AIGameGenerator {
    * @returns Boolean indicating if API key is available
    */
   public hasValidApiKey(): boolean {
-    const key = localStorage.getItem('openai_api_key') || (window as any).OPENAI_API_KEY;
+    // Check environment variable first, then fallback to localStorage
+    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
+    const localKey = localStorage.getItem('openai_api_key') || (window as any).OPENAI_API_KEY;
+    
+    // Use env key if available, otherwise use local storage
+    const key = envKey || localKey;
+    
     return !!key && typeof key === 'string' && key.startsWith('sk-');
+  }
+
+  /**
+   * Get the OpenAI API key from env or localStorage
+   * @returns The API key or null if not found
+   */
+  public getApiKey(): string | null {
+    // Check environment variable first, then fallback to localStorage
+    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (envKey) return envKey;
+    
+    return localStorage.getItem('openai_api_key') || (window as any).OPENAI_API_KEY || null;
   }
 
   /**

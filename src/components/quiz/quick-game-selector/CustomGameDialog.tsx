@@ -32,12 +32,21 @@ const CustomGameDialog: React.FC<CustomGameDialogProps> = ({
   
   useEffect(() => {
     if (open) {
-      const storedKey = localStorage.getItem('openai_api_key');
-      if (!storedKey) {
-        setShowApiKeyField(true);
+      // Check for environment variable first
+      const envKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (envKey) {
+        // If we have an env key, we don't need to show the API key field
+        setShowApiKeyField(false);
+        (window as any).OPENAI_API_KEY = envKey;
       } else {
-        setApiKey(storedKey);
-        (window as any).OPENAI_API_KEY = storedKey;
+        // Check localStorage as fallback
+        const storedKey = localStorage.getItem('openai_api_key');
+        if (!storedKey) {
+          setShowApiKeyField(true);
+        } else {
+          setApiKey(storedKey);
+          (window as any).OPENAI_API_KEY = storedKey;
+        }
       }
     }
   }, [open]);
@@ -84,6 +93,16 @@ const CustomGameDialog: React.FC<CustomGameDialogProps> = ({
   };
   
   const handleSubmitWithApiCheck = () => {
+    // Check for environment variable first
+    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (envKey) {
+      // If we have an env key, we can proceed without checking localStorage
+      (window as any).OPENAI_API_KEY = envKey;
+      onSubmit();
+      return;
+    }
+    
+    // No env key, check localStorage
     const storedKey = localStorage.getItem('openai_api_key');
     if (!storedKey && !apiKey) {
       setShowApiKeyField(true);

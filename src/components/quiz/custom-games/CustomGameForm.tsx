@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -34,8 +33,19 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
   // Use the singleton pattern
   const gameGenerator = AIGameGenerator.getInstance();
 
-  // Check for stored API key
+  // Check for environment variable or stored API key on component mount
   useEffect(() => {
+    // First check for environment variable
+    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (envKey) {
+      // If environment variable exists, no need to show API key field
+      setShowApiKeyField(false);
+      setApiKeyValidated(true);
+      (window as any).OPENAI_API_KEY = envKey;
+      return;
+    }
+    
+    // Fallback to localStorage
     const storedKey = localStorage.getItem('openai_api_key');
     if (storedKey) {
       setApiKey(storedKey);
@@ -108,7 +118,13 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       return;
     }
 
-    if (!apiKeyValidated) {
+    // Check for environment variable first
+    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (envKey) {
+      // If we have an env key, set it globally and continue
+      (window as any).OPENAI_API_KEY = envKey;
+    } else if (!apiKeyValidated) {
+      // No env key and no validated API key from localStorage
       toast({
         title: "Lỗi",
         description: "Vui lòng nhập và lưu API Key của OpenAI",
@@ -116,21 +132,21 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       });
       setShowApiKeyField(true);
       return;
+    } else {
+      // No env key, but we have a localStorage key
+      const currentApiKey = apiKey.trim() || localStorage.getItem('openai_api_key');
+      if (!currentApiKey) {
+        toast({
+          title: "Lỗi",
+          description: "Không tìm thấy API Key. Vui lòng nhập lại.",
+          variant: "destructive"
+        });
+        setShowApiKeyField(true);
+        return;
+      }
+      
+      (window as any).OPENAI_API_KEY = currentApiKey;
     }
-
-    // Set OpenAI API key globally
-    const currentApiKey = apiKey.trim() || localStorage.getItem('openai_api_key');
-    if (!currentApiKey) {
-      toast({
-        title: "Lỗi",
-        description: "Không tìm thấy API Key. Vui lòng nhập lại.",
-        variant: "destructive"
-      });
-      setShowApiKeyField(true);
-      return;
-    }
-    
-    (window as any).OPENAI_API_KEY = currentApiKey;
 
     // Tạo requestId độc nhất với timestamp và random string
     const requestId = Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
