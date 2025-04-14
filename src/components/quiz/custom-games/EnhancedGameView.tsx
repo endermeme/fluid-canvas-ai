@@ -24,19 +24,22 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [iframeError, setIframeError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (iframeRef.current && miniGame?.content) {
-      const enhancedContent = enhanceIframeContent(miniGame.content);
-      iframeRef.current.srcdoc = enhancedContent;
-    }
-  }, [miniGame]);
-
-  // Enhanced iframe content to provide optimal display
+  // Enhanced function to properly prepare the content
   const enhanceIframeContent = (content: string): string => {
     // Safely sanitize content by removing markdown-style code blocks
     let processedContent = content.replace(/```html|```/g, '');
     processedContent = processedContent.replace(/`/g, '');
+    
+    // Make sure content has proper HTML structure
+    if (!processedContent.includes('<!DOCTYPE html>')) {
+      if (processedContent.includes('<html')) {
+        processedContent = `<!DOCTYPE html>${processedContent}`;
+      } else {
+        processedContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${miniGame.title || 'Interactive Game'}</title></head><body>${processedContent}</body></html>`;
+      }
+    }
     
     // Add optimized styles for full display
     const optimizedStyles = `
@@ -122,10 +125,41 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     return processedContent;
   };
 
+  useEffect(() => {
+    if (iframeRef.current && miniGame?.content) {
+      try {
+        const enhancedContent = enhanceIframeContent(miniGame.content);
+        iframeRef.current.srcdoc = enhancedContent;
+        setIframeError(null);
+      } catch (error) {
+        console.error("Error setting iframe content:", error);
+        setIframeError("Failed to load game content. Please try refreshing.");
+      }
+    }
+  }, [miniGame]);
+
+  // Handle document fullscreen change events
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   const refreshGame = () => {
     if (iframeRef.current && miniGame?.content) {
-      const enhancedContent = enhanceIframeContent(miniGame.content);
-      iframeRef.current.srcdoc = enhancedContent;
+      try {
+        const enhancedContent = enhanceIframeContent(miniGame.content);
+        iframeRef.current.srcdoc = enhancedContent;
+        setIframeError(null);
+      } catch (error) {
+        console.error("Error refreshing game:", error);
+        setIframeError("Failed to refresh game. Please try again.");
+      }
     }
   };
 
@@ -135,10 +169,8 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         iframeRef.current.requestFullscreen().catch(err => {
           console.error(`Error attempting to enable fullscreen: ${err.message}`);
         });
-        setIsFullscreen(true);
       } else {
         document.exitFullscreen();
-        setIsFullscreen(false);
       }
     }
   };
@@ -212,18 +244,31 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       
       {/* Game Display */}
       <div className="flex-1 relative overflow-hidden">
-        <iframe
-          ref={iframeRef}
-          className="w-full h-full"
-          sandbox="allow-same-origin allow-scripts allow-forms"
-          title={miniGame.title || "Minigame"}
-          style={{
-            border: 'none',
-            display: 'block',
-            width: '100%',
-            height: '100%'
-          }}
-        />
+        {iframeError ? (
+          <div className="flex flex-col items-center justify-center h-full p-6 bg-destructive/10">
+            <p className="text-destructive mb-4">{iframeError}</p>
+            <Button 
+              variant="outline" 
+              onClick={refreshGame}
+            >
+              <RefreshCw className="h-4 w-4 mr-1.5" />
+              Tải lại
+            </Button>
+          </div>
+        ) : (
+          <iframe
+            ref={iframeRef}
+            className="w-full h-full"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
+            title={miniGame.title || "Minigame"}
+            style={{
+              border: 'none',
+              display: 'block',
+              width: '100%',
+              height: '100%'
+            }}
+          />
+        )}
       </div>
     </div>
   );

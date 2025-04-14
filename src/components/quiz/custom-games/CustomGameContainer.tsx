@@ -32,77 +32,163 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [iframeError, setIframeError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   
   // Generate a safe HTML content
   const generateHtmlContent = () => {
-    // Create a safe wrapper around the custom content
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${title}</title>
-        <style>
-          body {
-            margin: 0;
-            padding: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden;
-            background: #f8f9fa;
-          }
-          #game-container {
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          /* Custom styles for embedded content */
-          canvas {
-            max-width: 100%;
-            max-height: 100%;
-            margin: auto;
-          }
-        </style>
-      </head>
-      <body>
-        <div id="game-container">
-          ${content}
-        </div>
-        <script>
-          // Communication channel with parent
-          window.addEventListener('message', function(event) {
-            if (event.data === 'pause') {
-              // Implement pause logic if the game supports it
-              console.log('Game paused');
-              // You can add custom pause logic here
-            } else if (event.data === 'resume') {
-              // Implement resume logic if the game supports it
-              console.log('Game resumed');
-              // You can add custom resume logic here
+    // Process content to ensure it's valid HTML
+    let processedContent = content.replace(/```html|```/g, '');
+    processedContent = processedContent.replace(/`/g, '');
+    
+    // Check if content already has HTML structure
+    if (processedContent.includes('<!DOCTYPE html>')) {
+      // Extract the body content if possible
+      const bodyMatch = processedContent.match(/<body>([\s\S]*?)<\/body>/i);
+      const bodyContent = bodyMatch ? bodyMatch[1] : processedContent;
+      
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${title}</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 0;
+              font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              overflow: hidden;
+              background: #f8f9fa;
             }
-          });
-        </script>
-      </body>
-      </html>
-    `;
+            #game-container {
+              width: 100%;
+              height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            /* Custom styles for embedded content */
+            canvas {
+              max-width: 100%;
+              max-height: 100%;
+              margin: auto;
+            }
+          </style>
+        </head>
+        <body>
+          <div id="game-container">
+            ${bodyContent}
+          </div>
+          <script>
+            // Communication channel with parent
+            window.addEventListener('message', function(event) {
+              if (event.data === 'pause') {
+                // Implement pause logic if the game supports it
+                console.log('Game paused');
+                // You can add custom pause logic here
+              } else if (event.data === 'resume') {
+                // Implement resume logic if the game supports it
+                console.log('Game resumed');
+                // You can add custom resume logic here
+              }
+            });
+          </script>
+        </body>
+        </html>
+      `;
+    } else {
+      // If it's just content without HTML structure
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${title}</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 0;
+              font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              overflow: hidden;
+              background: #f8f9fa;
+            }
+            #game-container {
+              width: 100%;
+              height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            /* Custom styles for embedded content */
+            canvas {
+              max-width: 100%;
+              max-height: 100%;
+              margin: auto;
+            }
+          </style>
+        </head>
+        <body>
+          <div id="game-container">
+            ${processedContent}
+          </div>
+          <script>
+            // Communication channel with parent
+            window.addEventListener('message', function(event) {
+              if (event.data === 'pause') {
+                console.log('Game paused');
+              } else if (event.data === 'resume') {
+                console.log('Game resumed');
+              }
+            });
+          </script>
+        </body>
+        </html>
+      `;
+    }
   };
 
   useEffect(() => {
     if (iframeRef.current) {
-      const iframe = iframeRef.current;
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      
-      if (iframeDoc) {
-        iframeDoc.open();
-        iframeDoc.write(generateHtmlContent());
-        iframeDoc.close();
+      try {
+        const iframe = iframeRef.current;
+        const htmlContent = generateHtmlContent();
+        
+        if (iframe.contentDocument) {
+          iframe.contentDocument.open();
+          iframe.contentDocument.write(htmlContent);
+          iframe.contentDocument.close();
+          setIframeError(null);
+        } else if (iframe.contentWindow?.document) {
+          iframe.contentWindow.document.open();
+          iframe.contentWindow.document.write(htmlContent);
+          iframe.contentWindow.document.close();
+          setIframeError(null);
+        } else {
+          // Fallback to srcdoc if direct document access fails
+          iframe.srcdoc = htmlContent;
+        }
+      } catch (error) {
+        console.error("Error loading game content:", error);
+        setIframeError("Failed to load game content. Please try refreshing.");
       }
     }
   }, [content]);
+
+  // Handle document fullscreen change events
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   const toggleFullscreen = () => {
     const iframe = iframeRef.current;
@@ -117,8 +203,6 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
         document.exitFullscreen();
       }
     }
-    
-    setIsFullscreen(!isFullscreen);
   };
 
   const togglePause = () => {
@@ -152,13 +236,27 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
 
   const handleGameReload = () => {
     if (iframeRef.current) {
-      const iframe = iframeRef.current;
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      
-      if (iframeDoc) {
-        iframeDoc.open();
-        iframeDoc.write(generateHtmlContent());
-        iframeDoc.close();
+      try {
+        const iframe = iframeRef.current;
+        const htmlContent = generateHtmlContent();
+        
+        if (iframe.contentDocument) {
+          iframe.contentDocument.open();
+          iframe.contentDocument.write(htmlContent);
+          iframe.contentDocument.close();
+          setIframeError(null);
+        } else if (iframe.contentWindow?.document) {
+          iframe.contentWindow.document.open();
+          iframe.contentWindow.document.write(htmlContent);
+          iframe.contentWindow.document.close();
+          setIframeError(null);
+        } else {
+          // Fallback to srcdoc
+          iframe.srcdoc = htmlContent;
+        }
+      } catch (error) {
+        console.error("Error reloading game:", error);
+        setIframeError("Failed to reload game content. Please try again.");
       }
     }
   };
@@ -184,6 +282,16 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
         title="Toàn màn hình"
       >
         <Expand className="h-4 w-4" />
+      </Button>
+      
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        onClick={handleGameReload}
+        className="h-8 w-8 p-0 flex items-center justify-center"
+        title="Tải lại"
+      >
+        <RefreshCw className="h-4 w-4" />
       </Button>
     </>
   );
@@ -240,12 +348,25 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
       footerContent={footerActions}
     >
       <div className="w-full h-full">
-        <iframe 
-          ref={iframeRef}
-          className="w-full h-full border-none"
-          title={title}
-          sandbox="allow-scripts allow-same-origin"
-        />
+        {iframeError ? (
+          <div className="flex flex-col items-center justify-center h-full p-6 bg-destructive/10">
+            <p className="text-destructive mb-4">{iframeError}</p>
+            <Button 
+              variant="outline" 
+              onClick={handleGameReload}
+            >
+              <RefreshCw className="h-4 w-4 mr-1.5" />
+              Tải lại
+            </Button>
+          </div>
+        ) : (
+          <iframe 
+            ref={iframeRef}
+            className="w-full h-full border-none"
+            title={title}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
+          />
+        )}
       </div>
     </QuizContainer>
   );

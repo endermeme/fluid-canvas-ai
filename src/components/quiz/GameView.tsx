@@ -78,14 +78,19 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
   
   const handleReloadGame = () => {
     if (iframeRef.current) {
-      iframeRef.current.src = 'about:blank';
-      setTimeout(() => {
-        if (iframeRef.current) {
-          iframeRef.current.srcdoc = enhanceIframeContent(miniGame.content);
-        }
-      }, 100);
-      setGameStats({});
-      setIframeError(null);
+      try {
+        iframeRef.current.src = 'about:blank';
+        setTimeout(() => {
+          if (iframeRef.current) {
+            iframeRef.current.srcdoc = enhanceIframeContent(miniGame.content);
+          }
+        }, 100);
+        setGameStats({});
+        setIframeError(null);
+      } catch (error) {
+        console.error("Error reloading game:", error);
+        setIframeError("Failed to reload game. Please try again.");
+      }
     }
   };
 
@@ -94,6 +99,15 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
     // Safely sanitize content by removing markdown-style code blocks
     let processedContent = content.replace(/```html|```/g, '');
     processedContent = processedContent.replace(/`/g, '');
+    
+    // Make sure content has proper HTML structure
+    if (!processedContent.includes('<!DOCTYPE html>')) {
+      if (processedContent.includes('<html')) {
+        processedContent = `<!DOCTYPE html>${processedContent}`;
+      } else {
+        processedContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${miniGame.title || 'Interactive Game'}</title></head><body>${processedContent}</body></html>`;
+      }
+    }
     
     // Add optimized styles for full display
     const optimizedStyles = `
@@ -285,7 +299,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
             ref={iframeRef}
             srcDoc={enhancedContent}
             className="w-full h-full"
-            sandbox="allow-scripts allow-popups allow-same-origin"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
             onLoad={handleIframeLoad}
             title={miniGame.title || "Minigame"}
             style={{ 
