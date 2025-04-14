@@ -3,77 +3,111 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Gamepad, SparklesIcon, History } from 'lucide-react';
+import { Gamepad, SparklesIcon, History, QrCode, Share2 } from 'lucide-react';
 
 const HomePage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background/90 flex flex-col">
-      <header className="p-4 flex justify-center">
-        <h1 className="text-2xl font-bold text-primary">AI Game Creator</h1>
-      </header>
-      
-      <main className="flex-1 container mx-auto px-4 py-6">
-        <div className="max-w-3xl mx-auto space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link to="/custom-game">
-              <Card className="p-5 hover:shadow-md transition-all hover:border-primary hover:bg-primary/5 cursor-pointer h-full border-2 border-primary/20">
-                <div className="flex flex-col items-center text-center gap-3 h-full">
-                  <div className="p-3 bg-primary/10 rounded-full">
-                    <SparklesIcon className="h-8 w-8 text-primary" />
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex flex-col justify-center items-center">
+      <div className="w-full max-w-4xl px-4 py-10">
+        <header className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            AI Game Creator
+          </h1>
+          <p className="text-muted-foreground mt-2">Tạo trò chơi tương tác bằng trí tuệ nhân tạo</p>
+        </header>
+        
+        <main className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Link to="/custom-game" className="block h-full">
+              <Card className="p-6 h-full hover:shadow-lg transition-all hover:border-primary hover:bg-primary/5 cursor-pointer border-2 border-primary/20 overflow-hidden group">
+                <div className="flex flex-col items-center text-center gap-4 h-full relative">
+                  <div className="absolute -right-16 -top-16 w-32 h-32 bg-primary/10 rounded-full transform group-hover:scale-110 transition-transform"></div>
+                  <div className="p-4 bg-primary/10 rounded-full z-10 transform group-hover:scale-110 transition-transform">
+                    <SparklesIcon className="h-10 w-10 text-primary" />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-lg">Tạo Game HTML</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
+                  <div className="z-10">
+                    <h3 className="font-bold text-xl mb-1">Tạo Game HTML</h3>
+                    <p className="text-muted-foreground">
                       Mô tả game bạn muốn và AI sẽ tạo ngay
                     </p>
+                  </div>
+                  <div className="mt-auto pt-2 w-full">
+                    <Button variant="outline" className="w-full border-primary/30 text-primary hover:bg-primary/10 hover:text-primary">
+                      Bắt đầu tạo
+                    </Button>
                   </div>
                 </div>
               </Card>
             </Link>
             
-            <Link to="/preset-games">
-              <Card className="p-5 hover:shadow-md transition-all hover:border-primary hover:bg-primary/5 cursor-pointer h-full">
-                <div className="flex flex-col items-center text-center gap-3 h-full">
-                  <div className="p-3 bg-primary/10 rounded-full">
-                    <Gamepad className="h-8 w-8 text-primary" />
+            <Link to="/preset-games" className="block h-full">
+              <Card className="p-6 h-full hover:shadow-lg transition-all hover:border-primary hover:bg-primary/5 cursor-pointer border-2 border-primary/20 overflow-hidden group">
+                <div className="flex flex-col items-center text-center gap-4 h-full relative">
+                  <div className="absolute -right-16 -top-16 w-32 h-32 bg-primary/10 rounded-full transform group-hover:scale-110 transition-transform"></div>
+                  <div className="p-4 bg-primary/10 rounded-full z-10 transform group-hover:scale-110 transition-transform">
+                    <Gamepad className="h-10 w-10 text-primary" />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-lg">Trò Chơi Có Sẵn</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
+                  <div className="z-10">
+                    <h3 className="font-bold text-xl mb-1">Trò Chơi Có Sẵn</h3>
+                    <p className="text-muted-foreground">
                       Chọn từ các loại trò chơi được thiết kế sẵn
                     </p>
+                  </div>
+                  <div className="mt-auto pt-2 w-full">
+                    <Button variant="outline" className="w-full border-primary/30 text-primary hover:bg-primary/10 hover:text-primary">
+                      Xem trò chơi
+                    </Button>
                   </div>
                 </div>
               </Card>
             </Link>
           </div>
           
-          <div className="mt-6">
-            <Card className="p-4 bg-primary/5 border-primary/20">
-              <div className="flex flex-col sm:flex-row gap-4 items-center">
-                <div className="p-2 bg-primary/10 rounded-full">
-                  <History className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold">Lịch Sử Game</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Xem các trò chơi đã tạo
-                  </p>
-                </div>
-                <Link to="/game-history">
-                  <Button variant="default" size="sm" className="whitespace-nowrap">
-                    Xem lịch sử
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
+            <Link to="/game-history">
+              <Card className="p-5 hover:shadow-lg transition-all hover:border-primary/50 hover:bg-primary/5 border border-primary/20 overflow-hidden">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <History className="h-7 w-7 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg">Lịch Sử Game</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Xem và quản lý các trò chơi đã tạo
+                    </p>
+                  </div>
+                  <Button variant="ghost" size="icon" className="text-primary">
+                    <Share2 className="h-5 w-5" />
                   </Button>
-                </Link>
-              </div>
-            </Card>
+                </div>
+              </Card>
+            </Link>
+            
+            <Link to="/game-history">
+              <Card className="p-5 hover:shadow-lg transition-all hover:border-primary/50 hover:bg-primary/5 border border-primary/20 overflow-hidden">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <QrCode className="h-7 w-7 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg">Chia Sẻ Game</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Tạo QR code và link chia sẻ game với người khác
+                    </p>
+                  </div>
+                  <Button variant="ghost" size="icon" className="text-primary">
+                    <Share2 className="h-5 w-5" />
+                  </Button>
+                </div>
+              </Card>
+            </Link>
           </div>
-        </div>
-      </main>
-      
-      <footer className="p-3 text-center text-muted-foreground text-xs">
-        <p>© 2023 AI Game Creator</p>
-      </footer>
+        </main>
+        
+        <footer className="mt-12 text-center text-muted-foreground text-sm">
+          <p>© {new Date().getFullYear()} AI Game Creator | Powered by CES AI</p>
+        </footer>
+      </div>
     </div>
   );
 };
