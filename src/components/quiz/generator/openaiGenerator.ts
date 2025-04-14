@@ -55,19 +55,33 @@ export const generateWithOpenAI = async (
       max_tokens: 4000
     };
     
+    // Get the API key from the window object
+    const apiKey = (window as any).OPENAI_API_KEY;
+    
+    if (!apiKey) {
+      throw new Error('Không tìm thấy OpenAI API Key');
+    }
+    
     // Make API call
     const response = await fetch(OPENAI_API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + (window as any).OPENAI_API_KEY // This assumes the key is set in window object
+        'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify(payload)
     });
     
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+      const errorData = await response.json().catch(() => null);
+      const errorMessage = errorData?.error?.message || `API request failed: ${response.status} ${response.statusText}`;
+      
+      // Specific handling for API key errors
+      if (response.status === 401 || errorMessage.includes('API key') || errorMessage.includes('authentication')) {
+        throw new Error(`API Key không hợp lệ: ${errorMessage}`);
+      }
+      
+      throw new Error(errorMessage);
     }
     
     // Parse response
@@ -143,8 +157,18 @@ export const tryOpenAIGeneration = async (
   try {
     logInfo(SOURCE, `Attempt ${retryCount + 1} for topic: "${topic}"`);
     return await generateWithOpenAI(topic, settings);
-  } catch (error) {
+  } catch (error: any) {
     logError(SOURCE, `Attempt ${retryCount + 1} failed`, error);
+    
+    // API Key errors shouldn't be retried
+    if (error.message && (
+        error.message.includes('API Key') || 
+        error.message.includes('authentication') ||
+        error.message.includes('Unauthorized') ||
+        error.message.includes('401')
+    )) {
+      throw error; // Propagate API key errors without retrying
+    }
     
     // Wait a bit before retrying
     const waitTime = (retryCount + 1) * 1500;
