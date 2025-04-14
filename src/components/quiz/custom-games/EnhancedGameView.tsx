@@ -26,15 +26,12 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const [iframeError, setIframeError] = useState<string | null>(null);
 
   const sanitizeContent = (content: string) => {
-    // Xóa bỏ các khối code block của markdown nếu có
     let processedContent = content.replace(/```html|```/g, '').trim();
     
-    // Đảm bảo có cấu trúc HTML đầy đủ
     if (!processedContent.includes('<!DOCTYPE html>')) {
       processedContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${miniGame.title || 'Interactive Game'}</title></head><body>${processedContent}</body></html>`;
     }
     
-    // Thêm CSS cơ bản để cải thiện hiển thị
     const basicCSS = `
       <style>
         body { 
@@ -53,7 +50,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       </style>
     `;
     
-    // Chèn CSS vào HTML
     processedContent = processedContent.replace('</head>', `${basicCSS}</head>`);
     
     return processedContent;
@@ -110,29 +106,29 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="flex justify-between items-center p-2 bg-background/80 backdrop-blur-md border-b border-primary/10 z-10">
-        <div className="flex items-center">
+      <div className="flex justify-between items-center p-1.5 bg-background/80 backdrop-blur-md border-b border-primary/10 z-10">
+        <div className="flex items-center gap-1">
           {onBack && (
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={onBack} 
-              className="gap-1 text-xs"
+              className="w-7 h-7 p-0"
+              title="Quay lại"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
-              Quay lại
             </Button>
           )}
         </div>
         
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           {extraButton}
           
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={refreshGame} 
-            className="w-8 h-8 p-0"
+            className="w-7 h-7 p-0"
             title="Tải lại"
           >
             <RefreshCw className="h-3.5 w-3.5" />
@@ -142,7 +138,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
             variant="ghost" 
             size="sm" 
             onClick={toggleFullscreen} 
-            className="w-8 h-8 p-0"
+            className="w-7 h-7 p-0"
             title="Toàn màn hình"
           >
             <Maximize className="h-3.5 w-3.5" />
@@ -153,21 +149,21 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
               variant="outline" 
               size="sm" 
               onClick={onNewGame} 
-              className="ml-1 text-xs"
+              className="h-7 px-2 text-xs"
             >
-              <PlusCircle className="h-3.5 w-3.5 mr-1" />
+              <PlusCircle className="h-3 w-3 mr-1" />
               Game mới
             </Button>
           )}
           
-          {onShare && (
+          {onShare && miniGame?.content && (
             <Button 
               variant="default" 
               size="sm" 
               onClick={onShare} 
-              className="ml-1 text-xs"
+              className="h-7 px-2 text-xs"
             >
-              <Share2 className="h-3.5 w-3.5 mr-1" />
+              <Share2 className="h-3 w-3 mr-1" />
               Chia sẻ
             </Button>
           )}

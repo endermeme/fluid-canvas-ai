@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Home, RefreshCw, Settings, ArrowLeft, PlusCircle } from 'lucide-react';
@@ -67,17 +66,17 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
   return (
     <div className={cn("relative h-full w-full flex flex-col bg-gradient-to-b from-background to-background/95 shadow-lg rounded-lg overflow-hidden", className)}>
       {/* Streamlined Header */}
-      <div className="flex justify-between items-center bg-background/90 backdrop-blur-md p-2.5 border-b border-primary/10 shadow-sm">
-        <div className="flex items-center gap-1.5">
+      <div className="flex justify-between items-center bg-background/90 backdrop-blur-md px-2 py-1.5 border-b border-primary/10 shadow-sm">
+        <div className="flex items-center gap-1">
           {showBackButton && (
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={handleBack}
-              className="w-8 h-8 p-0"
+              className="w-7 h-7 p-0"
               title="Quay lại"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-3.5 w-3.5" />
             </Button>
           )}
           
@@ -86,28 +85,28 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
               variant="ghost" 
               size="sm" 
               onClick={() => navigate('/')}
-              className="w-8 h-8 p-0"
+              className="w-7 h-7 p-0"
               title="Trang chủ"
             >
-              <Home className="h-4 w-4" />
+              <Home className="h-3.5 w-3.5" />
             </Button>
           )}
           
-          <h2 className="text-sm font-medium truncate max-w-[180px] ml-1.5">{title}</h2>
+          <h2 className="text-sm font-medium truncate max-w-[180px] ml-1">{title}</h2>
         </div>
         
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           {headerRight}
           
           {showCreateButton && (
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={handleCreate}
-              className="h-8 px-2.5 text-xs"
+              onClick={onCreate}
+              className="h-7 px-2 text-xs"
               title="Tạo mới"
             >
-              <PlusCircle className="h-3.5 w-3.5 mr-1" />
+              <PlusCircle className="h-3 w-3 mr-1" />
               Tạo mới
             </Button>
           )}
@@ -116,11 +115,11 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={handleRefresh}
-              className="w-8 h-8 p-0"
+              onClick={onRefresh}
+              className="w-7 h-7 p-0"
               title="Tải lại"
             >
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className="h-3.5 w-3.5" />
             </Button>
           )}
           
@@ -129,10 +128,10 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
               variant="ghost" 
               size="sm" 
               onClick={onSettings}
-              className="w-8 h-8 p-0"
+              className="w-7 h-7 p-0"
               title="Cài đặt"
             >
-              <Settings className="h-4 w-4" />
+              <Settings className="h-3.5 w-3.5" />
             </Button>
           )}
         </div>
@@ -145,7 +144,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
       
       {/* Footer (optional) */}
       {footerContent && (
-        <div className="bg-background/90 backdrop-blur-md p-2.5 border-t border-primary/10">
+        <div className="bg-background/90 backdrop-blur-md p-2 border-t border-primary/10">
           {footerContent}
         </div>
       )}

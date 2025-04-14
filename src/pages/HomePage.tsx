@@ -3,13 +3,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Gamepad, SparklesIcon, History, QrCode, Share2 } from 'lucide-react';
+import { Gamepad, SparklesIcon, History, Share2 } from 'lucide-react';
 
 const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex flex-col justify-center items-center">
       <div className="w-full max-w-4xl px-4 py-10">
-        <header className="text-center mb-8">
+        <header className="text-center mb-8 animate-fade-in">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
             AI Game Creator
           </h1>
@@ -18,7 +18,7 @@ const HomePage: React.FC = () => {
         
         <main className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <Link to="/custom-game" className="block h-full">
+            <Link to="/custom-game" className="block h-full transform transition-all duration-300 hover:scale-[1.02]">
               <Card className="p-6 h-full hover:shadow-lg transition-all hover:border-primary hover:bg-primary/5 cursor-pointer border-2 border-primary/20 overflow-hidden group">
                 <div className="flex flex-col items-center text-center gap-4 h-full relative">
                   <div className="absolute -right-16 -top-16 w-32 h-32 bg-primary/10 rounded-full transform group-hover:scale-110 transition-transform"></div>
@@ -40,7 +40,7 @@ const HomePage: React.FC = () => {
               </Card>
             </Link>
             
-            <Link to="/preset-games" className="block h-full">
+            <Link to="/preset-games" className="block h-full transform transition-all duration-300 hover:scale-[1.02]">
               <Card className="p-6 h-full hover:shadow-lg transition-all hover:border-primary hover:bg-primary/5 cursor-pointer border-2 border-primary/20 overflow-hidden group">
                 <div className="flex flex-col items-center text-center gap-4 h-full relative">
                   <div className="absolute -right-16 -top-16 w-32 h-32 bg-primary/10 rounded-full transform group-hover:scale-110 transition-transform"></div>
@@ -65,7 +65,7 @@ const HomePage: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
             <Link to="/game-history">
-              <Card className="p-5 hover:shadow-lg transition-all hover:border-primary/50 hover:bg-primary/5 border border-primary/20 overflow-hidden">
+              <Card className="p-5 hover:shadow-lg transition-all hover:border-primary/50 hover:bg-primary/5 border border-primary/20 overflow-hidden transform hover:scale-[1.02] duration-300">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-primary/10 rounded-full">
                     <History className="h-7 w-7 text-primary" />
@@ -76,28 +76,6 @@ const HomePage: React.FC = () => {
                       Xem và quản lý các trò chơi đã tạo
                     </p>
                   </div>
-                  <Button variant="ghost" size="icon" className="text-primary">
-                    <Share2 className="h-5 w-5" />
-                  </Button>
-                </div>
-              </Card>
-            </Link>
-            
-            <Link to="/game-history">
-              <Card className="p-5 hover:shadow-lg transition-all hover:border-primary/50 hover:bg-primary/5 border border-primary/20 overflow-hidden">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary/10 rounded-full">
-                    <QrCode className="h-7 w-7 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg">Chia Sẻ Game</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Tạo QR code và link chia sẻ game với người khác
-                    </p>
-                  </div>
-                  <Button variant="ghost" size="icon" className="text-primary">
-                    <Share2 className="h-5 w-5" />
-                  </Button>
                 </div>
               </Card>
             </Link>
