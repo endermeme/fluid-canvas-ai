@@ -1,10 +1,11 @@
+
 export interface GameSettingsData {
   difficulty?: 'easy' | 'medium' | 'hard';
   questionCount?: number;
   timePerQuestion?: number;
   category: string;
   prompt?: string;
-  useCanvas?: boolean;
+  // Adding missing properties that are used in the codebase
   totalTime?: number;
   bonusTime?: number;
   useTimer?: boolean;
