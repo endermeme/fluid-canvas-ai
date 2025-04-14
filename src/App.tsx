@@ -1,4 +1,3 @@
-
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import Quiz from './pages/Quiz';

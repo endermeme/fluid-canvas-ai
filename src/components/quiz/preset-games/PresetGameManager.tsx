@@ -58,6 +58,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
+  // Track game start time
   useEffect(() => {
     if (!loading && gameContent && !gameStartTime) {
       setGameStartTime(Date.now());
@@ -67,8 +68,9 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
   const generateAIContent = async (prompt, type, gameSettings: GameSettingsData) => {
     setGenerating(true);
     setError(null);
-    setGameStartTime(null);
-
+    setGameStartTime(null); // Reset game start time
+    
+    // Simulate progress
     const progressInterval = setInterval(() => {
       setGenerationProgress(prev => {
         if (prev >= 95) {
@@ -78,7 +80,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
         return prev + Math.random() * 4 + 1;
       });
     }, 300);
-
+    
     try {
       const generationConfig = {
         temperature: 0.7,
@@ -86,7 +88,8 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
         topP: 0.95,
         maxOutputTokens: 8000,
       };
-
+      
+      // Incorporate settings into the prompt
       const difficultyLevel = gameSettings.difficulty;
       const questionCount = gameSettings.questionCount;
       const timePerQuestion = gameSettings.timePerQuestion;
@@ -94,7 +97,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
       const totalTime = gameSettings.totalTime;
       const bonusTime = gameSettings.bonusTime;
       const promptContent = gameSettings.prompt || prompt;
-
+      
       let gamePrompt = `Create content for a ${type} game with the following requirements:
 - Topic: ${promptContent}
 - Difficulty: ${difficultyLevel}
@@ -105,7 +108,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
 - Bonus time: ${bonusTime || 'not specified'} seconds
 
 Output must be valid JSON. `;
-
+      
       switch(type) {
         case 'quiz':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 5}} }`;
@@ -132,32 +135,35 @@ Output must be valid JSON. `;
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
           break;
       }
-
+      
       gamePrompt += " Return only JSON, no additional text.";
-
+      
       console.log("Sending prompt to Gemini:", gamePrompt);
-
+      
       const result = await model.generateContent(gamePrompt);
       const response = await result.response;
       const text = response.text();
-
+      
       console.log("Received response from Gemini:", text);
-
+      
       try {
+        // Extract JSON if wrapped in backticks
         const jsonStr = text.includes('```json') 
           ? text.split('```json')[1].split('```')[0].trim() 
           : text.includes('```') 
             ? text.split('```')[1].split('```')[0].trim() 
             : text;
-
+            
         console.log("Parsed JSON string:", jsonStr);
-
+        
         const parsedContent = JSON.parse(jsonStr);
-
+        
+        // Ensure time settings are present and match user settings
         if (!parsedContent.settings) {
           parsedContent.settings = {};
         }
-
+        
+        // Apply settings from user input
         switch(type) {
           case 'quiz':
             parsedContent.settings.timePerQuestion = timePerQuestion;
@@ -190,16 +196,18 @@ Output must be valid JSON. `;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 3;
             break;
         }
-
+        
+        // Clear generation progress interval and set to 100%
         clearInterval(progressInterval);
         setGenerationProgress(100);
-
+        
+        // Delay a bit to show 100% before completing
         setTimeout(() => {
           setGenerating(false);
           setLoading(false);
           setGameContent(parsedContent);
         }, 500);
-
+        
         return parsedContent;
       } catch (parseError) {
         console.error("Error parsing AI response:", parseError);
@@ -220,7 +228,8 @@ Output must be valid JSON. `;
         description: "Không thể tạo nội dung. Vui lòng thử lại sau.",
         variant: "destructive"
       });
-
+      
+      // Fall back to sample data
       loadSampleData(type);
     } finally {
       setGenerating(false);
@@ -228,9 +237,11 @@ Output must be valid JSON. `;
   };
 
   const loadSampleData = (type) => {
+    // Dynamically import sample data based on type
     import(`./data/${type}SampleData.ts`).then(module => {
       let data = null;
-
+      
+      // Determine which data to use based on type and difficulty keywords in the topic
       if (type === 'wordsearch' && initialTopic) {
         const lowerTopic = initialTopic.toLowerCase();
         if (lowerTopic.includes('easy') || lowerTopic.includes('simple')) {
@@ -243,12 +254,14 @@ Output must be valid JSON. `;
       } else {
         data = module.default || module[`${type}SampleData`];
       }
-
+      
+      // Apply user settings to sample data
       if (data) {
         if (!data.settings) {
           data.settings = {};
         }
-
+        
+        // Apply settings from user input
         switch(type) {
           case 'quiz':
             data.settings.timePerQuestion = settings.timePerQuestion;
@@ -282,7 +295,7 @@ Output must be valid JSON. `;
             break;
         }
       }
-
+      
       setLoading(false);
       setGameContent(data);
     }).catch(err => {
@@ -304,10 +317,12 @@ Output must be valid JSON. `;
     setSettings(gameSettings);
     setShowSettings(false);
     setLoading(true);
-
+    
+    // Use prompt from settings
     const aiPrompt = gameSettings.prompt || initialTopic;
-
+    
     if (aiPrompt && aiPrompt.trim() !== "") {
+      // Use AI to generate content if prompt exists
       console.log(`Creating ${gameType} game with prompt: "${aiPrompt}" and settings:`, gameSettings);
       toast({
         title: "Đang tạo trò chơi",
@@ -315,6 +330,7 @@ Output must be valid JSON. `;
       });
       generateAIContent(aiPrompt, gameType, gameSettings);
     } else {
+      // Otherwise use sample data for dev/test
       console.log(`Loading sample data for ${gameType} game with settings:`, gameSettings);
       loadSampleData(gameType);
     }
@@ -335,20 +351,12 @@ Output must be valid JSON. `;
   };
 
   const renderGameTemplate = () => {
-    const getTemplateComponent = () => {
-      if (!gameType || !gameTemplates[gameType]) {
-        console.error(`Game type "${gameType}" is not found in templates:`, gameTemplates);
-        return null;
-      }
-      return gameTemplates[gameType];
-    };
-
-    const GameTemplate = getTemplateComponent();
-
+    const GameTemplate = getGameTypeObject();
+    
     if (!GameTemplate) {
       return <div>Game type not supported</div>;
     }
-
+    
     return (
       <div className="flex flex-col h-full">
         <div className="flex justify-between items-center mb-4">
@@ -440,23 +448,26 @@ Output must be valid JSON. `;
         defaultSettings: settings
       }
     };
-
+    
     return gameTypeMap[gameType] || null;
   };
 
   const handleShare = () => {
     try {
       if (!gameContent) return;
-
+      
+      // Get HTML content from the current game
       const gameElement = document.getElementById('game-container');
       let htmlContent = '';
-
+      
       if (gameElement) {
         htmlContent = gameElement.innerHTML;
       } else {
+        // Fallback for games without direct DOM access
         const GameTemplate = getGameTypeObject();
         if (!GameTemplate) return;
-
+        
+        // Convert the game content to HTML format
         htmlContent = `
           <div class="interactive-game">
             <h1>${gameContent.title || 'Interactive Game'}</h1>
@@ -464,22 +475,25 @@ Output must be valid JSON. `;
               ${JSON.stringify(gameContent)}
             </div>
             <script>
+              // Initialize game data
               window.gameData = ${JSON.stringify(gameContent)};
             </script>
           </div>
         `;
       }
-
+      
+      // Save game for sharing
       const url = saveGameForSharing(
         gameContent.title || `${getGameTypeName()} Game`, 
         `Interactive ${getGameTypeName()} game`, 
         htmlContent
       );
-
+      
       if (url) {
         setShareUrl(url);
         setShowShareDialog(true);
-
+        
+        // Save to game history
         const historyItem = {
           id: new Date().getTime().toString(),
           title: gameContent.title || `${getGameTypeName()} Game`,
@@ -488,12 +502,12 @@ Output must be valid JSON. `;
           url: url,
           thumbnail: null
         };
-
+        
         const historyJson = localStorage.getItem('game_history');
         const history = historyJson ? JSON.parse(historyJson) : [];
         history.push(historyItem);
         localStorage.setItem('game_history', JSON.stringify(history));
-
+        
         toast({
           title: "Game đã được chia sẻ",
           description: "Đã tạo liên kết chia sẻ thành công",
@@ -541,7 +555,6 @@ Output must be valid JSON. `;
           initialSettings={settings}
           onStart={handleStartGame}
           onCancel={onBack}
-          topic={initialTopic || ""}
         />
       </div>
     );
@@ -587,8 +600,10 @@ Output must be valid JSON. `;
     <div className="flex flex-col h-full">
       {loading ? (
         <GameLoading 
-          topic={initialTopic || ""}
+          title={`Đang tạo ${getGameTypeName()}`}
           progress={generating ? generationProgress : undefined}
+          error={error}
+          onRetry={handleRetry}
         />
       ) : showSettings ? (
         <div className="p-4">
@@ -604,13 +619,13 @@ Output must be valid JSON. `;
             initialSettings={settings}
             onStart={handleStartGame}
             onCancel={onBack}
-            topic={initialTopic || ""}
           />
         </div>
       ) : (
         renderGameTemplate()
       )}
       
+      {/* Dialog for sharing game */}
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

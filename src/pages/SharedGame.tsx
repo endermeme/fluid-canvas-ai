@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getSharedGame, getRemainingTime, StoredGame, formatRemainingTime } from '@/utils/gameExport';
+import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
 import { addParticipant, getFakeIpAddress, GameParticipant } from '@/utils/gameParticipation';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Share2, Users, Clock, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Clock, AlertTriangle, Plus, Users, Share2, Copy, Check } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -17,278 +16,334 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { QRCodeSVG } from 'qrcode.react';
-import { useToast } from '@/hooks/use-toast';
 
-const SharedGame: React.FC = () => {
+const SharedGame = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const [game, setGame] = useState<StoredGame | null>(null);
   const [loading, setLoading] = useState(true);
+  const [timeLeft, setTimeLeft] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [joinOpen, setJoinOpen] = useState(false);
-  const [userName, setUserName] = useState('');
+  const [playerName, setPlayerName] = useState('');
+  const [showNameDialog, setShowNameDialog] = useState(false);
   const [participants, setParticipants] = useState<GameParticipant[]>([]);
-  const [remainingTime, setRemainingTime] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
-  const [showQR, setShowQR] = useState(false);
-  
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (!id) {
-      setError('No game ID provided');
+      setError('ID trò chơi không hợp lệ');
       setLoading(false);
       return;
     }
-    
-    try {
-      const sharedGame = getSharedGame(id);
-      if (!sharedGame) {
-        setError('Game not found or has expired');
-        setLoading(false);
-        return;
+
+    const loadGame = () => {
+      const loadedGame = getSharedGame(id);
+      setGame(loadedGame);
+      
+      if (loadedGame) {
+        setTimeLeft(getRemainingTime(loadedGame.expiresAt));
+        
+        // Load participants if available
+        const sessionsJson = localStorage.getItem('game_sessions');
+        if (sessionsJson) {
+          const sessions = JSON.parse(sessionsJson);
+          const session = sessions.find((s: any) => s.id === id);
+          if (session && session.participants) {
+            setParticipants(session.participants);
+          }
+        }
+      } else {
+        setError('Trò chơi không tồn tại hoặc đã hết hạn');
       }
       
-      setGame(sharedGame);
-      
-      // Check remaining time
-      const remaining = getRemainingTime(sharedGame);
-      setRemainingTime(remaining);
-      
-      // Set up timer to update remaining time
-      const interval = setInterval(() => {
-        const newRemaining = getRemainingTime(sharedGame);
-        setRemainingTime(newRemaining);
-        
-        if (newRemaining <= 0) {
-          clearInterval(interval);
-          setError('This game has expired');
-        }
-      }, 60000); // Update every minute
-      
       setLoading(false);
-      
-      return () => clearInterval(interval);
-    } catch (err) {
-      console.error('Error loading shared game:', err);
-      setError('Failed to load game');
-      setLoading(false);
-    }
-  }, [id]);
+    };
+
+    loadGame();
+    
+    // Update remaining time every minute
+    const intervalId = setInterval(() => {
+      if (game) {
+        setTimeLeft(getRemainingTime(game.expiresAt));
+      }
+    }, 60000);
+    
+    return () => clearInterval(intervalId);
+  }, [id, game]);
+
+  const handleCreateNewGame = () => {
+    navigate('/');
+  };
   
-  const handleJoin = () => {
-    if (!id || !userName.trim()) return;
+  const handleJoinGame = () => {
+    if (!playerName.trim() || !id) return;
     
-    const fakeIp = getFakeIpAddress();
-    const result = addParticipant(id, userName, fakeIp);
+    const ipAddress = getFakeIpAddress();
+    const result = addParticipant(id, playerName, ipAddress);
     
-    if (result.success) {
-      toast({
-        title: 'Tham gia thành công',
-        description: `Chào mừng ${userName} đến với trò chơi!`,
-      });
-      setJoinOpen(false);
-      // Reload participants
-      // loadParticipants();
-    } else {
-      toast({
-        title: 'Không thể tham gia',
-        description: result.message,
-        variant: 'destructive',
-      });
+    if (result.success && result.participant) {
+      setParticipants(prev => [...prev, result.participant]);
+      setShowNameDialog(false);
+    } else if (result.participant) {
+      // Already participated, just update the list
+      setParticipants(prev => 
+        prev.map(p => p.id === result.participant?.id ? result.participant : p)
+      );
+      setShowNameDialog(false);
     }
   };
   
   const handleCopyLink = () => {
-    const shareUrl = `${window.location.origin}/quiz/shared/${id}`;
+    const shareUrl = `${window.location.origin}/game/${id}`;
     navigator.clipboard.writeText(shareUrl)
       .then(() => {
         setCopied(true);
-        toast({
-          title: 'Đã sao chép',
-          description: 'Liên kết đã được sao chép vào clipboard',
-        });
         setTimeout(() => setCopied(false), 2000);
       })
       .catch(err => {
-        console.error('Could not copy text: ', err);
-        toast({
-          title: 'Lỗi sao chép',
-          description: 'Không thể sao chép liên kết',
-          variant: 'destructive',
-        });
+        console.error('Không thể sao chép liên kết:', err);
       });
   };
   
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Enhanced function to properly prepare the content
+  const enhanceIframeContent = (content: string): string => {
+    // Remove any existing style tags to prevent conflicts
+    let processedContent = content;
+    
+    // Add our new style definitions - maximizing display area
+    const fullDisplayStyles = `
+      <style>
+        html, body {
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+          overflow: hidden !important;
+        }
+        
+        *, *::before, *::after {
+          box-sizing: border-box !important;
+        }
+        
+        body > div, main, #root, #app, .container, .game-container, #game, .game {
+          width: 100% !important;
+          height: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: auto !important;
+          display: flex !important;
+          flex-direction: column !important;
+        }
+        
+        canvas {
+          display: block !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          margin: 0 auto !important;
+          object-fit: contain !important;
+        }
+        
+        pre, code {
+          white-space: pre-wrap !important;
+          word-break: break-word !important;
+          max-width: 100% !important;
+          margin: 0 !important;
+          padding: 8px !important;
+          background: rgba(0,0,0,0.05) !important;
+          border-radius: 4px !important;
+        }
+      </style>
+    `;
+    
+    // Insert our styles at the beginning of head or create a head if none exists
+    if (processedContent.includes('<head>')) {
+      processedContent = processedContent.replace('<head>', `<head>${fullDisplayStyles}`);
+    } else if (processedContent.includes('<html>')) {
+      processedContent = processedContent.replace('<html>', `<html><head>${fullDisplayStyles}</head>`);
+    } else {
+      // If no html structure, add complete html wrapper
+      processedContent = `<!DOCTYPE html><html><head>${fullDisplayStyles}</head><body>${processedContent}</body></html>`;
+    }
+    
+    return processedContent;
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg font-medium">Đang tải trò chơi...</p>
-        </div>
+      <div className="flex flex-col items-center justify-center h-screen space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <p className="text-lg">Đang tải trò chơi...</p>
       </div>
     );
   }
-  
-  if (error || !game) {
+
+  if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen p-4">
-        <Card className="max-w-md w-full p-6">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl">Không thể tải trò chơi</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              {error || 'Trò chơi không tồn tại hoặc đã hết hạn.'}
-            </CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Button 
-              className="w-full" 
-              onClick={() => navigate('/')}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Quay lại trang chủ
-            </Button>
-          </CardFooter>
-        </Card>
+      <div className="flex flex-col items-center justify-center h-screen space-y-6 p-4">
+        <AlertTriangle className="text-destructive h-16 w-16" />
+        <h1 className="text-2xl font-bold">{error}</h1>
+        <p className="text-muted-foreground text-center max-w-md">
+          Liên kết này có thể đã hết hạn hoặc không tồn tại. Trò chơi chỉ có hiệu lực trong 48 giờ.
+        </p>
+        <Button onClick={() => navigate('/')}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Quay lại màn hình chính
+        </Button>
       </div>
     );
   }
-  
+
+  if (!game) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen space-y-6 p-4">
+        <AlertTriangle className="text-destructive h-16 w-16" />
+        <h1 className="text-2xl font-bold">Trò chơi không tìm thấy</h1>
+        <Button onClick={() => navigate('/')}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Tạo trò chơi mới
+        </Button>
+      </div>
+    );
+  }
+
+  // Enhanced content with proper styling
+  const enhancedContent = enhanceIframeContent(game.htmlContent);
+  const shareUrl = `${window.location.origin}/game/${id}`;
+
   return (
-    <div className="container mx-auto p-4 min-h-screen flex flex-col">
-      <div className="flex items-center justify-between mb-6">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => navigate(-1)}
-        >
+    <div className="flex flex-col h-screen overflow-hidden">
+      <header className="bg-background/80 backdrop-blur-sm p-2 flex justify-between items-center z-10">
+        <Button variant="outline" size="sm" onClick={() => navigate('/')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Quay lại
         </Button>
         
         <div className="flex items-center gap-2">
-          {remainingTime !== null && (
-            <Badge variant="outline" className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {formatRemainingTime(remainingTime)}
-            </Badge>
-          )}
-        </div>
-      </div>
-      
-      <Card className="mx-auto max-w-4xl w-full mb-6">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl">{game.title}</CardTitle>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleCopyLink}
-              className="flex items-center gap-1"
-            >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              {copied ? 'Đã sao chép' : 'Sao chép link'}
-            </Button>
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Clock className="h-4 w-4 mr-1" />
+            <span>Còn lại: {timeLeft}</span>
           </div>
-          <CardDescription>{game.description}</CardDescription>
-        </CardHeader>
-        
-        <CardContent>
-          <Tabs defaultValue="game">
-            <TabsList className="mb-4">
-              <TabsTrigger value="game">Trò chơi</TabsTrigger>
-              <TabsTrigger value="share">Chia sẻ</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="game">
-              <div 
-                className="bg-card rounded-md p-4 min-h-[300px] border"
-                dangerouslySetInnerHTML={{ __html: game.htmlContent }}
-              />
-            </TabsContent>
-            
-            <TabsContent value="share">
-              <div className="flex flex-col items-center space-y-4 py-4">
-                <div className="p-4 bg-white rounded-lg">
-                  <QRCodeSVG 
-                    value={`${window.location.origin}/quiz/shared/${id}`} 
-                    size={200}
-                  />
-                </div>
-                
-                <div className="w-full space-y-2">
-                  <Label htmlFor="share-link">Liên kết chia sẻ</Label>
-                  <div className="flex">
-                    <Input 
-                      id="share-link" 
-                      value={`${window.location.origin}/quiz/shared/${id}`} 
-                      readOnly 
-                      className="rounded-r-none"
-                    />
-                    <Button 
-                      variant="outline" 
-                      className="rounded-l-none"
-                      onClick={handleCopyLink}
-                    >
-                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-                
-                <Button
-                  onClick={() => setJoinOpen(true)}
-                  className="w-full md:w-auto mt-4"
-                >
-                  Tham gia trò chơi
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+          
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Users className="h-4 w-4 mr-1" />
+            <span>{participants.length} người tham gia</span>
+          </div>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowNameDialog(true)}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            Tham gia
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowShareDialog(true)}
+          >
+            <Share2 className="h-4 w-4 mr-2" />
+            Chia sẻ
+          </Button>
+        </div>
+      </header>
       
-      <Dialog open={joinOpen} onOpenChange={setJoinOpen}>
-        <DialogContent className="sm:max-w-md">
+      <main className="flex-1 overflow-hidden w-full h-full">
+        <iframe
+          srcDoc={enhancedContent}
+          sandbox="allow-scripts allow-same-origin"
+          className="w-full h-full"
+          style={{ 
+            border: 'none',
+            margin: 0,
+            padding: 0,
+            width: '100%',
+            height: '100%',
+            display: 'block'
+          }}
+        />
+      </main>
+
+      {/* Dialog for entering player name */}
+      <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tham gia trò chơi</DialogTitle>
+            <DialogTitle>Tham gia game</DialogTitle>
             <DialogDescription>
-              Nhập tên của bạn để tham gia trò chơi này.
+              Nhập tên của bạn để tham gia game "{game.title}"
             </DialogDescription>
           </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Tên của bạn</Label>
-              <Input 
-                id="name" 
-                value={userName} 
-                onChange={(e) => setUserName(e.target.value)} 
-                placeholder="Nhập tên của bạn"
-              />
-            </div>
+          <div className="py-4">
+            <Label htmlFor="player-name">Tên của bạn</Label>
+            <Input 
+              id="player-name" 
+              value={playerName} 
+              onChange={(e) => setPlayerName(e.target.value)}
+              placeholder="Nhập tên của bạn"
+              className="mt-2"
+            />
           </div>
-          
           <DialogFooter>
-            <Button 
-              onClick={handleJoin}
-              disabled={!userName.trim()}
-            >
+            <Button variant="outline" onClick={() => setShowNameDialog(false)}>
+              Hủy
+            </Button>
+            <Button onClick={handleJoinGame} disabled={!playerName.trim()}>
               Tham gia
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Dialog for sharing game */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Chia sẻ game</DialogTitle>
+            <DialogDescription>
+              Chia sẻ game này với bạn bè để họ có thể tham gia chơi
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <div className="p-4 bg-white rounded-lg">
+              <QRCodeSVG value={shareUrl} size={200} />
+            </div>
+            
+            <div className="w-full space-y-2">
+              <Label htmlFor="share-link">Liên kết chia sẻ</Label>
+              <div className="flex">
+                <Input 
+                  id="share-link" 
+                  value={shareUrl} 
+                  readOnly 
+                  className="rounded-r-none"
+                />
+                <Button 
+                  variant="outline" 
+                  className="rounded-l-none"
+                  onClick={handleCopyLink}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowShareDialog(false)}>Đóng</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
