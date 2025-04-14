@@ -44,15 +44,6 @@ export const saveGameForSharing = (title: string, description: string, htmlConte
     // Remove expired games
     games = games.filter(game => game.expiresAt > now);
     
-    // Check for duplicate content to prevent multiple entries of same game
-    const existingGameIndex = games.findIndex(g => g.htmlContent === htmlContent);
-    
-    if (existingGameIndex >= 0) {
-      // Return URL of existing game instead of creating a duplicate
-      console.log("Game already exists, returning existing URL");
-      return `${getBaseUrl()}/${games[existingGameIndex].id}`;
-    }
-    
     // Add new game
     games.push(game);
     
@@ -88,27 +79,7 @@ export const getSharedGame = (id: string): StoredGame | null => {
   }
 };
 
-// Clean up expired games
-export const cleanupExpiredGames = (): void => {
-  try {
-    const gamesJson = localStorage.getItem('shared_games');
-    if (!gamesJson) return;
-    
-    const games: StoredGame[] = JSON.parse(gamesJson);
-    const now = Date.now();
-    
-    // Filter out expired games
-    const validGames = games.filter(game => game.expiresAt > now);
-    
-    if (validGames.length !== games.length) {
-      localStorage.setItem('shared_games', JSON.stringify(validGames));
-    }
-  } catch (error) {
-    console.error("Error cleaning up expired games:", error);
-  }
-};
-
-// Get remaining time for a game in hours and minutes
+// Calculate remaining time for a game
 export const getRemainingTime = (expiresAt: number): string => {
   try {
     const now = Date.now();
