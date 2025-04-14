@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { MiniGame } from './generator/AIGameGenerator';
+import { MiniGame } from './generator/types';
 import { Button } from '@/components/ui/button';
 import { Share2, RefreshCw, Trophy, ArrowLeft } from 'lucide-react';
 import { saveGameForSharing } from '@/utils/gameExport';
