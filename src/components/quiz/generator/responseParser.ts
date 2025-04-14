@@ -10,6 +10,7 @@ import { MiniGame } from './types';
 export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
   console.log("🔷 Gemini: Response received, extracting JSON...");
   console.log("🔷 Gemini: Response length:", text.length);
+  console.log("🔷 Gemini: Full response:", text);
   
   try {
     // First approach: Try to extract JSON directly
@@ -63,6 +64,8 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
     
     if (htmlMatch && htmlMatch[0]) {
       console.log("🔷 Gemini: Successfully extracted HTML content");
+      console.log("🔷 Gemini: Full HTML content:", htmlMatch[0]);
+      
       return {
         title: topic,
         description: "Generated HTML content",
@@ -76,6 +79,8 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
     
     if (fallbackHtmlMatch && fallbackHtmlMatch[0]) {
       console.log("🔷 Gemini: Extracted HTML with fallback regex");
+      console.log("🔷 Gemini: Full HTML content (fallback):", fallbackHtmlMatch[0]);
+      
       const htmlContent = `<!DOCTYPE html>${fallbackHtmlMatch[0]}`;
       return {
         title: topic,

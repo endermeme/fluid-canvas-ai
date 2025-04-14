@@ -85,6 +85,10 @@ export const generateWithGemini = async (
     logSuccess(SOURCE, `Response received in ${duration.seconds}s (${duration.ms}ms)`);
     logInfo(SOURCE, `Response length: ${text.length} characters`);
     
+    // Log full response to console
+    console.log('%c 📄 Full Gemini Response:', 'font-weight: bold; color: #6f42c1;');
+    console.log(text);
+    
     // Extract title from HTML
     let title = topic;
     const titleMatch = text.match(/<title>(.*?)<\/title>/i) || 

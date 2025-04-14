@@ -1,3 +1,4 @@
+
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { buildGeminiPrompt } from './promptBuilder';
@@ -117,6 +118,10 @@ export class AIGameGenerator {
       
       // Sanitize and clean HTML content
       const cleanedHtmlContent = this.sanitizeHtmlContent(htmlContent);
+      
+      // Log the full HTML to console
+      console.log('%c 📄 Full HTML Content:', 'font-weight: bold; color: #6f42c1;');
+      console.log(cleanedHtmlContent);
       
       // Extract game title
       let gameTitle = prompt;
