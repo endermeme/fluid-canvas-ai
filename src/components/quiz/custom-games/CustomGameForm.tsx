@@ -13,6 +13,8 @@ import GameLoading from '../GameLoading';
 import { Input } from '@/components/ui/input';
 import { tryOpenAIGeneration } from '../generator/openaiGenerator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import fs from 'fs';
+import path from 'path';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
@@ -69,6 +71,18 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     return key.trim().startsWith('sk-') && key.trim().length > 10;
   };
 
+  const saveApiKeyToEnv = (key: string) => {
+    try {
+      const envPath = path.resolve(process.cwd(), '.env.local');
+      const envContent = `VITE_OPENAI_API_KEY=${key}\n`;
+      
+      fs.writeFileSync(envPath, envContent);
+      console.log('API key saved to .env.local');
+    } catch (error) {
+      console.error('Error saving API key:', error);
+    }
+  };
+
   const saveApiKey = () => {
     setApiKeyError(null);
     
@@ -83,15 +97,16 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     }
     
     localStorage.setItem('openai_api_key', apiKey.trim());
+    saveApiKeyToEnv(apiKey.trim());  // Thêm dòng này
+    
     setShowApiKeyField(false);
     setApiKeyValidated(true);
     
     toast({
       title: "API Key đã được lưu",
-      description: "API Key của bạn đã được lưu vào trình duyệt",
+      description: "API Key của bạn đã được lưu vào trình duyệt và .env.local",
     });
     
-    // Set OpenAI API key in window for global access
     (window as any).OPENAI_API_KEY = apiKey.trim();
   };
 
@@ -376,7 +391,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
           <div>
             <div className="flex justify-between items-center">
               <Label htmlFor="content" className="flex items-center gap-2 text-base">
-                <SparklesIcon className="h-4 w-4 text-primary" /> 
+                <SparklesIcon className="h-4 w-4 mr-2" /> 
                 Mô tả game của bạn
               </Label>
               <div className="flex items-center gap-2">
