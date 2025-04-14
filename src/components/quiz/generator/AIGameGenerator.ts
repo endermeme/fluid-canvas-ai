@@ -1,4 +1,3 @@
-
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { buildGeminiPrompt } from './promptBuilder';
@@ -60,6 +59,21 @@ export class AIGameGenerator {
     }
   }
 
+  private sanitizeHtmlContent(htmlContent: string): string {
+    // Remove any markdown code blocks
+    let sanitizedContent = htmlContent.replace(/```html|```/g, '');
+    
+    // Ensure complete HTML structure
+    if (!sanitizedContent.includes('<!DOCTYPE html>')) {
+      sanitizedContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Interactive Game</title></head><body>${sanitizedContent}</body></html>`;
+    }
+    
+    // Basic HTML cleaning
+    sanitizedContent = sanitizedContent.replace(/\s+/g, ' ').trim();
+    
+    return sanitizedContent;
+  }
+
   /**
    * Generate an HTML game
    * @param prompt User prompt for game generation
@@ -69,23 +83,18 @@ export class AIGameGenerator {
     try {
       logInfo('AIGameGenerator', 'Generating HTML game', { prompt });
       
-      // Build a simplified prompt for HTML game generation
-      const htmlPrompt = buildGeminiPrompt(prompt, this.useCanvas);
+      const htmlPrompt = buildGeminiPrompt(prompt, true);
       
-      // Log API request details for debugging
-      console.log('User request prompt:', prompt);
-      console.log('Using model:', GEMINI_MODELS.DEFAULT);
-      console.log('API endpoint:', getApiEndpoint());
-      
-      // Create payload
       const payload = {
         contents: [{
           parts: [{text: htmlPrompt}]
         }],
-        generationConfig: DEFAULT_GENERATION_SETTINGS
+        generationConfig: {
+          ...DEFAULT_GENERATION_SETTINGS,
+          maxOutputTokens: 16384  // Increased token limit
+        }
       };
       
-      // Make API call
       const response = await fetch(getApiEndpoint(), {
         method: 'POST',
         headers: {
@@ -99,7 +108,6 @@ export class AIGameGenerator {
         throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
       }
       
-      // Parse response
       const result = await response.json();
       const htmlContent = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
       
@@ -107,24 +115,26 @@ export class AIGameGenerator {
         throw new Error('No content returned from API');
       }
       
-      // Extract a title from the HTML (first h1 or title tag)
+      // Sanitize and clean HTML content
+      const cleanedHtmlContent = this.sanitizeHtmlContent(htmlContent);
+      
+      // Extract game title
       let gameTitle = prompt;
-      const titleMatch = htmlContent.match(/<title>(.*?)<\/title>/i) || 
-                        htmlContent.match(/<h1[^>]*>(.*?)<\/h1>/i);
+      const titleMatch = cleanedHtmlContent.match(/<title>(.*?)<\/title>/i) || 
+                        cleanedHtmlContent.match(/<h1[^>]*>(.*?)<\/h1>/i);
       
       if (titleMatch && titleMatch[1]) {
-        gameTitle = titleMatch[1].replace(/<[^>]*>/g, '').trim(); // Remove any HTML tags inside the title
+        gameTitle = titleMatch[1].replace(/<[^>]*>/g, '').trim();
       }
       
-      // Create the game object
       const game: MiniGame = {
         title: gameTitle,
-        content: htmlContent
+        content: cleanedHtmlContent
       };
       
       logInfo('AIGameGenerator', 'HTML game generated successfully', {
         title: gameTitle,
-        contentLength: htmlContent.length
+        contentLength: cleanedHtmlContent.length
       });
       
       return game;

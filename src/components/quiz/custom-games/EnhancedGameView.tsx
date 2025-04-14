@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
@@ -26,101 +25,36 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [iframeError, setIframeError] = useState<string | null>(null);
 
-  // Enhanced function to properly prepare the content
-  const enhanceIframeContent = (content: string): string => {
-    // Safely sanitize content by removing markdown-style code blocks
-    let processedContent = content.replace(/```html|```/g, '');
-    processedContent = processedContent.replace(/`/g, '');
+  const sanitizeContent = (content: string) => {
+    // Xóa bỏ các khối code block của markdown nếu có
+    let processedContent = content.replace(/```html|```/g, '').trim();
     
-    // Make sure content has proper HTML structure
+    // Đảm bảo có cấu trúc HTML đầy đủ
     if (!processedContent.includes('<!DOCTYPE html>')) {
-      if (processedContent.includes('<html')) {
-        processedContent = `<!DOCTYPE html>${processedContent}`;
-      } else {
-        processedContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${miniGame.title || 'Interactive Game'}</title></head><body>${processedContent}</body></html>`;
-      }
+      processedContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${miniGame.title || 'Interactive Game'}</title></head><body>${processedContent}</body></html>`;
     }
     
-    // Add optimized styles for full display
-    const optimizedStyles = `
+    // Thêm CSS cơ bản để cải thiện hiển thị
+    const basicCSS = `
       <style>
-        html, body {
-          margin: 0 !important;
-          padding: 0 !important;
-          width: 100% !important;
-          height: 100% !important;
-          overflow: hidden !important;
-          font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+        body { 
+          font-family: Arial, sans-serif; 
+          display: flex; 
+          justify-content: center; 
+          align-items: center; 
+          height: 100vh; 
+          margin: 0; 
+          background-color: #f0f0f0; 
         }
-        
-        body {
-          display: flex !important;
-          flex-direction: column !important;
-          align-items: center !important;
-          justify-content: center !important;
-          background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%) !important;
-        }
-        
-        *, *::before, *::after {
-          box-sizing: border-box !important;
-        }
-        
-        #game-container, #root, #app, .container, .game-container, #game, .game, main, [class*="container"] {
-          width: 100% !important;
-          height: 100% !important;
-          margin: 0 auto !important;
-          padding: 0 !important;
-          display: flex !important;
-          flex-direction: column !important;
-          align-items: center !important;
-          justify-content: center !important;
-          max-width: 100% !important;
-        }
-        
-        canvas {
-          display: block !important;
-          max-width: 100% !important;
-          max-height: 100% !important;
-          margin: 0 auto !important;
-          object-fit: contain !important;
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-          margin: 0.5em 0 !important;
-          text-align: center !important;
-        }
-        
-        button {
-          cursor: pointer !important;
-          padding: 8px 16px !important;
-          margin: 8px !important;
-          background: #4f46e5 !important;
-          color: white !important;
-          border: none !important;
-          border-radius: 4px !important;
-          font-size: 16px !important;
-          transition: background 0.2s !important;
-        }
-        
-        button:hover {
-          background: #4338ca !important;
-        }
-        
-        pre, code {
-          display: none !important;
+        canvas, #game-container { 
+          max-width: 100%; 
+          max-height: 100%; 
         }
       </style>
     `;
     
-    // Insert styles and ensure proper HTML structure
-    if (processedContent.includes('<head>')) {
-      processedContent = processedContent.replace('<head>', `<head>${optimizedStyles}`);
-    } else if (processedContent.includes('<html>')) {
-      processedContent = processedContent.replace('<html>', `<html><head>${optimizedStyles}</head>`);
-    } else {
-      // If no html structure, add complete html wrapper
-      processedContent = `<!DOCTYPE html><html><head>${optimizedStyles}</head><body>${processedContent}</body></html>`;
-    }
+    // Chèn CSS vào HTML
+    processedContent = processedContent.replace('</head>', `${basicCSS}</head>`);
     
     return processedContent;
   };
@@ -128,17 +62,29 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   useEffect(() => {
     if (iframeRef.current && miniGame?.content) {
       try {
-        const enhancedContent = enhanceIframeContent(miniGame.content);
+        const enhancedContent = sanitizeContent(miniGame.content);
         iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
       } catch (error) {
         console.error("Error setting iframe content:", error);
-        setIframeError("Failed to load game content. Please try refreshing.");
+        setIframeError("Không thể tải nội dung game. Vui lòng thử lại.");
       }
     }
   }, [miniGame]);
 
-  // Handle document fullscreen change events
+  const refreshGame = () => {
+    if (iframeRef.current && miniGame?.content) {
+      try {
+        const enhancedContent = sanitizeContent(miniGame.content);
+        iframeRef.current.srcdoc = enhancedContent;
+        setIframeError(null);
+      } catch (error) {
+        console.error("Error refreshing game:", error);
+        setIframeError("Không thể tải lại game. Vui lòng thử lại.");
+      }
+    }
+  };
+
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -149,19 +95,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
-
-  const refreshGame = () => {
-    if (iframeRef.current && miniGame?.content) {
-      try {
-        const enhancedContent = enhanceIframeContent(miniGame.content);
-        iframeRef.current.srcdoc = enhancedContent;
-        setIframeError(null);
-      } catch (error) {
-        console.error("Error refreshing game:", error);
-        setIframeError("Failed to refresh game. Please try again.");
-      }
-    }
-  };
 
   const toggleFullscreen = () => {
     if (iframeRef.current) {
@@ -177,7 +110,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
 
   return (
     <div className="w-full h-full flex flex-col">
-      {/* Streamlined Controls Bar */}
       <div className="flex justify-between items-center p-2 bg-background/80 backdrop-blur-md border-b border-primary/10 z-10">
         <div className="flex items-center">
           {onBack && (
@@ -242,7 +174,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         </div>
       </div>
       
-      {/* Game Display */}
       <div className="flex-1 relative overflow-hidden">
         {iframeError ? (
           <div className="flex flex-col items-center justify-center h-full p-6 bg-destructive/10">
