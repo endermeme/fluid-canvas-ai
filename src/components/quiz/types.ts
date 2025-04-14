@@ -1,4 +1,3 @@
-
 export interface GameSettingsData {
   difficulty?: 'easy' | 'medium' | 'hard';
   questionCount?: number;
@@ -40,6 +39,7 @@ export interface GameSettingsData {
   allowMultipleCategories?: boolean;
   showCategoryHints?: boolean;
   allowMultipleAttempts?: boolean;
+  useCanvas?: boolean;
   requestMetadata?: {
     requestId?: string;
     timestamp?: string;

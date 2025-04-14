@@ -1,8 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
-import { AIGameGenerator } from '../generator/AIGameGenerator';
 import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
@@ -27,6 +26,14 @@ const GameController: React.FC<GameControllerProps> = ({
   const [showForm, setShowForm] = useState(!currentGame);
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Check for OpenAI API key on component mount
+  useEffect(() => {
+    const storedKey = localStorage.getItem('openai_api_key');
+    if (storedKey) {
+      (window as any).OPENAI_API_KEY = storedKey;
+    }
+  }, []);
   
   const handleGameGeneration = (content: string, game?: MiniGame) => {
     setCurrentTopic(content);
