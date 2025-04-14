@@ -1,33 +1,32 @@
 
-import { generateWithGemini, tryGeminiGeneration } from './geminiGenerator';
-import { generateWithOpenAI, tryOpenAIGeneration } from './openaiGenerator';
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
-import { logInfo, logError, logWarning } from './apiUtils';
-
-const SOURCE = "AI_GAME_GENERATOR";
+import { buildGeminiPrompt } from './promptBuilder';
+import { logInfo, logError } from './apiUtils';
+import { 
+  GEMINI_MODELS, 
+  API_VERSION, 
+  getApiEndpoint,
+  DEFAULT_GENERATION_SETTINGS
+} from '@/constants/api-constants';
 
 /**
- * Singleton class for generating games using AI models.
- * It abstracts the underlying API (Gemini or OpenAI) and provides
- * a consistent interface for generating games.
+ * API client for generating minigames with AI
  */
 export class AIGameGenerator {
   private static instance: AIGameGenerator;
   private useCanvas: boolean = false;
 
-  private constructor() {
-    // Private constructor to enforce singleton pattern
-    // Load canvas mode from localStorage if available
-    const savedCanvasMode = localStorage.getItem('canvas_mode');
-    if (savedCanvasMode !== null) {
-      this.useCanvas = savedCanvasMode === 'true';
-    }
+  /**
+   * Create a new AIGameGenerator
+   */
+  constructor() {
+    logInfo('AIGameGenerator', `Initialized with model: ${GEMINI_MODELS.DEFAULT} on API version: ${API_VERSION}`);
   }
 
   /**
-   * Get the singleton instance of the AIGameGenerator.
-   * @returns The singleton instance.
+   * Get the singleton instance of AIGameGenerator
+   * @returns AIGameGenerator instance
    */
   public static getInstance(): AIGameGenerator {
     if (!AIGameGenerator.instance) {
@@ -37,88 +36,104 @@ export class AIGameGenerator {
   }
 
   /**
-   * Set whether to use canvas mode for HTML game generation.
-   * @param useCanvas Whether to use canvas mode.
+   * Set canvas mode for HTML game generation
+   * @param useCanvas Whether to use canvas mode
    */
   public setCanvasMode(useCanvas: boolean): void {
-    logInfo(SOURCE, `Setting canvas mode to ${useCanvas}`);
     this.useCanvas = useCanvas;
-    localStorage.setItem('canvas_mode', String(useCanvas));
+    logInfo('AIGameGenerator', `Canvas mode ${useCanvas ? 'enabled' : 'disabled'}`);
   }
 
   /**
-   * Get current canvas mode setting
-   * @returns Current canvas mode state
-   */
-  public getCanvasMode(): boolean {
-    return this.useCanvas;
-  }
-
-  /**
-   * Check if OpenAI API key is available and valid
-   * @returns Boolean indicating if API key is available
-   */
-  public hasValidApiKey(): boolean {
-    // Check environment variable first, then fallback to localStorage
-    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
-    const localKey = localStorage.getItem('openai_api_key') || (window as any).OPENAI_API_KEY;
-    
-    // Use env key if available, otherwise use local storage
-    const key = envKey || localKey;
-    
-    return !!key && typeof key === 'string' && key.startsWith('sk-');
-  }
-
-  /**
-   * Get the OpenAI API key from env or localStorage
-   * @returns The API key or null if not found
-   */
-  public getApiKey(): string | null {
-    // Check environment variable first, then fallback to localStorage
-    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (envKey) return envKey;
-    
-    return localStorage.getItem('openai_api_key') || (window as any).OPENAI_API_KEY || null;
-  }
-
-  /**
-   * Generate a mini game using either Gemini or OpenAI.
-   * @param topic The topic of the game.
-   * @param settings Optional game settings.
-   * @returns A promise that resolves with the generated mini game or null if generation fails.
+   * Generate a minigame based on a topic
+   * @param topic Topic to generate game for
+   * @param settings Optional game settings
+   * @returns Promise with generated game or null
    */
   public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
-    // Add useCanvas to settings if not present
-    const enhancedSettings: GameSettingsData = {
-      ...settings,
-      requestMetadata: {
-        ...settings?.requestMetadata,
-        useCanvas: this.useCanvas
+    try {
+      const htmlGame = await this.generateHtmlGame(topic);
+      return htmlGame;
+    } catch (error) {
+      logError('AIGameGenerator', 'Error generating minigame', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate an HTML game
+   * @param prompt User prompt for game generation
+   * @returns Promise with generated game or null
+   */
+  private async generateHtmlGame(prompt: string): Promise<MiniGame | null> {
+    try {
+      logInfo('AIGameGenerator', 'Generating HTML game', { prompt });
+      
+      // Build a simplified prompt for HTML game generation
+      const htmlPrompt = buildGeminiPrompt(prompt, this.useCanvas);
+      
+      // Log API request details for debugging
+      console.log('User request prompt:', prompt);
+      console.log('Using model:', GEMINI_MODELS.DEFAULT);
+      console.log('API endpoint:', getApiEndpoint());
+      
+      // Create payload
+      const payload = {
+        contents: [{
+          parts: [{text: htmlPrompt}]
+        }],
+        generationConfig: DEFAULT_GENERATION_SETTINGS
+      };
+      
+      // Make API call
+      const response = await fetch(getApiEndpoint(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
       }
-    };
-    
-    // Check for OpenAI API key
-    if (this.hasValidApiKey()) {
-      logInfo(SOURCE, "Using OpenAI to generate game");
-      try {
-        return await tryOpenAIGeneration(topic, enhancedSettings);
-      } catch (error: any) {
-        // If it's an API key error, don't fall back to Gemini, but propagate the error
-        if (error.message && (
-            error.message.includes('API Key') || 
-            error.message.includes('authentication') ||
-            error.message.includes('Unauthorized')
-        )) {
-          logError(SOURCE, "OpenAI authentication failed", error);
-          throw error;
-        }
-        
-        logWarning(SOURCE, "OpenAI generation failed, falling back to Gemini", error);
-        return await tryGeminiGeneration(null, topic, enhancedSettings);
+      
+      // Parse response
+      const result = await response.json();
+      const htmlContent = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      
+      if (!htmlContent) {
+        throw new Error('No content returned from API');
       }
-    } else {
-      logInfo(SOURCE, "Using Gemini to generate game (no OpenAI API key found)");
-      return await tryGeminiGeneration(null, topic, enhancedSettings);
+      
+      // Extract a title from the HTML (first h1 or title tag)
+      let gameTitle = prompt;
+      const titleMatch = htmlContent.match(/<title>(.*?)<\/title>/i) || 
+                        htmlContent.match(/<h1[^>]*>(.*?)<\/h1>/i);
+      
+      if (titleMatch && titleMatch[1]) {
+        gameTitle = titleMatch[1].replace(/<[^>]*>/g, '').trim(); // Remove any HTML tags inside the title
+      }
+      
+      // Create the game object
+      const game: MiniGame = {
+        title: gameTitle,
+        content: htmlContent
+      };
+      
+      logInfo('AIGameGenerator', 'HTML game generated successfully', {
+        title: gameTitle,
+        contentLength: htmlContent.length
+      });
+      
+      return game;
+    } catch (error) {
+      logError('AIGameGenerator', 'Error generating HTML game', error);
+      return null;
     }
   }
 }
+
+// Export MiniGame type
+export type { MiniGame };

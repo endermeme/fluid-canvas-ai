@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import { getSharedGame } from '@/utils/gameExport';
 import QuizContainer from '@/components/quiz/QuizContainer';
@@ -11,15 +11,7 @@ import { useNavigate } from 'react-router-dom';
 const GameSharePage: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
-  const [game, setGame] = useState(gameId ? getSharedGame(gameId) : null);
-  
-  // Check for OpenAI API key on component mount
-  useEffect(() => {
-    const storedKey = localStorage.getItem('openai_api_key');
-    if (storedKey) {
-      (window as any).OPENAI_API_KEY = storedKey;
-    }
-  }, []);
+  const game = gameId ? getSharedGame(gameId) : null;
   
   const handleBack = () => {
     navigate('/custom-game');

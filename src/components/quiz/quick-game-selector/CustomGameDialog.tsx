@@ -1,12 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { Sparkles, Brain, Key, AlertTriangle } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Sparkles, Brain } from 'lucide-react';
 
 interface CustomGameDialogProps {
   open: boolean;
@@ -26,32 +25,8 @@ const CustomGameDialog: React.FC<CustomGameDialogProps> = ({
   isSubmitting
 }) => {
   const [progress, setProgress] = useState(0);
-  const [showApiKeyField, setShowApiKeyField] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   
-  useEffect(() => {
-    if (open) {
-      // Check for environment variable first
-      const envKey = import.meta.env.VITE_OPENAI_API_KEY;
-      if (envKey) {
-        // If we have an env key, we don't need to show the API key field
-        setShowApiKeyField(false);
-        (window as any).OPENAI_API_KEY = envKey;
-      } else {
-        // Check localStorage as fallback
-        const storedKey = localStorage.getItem('openai_api_key');
-        if (!storedKey) {
-          setShowApiKeyField(true);
-        } else {
-          setApiKey(storedKey);
-          (window as any).OPENAI_API_KEY = storedKey;
-        }
-      }
-    }
-  }, [open]);
-  
-  useEffect(() => {
+  React.useEffect(() => {
     if (isSubmitting) {
       const timer = setInterval(() => {
         setProgress(prev => {
@@ -69,53 +44,6 @@ const CustomGameDialog: React.FC<CustomGameDialogProps> = ({
       };
     }
   }, [isSubmitting]);
-
-  const validateApiKey = (key: string) => {
-    return key.trim().startsWith('sk-') && key.trim().length > 10;
-  };
-
-  const saveApiKey = () => {
-    setApiKeyError(null);
-    
-    if (!apiKey.trim()) {
-      setApiKeyError("API Key không được để trống");
-      return;
-    }
-    
-    if (!validateApiKey(apiKey)) {
-      setApiKeyError("API Key không hợp lệ. Key phải bắt đầu bằng 'sk-'");
-      return;
-    }
-    
-    localStorage.setItem('openai_api_key', apiKey.trim());
-    (window as any).OPENAI_API_KEY = apiKey.trim();
-    setShowApiKeyField(false);
-  };
-  
-  const handleSubmitWithApiCheck = () => {
-    // Check for environment variable first
-    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (envKey) {
-      // If we have an env key, we can proceed without checking localStorage
-      (window as any).OPENAI_API_KEY = envKey;
-      onSubmit();
-      return;
-    }
-    
-    // No env key, check localStorage
-    const storedKey = localStorage.getItem('openai_api_key');
-    if (!storedKey && !apiKey) {
-      setShowApiKeyField(true);
-      setApiKeyError("Vui lòng nhập API Key của OpenAI");
-      return;
-    }
-    
-    if (apiKey && !storedKey) {
-      saveApiKey();
-    }
-    
-    onSubmit();
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -164,49 +92,6 @@ const CustomGameDialog: React.FC<CustomGameDialogProps> = ({
           </div>
         ) : (
           <div className="flex flex-col gap-4 py-4">
-            {apiKeyError && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Lỗi API Key</AlertTitle>
-                <AlertDescription>{apiKeyError}</AlertDescription>
-              </Alert>
-            )}
-            
-            {showApiKeyField && (
-              <div className="bg-primary/5 p-4 rounded-lg border border-primary/10">
-                <div className="flex justify-between items-start mb-2">
-                  <label htmlFor="dialog-api-key" className="flex items-center gap-2 text-sm font-medium">
-                    <Key className="h-4 w-4 text-primary" />
-                    OpenAI API Key
-                  </label>
-                </div>
-                <div className="flex gap-2">
-                  <Input
-                    id="dialog-api-key"
-                    type="password"
-                    value={apiKey}
-                    onChange={(e) => {
-                      setApiKey(e.target.value);
-                      setApiKeyError(null);
-                    }}
-                    placeholder="sk-..."
-                    className="font-mono text-sm"
-                  />
-                  <Button 
-                    onClick={saveApiKey} 
-                    variant="outline" 
-                    className="shrink-0"
-                    disabled={!apiKey.trim() || !apiKey.trim().startsWith('sk-')}
-                  >
-                    Lưu
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  API Key sẽ được lưu trong trình duyệt của bạn
-                </p>
-              </div>
-            )}
-            
             <Textarea
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
@@ -234,7 +119,7 @@ const CustomGameDialog: React.FC<CustomGameDialogProps> = ({
           </Button>
           <Button 
             type="button" 
-            onClick={handleSubmitWithApiCheck} 
+            onClick={onSubmit} 
             disabled={!topic.trim() || isSubmitting}
             className={`${isSubmitting ? "opacity-70" : ""} bg-gradient-to-r from-primary to-primary/80 hover:opacity-90`}
           >

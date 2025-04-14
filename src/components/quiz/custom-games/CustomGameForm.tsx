@@ -1,19 +1,17 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { SparklesIcon, Info, Code, Key, AlertTriangle } from 'lucide-react';
+import { SparklesIcon, Info, Code } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { AIGameGenerator } from '../generator/AIGameGenerator';
 import { MiniGame } from '../generator/types';
 import { GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
-import { Input } from '@/components/ui/input';
-import { tryOpenAIGeneration } from '../generator/openaiGenerator';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { GEMINI_MODELS, API_VERSION, API_BASE_URL } from '@/constants/api-constants';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
@@ -24,88 +22,14 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [useCanvas, setUseCanvas] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [showApiKeyField, setShowApiKeyField] = useState(true);
-  const [apiKeyValidated, setApiKeyValidated] = useState(false);
-  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   
   // Use the singleton pattern
   const gameGenerator = AIGameGenerator.getInstance();
 
-  // Check for environment variable or stored API key on component mount
-  useEffect(() => {
-    // First check for environment variable
-    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (envKey) {
-      // If environment variable exists, no need to show API key field
-      setShowApiKeyField(false);
-      setApiKeyValidated(true);
-      (window as any).OPENAI_API_KEY = envKey;
-      return;
-    }
-    
-    // Fallback to localStorage
-    const storedKey = localStorage.getItem('openai_api_key');
-    if (storedKey) {
-      setApiKey(storedKey);
-      setShowApiKeyField(false);
-      setApiKeyValidated(true);
-      // Set OpenAI API key in window for global access
-      (window as any).OPENAI_API_KEY = storedKey;
-    }
-  }, []);
-
   const getPlaceholderText = () => {
     return 'Mô tả chi tiết game bạn muốn tạo. Hãy bao gồm thể loại game, giao diện, cách chơi và bất kỳ yêu cầu đặc biệt nào.\n\nVí dụ: "Tạo một trò chơi xếp hình với 9 mảnh ghép hình ảnh về vũ trụ, có âm thanh khi hoàn thành và hiệu ứng ngôi sao khi người chơi thắng."';
-  };
-
-  const toggleApiKeyField = () => {
-    setShowApiKeyField(!showApiKeyField);
-  };
-
-  const validateApiKey = (key: string) => {
-    // Basic validation to check if key has correct format (starts with 'sk-')
-    return key.trim().startsWith('sk-') && key.trim().length > 10;
-  };
-
-  const saveApiKey = () => {
-    setApiKeyError(null);
-    
-    if (!apiKey.trim()) {
-      setApiKeyError("API Key không được để trống");
-      return;
-    }
-    
-    if (!validateApiKey(apiKey)) {
-      setApiKeyError("API Key không hợp lệ. Key phải bắt đầu bằng 'sk-'");
-      return;
-    }
-    
-    localStorage.setItem('openai_api_key', apiKey.trim());
-    setShowApiKeyField(false);
-    setApiKeyValidated(true);
-    
-    toast({
-      title: "API Key đã được lưu",
-      description: "API Key của bạn đã được lưu vào trình duyệt",
-    });
-    
-    (window as any).OPENAI_API_KEY = apiKey.trim();
-  };
-
-  const clearApiKey = () => {
-    localStorage.removeItem('openai_api_key');
-    setApiKey('');
-    setShowApiKeyField(true);
-    setApiKeyValidated(false);
-    (window as any).OPENAI_API_KEY = null;
-    
-    toast({
-      title: "API Key đã được xóa",
-      description: "API Key đã được xóa khỏi trình duyệt",
-    });
   };
 
   const handleSubmit = async () => {
@@ -116,36 +40,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
         variant: "destructive"
       });
       return;
-    }
-
-    // Check for environment variable first
-    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (envKey) {
-      // If we have an env key, set it globally and continue
-      (window as any).OPENAI_API_KEY = envKey;
-    } else if (!apiKeyValidated) {
-      // No env key and no validated API key from localStorage
-      toast({
-        title: "Lỗi",
-        description: "Vui lòng nhập và lưu API Key của OpenAI",
-        variant: "destructive"
-      });
-      setShowApiKeyField(true);
-      return;
-    } else {
-      // No env key, but we have a localStorage key
-      const currentApiKey = apiKey.trim() || localStorage.getItem('openai_api_key');
-      if (!currentApiKey) {
-        toast({
-          title: "Lỗi",
-          description: "Không tìm thấy API Key. Vui lòng nhập lại.",
-          variant: "destructive"
-        });
-        setShowApiKeyField(true);
-        return;
-      }
-      
-      (window as any).OPENAI_API_KEY = currentApiKey;
     }
 
     // Tạo requestId độc nhất với timestamp và random string
@@ -162,7 +56,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     console.log('%c ⏱️ Timestamp', 'font-weight: bold; color: #6f42c1;', timestamp);
     console.log('%c 🔑 Request ID', 'font-weight: bold; color: #6f42c1;', requestId);
     console.log('%c 📊 Content Length', 'font-weight: bold; color: #6f42c1;', content.length, 'characters');
-    console.log('%c 🤖 Model', 'font-weight: bold; color: #6f42c1;', 'gpt-4o-mini');
+    console.log('%c 🤖 Model', 'font-weight: bold; color: #6f42c1;', GEMINI_MODELS.DEFAULT);
+    console.log('%c 🤖 API Version', 'font-weight: bold; color: #6f42c1;', API_VERSION);
+    console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #6f42c1;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.DEFAULT}:generateContent`);
     console.log('%c 🎨 Canvas Mode', 'font-weight: bold; color: #6f42c1;', useCanvas ? 'Enabled' : 'Disabled');
     console.groupEnd();
 
@@ -172,16 +68,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       // Set canvas mode according to the toggle
       gameGenerator.setCanvasMode(useCanvas);
       
-      // Minimal settings with metadata including canvas mode
+      // Minimal settings
       const settings: GameSettingsData = {
-        category: 'custom',
-        requestMetadata: {
-          requestId: requestId,
-          timestamp: timestamp,
-          contentLength: content.length,
-          source: 'openai',
-          useCanvas: useCanvas
-        }
+        category: 'custom'
       };
       
       // Log when starting the API request
@@ -191,16 +80,14 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
         'font-weight: bold;'
       );
       console.log('%c 📋 User Prompt', 'font-weight: bold; color: #2ea44f;', content);
-      console.log('%c 🤖 Model', 'font-weight: bold; color: #2ea44f;', 'gpt-4o-mini');
+      console.log('%c 🤖 Model', 'font-weight: bold; color: #2ea44f;', GEMINI_MODELS.DEFAULT);
+      console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #2ea44f;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.DEFAULT}:generateContent`);
       console.log('%c ⏳ Request Start Time', 'font-weight: bold; color: #2ea44f;', new Date().toISOString());
       console.groupEnd();
       
       // Measure processing time
       const startTime = performance.now();
-      
-      // Use OpenAI directly instead of gameGenerator
-      const game = await tryOpenAIGeneration(content, settings);
-      
+      const game = await gameGenerator.generateMiniGame(content, settings);
       const endTime = performance.now();
       const duration = ((endTime - startTime) / 1000).toFixed(2);
       
@@ -235,15 +122,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       } else {
         throw new Error("Không thể tạo game");
       }
-    } catch (error: any) {
-      // Check for API key related errors
-      const errorMessage = error?.message || "Không thể tạo game";
-      const isApiKeyError = 
-        errorMessage.includes("API key") || 
-        errorMessage.includes("authorization") || 
-        errorMessage.includes("401") ||
-        errorMessage.includes("Unauthorized");
-      
+    } catch (error) {
       // Log error with more information
       console.group(
         `%c ❌ API ERROR ${requestId} %c Generation failed`,
@@ -254,26 +133,13 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       console.log('%c 📝 Request Content', 'font-weight: bold; color: #d73a49;', content);
       console.log('%c ⏱️ Error Time', 'font-weight: bold; color: #d73a49;', new Date().toISOString());
       console.log('%c 🔍 Stack Trace', 'font-weight: bold; color: #d73a49;', error instanceof Error ? error.stack : 'No stack trace available');
-      console.log('%c 🔑 API Key Valid', 'font-weight: bold; color: #d73a49;', apiKeyValidated);
       console.groupEnd();
       
-      if (isApiKeyError) {
-        setApiKeyValidated(false);
-        setShowApiKeyField(true);
-        setApiKeyError("API Key không hợp lệ hoặc đã hết hạn. Vui lòng nhập key mới.");
-        toast({
-          title: "Lỗi API Key",
-          description: "API Key không hợp lệ hoặc đã hết hạn. Vui lòng nhập key mới.",
-          variant: "destructive"
-        });
-        localStorage.removeItem('openai_api_key');
-      } else {
-        toast({
-          title: "Lỗi tạo game",
-          description: "Có lỗi xảy ra khi tạo game. Vui lòng thử lại.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Lỗi tạo game",
+        description: "Có lỗi xảy ra khi tạo game. Vui lòng thử lại.",
+        variant: "destructive"
+      });
       onGenerate(content);
     } finally {
       setIsGenerating(false);
@@ -307,79 +173,16 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
             <div className="p-2 rounded-lg bg-primary/10">
               <Code className="h-6 w-6 text-primary" />
             </div>
-            Tạo trò chơi tùy chỉnh với OpenAI
+            Tạo trò chơi tùy chỉnh với AI
           </h2>
           <p className="text-muted-foreground">Mô tả chi tiết game bạn muốn tạo và AI sẽ xây dựng nó cho bạn</p>
         </div>
         
         <div className="space-y-4">
-          {apiKeyError && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Lỗi API Key</AlertTitle>
-              <AlertDescription>{apiKeyError}</AlertDescription>
-            </Alert>
-          )}
-          
-          {showApiKeyField && (
-            <div className="bg-primary/5 p-4 rounded-lg border border-primary/10">
-              <div className="flex justify-between items-start mb-2">
-                <Label htmlFor="api-key" className="flex items-center gap-2">
-                  <Key className="h-4 w-4 text-primary" />
-                  OpenAI API Key
-                </Label>
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  id="api-key"
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => {
-                    setApiKey(e.target.value);
-                    setApiKeyError(null);
-                  }}
-                  placeholder="sk-..."
-                  className="font-mono text-sm"
-                />
-                <Button 
-                  onClick={saveApiKey} 
-                  variant="outline" 
-                  className="shrink-0"
-                  disabled={!apiKey.trim() || !apiKey.trim().startsWith('sk-')}
-                >
-                  Lưu
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                API Key sẽ được lưu trong trình duyệt của bạn và không được gửi đến máy chủ của chúng tôi
-              </p>
-              <p className="text-xs text-primary/70 mt-2">
-                <strong>Lưu ý:</strong> Để lưu API Key vào biến môi trường, hãy tạo file .env.local ở thư mục gốc với nội dung: VITE_OPENAI_API_KEY=sk-your-key-here
-              </p>
-            </div>
-          )}
-          
-          {!showApiKeyField && (
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Key className="h-3 w-3" />
-                API Key đã được lưu
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={toggleApiKeyField} variant="ghost" size="sm" className="h-7 text-xs">
-                  Chỉnh sửa
-                </Button>
-                <Button onClick={clearApiKey} variant="ghost" size="sm" className="h-7 text-xs text-destructive">
-                  Xóa
-                </Button>
-              </div>
-            </div>
-          )}
-
           <div>
             <div className="flex justify-between items-center">
               <Label htmlFor="content" className="flex items-center gap-2 text-base">
-                <SparklesIcon className="h-4 w-4 mr-2" /> 
+                <SparklesIcon className="h-4 w-4 text-primary" /> 
                 Mô tả game của bạn
               </Label>
               <div className="flex items-center gap-2">
@@ -423,11 +226,11 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
             </Button>
             <Button 
               onClick={handleSubmit}
-              disabled={isGenerating || !content.trim() || (!apiKeyValidated && !validateApiKey(apiKey))}
+              disabled={isGenerating || !content.trim()}
               className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90"
             >
               <SparklesIcon className="h-4 w-4 mr-2" />
-              Tạo với OpenAI
+              Tạo với AI
             </Button>
           </div>
         </div>
