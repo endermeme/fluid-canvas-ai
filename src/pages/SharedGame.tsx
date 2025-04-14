@@ -1,9 +1,23 @@
-
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
+import { addParticipant, getFakeIpAddress, GameParticipant } from '@/utils/gameParticipation';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Clock, AlertTriangle, Plus } from 'lucide-react';
+import { ArrowLeft, Clock, AlertTriangle, Plus, Users, Share2, Copy, Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { QRCodeSVG } from 'qrcode.react';
 
 const SharedGame = () => {
   const { id } = useParams<{ id: string }>();
@@ -11,6 +25,11 @@ const SharedGame = () => {
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [playerName, setPlayerName] = useState('');
+  const [showNameDialog, setShowNameDialog] = useState(false);
+  const [participants, setParticipants] = useState<GameParticipant[]>([]);
+  const [copied, setCopied] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,6 +45,16 @@ const SharedGame = () => {
       
       if (loadedGame) {
         setTimeLeft(getRemainingTime(loadedGame.expiresAt));
+        
+        // Load participants if available
+        const sessionsJson = localStorage.getItem('game_sessions');
+        if (sessionsJson) {
+          const sessions = JSON.parse(sessionsJson);
+          const session = sessions.find((s: any) => s.id === id);
+          if (session && session.participants) {
+            setParticipants(session.participants);
+          }
+        }
       } else {
         setError('Trò chơi không tồn tại hoặc đã hết hạn');
       }
@@ -47,6 +76,47 @@ const SharedGame = () => {
 
   const handleCreateNewGame = () => {
     navigate('/');
+  };
+  
+  const handleJoinGame = () => {
+    if (!playerName.trim() || !id) return;
+    
+    const ipAddress = getFakeIpAddress();
+    const result = addParticipant(id, playerName, ipAddress);
+    
+    if (result.success && result.participant) {
+      setParticipants(prev => [...prev, result.participant]);
+      setShowNameDialog(false);
+    } else if (result.participant) {
+      // Already participated, just update the list
+      setParticipants(prev => 
+        prev.map(p => p.id === result.participant?.id ? result.participant : p)
+      );
+      setShowNameDialog(false);
+    }
+  };
+  
+  const handleCopyLink = () => {
+    const shareUrl = `${window.location.origin}/game/${id}`;
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(err => {
+        console.error('Không thể sao chép liên kết:', err);
+      });
+  };
+  
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   // Enhanced function to properly prepare the content
@@ -152,6 +222,7 @@ const SharedGame = () => {
 
   // Enhanced content with proper styling
   const enhancedContent = enhanceIframeContent(game.htmlContent);
+  const shareUrl = `${window.location.origin}/game/${id}`;
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
@@ -161,9 +232,34 @@ const SharedGame = () => {
           Quay lại
         </Button>
         
-        <div className="flex items-center text-sm text-muted-foreground">
-          <Clock className="h-4 w-4 mr-1" />
-          <span>Còn lại: {timeLeft}</span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Clock className="h-4 w-4 mr-1" />
+            <span>Còn lại: {timeLeft}</span>
+          </div>
+          
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Users className="h-4 w-4 mr-1" />
+            <span>{participants.length} người tham gia</span>
+          </div>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowNameDialog(true)}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            Tham gia
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowShareDialog(true)}
+          >
+            <Share2 className="h-4 w-4 mr-2" />
+            Chia sẻ
+          </Button>
         </div>
       </header>
       
@@ -183,17 +279,74 @@ const SharedGame = () => {
         />
       </main>
 
-      <div className="absolute bottom-4 right-4 flex space-x-2">
-        <Button 
-          size="sm" 
-          variant="ghost"
-          className="bg-primary/10" 
-          onClick={handleCreateNewGame}
-        >
-          <Plus size={16} className="mr-1" />
-          Quay Về
-        </Button>
-      </div>
+      {/* Dialog for entering player name */}
+      <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tham gia game</DialogTitle>
+            <DialogDescription>
+              Nhập tên của bạn để tham gia game "{game.title}"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="player-name">Tên của bạn</Label>
+            <Input 
+              id="player-name" 
+              value={playerName} 
+              onChange={(e) => setPlayerName(e.target.value)}
+              placeholder="Nhập tên của bạn"
+              className="mt-2"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNameDialog(false)}>
+              Hủy
+            </Button>
+            <Button onClick={handleJoinGame} disabled={!playerName.trim()}>
+              Tham gia
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Dialog for sharing game */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Chia sẻ game</DialogTitle>
+            <DialogDescription>
+              Chia sẻ game này với bạn bè để họ có thể tham gia chơi
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <div className="p-4 bg-white rounded-lg">
+              <QRCodeSVG value={shareUrl} size={200} />
+            </div>
+            
+            <div className="w-full space-y-2">
+              <Label htmlFor="share-link">Liên kết chia sẻ</Label>
+              <div className="flex">
+                <Input 
+                  id="share-link" 
+                  value={shareUrl} 
+                  readOnly 
+                  className="rounded-r-none"
+                />
+                <Button 
+                  variant="outline" 
+                  className="rounded-l-none"
+                  onClick={handleCopyLink}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowShareDialog(false)}>Đóng</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

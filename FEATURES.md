@@ -14,7 +14,7 @@ Dự án AI Game Creator cung cấp tính năng lưu trữ lịch sử game và 
 - Hỗ trợ tìm kiếm và lọc game theo các tiêu chí khác nhau
 
 ### Lưu Trữ
-- Game được lưu trữ trong `localStorage` của trình duyệt
+- Game được lưu trữ trong vps của máy chủ host cái react js này lên
 - Thông tin game bao gồm:
   - ID game (tạo bằng UUID)
   - Tiêu đề game

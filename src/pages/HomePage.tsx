@@ -50,7 +50,7 @@ const HomePage: React.FC = () => {
                   <div className="z-10">
                     <h3 className="font-bold text-xl mb-1">Trò Chơi Có Sẵn</h3>
                     <p className="text-muted-foreground">
-                      Chọn từ các loại trò chơi được thiết kế sẵn
+                      Chọn từ các loại trò chơi được thiết kế sẵn dưới đây
                     </p>
                   </div>
                   <div className="mt-auto pt-2 w-full">

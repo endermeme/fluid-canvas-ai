@@ -1,12 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Share2 } from 'lucide-react';
 import gameTemplates from './templates';
 import { useToast } from '@/hooks/use-toast';
 import GameSettings from '../GameSettings';
 import GameLoading from '../GameLoading';
 import { GameSettingsData } from '../types';
 import { Card } from '@/components/ui/card';
+import { saveGameForSharing } from '@/utils/gameExport';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { QRCodeSVG } from 'qrcode.react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Copy, Check } from 'lucide-react';
 
 // Import Gemini API 
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -39,6 +53,9 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
     prompt: initialTopic || "Learn interactively"
   });
   const [generationProgress, setGenerationProgress] = useState(0);
+  const [shareUrl, setShareUrl] = useState('');
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
   // Track game start time
@@ -334,19 +351,40 @@ Output must be valid JSON. `;
   };
 
   const renderGameTemplate = () => {
-    const topic = initialTopic || "Chủ đề chung";
-    const Template = gameTemplates[gameType];
+    const GameTemplate = getGameTypeObject();
     
-    if (Template) {
-      return <Template content={gameContent} topic={topic} onBack={onBack} />;
+    if (!GameTemplate) {
+      return <div>Game type not supported</div>;
     }
     
     return (
-      <div className="flex items-center justify-center h-full">
-        <Card className="p-6 max-w-md">
-          <p>Không tìm thấy mẫu cho loại game: {gameType}</p>
-          <Button onClick={onBack} className="mt-4">Quay lại</Button>
-        </Card>
+      <div className="flex flex-col h-full">
+        <div className="flex justify-between items-center mb-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleRetry}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Tạo lại
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShare}
+          >
+            <Share2 className="h-4 w-4 mr-2" />
+            Chia sẻ
+          </Button>
+        </div>
+        
+        <div id="game-container" className="flex-1">
+          <GameTemplate 
+            data={gameContent} 
+            onBack={handleRetry}
+          />
+        </div>
       </div>
     );
   };
@@ -414,15 +452,108 @@ Output must be valid JSON. `;
     return gameTypeMap[gameType] || null;
   };
 
+  const handleShare = () => {
+    try {
+      if (!gameContent) return;
+      
+      // Get HTML content from the current game
+      const gameElement = document.getElementById('game-container');
+      let htmlContent = '';
+      
+      if (gameElement) {
+        htmlContent = gameElement.innerHTML;
+      } else {
+        // Fallback for games without direct DOM access
+        const GameTemplate = getGameTypeObject();
+        if (!GameTemplate) return;
+        
+        // Convert the game content to HTML format
+        htmlContent = `
+          <div class="interactive-game">
+            <h1>${gameContent.title || 'Interactive Game'}</h1>
+            <div class="game-content">
+              ${JSON.stringify(gameContent)}
+            </div>
+            <script>
+              // Initialize game data
+              window.gameData = ${JSON.stringify(gameContent)};
+            </script>
+          </div>
+        `;
+      }
+      
+      // Save game for sharing
+      const url = saveGameForSharing(
+        gameContent.title || `${getGameTypeName()} Game`, 
+        `Interactive ${getGameTypeName()} game`, 
+        htmlContent
+      );
+      
+      if (url) {
+        setShareUrl(url);
+        setShowShareDialog(true);
+        
+        // Save to game history
+        const historyItem = {
+          id: new Date().getTime().toString(),
+          title: gameContent.title || `${getGameTypeName()} Game`,
+          type: gameType,
+          createdAt: new Date().getTime(),
+          url: url,
+          thumbnail: null
+        };
+        
+        const historyJson = localStorage.getItem('game_history');
+        const history = historyJson ? JSON.parse(historyJson) : [];
+        history.push(historyItem);
+        localStorage.setItem('game_history', JSON.stringify(history));
+        
+        toast({
+          title: "Game đã được chia sẻ",
+          description: "Đã tạo liên kết chia sẻ thành công",
+        });
+      } else {
+        toast({
+          title: "Lỗi chia sẻ",
+          description: "Không thể tạo liên kết chia sẻ",
+          variant: "destructive"
+        });
+      }
+    } catch (err) {
+      console.error("Lỗi khi chia sẻ game:", err);
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Đã xảy ra lỗi khi chia sẻ game",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(err => {
+        console.error('Không thể sao chép liên kết:', err);
+      });
+  };
+
   if (showSettings) {
     return (
       <div className="p-4">
-        <h2 className="text-2xl font-bold mb-4 text-center">Cài đặt trò chơi {getGameTypeName()}</h2>
-        <GameSettings
-          onStart={handleStartGame}
-          topic={initialTopic || ""}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">{getGameTypeName()}</h2>
+          <Button variant="ghost" size="sm" onClick={onBack}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Quay lại
+          </Button>
+        </div>
+        
+        <GameSettings 
           initialSettings={settings}
-          gameType={getGameTypeObject()}
+          onStart={handleStartGame}
           onCancel={onBack}
         />
       </div>
@@ -467,18 +598,71 @@ Output must be valid JSON. `;
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-grow overflow-auto">
-        {gameContent ? renderGameTemplate() : (
-          <div className="flex items-center justify-center h-full">
-            <Card className="p-6 max-w-md">
-              <p className="text-center">Không có nội dung trò chơi</p>
-              <div className="flex justify-center mt-4">
-                <Button onClick={onBack}>Quay lại</Button>
-              </div>
-            </Card>
+      {loading ? (
+        <GameLoading 
+          title={`Đang tạo ${getGameTypeName()}`}
+          progress={generating ? generationProgress : undefined}
+          error={error}
+          onRetry={handleRetry}
+        />
+      ) : showSettings ? (
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">{getGameTypeName()}</h2>
+            <Button variant="ghost" size="sm" onClick={onBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Quay lại
+            </Button>
           </div>
-        )}
-      </div>
+          
+          <GameSettings 
+            initialSettings={settings}
+            onStart={handleStartGame}
+            onCancel={onBack}
+          />
+        </div>
+      ) : (
+        renderGameTemplate()
+      )}
+      
+      {/* Dialog for sharing game */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Chia sẻ game</DialogTitle>
+            <DialogDescription>
+              Chia sẻ game này với bạn bè để họ có thể tham gia chơi
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <div className="p-4 bg-white rounded-lg">
+              <QRCodeSVG value={shareUrl} size={200} />
+            </div>
+            
+            <div className="w-full space-y-2">
+              <Label htmlFor="share-link">Liên kết chia sẻ</Label>
+              <div className="flex">
+                <Input 
+                  id="share-link" 
+                  value={shareUrl} 
+                  readOnly 
+                  className="rounded-r-none"
+                />
+                <Button 
+                  variant="outline" 
+                  className="rounded-l-none"
+                  onClick={handleCopyLink}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowShareDialog(false)}>Đóng</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
