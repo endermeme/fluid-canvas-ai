@@ -108,20 +108,29 @@ export const cleanupExpiredGames = (): void => {
   }
 };
 
-// Get remaining time for a game in hours and minutes
-export const getRemainingTime = (expiresAt: number): string => {
+// Get remaining time for a game in milliseconds
+export const getRemainingTime = (game: StoredGame | number): number => {
   try {
     const now = Date.now();
+    const expiresAt = typeof game === 'number' ? game : game.expiresAt;
     const remainingMs = expiresAt - now;
     
-    if (remainingMs <= 0) return 'Đã hết hạn';
-    
-    const hours = Math.floor(remainingMs / (60 * 60 * 1000));
-    const minutes = Math.floor((remainingMs % (60 * 60 * 1000)) / (60 * 1000));
-    
-    return `${hours} giờ ${minutes} phút`;
+    return Math.max(0, remainingMs);
   } catch (error) {
     console.error("Error calculating remaining time:", error);
-    return "Không xác định";
+    return 0;
   }
+};
+
+// Function to format remaining time in hours and minutes
+export const formatRemainingTime = (milliseconds: number): string => {
+  if (milliseconds <= 0) return 'Đã hết hạn';
+  
+  const hours = Math.floor(milliseconds / (60 * 60 * 1000));
+  const minutes = Math.floor((milliseconds % (60 * 60 * 1000)) / (60 * 1000));
+  
+  if (hours > 0) {
+    return `${hours} giờ ${minutes} phút`;
+  }
+  return `${minutes} phút`;
 };

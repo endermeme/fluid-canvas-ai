@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
+import { getSharedGame, getRemainingTime, StoredGame, formatRemainingTime } from '@/utils/gameExport';
 import { addParticipant, getFakeIpAddress, GameParticipant } from '@/utils/gameParticipation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Share2, Users, Clock, Copy, Check } from 'lucide-react';
@@ -134,18 +133,6 @@ const SharedGame: React.FC = () => {
       });
   };
   
-  const formatTimeRemaining = (milliseconds: number) => {
-    if (milliseconds <= 0) return 'Hết hạn';
-    
-    const hours = Math.floor(milliseconds / (1000 * 60 * 60));
-    const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (hours > 0) {
-      return `${hours} giờ ${minutes} phút`;
-    }
-    return `${minutes} phút`;
-  };
-  
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -197,7 +184,7 @@ const SharedGame: React.FC = () => {
           {remainingTime !== null && (
             <Badge variant="outline" className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              {formatTimeRemaining(remainingTime)}
+              {formatRemainingTime(remainingTime)}
             </Badge>
           )}
         </div>

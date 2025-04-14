@@ -541,6 +541,7 @@ Output must be valid JSON. `;
           initialSettings={settings}
           onStart={handleStartGame}
           onCancel={onBack}
+          topic={initialTopic || ""}
         />
       </div>
     );
@@ -586,10 +587,8 @@ Output must be valid JSON. `;
     <div className="flex flex-col h-full">
       {loading ? (
         <GameLoading 
-          title={`Đang tạo ${getGameTypeName()}`}
+          topic={initialTopic || ""}
           progress={generating ? generationProgress : undefined}
-          error={error}
-          onRetry={handleRetry}
         />
       ) : showSettings ? (
         <div className="p-4">
@@ -605,6 +604,7 @@ Output must be valid JSON. `;
             initialSettings={settings}
             onStart={handleStartGame}
             onCancel={onBack}
+            topic={initialTopic || ""}
           />
         </div>
       ) : (

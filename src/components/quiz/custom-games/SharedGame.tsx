@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
+import { getSharedGame, getRemainingTime, StoredGame, formatRemainingTime } from '@/utils/gameExport';
 import { addParticipant, getFakeIpAddress, GameParticipant } from '@/utils/gameParticipation';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
@@ -200,7 +200,7 @@ const SharedGame: React.FC = () => {
           {remainingTime !== null && (
             <Badge variant="outline" className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              {formatTimeRemaining(remainingTime)}
+              {formatRemainingTime(remainingTime)}
             </Badge>
           )}
           
