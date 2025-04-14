@@ -12,6 +12,7 @@ import {
   getApiEndpoint,
   DEFAULT_GENERATION_SETTINGS 
 } from '@/constants/api-constants';
+import { buildGeminiPrompt } from './promptBuilder';
 
 const SOURCE = "GEMINI";
 
@@ -35,34 +36,26 @@ export const generateWithGemini = async (
     settings: settings || {}
   });
   
-  // Simple prompt for HTML game generation
-  const prompt = `
-Create an HTML game based on this topic: "${topic}"
-
-Requirements:
-- Create a fun, interactive game that works in a browser
-- Use HTML, CSS, and JavaScript only (no external libraries)
-- The game should be fully self-contained in a single HTML file
-- Make the game visually appealing and user-friendly
-- Include a title, instructions, and scoring system
-- Handle all user interactions and game logic
-- Make sure the game is responsive and works on different screen sizes
-- Add appropriate error handling
-
-Return only the complete HTML code with inline CSS and JavaScript.
-`;
+  // Use the improved prompt builder
+  const prompt = buildGeminiPrompt(topic, true);
 
   try {
     logInfo(SOURCE, `Sending request to Gemini API using model ${GEMINI_MODELS.DEFAULT} (${API_VERSION})`);
     
     const startTime = Date.now();
     
-    // Create payload
+    // Create payload with improved generation settings for better code
     const payload = {
       contents: [{
         parts: [{text: prompt}]
       }],
-      generationConfig: DEFAULT_GENERATION_SETTINGS
+      generationConfig: {
+        ...DEFAULT_GENERATION_SETTINGS,
+        temperature: 0.7,  // Slightly higher for creativity but still structured
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 8192  // Ensure we get complete code
+      }
     };
     
     // Make API call
@@ -101,15 +94,29 @@ Return only the complete HTML code with inline CSS and JavaScript.
       title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
     }
     
+    // Extract HTML content properly
+    let content = text;
+    
+    // Clean up the response - ensure it's just the HTML
+    if (!content.trim().startsWith('<!DOCTYPE') && !content.trim().startsWith('<html')) {
+      // Try to extract HTML from the response
+      const htmlMatch = text.match(/<!DOCTYPE[\s\S]*<\/html>/i) || 
+                        text.match(/<html[\s\S]*<\/html>/i);
+      
+      if (htmlMatch && htmlMatch[0]) {
+        content = htmlMatch[0];
+      }
+    }
+    
     // Create MiniGame object
     const game: MiniGame = {
       title: title,
-      content: text
+      content: content
     };
     
     logSuccess(SOURCE, "Game generated successfully", {
       title: title,
-      contentSize: text.length
+      contentSize: content.length
     });
     
     return game;
