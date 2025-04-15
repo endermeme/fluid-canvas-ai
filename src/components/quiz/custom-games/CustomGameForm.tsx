@@ -56,9 +56,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     console.log('%c ⏱️ Timestamp', 'font-weight: bold; color: #6f42c1;', timestamp);
     console.log('%c 🔑 Request ID', 'font-weight: bold; color: #6f42c1;', requestId);
     console.log('%c 📊 Content Length', 'font-weight: bold; color: #6f42c1;', content.length, 'characters');
-    console.log('%c 🤖 Model', 'font-weight: bold; color: #6f42c1;', GEMINI_MODELS.DEFAULT);
+    console.log('%c 🤖 Model', 'font-weight: bold; color: #6f42c1;', GEMINI_MODELS.CUSTOM_GAME);
     console.log('%c 🤖 API Version', 'font-weight: bold; color: #6f42c1;', API_VERSION);
-    console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #6f42c1;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.DEFAULT}:generateContent`);
+    console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #6f42c1;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.CUSTOM_GAME}:generateContent`);
     console.log('%c 🎨 Canvas Mode', 'font-weight: bold; color: #6f42c1;', useCanvas ? 'Enabled' : 'Disabled');
     console.groupEnd();
 
@@ -80,8 +80,8 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
         'font-weight: bold;'
       );
       console.log('%c 📋 User Prompt', 'font-weight: bold; color: #2ea44f;', content);
-      console.log('%c 🤖 Model', 'font-weight: bold; color: #2ea44f;', GEMINI_MODELS.DEFAULT);
-      console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #2ea44f;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.DEFAULT}:generateContent`);
+      console.log('%c 🤖 Model', 'font-weight: bold; color: #2ea44f;', GEMINI_MODELS.CUSTOM_GAME);
+      console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #2ea44f;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.CUSTOM_GAME}:generateContent`);
       console.log('%c ⏳ Request Start Time', 'font-weight: bold; color: #2ea44f;', new Date().toISOString());
       console.groupEnd();
       

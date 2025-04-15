@@ -112,7 +112,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
 
     console.log("Starting minigame generation for topic:", topic);
     console.log("Starting game with settings:", settings);
-    console.log("Using model:", GEMINI_MODELS.DEFAULT);
+    console.log("Using model:", GEMINI_MODELS.CUSTOM_GAME);
 
     try {      
       const game = await gameGenerator.generateMiniGame(topic, settings);
@@ -122,7 +122,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
         setMiniGame(game);
         toast({
           title: "Minigame Đã Sẵn Sàng",
-          description: `Đã tạo minigame về "${topic}" với Gemini ${GEMINI_MODELS.DEFAULT}`,
+          description: `Đã tạo minigame về "${topic}" với Gemini ${GEMINI_MODELS.CUSTOM_GAME}`,
         });
       } else {
         throw new Error('Không thể tạo minigame');

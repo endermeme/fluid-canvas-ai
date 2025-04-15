@@ -21,7 +21,7 @@ export class AIGameGenerator {
    * Create a new AIGameGenerator
    */
   constructor() {
-    logInfo('AIGameGenerator', `Initialized with model: ${GEMINI_MODELS.DEFAULT} on API version: ${API_VERSION}`);
+    logInfo('AIGameGenerator', `Initialized with model: ${GEMINI_MODELS.CUSTOM_GAME} on API version: ${API_VERSION}`);
   }
 
   /**

@@ -22,7 +22,7 @@ const CustomGameSettings: React.FC<CustomGameSettingsProps> = ({
   const handleSubmit = () => {
     if (prompt.trim()) {
       console.log('User prompt submitted:', prompt);
-      console.log('Using model:', GEMINI_MODELS.DEFAULT);
+      console.log('Using model:', GEMINI_MODELS.CUSTOM_GAME);
       console.log('API version:', API_VERSION);
       console.log('API endpoint:', getApiEndpoint());
       onGenerate(prompt);
@@ -39,7 +39,7 @@ const CustomGameSettings: React.FC<CustomGameSettingsProps> = ({
               <Code className="h-10 w-10 text-primary" />
             </div>
             <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              Tạo Game Tương Tác Với {GEMINI_MODELS.DEFAULT}
+              Tạo Game Tương Tác Với {GEMINI_MODELS.CUSTOM_GAME}
             </h2>
             <p className="text-sm text-muted-foreground mt-2 text-center max-w-md">
               Mô tả chi tiết game bạn muốn tạo và hệ thống sẽ tạo demo game
@@ -62,7 +62,7 @@ const CustomGameSettings: React.FC<CustomGameSettingsProps> = ({
               disabled={!prompt.trim() || isGenerating}
             >
               <Sparkles className="mr-2 h-5 w-5" />
-              {isGenerating ? 'Đang tạo game...' : `Tạo game với ${GEMINI_MODELS.DEFAULT}`}
+              {isGenerating ? 'Đang tạo game...' : `Tạo game với ${GEMINI_MODELS.CUSTOM_GAME}`}
             </Button>
           </div>
           

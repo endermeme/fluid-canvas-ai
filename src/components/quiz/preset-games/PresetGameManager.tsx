@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw, Share2 } from 'lucide-react';
@@ -555,6 +556,7 @@ Output must be valid JSON. `;
           initialSettings={settings}
           onStart={handleStartGame}
           onCancel={onBack}
+          topic={initialTopic || ""}
         />
       </div>
     );
@@ -600,10 +602,7 @@ Output must be valid JSON. `;
     <div className="flex flex-col h-full">
       {loading ? (
         <GameLoading 
-          title={`Đang tạo ${getGameTypeName()}`}
-          progress={generating ? generationProgress : undefined}
-          error={error}
-          onRetry={handleRetry}
+          topic={initialTopic || ""}
         />
       ) : showSettings ? (
         <div className="p-4">
@@ -619,6 +618,7 @@ Output must be valid JSON. `;
             initialSettings={settings}
             onStart={handleStartGame}
             onCancel={onBack}
+            topic={initialTopic || ""}
           />
         </div>
       ) : (

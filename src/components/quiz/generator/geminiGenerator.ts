@@ -29,8 +29,8 @@ export const generateWithGemini = async (
   // Get game type from topic to provide better context for the AI
   const gameType = getGameTypeByTopic(topic);
   
-  logInfo(SOURCE, `Starting game generation for "${topic}" using ${GEMINI_MODELS.DEFAULT}`, {
-    model: GEMINI_MODELS.DEFAULT,
+  logInfo(SOURCE, `Starting game generation for "${topic}" using ${GEMINI_MODELS.CUSTOM_GAME}`, {
+    model: GEMINI_MODELS.CUSTOM_GAME,
     apiVersion: API_VERSION,
     type: gameType?.name || "Not specified",
     settings: settings || {}
@@ -40,7 +40,7 @@ export const generateWithGemini = async (
   const prompt = buildGeminiPrompt(topic, true);
 
   try {
-    logInfo(SOURCE, `Sending request to Gemini API using model ${GEMINI_MODELS.DEFAULT} (${API_VERSION})`);
+    logInfo(SOURCE, `Sending request to Gemini API using model ${GEMINI_MODELS.CUSTOM_GAME} (${API_VERSION})`);
     
     const startTime = Date.now();
     
