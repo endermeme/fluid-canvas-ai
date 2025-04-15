@@ -283,7 +283,9 @@ const GameSharePage: React.FC = () => {
                           <div>
                             <p className="font-medium">{participant.name}</p>
                             <p className="text-xs text-muted-foreground">
-                              Tham gia: {formatDate(participant.timestamp)}
+                              Tham gia: {formatDate(typeof participant.timestamp === 'string' 
+                                ? new Date(participant.timestamp).getTime() 
+                                : participant.timestamp)}
                             </p>
                           </div>
                         </div>

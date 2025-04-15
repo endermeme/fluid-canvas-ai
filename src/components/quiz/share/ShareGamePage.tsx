@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -63,25 +62,34 @@ const ShareGamePage: React.FC = () => {
     // Simulate IP address (in a real app, this would come from the server)
     const fakeIp = getFakeIpAddress();
     
-    const result = await addParticipant(gameId, values.name, fakeIp);
-    
-    if (result.success) {
+    try {
+      const result = await addParticipant(gameId, values.name, fakeIp);
+      
+      if (result.success) {
+        toast({
+          title: "Tham gia thành công!",
+          description: `Chào mừng ${values.name} tham gia game.`,
+        });
+        setHasJoined(true);
+      } else {
+        toast({
+          title: "Không thể tham gia",
+          description: result.message,
+          variant: "destructive",
+        });
+        
+        // If they've retried too many times but we want to let them in anyway
+        if (result.participant && result.participant.retryCount <= 2) {
+          setHasJoined(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error joining game:", error);
       toast({
-        title: "Tham gia thành công!",
-        description: `Chào mừng ${values.name} tham gia game.`,
-      });
-      setHasJoined(true);
-    } else {
-      toast({
-        title: "Không thể tham gia",
-        description: result.message,
+        title: "Lỗi",
+        description: "Đã xảy ra lỗi khi tham gia game.",
         variant: "destructive",
       });
-      
-      // If they've retried too many times but we want to let them in anyway
-      if (result.participant && result.participant.retryCount <= 2) {
-        setHasJoined(true);
-      }
     }
   };
 

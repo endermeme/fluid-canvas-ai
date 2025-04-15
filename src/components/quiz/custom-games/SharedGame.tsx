@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
-import { addParticipant, getFakeIpAddress, GameParticipant } from '@/utils/gameParticipation';
+import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
+import { addParticipant, getFakeIpAddress } from '@/utils/gameParticipation';
+import { StoredGame, GameParticipant } from '@/utils/types';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import { Button } from '@/components/ui/button';
@@ -33,4 +34,3 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { QRCodeSVG } from 'qrcode.react';
-// ... existing code ... 

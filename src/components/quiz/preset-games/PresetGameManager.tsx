@@ -420,7 +420,7 @@ Output must be valid JSON. `;
         defaultSettings: settings
       },
       'pictionary': {
-        id: 'pictionary', 
+        id: 'pictionary',
         name: 'Đoán Hình',
         description: 'Chọn đáp án đúng dựa trên hình ảnh',
         icon: 'heart-handshake',
@@ -438,45 +438,45 @@ Output must be valid JSON. `;
     return gameTypeMap[gameType] || null;
   };
 
-const handleShareGame = async () => {
-  try {
-    if (!gameContent) return;
-    
-    // Get HTML content from the game
-    const html = document.getElementById('game-container')?.innerHTML || '';
-    
-    // Save game to Supabase
-    const shareUrl = await saveGameForSharing(
-      gameContent.title || getGameTypeName(),
-      'Generated from ' + getGameTypeName(),
-      html
-    );
-    
-    // Update state with the generated URL
-    if (shareUrl) {
-      setShareUrl(shareUrl);
-      setShowShareDialog(true);
+  const handleShare = async () => {
+    try {
+      if (!gameContent) return;
       
+      // Get HTML content from the game
+      const html = document.getElementById('game-container')?.innerHTML || '';
+      
+      // Save game to Supabase
+      const shareUrl = await saveGameForSharing(
+        gameContent.title || getGameTypeName(),
+        'Generated from ' + getGameTypeName(),
+        html
+      );
+      
+      // Update state with the generated URL
+      if (shareUrl) {
+        setShareUrl(shareUrl);
+        setShowShareDialog(true);
+        
+        toast({
+          title: "Game đã được chia sẻ",
+          description: "Đường dẫn đã được tạo để chia sẻ trò chơi.",
+        });
+      } else {
+        toast({
+          title: "Không thể chia sẻ game",
+          description: "Đã xảy ra lỗi khi tạo đường dẫn. Vui lòng thử lại.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error sharing game:", error);
       toast({
-        title: "Game đã được chia sẻ",
-        description: "Đường dẫn đã được tạo để chia sẻ trò chơi.",
-      });
-    } else {
-      toast({
-        title: "Không thể chia sẻ game",
-        description: "Đã xảy ra lỗi khi tạo đường dẫn. Vui lòng thử lại.",
+        title: "Lỗi chia sẻ",
+        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
         variant: "destructive"
       });
     }
-  } catch (error) {
-    console.error("Error sharing game:", error);
-    toast({
-      title: "Lỗi chia sẻ",
-      description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
-      variant: "destructive"
-    });
-  }
-};
+  };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareUrl)

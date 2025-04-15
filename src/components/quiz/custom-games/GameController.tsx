@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
@@ -62,20 +61,24 @@ const GameController: React.FC<GameControllerProps> = ({
     setShowForm(true);
   };
   
-  const handleShareGame = () => {
+  const handleShareGame = async () => {
     if (!currentGame) return;
     
-    const gameSession = createGameSession(
-      currentGame.title || "Minigame tương tác",
-      currentGame.content
-    );
-    
-    navigate(`/game/${gameSession.id}`);
-    
-    toast({
-      title: "Game đã được chia sẻ",
-      description: "Bạn có thể gửi link cho người khác để họ tham gia.",
-    });
+    try {
+      const gameSession = await createGameSession(
+        currentGame.title || "Minigame tương tác",
+        currentGame.content
+      );
+      
+      navigate(`/game/${gameSession.id}`);
+      
+      toast({
+        title: "Game đã được chia sẻ",
+        description: "Bạn có thể gửi link cho người khác để họ tham gia.",
+      });
+    } catch (error) {
+      console.error("Error sharing game:", error);
+    }
   };
 
   const getContainerTitle = () => {

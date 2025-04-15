@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -31,7 +30,7 @@ const GameHistory: React.FC = () => {
     try {
       const gameSessions = await getAllGameSessions();
       // Sort by creation date (newest first)
-      const sortedSessions = [...gameSessions].sort((a, b) => b.createdAt - a.createdAt);
+      const sortedSessions = gameSessions.sort((a, b) => b.createdAt - a.createdAt);
       setGames(sortedSessions);
     } catch (error) {
       console.error("Error loading games:", error);

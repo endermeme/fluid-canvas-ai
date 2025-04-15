@@ -1,373 +1,211 @@
-
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { ArrowLeft, Share2, Users, Clock, Copy, Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { 
-  Home, 
-  RefreshCw, 
-  Share2, 
-  Expand, 
-  Play, 
-  Pause, 
-  Download, 
-  Gamepad
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { QRCodeSVG } from 'qrcode.react';
+
+import QuizContainer from '@/components/quiz/QuizContainer';
+import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import { createGameSession } from '@/utils/gameParticipation';
-import { useToast } from '@/hooks/use-toast';
-import QuizContainer from '../QuizContainer';
 
 interface CustomGameContainerProps {
   title?: string;
-  content: string;
-  onBack?: () => void;
-  onNewGame?: () => void;
+  content?: string;
 }
 
-const CustomGameContainer: React.FC<CustomGameContainerProps> = ({ 
-  title = "Trò Chơi Tùy Chỉnh", 
-  content, 
-  onBack, 
-  onNewGame 
-}) => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [iframeError, setIframeError] = useState<string | null>(null);
+const CustomGameContainer: React.FC<CustomGameContainerProps> = ({ title = "Minigame Tương Tác", content = "" }) => {
+  const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState('game');
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Generate a safe HTML content
-  const generateHtmlContent = () => {
-    // Process content to ensure it's valid HTML
-    let processedContent = content.replace(/```html|```/g, '');
-    processedContent = processedContent.replace(/`/g, '');
+  const handleBack = () => {
+    navigate('/');
+  };
+  
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(err => {
+        console.error('Không thể sao chép liên kết:', err);
+      });
+  };
+  
+  const handleShareGame = async () => {
+    if (!miniGame) return;
     
-    // Check if content already has HTML structure
-    if (processedContent.includes('<!DOCTYPE html>')) {
-      // Extract the body content if possible
-      const bodyMatch = processedContent.match(/<body>([\s\S]*?)<\/body>/i);
-      const bodyContent = bodyMatch ? bodyMatch[1] : processedContent;
+    try {
+      const gameSession = await createGameSession(
+        miniGame.title || "Minigame tương tác",
+        miniGame.content
+      );
       
-      return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>${title}</title>
-          <style>
-            body {
-              margin: 0;
-              padding: 0;
-              font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-              overflow: hidden;
-              background: #f8f9fa;
-            }
-            #game-container {
-              width: 100%;
-              height: 100vh;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-            /* Custom styles for embedded content */
-            canvas {
-              max-width: 100%;
-              max-height: 100%;
-              margin: auto;
-            }
-          </style>
-        </head>
-        <body>
-          <div id="game-container">
-            ${bodyContent}
-          </div>
-          <script>
-            // Communication channel with parent
-            window.addEventListener('message', function(event) {
-              if (event.data === 'pause') {
-                // Implement pause logic if the game supports it
-                console.log('Game paused');
-                // You can add custom pause logic here
-              } else if (event.data === 'resume') {
-                // Implement resume logic if the game supports it
-                console.log('Game resumed');
-                // You can add custom resume logic here
-              }
-            });
-          </script>
-        </body>
-        </html>
-      `;
-    } else {
-      // If it's just content without HTML structure
-      return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>${title}</title>
-          <style>
-            body {
-              margin: 0;
-              padding: 0;
-              font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-              overflow: hidden;
-              background: #f8f9fa;
-            }
-            #game-container {
-              width: 100%;
-              height: 100vh;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-            /* Custom styles for embedded content */
-            canvas {
-              max-width: 100%;
-              max-height: 100%;
-              margin: auto;
-            }
-          </style>
-        </head>
-        <body>
-          <div id="game-container">
-            ${processedContent}
-          </div>
-          <script>
-            // Communication channel with parent
-            window.addEventListener('message', function(event) {
-              if (event.data === 'pause') {
-                console.log('Game paused');
-              } else if (event.data === 'resume') {
-                console.log('Game resumed');
-              }
-            });
-          </script>
-        </body>
-        </html>
-      `;
-    }
-  };
-
-  useEffect(() => {
-    if (iframeRef.current) {
-      try {
-        const iframe = iframeRef.current;
-        const htmlContent = generateHtmlContent();
-        
-        if (iframe.contentDocument) {
-          iframe.contentDocument.open();
-          iframe.contentDocument.write(htmlContent);
-          iframe.contentDocument.close();
-          setIframeError(null);
-        } else if (iframe.contentWindow?.document) {
-          iframe.contentWindow.document.open();
-          iframe.contentWindow.document.write(htmlContent);
-          iframe.contentWindow.document.close();
-          setIframeError(null);
-        } else {
-          // Fallback to srcdoc if direct document access fails
-          iframe.srcdoc = htmlContent;
-        }
-      } catch (error) {
-        console.error("Error loading game content:", error);
-        setIframeError("Failed to load game content. Please try refreshing.");
-      }
-    }
-  }, [content]);
-
-  // Handle document fullscreen change events
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
-  }, []);
-
-  const toggleFullscreen = () => {
-    const iframe = iframeRef.current;
-    if (!iframe) return;
-
-    if (!isFullscreen) {
-      if (iframe.requestFullscreen) {
-        iframe.requestFullscreen();
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
-  };
-
-  const togglePause = () => {
-    const iframe = iframeRef.current;
-    if (!iframe || !iframe.contentWindow) return;
-    
-    if (isPaused) {
-      iframe.contentWindow.postMessage('resume', '*');
-    } else {
-      iframe.contentWindow.postMessage('pause', '*');
-    }
-    
-    setIsPaused(!isPaused);
-  };
-
-  const handleShareGame = () => {
-    // Create a shareable game session
-    const gameSession = createGameSession(
-      title,
-      content
-    );
-    
-    // Navigate to the share page
-    navigate(`/game/${gameSession.id}`);
-    
-    toast({
-      title: "Game đã được chia sẻ",
-      description: "Bạn có thể gửi link cho người khác để họ tham gia.",
-    });
-  };
-
-  const handleGameReload = () => {
-    if (iframeRef.current) {
-      try {
-        const iframe = iframeRef.current;
-        const htmlContent = generateHtmlContent();
-        
-        if (iframe.contentDocument) {
-          iframe.contentDocument.open();
-          iframe.contentDocument.write(htmlContent);
-          iframe.contentDocument.close();
-          setIframeError(null);
-        } else if (iframe.contentWindow?.document) {
-          iframe.contentWindow.document.open();
-          iframe.contentWindow.document.write(htmlContent);
-          iframe.contentWindow.document.close();
-          setIframeError(null);
-        } else {
-          // Fallback to srcdoc
-          iframe.srcdoc = htmlContent;
-        }
-      } catch (error) {
-        console.error("Error reloading game:", error);
-        setIframeError("Failed to reload game content. Please try again.");
-      }
-    }
-  };
-
-  // Custom header controls for game
-  const headerControls = (
-    <>
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={togglePause}
-        className="h-8 w-8 p-0 flex items-center justify-center"
-        title={isPaused ? "Tiếp tục" : "Tạm dừng"}
-      >
-        {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-      </Button>
+      navigate(`/game/${gameSession.id}`);
       
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={toggleFullscreen}
-        className="h-8 w-8 p-0 flex items-center justify-center"
-        title="Toàn màn hình"
-      >
-        <Expand className="h-4 w-4" />
-      </Button>
-      
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={handleGameReload}
-        className="h-8 w-8 p-0 flex items-center justify-center"
-        title="Tải lại"
-      >
-        <RefreshCw className="h-4 w-4" />
-      </Button>
-    </>
-  );
-
-  // Footer actions
-  const footerActions = (
-    <div className="flex justify-between items-center">
-      <div>
-        {onNewGame && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={onNewGame}
-            className="border-primary/20 bg-primary/5"
-          >
-            <Gamepad className="h-4 w-4 mr-1.5" />
-            Trò Chơi Mới
-          </Button>
-        )}
-      </div>
-      
-      <div className="flex items-center gap-2">
-        <Button 
-          variant="secondary" 
-          size="sm" 
-          onClick={handleShareGame}
-          className="bg-primary/10 border border-primary/20 shadow-sm"
-        >
-          <Share2 className="h-4 w-4 mr-1.5" />
-          Chia Sẻ
-        </Button>
-        
-        <Button 
-          variant="default" 
-          size="sm"
-          className="bg-gradient-to-r from-primary to-primary/80"
-        >
-          <Download className="h-4 w-4 mr-1.5" />
-          Lưu
-        </Button>
-      </div>
-    </div>
-  );
-
+      toast({
+        title: "Game đã được chia sẻ",
+        description: "Bạn có thể gửi link cho người khác để họ tham gia.",
+      });
+    } catch (error) {
+      console.error("Error sharing game:", error);
+    }
+  };
+  
+  const [miniGame] = useState({
+    title: title,
+    content: content
+  });
+  
   return (
     <QuizContainer
-      title={title}
+      title={miniGame.title}
       showBackButton={true}
-      showHomeButton={false}
-      showRefreshButton={false}
-      onBack={onBack}
-      onRefresh={handleGameReload}
-      headerRight={headerControls}
-      footerContent={footerActions}
+      onBack={handleBack}
+      className="p-0 overflow-hidden"
     >
-      <div className="w-full h-full">
-        {iframeError ? (
-          <div className="flex flex-col items-center justify-center h-full p-6 bg-destructive/10">
-            <p className="text-destructive mb-4">{iframeError}</p>
-            <Button 
-              variant="outline" 
-              onClick={handleGameReload}
-            >
-              <RefreshCw className="h-4 w-4 mr-1.5" />
-              Tải lại
-            </Button>
-          </div>
-        ) : (
-          <iframe 
-            ref={iframeRef}
-            className="w-full h-full border-none"
-            title={title}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
+        <div className="border-b px-4 py-2 flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="game">Game</TabsTrigger>
+            <TabsTrigger value="share">Chia sẻ</TabsTrigger>
+          </TabsList>
+        </div>
+        
+        <TabsContent value="game" className="h-[calc(100%-48px)] m-0">
+          <EnhancedGameView 
+            miniGame={{
+              title: miniGame.title,
+              content: miniGame.content
+            }}
+            onBack={handleBack}
           />
-        )}
-      </div>
+        </TabsContent>
+        
+        <TabsContent value="share" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
+          <div className="max-w-md mx-auto space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Chia sẻ game</CardTitle>
+                <CardDescription>
+                  Chia sẻ game này với bạn bè để họ có thể tham gia chơi
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-center p-4 bg-white rounded-lg">
+                  <QRCodeSVG value={shareUrl} size={200} />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="share-link">Liên kết chia sẻ</Label>
+                  <div className="flex">
+                    <Input 
+                      id="share-link" 
+                      value={shareUrl} 
+                      readOnly 
+                      className="rounded-r-none"
+                    />
+                    <Button 
+                      variant="outline" 
+                      className="rounded-l-none"
+                      onClick={handleCopyLink}
+                    >
+                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full">
+                  <Users className="h-4 w-4 mr-2" />
+                  Tham gia game
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Thông tin game</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tiêu đề:</span>
+                  <span className="font-medium">{miniGame.title}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+      
+      {/* Dialog for entering player name */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Chia sẻ game</DialogTitle>
+            <DialogDescription>
+              Sao chép hoặc quét mã QR để chia sẻ game này với bạn bè
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <div className="p-4 bg-white rounded-lg">
+              <QRCodeSVG value={shareUrl} size={200} />
+            </div>
+            
+            <div className="w-full space-y-2">
+              <Label htmlFor="share-link">Liên kết chia sẻ</Label>
+              <div className="flex">
+                <Input 
+                  id="share-link" 
+                  value={shareUrl} 
+                  readOnly 
+                  className="rounded-r-none"
+                />
+                <Button 
+                  variant="outline" 
+                  className="rounded-l-none"
+                  onClick={handleCopyLink}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowShareDialog(false)}>Đóng</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </QuizContainer>
   );
 };

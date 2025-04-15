@@ -14,10 +14,9 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   getGameSession, 
   exportParticipantsToCSV,
-  maskIpAddress,
-  GameParticipant,
-  GameSession
+  maskIpAddress
 } from '@/utils/gameParticipation';
+import { GameParticipant, GameSession } from '@/utils/types';
 import { ArrowLeft, Download, Users, RefreshCw, Share2, Eye } from 'lucide-react';
 
 const GameDashboard: React.FC = () => {
@@ -59,25 +58,34 @@ const GameDashboard: React.FC = () => {
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!gameId || !game) return;
     
-    const csvContent = exportParticipantsToCSV(gameId);
-    
-    // Create a CSV file and trigger download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${game.title}_participants.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast({
-      title: "Xuất dữ liệu thành công",
-      description: "Dữ liệu người tham gia đã được tải xuống.",
-    });
+    try {
+      const csvContent = await exportParticipantsToCSV(gameId);
+      
+      // Create a CSV file and trigger download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${game.title}_participants.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Xuất dữ liệu thành công",
+        description: "Dữ liệu người tham gia đã được tải xuống.",
+      });
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+      toast({
+        title: "Lỗi xuất dữ liệu",
+        description: "Không thể xuất dữ liệu. Vui lòng thử lại.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleShareLink = () => {
@@ -130,7 +138,7 @@ const GameDashboard: React.FC = () => {
             <ArrowLeft className="h-4 w-4" />
             <span>Quay lại</span>
           </Button>
-          <h1 className="text-2xl font-bold">{game.title}</h1>
+          <h1 className="text-2xl font-bold">{game?.title}</h1>
         </div>
         
         <div className="flex items-center gap-2">
@@ -156,7 +164,7 @@ const GameDashboard: React.FC = () => {
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-medium">
-              Người tham gia ({game.participants.length})
+              Người tham gia ({game?.participants.length || 0})
             </h2>
           </div>
           
@@ -172,7 +180,7 @@ const GameDashboard: React.FC = () => {
           </div>
         </div>
         
-        {game.participants.length > 0 ? (
+        {game && game.participants.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
