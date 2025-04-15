@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,39 +6,44 @@ import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle, RefreshCw, Clock, ArrowLeft, ChevronRight } from 'lucide-react';
 
 interface QuizTemplateProps {
-  content: any;
+  data?: any;
+  content?: any;
   topic: string;
   onBack?: () => void;
 }
 
-const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic, onBack }) => {
+const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBack }) => {
+  const gameContent = content || data;
+  
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(content?.settings?.timePerQuestion || 30);
-  const [totalTimeLeft, setTotalTimeLeft] = useState(content?.settings?.totalTime || 300);
+  const [timeLeft, setTimeLeft] = useState(gameContent?.settings?.timePerQuestion || 30);
+  const [totalTimeLeft, setTotalTimeLeft] = useState(gameContent?.settings?.totalTime || 300);
   const [timerRunning, setTimerRunning] = useState(true);
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
-  const questions = content?.questions || [];
+  const questions = gameContent?.questions || [];
   const isLastQuestion = currentQuestion === questions.length - 1;
 
   useEffect(() => {
     if (!gameStarted && questions.length > 0) {
       setGameStarted(true);
       
-      const questionTime = content?.settings?.timePerQuestion || 30;
-      const totalTime = content?.settings?.totalTime || (questions.length * questionTime);
+      const questionTime = gameContent?.settings?.timePerQuestion || 30;
+      const totalTime = gameContent?.settings?.totalTime || (questions.length * questionTime);
       
       setTimeLeft(questionTime);
       setTotalTimeLeft(totalTime);
       
       console.log(`Game initialized with ${questionTime}s per question and ${totalTime}s total time`);
+      console.log("Game content:", gameContent);
+      console.log("Questions:", questions);
     }
-  }, [content, questions, gameStarted]);
+  }, [gameContent, questions, gameStarted]);
 
   useEffect(() => {
     if (timeLeft > 0 && timerRunning && !isAnswered) {
@@ -88,8 +92,8 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic, onBack }) =
     if (optionIndex === questions[currentQuestion].correctAnswer) {
       setScore(score + 1);
       
-      if (content?.settings?.bonusTimePerCorrect) {
-        const bonusTime = content.settings.bonusTimePerCorrect;
+      if (gameContent?.settings?.bonusTimePerCorrect) {
+        const bonusTime = gameContent.settings.bonusTimePerCorrect;
         setTotalTimeLeft(prev => prev + bonusTime);
         
         toast({
@@ -120,7 +124,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic, onBack }) =
       setCurrentQuestion(currentQuestion + 1);
       setSelectedOption(null);
       setIsAnswered(false);
-      setTimeLeft(content?.settings?.timePerQuestion || 30);
+      setTimeLeft(gameContent?.settings?.timePerQuestion || 30);
       setTimerRunning(true);
     }
   };
@@ -131,13 +135,13 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic, onBack }) =
     setScore(0);
     setShowResult(false);
     setIsAnswered(false);
-    setTimeLeft(content?.settings?.timePerQuestion || 30);
-    setTotalTimeLeft(content?.settings?.totalTime || 300);
+    setTimeLeft(gameContent?.settings?.timePerQuestion || 30);
+    setTotalTimeLeft(gameContent?.settings?.totalTime || 300);
     setTimerRunning(true);
     setGameStarted(true);
   };
 
-  if (!content || !questions.length) {
+  if (!gameContent || !questions.length) {
     return <div className="p-4">Không có dữ liệu câu hỏi</div>;
   }
 
@@ -161,7 +165,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic, onBack }) =
         <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
           <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả</h2>
           <p className="text-lg mb-4">
-            Chủ đề: <span className="font-semibold">{content.title || topic}</span>
+            Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
           </p>
           
           <div className="mb-6">

@@ -7,18 +7,21 @@ import { RefreshCw, ChevronRight, HelpCircle, Clock, Image, ArrowLeft } from 'lu
 import { generatePixabayImage, handleImageError, generatePlaceholderImage } from '../../generator/imageInstructions';
 
 interface PictionaryTemplateProps {
-  content: any;
+  data?: any;
+  content?: any;
   topic: string;
   onBack?: () => void;
 }
 
-const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic, onBack }) => {
+const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, topic, onBack }) => {
+  const gameContent = content || data;
+  
   const [currentItem, setCurrentItem] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(content?.settings?.timePerQuestion || 20);
+  const [timeLeft, setTimeLeft] = useState(gameContent?.settings?.timePerQuestion || 20);
   const [timerRunning, setTimerRunning] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -26,9 +29,12 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic,
   const [isProcessing, setIsProcessing] = useState(true);
   const { toast } = useToast();
 
-  const rawItems = content?.items || [];
+  const rawItems = gameContent?.items || [];
 
   useEffect(() => {
+    console.log("PictionaryTemplate - Game content:", gameContent);
+    console.log("PictionaryTemplate - Raw items:", rawItems);
+    
     const processItems = async () => {
       setIsProcessing(true);
       const processed = [...rawItems];
@@ -61,7 +67,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic,
     };
     
     processItems();
-  }, [content]);
+  }, [gameContent]);
 
   const items = processedItems;
   const isLastItem = currentItem === items.length - 1;
@@ -112,7 +118,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic,
       setCurrentItem(currentItem + 1);
       setSelectedOption(null);
       setShowHint(false);
-      setTimeLeft(content?.settings?.timePerQuestion || 20);
+      setTimeLeft(gameContent?.settings?.timePerQuestion || 20);
       setTimerRunning(true);
       setImageLoaded(false);
       setImageError(false);
@@ -135,7 +141,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic,
     setScore(0);
     setShowResult(false);
     setShowHint(false);
-    setTimeLeft(content?.settings?.timePerQuestion || 20);
+    setTimeLeft(gameContent?.settings?.timePerQuestion || 20);
     setTimerRunning(true);
     setImageLoaded(false);
     setImageError(false);
@@ -155,7 +161,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic,
     img.alt = `Không thể tải hình ảnh: ${itemAnswer}`;
   };
 
-  if (!content || !items.length || isProcessing) {
+  if (!gameContent || !items.length || isProcessing) {
     return (
       <div className="flex items-center justify-center h-full relative">
         {onBack && (
@@ -198,7 +204,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic,
         <Card className="max-w-md w-full p-6 text-center">
           <h2 className="text-2xl font-bold mb-4">Kết quả</h2>
           <p className="text-lg mb-4">
-            Chủ đề: <span className="font-semibold">{content.title || topic}</span>
+            Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
           </p>
           
           <div className="mb-6">
@@ -307,7 +313,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic,
       </div>
 
       <div className="flex gap-2 items-center">
-        {content?.settings?.showHints && !showHint && selectedOption === null && (
+        {gameContent?.settings?.showHints && !showHint && selectedOption === null && (
           <Button 
             variant="outline"
             onClick={handleShowHint}
@@ -322,7 +328,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ content, topic,
         <Button 
           onClick={handleNextItem}
           size="sm"
-          className={`${(showHint && selectedOption === null) || (content?.settings?.showHints && !showHint && selectedOption === null) ? "flex-1" : "w-full"}`}
+          className={`${(showHint && selectedOption === null) || (gameContent?.settings?.showHints && !showHint && selectedOption === null) ? "flex-1" : "w-full"}`}
           disabled={timerRunning && selectedOption === null && !isLastItem}
         >
           {isLastItem ? 'Xem kết quả' : 'Tiếp theo'}

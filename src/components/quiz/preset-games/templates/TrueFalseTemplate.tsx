@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,24 +6,27 @@ import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle, RefreshCw, AlertCircle, Clock, ArrowLeft, ChevronRight } from 'lucide-react';
 
 interface TrueFalseTemplateProps {
-  content: any;
+  data?: any;
+  content?: any;
   topic: string;
   onBack?: () => void;
 }
 
-const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic, onBack }) => {
+const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, topic, onBack }) => {
+  const gameContent = content || data;
+  
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Array<boolean | null>>([]);
   const [score, setScore] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(content?.settings?.timePerQuestion || 15);
-  const [totalTimeLeft, setTotalTimeLeft] = useState(content?.settings?.totalTime || 150);
+  const [timeLeft, setTimeLeft] = useState(gameContent?.settings?.timePerQuestion || 15);
+  const [totalTimeLeft, setTotalTimeLeft] = useState(gameContent?.settings?.totalTime || 150);
   const [timerRunning, setTimerRunning] = useState(true);
   const [showResult, setShowResult] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
-  const questions = content?.questions || [];
+  const questions = gameContent?.questions || [];
   const isLastQuestion = currentQuestion === questions.length - 1;
   const currentAnswer = userAnswers[currentQuestion];
 
@@ -32,15 +34,17 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic, o
     if (!gameStarted && questions.length > 0) {
       setGameStarted(true);
       
-      const questionTime = content?.settings?.timePerQuestion || 15;
-      const totalTime = content?.settings?.totalTime || (questions.length * questionTime);
+      const questionTime = gameContent?.settings?.timePerQuestion || 15;
+      const totalTime = gameContent?.settings?.totalTime || (questions.length * questionTime);
       
       setTimeLeft(questionTime);
       setTotalTimeLeft(totalTime);
       
       console.log(`Game initialized with ${questionTime}s per question and ${totalTime}s total time`);
+      console.log("Game content:", gameContent);
+      console.log("Questions:", questions);
     }
-  }, [content, questions, gameStarted]);
+  }, [gameContent, questions, gameStarted]);
 
   useEffect(() => {
     if (timeLeft > 0 && timerRunning) {
@@ -84,7 +88,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic, o
     const newAnswers = [...userAnswers];
     newAnswers[currentQuestion] = answer;
     setUserAnswers(newAnswers);
-    setShowExplanation(content?.settings?.showExplanation ?? true);
+    setShowExplanation(gameContent?.settings?.showExplanation ?? true);
     setTimerRunning(false);
 
     const isCorrect = answer === questions[currentQuestion].isTrue;
@@ -111,7 +115,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic, o
     } else {
       setCurrentQuestion(currentQuestion + 1);
       setShowExplanation(false);
-      setTimeLeft(content?.settings?.timePerQuestion || 15);
+      setTimeLeft(gameContent?.settings?.timePerQuestion || 15);
       setTimerRunning(true);
     }
   };
@@ -122,13 +126,13 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic, o
     setScore(0);
     setShowExplanation(false);
     setShowResult(false);
-    setTimeLeft(content?.settings?.timePerQuestion || 15);
-    setTotalTimeLeft(content?.settings?.totalTime || 150);
+    setTimeLeft(gameContent?.settings?.timePerQuestion || 15);
+    setTotalTimeLeft(gameContent?.settings?.totalTime || 150);
     setTimerRunning(true);
     setGameStarted(true);
   };
 
-  if (!content || !questions.length) {
+  if (!gameContent || !questions.length) {
     return <div className="p-4">Không có dữ liệu câu hỏi</div>;
   }
 
@@ -156,7 +160,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic, o
         <Card className="max-w-md w-full p-6 text-center">
           <h2 className="text-2xl font-bold mb-4">Kết Quả</h2>
           <p className="text-lg mb-4">
-            Chủ đề: <span className="font-semibold">{content.title || topic}</span>
+            Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
           </p>
           
           <div className="mb-6">
