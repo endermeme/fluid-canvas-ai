@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw, Share2 } from 'lucide-react';
@@ -352,7 +351,8 @@ Output must be valid JSON. `;
   };
 
   const renderGameTemplate = () => {
-    const GameTemplate = getGameTypeObject();
+    // Fix: Get the actual component instead of the object
+    const GameTemplate = gameTemplates[gameType];
     
     if (!GameTemplate) {
       return <div>Game type not supported</div>;
@@ -465,7 +465,7 @@ Output must be valid JSON. `;
         htmlContent = gameElement.innerHTML;
       } else {
         // Fallback for games without direct DOM access
-        const GameTemplate = getGameTypeObject();
+        const GameTemplate = gameTemplates[gameType];
         if (!GameTemplate) return;
         
         // Convert the game content to HTML format
