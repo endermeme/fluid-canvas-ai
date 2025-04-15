@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { cleanupExpiredGames, getRemainingTime, StoredGame } from '@/utils/gameExport';
+import { getRemainingTime } from '@/utils/gameExport';
+import { StoredGame } from '@/utils/types';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import { Button } from '@/components/ui/button';
 import { Plus, Clock, ExternalLink, Search, Trash2, Share2, Filter } from 'lucide-react';
@@ -42,7 +43,6 @@ const GameHistoryPage: React.FC = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    cleanupExpiredGames();
     loadGames();
   }, []);
   

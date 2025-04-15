@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
 import { addParticipant, getFakeIpAddress, GameParticipant } from '@/utils/gameParticipation';
+import { StoredGame } from '@/utils/types';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import { Button } from '@/components/ui/button';
@@ -45,20 +47,24 @@ const GameSharePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('game');
   
   useEffect(() => {
-    if (gameId) {
-      const loadedGame = getSharedGame(gameId);
-      setGame(loadedGame);
-      
-      // Load participants if available
-      const sessionsJson = localStorage.getItem('game_sessions');
-      if (sessionsJson) {
-        const sessions = JSON.parse(sessionsJson);
-        const session = sessions.find((s: any) => s.id === gameId);
-        if (session && session.participants) {
-          setParticipants(session.participants);
+    const loadGame = async () => {
+      if (gameId) {
+        const loadedGame = await getSharedGame(gameId);
+        setGame(loadedGame);
+        
+        // Load participants if available
+        const sessionsJson = localStorage.getItem('game_sessions');
+        if (sessionsJson) {
+          const sessions = JSON.parse(sessionsJson);
+          const session = sessions.find((s: any) => s.id === gameId);
+          if (session && session.participants) {
+            setParticipants(session.participants);
+          }
         }
       }
-    }
+    };
+    
+    loadGame();
   }, [gameId]);
   
   const handleBack = () => {
@@ -77,13 +83,15 @@ const GameSharePage: React.FC = () => {
       });
   };
   
-  const handleJoinGame = () => {
-    if (!playerName.trim()) return;
+  const handleJoinGame = async () => {
+    if (!playerName.trim() || !gameId || !game) return;
     
-    const ipAddress = getFakeIpAddress();
-    const result = addParticipant(gameId || '', playerName, ipAddress);
+    // Simulate IP address (in a real app, this would come from the server)
+    const fakeIp = getFakeIpAddress();
     
-    if (result.success && result.participant) {
+    const result = await addParticipant(gameId, playerName, fakeIp);
+    
+    if (result.success) {
       setParticipants(prev => [...prev, result.participant]);
       setShowNameDialog(false);
     } else if (result.participant) {

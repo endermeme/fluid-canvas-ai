@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from './generator/AIGameGenerator';
@@ -140,7 +139,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     }
   };
 
-  const handleShareGame = () => {
+  const handleShareGame = async () => {
     if (!miniGame) return;
     
     const gameSession = createGameSession(
@@ -148,12 +147,30 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       miniGame.content
     );
     
-    navigate(`/game/${gameSession.id}`);
+    const { data: game } = await supabase
+      .from('games')
+      .insert({
+        title: miniGame.title || "Minigame tương tác",
+        html_content: miniGame.content,
+        game_type: 'shared'
+      })
+      .select()
+      .single();
     
-    toast({
-      title: "Game đã được chia sẻ",
-      description: "Bạn có thể gửi link cho người khác để họ tham gia.",
-    });
+    if (game) {
+      navigate(`/game/${game.id}`);
+      
+      toast({
+        title: "Game đã được chia sẻ",
+        description: "Bạn có thể gửi link cho người khác để họ tham gia.",
+      });
+    } else {
+      toast({
+        title: "Không thể chia sẻ game",
+        description: "Đã xảy ra lỗi khi chia sẻ game. Vui lòng thử lại.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {

@@ -1,5 +1,6 @@
+
 import { supabase } from "@/integrations/supabase/client";
-import type { StoredGame } from "@/utils/types";
+import { StoredGame } from "@/utils/types";
 
 // Get the base URL for shared games
 const getBaseUrl = () => {
@@ -84,5 +85,23 @@ export const getRemainingTime = (expiresAt: number): string => {
   } catch (error) {
     console.error("Error calculating remaining time:", error);
     return "Không xác định";
+  }
+};
+
+// Clean up expired games from local storage
+export const cleanupExpiredGames = () => {
+  try {
+    const gamesJson = localStorage.getItem('shared_games');
+    if (!gamesJson) return;
+    
+    const games: StoredGame[] = JSON.parse(gamesJson);
+    const now = Date.now();
+    const validGames = games.filter(game => game.expiresAt > now);
+    
+    if (validGames.length !== games.length) {
+      localStorage.setItem('shared_games', JSON.stringify(validGames));
+    }
+  } catch (error) {
+    console.error("Error cleaning up expired games:", error);
   }
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -26,12 +25,17 @@ const GameHistory: React.FC = () => {
     loadGames();
   }, []);
 
-  const loadGames = () => {
-    const gameSessions = getAllGameSessions();
-    // Sort by creation date (newest first)
-    gameSessions.sort((a, b) => b.createdAt - a.createdAt);
-    setGames(gameSessions);
-    setLoading(false);
+  const loadGames = async () => {
+    try {
+      const gameSessions = await getAllGameSessions();
+      // Sort by creation date (newest first)
+      gameSessions.sort((a, b) => b.createdAt - a.createdAt);
+      setGames(gameSessions);
+    } catch (error) {
+      console.error("Error loading games:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleViewDashboard = (gameId: string) => {

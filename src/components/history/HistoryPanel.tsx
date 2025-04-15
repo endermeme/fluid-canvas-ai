@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Bookmark } from 'lucide-react';
-import { StoredGame, cleanupExpiredGames, getRemainingTime } from '@/utils/gameExport';
+import { getRemainingTime } from '@/utils/gameExport';
+import { StoredGame } from '@/utils/types';
 import { useNavigate } from 'react-router-dom';
 
 interface HistoryPanelProps {
@@ -22,7 +22,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
   
   // Load games when opening the panel
   const loadGames = () => {
-    cleanupExpiredGames(); // First clean up expired games
+    // Using local storage as fallback until Supabase implementation is complete
     const gamesJson = localStorage.getItem('shared_games');
     if (gamesJson) {
       const parsedGames: StoredGame[] = JSON.parse(gamesJson);

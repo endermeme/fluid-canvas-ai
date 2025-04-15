@@ -23,25 +23,30 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (miniGame && miniGame.content) {
-      try {
-        saveGameForSharing(
-          miniGame.title || "Minigame tương tác", 
-          "", 
-          miniGame.content
-        );
-      } catch (e) {
-        console.error("Error saving game to history:", e);
+    const saveGameToHistory = async () => {
+      if (miniGame && miniGame.content) {
+        try {
+          await saveGameForSharing(
+            miniGame.title || "Minigame tương tác", 
+            "", 
+            miniGame.content
+          );
+        } catch (e) {
+          console.error("Error saving game to history:", e);
+        }
       }
-    }
+    };
+    
+    saveGameToHistory();
   }, [miniGame]);
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (shareInProgress) return;
     
     try {
       setShareInProgress(true);
-      const shareUrl = saveGameForSharing(
+      
+      const shareUrl = await saveGameForSharing(
         miniGame.title || "Minigame tương tác",
         "",
         miniGame.content

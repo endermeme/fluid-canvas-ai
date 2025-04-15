@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
+import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
+import { StoredGame } from '@/utils/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import QuizContainer from '@/components/quiz/QuizContainer';
@@ -20,8 +21,8 @@ const SharedGame: React.FC = () => {
       return;
     }
 
-    const loadGame = () => {
-      const loadedGame = getSharedGame(id);
+    const loadGame = async () => {
+      const loadedGame = await getSharedGame(id);
       if (loadedGame) {
         setGame(loadedGame);
       } else {

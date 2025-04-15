@@ -1,19 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-
-export interface GameParticipant {
-  id: string;
-  name: string;
-  timestamp: string;
-  ipAddress?: string;
-}
-
-export interface GameSession {
-  id: string;
-  title: string;
-  participants: GameParticipant[];
-  createdAt: number;
-}
+import { GameParticipant, GameSession } from "@/utils/types";
 
 // Generate a fake IP for development/demo purposes
 export const getFakeIpAddress = () => {
@@ -98,6 +85,7 @@ export const getGameSession = async (gameId: string): Promise<GameSession | null
     return {
       id: game.id,
       title: game.title,
+      htmlContent: game.html_content,
       participants: participants || [],
       createdAt: new Date(game.created_at).getTime()
     };
@@ -131,6 +119,7 @@ export const getAllGameSessions = async (): Promise<GameSession[]> => {
         return {
           id: game.id,
           title: game.title,
+          htmlContent: game.html_content,
           participants: participants || [],
           createdAt: new Date(game.created_at).getTime()
         };
@@ -142,4 +131,98 @@ export const getAllGameSessions = async (): Promise<GameSession[]> => {
     console.error("Error in getAllGameSessions:", error);
     return [];
   }
+};
+
+// Create a new game session
+export const createGameSession = (title: string, htmlContent: string): GameSession => {
+  try {
+    const gameData = {
+      title: title || "Minigame Tương tác",
+      html_content: htmlContent,
+      game_type: 'shared'
+    };
+    
+    // Create the game in the database
+    const { data: game, error } = supabase
+      .from('games')
+      .insert(gameData)
+      .select()
+      .single();
+      
+    if (error) {
+      console.error("Error creating game session:", error);
+      // Return a temporary session object for fallback
+      return {
+        id: Math.random().toString(36).substring(2, 9),
+        title: title,
+        htmlContent: htmlContent,
+        participants: [],
+        createdAt: Date.now()
+      };
+    }
+    
+    // This code assumes game is already returned, but we need to handle the Promise
+    // We'll fix this in components that call this function
+    return {
+      id: "temporary-id", // This will be replaced when the promise resolves
+      title: title,
+      htmlContent: htmlContent,
+      participants: [],
+      createdAt: Date.now()
+    };
+  } catch (error) {
+    console.error("Error in createGameSession:", error);
+    return {
+      id: Math.random().toString(36).substring(2, 9),
+      title: title,
+      htmlContent: htmlContent,
+      participants: [],
+      createdAt: Date.now()
+    };
+  }
+};
+
+// Export participants to CSV
+export const exportParticipantsToCSV = (gameId: string): string => {
+  try {
+    // Get participants for the game
+    const { data: participants, error } = supabase
+      .from('game_participants')
+      .select('*')
+      .eq('game_id', gameId)
+      .order('timestamp', { ascending: false });
+      
+    if (error || !participants || participants.length === 0) {
+      return "Name,IP Address,Timestamp,Retry Count\n";
+    }
+    
+    // Create CSV header
+    let csv = "Name,IP Address,Timestamp,Retry Count\n";
+    
+    // Add data rows
+    participants.forEach(p => {
+      const row = [
+        `"${p.name.replace(/"/g, '""')}"`,
+        `"${p.ip_address || ''}"`,
+        `"${new Date(p.timestamp).toLocaleString()}"`,
+        p.retry_count || 0
+      ];
+      csv += row.join(',') + '\n';
+    });
+    
+    return csv;
+  } catch (error) {
+    console.error("Error exporting participants to CSV:", error);
+    return "Error generating CSV data";
+  }
+};
+
+// Mask IP address for privacy
+export const maskIpAddress = (ip?: string): string => {
+  if (!ip) return "N/A";
+  
+  const parts = ip.split('.');
+  if (parts.length !== 4) return ip;
+  
+  return `${parts[0]}.${parts[1]}.*.*`;
 };

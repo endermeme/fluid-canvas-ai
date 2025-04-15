@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -38,19 +37,26 @@ const GameDashboard: React.FC = () => {
     loadGameData();
   }, [gameId, navigate]);
   
-  const loadGameData = () => {
-    const gameSession = getGameSession(gameId || '');
-    if (gameSession) {
-      setGame(gameSession);
-    } else {
-      toast({
-        title: "Game không tồn tại",
-        description: "Game này không tồn tại hoặc đã bị xóa.",
-        variant: "destructive",
-      });
-      navigate('/preset-games');
+  const loadGameData = async () => {
+    try {
+      if (!gameId) return;
+      
+      const gameSession = await getGameSession(gameId);
+      if (gameSession) {
+        setGame(gameSession);
+      } else {
+        toast({
+          title: "Game không tồn tại",
+          description: "Game này không tồn tại hoặc đã bị xóa.",
+          variant: "destructive",
+        });
+        navigate('/preset-games');
+      }
+    } catch (error) {
+      console.error("Error loading game data:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleExport = () => {
