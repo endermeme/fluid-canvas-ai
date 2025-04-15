@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,12 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
       const parsedGames: StoredGame[] = JSON.parse(gamesJson);
       const now = Date.now();
       // Only show non-expired games
-      const validGames = parsedGames.filter(game => game.expiresAt > now);
+      const validGames = parsedGames.filter(game => {
+        const expireDate = game.expiresAt instanceof Date ? 
+          game.expiresAt.getTime() : 
+          typeof game.expiresAt === 'number' ? game.expiresAt : new Date(game.expiresAt).getTime();
+        return expireDate > now;
+      });
       setGames(validGames);
     } else {
       setGames([]);

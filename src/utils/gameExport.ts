@@ -7,6 +7,7 @@ export interface StoredGame {
   gameType: string;
   content: any;
   htmlContent: string;
+  description?: string; // Added description field
   expiresAt: Date;
   createdAt: Date;
 }
@@ -23,7 +24,8 @@ export const saveGameForSharing = async (
       title,
       game_type: gameType,
       html_content: htmlContent,
-      content: content // Store the entire game content/configuration
+      content: content, // Store the entire game content/configuration
+      description: `Shared game: ${title}` // Add a default description
     })
     .select()
     .single();
@@ -47,14 +49,16 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
     gameType: game.game_type,
     content: game.content,
     htmlContent: game.html_content,
+    description: game.description || `Shared game: ${game.title}`, // Provide a default if missing
     expiresAt: new Date(game.expires_at),
     createdAt: new Date(game.created_at)
   };
 };
 
-export const getRemainingTime = (expiresAt: Date): string => {
+export const getRemainingTime = (expiresAt: Date | number): string => {
   const now = new Date();
-  const diff = expiresAt.getTime() - now.getTime();
+  const expDate = expiresAt instanceof Date ? expiresAt : new Date(expiresAt);
+  const diff = expDate.getTime() - now.getTime();
   
   if (diff <= 0) return 'Đã hết hạn';
   

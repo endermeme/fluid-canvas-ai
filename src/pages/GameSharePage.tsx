@@ -49,15 +49,20 @@ const GameSharePage: React.FC = () => {
     const loadGame = async () => {
       if (gameId) {
         const loadedGame = await getSharedGame(gameId);
-        setGame(loadedGame);
-        
-        // Load participants if available
-        const sessionsJson = localStorage.getItem('game_sessions');
-        if (sessionsJson) {
-          const sessions = JSON.parse(sessionsJson);
-          const session = sessions.find((s: any) => s.id === gameId);
-          if (session && session.participants) {
-            setParticipants(session.participants);
+        if (loadedGame) {
+          const completeGame: StoredGame = {
+            ...loadedGame,
+            description: loadedGame.description || `Shared game: ${loadedGame.title}`
+          };
+          setGame(completeGame);
+          
+          const sessionsJson = localStorage.getItem('game_sessions');
+          if (sessionsJson) {
+            const sessions = JSON.parse(sessionsJson);
+            const session = sessions.find((s: any) => s.id === gameId);
+            if (session && session.participants) {
+              setParticipants(session.participants);
+            }
           }
         }
       }
@@ -85,7 +90,6 @@ const GameSharePage: React.FC = () => {
   const handleJoinGame = async () => {
     if (!playerName.trim() || !gameId || !game) return;
     
-    // Simulate IP address (in a real app, this would come from the server)
     const fakeIp = getFakeIpAddress();
     
     const result = await addParticipant(gameId, playerName, fakeIp);
@@ -94,7 +98,6 @@ const GameSharePage: React.FC = () => {
       setParticipants(prev => result.participant ? [...prev, result.participant] : prev);
       setShowNameDialog(false);
     } else if (result.participant) {
-      // Already participated, just update the list
       setParticipants(prev => 
         prev.map(p => p.id === result.participant?.id ? result.participant : p)
       );
@@ -150,7 +153,7 @@ const GameSharePage: React.FC = () => {
           
           <div className="flex items-center text-sm text-muted-foreground">
             <Clock className="h-4 w-4 mr-1" />
-            <span>Còn lại: {getRemainingTime(game.expiresAt)}</span>
+            <span>Còn lại: {game && getRemainingTime(game.expiresAt)}</span>
           </div>
         </div>
         
@@ -313,7 +316,6 @@ const GameSharePage: React.FC = () => {
         </TabsContent>
       </Tabs>
       
-      {/* Dialog for entering player name */}
       <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>
         <DialogContent>
           <DialogHeader>

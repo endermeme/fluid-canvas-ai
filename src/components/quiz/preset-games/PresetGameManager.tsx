@@ -445,10 +445,11 @@ Output must be valid JSON. `;
       // Get HTML content from the game
       const html = document.getElementById('game-container')?.innerHTML || '';
       
-      // Save game to Supabase
+      // Save game to Supabase - ensure we provide all 4 parameters
       const shareUrl = await saveGameForSharing(
         gameContent.title || getGameTypeName(),
-        'Generated from ' + getGameTypeName(),
+        gameType,
+        gameContent,
         html
       );
       

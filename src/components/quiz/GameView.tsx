@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { useToast } from '@/hooks/use-toast';
@@ -28,7 +27,8 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
         try {
           await saveGameForSharing(
             miniGame.title || "Minigame tương tác", 
-            "", 
+            "custom-game",
+            miniGame.content,
             miniGame.content
           );
         } catch (e) {
@@ -48,7 +48,8 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
       
       const shareUrl = await saveGameForSharing(
         miniGame.title || "Minigame tương tác",
-        "",
+        "custom-game",
+        miniGame.content,
         miniGame.content
       );
       

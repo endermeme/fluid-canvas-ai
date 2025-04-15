@@ -24,7 +24,12 @@ const SharedGame: React.FC = () => {
     const loadGame = async () => {
       const loadedGame = await getSharedGame(id);
       if (loadedGame) {
-        setGame(loadedGame);
+        // Make sure we have all required fields from the types.ts StoredGame interface
+        const completeGame: StoredGame = {
+          ...loadedGame,
+          description: loadedGame.description || `Shared game: ${loadedGame.title}`
+        };
+        setGame(completeGame);
       } else {
         setError('Game không tồn tại hoặc đã hết hạn');
       }
@@ -65,16 +70,16 @@ const SharedGame: React.FC = () => {
           Quay lại
         </Button>
         <div className="text-sm text-muted-foreground">
-          Còn lại: {getRemainingTime(game.expiresAt)}
+          Còn lại: {game && getRemainingTime(game.expiresAt)}
         </div>
       </header>
       
       <main className="flex-1 overflow-hidden">
         <iframe
-          srcDoc={game.htmlContent}
+          srcDoc={game?.htmlContent}
           sandbox="allow-scripts allow-same-origin"
           className="w-full h-full border-none"
-          title={game.title}
+          title={game?.title || "Shared Game"}
         />
       </main>
     </div>
