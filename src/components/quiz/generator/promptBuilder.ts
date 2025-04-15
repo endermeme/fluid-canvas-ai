@@ -68,7 +68,6 @@ export const buildGeminiPrompt = (
     
     Here's a basic structure to follow:
     
-    ```javascript
     // Initialize canvas
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -125,7 +124,6 @@ export const buildGeminiPrompt = (
     
     // Start the game
     init();
-    ```
     `;
   } else {
     return `${basePrompt}
@@ -148,7 +146,6 @@ export const buildGeminiPrompt = (
     
     Here's a basic structure to follow:
     
-    ```javascript
     // Game variables
     let score = 0;
     let gameRunning = false;
@@ -188,7 +185,6 @@ export const buildGeminiPrompt = (
     
     // Initialize on load
     document.addEventListener('DOMContentLoaded', initGame);
-    ```
     `;
   }
 };
