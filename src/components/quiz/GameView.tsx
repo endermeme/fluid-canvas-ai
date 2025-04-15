@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { Button } from '@/components/ui/button';
@@ -94,13 +93,10 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
     }
   };
 
-  // Enhanced function to properly prepare the content
   const enhanceIframeContent = (content: string): string => {
-    // Safely sanitize content by removing markdown-style code blocks
     let processedContent = content.replace(/```html|```/g, '');
     processedContent = processedContent.replace(/`/g, '');
     
-    // Make sure content has proper HTML structure
     if (!processedContent.includes('<!DOCTYPE html>')) {
       if (processedContent.includes('<html')) {
         processedContent = `<!DOCTYPE html>${processedContent}`;
@@ -109,7 +105,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
       }
     }
     
-    // Add optimized styles for full display
     const optimizedStyles = `
       <style>
         html, body {
@@ -180,13 +175,11 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
       </style>
     `;
     
-    // Insert styles and ensure proper HTML structure
     if (processedContent.includes('<head>')) {
       processedContent = processedContent.replace('<head>', `<head>${optimizedStyles}`);
     } else if (processedContent.includes('<html>')) {
       processedContent = processedContent.replace('<html>', `<html><head>${optimizedStyles}</head>`);
     } else {
-      // If no html structure, add complete html wrapper
       processedContent = `<!DOCTYPE html><html><head>${optimizedStyles}</head><body>${processedContent}</body></html>`;
     }
     
@@ -199,7 +192,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
       
       setIframeError(null);
 
-      // Set up message listener for game stats
       window.addEventListener('message', (event) => {
         try {
           const data = event.data;
@@ -231,12 +223,10 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
     return <div>Không thể tải minigame</div>;
   }
 
-  // Enhanced content with proper styling
   const enhancedContent = enhanceIframeContent(miniGame.content);
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      {/* Controls Bar */}
       <div className="flex justify-between items-center p-2 bg-background/80 backdrop-blur-md border-b border-primary/10 z-10">
         <Button 
           variant="ghost" 
@@ -281,7 +271,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
         </div>
       </div>
       
-      {/* Game Display */}
       <div className="flex-1 relative overflow-hidden">
         {iframeError ? (
           <div className="flex flex-col items-center justify-center h-full p-6 bg-destructive/10">
