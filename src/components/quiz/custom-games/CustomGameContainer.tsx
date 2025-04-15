@@ -33,6 +33,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import { createGameSession } from '@/utils/gameParticipation';
+import { useToast } from '@/hooks/use-toast';
 
 interface CustomGameContainerProps {
   title?: string;
