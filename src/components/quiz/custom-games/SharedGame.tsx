@@ -1,36 +1,91 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
-import { addParticipant, getFakeIpAddress } from '@/utils/gameParticipation';
-import { StoredGame, GameParticipant } from '@/utils/types';
+import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
+import { addParticipant } from '@/utils/gameParticipation';
 import QuizContainer from '@/components/quiz/QuizContainer';
-import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Share2, Users, Clock, Copy, Check } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { QRCodeSVG } from 'qrcode.react';
+import gameTemplates from '@/components/quiz/preset-games/templates';
+import CustomGameContainer from './CustomGameContainer';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
+
+const SharedGame: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [game, setGame] = useState<StoredGame | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const loadGame = async () => {
+      if (!id) {
+        setError('ID game không hợp lệ');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const loadedGame = await getSharedGame(id);
+        if (loadedGame) {
+          setGame(loadedGame);
+        } else {
+          setError('Game không tồn tại hoặc đã hết hạn');
+        }
+      } catch (err) {
+        console.error('Error loading game:', err);
+        setError('Không thể tải game. Vui lòng thử lại sau.');
+      }
+      setLoading(false);
+    };
+
+    loadGame();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <QuizContainer title="Đang tải game...">
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </QuizContainer>
+    );
+  }
+
+  if (error || !game) {
+    return (
+      <QuizContainer
+        title="Game không tồn tại"
+        showBackButton={true}
+        onBack={() => navigate('/preset-games')}
+      >
+        <div className="flex flex-col items-center justify-center h-full p-6">
+          <p className="text-center mb-6 text-muted-foreground">{error}</p>
+        </div>
+      </QuizContainer>
+    );
+  }
+
+  // Render appropriate game template based on game type
+  const GameTemplate = gameTemplates[game.gameType as keyof typeof gameTemplates];
+  
+  if (GameTemplate) {
+    return (
+      <GameTemplate
+        topic={game.title}
+        content={game.content}
+        onBack={() => navigate('/preset-games')}
+      />
+    );
+  }
+
+  // Fallback to custom game container for custom games
+  return (
+    <CustomGameContainer 
+      title={game.title}
+      content={game.content}
+    />
+  );
+};
+
+export default SharedGame;
