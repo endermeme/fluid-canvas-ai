@@ -150,6 +150,8 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       );
       
       if (gameSession.id) {
+        const shareUrl = `${window.location.origin}/game/${gameSession.id}`;
+        
         navigate(`/game/${gameSession.id}`);
         
         toast({

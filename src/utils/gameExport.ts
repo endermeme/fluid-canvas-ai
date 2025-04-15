@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface StoredGame {
@@ -32,7 +31,10 @@ export const saveGameForSharing = async (
     .single();
 
   if (error) throw error;
-  return game.id;
+  
+  // Return the full URL instead of just the ID
+  const baseUrl = window.location.origin;
+  return `${baseUrl}/game/${game.id}`;
 };
 
 export const getSharedGame = async (id: string): Promise<StoredGame | null> => {

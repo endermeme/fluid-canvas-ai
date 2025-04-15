@@ -453,7 +453,7 @@ Output must be valid JSON. `;
         html
       );
       
-      // Update state with the generated URL
+      // Update state with the generated URL - now it's a full URL
       if (shareUrl) {
         setShareUrl(shareUrl);
         setShowShareDialog(true);
