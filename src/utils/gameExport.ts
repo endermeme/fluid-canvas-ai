@@ -25,7 +25,7 @@ export const saveGameForSharing = async (
       title,
       game_type: gameType,
       html_content: htmlContent,
-      content, // Store the entire game content/configuration
+      // Don't include the content field since it doesn't exist in the database
       description: description || `Shared game: ${title}` // Add a default description
     })
     .select()
@@ -50,7 +50,7 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
     id: game.id,
     title: game.title,
     gameType: game.game_type,
-    // Since content might not exist in older records, provide a default empty object
+    // Since content might not exist in the database, provide a default empty object
     content: {},
     htmlContent: game.html_content,
     description: game.description || `Shared game: ${game.title}`, // Provide a default if missing
