@@ -44,11 +44,14 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
 
   if (error || !game) return null;
 
+  // The game object from Supabase has snake_case properties
+  // We need to convert them to camelCase for our frontend
   return {
     id: game.id,
     title: game.title,
     gameType: game.game_type,
-    content: game.content || {}, // Handle case when content is null
+    // For content, we need to handle the case where it might be stored as a JSON string
+    content: typeof game.content === 'string' ? JSON.parse(game.content) : (game.content || {}),
     htmlContent: game.html_content,
     description: game.description || `Shared game: ${game.title}`, // Provide a default if missing
     expiresAt: new Date(game.expires_at).getTime(), // Convert to timestamp for consistency
