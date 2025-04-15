@@ -28,16 +28,18 @@ export const generateWithGemini = async (
 ): Promise<MiniGame | null> => {
   // Get game type from topic to provide better context for the AI
   const gameType = getGameTypeByTopic(topic);
+  const useCanvas = settings?.useCanvas !== undefined ? settings.useCanvas : true;
   
   logInfo(SOURCE, `Starting game generation for "${topic}" using ${GEMINI_MODELS.CUSTOM_GAME}`, {
     model: GEMINI_MODELS.CUSTOM_GAME,
     apiVersion: API_VERSION,
     type: gameType?.name || "Not specified",
-    settings: settings || {}
+    settings: settings || {},
+    canvasMode: useCanvas ? "enabled" : "disabled"
   });
   
-  // Use the improved prompt builder
-  const prompt = buildGeminiPrompt(topic, true);
+  // Use the improved prompt builder with canvas mode setting
+  const prompt = buildGeminiPrompt(topic, useCanvas);
 
   try {
     logInfo(SOURCE, `Sending request to Gemini API using model ${GEMINI_MODELS.CUSTOM_GAME} (${API_VERSION})`);
@@ -112,15 +114,20 @@ export const generateWithGemini = async (
       }
     }
     
+    // Sanitize content to prevent common JavaScript errors
+    content = sanitizeGameCode(content, useCanvas);
+    
     // Create MiniGame object
     const game: MiniGame = {
       title: title,
-      content: content
+      content: content,
+      useCanvas: useCanvas
     };
     
     logSuccess(SOURCE, "Game generated successfully", {
       title: title,
-      contentSize: content.length
+      contentSize: content.length,
+      useCanvas: useCanvas
     });
     
     return game;
@@ -128,6 +135,83 @@ export const generateWithGemini = async (
     logError(SOURCE, "Error generating with Gemini", error);
     throw error;
   }
+};
+
+/**
+ * Sanitizes the game HTML/JS code to prevent common errors
+ * @param content Original HTML content
+ * @param useCanvas Whether Canvas API is being used
+ * @returns Sanitized HTML content
+ */
+const sanitizeGameCode = (content: string, useCanvas: boolean): string => {
+  let sanitized = content;
+  
+  // Fix common JavaScript errors
+  
+  // 1. Ensure requestAnimationFrame is properly called
+  sanitized = sanitized.replace(
+    /requestAnimationFrame\s*\(\s*\)/g, 
+    'requestAnimationFrame(gameLoop)'
+  );
+  
+  // 2. Fix canvas initialization if canvas mode is enabled
+  if (useCanvas) {
+    // Check if canvas is properly getting context
+    if (!sanitized.includes('getContext')) {
+      sanitized = sanitized.replace(
+        /<canvas\s+id="([^"]+)"[^>]*>/,
+        (match, canvasId) => {
+          // Add canvas initialization after the closing body tag
+          const initScript = `
+            <script>
+              // Initialize canvas
+              const canvas = document.getElementById('${canvasId}');
+              const ctx = canvas.getContext('2d');
+              
+              // Set canvas size
+              function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+              }
+              
+              // Call resize on load and when window size changes
+              window.addEventListener('resize', resizeCanvas);
+              resizeCanvas();
+            </script>
+          `;
+          return match + initScript;
+        }
+      );
+    }
+  }
+  
+  // 3. Fix event listeners to use proper syntax
+  sanitized = sanitized.replace(
+    /addEventListener\s*\(\s*['"]([^'"]+)['"]\s*,\s*([^,)]+)\s*\)/g,
+    'addEventListener("$1", $2)'
+  );
+  
+  // 4. Add proper error handling to prevent crashes
+  if (!sanitized.includes('try') && !sanitized.includes('catch')) {
+    // Add global error handler
+    sanitized = sanitized.replace(
+      /<\/body>/,
+      `
+      <script>
+        // Global error handling
+        window.onerror = function(message, source, lineno, colno, error) {
+          console.error('Game error:', message);
+          console.error('At:', source, 'line:', lineno, 'column:', colno);
+          console.error('Stack:', error && error.stack);
+          return true; // Prevents default error handling
+        };
+      </script>
+      </body>
+      `
+    );
+  }
+  
+  return sanitized;
 };
 
 /**

@@ -4,7 +4,7 @@
  * Centralized location for all API keys and model configurations
  */
 
-// Google Gemini API Key
+// Google Gemini API Key (public API key)
 export const GEMINI_API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 // Gemini Model configurations
@@ -36,4 +36,3 @@ export const REQUEST_TIMEOUT = 60000; // 60 seconds
 
 // Maximum retry attempts for API calls
 export const MAX_RETRY_ATTEMPTS = 3;
-
