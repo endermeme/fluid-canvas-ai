@@ -50,8 +50,8 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
     id: game.id,
     title: game.title,
     gameType: game.game_type,
-    // For content, we need to handle the case where it might be stored as a JSON string
-    content: typeof game.content === 'string' ? JSON.parse(game.content) : (game.content || {}),
+    // Since content might not exist in older records, provide a default empty object
+    content: {},
     htmlContent: game.html_content,
     description: game.description || `Shared game: ${game.title}`, // Provide a default if missing
     expiresAt: new Date(game.expires_at).getTime(), // Convert to timestamp for consistency
