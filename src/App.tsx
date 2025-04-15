@@ -19,6 +19,8 @@ function App() {
       <Route path="/game-history" element={<GameHistoryPage />} />
       <Route path="/custom-game" element={<GameController />} />
       <Route path="/quiz/shared/:id" element={<SharedGame />} />
+      <Route path="/play/:gameId" element={<SharedGame />} />
+      <Route path="/play/:gameType/:slug/:gameId" element={<SharedGame />} />
     </Routes>
   );
 }

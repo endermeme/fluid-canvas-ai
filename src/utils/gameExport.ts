@@ -38,7 +38,7 @@ export const saveGameForSharing = async (
   
   // Return the full URL with game type and slug in the path
   const baseUrl = window.location.origin;
-  return `${baseUrl}/game/${gameType}/${slug}/${game.id}`;
+  return `${baseUrl}/play/${gameType}/${slug}/${game.id}`;
 };
 
 export const getSharedGame = async (id: string): Promise<StoredGame | null> => {

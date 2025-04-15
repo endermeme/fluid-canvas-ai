@@ -154,9 +154,9 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
         // Create a slug from the title for more descriptive URL
         const gameTitle = miniGame.title || "Minigame tương tác";
         const slug = gameTitle.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
-        const shareUrl = `${window.location.origin}/game/custom-game/${slug}/${gameSession.id}`;
+        const shareUrl = `${window.location.origin}/play/custom-game/${slug}/${gameSession.id}`;
         
-        navigate(`/game/custom-game/${slug}/${gameSession.id}`);
+        navigate(`/play/custom-game/${slug}/${gameSession.id}`);
         
         toast({
           title: "Game đã được chia sẻ",
