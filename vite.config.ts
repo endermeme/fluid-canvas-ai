@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => ({
     componentTagger(),
     unusedFiles({
       root: path.resolve(__dirname, 'src'), // specify root directory
-      patterns: [
+      exclude: [
         '**/node_modules/**', 
         '**/*.d.ts', 
         '**/index.tsx', 
@@ -48,3 +48,4 @@ export default defineConfig(({ mode }) => ({
     keepNames: true,
   },
 }));
+
