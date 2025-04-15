@@ -9,7 +9,11 @@ export const getFakeIpAddress = () => {
 };
 
 // Add a participant to a game
-export const addParticipant = async (gameId: string, name: string, ipAddress: string) => {
+export const addParticipant = async (gameId: string, name: string, ipAddress: string): Promise<{ 
+  success: boolean; 
+  message: string; 
+  participant: GameParticipant | null;
+}> => {
   try {
     // Check if this IP has already participated recently
     const { data: existingParticipants, error: checkError } = await supabase
@@ -42,10 +46,20 @@ export const addParticipant = async (gameId: string, name: string, ipAddress: st
       };
     }
 
+    // Convert database fields to our interface format
+    const formattedParticipant: GameParticipant = {
+      id: participant.id,
+      game_id: participant.game_id,
+      name: participant.name,
+      timestamp: participant.timestamp,
+      ipAddress: participant.ip_address,
+      retryCount: participant.retry_count
+    };
+
     return { 
       success: true, 
       message: "Tham gia thành công", 
-      participant 
+      participant: formattedParticipant
     };
   } catch (error) {
     console.error("Error in addParticipant:", error);
@@ -82,11 +96,21 @@ export const getGameSession = async (gameId: string): Promise<GameSession | null
       return null;
     }
 
+    // Format participants to match our interface
+    const formattedParticipants: GameParticipant[] = (participants || []).map(p => ({
+      id: p.id,
+      game_id: p.game_id,
+      name: p.name,
+      timestamp: p.timestamp,
+      ipAddress: p.ip_address,
+      retryCount: p.retry_count
+    }));
+
     return {
       id: game.id,
       title: game.title,
       htmlContent: game.html_content,
-      participants: participants || [],
+      participants: formattedParticipants,
       createdAt: new Date(game.created_at).getTime()
     };
   } catch (error) {
@@ -116,11 +140,21 @@ export const getAllGameSessions = async (): Promise<GameSession[]> => {
           .eq('game_id', game.id)
           .order('timestamp', { ascending: false });
 
+        // Format participants to match our interface
+        const formattedParticipants: GameParticipant[] = (participants || []).map(p => ({
+          id: p.id,
+          game_id: p.game_id,
+          name: p.name,
+          timestamp: p.timestamp,
+          ipAddress: p.ip_address,
+          retryCount: p.retry_count
+        }));
+
         return {
           id: game.id,
           title: game.title,
           htmlContent: game.html_content,
-          participants: participants || [],
+          participants: formattedParticipants,
           createdAt: new Date(game.created_at).getTime()
         };
       })
@@ -134,18 +168,15 @@ export const getAllGameSessions = async (): Promise<GameSession[]> => {
 };
 
 // Create a new game session
-export const createGameSession = (title: string, htmlContent: string): GameSession => {
+export const createGameSession = async (title: string, htmlContent: string): Promise<GameSession> => {
   try {
-    const gameData = {
-      title: title || "Minigame Tương tác",
-      html_content: htmlContent,
-      game_type: 'shared'
-    };
-    
-    // Create the game in the database
-    const { data: game, error } = supabase
+    const { data, error } = await supabase
       .from('games')
-      .insert(gameData)
+      .insert({
+        title: title || "Minigame Tương tác",
+        html_content: htmlContent,
+        game_type: 'shared'
+      })
       .select()
       .single();
       
@@ -161,14 +192,12 @@ export const createGameSession = (title: string, htmlContent: string): GameSessi
       };
     }
     
-    // This code assumes game is already returned, but we need to handle the Promise
-    // We'll fix this in components that call this function
     return {
-      id: "temporary-id", // This will be replaced when the promise resolves
-      title: title,
-      htmlContent: htmlContent,
+      id: data.id,
+      title: data.title,
+      htmlContent: data.html_content,
       participants: [],
-      createdAt: Date.now()
+      createdAt: new Date(data.created_at).getTime()
     };
   } catch (error) {
     console.error("Error in createGameSession:", error);
@@ -183,10 +212,10 @@ export const createGameSession = (title: string, htmlContent: string): GameSessi
 };
 
 // Export participants to CSV
-export const exportParticipantsToCSV = (gameId: string): string => {
+export const exportParticipantsToCSV = async (gameId: string): Promise<string> => {
   try {
     // Get participants for the game
-    const { data: participants, error } = supabase
+    const { data: participants, error } = await supabase
       .from('game_participants')
       .select('*')
       .eq('game_id', gameId)

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,8 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { getAllGameSessions, GameSession } from '@/utils/gameParticipation';
+import { getAllGameSessions } from '@/utils/gameParticipation';
+import { GameSession } from '@/utils/types';
 import { ArrowLeft, ChevronRight, BookOpen, Clock, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
@@ -29,8 +31,8 @@ const GameHistory: React.FC = () => {
     try {
       const gameSessions = await getAllGameSessions();
       // Sort by creation date (newest first)
-      gameSessions.sort((a, b) => b.createdAt - a.createdAt);
-      setGames(gameSessions);
+      const sortedSessions = [...gameSessions].sort((a, b) => b.createdAt - a.createdAt);
+      setGames(sortedSessions);
     } catch (error) {
       console.error("Error loading games:", error);
     } finally {

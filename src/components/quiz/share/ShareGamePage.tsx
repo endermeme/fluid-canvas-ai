@@ -39,27 +39,31 @@ const ShareGamePage: React.FC = () => {
       return;
     }
     
-    const gameSession = getGameSession(gameId);
-    if (gameSession) {
-      setGame(gameSession);
-    } else {
-      toast({
-        title: "Game không tồn tại",
-        description: "Game này không tồn tại hoặc đã bị xóa.",
-        variant: "destructive",
-      });
-      navigate('/preset-games');
-    }
-    setLoading(false);
+    const loadGame = async () => {
+      const gameSession = await getGameSession(gameId);
+      if (gameSession) {
+        setGame(gameSession);
+      } else {
+        toast({
+          title: "Game không tồn tại",
+          description: "Game này không tồn tại hoặc đã bị xóa.",
+          variant: "destructive",
+        });
+        navigate('/preset-games');
+      }
+      setLoading(false);
+    };
+    
+    loadGame();
   }, [gameId, navigate, toast]);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!gameId || !game) return;
     
     // Simulate IP address (in a real app, this would come from the server)
     const fakeIp = getFakeIpAddress();
     
-    const result = addParticipant(gameId, values.name, fakeIp);
+    const result = await addParticipant(gameId, values.name, fakeIp);
     
     if (result.success) {
       toast({

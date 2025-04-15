@@ -12,6 +12,7 @@ import { createGameSession } from '@/utils/gameParticipation';
 import { Button } from '@/components/ui/button';
 import { Share2 } from 'lucide-react';
 import { GEMINI_API_KEY, GEMINI_MODELS } from '@/constants/api-constants';
+import { supabase } from '@/integrations/supabase/client';
 
 interface QuizGeneratorProps {
   topic?: string;
@@ -142,29 +143,28 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const handleShareGame = async () => {
     if (!miniGame) return;
     
-    const gameSession = createGameSession(
-      miniGame.title || "Minigame tương tác",
-      miniGame.content
-    );
-    
-    const { data: game } = await supabase
-      .from('games')
-      .insert({
-        title: miniGame.title || "Minigame tương tác",
-        html_content: miniGame.content,
-        game_type: 'shared'
-      })
-      .select()
-      .single();
-    
-    if (game) {
-      navigate(`/game/${game.id}`);
+    try {
+      const gameSession = await createGameSession(
+        miniGame.title || "Minigame tương tác",
+        miniGame.content
+      );
       
-      toast({
-        title: "Game đã được chia sẻ",
-        description: "Bạn có thể gửi link cho người khác để họ tham gia.",
-      });
-    } else {
+      if (gameSession.id) {
+        navigate(`/game/${gameSession.id}`);
+        
+        toast({
+          title: "Game đã được chia sẻ",
+          description: "Bạn có thể gửi link cho người khác để họ tham gia.",
+        });
+      } else {
+        toast({
+          title: "Không thể chia sẻ game",
+          description: "Đã xảy ra lỗi khi chia sẻ game. Vui lòng thử lại.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error sharing game:", error);
       toast({
         title: "Không thể chia sẻ game",
         description: "Đã xảy ra lỗi khi chia sẻ game. Vui lòng thử lại.",

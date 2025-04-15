@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
-import { addParticipant, getFakeIpAddress, GameParticipant } from '@/utils/gameParticipation';
-import { StoredGame } from '@/utils/types';
+import { addParticipant, getFakeIpAddress } from '@/utils/gameParticipation';
+import { StoredGame, GameParticipant } from '@/utils/types';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import { Button } from '@/components/ui/button';
@@ -92,7 +91,7 @@ const GameSharePage: React.FC = () => {
     const result = await addParticipant(gameId, playerName, fakeIp);
     
     if (result.success) {
-      setParticipants(prev => [...prev, result.participant]);
+      setParticipants(prev => result.participant ? [...prev, result.participant] : prev);
       setShowNameDialog(false);
     } else if (result.participant) {
       // Already participated, just update the list

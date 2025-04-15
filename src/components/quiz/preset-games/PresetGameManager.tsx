@@ -438,76 +438,45 @@ Output must be valid JSON. `;
     return gameTypeMap[gameType] || null;
   };
 
-  const handleShare = () => {
-    try {
-      if (!gameContent) return;
-
-      const gameElement = document.getElementById('game-container');
-      let htmlContent = '';
-
-      if (gameElement) {
-        htmlContent = gameElement.innerHTML;
-      } else {
-        const GameTemplate = gameTemplates[gameType];
-        if (!GameTemplate) return;
-
-        htmlContent = `
-          <div class="interactive-game">
-            <h1>${gameContent.title || 'Interactive Game'}</h1>
-            <div class="game-content">
-              ${JSON.stringify(gameContent)}
-            </div>
-            <script>
-              window.gameData = ${JSON.stringify(gameContent)};
-            </script>
-          </div>
-        `;
-      }
-
-      const url = saveGameForSharing(
-        gameContent.title || `${getGameTypeName()} Game`, 
-        `Interactive ${getGameTypeName()} game`, 
-        htmlContent
-      );
-
-      if (url) {
-        setShareUrl(url);
-        setShowShareDialog(true);
-
-        const historyItem = {
-          id: new Date().getTime().toString(),
-          title: gameContent.title || `${getGameTypeName()} Game`,
-          type: gameType,
-          createdAt: new Date().getTime(),
-          url: url,
-          thumbnail: null
-        };
-
-        const historyJson = localStorage.getItem('game_history');
-        const history = historyJson ? JSON.parse(historyJson) : [];
-        history.push(historyItem);
-        localStorage.setItem('game_history', JSON.stringify(history));
-
-        toast({
-          title: "Game đã được chia sẻ",
-          description: "Đã tạo liên kết chia sẻ thành công",
-        });
-      } else {
-        toast({
-          title: "Lỗi chia sẻ",
-          description: "Không thể tạo liên kết chia sẻ",
-          variant: "destructive"
-        });
-      }
-    } catch (err) {
-      console.error("Lỗi khi chia sẻ game:", err);
+const handleShareGame = async () => {
+  try {
+    if (!gameContent) return;
+    
+    // Get HTML content from the game
+    const html = document.getElementById('game-container')?.innerHTML || '';
+    
+    // Save game to Supabase
+    const shareUrl = await saveGameForSharing(
+      gameContent.title || getGameTypeName(),
+      'Generated from ' + getGameTypeName(),
+      html
+    );
+    
+    // Update state with the generated URL
+    if (shareUrl) {
+      setShareUrl(shareUrl);
+      setShowShareDialog(true);
+      
       toast({
-        title: "Lỗi chia sẻ",
-        description: "Đã xảy ra lỗi khi chia sẻ game",
+        title: "Game đã được chia sẻ",
+        description: "Đường dẫn đã được tạo để chia sẻ trò chơi.",
+      });
+    } else {
+      toast({
+        title: "Không thể chia sẻ game",
+        description: "Đã xảy ra lỗi khi tạo đường dẫn. Vui lòng thử lại.",
         variant: "destructive"
       });
     }
-  };
+  } catch (error) {
+    console.error("Error sharing game:", error);
+    toast({
+      title: "Lỗi chia sẻ",
+      description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
+      variant: "destructive"
+    });
+  }
+};
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareUrl)
