@@ -10,7 +10,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
 const SharedGame: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id, gameType, slug, gameId } = useParams<{ 
+    id?: string; 
+    gameType?: string; 
+    slug?: string; 
+    gameId?: string; 
+  }>();
+  
   const [game, setGame] = useState<StoredGame | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,14 +25,17 @@ const SharedGame: React.FC = () => {
 
   useEffect(() => {
     const loadGame = async () => {
-      if (!id) {
+      // Determine which ID to use - either from the new URL pattern or the old one
+      const gameIdentifier = gameId || id;
+      
+      if (!gameIdentifier) {
         setError('ID game không hợp lệ');
         setLoading(false);
         return;
       }
 
       try {
-        const loadedGame = await getSharedGame(id);
+        const loadedGame = await getSharedGame(gameIdentifier);
         if (loadedGame) {
           setGame(loadedGame);
         } else {
@@ -40,7 +49,7 @@ const SharedGame: React.FC = () => {
     };
 
     loadGame();
-  }, [id]);
+  }, [id, gameId]);
 
   if (loading) {
     return (

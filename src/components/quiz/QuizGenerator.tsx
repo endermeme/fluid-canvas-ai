@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from './generator/AIGameGenerator';
@@ -150,9 +151,12 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       );
       
       if (gameSession.id) {
-        const shareUrl = `${window.location.origin}/game/${gameSession.id}`;
+        // Create a slug from the title for more descriptive URL
+        const gameTitle = miniGame.title || "Minigame tương tác";
+        const slug = gameTitle.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
+        const shareUrl = `${window.location.origin}/game/custom-game/${slug}/${gameSession.id}`;
         
-        navigate(`/game/${gameSession.id}`);
+        navigate(`/game/custom-game/${slug}/${gameSession.id}`);
         
         toast({
           title: "Game đã được chia sẻ",

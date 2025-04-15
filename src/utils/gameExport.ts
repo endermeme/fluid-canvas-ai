@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface StoredGame {
@@ -32,16 +33,27 @@ export const saveGameForSharing = async (
 
   if (error) throw error;
   
-  // Return the full URL instead of just the ID
+  // Create a slug from the title
+  const slug = title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
+  
+  // Return the full URL with game type and slug in the path
   const baseUrl = window.location.origin;
-  return `${baseUrl}/game/${game.id}`;
+  return `${baseUrl}/game/${gameType}/${slug}/${game.id}`;
 };
 
 export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
+  // Extract the actual UUID from the path if it contains type/slug format
+  let gameId = id;
+  if (id.includes('/')) {
+    // Get the last segment which should be the UUID
+    const segments = id.split('/');
+    gameId = segments[segments.length - 1];
+  }
+
   const { data: game, error } = await supabase
     .from('games')
     .select('*')
-    .eq('id', id)
+    .eq('id', gameId)
     .single();
 
   if (error || !game) return null;

@@ -8,36 +8,45 @@ import { ArrowLeft } from 'lucide-react';
 import QuizContainer from '@/components/quiz/QuizContainer';
 
 const SharedGame: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id, gameType, slug, gameId } = useParams<{ 
+    id?: string; 
+    gameType?: string; 
+    slug?: string; 
+    gameId?: string; 
+  }>();
+  
   const [game, setGame] = useState<StoredGame | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!id) {
+    if (!id && !gameId) {
       setError('ID game không hợp lệ');
       setLoading(false);
       return;
     }
 
     const loadGame = async () => {
-      const loadedGame = await getSharedGame(id);
-      if (loadedGame) {
-        // Ensure the loaded game conforms to the StoredGame interface
-        const completeGame: StoredGame = {
-          ...loadedGame,
-          description: loadedGame.description || `Shared game: ${loadedGame.title}`
-        };
-        setGame(completeGame);
-      } else {
-        setError('Game không tồn tại hoặc đã hết hạn');
+      // Use either the gameId (from new URL format) or id (from old format)
+      const gameIdentifier = gameId || id;
+      
+      try {
+        const loadedGame = await getSharedGame(gameIdentifier!);
+        if (loadedGame) {
+          setGame(loadedGame);
+        } else {
+          setError('Game không tồn tại hoặc đã hết hạn');
+        }
+      } catch (err) {
+        console.error('Error loading game:', err);
+        setError('Không thể tải game. Vui lòng thử lại sau.');
       }
       setLoading(false);
     };
 
     loadGame();
-  }, [id]);
+  }, [id, gameId]);
 
   if (loading) {
     return (
