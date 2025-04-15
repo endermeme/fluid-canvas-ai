@@ -1,7 +1,9 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Share2, RefreshCw, Trophy, ArrowLeft } from 'lucide-react';
+import BackButton from './header-buttons/BackButton';
+import ReloadButton from './header-buttons/ReloadButton';
+import ShareButton from './header-buttons/ShareButton';
+import ScoreDisplay from './header-buttons/ScoreDisplay';
 
 interface GameViewHeaderProps {
   onBack: () => void;
@@ -22,44 +24,19 @@ const GameViewHeader: React.FC<GameViewHeaderProps> = ({
 }) => {
   return (
     <div className="flex justify-between items-center p-2 bg-background/80 backdrop-blur-md border-b border-primary/10 z-10">
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={onBack} 
-        className="gap-1 text-xs"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Quay lại
-      </Button>
-        
+      <BackButton onClick={onBack} />
+      
       <div className="flex items-center gap-1.5">
         {score !== undefined && (
-          <div className="px-2 py-1 bg-primary/10 rounded-full text-xs font-medium flex items-center">
-            <Trophy className="h-3 w-3 text-primary mr-1" />
-            {score} điểm
-          </div>
+          <ScoreDisplay score={score} />
         )}
         
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onReload}
-          className="w-8 h-8 p-0"
-          title="Chơi lại"
-        >
-          <RefreshCw className="h-3.5 w-3.5" />
-        </Button>
+        <ReloadButton onClick={onReload} />
         
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <ShareButton 
           onClick={onShare}
           disabled={shareInProgress}
-          className="gap-1 text-xs"
-        >
-          <Share2 className="h-3.5 w-3.5" />
-          Chia Sẻ
-        </Button>
+        />
         
         {extraButton}
       </div>
