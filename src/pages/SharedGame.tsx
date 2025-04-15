@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChartLine } from 'lucide-react';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import gameTemplates from '@/components/quiz/preset-games/templates';
 
@@ -70,7 +69,6 @@ const SharedGame: React.FC = () => {
     );
   }
 
-  // If the game has a specific game type, try to use the corresponding template
   if (game.gameType && gameTemplates[game.gameType as keyof typeof gameTemplates]) {
     const GameTemplate = gameTemplates[game.gameType as keyof typeof gameTemplates];
     
@@ -81,8 +79,18 @@ const SharedGame: React.FC = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Quay lại
           </Button>
-          <div className="text-sm text-muted-foreground">
-            Còn lại: {game && getRemainingTime(game.expiresAt)}
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-muted-foreground">
+              Còn lại: {game && getRemainingTime(game.expiresAt)}
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate(`${window.location.pathname}/dashboard`)}
+            >
+              <ChartLine className="h-4 w-4 mr-2" />
+              Giáo viên
+            </Button>
           </div>
         </header>
         
@@ -98,7 +106,6 @@ const SharedGame: React.FC = () => {
     );
   }
 
-  // Fallback to iframe rendering if no specific template or custom HTML content
   return (
     <div className="flex flex-col h-screen">
       <header className="bg-background/80 backdrop-blur-sm p-4 flex items-center justify-between border-b">
@@ -106,8 +113,18 @@ const SharedGame: React.FC = () => {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Quay lại
         </Button>
-        <div className="text-sm text-muted-foreground">
-          Còn lại: {game && getRemainingTime(game.expiresAt)}
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-muted-foreground">
+            Còn lại: {game && getRemainingTime(game.expiresAt)}
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate(`${window.location.pathname}/dashboard`)}
+          >
+            <ChartLine className="h-4 w-4 mr-2" />
+            Giáo viên
+          </Button>
         </div>
       </header>
       

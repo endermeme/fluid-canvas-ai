@@ -1,4 +1,3 @@
-
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import Quiz from './pages/Quiz';
@@ -7,6 +6,7 @@ import GameSharePage from './pages/GameSharePage';
 import GameHistoryPage from './pages/GameHistoryPage';
 import GameController from './components/quiz/custom-games/GameController';
 import SharedGame from './pages/SharedGame';
+import TeacherDashboard from './components/quiz/share/TeacherDashboard';
 
 function App() {
   return (
@@ -21,6 +21,8 @@ function App() {
       <Route path="/quiz/shared/:id" element={<SharedGame />} />
       <Route path="/play/:gameId" element={<SharedGame />} />
       <Route path="/play/:gameType/:slug/:gameId" element={<SharedGame />} />
+      <Route path="/game/:gameId/dashboard" element={<TeacherDashboard />} />
+      <Route path="/play/:gameType/:slug/:gameId/dashboard" element={<TeacherDashboard />} />
     </Routes>
   );
 }
