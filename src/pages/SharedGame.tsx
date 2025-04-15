@@ -24,7 +24,7 @@ const SharedGame: React.FC = () => {
     const loadGame = async () => {
       const loadedGame = await getSharedGame(id);
       if (loadedGame) {
-        // Make sure we have all required fields from the types.ts StoredGame interface
+        // Ensure the loaded game conforms to the StoredGame interface
         const completeGame: StoredGame = {
           ...loadedGame,
           description: loadedGame.description || `Shared game: ${loadedGame.title}`

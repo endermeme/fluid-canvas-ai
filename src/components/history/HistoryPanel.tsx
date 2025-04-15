@@ -30,9 +30,9 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
       const now = Date.now();
       // Only show non-expired games
       const validGames = parsedGames.filter(game => {
-        const expireDate = game.expiresAt instanceof Date ? 
-          game.expiresAt.getTime() : 
-          typeof game.expiresAt === 'number' ? game.expiresAt : new Date(game.expiresAt).getTime();
+        const expireDate = typeof game.expiresAt === 'number' ? 
+          game.expiresAt : 
+          game.expiresAt.getTime();
         return expireDate > now;
       });
       setGames(validGames);
@@ -93,7 +93,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleSelectGame(game)}
+                      onClick={() => onSelectGame?.(game)}
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       Mở lại

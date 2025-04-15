@@ -105,8 +105,8 @@ const GameSharePage: React.FC = () => {
     }
   };
   
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
+  const formatDate = (timestamp: number | Date) => {
+    const date = typeof timestamp === 'number' ? new Date(timestamp) : timestamp;
     return date.toLocaleDateString('vi-VN', {
       day: '2-digit',
       month: '2-digit',

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRemainingTime } from '@/utils/gameExport';
@@ -55,7 +56,12 @@ const GameHistoryPage: React.FC = () => {
     if (gamesJson) {
       const parsedGames: StoredGame[] = JSON.parse(gamesJson);
       const now = Date.now();
-      const validGames = parsedGames.filter(game => game.expiresAt > now);
+      const validGames = parsedGames.filter(game => {
+        const expiryTime = typeof game.expiresAt === 'number' 
+          ? game.expiresAt 
+          : game.expiresAt.getTime();
+        return expiryTime > now;
+      });
       setGames(validGames);
     } else {
       setGames([]);
@@ -77,13 +83,25 @@ const GameHistoryPage: React.FC = () => {
     // Sort games
     switch (sortBy) {
       case 'newest':
-        result.sort((a, b) => b.createdAt - a.createdAt);
+        result.sort((a, b) => {
+          const timeA = typeof a.createdAt === 'number' ? a.createdAt : a.createdAt.getTime();
+          const timeB = typeof b.createdAt === 'number' ? b.createdAt : b.createdAt.getTime();
+          return timeB - timeA;
+        });
         break;
       case 'oldest':
-        result.sort((a, b) => a.createdAt - b.createdAt);
+        result.sort((a, b) => {
+          const timeA = typeof a.createdAt === 'number' ? a.createdAt : a.createdAt.getTime();
+          const timeB = typeof b.createdAt === 'number' ? b.createdAt : b.createdAt.getTime();
+          return timeA - timeB;
+        });
         break;
       case 'expiring':
-        result.sort((a, b) => a.expiresAt - b.expiresAt);
+        result.sort((a, b) => {
+          const timeA = typeof a.expiresAt === 'number' ? a.expiresAt : a.expiresAt.getTime();
+          const timeB = typeof b.expiresAt === 'number' ? b.expiresAt : b.expiresAt.getTime();
+          return timeA - timeB;
+        });
         break;
     }
     
@@ -120,8 +138,8 @@ const GameHistoryPage: React.FC = () => {
     }
   };
   
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
+  const formatDate = (timestamp: number | Date) => {
+    const date = typeof timestamp === 'number' ? new Date(timestamp) : timestamp;
     return date.toLocaleDateString('vi-VN', {
       day: '2-digit',
       month: '2-digit',
