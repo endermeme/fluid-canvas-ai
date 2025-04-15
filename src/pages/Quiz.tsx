@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -35,8 +34,10 @@ const Quiz = () => {
     setMiniGame(null);
     
     try {
-      // Use the Gemini API to generate the game
-      const game = await tryGeminiGeneration(null, promptText, { useCanvas });
+      const game = await tryGeminiGeneration(null, promptText, { 
+        useCanvas, 
+        category: 'general' 
+      });
       
       if (game) {
         setGameContent(game.content);
@@ -62,7 +63,6 @@ const Quiz = () => {
         variant: "destructive"
       });
       
-      // Create a fallback game as a placeholder
       const fallbackHTML = generateFallbackGame(promptText);
       setGameContent(fallbackHTML);
       setGameTitle(`Game: ${promptText.substring(0, 40)}...`);
@@ -98,7 +98,6 @@ const Quiz = () => {
     }
   };
 
-  // Generate a fallback game if the API call fails
   const generateFallbackGame = (promptText: string): string => {
     return `
       <!DOCTYPE html>
@@ -223,7 +222,6 @@ const Quiz = () => {
         </div>
         
         <script>
-          // Game variables
           let score = 0;
           let gameRunning = false;
           let gameObjects = [];
@@ -231,17 +229,14 @@ const Quiz = () => {
           let scoreElement;
           let gameTimer;
           
-          // Initialize the game
           document.addEventListener('DOMContentLoaded', function() {
             gameArea = document.getElementById('gameArea');
             scoreElement = document.getElementById('score');
             
-            // Add event listeners
             document.getElementById('playButton').addEventListener('click', startGame);
             document.getElementById('resetButton').addEventListener('click', resetGame);
           });
           
-          // Start the game
           function startGame() {
             if (gameRunning) return;
             
@@ -249,66 +244,53 @@ const Quiz = () => {
             gameRunning = true;
             document.getElementById('playButton').textContent = 'Đang chơi...';
             
-            // Create game objects periodically
             gameTimer = setInterval(createGameObject, 1500);
-            createGameObject(); // Create one immediately
+            createGameObject();
           }
           
-          // Reset the game
           function resetGame() {
             gameRunning = false;
             score = 0;
             scoreElement.textContent = score;
             document.getElementById('playButton').textContent = 'Bắt đầu chơi';
             
-            // Clear timer and remove all game objects
             clearInterval(gameTimer);
             gameObjects.forEach(obj => obj.element.remove());
             gameObjects = [];
           }
           
-          // Create a game object
           function createGameObject() {
             if (!gameRunning) return;
             
-            // Get game area dimensions
             const areaRect = gameArea.getBoundingClientRect();
             const maxX = areaRect.width - 50;
             const maxY = areaRect.height - 50;
             
-            // Create a new element
             const element = document.createElement('div');
             element.classList.add('game-object');
             
-            // Random position
             const x = Math.floor(Math.random() * maxX);
             const y = Math.floor(Math.random() * maxY);
             
-            // Random color
             const colors = ['#4f46e5', '#06b6d4', '#ec4899', '#f97316', '#84cc16'];
             const color = colors[Math.floor(Math.random() * colors.length)];
             
-            // Set position and color
             element.style.left = x + 'px';
             element.style.top = y + 'px';
             element.style.backgroundColor = color;
             
-            // Add click event
             element.addEventListener('click', function() {
               increaseScore(element);
             });
             
-            // Add to game area
             gameArea.appendChild(element);
             
-            // Add to game objects array
             const gameObject = {
               element: element,
               createdAt: Date.now()
             };
             gameObjects.push(gameObject);
             
-            // Remove after 3 seconds
             setTimeout(() => {
               if (gameObjects.includes(gameObject)) {
                 element.remove();
@@ -317,16 +299,13 @@ const Quiz = () => {
             }, 3000);
           }
           
-          // Increase score when clicking an object
           function increaseScore(element) {
             score += 10;
             scoreElement.textContent = score;
             
-            // Visual feedback
             element.style.transform = 'scale(1.5)';
             element.style.opacity = '0';
             
-            // Remove after animation
             setTimeout(() => {
               element.remove();
               gameObjects = gameObjects.filter(obj => obj.element !== element);
