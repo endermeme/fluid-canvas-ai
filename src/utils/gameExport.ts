@@ -58,14 +58,28 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
 
   if (error || !game) return null;
 
+  // Try to parse the HTML content to extract game data if possible
+  let parsedContent = null;
+  if (game.html_content && game.html_content.includes('data-game-content')) {
+    try {
+      // Extract the content from a data attribute if it exists in the HTML
+      const contentMatch = game.html_content.match(/data-game-content="([^"]*)"/);
+      if (contentMatch && contentMatch[1]) {
+        parsedContent = JSON.parse(decodeURIComponent(contentMatch[1]));
+      }
+    } catch (e) {
+      console.error('Error parsing game content from HTML:', e);
+    }
+  }
+
   // The game object from Supabase has snake_case properties
   // We need to convert them to camelCase for our frontend
   return {
     id: game.id,
     title: game.title,
     gameType: game.game_type,
-    // Since content might not exist in the database, provide a default empty object
-    content: {},
+    // Use parsed content or fall back to an empty object
+    content: parsedContent || {},
     htmlContent: game.html_content,
     description: game.description || `Shared game: ${game.title}`, // Provide a default if missing
     expiresAt: new Date(game.expires_at).getTime(), // Convert to timestamp for consistency

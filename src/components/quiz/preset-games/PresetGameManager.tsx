@@ -443,7 +443,12 @@ Output must be valid JSON. `;
       if (!gameContent) return;
       
       // Get HTML content from the game
-      const html = document.getElementById('game-container')?.innerHTML || '';
+      const gameContainer = document.getElementById('game-container');
+      let html = gameContainer?.innerHTML || '';
+      
+      // Encode game content as a data attribute to ensure we can retrieve it later
+      const encodedContent = encodeURIComponent(JSON.stringify(gameContent));
+      html = `<div data-game-content="${encodedContent}">${html}</div>`;
       
       // Save game to Supabase - ensure we provide all 4 parameters
       const shareUrl = await saveGameForSharing(
