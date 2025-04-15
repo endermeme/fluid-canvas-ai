@@ -36,3 +36,4 @@ export const REQUEST_TIMEOUT = 60000; // 60 seconds
 
 // Maximum retry attempts for API calls
 export const MAX_RETRY_ATTEMPTS = 3;
+
