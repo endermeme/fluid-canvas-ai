@@ -1,14 +1,5 @@
-
-import { v4 as uuidv4 } from 'uuid';
-
-export interface StoredGame {
-  id: string;
-  title: string;
-  description: string;
-  htmlContent: string;
-  createdAt: number;
-  expiresAt: number;
-}
+import { supabase } from "@/integrations/supabase/client";
+import type { StoredGame } from "@/utils/types";
 
 // Get the base URL for shared games
 const getBaseUrl = () => {
@@ -16,42 +7,32 @@ const getBaseUrl = () => {
   return `${url}/quiz/shared`;
 };
 
-// Save game to localStorage with 48-hour expiration
-export const saveGameForSharing = (title: string, description: string, htmlContent: string): string => {
+// Save game to Supabase with 48-hour expiration
+export const saveGameForSharing = async (title: string, description: string, htmlContent: string): Promise<string> => {
   try {
     if (!htmlContent) {
       console.error("Cannot save empty game content");
       return "";
     }
     
-    const id = uuidv4();
-    const now = Date.now();
-    const expiresAt = now + (48 * 60 * 60 * 1000); // 48 hours in milliseconds
-    
-    const game: StoredGame = {
-      id,
-      title: title || "Minigame Tương tác",
-      description: description || "",
-      htmlContent,
-      createdAt: now,
-      expiresAt
-    };
-    
-    // Get existing games
-    const gamesJson = localStorage.getItem('shared_games');
-    let games: StoredGame[] = gamesJson ? JSON.parse(gamesJson) : [];
-    
-    // Remove expired games
-    games = games.filter(game => game.expiresAt > now);
-    
-    // Add new game
-    games.push(game);
-    
-    // Save back to localStorage
-    localStorage.setItem('shared_games', JSON.stringify(games));
+    const { data: game, error } = await supabase
+      .from('games')
+      .insert({
+        title: title || "Minigame Tương tác",
+        description: description || "",
+        html_content: htmlContent,
+        game_type: 'custom',
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error("Error saving game:", error);
+      return "";
+    }
     
     // Return the share URL
-    return `${getBaseUrl()}/${id}`;
+    return `${getBaseUrl()}/${game.id}`;
   } catch (error) {
     console.error("Error saving game:", error);
     return "";
@@ -59,42 +40,32 @@ export const saveGameForSharing = (title: string, description: string, htmlConte
 };
 
 // Get a game by ID
-export const getSharedGame = (id: string): StoredGame | null => {
+export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
   try {
     if (!id) return null;
     
-    const gamesJson = localStorage.getItem('shared_games');
-    if (!gamesJson) return null;
-    
-    const games: StoredGame[] = JSON.parse(gamesJson);
-    const now = Date.now();
-    
-    // Find the game with matching ID and not expired
-    const game = games.find(g => g.id === id && g.expiresAt > now);
-    
-    return game || null;
+    const { data: game, error } = await supabase
+      .from('games')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !game) {
+      console.error("Error getting shared game:", error);
+      return null;
+    }
+
+    return {
+      id: game.id,
+      title: game.title,
+      description: game.description || "",
+      htmlContent: game.html_content,
+      createdAt: new Date(game.created_at).getTime(),
+      expiresAt: new Date(game.expires_at).getTime()
+    };
   } catch (error) {
     console.error("Error getting shared game:", error);
     return null;
-  }
-};
-
-// Clean up expired games
-export const cleanupExpiredGames = (): void => {
-  try {
-    const gamesJson = localStorage.getItem('shared_games');
-    if (!gamesJson) return;
-
-    const games: StoredGame[] = JSON.parse(gamesJson);
-    const now = Date.now();
-    
-    // Filter out expired games
-    const validGames = games.filter(game => game.expiresAt > now);
-    
-    // Save filtered games back to localStorage
-    localStorage.setItem('shared_games', JSON.stringify(validGames));
-  } catch (error) {
-    console.error("Error cleaning up expired games:", error);
   }
 };
 

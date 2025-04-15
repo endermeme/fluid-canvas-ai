@@ -1,141 +1,145 @@
 
-import { v4 as uuidv4 } from 'uuid';
+import { supabase } from "@/integrations/supabase/client";
 
 export interface GameParticipant {
   id: string;
   name: string;
-  ipAddress: string;
-  timestamp: number;
-  retryCount: number;
+  timestamp: string;
+  ipAddress?: string;
 }
 
 export interface GameSession {
   id: string;
   title: string;
-  htmlContent: string;
   participants: GameParticipant[];
   createdAt: number;
-  creatorId?: string;
 }
 
-// Function to save a new game session
-export const createGameSession = (title: string, htmlContent: string): GameSession => {
-  const id = uuidv4();
-  const now = Date.now();
-  
-  const gameSession: GameSession = {
-    id,
-    title,
-    htmlContent,
-    participants: [],
-    createdAt: now,
-  };
-  
-  // Save to localStorage
-  const sessionsJson = localStorage.getItem('game_sessions');
-  const sessions: GameSession[] = sessionsJson ? JSON.parse(sessionsJson) : [];
-  
-  sessions.push(gameSession);
-  localStorage.setItem('game_sessions', JSON.stringify(sessions));
-  
-  return gameSession;
+// Generate a fake IP for development/demo purposes
+export const getFakeIpAddress = () => {
+  const octets = Array.from({ length: 4 }, () => Math.floor(Math.random() * 256));
+  return octets.join('.');
 };
 
-// Function to get all game sessions
-export const getAllGameSessions = (): GameSession[] => {
-  const sessionsJson = localStorage.getItem('game_sessions');
-  return sessionsJson ? JSON.parse(sessionsJson) : [];
-};
+// Add a participant to a game
+export const addParticipant = async (gameId: string, name: string, ipAddress: string) => {
+  try {
+    // Check if this IP has already participated recently
+    const { data: existingParticipants, error: checkError } = await supabase
+      .from('game_participants')
+      .select('retry_count')
+      .eq('game_id', gameId)
+      .eq('ip_address', ipAddress)
+      .order('timestamp', { ascending: false })
+      .limit(1);
 
-// Function to get a specific game session
-export const getGameSession = (id: string): GameSession | null => {
-  const sessions = getAllGameSessions();
-  return sessions.find(session => session.id === id) || null;
-};
+    const retryCount = existingParticipants?.[0]?.retry_count || 0;
 
-// Function to add a participant to a game session
-export const addParticipant = (gameId: string, name: string, ipAddress: string): { success: boolean; participant?: GameParticipant; message?: string } => {
-  const sessions = getAllGameSessions();
-  const sessionIndex = sessions.findIndex(s => s.id === gameId);
-  
-  if (sessionIndex === -1) {
-    return { success: false, message: "Game session not found" };
-  }
-  
-  const session = sessions[sessionIndex];
-  
-  // Check if this IP has already participated
-  const existingParticipant = session.participants.find(p => p.ipAddress === ipAddress);
-  
-  if (existingParticipant) {
-    // Increment retry count
-    existingParticipant.retryCount += 1;
-    
-    // Update the session with the incremented retry count
-    sessions[sessionIndex] = {
-      ...session,
-      participants: [
-        ...session.participants.filter(p => p.id !== existingParticipant.id),
-        existingParticipant
-      ]
+    const { data: participant, error } = await supabase
+      .from('game_participants')
+      .insert({
+        game_id: gameId,
+        name,
+        ip_address: ipAddress,
+        retry_count: retryCount + 1
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error adding participant:", error);
+      return { 
+        success: false, 
+        message: "Không thể tham gia game lúc này",
+        participant: null
+      };
+    }
+
+    return { 
+      success: true, 
+      message: "Tham gia thành công", 
+      participant 
     };
-    
-    localStorage.setItem('game_sessions', JSON.stringify(sessions));
-    
+  } catch (error) {
+    console.error("Error in addParticipant:", error);
     return { 
       success: false, 
-      message: "You have already participated in this game session.",
-      participant: existingParticipant
+      message: "Đã xảy ra lỗi khi tham gia game", 
+      participant: null 
     };
   }
-  
-  // Add new participant
-  const participant: GameParticipant = {
-    id: uuidv4(),
-    name,
-    ipAddress,
-    timestamp: Date.now(),
-    retryCount: 0
-  };
-  
-  session.participants.push(participant);
-  sessions[sessionIndex] = session;
-  
-  localStorage.setItem('game_sessions', JSON.stringify(sessions));
-  
-  return { success: true, participant };
 };
 
-// Helper to get a random fake IP for demo purposes
-export const getFakeIpAddress = () => {
-  return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+// Get a game session by ID
+export const getGameSession = async (gameId: string): Promise<GameSession | null> => {
+  try {
+    const { data: game, error: gameError } = await supabase
+      .from('games')
+      .select('*')
+      .eq('id', gameId)
+      .single();
+
+    if (gameError || !game) {
+      console.error("Error getting game:", gameError);
+      return null;
+    }
+
+    const { data: participants, error: participantsError } = await supabase
+      .from('game_participants')
+      .select('*')
+      .eq('game_id', gameId)
+      .order('timestamp', { ascending: false });
+
+    if (participantsError) {
+      console.error("Error getting participants:", participantsError);
+      return null;
+    }
+
+    return {
+      id: game.id,
+      title: game.title,
+      participants: participants || [],
+      createdAt: new Date(game.created_at).getTime()
+    };
+  } catch (error) {
+    console.error("Error in getGameSession:", error);
+    return null;
+  }
 };
 
-// Export participant data to CSV
-export const exportParticipantsToCSV = (gameId: string): string => {
-  const session = getGameSession(gameId);
-  
-  if (!session) return '';
-  
-  const headers = ['Name', 'IP Address', 'Timestamp', 'Retry Count'];
-  const rows = session.participants.map(p => [
-    p.name,
-    p.ipAddress,
-    new Date(p.timestamp).toLocaleString(),
-    p.retryCount.toString()
-  ]);
-  
-  const csvContent = [
-    headers.join(','),
-    ...rows.map(row => row.join(','))
-  ].join('\n');
-  
-  return csvContent;
-};
+// Get all game sessions
+export const getAllGameSessions = async (): Promise<GameSession[]> => {
+  try {
+    const { data: games, error: gamesError } = await supabase
+      .from('games')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-// Function to mask IP address for privacy
-export const maskIpAddress = (ip: string): string => {
-  const parts = ip.split('.');
-  return `${parts[0]}.${parts[1]}.*.*`;
-};
+    if (gamesError || !games) {
+      console.error("Error getting games:", gamesError);
+      return [];
+    }
 
+    const sessions: GameSession[] = await Promise.all(
+      games.map(async (game) => {
+        const { data: participants } = await supabase
+          .from('game_participants')
+          .select('*')
+          .eq('game_id', game.id)
+          .order('timestamp', { ascending: false });
+
+        return {
+          id: game.id,
+          title: game.title,
+          participants: participants || [],
+          createdAt: new Date(game.created_at).getTime()
+        };
+      })
+    );
+
+    return sessions;
+  } catch (error) {
+    console.error("Error in getAllGameSessions:", error);
+    return [];
+  }
+};
