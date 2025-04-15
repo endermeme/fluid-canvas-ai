@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -165,7 +164,9 @@ export default {
 				'float': 'float 3s ease-in-out infinite',
 				'ripple': 'ripple 0.6s linear',
 				'touch-response': 'touch-response 0.3s ease-out',
-				'button-ripple': 'button-ripple 0.7s ease-out forwards'
+				'button-ripple': 'button-ripple 0.7s ease-out forwards',
+				'bounce-slow': 'bounce 3s infinite',
+				'pulse-soft': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
 			},
 			backgroundImage: {
 				'gradient-canvas': 'linear-gradient(to right bottom, hsl(210, 100%, 98%), hsl(220, 100%, 97%))',
