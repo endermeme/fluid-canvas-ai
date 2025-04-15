@@ -3,7 +3,7 @@
 export interface StoredGame {
   id: string;
   title: string;
-  description: string;
+  description?: string; // Changed from required to optional
   gameType?: string;
   content?: any;
   htmlContent: string;

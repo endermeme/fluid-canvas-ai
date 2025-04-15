@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
-import { StoredGame } from '@/utils/types';
+import { getSharedGame, getRemainingTime, StoredGame } from '@/utils/gameExport';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import QuizContainer from '@/components/quiz/QuizContainer';
@@ -28,7 +26,6 @@ const SharedGame: React.FC = () => {
     }
 
     const loadGame = async () => {
-      // Use either the gameId (from new URL format) or id (from old format)
       const gameIdentifier = gameId || id;
       
       try {
