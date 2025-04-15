@@ -79,6 +79,25 @@ export const getSharedGame = (id: string): StoredGame | null => {
   }
 };
 
+// Clean up expired games
+export const cleanupExpiredGames = (): void => {
+  try {
+    const gamesJson = localStorage.getItem('shared_games');
+    if (!gamesJson) return;
+
+    const games: StoredGame[] = JSON.parse(gamesJson);
+    const now = Date.now();
+    
+    // Filter out expired games
+    const validGames = games.filter(game => game.expiresAt > now);
+    
+    // Save filtered games back to localStorage
+    localStorage.setItem('shared_games', JSON.stringify(validGames));
+  } catch (error) {
+    console.error("Error cleaning up expired games:", error);
+  }
+};
+
 // Calculate remaining time for a game
 export const getRemainingTime = (expiresAt: number): string => {
   try {
