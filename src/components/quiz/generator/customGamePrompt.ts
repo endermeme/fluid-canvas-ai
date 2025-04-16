@@ -1,3 +1,4 @@
+
 export interface GamePromptOptions {
   topic: string;
   useCanvas?: boolean;
@@ -19,13 +20,14 @@ export const generateCustomGamePrompt = (options: GamePromptOptions): string => 
 Create an interactive HTML game based on: "${topic}"
 
 **CRITICAL FORMATTING REQUIREMENTS:**
-- Return code in markdown format with separate \`\`\`html, \`\`\`css, and \`\`\`js blocks
+- You MUST return code in markdown format with SEPARATE \`\`\`html, \`\`\`css, and \`\`\`js blocks
 - NEVER return a full HTML document - only return separate code blocks
 - NEVER put all code on one line - use proper line breaks and indentation for EACH section
 - Each HTML tag MUST be on its own line with proper indentation
 - Each CSS rule MUST have properties on separate lines
 - Each JavaScript function MUST have proper spacing and formatting
 - Format exactly like professional code in a modern IDE
+- Your code WILL be split into separate HTML, CSS, and JS files
 
 **EXAMPLE FORMAT (MANDATORY):**
 
