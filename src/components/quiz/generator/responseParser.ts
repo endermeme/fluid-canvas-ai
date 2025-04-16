@@ -151,4 +151,3 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
     };
   }
 };
-
