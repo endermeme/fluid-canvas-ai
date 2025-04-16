@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Code, Eye } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -29,6 +29,22 @@ const GameContainer: React.FC<GameContainerProps> = ({
 }) => {
   const [viewMode, setViewMode] = useState<'game' | 'code'>('game');
   const [codeTab, setCodeTab] = useState<'html' | 'css' | 'js' | 'full'>('html');
+  const [htmlDisplayContent, setHtmlDisplayContent] = useState<string>('');
+  const [cssDisplayContent, setcssDisplayContent] = useState<string>('');
+  const [jsDisplayContent, setJsDisplayContent] = useState<string>('');
+
+  // Process content for display
+  useEffect(() => {
+    if (htmlContent) {
+      setHtmlDisplayContent(htmlContent);
+    }
+    if (cssContent) {
+      setcssDisplayContent(cssContent);
+    }
+    if (jsContent) {
+      setJsDisplayContent(jsContent);
+    }
+  }, [htmlContent, cssContent, jsContent]);
 
   const formatCodeForDisplay = (code: string, language: string) => {
     return (
@@ -84,7 +100,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
               />
             ) : (
               <div className="p-4">
-                {isSeparatedFiles ? (
+                {isSeparatedFiles && (htmlDisplayContent || cssDisplayContent || jsDisplayContent) ? (
                   <Tabs
                     defaultValue="html"
                     value={codeTab}
@@ -100,17 +116,17 @@ const GameContainer: React.FC<GameContainerProps> = ({
                     
                     <TabsContent value="html">
                       <h3 className="text-lg font-medium mb-2">HTML</h3>
-                      {formatCodeForDisplay(htmlContent || '', 'html')}
+                      {formatCodeForDisplay(htmlDisplayContent || '', 'html')}
                     </TabsContent>
                     
                     <TabsContent value="css">
                       <h3 className="text-lg font-medium mb-2">CSS</h3>
-                      {formatCodeForDisplay(cssContent || '', 'css')}
+                      {formatCodeForDisplay(cssDisplayContent || '', 'css')}
                     </TabsContent>
                     
                     <TabsContent value="js">
                       <h3 className="text-lg font-medium mb-2">JavaScript</h3>
-                      {formatCodeForDisplay(jsContent || '', 'javascript')}
+                      {formatCodeForDisplay(jsDisplayContent || '', 'javascript')}
                     </TabsContent>
                     
                     <TabsContent value="full">
