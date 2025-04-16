@@ -1,14 +1,18 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { enhanceIframeContent } from '../utils/iframe-utils';
+import GameContainer from '../components/GameContainer';
 
 interface EnhancedGameViewProps {
   miniGame: {
     title?: string;
     content: string;
+    htmlContent?: string;
+    cssContent?: string;
+    jsContent?: string;
+    isSeparatedFiles?: boolean;
   };
   onBack?: () => void;
   onNewGame?: () => void;
@@ -75,6 +79,23 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       }
     }
   };
+
+  // Sử dụng component GameContainer để hiển thị nếu có file tách biệt
+  if (miniGame.isSeparatedFiles) {
+    return (
+      <GameContainer
+        iframeRef={iframeRef}
+        content={miniGame.content}
+        title={miniGame.title}
+        error={iframeError}
+        onReload={refreshGame}
+        htmlContent={miniGame.htmlContent}
+        cssContent={miniGame.cssContent}
+        jsContent={miniGame.jsContent}
+        isSeparatedFiles={miniGame.isSeparatedFiles}
+      />
+    );
+  }
 
   return (
     <div className="w-full h-full flex flex-col">
