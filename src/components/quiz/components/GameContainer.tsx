@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
+import { enhanceIframeContent } from '../utils/iframe-utils';
 
 interface GameContainerProps {
   iframeRef: React.RefObject<HTMLIFrameElement>;
@@ -18,6 +19,9 @@ const GameContainer: React.FC<GameContainerProps> = ({
   error,
   onReload
 }) => {
+  // Ensure content is properly formatted
+  const formattedContent = content ? enhanceIframeContent(content, title) : '';
+  
   return (
     <div className="flex-1 relative overflow-hidden">
       {error ? (
@@ -34,7 +38,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
       ) : (
         <iframe
           ref={iframeRef}
-          srcDoc={content}
+          srcDoc={formattedContent}
           className="w-full h-full"
           sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
           title={title || "Minigame"}

@@ -40,7 +40,18 @@ export const generateWithGemini = async (
     category: settings?.category || 'general'
   };
 
-  const prompt = generateCustomGamePrompt(promptOptions);
+  // Add instructions for proper code formatting to the prompt
+  const formattingInstructions = `
+IMPORTANT: Please ensure your response includes properly formatted and indented HTML, CSS, and JavaScript code.
+- Use proper indentation with new lines for HTML tags
+- Format JavaScript with line breaks after statements and proper indentation for blocks
+- Format CSS with proper spacing and line breaks
+- Do not minify or compress the code
+- Ensure the code is human-readable with appropriate spacing and line breaks
+`;
+
+  // Generate prompt with formatting instructions
+  const prompt = generateCustomGamePrompt(promptOptions) + formattingInstructions;
 
   try {
     logInfo(SOURCE, `Sending request to Gemini API`);
@@ -125,12 +136,13 @@ export const generateWithGemini = async (
 const sanitizeGameCode = (content: string): string => {
   let sanitized = content;
   
+  // Basic code cleanup while preserving line breaks and formatting
   sanitized = sanitized
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/\/\/.*/g, '')
-    .replace(/\s*\n\s*\n\s*/g, '\n')
+    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+    .replace(/\/\/[^\n]*/g, '') // Remove single-line comments
     .trim();
   
+  // Fix common JavaScript issues while preserving formatting
   sanitized = sanitized.replace(
     /requestAnimationFrame\s*\(\s*\)/g, 
     'requestAnimationFrame(gameLoop)'
@@ -141,18 +153,21 @@ const sanitizeGameCode = (content: string): string => {
     'addEventListener("$1", $2)'
   );
 
-  sanitized = sanitized.replace(
-    /<\/body>/,
-    `
-    <script>
-      window.onerror = (message, source, lineno, colno, error) => {
-        console.error('Game error:', { message, source, lineno, colno, stack: error?.stack });
-        return true;
-      };
-    </script>
-    </body>
-    `
-  );
+  // Add error handling script while preserving formatting
+  if (!sanitized.includes('window.onerror')) {
+    sanitized = sanitized.replace(
+      /<\/body>/,
+      `
+  <script>
+    window.onerror = (message, source, lineno, colno, error) => {
+      console.error('Game error:', { message, source, lineno, colno, stack: error?.stack });
+      return true;
+    };
+  </script>
+</body>
+`
+    );
+  }
   
   return sanitized;
 };

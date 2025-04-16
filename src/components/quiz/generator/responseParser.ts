@@ -3,6 +3,67 @@ import { MiniGame } from './types';
 import { injectImageUtils } from './imageGenerator';
 
 /**
+ * Formats HTML content with proper indentation and line breaks
+ * @param content The HTML content to format
+ * @returns Formatted HTML content
+ */
+const formatGameContent = (content: string): string => {
+  if (!content) return '';
+  
+  try {
+    // First remove any code block markers if present
+    let formattedContent = content.replace(/```html|```/g, '').trim();
+    
+    // Basic formatting for HTML structure
+    formattedContent = formattedContent
+      // Add line breaks after opening tags
+      .replace(/(<[^\/!][^>]*>)(?!\s*[\r\n])/g, '$1\n')
+      // Add line breaks before closing tags
+      .replace(/(?<!\s*[\r\n])(<\/[^>]+>)/g, '\n$1')
+      // Add line breaks after self-closing tags
+      .replace(/(<[^>]*\/>)(?!\s*[\r\n])/g, '$1\n')
+      // Add line breaks after <!DOCTYPE>, <!-- comments -->, etc.
+      .replace(/(<!(?:DOCTYPE|--)[^>]*>)(?!\s*[\r\n])/g, '$1\n')
+      // Add double line breaks before <head>, <body>, <script>, <style> tags
+      .replace(/(<(?:head|body|script|style)[^>]*>)/g, '\n\n$1\n')
+      // Add double line breaks after </head>, </body>, </script>, </style> tags
+      .replace(/(<\/(?:head|body|script|style)>)/g, '\n$1\n\n')
+      // Ensure proper indentation for JavaScript blocks
+      .replace(/(<script[^>]*>)(\s*)([\s\S]*?)(\s*)(<\/script>)/g, (match, openTag, ws1, code, ws2, closeTag) => {
+        // Format JavaScript code with line breaks and indentation
+        const formattedJs = code
+          .replace(/\{/g, '{\n  ')
+          .replace(/\}/g, '\n}\n')
+          .replace(/;(?!\s*[\r\n])/g, ';\n  ')
+          .replace(/\}\s*else/g, '} else')
+          .replace(/if\s*\(([^)]+)\)\s*\{/g, 'if ($1) {');
+        
+        return `${openTag}\n  ${formattedJs}\n${closeTag}`;
+      })
+      // Ensure proper indentation for CSS blocks
+      .replace(/(<style[^>]*>)(\s*)([\s\S]*?)(\s*)(<\/style>)/g, (match, openTag, ws1, code, ws2, closeTag) => {
+        // Format CSS code with line breaks and indentation
+        const formattedCss = code
+          .replace(/\{/g, ' {\n  ')
+          .replace(/;/g, ';\n  ')
+          .replace(/\}/g, '\n}\n');
+        
+        return `${openTag}\n  ${formattedCss}\n${closeTag}`;
+      });
+    
+    // Remove excessive empty lines
+    formattedContent = formattedContent
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
+      .trim();
+    
+    return formattedContent;
+  } catch (error) {
+    console.error('Error formatting HTML content:', error);
+    return content;
+  }
+};
+
+/**
  * Attempts to extract and parse a MiniGame from Gemini's text response
  * @param text The raw text response from Gemini API
  * @param topic Fallback topic if extraction fails
@@ -26,6 +87,8 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
         console.log(`🔷 Gemini: Game title: "${gameData.title || 'No title'}"`);
         
         let content = gameData.content || '';
+        // Format the content
+        content = formatGameContent(content);
         // Add image utilities
         content = injectImageUtils(content);
         
@@ -51,6 +114,8 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
           console.log("🔷 Gemini: JSON parsed after sanitization");
           
           let content = gameData.content || '';
+          // Format the content
+          content = formatGameContent(content);
           // Add image utilities
           content = injectImageUtils(content);
           
@@ -81,8 +146,10 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
         title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
       }
       
+      // Format the content
+      let enhancedHtml = formatGameContent(htmlMatch[0]);
       // Add image utilities
-      const enhancedHtml = injectImageUtils(htmlMatch[0]);
+      enhancedHtml = injectImageUtils(enhancedHtml);
       
       return {
         title: title,
@@ -107,8 +174,10 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
       }
       
       const htmlContent = `<!DOCTYPE html>${fallbackHtmlMatch[0]}`;
+      // Format the content
+      let enhancedHtml = formatGameContent(htmlContent);
       // Add image utilities
-      const enhancedHtml = injectImageUtils(htmlContent);
+      enhancedHtml = injectImageUtils(enhancedHtml);
       
       return {
         title: title,
