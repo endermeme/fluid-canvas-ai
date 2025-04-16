@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface StoredGame {
@@ -6,7 +7,7 @@ export interface StoredGame {
   gameType: string;
   content: any;
   htmlContent: string;
-  description?: string;
+  description?: string; // Changed to optional to match types.ts
   expiresAt: Date | number;
   createdAt: Date | number;
 }
