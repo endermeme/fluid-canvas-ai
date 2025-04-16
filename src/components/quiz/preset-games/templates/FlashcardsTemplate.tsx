@@ -139,7 +139,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
   };
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
+    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative overflow-hidden">
       {onBack && (
         <Button 
           variant="ghost" 
@@ -165,9 +165,9 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
         <Progress value={progress} className="h-2 bg-secondary" />
       </div>
 
-      <div className="flex-grow flex items-center justify-center mb-4 perspective-1000">
+      <div className="flex-grow flex items-center justify-center mb-4 perspective-1000 overflow-hidden">
         <div 
-          className="w-full max-w-md aspect-[3/2] cursor-pointer relative group"
+          className="w-full max-w-4xl aspect-[3/2] cursor-pointer relative group px-4"
           onClick={handleFlip}
           style={{
             transformStyle: 'preserve-3d',
@@ -176,12 +176,12 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
           }}
         >
           <Card 
-            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-2 border-primary/20 shadow-lg group-hover:shadow-xl transition-all duration-300"
+            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-2 border-primary/20 shadow-lg group-hover:shadow-xl transition-all duration-300 overflow-auto"
             style={{
               backfaceVisibility: 'hidden'
             }}
           >
-            <div className="text-center">
+            <div className="text-center max-w-full">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
                 Nhấn để lật thẻ
                 {autoFlip && !isFlipped && (
@@ -191,20 +191,24 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
                   </div>
                 )}
               </div>
-              <div className="text-3xl font-bold text-primary/90">{cards[currentCard].front}</div>
+              <div className="text-3xl font-bold text-primary/90 break-words whitespace-pre-wrap">
+                {cards[currentCard].front}
+              </div>
             </div>
           </Card>
           
           <Card 
-            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm border-2 border-primary/30 shadow-lg"
+            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm border-2 border-primary/30 shadow-lg overflow-auto"
             style={{
               backfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)'
             }}
           >
-            <div className="text-center">
+            <div className="text-center max-w-full">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Mặt sau</div>
-              <div className="text-2xl text-primary/90">{cards[currentCard].back}</div>
+              <div className="text-2xl text-primary/90 break-words whitespace-pre-wrap">
+                {cards[currentCard].back}
+              </div>
             </div>
           </Card>
         </div>

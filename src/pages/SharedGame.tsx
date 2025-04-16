@@ -73,10 +73,15 @@ const SharedGame: React.FC = () => {
     const GameTemplate = gameTemplates[game.gameType as keyof typeof gameTemplates];
     
     return (
-      <div className="h-screen flex flex-col">
-        <header className="bg-background/80 backdrop-blur-sm p-4 flex items-center justify-between border-b">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+      <div className="h-screen flex flex-col overflow-hidden">
+        <header className="bg-background/80 backdrop-blur-sm p-4 flex items-center justify-between border-b sticky top-0 z-50">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => navigate('/')}
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
             Quay lại
           </Button>
           <div className="flex items-center gap-4">

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw, Share2 } from 'lucide-react';
@@ -500,8 +501,13 @@ Output must be valid JSON. `;
       <div className="p-4">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">{getGameTypeName()}</h2>
-          <Button variant="ghost" size="sm" onClick={onBack}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onBack}
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
             Quay lại
           </Button>
         </div>
