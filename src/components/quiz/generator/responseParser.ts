@@ -27,13 +27,38 @@ const formatGameContent = (content: string): string => {
     // Remove markdown code block markers
     let formattedContent = extractCodeFromMarkdown(content);
     
-    // Preserve line breaks and indentation
-    formattedContent = formattedContent
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0)
-      .join('\n');
-
+    // Preserve line breaks and indentation from original source
+    // This is critical for maintaining proper code formatting
+    
+    // Check if the content is already properly formatted with line breaks
+    if (!formattedContent.includes('\n')) {
+      // If no line breaks are present, we need to reconstruct formatting
+      // Convert HTML tags to add proper line breaks and indentation
+      formattedContent = formattedContent
+        // Add line breaks after opening tags
+        .replace(/(<[^\/!][^>]*>)/g, '$1\n')
+        // Add line breaks before closing tags
+        .replace(/(<\/[^>]+>)/g, '\n$1')
+        // Add line breaks after self-closing tags
+        .replace(/(<[^>]*\/>)/g, '$1\n')
+        // Format <style> blocks with line breaks
+        .replace(/<style[^>]*>(.*?)<\/style>/g, (match, styleContent) => {
+          return match.replace(styleContent, styleContent
+            .replace(/\{/g, ' {\n  ')
+            .replace(/;/g, ';\n  ')
+            .replace(/}/g, '\n}\n')
+          );
+        })
+        // Format <script> blocks with line breaks
+        .replace(/<script[^>]*>(.*?)<\/script>/g, (match, scriptContent) => {
+          return match.replace(scriptContent, scriptContent
+            .replace(/\{/g, ' {\n  ')
+            .replace(/;(?!\n)/g, ';\n  ')
+            .replace(/}/g, '\n}\n')
+          );
+        });
+    }
+    
     // Make sure we have proper DOCTYPE and HTML structure
     if (!formattedContent.includes('<!DOCTYPE html>')) {
       if (formattedContent.includes('<html')) {
@@ -43,39 +68,44 @@ const formatGameContent = (content: string): string => {
       }
     }
 
-    // Format HTML structure
-    formattedContent = formattedContent
-      // Add line breaks after opening tags
-      .replace(/(<[^\/!][^>]*>)/g, '$1\n')
-      // Add line breaks before closing tags
-      .replace(/(<\/[^>]+>)/g, '\n$1')
-      // Add line breaks after self-closing tags
-      .replace(/(<[^>]*\/>)/g, '$1\n')
-      // Add double line breaks before major sections
-      .replace(/(<(?:head|body|script|style)[^>]*>)/g, '\n\n$1\n')
-      // Format JavaScript in script tags
-      .replace(/<script[^>]*>([\s\S]*?)<\/script>/g, (match, code) => {
-        const formattedJs = code
-          .replace(/\{/g, '{\n  ')
-          .replace(/\}/g, '\n}\n')
-          .replace(/;(?!\n)/g, ';\n  ')
-          .trim();
-        return `<script>\n  ${formattedJs}\n</script>`;
-      })
-      // Format CSS in style tags
-      .replace(/<style[^>]*>([\s\S]*?)<\/style>/g, (match, code) => {
-        const formattedCss = code
-          .replace(/\{/g, ' {\n  ')
-          .replace(/;/g, ';\n  ')
-          .replace(/\}/g, '\n}\n')
-          .trim();
-        return `<style>\n  ${formattedCss}\n</style>`;
-      });
+    // Properly format HTML structure with indentation
+    const lines = formattedContent.split('\n');
+    let indentLevel = 0;
+    let formattedLines = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i].trim();
+      if (!line) continue;
+      
+      // Decrease indent for closing tags
+      if (line.startsWith('</') && !line.startsWith('</script') && !line.startsWith('</style')) {
+        indentLevel = Math.max(0, indentLevel - 1);
+      }
+      
+      // Add current indentation
+      formattedLines.push('  '.repeat(indentLevel) + line);
+      
+      // Increase indent after opening tags (excluding self-closing or special tags)
+      if (line.match(/<[^\/!][^>]*>/) && 
+          !line.match(/<[^>]*\/>/) && 
+          !line.match(/<(script|style|link|meta|br|hr|img|input)[^>]*>/i)) {
+        indentLevel++;
+      }
+    }
+    
+    formattedContent = formattedLines.join('\n');
 
-    // Clean up excessive empty lines
-    formattedContent = formattedContent
-      .replace(/\n\s*\n\s*\n/g, '\n\n')
-      .trim();
+    // Format JavaScript in script tags
+    formattedContent = formattedContent.replace(/<script[^>]*>([\s\S]*?)<\/script>/g, (match, code) => {
+      const formattedJs = formatJavaScript(code);
+      return `<script>\n${formattedJs}\n</script>`;
+    });
+    
+    // Format CSS in style tags
+    formattedContent = formattedContent.replace(/<style[^>]*>([\s\S]*?)<\/style>/g, (match, code) => {
+      const formattedCss = formatCss(code);
+      return `<style>\n${formattedCss}\n</style>`;
+    });
 
     return formattedContent;
   } catch (error) {
@@ -84,12 +114,79 @@ const formatGameContent = (content: string): string => {
   }
 };
 
+// Helper function to format JavaScript with proper indentation
+const formatJavaScript = (code: string): string => {
+  if (!code.trim()) return '';
+  
+  try {
+    let formattedCode = code
+      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments
+      .replace(/\/\/[^\n]*/g, '') // Remove line comments
+      .trim();
+    
+    // Format JS with indentation and line breaks
+    const lines = formattedCode.split('\n');
+    let indentLevel = 1; // Start with 1 indent level (we're inside a script tag)
+    let formattedLines = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i].trim();
+      if (!line) continue;
+      
+      // Decrease indent for closing braces
+      if (line.startsWith('}')) {
+        indentLevel = Math.max(0, indentLevel - 1);
+      }
+      
+      // Add current indentation
+      formattedLines.push('  '.repeat(indentLevel) + line);
+      
+      // Increase indent after opening braces
+      if (line.endsWith('{')) {
+        indentLevel++;
+      }
+    }
+    
+    return formattedLines.join('\n');
+  } catch (error) {
+    console.error('Error formatting JavaScript:', error);
+    return code;
+  }
+};
+
+// Helper function to format CSS with proper indentation
+const formatCss = (code: string): string => {
+  if (!code.trim()) return '';
+  
+  try {
+    // Basic CSS formatting
+    let formattedCode = code
+      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove comments
+      .trim();
+    
+    // Format CSS with indentation and line breaks
+    formattedCode = formattedCode
+      .replace(/\s*\{\s*/g, ' {\n  ')
+      .replace(/;\s*/g, ';\n  ')
+      .replace(/\s*}\s*/g, '\n}\n')
+      .replace(/\n\s*\n/g, '\n'); // Remove double line breaks
+    
+    return formattedCode;
+  } catch (error) {
+    console.error('Error formatting CSS:', error);
+    return code;
+  }
+};
+
 export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
   console.log("🔷 Gemini: Starting response parsing");
   
   try {
-    // First try to extract HTML content
+    // Extract HTML content with better formatting preservation
     const htmlContent = formatGameContent(text);
+    
+    // Log the formatted HTML for debugging
+    console.log("🔷 Gemini: Formatted HTML content", htmlContent.substring(0, 500) + "...");
     
     // Extract title from HTML content
     let title = topic;
