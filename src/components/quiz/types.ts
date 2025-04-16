@@ -1,3 +1,4 @@
+
 export interface GameSettingsData {
   difficulty?: 'easy' | 'medium' | 'hard';
   questionCount?: number;
@@ -39,6 +40,7 @@ export interface GameSettingsData {
   allowMultipleCategories?: boolean;
   showCategoryHints?: boolean;
   allowMultipleAttempts?: boolean;
+  language?: string; // Add the missing language property
   requestMetadata?: {
     requestId?: string;
     timestamp?: string;
