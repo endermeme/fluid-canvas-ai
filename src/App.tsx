@@ -1,20 +1,18 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   createBrowserRouter,
   RouterProvider,
-  useNavigate,
-  useLocation,
 } from "react-router-dom";
-import { Shell } from "@/components/layout/shell"
-import { Home } from "@/pages/Home"
-import { Docs } from "@/pages/Docs"
-import { Pricing } from "@/pages/Pricing"
-import { Quiz } from "@/pages/Quiz";
-import { GameDashboard } from "@/pages/GameDashboard";
-import { SharedGame } from "@/components/quiz/share/SharedGame";
-import { GameHistory } from "@/pages/GameHistory";
-import { PresetGamesPage } from "@/components/quiz/preset-games/PresetGamesPage";
-import CustomGameContainer from "@/components/quiz/custom-games/CustomGameContainer";
+import Shell from "@/components/layout/Shell";
+import Home from "@/pages/Home";
+import Docs from "@/pages/Docs";
+import Pricing from "@/pages/Pricing";
+import Quiz from "@/pages/Quiz";
+import GameDashboard from "@/pages/GameDashboard";
+import SharedGame from "@/components/quiz/share/SharedGame";
+import GameHistory from "@/pages/GameHistory"; 
+import PresetGamesPage from "@/components/quiz/preset-games/PresetGamesPage";
 import CustomGame from "@/pages/CustomGame";
 
 function App() {

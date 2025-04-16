@@ -157,7 +157,8 @@ const LuckyWheel: React.FC = () => {
         </div>
       </div>
       
-      <style jsx>{`
+      <style>
+        {`
         .container {
           width: 100%; 
           max-width: 800px; 
@@ -203,7 +204,8 @@ const LuckyWheel: React.FC = () => {
             height: 300px;
           }
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
