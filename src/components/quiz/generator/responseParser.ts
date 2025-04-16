@@ -1,3 +1,4 @@
+
 import { MiniGame } from './types';
 import { injectImageUtils } from './imageGenerator';
 

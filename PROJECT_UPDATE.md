@@ -25,16 +25,11 @@
 
 ## Vị Trí File Liên Quan
 
-### 1. File Code Game
-- **src/components/quiz/custom-games/lucky-wheel/index.html**: File HTML của game
-- **src/components/quiz/custom-games/lucky-wheel/styles.css**: File CSS của game
-- **src/components/quiz/custom-games/lucky-wheel/game.js**: File JavaScript của game
-
-### 2. File Xử Lý Response
+### 1. File Xử Lý Response
 - **src/components/quiz/generator/responseParser.ts**: File xử lý và trích xuất code từ phản hồi AI
 - **src/components/quiz/generator/geminiGenerator.ts**: File gọi API Gemini và xử lý phản hồi
 
-### 3. File Khác
+### 2. File Khác
 - **src/components/quiz/generator/apiUtils.ts**: Công cụ hỗ trợ làm việc với API
 - **src/components/quiz/QuizGenerator.tsx**: Component chính để tạo game
 - **src/pages/Quiz.tsx**: Trang giao diện tạo game
@@ -52,11 +47,8 @@
 - Cải thiện `formatGameContent` để tạo nội dung HTML có cấu trúc đúng
 
 ### 3. Tách File
-- Thực hiện tách code thành các file riêng biệt:
-  - HTML trong `index.html`
-  - CSS trong `styles.css`
-  - JavaScript trong `game.js`
-- Cập nhật `index.html` để load CSS và JavaScript từ các file riêng
+- Thực hiện tách code thành các file riêng biệt cho tất cả custom game
+- Cập nhật hệ thống để tự động trích xuất và định dạng code khi nhận từ API
 
 ### 4. Khắc Phục Vấn Đề NPM
 - Cập nhật file `vite.config.ts` để tối ưu hóa cấu hình dev server
