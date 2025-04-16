@@ -48,4 +48,3 @@ export default defineConfig(({ mode }) => ({
     keepNames: true,
   },
 }));
-
