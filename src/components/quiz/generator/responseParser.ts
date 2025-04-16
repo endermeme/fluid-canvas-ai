@@ -1,6 +1,6 @@
-
 import { MiniGame } from './types';
 import { injectImageUtils } from './imageGenerator';
+import { parseMixedFormatCode, combineHtmlCssJs } from './mixedFormatParser';
 
 /**
  * Extract HTML, CSS, and JS from markdown format
@@ -78,13 +78,14 @@ const extractCodeFromMixedFormat = (text: string): { html: string, css: string, 
 };
 
 /**
- * NEW: Extract code when CSS and JS are marked with keywords in plain text
- * This handles cases where the response has format like:
- * <html>...</html> css <css_code> js <js_code>
- * or like:
- * <html content> css .container {...} js document.addEventListener...
+ * Extract code when CSS and JS are marked with keywords in plain text
  */
 const extractCodeFromKeywordFormat = (text: string): { html: string, css: string, js: string } => {
+  // Check if we should use the new parser
+  if ((text.includes(' css ') || text.match(/\bcss\s+\./)) && text.includes(' js ')) {
+    return parseMixedFormatCode(text);
+  }
+  
   // Try to find HTML, CSS and JS sections by keywords
   let htmlContent = '';
   let cssContent = '';
@@ -278,25 +279,7 @@ const formatCSSOneLineToMultiLine = (code: string): string => {
  * Create complete HTML from separate parts
  */
 const createCompleteHtml = (html: string, css: string, js: string): string => {
-  const docType = '<!DOCTYPE html>';
-  return `
-${docType}
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Game</title>
-  <style>
-${css}
-  </style>
-</head>
-<body>
-${html}
-  <script>
-${js}
-  </script>
-</body>
-</html>`;
+  return combineHtmlCssJs(html, css, js);
 };
 
 /**
@@ -306,6 +289,42 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
   console.log("🔷 Gemini: Starting response parsing");
   
   try {
+    // Check for the mixed format with css and js keywords first
+    if ((text.includes(' css ') || text.match(/\bcss\s+\./)) && text.includes(' js ')) {
+      console.log("🔷 Gemini: Detected mixed format with css/js keywords");
+      const { html, css, js } = parseMixedFormatCode(text);
+      
+      if (html || css || js) {
+        console.log("🔷 Gemini: Successfully parsed mixed format content");
+        
+        // Format the extracted code
+        const formattedHTML = formatHTML(html);
+        const formattedCSS = formatCss(css);
+        const formattedJS = formatJavaScript(js);
+        
+        // Create complete HTML
+        const completeHtml = createCompleteHtml(formattedHTML, formattedCSS, formattedJS);
+        const enhancedHtml = injectImageUtils(completeHtml);
+        
+        // Extract title
+        let title = topic;
+        const titleMatch = completeHtml.match(/<title>(.*?)<\/title>/i);
+        if (titleMatch && titleMatch[1]) {
+          title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
+        }
+        
+        return {
+          title: title,
+          description: "Generated game content",
+          content: enhancedHtml,
+          htmlContent: formattedHTML,
+          cssContent: formattedCSS,
+          jsContent: formattedJS,
+          isSeparatedFiles: true
+        };
+      }
+    }
+    
     // Analyze response type
     const isCompleteHtml = text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html');
     const hasMarkdownBlocks = text.includes('```html') && (text.includes('```css') || text.includes('```js'));
