@@ -1,9 +1,7 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { enhanceIframeContent } from '../utils/iframe-utils';
 
 interface EnhancedGameViewProps {
   miniGame: {
@@ -27,10 +25,40 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [iframeError, setIframeError] = useState<string | null>(null);
 
+  const sanitizeContent = (content: string) => {
+    let processedContent = content.replace(/```html|```/g, '').trim();
+    
+    if (!processedContent.includes('<!DOCTYPE html>')) {
+      processedContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${miniGame.title || 'Interactive Game'}</title></head><body>${processedContent}</body></html>`;
+    }
+    
+    const basicCSS = `
+      <style>
+        body { 
+          font-family: Arial, sans-serif; 
+          display: flex; 
+          justify-content: center; 
+          align-items: center; 
+          height: 100vh; 
+          margin: 0; 
+          background-color: #f0f0f0; 
+        }
+        canvas, #game-container { 
+          max-width: 100%; 
+          max-height: 100%; 
+        }
+      </style>
+    `;
+    
+    processedContent = processedContent.replace('</head>', `${basicCSS}</head>`);
+    
+    return processedContent;
+  };
+
   useEffect(() => {
     if (iframeRef.current && miniGame?.content) {
       try {
-        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
+        const enhancedContent = sanitizeContent(miniGame.content);
         iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
       } catch (error) {
@@ -43,12 +71,9 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const refreshGame = () => {
     if (iframeRef.current && miniGame?.content) {
       try {
-        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
+        const enhancedContent = sanitizeContent(miniGame.content);
         iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
-        
-        // Clear any console errors related to the iframe
-        console.clear();
       } catch (error) {
         console.error("Error refreshing game:", error);
         setIframeError("Không thể tải lại game. Vui lòng thử lại.");
@@ -161,17 +186,13 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           <iframe
             ref={iframeRef}
             className="w-full h-full"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-downloads"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
             title={miniGame.title || "Minigame"}
             style={{
               border: 'none',
               display: 'block',
               width: '100%',
               height: '100%'
-            }}
-            onLoad={() => {
-              // Clear console errors related to the iframe
-              console.clear();
             }}
           />
         )}

@@ -36,17 +36,13 @@ const GameContainer: React.FC<GameContainerProps> = ({
           ref={iframeRef}
           srcDoc={content}
           className="w-full h-full"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-downloads"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
           title={title || "Minigame"}
           style={{ 
             border: 'none',
             width: '100%',
             height: '100%',
             display: 'block'
-          }}
-          onLoad={(e) => {
-            // Clear console errors related to the iframe after it loads
-            console.clear();
           }}
         />
       )}
