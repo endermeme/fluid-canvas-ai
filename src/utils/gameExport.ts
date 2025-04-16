@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface StoredGame {
@@ -7,7 +6,7 @@ export interface StoredGame {
   gameType: string;
   content: any;
   htmlContent: string;
-  description?: string; // Added description field
+  description?: string;
   expiresAt: Date | number;
   createdAt: Date | number;
 }
@@ -25,8 +24,9 @@ export const saveGameForSharing = async (
       title,
       game_type: gameType,
       html_content: htmlContent,
-      // Don't include the content field since it doesn't exist in the database
-      description: description || `Shared game: ${title}` // Add a default description
+      content_type: 'html',
+      is_published: true,
+      description: description || `Shared game: ${title}`
     })
     .select()
     .single();
@@ -72,18 +72,15 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
     }
   }
 
-  // The game object from Supabase has snake_case properties
-  // We need to convert them to camelCase for our frontend
   return {
     id: game.id,
     title: game.title,
     gameType: game.game_type,
-    // Use parsed content or fall back to an empty object
     content: parsedContent || {},
     htmlContent: game.html_content,
-    description: game.description || `Shared game: ${game.title}`, // Provide a default if missing
-    expiresAt: new Date(game.expires_at).getTime(), // Convert to timestamp for consistency
-    createdAt: new Date(game.created_at).getTime()  // Convert to timestamp for consistency
+    description: game.description || `Shared game: ${game.title}`,
+    expiresAt: new Date(game.expires_at).getTime(),
+    createdAt: new Date(game.created_at).getTime()
   };
 };
 

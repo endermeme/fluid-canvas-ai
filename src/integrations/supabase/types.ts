@@ -46,6 +46,7 @@ export type Database = {
       }
       games: {
         Row: {
+          content_type: string | null
           created_at: string
           creator_ip: string | null
           description: string | null
@@ -54,9 +55,11 @@ export type Database = {
           html_content: string
           id: string
           is_preset: boolean | null
+          is_published: boolean | null
           title: string
         }
         Insert: {
+          content_type?: string | null
           created_at?: string
           creator_ip?: string | null
           description?: string | null
@@ -65,9 +68,11 @@ export type Database = {
           html_content: string
           id?: string
           is_preset?: boolean | null
+          is_published?: boolean | null
           title: string
         }
         Update: {
+          content_type?: string | null
           created_at?: string
           creator_ip?: string | null
           description?: string | null
@@ -76,6 +81,7 @@ export type Database = {
           html_content?: string
           id?: string
           is_preset?: boolean | null
+          is_published?: boolean | null
           title?: string
         }
         Relationships: []
