@@ -13,6 +13,11 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     }
   }
   
+  // Add necessary security headers
+  const securityHeaders = `
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self'; object-src 'none';">
+  `;
+  
   // Format JavaScript in <script> tags for better readability
   processedContent = processedContent.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (match, script) => {
     // Format the JavaScript by adding line breaks and indentation
@@ -24,7 +29,8 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       .replace(/\n\s*\n/g, '\n')
       .trim();
     
-    return `<script>\n${formattedScript}\n</script>`;
+    // Add script isolation to prevent cross-origin issues
+    return `<script>\n// Isolate script to prevent cross-origin issues\n(function() {\n${formattedScript}\n})();\n</script>`;
   });
   
   // Format CSS in <style> tags for better readability
@@ -111,13 +117,13 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     </style>
   `;
   
-  // Add our optimized styles to the head
+  // Add our optimized styles and security headers to the head
   if (processedContent.includes('<head>')) {
-    processedContent = processedContent.replace('<head>', `<head>${optimizedStyles}`);
+    processedContent = processedContent.replace('<head>', `<head>${securityHeaders}${optimizedStyles}`);
   } else if (processedContent.includes('<html>')) {
-    processedContent = processedContent.replace('<html>', `<html><head>${optimizedStyles}</head>`);
+    processedContent = processedContent.replace('<html>', `<html><head>${securityHeaders}${optimizedStyles}</head>`);
   } else {
-    processedContent = `<!DOCTYPE html><html><head>${optimizedStyles}</head><body>${processedContent}</body></html>`;
+    processedContent = `<!DOCTYPE html><html><head>${securityHeaders}${optimizedStyles}</head><body>${processedContent}</body></html>`;
   }
   
   return processedContent;
