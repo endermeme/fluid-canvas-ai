@@ -40,14 +40,17 @@ export const generateWithGemini = async (
     category: settings?.category || 'general'
   };
 
-  // Add instructions for proper code formatting to the prompt
+  // Add enhanced instructions for proper code formatting to the prompt
   const formattingInstructions = `
-IMPORTANT: Please ensure your response includes properly formatted and indented HTML, CSS, and JavaScript code.
-- Use proper indentation with new lines for HTML tags
-- Format JavaScript with line breaks after statements and proper indentation for blocks
-- Format CSS with proper spacing and line breaks
-- Do not minify or compress the code
-- Ensure the code is human-readable with appropriate spacing and line breaks
+IMPORTANT CODE FORMATTING INSTRUCTIONS:
+1. Provide well-formatted, properly indented HTML, CSS, and JavaScript code
+2. Use proper indentation with appropriate line breaks between HTML tags
+3. Keep JavaScript functions well-structured with proper spacing and line breaks
+4. Format CSS with proper spacing, indentation, and line breaks
+5. Ensure closing brackets and parentheses are properly aligned
+6. Use descriptive variable and function names
+7. Add comments to explain complex logic
+8. Remember that well-structured code is essential for the game to function correctly
 `;
 
   // Generate prompt with formatting instructions

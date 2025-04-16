@@ -22,6 +22,9 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     }
   }
   
+  // Format HTML with proper indentation and line breaks
+  processedContent = formatHtmlContent(processedContent);
+  
   // Optimized CSS styles with proper formatting
   const optimizedStyles = `
 <style>
@@ -115,13 +118,206 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     processedContent = processedContent.replace('</head>', `  ${cspTag}\n</head>`);
   }
   
-  // Ensure JavaScript is wrapped in self-executing functions to avoid global scope pollution
-  processedContent = processedContent.replace(/<script>([\s\S]*?)<\/script>/g, (match, script) => {
-    if (!script.includes('(function() {') && !script.includes('function(') && script.trim()) {
-      return `<script>\n(function() {\n  ${script}\n})();\n</script>`;
+  // Properly format and wrap JavaScript in script tags
+  processedContent = processedContent.replace(/<script>([\s\S]*?)<\/script>/gi, (match, scriptContent) => {
+    // Don't wrap already wrapped code or empty scripts
+    if (!scriptContent.trim() || 
+        scriptContent.includes('(function()') || 
+        scriptContent.includes('(() =>')) {
+      return formatScriptTag(match);
     }
-    return match;
+    
+    // Wrap in self-executing function with proper indentation
+    return `<script>\n(function() {\n${formatJavaScript(scriptContent)}\n})();\n</script>`;
   });
   
   return processedContent;
+};
+
+/**
+ * Format JavaScript code with proper indentation and line breaks
+ */
+const formatJavaScript = (code: string): string => {
+  if (!code || typeof code !== 'string') return '';
+  
+  try {
+    // Basic JS formatting
+    let formatted = code
+      // Add line breaks after semicolons, opening braces, and before closing braces
+      .replace(/;(?!\n)/g, ';\n')
+      .replace(/{(?!\n)/g, '{\n')
+      .replace(/(?<!\n)}/g, '\n}')
+      // Add line breaks after function declarations
+      .replace(/function\s+(\w+)\s*\([^)]*\)\s*{/g, 'function $1($2) {\n')
+      // Format if statements with line breaks
+      .replace(/if\s*\([^)]+\)\s*{/g, match => match + '\n')
+      // Format for loops with line breaks
+      .replace(/for\s*\([^)]+\)\s*{/g, match => match + '\n')
+      // Format variable declarations with line breaks
+      .replace(/(const|let|var)\s+([^;]+);/g, '$1 $2;\n')
+      // Clean up excessive empty lines
+      .replace(/\n\s*\n\s*\n/g, '\n\n');
+    
+    // Add proper indentation
+    const lines = formatted.split('\n');
+    let indentLevel = 1; // Start with 1 level as we're inside a self-executing function
+    let indentedCode = '';
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) {
+        indentedCode += '\n';
+        continue;
+      }
+      
+      // Decrease indent for closing braces
+      if (line.startsWith('}')) {
+        indentLevel = Math.max(0, indentLevel - 1);
+      }
+      
+      // Add current indentation
+      indentedCode += '  '.repeat(indentLevel) + line + '\n';
+      
+      // Increase indent after opening braces
+      if (line.endsWith('{')) {
+        indentLevel++;
+      }
+    }
+    
+    return indentedCode;
+  } catch (error) {
+    console.error('Error formatting JavaScript:', error);
+    return '  ' + code.trim().split('\n').join('\n  ');
+  }
+};
+
+/**
+ * Format a script tag with proper indentation
+ */
+const formatScriptTag = (scriptTag: string): string => {
+  if (!scriptTag || typeof scriptTag !== 'string') return '';
+  
+  try {
+    // Extract content between script tags
+    const content = scriptTag.match(/<script[^>]*>([\s\S]*?)<\/script>/i)?.[1] || '';
+    
+    if (!content.trim()) {
+      return '<script>\n</script>';
+    }
+    
+    // Get attributes from opening tag
+    const attributes = scriptTag.match(/<script([^>]*)>/i)?.[1] || '';
+    
+    // Format the script content with indentation
+    const formattedContent = formatJavaScript(content);
+    
+    // Return formatted script tag
+    return `<script${attributes}>\n${formattedContent}</script>`;
+  } catch (error) {
+    console.error('Error formatting script tag:', error);
+    return scriptTag;
+  }
+};
+
+/**
+ * Format HTML content with proper indentation and line breaks
+ */
+const formatHtmlContent = (html: string): string => {
+  if (!html || typeof html !== 'string') return '';
+  
+  try {
+    // Preserve content in script and style tags
+    const scriptTags: string[] = [];
+    const styleTags: string[] = [];
+    
+    // Extract and replace script tags with placeholders
+    let processedHtml = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, (match) => {
+      const placeholder = `__SCRIPT_PLACEHOLDER_${scriptTags.length}__`;
+      scriptTags.push(match);
+      return placeholder;
+    });
+    
+    // Extract and replace style tags with placeholders
+    processedHtml = processedHtml.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, (match) => {
+      const placeholder = `__STYLE_PLACEHOLDER_${styleTags.length}__`;
+      styleTags.push(match);
+      return placeholder;
+    });
+    
+    // Format HTML structure
+    processedHtml = processedHtml
+      // Add line breaks after opening tags
+      .replace(/(<[^\/!][^>]*>)(?!\s*[\r\n])/g, '$1\n')
+      // Add line breaks before closing tags
+      .replace(/(?<!\s*[\r\n])(<\/[^>]+>)/g, '\n$1')
+      // Add line breaks after self-closing tags
+      .replace(/(<[^>]*\/>)(?!\s*[\r\n])/g, '$1\n')
+      // Add line breaks after comments and DOCTYPE
+      .replace(/(<!(?:DOCTYPE|--)[^>]*>)(?!\s*[\r\n])/g, '$1\n')
+      // Clean up excessive empty lines
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
+      .trim();
+    
+    // Apply indentation
+    const lines = processedHtml.split('\n');
+    let indentLevel = 0;
+    let formattedHtml = '';
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      
+      // Special case for DOCTYPE which doesn't get indented
+      if (line.startsWith('<!DOCTYPE')) {
+        formattedHtml += line + '\n';
+        continue;
+      }
+      
+      // Decrease indent for closing tags
+      if (line.startsWith('</') && !line.startsWith('</script') && !line.startsWith('</style')) {
+        indentLevel = Math.max(0, indentLevel - 1);
+      }
+      
+      // Add current indentation
+      formattedHtml += '  '.repeat(indentLevel) + line + '\n';
+      
+      // Increase indent after opening tags, but not for self-closing or special tags
+      if (line.match(/<[^\/!][^>]*>/) && 
+          !line.match(/<[^>]*\/>/) && 
+          !line.match(/<(script|style|link|meta|br|hr|img|input)[^>]*>/i)) {
+        indentLevel++;
+      }
+    }
+    
+    // Restore script tags
+    scriptTags.forEach((script, index) => {
+      const placeholder = `__SCRIPT_PLACEHOLDER_${index}__`;
+      formattedHtml = formattedHtml.replace(placeholder, formatScriptTag(script));
+    });
+    
+    // Restore style tags with formatting
+    styleTags.forEach((style, index) => {
+      const placeholder = `__STYLE_PLACEHOLDER_${index}__`;
+      
+      // Format the CSS content
+      const formattedStyle = style.replace(/<style[^>]*>([\s\S]*?)<\/style>/i, (match, cssContent) => {
+        const formattedCss = cssContent
+          .replace(/{/g, ' {\n  ')
+          .replace(/;/g, ';\n  ')
+          .replace(/}/g, '\n}')
+          .replace(/\s+/g, ' ')
+          .replace(/\n\s*\n/g, '\n')
+          .trim();
+        
+        return `<style>\n  ${formattedCss}\n</style>`;
+      });
+      
+      formattedHtml = formattedHtml.replace(placeholder, formattedStyle);
+    });
+    
+    return formattedHtml;
+  } catch (error) {
+    console.error('Error formatting HTML content:', error);
+    return html;
+  }
 };
