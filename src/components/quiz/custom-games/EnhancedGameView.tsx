@@ -31,7 +31,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     if (iframeRef.current && miniGame?.content) {
       try {
         const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
-        iframeRef.current.srcDoc = enhancedContent;
+        iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
       } catch (error) {
         console.error("Error setting iframe content:", error);
@@ -44,7 +44,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     if (iframeRef.current && miniGame?.content) {
       try {
         const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
-        iframeRef.current.srcDoc = enhancedContent;
+        iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
       } catch (error) {
         console.error("Error refreshing game:", error);

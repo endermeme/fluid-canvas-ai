@@ -48,7 +48,7 @@ const SharedGame: React.FC = () => {
     
     if (iframeRef.current) {
       const enhancedContent = enhanceIframeContent(game.htmlContent, game.title);
-      iframeRef.current.srcDoc = enhancedContent;
+      iframeRef.current.srcdoc = enhancedContent;
       setIframeError(null);
     }
   };

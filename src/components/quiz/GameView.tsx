@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { useToast } from '@/hooks/use-toast';
@@ -90,7 +89,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
         iframeRef.current.src = 'about:blank';
         setTimeout(() => {
           if (iframeRef.current) {
-            iframeRef.current.srcDoc = enhanceIframeContent(miniGame.content, miniGame.title);
+            iframeRef.current.srcdoc = enhanceIframeContent(miniGame.content, miniGame.title);
           }
         }, 100);
         setGameStats({});
