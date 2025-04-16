@@ -20,9 +20,8 @@ export const generateCustomGamePrompt = (options: GamePromptOptions): string => 
 Create an interactive HTML game based on: "${topic}"
 
 **STRICT REQUIREMENTS:**
-- No backsplash like // or anny comment in css js html
-- Output only complete, runnable HTML code (HTML, CSS, JS combined)
-- No comments in code (JS/HTML/CSS)
+- Format the code with proper indentation and line breaks for readability
+- Output complete, runnable HTML code (HTML, CSS, JS combined) with proper formatting
 - Use modern JavaScript (ES6+), no external libraries
 - Clean, readable, maintainable code with descriptive names
 - Strictly modular structure: init, update, render, game loop

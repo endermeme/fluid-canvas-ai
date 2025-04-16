@@ -26,6 +26,8 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
         console.log(`🔷 Gemini: Game title: "${gameData.title || 'No title'}"`);
         
         let content = gameData.content || '';
+        // Format the content for better readability
+        content = formatGameContent(content);
         // Add image utilities
         content = injectImageUtils(content);
         
@@ -51,6 +53,8 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
           console.log("🔷 Gemini: JSON parsed after sanitization");
           
           let content = gameData.content || '';
+          // Format the content for better readability
+          content = formatGameContent(content);
           // Add image utilities
           content = injectImageUtils(content);
           
@@ -81,8 +85,10 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
         title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
       }
       
+      // Format the HTML content for better readability
+      let formattedHtml = formatGameContent(htmlMatch[0]);
       // Add image utilities
-      const enhancedHtml = injectImageUtils(htmlMatch[0]);
+      const enhancedHtml = injectImageUtils(formattedHtml);
       
       return {
         title: title,
@@ -107,8 +113,10 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
       }
       
       const htmlContent = `<!DOCTYPE html>${fallbackHtmlMatch[0]}`;
+      // Format the HTML content for better readability
+      let formattedHtml = formatGameContent(htmlContent);
       // Add image utilities
-      const enhancedHtml = injectImageUtils(htmlContent);
+      const enhancedHtml = injectImageUtils(formattedHtml);
       
       return {
         title: title,
@@ -153,8 +161,10 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
       </html>
     `;
     
+    // Format the HTML content for better readability
+    let formattedHtml = formatGameContent(wrappedHtml);
     // Add image utilities
-    const enhancedHtml = injectImageUtils(wrappedHtml);
+    const enhancedHtml = injectImageUtils(formattedHtml);
     
     return {
       title: topic,
@@ -206,5 +216,64 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
       description: "Error generating content",
       content: errorHtml
     };
+  }
+};
+
+/**
+ * Format HTML/CSS/JS content to improve readability and debugging
+ * @param content The raw content to format
+ * @returns Formatted content with proper line breaks and indentation
+ */
+const formatGameContent = (content: string): string => {
+  if (!content) return content;
+  
+  try {
+    // Format HTML structure
+    let formatted = content
+      // Add line breaks between HTML tags
+      .replace(/>\s*</g, '>\n<')
+      // Format doctype and html tags
+      .replace(/<!DOCTYPE html>/i, '<!DOCTYPE html>\n');
+    
+    // Format script tags content
+    formatted = formatted.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (match, script) => {
+      // Format JavaScript with proper line breaks and indentation
+      const formattedJS = script
+        .replace(/\{/g, ' {\n  ')
+        .replace(/\}/g, '\n}')
+        .replace(/;\s*/g, ';\n  ')
+        .replace(/\/\/[^\n]*/g, (comment) => `\n  ${comment}\n  `)
+        .replace(/\s*\n\s*\n\s*/g, '\n  ')
+        .replace(/function\s+/g, '\nfunction ')
+        .replace(/const\s+/g, '\nconst ')
+        .replace(/let\s+/g, '\nlet ')
+        .replace(/var\s+/g, '\nvar ')
+        .replace(/if\s*\(/g, 'if (')
+        .replace(/else\s*\{/g, 'else {')
+        .replace(/for\s*\(/g, 'for (')
+        .replace(/while\s*\(/g, 'while (')
+        .trim();
+      
+      return `<script>\n${formattedJS}\n</script>`;
+    });
+    
+    // Format style tags content
+    formatted = formatted.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, (match, style) => {
+      // Format CSS with proper line breaks and indentation
+      const formattedCSS = style
+        .replace(/\{/g, ' {\n  ')
+        .replace(/;/g, ';\n  ')
+        .replace(/\}/g, '\n}\n')
+        .replace(/\/\*[\s\S]*?\*\//g, (comment) => comment.replace(/\n/g, '\n  '))
+        .replace(/\s*\n\s*\n\s*/g, '\n')
+        .trim();
+      
+      return `<style>\n${formattedCSS}\n</style>`;
+    });
+    
+    return formatted;
+  } catch (error) {
+    console.error('Error formatting game content:', error);
+    return content; // Return original content if formatting fails
   }
 };
