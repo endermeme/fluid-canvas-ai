@@ -90,7 +90,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
         iframeRef.current.src = 'about:blank';
         setTimeout(() => {
           if (iframeRef.current) {
-            iframeRef.current.srcdoc = enhanceIframeContent(miniGame.content, miniGame.title);
+            iframeRef.current.srcDoc = enhanceIframeContent(miniGame.content, miniGame.title);
           }
         }, 100);
         setGameStats({});

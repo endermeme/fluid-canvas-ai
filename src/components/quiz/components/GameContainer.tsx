@@ -37,7 +37,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
           className="w-full h-full"
           sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
           title={title || "Custom Game"}
-          srcdoc={content}
+          srcDoc={content}
           style={{
             border: 'none',
             display: 'block',
