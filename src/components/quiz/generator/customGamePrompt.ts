@@ -17,56 +17,30 @@ export const generateCustomGamePrompt = (options: GamePromptOptions): string => 
   } = options;
 
   const basePrompt = `
-    Create an interactive HTML game based on this prompt: "${topic}"
+Create an interactive HTML game based on: "${topic}"
 
-    STRICT CODE GENERATION REQUIREMENTS:
-    - Produce fully functional HTML, CSS, and JavaScript code
-    - Use modern JavaScript (ES6+) without external libraries
-    - Implement proper event listeners and game mechanics
-    - Ensure clean, readable code with meaningful variable and function names
-    - Break down complex logic into focused functions
-    - Maintain clean, concise code structure
-    - Prioritize code readability and performance
-    - Implement error handling gracefully
-    - Ensure cross-browser compatibility
-    - Create responsive design for various screen sizes
-    - Avoid unnecessary global variables
-    - Use semantic HTML5 elements
-    - Implement proper game state management
-    - DO NOT include comments in the code, use descriptive names instead
-    
-    PERFORMANCE AND BEST PRACTICES:
-    - Use requestAnimationFrame for smooth animations
-    - Optimize memory usage and prevent memory leaks
-    - Handle user interactions efficiently
-    - Implement proper input validation
-    - Create intuitive user experience
-    - Use local storage for persistent game state if needed
+**STRICT REQUIREMENTS:**
+- No backsplash like // or anny comment in css js html
+- Output only complete, runnable HTML code (HTML, CSS, JS combined)
+- No comments in code (JS/HTML/CSS)
+- Use modern JavaScript (ES6+), no external libraries
+- Clean, readable, maintainable code with descriptive names
+- Strictly modular structure: init, update, render, game loop
+- Use semantic HTML5, responsive layout
+- No global variables unless absolutely needed
+- Implement proper event handling, game state management, and error handling
+- Optimize for cross-browser compatibility and performance
+- Input validation and user-friendly interactions
+- Use localStorage if persistence is needed
+- Use HTML5 Canvas
+- Efficient rendering, sprite optimization, dynamic resizing
+- Smooth animation via requestAnimationFrame
 
-    ${useCanvas ? `
-    CANVAS RENDERING REQUIREMENTS:
-    - Use HTML5 Canvas for advanced graphics
-    - Implement efficient rendering techniques
-    - Handle canvas resizing dynamically
-    - Create smooth, performant animations
-    - Use sprite-based rendering when appropriate
-    - Optimize canvas drawing operations` : ''}
+**Game content must match:**
+- Difficulty level: \`${difficulty}\`
+- Category: \`${category}\`
+- Language: \`${language === 'vi' ? 'Vietnamese' : 'English'}\`
 
-    GAME STRUCTURE:
-    - Clear initialization function
-    - Modular game loop
-    - Separate update and render functions
-    - Implement game state tracking
-    - Create reusable game object methods
-    - Handle game start, progress, and end states
-    - Make the game appropriate for ${difficulty} difficulty
-    - Focus on ${category} category content
-
-    LANGUAGE SETTINGS:
-    - Use ${language === 'vi' ? 'Vietnamese' : 'English'} for all text and instructions
-
-    OUTPUT FORMAT:
-    Respond ONLY with complete, runnable HTML code for the game.
   `;
 
   return basePrompt;
