@@ -13,6 +13,7 @@ import {
   DEFAULT_GENERATION_SETTINGS 
 } from '@/constants/api-constants';
 import { buildGeminiPrompt } from './promptBuilder';
+import { generateCustomGamePrompt } from './customGamePrompt';
 
 const SOURCE = "GEMINI";
 
@@ -31,19 +32,15 @@ export const generateWithGemini = async (
     canvasMode: useCanvas ? "enabled" : "disabled"
   });
 
-  const prompt = `Create a clean, production-ready game about ${topic}.
-Key requirements:
-- Use TypeScript with proper type annotations
-- Avoid comments in the code, use clear variable/function names instead
-- Follow React best practices and hooks guidelines
-- Implement proper error handling
-- Use meaningful variable and function names that explain their purpose
-- Break down complex logic into smaller, focused functions
-- Keep the code DRY (Don't Repeat Yourself)
-- Return valid, well-formatted HTML/TypeScript code
-${useCanvas ? '- Utilize HTML5 Canvas API efficiently' : ''}
+  const promptOptions = {
+    topic,
+    useCanvas,
+    language: settings?.language || 'en',
+    difficulty: settings?.difficulty || 'medium',
+    category: settings?.category || 'general'
+  };
 
-Output must be valid JSX/TSX code that can be directly used in a React component.`;
+  const prompt = generateCustomGamePrompt(promptOptions);
 
   try {
     logInfo(SOURCE, `Sending request to Gemini API`);
