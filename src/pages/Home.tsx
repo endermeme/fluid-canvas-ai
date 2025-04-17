@@ -12,10 +12,10 @@ const Home: React.FC = () => {
           Create, share, and play interactive quizzes and games for education and fun
         </p>
         <div className="flex flex-wrap justify-center gap-4">
-          <Button asChild size="lg">
+          <Button asChild>
             <Link to="/quiz">Start Quiz</Link>
           </Button>
-          <Button asChild size="lg" variant="outline">
+          <Button asChild variant="outline">
             <Link to="/custom-game">Custom Games</Link>
           </Button>
         </div>

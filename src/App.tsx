@@ -31,54 +31,52 @@ function App() {
     };
   }, []);
 
-  return (
-    <RouterProvider
-      router={createBrowserRouter([
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <Shell />,
+      children: [
         {
-          path: "/",
-          element: <Shell />,
-          children: [
-            {
-              index: true,
-              element: <Home />,
-            },
-            {
-              path: "docs",
-              element: <Docs />,
-            },
-            {
-              path: "pricing",
-              element: <Pricing />,
-            },
-          ],
+          index: true,
+          element: <Home />,
         },
         {
-          path: "/quiz",
-          element: <Quiz />,
+          path: "docs",
+          element: <Docs />,
         },
         {
-          path: "/game/:id/dashboard",
-          element: <GameDashboard />,
+          path: "pricing",
+          element: <Pricing />,
         },
-        {
-          path: "/share/:id",
-          element: <SharedGame />,
-        },
-        {
-          path: "/game-history",
-          element: <GameHistory />,
-        },
-        {
-          path: "/preset-games",
-          element: <PresetGamesPage />,
-        },
-        {
-          path: "/custom-game",
-          element: <CustomGame />,
-        },
-      ])}
-    />
-  );
+      ],
+    },
+    {
+      path: "/quiz",
+      element: <Quiz />,
+    },
+    {
+      path: "/game/:id/dashboard",
+      element: <GameDashboard />,
+    },
+    {
+      path: "/share/:id",
+      element: <SharedGame />,
+    },
+    {
+      path: "/game-history",
+      element: <GameHistory />,
+    },
+    {
+      path: "/preset-games",
+      element: <PresetGamesPage />,
+    },
+    {
+      path: "/custom-game",
+      element: <CustomGame />,
+    },
+  ]);
+
+  return <RouterProvider router={router} />;
 }
 
 export default App;
