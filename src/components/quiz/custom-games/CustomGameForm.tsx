@@ -149,7 +149,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
             <div className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg">
               <Info className="w-4 h-4 text-primary mt-1" />
               <p className="text-sm text-muted-foreground">
-                Chức năng sẽ tạo một game cơ bản dựa trên mô tả của bạn. Tính năng tạo game với AI đã bị gỡ bỏ.
+                Hệ thống sẽ tạo game tùy chỉnh dựa trên mô tả của bạn, sử dụng HTML, CSS và JavaScript.
               </p>
             </div>
           </div>

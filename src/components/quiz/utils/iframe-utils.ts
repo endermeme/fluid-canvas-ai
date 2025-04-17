@@ -1,3 +1,4 @@
+
 export const enhanceIframeContent = (content: string, title?: string): string => {
   // Add viewport meta tag for responsive layout if not present
   if (!content.includes('<meta name="viewport"')) {
@@ -135,9 +136,9 @@ export const createCompleteHtmlFromParts = (
 ): string => {
   // Fix template literals in JavaScript to prevent syntax errors
   const fixedJsContent = jsContent
-    .replace(/\${(\w+)}/g, (match, variable) => {
-      // Keep the literal ${topic} as is, but escape characters that might cause issues
-      return match.replace(/'/g, "\\'").replace(/"/g, '\\"');
+    .replace(/`([^`]*)`/g, function(match) {
+      // Escape backticks and replace newlines with proper escaped newlines
+      return match.replace(/\n/g, "\\n").replace(/\r/g, "\\r");
     });
     
   const docType = '<!DOCTYPE html>';
