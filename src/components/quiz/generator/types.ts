@@ -1,4 +1,5 @@
-import { GameType } from "../gameTypes";
+
+import { gameTypes } from "../gameTypes";
 
 export interface MiniGame {
   title: string;
@@ -15,7 +16,7 @@ export interface MiniGame {
   
   items?: any[];
   useCanvas?: boolean;
-  gameType?: GameType;
+  gameType?: keyof typeof gameTypes;
 }
 
 export interface GameApiResponse {

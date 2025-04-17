@@ -7,6 +7,46 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
   if (!content) return '';
 
   try {
+    // Add viewport meta and basic styling to ensure proper display
+    const viewportMeta = '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
+    
+    // Basic responsive styling to ensure content fits well in iframe
+    const responsiveStyles = `
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.5;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  img, canvas {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  .container, .game-container, #game, .game, main {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+  }
+</style>`;
+    
     // Add game communication channel
     const gameCommsScript = `
 <script>
@@ -46,13 +86,53 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       }, '*');
     }
   });
+  
+  // Send resize message to parent
+  function reportHeight() {
+    if (window.parent) {
+      const height = Math.max(
+        document.body.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.clientHeight,
+        document.documentElement.scrollHeight,
+        document.documentElement.offsetHeight
+      );
+      
+      window.parent.postMessage({
+        type: 'setHeight',
+        height: height
+      }, '*');
+    }
+  }
+  
+  // Report height on load and resize
+  window.addEventListener('load', reportHeight);
+  window.addEventListener('resize', reportHeight);
+  
+  // Set up a mutation observer to detect DOM changes and report height
+  var observer = new MutationObserver(function() {
+    reportHeight();
+  });
+  
+  // Start observing when DOM is ready
+  document.addEventListener('DOMContentLoaded', function() {
+    observer.observe(document.body, { 
+      childList: true, 
+      subtree: true,
+      attributes: true,
+      characterData: true
+    });
+    reportHeight();
+  });
 })();
 </script>`;
 
     // Check if the content already has a body tag
     if (content.includes('</body>')) {
       // Insert the script before the closing body tag
-      return content.replace('</body>', `${gameCommsScript}</body>`);
+      return content
+        .replace(/<\/head>/, `${viewportMeta}${responsiveStyles}</head>`)
+        .replace('</body>', `${gameCommsScript}</body>`);
     } else {
       // Content doesn't have a body tag, create a minimal HTML document
       return `
@@ -60,18 +140,9 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  ${viewportMeta}
   <title>${title || 'Interactive Game'}</title>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 0;
-      padding: 20px;
-      max-width: 100%;
-      overflow-x: hidden;
-      box-sizing: border-box;
-    }
-  </style>
+  ${responsiveStyles}
 </head>
 <body>
   ${content}
