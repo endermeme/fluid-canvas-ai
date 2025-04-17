@@ -1,3 +1,4 @@
+
 export const enhanceIframeContent = (content: string, title?: string): string => {
   // Add viewport meta tag for responsive layout if not present
   if (!content.includes('<meta name="viewport"')) {
@@ -126,7 +127,7 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
   return content;
 };
 
-// New utility to create a complete HTML document from separated HTML, CSS, and JS files
+// Utility to create a complete HTML document from separated HTML, CSS, and JS files
 export const createCompleteHtmlFromParts = (
   htmlContent: string, 
   cssContent: string, 

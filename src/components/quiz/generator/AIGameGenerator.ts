@@ -1,14 +1,7 @@
 
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
-import { buildGeminiPrompt } from './promptBuilder';
 import { logInfo, logError } from './apiUtils';
-import { 
-  GEMINI_MODELS, 
-  API_VERSION, 
-  getApiEndpoint,
-  DEFAULT_GENERATION_SETTINGS
-} from '@/constants/api-constants';
 
 /**
  * API client for generating minigames with AI
@@ -21,7 +14,7 @@ export class AIGameGenerator {
    * Create a new AIGameGenerator
    */
   constructor() {
-    logInfo('AIGameGenerator', `Initialized with model: ${GEMINI_MODELS.CUSTOM_GAME} on API version: ${API_VERSION}`);
+    logInfo('AIGameGenerator', 'Initialized AIGameGenerator');
   }
 
   /**
@@ -52,101 +45,72 @@ export class AIGameGenerator {
    */
   public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
-      const htmlGame = await this.generateHtmlGame(topic);
-      return htmlGame;
+      // Create a simple placeholder game since Gemini functionality is removed
+      const placeholderGame: MiniGame = {
+        title: `Game: ${topic}`,
+        content: this.createPlaceholderGame(topic),
+        htmlContent: `<div id="game-container"><h1>Game: ${topic}</h1><p>This is a placeholder game.</p></div>`,
+        cssContent: `body { font-family: system-ui, sans-serif; } #game-container { max-width: 800px; margin: 0 auto; text-align: center; }`,
+        jsContent: `console.log('Placeholder game loaded');`,
+        isSeparatedFiles: true
+      };
+      
+      return placeholderGame;
     } catch (error) {
       logError('AIGameGenerator', 'Error generating minigame', error);
       throw error;
     }
   }
 
-  private sanitizeHtmlContent(htmlContent: string): string {
-    // Remove any markdown code blocks
-    let sanitizedContent = htmlContent.replace(/```html|```/g, '');
-    
-    // Ensure complete HTML structure
-    if (!sanitizedContent.includes('<!DOCTYPE html>')) {
-      sanitizedContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Interactive Game</title></head><body>${sanitizedContent}</body></html>`;
-    }
-    
-    // Basic HTML cleaning
-    sanitizedContent = sanitizedContent.replace(/\s+/g, ' ').trim();
-    
-    return sanitizedContent;
-  }
-
-  /**
-   * Generate an HTML game
-   * @param prompt User prompt for game generation
-   * @returns Promise with generated game or null
-   */
-  private async generateHtmlGame(prompt: string): Promise<MiniGame | null> {
-    try {
-      logInfo('AIGameGenerator', 'Generating HTML game', { prompt });
-      
-      const htmlPrompt = buildGeminiPrompt(prompt, true);
-      
-      const payload = {
-        contents: [{
-          parts: [{text: htmlPrompt}]
-        }],
-        generationConfig: {
-          ...DEFAULT_GENERATION_SETTINGS,
-          maxOutputTokens: 16384  // Increased token limit
+  private createPlaceholderGame(topic: string): string {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Game: ${topic}</title>
+      <style>
+        body {
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+          max-width: 800px;
+          margin: 50px auto;
+          padding: 20px;
+          text-align: center;
+          color: #333;
         }
-      };
-      
-      const response = await fetch(getApiEndpoint(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
-      }
-      
-      const result = await response.json();
-      const htmlContent = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      
-      if (!htmlContent) {
-        throw new Error('No content returned from API');
-      }
-      
-      // Sanitize and clean HTML content
-      const cleanedHtmlContent = this.sanitizeHtmlContent(htmlContent);
-      
-      // Log the full HTML to console
-      console.log('%c 📄 Full HTML Content:', 'font-weight: bold; color: #6f42c1;');
-      console.log(cleanedHtmlContent);
-      
-      // Extract game title
-      let gameTitle = prompt;
-      const titleMatch = cleanedHtmlContent.match(/<title>(.*?)<\/title>/i) || 
-                        cleanedHtmlContent.match(/<h1[^>]*>(.*?)<\/h1>/i);
-      
-      if (titleMatch && titleMatch[1]) {
-        gameTitle = titleMatch[1].replace(/<[^>]*>/g, '').trim();
-      }
-      
-      const game: MiniGame = {
-        title: gameTitle,
-        content: cleanedHtmlContent
-      };
-      
-      logInfo('AIGameGenerator', 'HTML game generated successfully', {
-        title: gameTitle,
-        contentLength: cleanedHtmlContent.length
-      });
-      
-      return game;
-    } catch (error) {
-      logError('AIGameGenerator', 'Error generating HTML game', error);
-      return null;
-    }
+        .game-container {
+          background-color: #f8fafc;
+          border-radius: 12px;
+          padding: 32px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 { color: #4f46e5; margin-bottom: 16px; }
+        button {
+          background-color: #4f46e5;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 16px;
+          margin: 10px 5px;
+        }
+        button:hover { background-color: #4338ca; }
+      </style>
+    </head>
+    <body>
+      <div class="game-container">
+        <h1>Game: ${topic}</h1>
+        <p>This is a placeholder game since the AI game generation has been removed.</p>
+        <button onclick="alert('Game functionality removed')">Play</button>
+      </div>
+      <script>
+        console.log('Placeholder game loaded');
+      </script>
+    </body>
+    </html>
+    `;
   }
 }
 

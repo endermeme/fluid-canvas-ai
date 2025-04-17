@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from './generator/AIGameGenerator';
@@ -11,8 +12,6 @@ import { useNavigate } from 'react-router-dom';
 import { createGameSession } from '@/utils/gameParticipation';
 import { Button } from '@/components/ui/button';
 import { Share2 } from 'lucide-react';
-import { GEMINI_API_KEY, GEMINI_MODELS } from '@/constants/api-constants';
-import { supabase } from '@/integrations/supabase/client';
 
 interface QuizGeneratorProps {
   topic?: string;
@@ -112,7 +111,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
 
     console.log("Starting minigame generation for topic:", topic);
     console.log("Starting game with settings:", settings);
-    console.log("Using model:", GEMINI_MODELS.CUSTOM_GAME);
 
     try {      
       const game = await gameGenerator.generateMiniGame(topic, settings);
@@ -122,7 +120,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
         setMiniGame(game);
         toast({
           title: "Minigame Đã Sẵn Sàng",
-          description: `Đã tạo minigame về "${topic}" với Gemini ${GEMINI_MODELS.CUSTOM_GAME}`,
+          description: `Đã tạo minigame về "${topic}"`,
         });
       } else {
         throw new Error('Không thể tạo minigame');
