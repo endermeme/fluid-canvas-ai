@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -6,7 +7,7 @@ import QuizContainer from '@/components/quiz/QuizContainer';
 import GameLoading from '@/components/quiz/GameLoading';
 import CustomGameSettings from '@/components/quiz/custom-games/CustomGameSettings';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
-import { tryGeminiGeneration } from '@/components/quiz/generator/geminiGenerator';
+import { AIGameGenerator } from '@/components/quiz/generator/AIGameGenerator';
 
 const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -16,6 +17,8 @@ const Quiz = () => {
   const [miniGame, setMiniGame] = useState<{ title: string, content: string } | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  const gameGenerator = AIGameGenerator.getInstance();
   
   const handleGenerate = async (promptText: string, useCanvas: boolean = true) => {
     if (!promptText.trim()) {
@@ -34,10 +37,11 @@ const Quiz = () => {
     setMiniGame(null);
     
     try {
-      const game = await tryGeminiGeneration(null, promptText, { 
-        useCanvas, 
-        category: 'general' 
-      });
+      // Set canvas mode according to user preference
+      gameGenerator.setCanvasMode(useCanvas);
+      
+      // Generate game using the AIGameGenerator instance
+      const game = await gameGenerator.generateMiniGame(promptText);
       
       if (game) {
         setGameContent(game.content);
