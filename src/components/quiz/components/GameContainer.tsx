@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Code, Eye } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -30,6 +30,27 @@ const GameContainer: React.FC<GameContainerProps> = ({
 }) => {
   const [viewMode, setViewMode] = useState<'game' | 'code'>('game');
   const [codeTab, setCodeTab] = useState<'html' | 'css' | 'js' | 'full'>('html');
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+
+  useEffect(() => {
+    // Set up message listener for iframe communication
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type) {
+        if (event.data.type === 'console') {
+          console.log(`[Game Console ${event.data.method}]:`, ...event.data.args);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
+
+  const handleIframeLoad = () => {
+    setIframeLoaded(true);
+  };
 
   const formatCodeForDisplay = (code: string, language: string) => {
     return (
@@ -90,6 +111,8 @@ const GameContainer: React.FC<GameContainerProps> = ({
                 title={title || "Custom Game"}
                 srcDoc={getDisplayContent()}
                 style={{ border: 'none', display: 'block', width: '100%', height: '100%' }}
+                onLoad={handleIframeLoad}
+                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
               />
             ) : (
               <div className="p-4">

@@ -47,27 +47,35 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
   if (!content.includes('window.parent.postMessage')) {
     content = content.replace('</body>', `
   <script>
-    // Communication with parent window
+    // Communication with parent window - fixed for cross-origin safety
     function reportGameStats(stats) {
-      window.parent.postMessage({
-        type: 'gameStats',
-        payload: stats
-      }, '*');
+      try {
+        window.parent.postMessage({
+          type: 'gameStats',
+          payload: stats
+        }, '*');
+      } catch(e) {
+        console.error("Error posting message to parent:", e);
+      }
     }
     
     // When game completes, report it
     function reportGameCompleted(score) {
-      reportGameStats({
-        completed: true,
-        score: score || 0,
-        totalTime: Date.now() - window.gameStartTime
-      });
+      try {
+        reportGameStats({
+          completed: true,
+          score: score || 0,
+          totalTime: Date.now() - window.gameStartTime
+        });
+      } catch(e) {
+        console.error("Error reporting game completion:", e);
+      }
     }
     
     // Track game start time
     window.gameStartTime = Date.now();
     
-    // Intercept console logs for debugging
+    // Intercept console logs for debugging with safe cross-origin handling
     const originalConsole = { 
       log: console.log, 
       error: console.error, 
@@ -77,48 +85,70 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     console.log = function() {
       originalConsole.log.apply(console, arguments);
       try {
+        const args = Array.from(arguments).map(arg => {
+          try { 
+            return typeof arg === 'object' ? JSON.stringify(arg) : String(arg);
+          } catch(e) { 
+            return String(arg); 
+          }
+        });
         window.parent.postMessage({
           type: 'console',
           method: 'log',
-          args: Array.from(arguments).map(arg => {
-            try { return JSON.stringify(arg); } 
-            catch(e) { return String(arg); }
-          })
+          args: args
         }, '*');
-      } catch(e) {}
+      } catch(e) {
+        // Silent fail for console interception
+      }
     };
     
     console.error = function() {
       originalConsole.error.apply(console, arguments);
       try {
+        const args = Array.from(arguments).map(arg => {
+          try { 
+            return typeof arg === 'object' ? JSON.stringify(arg) : String(arg);
+          } catch(e) { 
+            return String(arg); 
+          }
+        });
         window.parent.postMessage({
           type: 'console',
           method: 'error',
-          args: Array.from(arguments).map(arg => {
-            try { return JSON.stringify(arg); } 
-            catch(e) { return String(arg); }
-          })
+          args: args
         }, '*');
-      } catch(e) {}
+      } catch(e) {
+        // Silent fail for console interception
+      }
     };
     
     console.warn = function() {
       originalConsole.warn.apply(console, arguments);
       try {
+        const args = Array.from(arguments).map(arg => {
+          try { 
+            return typeof arg === 'object' ? JSON.stringify(arg) : String(arg);
+          } catch(e) { 
+            return String(arg); 
+          }
+        });
         window.parent.postMessage({
           type: 'console',
           method: 'warn',
-          args: Array.from(arguments).map(arg => {
-            try { return JSON.stringify(arg); } 
-            catch(e) { return String(arg); }
-          })
+          args: args
         }, '*');
-      } catch(e) {}
+      } catch(e) {
+        // Silent fail for console interception
+      }
     };
     
     // Report initial load complete
     window.addEventListener('load', function() {
-      reportGameStats({ loaded: true });
+      try {
+        reportGameStats({ loaded: true });
+      } catch(e) {
+        console.error("Error reporting game load:", e);
+      }
     });
   </script>
 </body>`);

@@ -31,6 +31,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [iframeError, setIframeError] = useState<string | null>(null);
+  const [gameStats, setGameStats] = useState<{score?: number; completed?: boolean; totalTime?: number}>({});
 
   useEffect(() => {
     if (iframeRef.current) {
@@ -57,6 +58,28 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     }
   }, [miniGame]);
 
+  // Add event listener for messages from the iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        if (event.data && typeof event.data === 'object') {
+          if (event.data.type === 'gameStats' && event.data.payload) {
+            setGameStats(event.data.payload);
+          } else if (event.data.type === 'console') {
+            console.log(`[Game Console ${event.data.method}]:`, ...event.data.args);
+          }
+        }
+      } catch (err) {
+        console.error("Error processing iframe message:", err);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
+
   const refreshGame = () => {
     if (iframeRef.current) {
       try {
@@ -68,13 +91,26 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
             miniGame.jsContent,
             miniGame.title
           );
-          iframeRef.current.srcdoc = enhancedContent;
+          // Use a different technique to reload the iframe
+          iframeRef.current.src = 'about:blank';
+          setTimeout(() => {
+            if (iframeRef.current) {
+              iframeRef.current.srcdoc = enhancedContent;
+            }
+          }, 50);
         } else if (miniGame.content) {
           // Use the full content directly
           const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
-          iframeRef.current.srcdoc = enhancedContent;
+          // Use a different technique to reload the iframe
+          iframeRef.current.src = 'about:blank';
+          setTimeout(() => {
+            if (iframeRef.current) {
+              iframeRef.current.srcdoc = enhancedContent;
+            }
+          }, 50);
         }
         setIframeError(null);
+        setGameStats({});
       } catch (error) {
         console.error("Error refreshing game:", error);
         setIframeError("Không thể tải lại game. Vui lòng thử lại.");
@@ -212,6 +248,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
               width: '100%',
               height: '100%'
             }}
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
           />
         )}
       </div>
