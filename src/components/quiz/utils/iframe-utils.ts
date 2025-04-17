@@ -7,6 +7,34 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
   if (!content) return '';
 
   try {
+    // Check if content already has proper HTML structure or contains CSS/JS markers
+    const hasCssSection = content.includes('css ');
+    const hasJsSection = content.includes('js ');
+    
+    // Extract CSS and JS if they exist in the content
+    let htmlContent = content;
+    let cssContent = '';
+    let jsContent = '';
+    
+    if (hasCssSection || hasJsSection) {
+      // Split content into HTML, CSS, and JS sections
+      const sections = content.split(/\s*(css|js)\s+/);
+      
+      if (sections.length >= 1) {
+        htmlContent = sections[0].trim();
+      }
+      
+      for (let i = 1; i < sections.length; i += 2) {
+        if (i + 1 < sections.length) {
+          if (sections[i] === 'css') {
+            cssContent = sections[i + 1].trim();
+          } else if (sections[i] === 'js') {
+            jsContent = sections[i + 1].trim();
+          }
+        }
+      }
+    }
+
     // Add viewport meta and basic styling to ensure proper display
     const viewportMeta = '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
     
@@ -45,6 +73,7 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     margin: 0 auto;
     padding: 0;
   }
+  ${cssContent ? `\n  ${cssContent.replace(/\n/g, '\n  ')}` : ''}
 </style>`;
     
     // Add game communication channel
@@ -125,11 +154,29 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     reportHeight();
   });
 })();
+
+${jsContent ? `\n${jsContent}` : ''}
 </script>`;
 
-    // Check if the content already has a body tag
-    if (content.includes('</body>')) {
-      // Insert the script before the closing body tag
+    // Properly format the fruit puzzle game
+    if (hasCssSection || hasJsSection) {
+      // Create a complete HTML document with structured sections
+      return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  ${viewportMeta}
+  <title>${title || 'Interactive Game'}</title>
+  ${responsiveStyles}
+</head>
+<body>
+  ${htmlContent}
+  ${gameCommsScript}
+</body>
+</html>`;
+    } else if (content.includes('</body>')) {
+      // Insert the script before the closing body tag for existing HTML
       return content
         .replace(/<\/head>/, `${viewportMeta}${responsiveStyles}</head>`)
         .replace('</body>', `${gameCommsScript}</body>`);
