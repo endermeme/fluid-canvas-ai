@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { enhanceIframeContent } from '../utils/iframe-utils';
+import { enhanceIframeContent, createCompleteHtmlFromParts } from '../utils/iframe-utils';
 import GameContainer from '../components/GameContainer';
 
 interface EnhancedGameViewProps {
@@ -33,10 +33,22 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const [iframeError, setIframeError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (iframeRef.current && miniGame?.content) {
+    if (iframeRef.current) {
       try {
-        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
-        iframeRef.current.srcdoc = enhancedContent;
+        if (miniGame.isSeparatedFiles && miniGame.htmlContent && miniGame.cssContent && miniGame.jsContent) {
+          // Generate complete content from separated files
+          const enhancedContent = createCompleteHtmlFromParts(
+            miniGame.htmlContent,
+            miniGame.cssContent,
+            miniGame.jsContent,
+            miniGame.title
+          );
+          iframeRef.current.srcdoc = enhancedContent;
+        } else if (miniGame.content) {
+          // Use the full content directly
+          const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
+          iframeRef.current.srcdoc = enhancedContent;
+        }
         setIframeError(null);
       } catch (error) {
         console.error("Error setting iframe content:", error);
@@ -46,10 +58,22 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   }, [miniGame]);
 
   const refreshGame = () => {
-    if (iframeRef.current && miniGame?.content) {
+    if (iframeRef.current) {
       try {
-        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
-        iframeRef.current.srcdoc = enhancedContent;
+        if (miniGame.isSeparatedFiles && miniGame.htmlContent && miniGame.cssContent && miniGame.jsContent) {
+          // Generate complete content from separated files
+          const enhancedContent = createCompleteHtmlFromParts(
+            miniGame.htmlContent,
+            miniGame.cssContent,
+            miniGame.jsContent,
+            miniGame.title
+          );
+          iframeRef.current.srcdoc = enhancedContent;
+        } else if (miniGame.content) {
+          // Use the full content directly
+          const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
+          iframeRef.current.srcdoc = enhancedContent;
+        }
         setIframeError(null);
       } catch (error) {
         console.error("Error refreshing game:", error);

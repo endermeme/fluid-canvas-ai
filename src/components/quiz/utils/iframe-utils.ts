@@ -1,120 +1,157 @@
-
-/**
- * Enhanced iframe utilities for custom games
- */
-
 export const enhanceIframeContent = (content: string, title?: string): string => {
-  if (!content) return '';
-
-  try {
-    // Add game communication channel
-    const gameCommsScript = `
-<script>
-// Game communication utilities
-(function() {
-  // Send game stats to parent
-  window.sendGameStats = function(stats) {
-    if (window.parent) {
+  // Add viewport meta tag for responsive layout if not present
+  if (!content.includes('<meta name="viewport"')) {
+    content = content.replace('<head>', '<head>\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">');
+  }
+  
+  // Make clickable elements visible and add pointer cursor
+  if (!content.includes('user-select: none')) {
+    content = content.replace('</head>', `  <style>
+    button, a, input[type="button"], input[type="submit"], .clickable, [role="button"] {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    ::selection {
+      background-color: rgba(79, 70, 229, 0.2);
+    }
+    html, body {
+      overscroll-behavior: none;
+      overflow: hidden;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    img {
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+    canvas {
+      touch-action: none;
+    }
+  </style>
+</head>`);
+  }
+  
+  // Add title if provided
+  if (title && !content.includes('<title>')) {
+    content = content.replace('<head>', `<head>\n  <title>${title}</title>`);
+  }
+  
+  // Add communication with parent window
+  if (!content.includes('window.parent.postMessage')) {
+    content = content.replace('</body>', `
+  <script>
+    // Communication with parent window
+    function reportGameStats(stats) {
       window.parent.postMessage({
         type: 'gameStats',
         payload: stats
       }, '*');
     }
-  };
-  
-  // Game completion handler
-  window.completeGame = function(score) {
-    window.sendGameStats({
-      completed: true,
-      score: score,
-      completedAt: new Date().toISOString()
+    
+    // When game completes, report it
+    function reportGameCompleted(score) {
+      reportGameStats({
+        completed: true,
+        score: score || 0,
+        totalTime: Date.now() - window.gameStartTime
+      });
+    }
+    
+    // Track game start time
+    window.gameStartTime = Date.now();
+    
+    // Intercept console logs for debugging
+    const originalConsole = { 
+      log: console.log, 
+      error: console.error, 
+      warn: console.warn 
+    };
+    
+    console.log = function() {
+      originalConsole.log.apply(console, arguments);
+      try {
+        window.parent.postMessage({
+          type: 'console',
+          method: 'log',
+          args: Array.from(arguments).map(arg => {
+            try { return JSON.stringify(arg); } 
+            catch(e) { return String(arg); }
+          })
+        }, '*');
+      } catch(e) {}
+    };
+    
+    console.error = function() {
+      originalConsole.error.apply(console, arguments);
+      try {
+        window.parent.postMessage({
+          type: 'console',
+          method: 'error',
+          args: Array.from(arguments).map(arg => {
+            try { return JSON.stringify(arg); } 
+            catch(e) { return String(arg); }
+          })
+        }, '*');
+      } catch(e) {}
+    };
+    
+    console.warn = function() {
+      originalConsole.warn.apply(console, arguments);
+      try {
+        window.parent.postMessage({
+          type: 'console',
+          method: 'warn',
+          args: Array.from(arguments).map(arg => {
+            try { return JSON.stringify(arg); } 
+            catch(e) { return String(arg); }
+          })
+        }, '*');
+      } catch(e) {}
+    };
+    
+    // Report initial load complete
+    window.addEventListener('load', function() {
+      reportGameStats({ loaded: true });
     });
-  };
-
-  // Setup window error handling
-  window.addEventListener('error', function(event) {
-    console.error('Game error:', event.error);
-    if (window.parent) {
-      window.parent.postMessage({
-        type: 'gameError',
-        payload: {
-          message: event.message,
-          source: event.filename,
-          line: event.lineno,
-          column: event.colno
-        }
-      }, '*');
-    }
-  });
-})();
-</script>`;
-
-    // Check if the content already has a body tag
-    if (content.includes('</body>')) {
-      // Insert the script before the closing body tag
-      return content.replace('</body>', `${gameCommsScript}</body>`);
-    } else {
-      // Content doesn't have a body tag, create a minimal HTML document
-      return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title || 'Interactive Game'}</title>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 0;
-      padding: 20px;
-      max-width: 100%;
-      overflow-x: hidden;
-      box-sizing: border-box;
-    }
-  </style>
-</head>
-<body>
-  ${content}
-  ${gameCommsScript}
-</body>
-</html>`;
-    }
-  } catch (error) {
-    console.error('Error enhancing iframe content:', error);
-    return content; // Return original content on error
+  </script>
+</body>`);
   }
+  
+  return content;
 };
 
-/**
- * Wrap content in iframe-safe HTML if it's not already HTML
- */
-export const wrapContentInHtml = (content: string, title?: string): string => {
-  // Check if content is already HTML (has html tags)
-  if (content.includes('<html') || content.includes('<!DOCTYPE html>')) {
-    return enhanceIframeContent(content, title);
-  }
-  
-  // Wrap in minimal HTML
-  return `
-<!DOCTYPE html>
+// New utility to create a complete HTML document from separated HTML, CSS, and JS files
+export const createCompleteHtmlFromParts = (
+  htmlContent: string, 
+  cssContent: string, 
+  jsContent: string,
+  title?: string
+): string => {
+  const docType = '<!DOCTYPE html>';
+  const html = `
+${docType}
 <html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title || 'Interactive Content'}</title>
+  ${title ? `<title>${title}</title>` : '<title>Interactive Game</title>'}
   <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 0;
-      padding: 20px;
-      max-width: 100%;
-      overflow-x: hidden;
-      box-sizing: border-box;
-    }
+${cssContent || ''}
   </style>
 </head>
 <body>
-  ${content}
+${htmlContent || ''}
+  <script>
+${jsContent || ''}
+  </script>
 </body>
 </html>`;
+
+  return enhanceIframeContent(html, title);
 };

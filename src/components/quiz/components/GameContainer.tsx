@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Code, Eye } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { createCompleteHtmlFromParts } from '../utils/iframe-utils';
 
 interface GameContainerProps {
   iframeRef: React.RefObject<HTMLIFrameElement>;
@@ -36,6 +37,14 @@ const GameContainer: React.FC<GameContainerProps> = ({
         <code>{code}</code>
       </pre>
     );
+  };
+
+  // Create a complete HTML document from separated parts if needed
+  const getDisplayContent = () => {
+    if (isSeparatedFiles && htmlContent && cssContent && jsContent) {
+      return createCompleteHtmlFromParts(htmlContent, cssContent, jsContent, title);
+    }
+    return content;
   };
 
   return (
@@ -79,7 +88,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
                 className="w-full h-full"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
                 title={title || "Custom Game"}
-                srcDoc={content}
+                srcDoc={getDisplayContent()}
                 style={{ border: 'none', display: 'block', width: '100%', height: '100%' }}
               />
             ) : (
@@ -115,7 +124,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
                     
                     <TabsContent value="full">
                       <h3 className="text-lg font-medium mb-2">HTML đầy đủ</h3>
-                      {formatCodeForDisplay(content, 'html')}
+                      {formatCodeForDisplay(getDisplayContent(), 'html')}
                     </TabsContent>
                   </Tabs>
                 ) : (
