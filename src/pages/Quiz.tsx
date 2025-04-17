@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -14,7 +13,7 @@ const Quiz = () => {
   const [gameContent, setGameContent] = useState<string | null>(null);
   const [gameTitle, setGameTitle] = useState('Game Tương Tác');
   const [prompt, setPrompt] = useState('');
-  const [miniGame, setMiniGame] = useState<{ title: string, content: string } | null>(null);
+  const [miniGame, setMiniGame] = useState<{ title: string, content: string, htmlContent: string, cssContent: string, jsContent: string, isSeparatedFiles: boolean } | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -37,10 +36,8 @@ const Quiz = () => {
     setMiniGame(null);
     
     try {
-      // Set canvas mode according to user preference
       gameGenerator.setCanvasMode(useCanvas);
       
-      // Generate game using the AIGameGenerator instance
       const game = await gameGenerator.generateMiniGame(promptText);
       
       if (game) {
@@ -48,7 +45,11 @@ const Quiz = () => {
         setGameTitle(game.title || `Game: ${promptText.substring(0, 40)}...`);
         setMiniGame({
           title: game.title || `Game: ${promptText.substring(0, 40)}...`,
-          content: game.content
+          content: game.content,
+          htmlContent: game.htmlContent,
+          cssContent: game.cssContent,
+          jsContent: game.jsContent,
+          isSeparatedFiles: game.isSeparatedFiles
         });
         
         toast({
@@ -72,7 +73,11 @@ const Quiz = () => {
       setGameTitle(`Game: ${promptText.substring(0, 40)}...`);
       setMiniGame({
         title: `Game: ${promptText.substring(0, 40)}...`,
-        content: fallbackHTML
+        content: fallbackHTML,
+        htmlContent: fallbackHTML,
+        cssContent: '',
+        jsContent: '',
+        isSeparatedFiles: false
       });
     } finally {
       setIsGenerating(false);
@@ -330,7 +335,14 @@ const Quiz = () => {
       return (
         <div className="w-full h-full">
           <EnhancedGameView 
-            miniGame={miniGame}
+            miniGame={{
+              title: miniGame.title,
+              content: miniGame.content,
+              htmlContent: miniGame.htmlContent,
+              cssContent: miniGame.cssContent,
+              jsContent: miniGame.jsContent,
+              isSeparatedFiles: miniGame.isSeparatedFiles
+            }}
             onBack={handleReset}
             extraButton={
               <Button 
@@ -358,7 +370,7 @@ const Quiz = () => {
   return (
     <div className="h-screen w-full bg-gradient-to-b from-background to-background/95 overflow-hidden">
       <QuizContainer
-        title={miniGame ? miniGame.title : "Tạo Game Tùy Chỉnh"}
+        title={miniGame ? miniGame.title : "Tạo Game T��y Chỉnh"}
         showBackButton={true}
         showRefreshButton={false}
         showHomeButton={true}
