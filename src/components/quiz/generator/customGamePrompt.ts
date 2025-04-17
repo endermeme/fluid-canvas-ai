@@ -1,3 +1,4 @@
+
 export interface GamePromptOptions {
   topic: string;
   useCanvas?: boolean;

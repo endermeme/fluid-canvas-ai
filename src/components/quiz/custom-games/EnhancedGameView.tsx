@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
@@ -80,7 +81,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     }
   };
 
-  // Sử dụng component GameContainer để hiển thị nếu có file tách biệt
+  // Use GameContainer component to display if separated files exist
   if (miniGame.isSeparatedFiles) {
     return (
       <GameContainer

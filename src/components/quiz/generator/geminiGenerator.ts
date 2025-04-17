@@ -1,3 +1,4 @@
+
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -39,7 +40,7 @@ export const generateWithGemini = async (
     category: settings?.category || 'general'
   };
 
-  // Hướng dẫn định dạng code chi tiết hơn
+  // More detailed code formatting instructions
   const formattingInstructions = `
 FORMATTING REQUIREMENTS (CRITICAL - MUST FOLLOW):
 1. Code must be properly formatted with clear indentation and line breaks
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
 \`\`\`
 `;
 
-  // Tạo prompt với hướng dẫn định dạng
+  // Create prompt with formatting instructions
   const prompt = generateCustomGamePrompt(promptOptions) + formattingInstructions;
 
   try {
@@ -135,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const duration = measureExecutionTime(startTime);
     logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
     
-    // Phân tích và báo cáo về định dạng phản hồi
+    // Analyze and report response format
     const hasMarkdownBlocks = text.includes('```html') && (text.includes('```css') || text.includes('```js'));
     const isCompleteHtml = text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html');
     const isOneLineHtml = text.includes('</head>') && !text.includes('\n</head>');
@@ -160,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let content = text;
     
     if (!isCompleteHtml && !hasMarkdownBlocks) {
-      // Nếu không phải là HTML hoàn chỉnh hoặc markdown blocks, thử tìm HTML
+      // If not complete HTML or markdown blocks, try to find HTML
       const htmlMatch = text.match(/<!DOCTYPE[\s\S]*<\/html>/i) || 
                         text.match(/<html[\s\S]*<\/html>/i);
       

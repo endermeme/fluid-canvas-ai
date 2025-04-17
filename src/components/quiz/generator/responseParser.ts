@@ -1,8 +1,9 @@
+
 import { MiniGame } from './types';
 import { injectImageUtils } from './imageGenerator';
 
 /**
- * Trích xuất HTML, CSS và JS từ markdown
+ * Extract HTML, CSS and JS from markdown
  */
 const extractCodeFromMarkdown = (text: string): { html: string, css: string, js: string } => {
   const htmlMatch = text.match(/```html\n([\s\S]*?)```/);
@@ -21,10 +22,10 @@ const extractCodeFromMarkdown = (text: string): { html: string, css: string, js:
 };
 
 /**
- * Trích xuất HTML, CSS và JS từ HTML hoàn chỉnh
+ * Extract HTML, CSS and JS from complete HTML
  */
 const extractCodeFromFullHtml = (html: string): { html: string, css: string, js: string } => {
-  // Tìm style tag
+  // Find style tag
   const styleMatch = html.match(/<style>([\s\S]*?)<\/style>/i);
   const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/i);
 
@@ -32,7 +33,7 @@ const extractCodeFromFullHtml = (html: string): { html: string, css: string, js:
   const cssCode = styleMatch?.[1]?.trim() || '';
   const jsCode = scriptMatch?.[1]?.trim() || '';
 
-  // Loại bỏ style và script khỏi HTML
+  // Remove style and script from HTML
   if (styleMatch) {
     htmlCode = htmlCode.replace(/<style>[\s\S]*?<\/style>/i, '');
   }
@@ -48,25 +49,25 @@ const extractCodeFromFullHtml = (html: string): { html: string, css: string, js:
 };
 
 /**
- * Trích xuất HTML, CSS, JS từ định dạng lạ (HTML kèm css và js ở cuối)
+ * Extract HTML, CSS, JS from mixed format (HTML with css and js at the end)
  */
 const extractCodeFromMixedFormat = (text: string): { html: string, css: string, js: string } => {
-  // Tìm HTML hoàn chỉnh
+  // Find complete HTML
   const htmlMatch = text.match(/<!DOCTYPE[\s\S]*?<\/html>/i);
   if (!htmlMatch) return { html: '', css: '', js: '' };
 
-  // Nhận HTML
+  // Get HTML
   const fullHtml = htmlMatch[0];
   
-  // Tìm phần CSS
+  // Find CSS part
   const cssMatch = text.match(/<\/html>[\s\S]*?css\s+([\s\S]*?)(?=js|$)/i);
   const jsMatch = text.match(/js\s+([\s\S]*?)$/i);
 
-  // Trích xuất các phần
+  // Extract parts
   const cssCode = cssMatch?.[1]?.trim() || '';
   const jsCode = jsMatch?.[1]?.trim() || '';
 
-  // Trích xuất nội dung HTML từ HTML hoàn chỉnh
+  // Extract HTML content from complete HTML
   const { html: htmlContent } = extractCodeFromFullHtml(fullHtml);
 
   return {
@@ -77,13 +78,13 @@ const extractCodeFromMixedFormat = (text: string): { html: string, css: string, 
 };
 
 /**
- * Định dạng HTML với thụt lề và xuống dòng
+ * Format HTML with indentation and line breaks
  */
 const formatHTML = (code: string): string => {
   if (!code.trim()) return '';
   
   try {
-    // Xử lý trường hợp HTML trên một dòng
+    // Handle one-line HTML case
     if (!code.includes('\n')) {
       return formatHTMLOneLineToMultiLine(code);
     }
@@ -96,17 +97,17 @@ const formatHTML = (code: string): string => {
       let line = lines[i].trim();
       if (!line) continue;
       
-      // Giảm thụt lề cho thẻ đóng
+      // Decrease indent for closing tags
       if (line.match(/^<\/\w+>/)) {
         indentLevel = Math.max(0, indentLevel - 1);
       }
       
-      // Thêm thụt lề
+      // Add indentation
       formattedLines.push('  '.repeat(indentLevel) + line);
       
-      // Tăng thụt lề cho thẻ mở (không phải thẻ tự đóng)
+      // Increase indent for opening tags (not self-closing)
       if (line.match(/<\w+[^>]*>/) && !line.match(/<\w+[^>]*\/>/)) {
-        // Không tăng thụt lề cho các thẻ không cần đóng
+        // Don't increase indent for tags that don't need closing
         if (!line.match(/<(br|hr|img|input|link|meta)[^>]*>/i)) {
           indentLevel++;
         }
@@ -121,7 +122,7 @@ const formatHTML = (code: string): string => {
 };
 
 /**
- * Chuyển HTML từ một dòng sang nhiều dòng
+ * Convert one-line HTML to multi-line
  */
 const formatHTMLOneLineToMultiLine = (code: string): string => {
   let formattedCode = code
@@ -132,20 +133,20 @@ const formatHTMLOneLineToMultiLine = (code: string): string => {
 };
 
 /**
- * Định dạng JavaScript với thụt lề và xuống dòng
+ * Format JavaScript with indentation and line breaks
  */
 const formatJavaScript = (code: string): string => {
   if (!code.trim()) return '';
   
   try {
-    // Xử lý trường hợp JS trên một dòng
+    // Handle one-line JS case
     if (!code.includes('\n')) {
       code = formatJSOneLineToMultiLine(code);
     }
     
     let formattedCode = code
-      .replace(/\/\*[\s\S]*?\*\//g, '') // Xóa block comments
-      .replace(/\/\/[^\n]*/g, '')       // Xóa line comments
+      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments
+      .replace(/\/\/[^\n]*/g, '')       // Remove line comments
       .trim();
     
     const lines = formattedCode.split('\n');
@@ -156,15 +157,15 @@ const formatJavaScript = (code: string): string => {
       let line = lines[i].trim();
       if (!line) continue;
       
-      // Giảm thụt lề cho dấu }
+      // Decrease indent for closing braces
       if (line.startsWith('}')) {
         indentLevel = Math.max(0, indentLevel - 1);
       }
       
-      // Thêm thụt lề hiện tại
+      // Add current indentation
       formattedLines.push('  '.repeat(indentLevel) + line);
       
-      // Tăng thụt lề sau dấu {
+      // Increase indent after opening braces
       if (line.endsWith('{')) {
         indentLevel++;
       }
@@ -178,7 +179,7 @@ const formatJavaScript = (code: string): string => {
 };
 
 /**
- * Chuyển JS từ một dòng sang nhiều dòng
+ * Convert one-line JS to multi-line
  */
 const formatJSOneLineToMultiLine = (code: string): string => {
   return code
@@ -191,27 +192,27 @@ const formatJSOneLineToMultiLine = (code: string): string => {
 };
 
 /**
- * Định dạng CSS với thụt lề và xuống dòng
+ * Format CSS with indentation and line breaks
  */
 const formatCss = (code: string): string => {
   if (!code.trim()) return '';
   
   try {
-    // Xử lý trường hợp CSS trên một dòng
+    // Handle one-line CSS case
     if (!code.includes('\n')) {
       code = formatCSSOneLineToMultiLine(code);
     }
     
     let formattedCode = code
-      .replace(/\/\*[\s\S]*?\*\//g, '') // Xóa comments
+      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove comments
       .trim();
     
-    // Định dạng CSS với thụt lề và xuống dòng
+    // Format CSS with indentation and line breaks
     formattedCode = formattedCode
       .replace(/\s*\{\s*/g, ' {\n  ')
       .replace(/;\s*/g, ';\n  ')
       .replace(/\s*}\s*/g, '\n}\n')
-      .replace(/\n\s*\n/g, '\n'); // Xóa dòng trống kép
+      .replace(/\n\s*\n/g, '\n'); // Remove double empty lines
     
     return formattedCode;
   } catch (error) {
@@ -221,7 +222,7 @@ const formatCss = (code: string): string => {
 };
 
 /**
- * Chuyển CSS từ một dòng sang nhiều dòng
+ * Convert one-line CSS to multi-line
  */
 const formatCSSOneLineToMultiLine = (code: string): string => {
   return code
@@ -231,7 +232,7 @@ const formatCSSOneLineToMultiLine = (code: string): string => {
 };
 
 /**
- * Tạo HTML hoàn chỉnh từ các phần riêng biệt
+ * Create complete HTML from separate parts
  */
 const createCompleteHtml = (html: string, css: string, js: string): string => {
   const docType = '<!DOCTYPE html>';
@@ -256,13 +257,13 @@ ${js}
 };
 
 /**
- * Xử lý và phân tích phản hồi từ Gemini
+ * Parse and process response from Gemini
  */
 export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
   console.log("🔷 Gemini: Starting response parsing");
   
   try {
-    // Phân tích loại phản hồi
+    // Analyze response type
     const isCompleteHtml = text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html');
     const hasMarkdownBlocks = text.includes('```html') && (text.includes('```css') || text.includes('```js'));
     const isMixedFormat = text.includes('</html>') && (text.includes(' css ') || text.includes(' js '));
@@ -273,7 +274,7 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
       isMixedFormat
     });
     
-    // Trích xuất code dựa vào định dạng
+    // Extract code based on format
     let html = '', css = '', js = '';
     
     if (hasMarkdownBlocks) {
@@ -295,7 +296,7 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
       css = extracted.css;
       js = extracted.js;
     } else {
-      // Định dạng không xác định, thử phát hiện
+      // Unknown format, try to detect
       console.log("🔷 Gemini: Unknown format, attempting detection");
       if (text.includes('<html') && text.includes('<style') && text.includes('<script')) {
         const extracted = extractCodeFromFullHtml(text);
@@ -303,21 +304,21 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
         css = extracted.css;
         js = extracted.js;
       } else {
-        // Nếu không thể trích xuất, sử dụng toàn bộ text làm HTML
+        // If can't extract, use whole text as HTML
         html = text;
       }
     }
     
-    // Định dạng code
+    // Format code
     const formattedHTML = formatHTML(html);
     const formattedCSS = formatCss(css);
     const formattedJS = formatJavaScript(js);
     
-    // Tạo HTML hoàn chỉnh cho hiển thị
+    // Create complete HTML for display
     const completeHtml = createCompleteHtml(formattedHTML, formattedCSS, formattedJS);
     const enhancedHtml = injectImageUtils(completeHtml);
     
-    // Trích xuất tiêu đề
+    // Extract title
     let title = topic;
     const titleMatch = enhancedHtml.match(/<title>(.*?)<\/title>/i);
     if (titleMatch && titleMatch[1]) {
@@ -326,7 +327,7 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
     
     console.log("🔷 Gemini: Successfully parsed game content");
     
-    // Trả về game với cả dạng đầy đủ và tách biệt
+    // Return game with both full and separated format
     return {
       title: title,
       description: "Generated HTML game content",
@@ -339,7 +340,7 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
   } catch (error) {
     console.error("❌ Gemini: Content extraction error:", error);
     
-    // Tạo trang lỗi
+    // Create error page
     const errorHtml = `
       <!DOCTYPE html>
       <html>
