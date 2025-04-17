@@ -1,12 +1,9 @@
-
 import { GameType } from "../gameTypes";
 
 export interface MiniGame {
   title: string;
   description?: string;
-  
-  // Combined format (for backward compatibility)
-  content?: string;
+  content?: string; // For backward compatibility
   
   // Separate files format
   htmlContent?: string;
@@ -25,11 +22,6 @@ export interface GameApiResponse {
   title: string;
   content: string;
   description?: string;
-  
-  // New fields for separated content
-  htmlContent?: string;
-  cssContent?: string;
-  jsContent?: string;
 }
 
 export interface APISettings {

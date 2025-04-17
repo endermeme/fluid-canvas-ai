@@ -1,4 +1,3 @@
-
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -14,7 +13,6 @@ import {
 } from '@/constants/api-constants';
 import { buildGeminiPrompt } from './promptBuilder';
 import { generateCustomGamePrompt } from './customGamePrompt';
-import { parseGeminiResponse } from './responseParser';
 
 const SOURCE = "GEMINI";
 
@@ -41,7 +39,7 @@ export const generateWithGemini = async (
     category: settings?.category || 'general'
   };
 
-  // More detailed code formatting instructions
+  // Hướng dẫn định dạng code chi tiết hơn
   const formattingInstructions = `
 FORMATTING REQUIREMENTS (CRITICAL - MUST FOLLOW):
 1. Code must be properly formatted with clear indentation and line breaks
@@ -93,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
 \`\`\`
 `;
 
-  // Create prompt with formatting instructions
+  // Tạo prompt với hướng dẫn định dạng
   const prompt = generateCustomGamePrompt(promptOptions) + formattingInstructions;
 
   try {
@@ -137,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const duration = measureExecutionTime(startTime);
     logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
     
-    // Analyze and report on response format
+    // Phân tích và báo cáo về định dạng phản hồi
     const hasMarkdownBlocks = text.includes('```html') && (text.includes('```css') || text.includes('```js'));
     const isCompleteHtml = text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html');
     const isOneLineHtml = text.includes('</head>') && !text.includes('\n</head>');
@@ -151,8 +149,34 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('%c Generated Game Code (First 500 chars):', 'font-weight: bold; color: #6f42c1;');
     console.log(text.substring(0, 500) + '...');
     
-    // Parse response using the separate parser
-    const game = parseGeminiResponse(text, topic);
+    let title = topic;
+    const titleMatch = text.match(/<title>(.*?)<\/title>/i) || 
+                      text.match(/<h1[^>]*>(.*?)<\/h1>/i);
+    
+    if (titleMatch && titleMatch[1]) {
+      title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
+    }
+    
+    let content = text;
+    
+    if (!isCompleteHtml && !hasMarkdownBlocks) {
+      // Nếu không phải là HTML hoàn chỉnh hoặc markdown blocks, thử tìm HTML
+      const htmlMatch = text.match(/<!DOCTYPE[\s\S]*<\/html>/i) || 
+                        text.match(/<html[\s\S]*<\/html>/i);
+      
+      if (htmlMatch && htmlMatch[0]) {
+        content = htmlMatch[0];
+        console.log('🔶 Gemini: Extracted HTML content from mixed response');
+      }
+    }
+    
+    content = sanitizeGameCode(content);
+    
+    const game: MiniGame = {
+      title: title,
+      content: content,
+      useCanvas: useCanvas
+    };
     
     logSuccess(SOURCE, "Game generated successfully");
     
@@ -161,6 +185,52 @@ document.addEventListener('DOMContentLoaded', function() {
     logError(SOURCE, "Error generating with Gemini", error);
     throw error;
   }
+};
+
+const sanitizeGameCode = (content: string): string => {
+  let sanitized = content;
+  
+  // Check if content is in one line and directly format it if needed
+  if (sanitized.includes('</head>') && !sanitized.includes('\n</head>')) {
+    console.log("🔶 Gemini: Detecting one-line HTML response, applying special formatting");
+    // Let responseParser handle the formatting
+    return sanitized;
+  }
+  
+  // Basic code cleanup while preserving line breaks and formatting
+  sanitized = sanitized
+    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+    .replace(/\/\/[^\n]*/g, '') // Remove single-line comments
+    .trim();
+  
+  // Fix common JavaScript issues while preserving formatting
+  sanitized = sanitized.replace(
+    /requestAnimationFrame\s*\(\s*\)/g, 
+    'requestAnimationFrame(gameLoop)'
+  );
+  
+  sanitized = sanitized.replace(
+    /addEventListener\s*\(\s*['"]([^'"]+)['"]\s*,\s*([^,)]+)\s*\)/g,
+    'addEventListener("$1", $2)'
+  );
+
+  // Add error handling script while preserving formatting
+  if (!sanitized.includes('window.onerror')) {
+    sanitized = sanitized.replace(
+      /<\/body>/,
+      `
+  <script>
+    window.onerror = (message, source, lineno, colno, error) => {
+      console.error('Game error:', { message, source, lineno, colno, stack: error?.stack });
+      return true;
+    };
+  </script>
+</body>
+`
+    );
+  }
+  
+  return sanitized;
 };
 
 export const tryGeminiGeneration = async (
