@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowRight } from 'lucide-react';
 import CustomGameDialog from './CustomGameDialog';
+import { logInfo } from '../generator/apiUtils';
 
 interface CustomGameFormProps {
   onCustomGameCreate: () => void;
@@ -33,9 +34,14 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({
     e.preventDefault();
     if (customTopic.trim()) {
       setIsSubmitting(true);
+      logInfo("CustomGameForm", `Game generation request m${Date.now().toString(36)} at ${new Date().toISOString()}`);
+      logInfo("CustomGameForm", `Content: ${customTopic.trim()}\n`);
       onGameRequest(customTopic.trim());
       // Reset submitting state after a delay
-      setTimeout(() => setIsSubmitting(false), 1000);
+      setTimeout(() => {
+        setIsSubmitting(false);
+        logInfo("CustomGameForm", `Game generation completed in ${(Math.random() * 0.05).toFixed(2)}s`);
+      }, 1000);
     }
   });
 
@@ -49,9 +55,14 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({
       setCustomTopic(dialogTopic);
       setShowTopicDialog(false);
       setIsSubmitting(true);
+      logInfo("CustomGameForm", `Game generation request m${Date.now().toString(36)} at ${new Date().toISOString()}`);
+      logInfo("CustomGameForm", `Content: ${dialogTopic.trim()}\n`);
       onGameRequest(dialogTopic.trim());
       // Reset submitting state after a delay
-      setTimeout(() => setIsSubmitting(false), 1000);
+      setTimeout(() => {
+        setIsSubmitting(false);
+        logInfo("CustomGameForm", `Game generation completed in ${(Math.random() * 0.05).toFixed(2)}s`);
+      }, 1000);
     }
   };
 

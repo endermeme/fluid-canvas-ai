@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -7,6 +8,7 @@ import GameLoading from '@/components/quiz/GameLoading';
 import CustomGameSettings from '@/components/quiz/custom-games/CustomGameSettings';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import { AIGameGenerator } from '@/components/quiz/generator/AIGameGenerator';
+import { logInfo, logError } from '@/components/quiz/generator/apiUtils';
 
 const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -36,6 +38,7 @@ const Quiz = () => {
     setMiniGame(null);
     
     try {
+      logInfo('Quiz', `Game generation request for topic: ${promptText}`);
       gameGenerator.setCanvasMode(useCanvas);
       
       const game = await gameGenerator.generateMiniGame(promptText);
@@ -46,21 +49,26 @@ const Quiz = () => {
         setMiniGame({
           title: game.title || `Game: ${promptText.substring(0, 40)}...`,
           content: game.content,
-          htmlContent: game.htmlContent,
-          cssContent: game.cssContent,
-          jsContent: game.jsContent,
-          isSeparatedFiles: game.isSeparatedFiles
+          htmlContent: game.htmlContent || '',
+          cssContent: game.cssContent || '',
+          jsContent: game.jsContent || '',
+          isSeparatedFiles: game.isSeparatedFiles || false
         });
         
         toast({
           title: "Trò chơi đã được tạo",
-          description: "Trò chơi đã được tạo thành công với HTML, CSS và JavaScript",
+          description: "Trò chơi đã được tạo thành công với HTML, CSS và JavaScript riêng biệt",
+        });
+        
+        logInfo('Quiz', `Game generation completed`, {
+          title: game.title,
+          separatedFiles: game.isSeparatedFiles
         });
       } else {
         throw new Error("Không thể tạo game");
       }
     } catch (error) {
-      console.error("Error generating game:", error);
+      logError("Quiz", "Error generating game:", error);
       
       toast({
         title: "Lỗi tạo game",
@@ -370,7 +378,7 @@ const Quiz = () => {
   return (
     <div className="h-screen w-full bg-gradient-to-b from-background to-background/95 overflow-hidden">
       <QuizContainer
-        title={miniGame ? miniGame.title : "Tạo Game T��y Chỉnh"}
+        title={miniGame ? miniGame.title : "Tạo Game Tùy Chỉnh"}
         showBackButton={true}
         showRefreshButton={false}
         showHomeButton={true}

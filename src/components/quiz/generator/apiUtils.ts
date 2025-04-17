@@ -12,7 +12,7 @@
 export const logInfo = (component: string, message: string, data?: any): void => {
   console.info(`[${component}] INFO: ${message}`);
   if (data) {
-    console.info(JSON.stringify(data, null, 2));
+    console.info(typeof data === 'object' ? JSON.stringify(data, null, 2) : data);
   }
 };
 
@@ -47,7 +47,7 @@ export const logError = (component: string, message: string, error?: any): void 
 export const logWarning = (component: string, message: string, data?: any): void => {
   console.warn(`[${component}] WARNING: ${message}`);
   if (data) {
-    console.warn(JSON.stringify(data, null, 2));
+    console.warn(typeof data === 'object' ? JSON.stringify(data, null, 2) : data);
   }
 };
 
@@ -66,4 +66,30 @@ export const sanitizeLogContent = (content: any): string => {
   } catch (error) {
     return String(content);
   }
+};
+
+/**
+ * Format code with proper indentation and line breaks for display
+ * @param code Code to format
+ * @returns Formatted code
+ */
+export const formatCodeForDisplay = (code: string): string => {
+  // Replace all backtick literals with their escaped version to prevent syntax errors
+  return code.replace(/`/g, '\\`');
+};
+
+/**
+ * Escape string literals to prevent syntax errors
+ * @param text Text to escape
+ * @returns Escaped text
+ */
+export const escapeStringLiterals = (text: string): string => {
+  return text
+    .replace(/\\/g, '\\\\')  // Escape backslashes
+    .replace(/"/g, '\\"')    // Escape double quotes
+    .replace(/'/g, "\\'")    // Escape single quotes
+    .replace(/`/g, '\\`')    // Escape backticks
+    .replace(/\n/g, '\\n')   // Replace newlines with \n
+    .replace(/\r/g, '\\r')   // Replace carriage returns with \r
+    .replace(/\t/g, '\\t');  // Replace tabs with \t
 };

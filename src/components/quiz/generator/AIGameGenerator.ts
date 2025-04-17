@@ -1,7 +1,6 @@
-
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
-import { logInfo, logError } from './apiUtils';
+import { logInfo, logError, escapeStringLiterals } from './apiUtils';
 import { GEMINI_API_KEY, GEMINI_MODELS, getApiEndpoint, DEFAULT_GENERATION_SETTINGS, REQUEST_TIMEOUT } from '../../../constants/api-constants';
 
 /**
@@ -61,7 +60,7 @@ export class AIGameGenerator {
       const jsContent = this.createJsContent(topic, gameType);
       
       // Create the full content by combining the files
-      const fullContent = this.createFullContent(htmlContent, cssContent, jsContent, topic);
+      const fullContent = this.createFullContent(htmlContent, cssContent, jsContent, title);
       
       // Create the minigame object with separated files
       const game: MiniGame = {
@@ -757,7 +756,7 @@ const optionsList = document.getElementById('options-list');
 
 // Initialize the wheel
 function initWheel() {
-  console.log('Initializing wheel for: ${topic}');
+  console.log("Initializing wheel for: ${topic}");
   
   if (!wheelElement) return;
   
@@ -1080,7 +1079,7 @@ const optionsContainer = document.getElementById('options-container');
 
 // Game initialization
 function initGame() {
-  console.log('Quiz game initialized for topic: ${topic}');
+  console.log("Quiz game initialized for topic: ${topic}");
   
   // Generate quiz questions based on topic
   generateQuestions();
@@ -1332,7 +1331,7 @@ const muteButton = document.getElementById('mute-button');
 
 // Game initialization
 function initGame() {
-  console.log('Game initialized for topic: ${topic}');
+  console.log("Game initialized for topic: ${topic}");
   
   // Event listeners
   startButton.addEventListener('click', startGame);
@@ -1557,22 +1556,31 @@ window.addEventListener('load', function() {
     }
   }
 
-  private createFullContent(htmlContent: string, cssContent: string, jsContent: string, topic: string): string {
+  private createFullContent(htmlContent: string, cssContent: string, jsContent: string, title: string): string {
+    // Fix: Replace raw string literals in template literals to prevent syntax errors
+    const fixedJsContent = jsContent
+      .replace(/\${topic}/g, "${topic}")
+      .replace(/'/g, "\\'")
+      .replace(/`/g, "\\`")
+      .replace(/console\.log\("([^"]+)"\);/g, function(match, p1) {
+        return match.replace(/\${topic}/, "${topic}");
+      });
+
     return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game: ${topic}</title>
+  <title>${title}</title>
   <style>
 ${cssContent}
   </style>
 </head>
 <body>
-${htmlContent.split('<!DOCTYPE html>')[1].split('<head>')[0]}
+${htmlContent.split('<!DOCTYPE html>')[1].split('</head>')[1].split('<body>')[1].split('</body>')[0]}
   <script>
-${jsContent}
+${fixedJsContent}
   </script>
 </body>
 </html>`;

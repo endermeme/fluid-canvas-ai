@@ -5,10 +5,10 @@ export interface MiniGame {
   title: string;
   description?: string;
   content: string;
-  htmlContent?: string;
-  cssContent?: string;
-  jsContent?: string;
-  isSeparatedFiles?: boolean;
+  htmlContent: string;  // HTML content of the game
+  cssContent: string;   // CSS content of the game
+  jsContent: string;    // JavaScript content of the game
+  isSeparatedFiles: boolean;
   useCanvas?: boolean;
 }
 
