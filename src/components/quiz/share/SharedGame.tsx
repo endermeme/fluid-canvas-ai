@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getSharedGame } from '@/utils/gameExport';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Eye } from 'lucide-react';
-import { enhanceIframeContent, createCompleteHtmlFromParts } from '../utils/iframe-utils';
+import { enhanceIframeContent } from '../utils/iframe-utils';
 import GameContainer from '../components/GameContainer';
 import { useToast } from '@/hooks/use-toast';
 
@@ -47,20 +47,8 @@ const SharedGame: React.FC = () => {
     if (!game) return;
     
     if (iframeRef.current) {
-      // Check if we have separated content
-      if (game.htmlContent && game.cssContent && game.jsContent) {
-        const enhancedContent = createCompleteHtmlFromParts(
-          game.htmlContent,
-          game.cssContent,
-          game.jsContent,
-          game.title
-        );
-        iframeRef.current.srcdoc = enhancedContent;
-      } else {
-        // Fall back to full content
-        const enhancedContent = enhanceIframeContent(game.htmlContent || game.content, game.title);
-        iframeRef.current.srcdoc = enhancedContent;
-      }
+      const enhancedContent = enhanceIframeContent(game.htmlContent, game.title);
+      iframeRef.current.srcdoc = enhancedContent;
       setIframeError(null);
     }
   };
@@ -87,21 +75,7 @@ const SharedGame: React.FC = () => {
     );
   }
 
-  // Determine what content to use based on available data
-  const getGameContent = () => {
-    if (game.htmlContent && game.cssContent && game.jsContent) {
-      return createCompleteHtmlFromParts(
-        game.htmlContent,
-        game.cssContent,
-        game.jsContent,
-        game.title
-      );
-    } else {
-      return enhanceIframeContent(game.htmlContent || game.content, game.title);
-    }
-  };
-
-  const enhancedContent = getGameContent();
+  const enhancedContent = enhanceIframeContent(game.htmlContent, game.title);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -132,10 +106,6 @@ const SharedGame: React.FC = () => {
           title={game.title}
           error={iframeError}
           onReload={handleReload}
-          htmlContent={game.htmlContent}
-          cssContent={game.cssContent}
-          jsContent={game.jsContent}
-          isSeparatedFiles={!!(game.htmlContent && game.cssContent && game.jsContent)}
         />
       </main>
     </div>

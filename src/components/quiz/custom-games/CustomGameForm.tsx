@@ -11,6 +11,7 @@ import { AIGameGenerator } from '../generator/AIGameGenerator';
 import { MiniGame } from '../generator/types';
 import { GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
+import { GEMINI_MODELS, API_VERSION, API_BASE_URL } from '@/constants/api-constants';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
@@ -45,9 +46,21 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     const requestId = Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
     const timestamp = new Date().toISOString();
     
-    // Log thông tin request trong console
-    console.log(`Game generation request ${requestId} at ${timestamp}`);
-    console.log('Content:', content);
+    // Log thông tin request trong console với styled console group
+    console.groupCollapsed(
+      `%c 🎮 GAME REQUEST ${requestId} %c ${content.substring(0, 40)}${content.length > 40 ? '...' : ''}`,
+      'background: #6f42c1; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
+      'font-weight: bold;'
+    );
+    console.log('%c 📝 Content', 'font-weight: bold; color: #6f42c1;', content);
+    console.log('%c ⏱️ Timestamp', 'font-weight: bold; color: #6f42c1;', timestamp);
+    console.log('%c 🔑 Request ID', 'font-weight: bold; color: #6f42c1;', requestId);
+    console.log('%c 📊 Content Length', 'font-weight: bold; color: #6f42c1;', content.length, 'characters');
+    console.log('%c 🤖 Model', 'font-weight: bold; color: #6f42c1;', GEMINI_MODELS.CUSTOM_GAME);
+    console.log('%c 🤖 API Version', 'font-weight: bold; color: #6f42c1;', API_VERSION);
+    console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #6f42c1;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.CUSTOM_GAME}:generateContent`);
+    console.log('%c 🎨 Canvas Mode', 'font-weight: bold; color: #6f42c1;', useCanvas ? 'Enabled' : 'Disabled');
+    console.groupEnd();
 
     setIsGenerating(true);
     
@@ -60,18 +73,49 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
         category: 'custom'
       };
       
+      // Log when starting the API request
+      console.group(
+        `%c 🚀 API REQUEST ${requestId} %c Generating game`,
+        'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
+        'font-weight: bold;'
+      );
+      console.log('%c 📋 User Prompt', 'font-weight: bold; color: #2ea44f;', content);
+      console.log('%c 🤖 Model', 'font-weight: bold; color: #2ea44f;', GEMINI_MODELS.CUSTOM_GAME);
+      console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #2ea44f;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.CUSTOM_GAME}:generateContent`);
+      console.log('%c ⏳ Request Start Time', 'font-weight: bold; color: #2ea44f;', new Date().toISOString());
+      console.groupEnd();
+      
       // Measure processing time
       const startTime = performance.now();
       const game = await gameGenerator.generateMiniGame(content, settings);
       const endTime = performance.now();
       const duration = ((endTime - startTime) / 1000).toFixed(2);
       
-      console.log(`Game generation completed in ${duration}s`);
+      // Log API results
+      console.group(
+        `%c ✅ API RESPONSE ${requestId} %c Completed in ${duration}s`,
+        'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
+        'font-weight: bold;'
+      );
+      console.log('%c 📊 Result', 'font-weight: bold; color: #2ea44f;', {
+        success: !!game,
+        title: game?.title || 'N/A',
+        contentSize: game?.content?.length || 0,
+        processingTime: `${duration}s`,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Log code sample (if any, only showing first 200 characters)
+      if (game?.content) {
+        console.log('%c 🧩 Code Sample', 'font-weight: bold; color: #2ea44f;', 
+          game.content.substring(0, 200) + (game.content.length > 200 ? '...' : ''));
+      }
+      console.groupEnd();
       
       if (game) {
         toast({
           title: "Đã tạo trò chơi",
-          description: `Trò chơi đã được tạo thành công.`,
+          description: `Trò chơi đã được tạo thành công với HTML, CSS và JavaScript.`,
         });
         
         onGenerate(content, game);
@@ -79,7 +123,17 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
         throw new Error("Không thể tạo game");
       }
     } catch (error) {
-      console.error("Error generating game:", error);
+      // Log error with more information
+      console.group(
+        `%c ❌ API ERROR ${requestId} %c Generation failed`,
+        'background: #d73a49; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
+        'font-weight: bold;'
+      );
+      console.log('%c 🚨 Error Details', 'font-weight: bold; color: #d73a49;', error);
+      console.log('%c 📝 Request Content', 'font-weight: bold; color: #d73a49;', content);
+      console.log('%c ⏱️ Error Time', 'font-weight: bold; color: #d73a49;', new Date().toISOString());
+      console.log('%c 🔍 Stack Trace', 'font-weight: bold; color: #d73a49;', error instanceof Error ? error.stack : 'No stack trace available');
+      console.groupEnd();
       
       toast({
         title: "Lỗi tạo game",
@@ -89,6 +143,13 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       onGenerate(content);
     } finally {
       setIsGenerating(false);
+      
+      // Log end of the entire process
+      console.log(
+        `%c 🏁 REQUEST COMPLETE ${requestId} %c ${new Date().toISOString()}`,
+        'background: #6f42c1; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
+        'font-weight: bold;'
+      );
     }
   };
 
@@ -112,9 +173,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
             <div className="p-2 rounded-lg bg-primary/10">
               <Code className="h-6 w-6 text-primary" />
             </div>
-            Tạo trò chơi tùy chỉnh
+            Tạo trò chơi tùy chỉnh với AI
           </h2>
-          <p className="text-muted-foreground">Mô tả chi tiết game bạn muốn tạo</p>
+          <p className="text-muted-foreground">Mô tả chi tiết game bạn muốn tạo và AI sẽ xây dựng nó cho bạn</p>
         </div>
         
         <div className="space-y-4">
@@ -149,7 +210,8 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
             <div className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg">
               <Info className="w-4 h-4 text-primary mt-1" />
               <p className="text-sm text-muted-foreground">
-                Hệ thống sẽ tạo game tùy chỉnh dựa trên mô tả của bạn, sử dụng HTML, CSS và JavaScript.
+                AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Bạn càng mô tả chi tiết, AI càng tạo ra game phù hợp với ý tưởng của bạn.
+                {useCanvas && " Canvas mode sẽ tạo game sử dụng HTML5 Canvas cho hiệu ứng đồ họa tốt hơn."}
               </p>
             </div>
           </div>
@@ -165,10 +227,10 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
             <Button 
               onClick={handleSubmit}
               disabled={isGenerating || !content.trim()}
-              className={`${isGenerating ? "opacity-70" : ""} bg-gradient-to-r from-primary to-primary/80 hover:opacity-90`}
+              className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90"
             >
               <SparklesIcon className="h-4 w-4 mr-2" />
-              Tạo Game
+              Tạo với AI
             </Button>
           </div>
         </div>

@@ -1,18 +1,40 @@
-
-import { GameSettingsData } from '../types';
+import { GameType } from "../gameTypes";
 
 export interface MiniGame {
   title: string;
   description?: string;
-  content: string;
-  htmlContent: string;  // HTML content of the game
-  cssContent: string;   // CSS content of the game
-  jsContent: string;    // JavaScript content of the game
-  isSeparatedFiles: boolean;
+  content?: string; // For backward compatibility
+  
+  // Separate files format
+  htmlContent?: string;
+  cssContent?: string;
+  jsContent?: string;
+  
+  // Flag to indicate if using separate files
+  isSeparatedFiles?: boolean;
+  
+  items?: any[];
   useCanvas?: boolean;
+  gameType?: GameType;
+}
+
+export interface GameApiResponse {
+  title: string;
+  content: string;
+  description?: string;
+}
+
+export interface APISettings {
+  apiKey: string;
+  model: string;
+  temperature: number;
+  maxTokens: number;
 }
 
 export interface GameGenerationOptions {
-  topic: string;
-  settings?: GameSettingsData;
+  useCanvas?: boolean;
+  difficulty?: string;
+  language?: string;
+  timeLimit?: number;
+  category?: string;
 }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -7,19 +6,16 @@ import QuizContainer from '@/components/quiz/QuizContainer';
 import GameLoading from '@/components/quiz/GameLoading';
 import CustomGameSettings from '@/components/quiz/custom-games/CustomGameSettings';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
-import { AIGameGenerator } from '@/components/quiz/generator/AIGameGenerator';
-import { logInfo, logError } from '@/components/quiz/generator/apiUtils';
+import { tryGeminiGeneration } from '@/components/quiz/generator/geminiGenerator';
 
 const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [gameContent, setGameContent] = useState<string | null>(null);
   const [gameTitle, setGameTitle] = useState('Game Tương Tác');
   const [prompt, setPrompt] = useState('');
-  const [miniGame, setMiniGame] = useState<{ title: string, content: string, htmlContent: string, cssContent: string, jsContent: string, isSeparatedFiles: boolean } | null>(null);
+  const [miniGame, setMiniGame] = useState<{ title: string, content: string } | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-  
-  const gameGenerator = AIGameGenerator.getInstance();
   
   const handleGenerate = async (promptText: string, useCanvas: boolean = true) => {
     if (!promptText.trim()) {
@@ -38,37 +34,28 @@ const Quiz = () => {
     setMiniGame(null);
     
     try {
-      logInfo('Quiz', `Game generation request for topic: ${promptText}`);
-      gameGenerator.setCanvasMode(useCanvas);
-      
-      const game = await gameGenerator.generateMiniGame(promptText);
+      const game = await tryGeminiGeneration(null, promptText, { 
+        useCanvas, 
+        category: 'general' 
+      });
       
       if (game) {
         setGameContent(game.content);
         setGameTitle(game.title || `Game: ${promptText.substring(0, 40)}...`);
         setMiniGame({
           title: game.title || `Game: ${promptText.substring(0, 40)}...`,
-          content: game.content,
-          htmlContent: game.htmlContent || '',
-          cssContent: game.cssContent || '',
-          jsContent: game.jsContent || '',
-          isSeparatedFiles: game.isSeparatedFiles || false
+          content: game.content
         });
         
         toast({
           title: "Trò chơi đã được tạo",
-          description: "Trò chơi đã được tạo thành công với HTML, CSS và JavaScript riêng biệt",
-        });
-        
-        logInfo('Quiz', `Game generation completed`, {
-          title: game.title,
-          separatedFiles: game.isSeparatedFiles
+          description: "Trò chơi đã được tạo thành công với HTML, CSS và JavaScript",
         });
       } else {
         throw new Error("Không thể tạo game");
       }
     } catch (error) {
-      logError("Quiz", "Error generating game:", error);
+      console.error("Error generating game:", error);
       
       toast({
         title: "Lỗi tạo game",
@@ -81,11 +68,7 @@ const Quiz = () => {
       setGameTitle(`Game: ${promptText.substring(0, 40)}...`);
       setMiniGame({
         title: `Game: ${promptText.substring(0, 40)}...`,
-        content: fallbackHTML,
-        htmlContent: fallbackHTML,
-        cssContent: '',
-        jsContent: '',
-        isSeparatedFiles: false
+        content: fallbackHTML
       });
     } finally {
       setIsGenerating(false);
@@ -343,14 +326,7 @@ const Quiz = () => {
       return (
         <div className="w-full h-full">
           <EnhancedGameView 
-            miniGame={{
-              title: miniGame.title,
-              content: miniGame.content,
-              htmlContent: miniGame.htmlContent,
-              cssContent: miniGame.cssContent,
-              jsContent: miniGame.jsContent,
-              isSeparatedFiles: miniGame.isSeparatedFiles
-            }}
+            miniGame={miniGame}
             onBack={handleReset}
             extraButton={
               <Button 

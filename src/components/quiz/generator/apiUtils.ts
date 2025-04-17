@@ -1,95 +1,104 @@
 
 /**
- * Utility functions for API logging and error handling
+ * Utility functions for API communication and logging
  */
 
+export const SOURCE = "CUSTOM_GAME_GENERATOR";
+
 /**
- * Log info messages with proper indentation
- * @param component Component name
- * @param message Message to log
+ * Log information to the console with proper formatting
+ * @param context The logging context/source
+ * @param message The message to log
  * @param data Optional data to log
  */
-export const logInfo = (component: string, message: string, data?: any): void => {
-  console.info(`[${component}] INFO: ${message}`);
+export function logInfo(context: string, message: string, data?: any) {
+  console.log(
+    `%c ${context} INFO %c ${message}`,
+    'background: #0366d6; color: white; padding: 2px 6px; border-radius: 4px;',
+    'color: #0366d6; font-weight: bold;'
+  );
+  
   if (data) {
-    console.info(typeof data === 'object' ? JSON.stringify(data, null, 2) : data);
+    console.log('%c 📊 Data:', 'color: #0366d6;', data);
   }
-};
+}
 
 /**
- * Log error messages with proper indentation
- * @param component Component name
- * @param message Error message
- * @param error Error object or details
+ * Log success to the console with proper formatting
+ * @param context The logging context/source
+ * @param message The message to log
+ * @param data Optional data to log
  */
-export const logError = (component: string, message: string, error?: any): void => {
-  console.error(`[${component}] ERROR: ${message}`);
+export function logSuccess(context: string, message: string, data?: any) {
+  console.log(
+    `%c ${context} SUCCESS %c ${message}`,
+    'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px;',
+    'color: #2ea44f; font-weight: bold;'
+  );
+  
+  if (data) {
+    console.log('%c 📊 Data:', 'color: #2ea44f;', data);
+  }
+}
+
+/**
+ * Log warning to the console with proper formatting
+ * @param context The logging context/source
+ * @param message The message to log
+ * @param data Optional data to log
+ */
+export function logWarning(context: string, message: string, data?: any) {
+  console.log(
+    `%c ${context} WARNING %c ${message}`,
+    'background: #f9a825; color: black; padding: 2px 6px; border-radius: 4px;',
+    'color: #f9a825; font-weight: bold;'
+  );
+  
+  if (data) {
+    console.log('%c 📊 Data:', 'color: #f9a825;', data);
+  }
+}
+
+/**
+ * Log error to the console with proper formatting
+ * @param context The logging context/source
+ * @param message The message to log
+ * @param error Optional error object
+ */
+export function logError(context: string, message: string, error?: any) {
+  console.error(
+    `%c ${context} ERROR %c ${message}`,
+    'background: #d73a49; color: white; padding: 2px 6px; border-radius: 4px;',
+    'color: #d73a49; font-weight: bold;'
+  );
   
   if (error) {
-    if (error instanceof Error) {
-      console.error(`Error name: ${error.name}`);
-      console.error(`Error message: ${error.message}`);
-      console.error(`Error stack: ${error.stack}`);
-    } else if (typeof error === 'object') {
-      console.error(JSON.stringify(error, null, 2));
-    } else {
-      console.error(error);
-    }
+    console.error(error);
   }
-};
+}
 
 /**
- * Log warning messages with proper indentation
- * @param component Component name
- * @param message Warning message
- * @param data Optional data to log
+ * Format an object for logging
+ * @param obj Object to format
+ * @returns Formatted object for logging
  */
-export const logWarning = (component: string, message: string, data?: any): void => {
-  console.warn(`[${component}] WARNING: ${message}`);
-  if (data) {
-    console.warn(typeof data === 'object' ? JSON.stringify(data, null, 2) : data);
-  }
-};
-
-/**
- * Sanitize log content to prevent XSS and formatting issues
- * @param content Content to sanitize
- * @returns Sanitized content
- */
-export const sanitizeLogContent = (content: any): string => {
-  if (typeof content === 'string') {
-    return content;
-  }
-  
+export function formatLogObject(obj: any): string {
   try {
-    return JSON.stringify(content, null, 2);
+    if (typeof obj === 'string') return obj;
+    return JSON.stringify(obj, null, 2);
   } catch (error) {
-    return String(content);
+    return 'Unable to stringify object for logging';
   }
-};
+}
 
 /**
- * Format code with proper indentation and line breaks for display
- * @param code Code to format
- * @returns Formatted code
+ * Measure execution time
+ * @param startTime Start time in milliseconds
+ * @returns Object with execution time in milliseconds and seconds
  */
-export const formatCodeForDisplay = (code: string): string => {
-  // Replace all backtick literals with their escaped version to prevent syntax errors
-  return code.replace(/`/g, '\\`');
-};
-
-/**
- * Escape string literals to prevent syntax errors
- * @param text Text to escape
- * @returns Escaped text
- */
-export const escapeStringLiterals = (text: string): string => {
-  return text
-    .replace(/\\/g, '\\\\')  // Escape backslashes
-    .replace(/"/g, '\\"')    // Escape double quotes
-    .replace(/'/g, "\\'")    // Escape single quotes
-    .replace(/`/g, '\\`')    // Escape backticks
-    .replace(/\n/g, '\\n')   // Replace newlines with \n
-    .replace(/\r/g, '\\r')   // Replace carriage returns with \r
-    .replace(/\t/g, '\\t');  // Replace tabs with \t
-};
+export function measureExecutionTime(startTime: number) {
+  const endTime = Date.now();
+  const ms = endTime - startTime;
+  const seconds = (ms / 1000).toFixed(2);
+  return { ms, seconds };
+}
