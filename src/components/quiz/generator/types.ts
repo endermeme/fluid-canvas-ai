@@ -1,5 +1,5 @@
 
-import { GameType } from "../gameTypes";
+import { GameType } from '../types'; // Change the import path to the correct location
 
 export interface MiniGame {
   title: string;
