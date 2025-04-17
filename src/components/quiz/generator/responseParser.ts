@@ -1,6 +1,6 @@
+
 import { MiniGame } from './types';
 import { injectImageUtils } from './imageGenerator';
-import { parseMixedFormatCode, combineHtmlCssJs } from './mixedFormatParser';
 
 /**
  * Extract HTML, CSS, and JS from markdown format
@@ -74,50 +74,6 @@ const extractCodeFromMixedFormat = (text: string): { html: string, css: string, 
     html: htmlContent,
     css: cssCode,
     js: jsCode
-  };
-};
-
-/**
- * Extract code when CSS and JS are marked with keywords in plain text
- */
-const extractCodeFromKeywordFormat = (text: string): { html: string, css: string, js: string } => {
-  // Check if we should use the new parser
-  if ((text.includes(' css ') || text.match(/\bcss\s+\./)) && text.includes(' js ')) {
-    return parseMixedFormatCode(text);
-  }
-  
-  // Try to find HTML, CSS and JS sections by keywords
-  let htmlContent = '';
-  let cssContent = '';
-  let jsContent = '';
-  
-  // Check if we have css and js markers
-  const hasCssKeyword = text.includes(' css ') || text.match(/\bcss\s+\./);
-  const hasJsKeyword = text.includes(' js ');
-  
-  if (hasCssKeyword && hasJsKeyword) {
-    // Extract HTML (everything before css keyword)
-    const cssIndex = text.indexOf(' css ');
-    if (cssIndex > 0) {
-      htmlContent = text.substring(0, cssIndex).trim();
-    }
-    
-    // Extract CSS (between css and js keywords)
-    const jsIndex = text.indexOf(' js ');
-    if (cssIndex > 0 && jsIndex > cssIndex) {
-      cssContent = text.substring(cssIndex + 5, jsIndex).trim();
-    }
-    
-    // Extract JS (everything after js keyword)
-    if (jsIndex > 0) {
-      jsContent = text.substring(jsIndex + 4).trim();
-    }
-  }
-  
-  return {
-    html: htmlContent,
-    css: cssContent,
-    js: jsContent
   };
 };
 
@@ -279,7 +235,25 @@ const formatCSSOneLineToMultiLine = (code: string): string => {
  * Create complete HTML from separate parts
  */
 const createCompleteHtml = (html: string, css: string, js: string): string => {
-  return combineHtmlCssJs(html, css, js);
+  const docType = '<!DOCTYPE html>';
+  return `
+${docType}
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Game</title>
+  <style>
+${css}
+  </style>
+</head>
+<body>
+${html}
+  <script>
+${js}
+  </script>
+</body>
+</html>`;
 };
 
 /**
@@ -289,53 +263,15 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
   console.log("🔷 Gemini: Starting response parsing");
   
   try {
-    // Check for the mixed format with css and js keywords first
-    if ((text.includes(' css ') || text.match(/\bcss\s+\./)) && text.includes(' js ')) {
-      console.log("🔷 Gemini: Detected mixed format with css/js keywords");
-      const { html, css, js } = parseMixedFormatCode(text);
-      
-      if (html || css || js) {
-        console.log("🔷 Gemini: Successfully parsed mixed format content");
-        
-        // Format the extracted code
-        const formattedHTML = formatHTML(html);
-        const formattedCSS = formatCss(css);
-        const formattedJS = formatJavaScript(js);
-        
-        // Create complete HTML
-        const completeHtml = createCompleteHtml(formattedHTML, formattedCSS, formattedJS);
-        const enhancedHtml = injectImageUtils(completeHtml);
-        
-        // Extract title
-        let title = topic;
-        const titleMatch = completeHtml.match(/<title>(.*?)<\/title>/i);
-        if (titleMatch && titleMatch[1]) {
-          title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
-        }
-        
-        return {
-          title: title,
-          description: "Generated game content",
-          content: enhancedHtml,
-          htmlContent: formattedHTML,
-          cssContent: formattedCSS,
-          jsContent: formattedJS,
-          isSeparatedFiles: true
-        };
-      }
-    }
-    
     // Analyze response type
     const isCompleteHtml = text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html');
     const hasMarkdownBlocks = text.includes('```html') && (text.includes('```css') || text.includes('```js'));
     const isMixedFormat = text.includes('</html>') && (text.includes(' css ') || text.includes(' js '));
-    const hasKeywordFormat = (text.includes(' css ') || text.match(/\bcss\s+\./)) && text.includes(' js ');
     
     console.log("🔷 Gemini: Response format analysis:", {
       isCompleteHtml,
       hasMarkdownBlocks,
-      isMixedFormat,
-      hasKeywordFormat
+      isMixedFormat
     });
     
     // Extract code based on format
@@ -350,12 +286,6 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
     } else if (isMixedFormat) {
       console.log("🔷 Gemini: Extracting code from mixed format (HTML with css/js keywords)");
       const extracted = extractCodeFromMixedFormat(text);
-      html = extracted.html;
-      css = extracted.css;
-      js = extracted.js;
-    } else if (hasKeywordFormat) {
-      console.log("🔷 Gemini: Extracting code from keyword format (plain text with css/js markers)");
-      const extracted = extractCodeFromKeywordFormat(text);
       html = extracted.html;
       css = extracted.css;
       js = extracted.js;
@@ -374,32 +304,10 @@ export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
         css = extracted.css;
         js = extracted.js;
       } else {
-        // Try keyword format as last resort
-        const extracted = extractCodeFromKeywordFormat(text);
-        if (extracted.css && extracted.js) {
-          console.log("🔷 Gemini: Successfully extracted using keyword format");
-          html = extracted.html;
-          css = extracted.css;
-          js = extracted.js;
-        } else {
-          // If can't extract, use entire text as HTML
-          html = text;
-        }
+        // If can't extract, use entire text as HTML
+        html = text;
       }
     }
-    
-    // Handle specifically the case where html is empty but we have DIV content in the text
-    if (!html && text.includes('<div') && css && js) {
-      const divMatch = text.match(/(<div[\s\S]*?<\/div>)/);
-      if (divMatch) {
-        html = divMatch[1];
-      }
-    }
-    
-    // Log extracted content for debugging
-    console.log("🔷 Gemini: Extracted HTML:", html ? html.substring(0, 100) + "..." : "None");
-    console.log("🔷 Gemini: Extracted CSS:", css ? css.substring(0, 100) + "..." : "None");
-    console.log("🔷 Gemini: Extracted JS:", js ? js.substring(0, 100) + "..." : "None");
     
     // Format code
     const formattedHTML = formatHTML(html);

@@ -1,5 +1,5 @@
 
-import { GameSettingsData, GameType } from "../types";
+import { GameType } from "../gameTypes";
 
 export interface MiniGame {
   title: string;
