@@ -18,8 +18,8 @@ export class AIGameGenerator {
 
   constructor(apiKey: string) {
     this.genAI = new GoogleGenerativeAI(apiKey);
-    // Update to use gemini-1.5-pro or gemini-1.0-pro instead of gemini-pro
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    // Update to use gemini-2.0-flash model
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
   }
 
   async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
