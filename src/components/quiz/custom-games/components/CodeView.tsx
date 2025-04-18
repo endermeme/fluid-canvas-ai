@@ -2,22 +2,40 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { parseCodeBlocks } from '../utils/code-block-parser';
+import { parseCodeBlocks } from '@/components/quiz/utils/code-block-parser';
 
 interface CodeViewProps {
-  content: string;
+  content?: string;
+  htmlContent?: string;
+  cssContent?: string;
+  jsContent?: string;
 }
 
-const CodeView: React.FC<CodeViewProps> = ({ content }) => {
-  const parsedCode = parseCodeBlocks(content);
+const CodeView: React.FC<CodeViewProps> = ({ content, htmlContent, cssContent, jsContent }) => {
+  // Use the provided content directly if it exists, otherwise parse from the content prop
+  let html = htmlContent || '';
+  let css = cssContent || '';
+  let js = jsContent || '';
+  let title = '';
+  let description = '';
+  
+  // If content is provided, parse it
+  if (content) {
+    const parsedCode = parseCodeBlocks(content);
+    html = parsedCode.html || html;
+    css = parsedCode.css || css;
+    js = parsedCode.javascript || js;
+    title = parsedCode.title || title;
+    description = parsedCode.description || description;
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{parsedCode.title || "Code Game"}</CardTitle>
+          <CardTitle>{title || "Code Game"}</CardTitle>
           <CardDescription>
-            {parsedCode.description || "Code của game được tách thành các phần HTML, CSS và JavaScript"}
+            {description || "Code của game được tách thành các phần HTML, CSS và JavaScript"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -30,19 +48,19 @@ const CodeView: React.FC<CodeViewProps> = ({ content }) => {
             
             <TabsContent value="html">
               <pre className="p-4 bg-gray-100 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
-                <code>{parsedCode.html || "No HTML content"}</code>
+                <code>{html || "No HTML content"}</code>
               </pre>
             </TabsContent>
             
             <TabsContent value="css">
               <pre className="p-4 bg-gray-100 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
-                <code>{parsedCode.css || "No CSS content"}</code>
+                <code>{css || "No CSS content"}</code>
               </pre>
             </TabsContent>
             
             <TabsContent value="js">
               <pre className="p-4 bg-gray-100 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
-                <code>{parsedCode.javascript || "No JavaScript content"}</code>
+                <code>{js || "No JavaScript content"}</code>
               </pre>
             </TabsContent>
           </Tabs>
