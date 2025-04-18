@@ -13,6 +13,7 @@ function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/quiz" element={<Quiz />} />
+      <Route path="/custom-game" element={<Quiz />} />
       <Route path="/preset-games" element={<PresetGamesPage />} />
       <Route path="/game/:gameId" element={<GameSharePage />} />
       <Route path="/game/:gameType/:slug/:gameId" element={<GameSharePage />} />

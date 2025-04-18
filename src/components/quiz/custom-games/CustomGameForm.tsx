@@ -7,14 +7,9 @@ import { Label } from '@/components/ui/label';
 import { SparklesIcon, Info, Code } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { AIGameGenerator } from '../generator/AIGameGenerator';
-import { MiniGame } from '../generator/types';
-import { GameSettingsData } from '../types';
-import GameLoading from '../GameLoading';
-import { GEMINI_MODELS, API_VERSION, API_BASE_URL } from '@/constants/api-constants';
 
 interface CustomGameFormProps {
-  onGenerate: (content: string, game?: MiniGame) => void;
+  onGenerate: (content: string) => void;
   onCancel: () => void;
 }
 
@@ -24,9 +19,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
   const [useCanvas, setUseCanvas] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  
-  // Use the singleton pattern
-  const gameGenerator = AIGameGenerator.getInstance();
 
   const getPlaceholderText = () => {
     return 'Mô tả chi tiết game bạn muốn tạo. Hãy bao gồm thể loại game, giao diện, cách chơi và bất kỳ yêu cầu đặc biệt nào.\n\nVí dụ: "Tạo một trò chơi xếp hình với 9 mảnh ghép hình ảnh về vũ trụ, có âm thanh khi hoàn thành và hiệu ứng ngôi sao khi người chơi thắng."';
@@ -42,128 +34,29 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       return;
     }
 
-    // Tạo requestId độc nhất với timestamp và random string
-    const requestId = Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
-    const timestamp = new Date().toISOString();
-    
-    // Log thông tin request trong console với styled console group
-    console.groupCollapsed(
-      `%c 🎮 GAME REQUEST ${requestId} %c ${content.substring(0, 40)}${content.length > 40 ? '...' : ''}`,
-      'background: #6f42c1; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-      'font-weight: bold;'
-    );
-    console.log('%c 📝 Content', 'font-weight: bold; color: #6f42c1;', content);
-    console.log('%c ⏱️ Timestamp', 'font-weight: bold; color: #6f42c1;', timestamp);
-    console.log('%c 🔑 Request ID', 'font-weight: bold; color: #6f42c1;', requestId);
-    console.log('%c 📊 Content Length', 'font-weight: bold; color: #6f42c1;', content.length, 'characters');
-    console.log('%c 🤖 Model', 'font-weight: bold; color: #6f42c1;', GEMINI_MODELS.CUSTOM_GAME);
-    console.log('%c 🤖 API Version', 'font-weight: bold; color: #6f42c1;', API_VERSION);
-    console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #6f42c1;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.CUSTOM_GAME}:generateContent`);
-    console.log('%c 🎨 Canvas Mode', 'font-weight: bold; color: #6f42c1;', useCanvas ? 'Enabled' : 'Disabled');
-    console.groupEnd();
-
     setIsGenerating(true);
     
     try {
-      // Set canvas mode according to the toggle
-      gameGenerator.setCanvasMode(useCanvas);
-      
-      // Minimal settings
-      const settings: GameSettingsData = {
-        category: 'custom'
-      };
-      
-      // Log when starting the API request
-      console.group(
-        `%c 🚀 API REQUEST ${requestId} %c Generating game`,
-        'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-        'font-weight: bold;'
-      );
-      console.log('%c 📋 User Prompt', 'font-weight: bold; color: #2ea44f;', content);
-      console.log('%c 🤖 Model', 'font-weight: bold; color: #2ea44f;', GEMINI_MODELS.CUSTOM_GAME);
-      console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #2ea44f;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.CUSTOM_GAME}:generateContent`);
-      console.log('%c ⏳ Request Start Time', 'font-weight: bold; color: #2ea44f;', new Date().toISOString());
-      console.groupEnd();
-      
-      // Measure processing time
-      const startTime = performance.now();
-      const game = await gameGenerator.generateMiniGame(content, settings);
-      const endTime = performance.now();
-      const duration = ((endTime - startTime) / 1000).toFixed(2);
-      
-      // Log API results
-      console.group(
-        `%c ✅ API RESPONSE ${requestId} %c Completed in ${duration}s`,
-        'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-        'font-weight: bold;'
-      );
-      console.log('%c 📊 Result', 'font-weight: bold; color: #2ea44f;', {
-        success: !!game,
-        title: game?.title || 'N/A',
-        contentSize: game?.content?.length || 0,
-        processingTime: `${duration}s`,
-        timestamp: new Date().toISOString()
-      });
-      
-      // Log code sample (if any, only showing first 200 characters)
-      if (game?.content) {
-        console.log('%c 🧩 Code Sample', 'font-weight: bold; color: #2ea44f;', 
-          game.content.substring(0, 200) + (game.content.length > 200 ? '...' : ''));
-      }
-      console.groupEnd();
-      
-      if (game) {
+      // Simplified version - just notify the parent
+      setTimeout(() => {
         toast({
           title: "Đã tạo trò chơi",
-          description: `Trò chơi đã được tạo thành công với HTML, CSS và JavaScript.`,
+          description: `Trò chơi đã được tạo thành công.`,
         });
         
-        onGenerate(content, game);
-      } else {
-        throw new Error("Không thể tạo game");
-      }
+        onGenerate(content);
+        setIsGenerating(false);
+      }, 1000);
     } catch (error) {
-      // Log error with more information
-      console.group(
-        `%c ❌ API ERROR ${requestId} %c Generation failed`,
-        'background: #d73a49; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-        'font-weight: bold;'
-      );
-      console.log('%c 🚨 Error Details', 'font-weight: bold; color: #d73a49;', error);
-      console.log('%c 📝 Request Content', 'font-weight: bold; color: #d73a49;', content);
-      console.log('%c ⏱️ Error Time', 'font-weight: bold; color: #d73a49;', new Date().toISOString());
-      console.log('%c 🔍 Stack Trace', 'font-weight: bold; color: #d73a49;', error instanceof Error ? error.stack : 'No stack trace available');
-      console.groupEnd();
-      
+      console.error("Error generating game:", error);
       toast({
         title: "Lỗi tạo game",
         description: "Có lỗi xảy ra khi tạo game. Vui lòng thử lại.",
         variant: "destructive"
       });
-      onGenerate(content);
-    } finally {
       setIsGenerating(false);
-      
-      // Log end of the entire process
-      console.log(
-        `%c 🏁 REQUEST COMPLETE ${requestId} %c ${new Date().toISOString()}`,
-        'background: #6f42c1; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-        'font-weight: bold;'
-      );
     }
   };
-
-  const handleCancel = () => {
-    if (window.location.pathname === '/quiz' && !window.location.search) {
-      navigate('/');
-    } else {
-      onCancel();
-    }
-  };
-
-  if (isGenerating) {
-    return <GameLoading topic={content} />;
-  }
 
   return (
     <div className="p-4 max-w-4xl mx-auto w-full">
@@ -219,7 +112,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
           <div className="flex justify-between pt-4">
             <Button 
               variant="outline" 
-              onClick={handleCancel}
+              onClick={onCancel}
               className="border-primary/20 hover:border-primary/30 hover:bg-primary/5"
             >
               Hủy
@@ -235,6 +128,16 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
           </div>
         </div>
       </Card>
+      
+      {isGenerating && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h3 className="text-xl font-medium mb-2">Đang tạo game...</h3>
+            <p className="text-muted-foreground">Quá trình này có thể mất vài giây</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

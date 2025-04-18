@@ -13,33 +13,37 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack }) => {
   useEffect(() => {
     if (!iframeRef.current || !miniGame.content) return;
     
-    // Get the iframe document
-    const iframeDoc = iframeRef.current.contentDocument || 
-      (iframeRef.current.contentWindow?.document);
-    
-    if (iframeDoc) {
-      // Clear the document first
-      iframeDoc.open();
+    try {
+      // Get the iframe document
+      const iframeDoc = iframeRef.current.contentDocument || 
+        (iframeRef.current.contentWindow?.document);
       
-      // Write the HTML content
-      iframeDoc.write(miniGame.content);
-      
-      // Close the document after writing
-      iframeDoc.close();
-      
-      // Add event listener to handle messages from the iframe
-      const handleMessage = (event: MessageEvent) => {
-        if (event.data && event.data.type === 'gameScore') {
-          console.log('Received game score:', event.data.score);
-        }
-      };
-      
-      window.addEventListener('message', handleMessage);
-      
-      // Clean up on unmount
-      return () => {
-        window.removeEventListener('message', handleMessage);
-      };
+      if (iframeDoc) {
+        // Clear the document first
+        iframeDoc.open();
+        
+        // Write the HTML content
+        iframeDoc.write(miniGame.content);
+        
+        // Close the document after writing
+        iframeDoc.close();
+        
+        // Add event listener to handle messages from the iframe
+        const handleMessage = (event: MessageEvent) => {
+          if (event.data && event.data.type === 'gameScore') {
+            console.log('Received game score:', event.data.score);
+          }
+        };
+        
+        window.addEventListener('message', handleMessage);
+        
+        // Clean up on unmount
+        return () => {
+          window.removeEventListener('message', handleMessage);
+        };
+      }
+    } catch (error) {
+      console.error("Error rendering game content:", error);
     }
   }, [miniGame.content]);
   
