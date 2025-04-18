@@ -1,6 +1,24 @@
 
-import { MiniGame, GameGenerationOptions } from './types';
 import { buildGeminiPrompt } from './promptBuilder';
+
+/**
+ * Interface for generated mini-games
+ */
+export interface MiniGame {
+  title?: string;
+  description?: string;
+  content: string;
+}
+
+/**
+ * Interface for game generation options
+ */
+export interface GameGenerationOptions {
+  difficulty?: 'easy' | 'medium' | 'hard';
+  language?: string;
+  ageGroup?: string;
+  timeLimit?: number;
+}
 
 /**
  * Generator for AI-powered minigames
@@ -9,7 +27,8 @@ export class AIGameGenerator {
   private static instance: AIGameGenerator;
   private useCanvas: boolean = true;
   
-  private constructor() {}
+  // Changed constructor to public to allow direct instantiation
+  constructor() {}
   
   public static getInstance(): AIGameGenerator {
     if (!AIGameGenerator.instance) {
@@ -160,4 +179,5 @@ export class AIGameGenerator {
   }
 }
 
-export type { MiniGame };
+// Re-export the MiniGame interface for imports elsewhere
+export type { MiniGame, GameGenerationOptions };

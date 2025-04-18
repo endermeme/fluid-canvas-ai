@@ -3,7 +3,7 @@ import React from 'react';
 
 interface GameLoadingProps {
   topic: string;
-  progress?: number; // Adding the missing progress prop
+  progress?: number;
 }
 
 const GameLoading: React.FC<GameLoadingProps> = ({ topic, progress }) => {

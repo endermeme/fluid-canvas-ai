@@ -1,6 +1,5 @@
 
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
 
@@ -12,11 +11,7 @@ const renderApp = () => {
   // Sử dụng cách an toàn hơn để kiểm tra việc render
   try {
     const root = createRoot(rootElement);
-    root.render(
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    );
+    root.render(<App />);
     console.log("Ứng dụng đã được khởi tạo thành công");
   } catch (error) {
     console.error("Lỗi khi khởi tạo ứng dụng:", error);
