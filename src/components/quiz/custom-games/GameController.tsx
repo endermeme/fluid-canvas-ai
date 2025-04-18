@@ -1,16 +1,15 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
+import { AIGameGenerator } from '../generator/AIGameGenerator';
 import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Share2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createGameSession } from '@/utils/gameParticipation';
 import QuizContainer from '../QuizContainer';
-import { tryGeminiGeneration } from '../generator/geminiGenerator';
 
 interface GameControllerProps {
   initialTopic?: string;
@@ -23,155 +22,29 @@ const GameController: React.FC<GameControllerProps> = ({
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentGame, setCurrentGame] = useState<MiniGame | null>(null);
-  const [currentTopic, setCurrentTopic] = useState<string>(initialTopic || "vòng quay may mắn");
+  const [currentTopic, setCurrentTopic] = useState<string>(initialTopic);
   const [showForm, setShowForm] = useState(!currentGame);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const location = useLocation();
   
-  // Auto-generate wheel game when page loads
-  useEffect(() => {
-    // Only auto-generate on the custom-game route
-    if (location.pathname === '/custom-game' && !currentGame && !isGenerating) {
-      handleGameGeneration("vòng quay may mắn");
-    }
-  }, [location.pathname]);
-  
-  const handleGameGeneration = async (content: string, game?: MiniGame) => {
+  const handleGameGeneration = (content: string, game?: MiniGame) => {
     setCurrentTopic(content);
-    setIsGenerating(true);
     
-    try {
-      // If a game object was directly provided, use it
-      if (game) {
-        setCurrentGame(game);
-        setShowForm(false);
-        
-        if (onGameGenerated) {
-          onGameGenerated(game);
-        }
-        
-        toast({
-          title: "Minigame Đã Sẵn Sàng",
-          description: `Minigame "${game.title || content}" đã được tạo thành công.`,
-        });
-        setIsGenerating(false);
-        return;
+    if (game) {
+      setCurrentGame(game);
+      setShowForm(false);
+      
+      if (onGameGenerated) {
+        onGameGenerated(game);
       }
       
-      // Special handling for wheel game
-      if (content.toLowerCase().includes('vòng quay')) {
-        try {
-          // Load the wheel game HTML
-          const wheelGameHTML = await fetch('/vong-quay/index.html')
-            .then(response => {
-              if (!response.ok) {
-                throw new Error(`Failed to load wheel game template: ${response.status}`);
-              }
-              return response.text();
-            });
-          
-          // Load the CSS and JS for the wheel game
-          const wheelGameCSS = await fetch('/vong-quay/style.css').then(r => r.text());
-          const wheelGameJS = await fetch('/vong-quay/script.js').then(r => r.text()).catch(() => '');
-          
-          // Combine into a single HTML document
-          const combinedHTML = `
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vòng Quay May Mắn</title>
-    <style>
-    ${wheelGameCSS}
-    </style>
-</head>
-<body>
-    <div class="wheel-container">
-        <div class="pointer">▼</div>
-        <div class="wheel">
-        </div>
-
-        <button id="spin-btn">Quay!</button>
-        <div id="result"></div>
-    </div>
-
-    <script>
-    ${wheelGameJS}
-    </script>
-</body>
-</html>
-          `;
-          
-          const wheelGame: MiniGame = {
-            title: "Vòng Quay May Mắn",
-            content: combinedHTML,
-            useCanvas: false
-          };
-          
-          setCurrentGame(wheelGame);
-          setShowForm(false);
-          
-          if (onGameGenerated) {
-            onGameGenerated(wheelGame);
-          }
-          
-          toast({
-            title: "Vòng Quay May Mắn",
-            description: "Vòng quay may mắn đã sẵn sàng!",
-          });
-          
-        } catch (error) {
-          console.error("Error loading wheel game:", error);
-          // Fallback to AI generation if wheel game template fails
-          generateWithAI(content);
-        }
-      } else {
-        // For other topics, generate using Gemini
-        generateWithAI(content);
-      }
-    } catch (error) {
-      console.error("Error in game generation:", error);
       toast({
-        title: "Lỗi tạo game",
-        description: "Có lỗi xảy ra khi tạo game. Vui lòng thử lại.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-  
-  const generateWithAI = async (content: string) => {
-    try {
-      const game = await tryGeminiGeneration(null, content, { 
-        category: 'custom' 
-      });
-      
-      if (game) {
-        setCurrentGame(game);
-        setShowForm(false);
-        
-        if (onGameGenerated) {
-          onGameGenerated(game);
-        }
-        
-        toast({
-          title: "Minigame Đã Sẵn Sàng",
-          description: `Minigame đã được tạo thành công.`,
-        });
-      } else {
-        throw new Error("Không thể tạo game");
-      }
-    } catch (error) {
-      console.error("Error generating game with AI:", error);
-      toast({
-        title: "Lỗi tạo game",
-        description: "Có lỗi xảy ra khi tạo game. Vui lòng thử lại.",
-        variant: "destructive"
+        title: "Minigame Đã Sẵn Sàng",
+        description: `Minigame "${game.title || content}" đã được tạo thành công.`,
       });
     }
+    
+    setIsGenerating(false);
   };
 
   const handleBack = () => {

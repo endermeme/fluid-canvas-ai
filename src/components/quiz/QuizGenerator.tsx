@@ -1,5 +1,7 @@
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { AIGameGenerator } from './generator/AIGameGenerator';
 import { MiniGame } from './generator/types';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
@@ -11,7 +13,7 @@ import { createGameSession } from '@/utils/gameParticipation';
 import { Button } from '@/components/ui/button';
 import { Share2 } from 'lucide-react';
 import { GEMINI_API_KEY, GEMINI_MODELS } from '@/constants/api-constants';
-import { tryGeminiGeneration } from './generator/geminiGenerator';
+import { supabase } from '@/integrations/supabase/client';
 
 interface QuizGeneratorProps {
   topic?: string;
@@ -29,6 +31,8 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const { toast } = useToast();
   const navigate = useNavigate();
   
+  const gameGenerator = AIGameGenerator.getInstance();
+  
   const [canvasMode] = useState<boolean>(true);
   
   const defaultSettings: GameSettingsData = {
@@ -40,7 +44,8 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   
   useEffect(() => {
     localStorage.setItem('canvas_mode', 'true');
-  }, []);
+    gameGenerator.setCanvasMode(true);
+  }, [gameGenerator]);
 
   useImperativeHandle(ref, () => ({
     generateQuiz: (topic: string, settings?: GameSettingsData) => {
@@ -111,141 +116,17 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     console.log("Using model:", GEMINI_MODELS.CUSTOM_GAME);
 
     try {      
-      if (topic.toLowerCase().includes('vòng quay') || topic.toLowerCase().includes('wheel')) {
-        const wheelGameHTML = await fetch('/vong-quay/index.html')
-          .then(response => {
-            if (!response.ok) {
-              throw new Error(`Failed to load wheel game template: ${response.status}`);
-            }
-            return response.text();
-          });
-        
-        const wheelGameCSS = await fetch('/vong-quay/style.css').then(r => r.text());
-        const wheelGameJS = await fetch('/vong-quay/script.js').then(r => r.text()).catch(() => '');
-        
-        const combinedHTML = `
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vòng Quay May Mắn</title>
-    <style>
-    ${wheelGameCSS}
-    </style>
-</head>
-<body>
-    <div class="wheel-container">
-        <div class="pointer">▼</div>
-        <div class="wheel">
-        </div>
-
-        <button id="spin-btn">Quay!</button>
-        <div id="result"></div>
-    </div>
-
-    <script>
-    const items = [
-        "Giải nhất", 
-        "Giải nhì", 
-        "Giải ba", 
-        "May mắn", 
-        "Tiếp tục", 
-        "Thử lại", 
-        "Quà đặc biệt", 
-        "Chúc may mắn"
-    ];
-
-    const colors = [
-        "#f44336", "#e91e63", "#9c27b0", "#673ab7", 
-        "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4"
-    ];
-
-    const wheel = document.querySelector('.wheel');
-    const spinBtn = document.getElementById('spin-btn');
-    const result = document.getElementById('result');
-
-    function createWheel() {
-        const totalItems = items.length;
-        const anglePerItem = 360 / totalItems;
-        const offsetAngle = anglePerItem / 2;
-
-        for (let i = 0; i < totalItems; i++) {
-            const segment = document.createElement('div');
-            segment.className = 'segment';
-            segment.style.transform = \`rotate(\${i * anglePerItem + offsetAngle}deg)\`;
-            segment.style.backgroundColor = colors[i % colors.length];
-
-            const text = document.createElement('span');
-            text.textContent = items[i];
-            segment.appendChild(text);
-
-            wheel.appendChild(segment);
-        }
-    }
-
-    window.addEventListener('DOMContentLoaded', createWheel);
-
-    let isSpinning = false;
-
-    spinBtn.addEventListener('click', () => {
-        if (isSpinning) return;
-        
-        isSpinning = true;
-        spinBtn.disabled = true;
-        result.textContent = '';
-        
-        const totalRotation = 1080 + Math.floor(Math.random() * 1080);
-        
-        wheel.style.transition = 'transform 4s ease-out';
-        wheel.style.transform = \`rotate(\${totalRotation}deg)\`;
-        
-        setTimeout(() => {
-            const finalRotation = totalRotation % 360;
-            const anglePerItem = 360 / items.length;
-            let selectedIndex = Math.floor(finalRotation / anglePerItem);
-            selectedIndex = (items.length - selectedIndex) % items.length;
-            
-            result.textContent = \`Kết quả: \${items[selectedIndex]}\`;
-            
-            isSpinning = false;
-            spinBtn.disabled = false;
-
-            const event = new CustomEvent('game-completed', {
-                detail: { score: 100, result: items[selectedIndex] }
-            });
-            document.dispatchEvent(event);
-        }, 4000);
-    });
-    </script>
-</body>
-</html>
-        `;
-        
-        const wheelGame: MiniGame = {
-          title: "Vòng Quay May Mắn",
-          content: combinedHTML,
-          useCanvas: false
-        };
-        
-        setMiniGame(wheelGame);
+      const game = await gameGenerator.generateMiniGame(topic, settings);
+      
+      if (game) {
+        console.log("Minigame generated successfully:", game.title);
+        setMiniGame(game);
         toast({
-          title: "Vòng Quay May Mắn",
-          description: "Vòng quay may mắn đã sẵn sàng!",
+          title: "Minigame Đã Sẵn Sàng",
+          description: `Đã tạo minigame về "${topic}" với Gemini ${GEMINI_MODELS.CUSTOM_GAME}`,
         });
       } else {
-        const game = await tryGeminiGeneration(null, topic, settings);
-        
-        if (game) {
-          console.log("Minigame generated successfully:", game.title);
-          setMiniGame(game);
-          toast({
-            title: "Minigame Đã Sẵn Sàng",
-            description: `Đã tạo minigame về "${topic}" với Gemini ${GEMINI_MODELS.CUSTOM_GAME}`,
-          });
-        } else {
-          throw new Error('Không thể tạo minigame');
-        }
+        throw new Error('Không thể tạo minigame');
       }
     } catch (error) {
       console.error('Lỗi Tạo Minigame:', error);
@@ -270,6 +151,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       );
       
       if (gameSession.id) {
+        // Create a slug from the title for more descriptive URL
         const gameTitle = miniGame.title || "Minigame tương tác";
         const slug = gameTitle.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
         const shareUrl = `${window.location.origin}/play/custom-game/${slug}/${gameSession.id}`;

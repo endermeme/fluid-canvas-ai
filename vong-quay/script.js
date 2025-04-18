@@ -1,87 +1,140 @@
-
-// Danh sách các mục trên vòng quay
-const items = [
-    "Giải nhất", 
-    "Giải nhì", 
-    "Giải ba", 
-    "May mắn", 
-    "Tiếp tục", 
-    "Thử lại", 
-    "Quà đặc biệt", 
-    "Chúc may mắn"
-];
-
-// Màu sắc cho các phân đoạn
-const colors = [
-    "#f44336", "#e91e63", "#9c27b0", "#673ab7", 
-    "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4"
-];
-
-// Lấy các phần tử DOM
 const wheel = document.querySelector('.wheel');
 const spinBtn = document.getElementById('spin-btn');
-const result = document.getElementById('result');
+const resultDiv = document.getElementById('result');
 
-// Tạo các phân đoạn cho vòng quay
-function createWheel() {
-    const totalItems = items.length;
-    const anglePerItem = 360 / totalItems;
-    const offsetAngle = anglePerItem / 2;
+// --- Cấu hình các phần thưởng ---
+const segments = [
+    { text: '10 Điểm', color: '#f1c40f' }, // Vàng
+    { text: 'Mất lượt', color: '#e74c3c' }, // Đỏ
+    { text: '20 Điểm', color: '#3498db' }, // Xanh dương
+    { text: 'Thêm lượt', color: '#2ecc71' }, // Xanh lá
+    { text: '50 Điểm', color: '#f39c12' }, // Cam
+    { text: 'Chúc MM Lần Sau', color: '#9b59b6' }, // Tím
+    { text: '100 Điểm', color: '#1abc9c' }, // Xanh ngọc
+    { text: 'Thử Lại', color: '#7f8c8d' }  // Xám
+];
 
-    for (let i = 0; i < totalItems; i++) {
-        const segment = document.createElement('div');
-        segment.className = 'segment';
-        segment.style.transform = `rotate(${i * anglePerItem + offsetAngle}deg)`;
-        segment.style.backgroundColor = colors[i % colors.length];
-
-        const text = document.createElement('span');
-        text.textContent = items[i];
-        segment.appendChild(text);
-
-        wheel.appendChild(segment);
-    }
-}
-
-// Tạo vòng quay khi trang tải xong
-window.addEventListener('DOMContentLoaded', createWheel);
-
-// Biến lưu trạng thái đang quay
+const numSegments = segments.length;
+const segmentAngle = 360 / numSegments;
+let currentRotation = 0; // Lưu góc quay hiện tại để quay tiếp
 let isSpinning = false;
 
-// Xử lý sự kiện khi nhấn nút quay
-spinBtn.addEventListener('click', () => {
-    if (isSpinning) return; // Ngăn người dùng quay khi đang quay
-    
+// --- Tạo các phần tử segment ---
+function createSegments() {
+    segments.forEach((segment, index) => {
+        const segmentElement = document.createElement('div');
+        segmentElement.classList.add('segment');
+
+        // Tính góc quay cho segment này (quay quanh tâm)
+        const rotation = segmentAngle * index;
+
+        // Tính góc nghiêng để tạo hình rẻ quạt
+        // Góc nghiêng cần thiết để cạnh của segment thẳng hàng với tâm
+        // Điều chỉnh skewY dựa trên segmentAngle
+        const skewY = 90 - segmentAngle;
+
+        segmentElement.style.transform = `rotate(${rotation}deg) skewY(-${skewY}deg)`;
+        segmentElement.style.backgroundColor = segment.color;
+
+        const span = document.createElement('span');
+        span.textContent = segment.text;
+        // Điều chỉnh xoay của chữ để nó gần như thẳng đứng hoặc hướng ra ngoài
+        span.style.transform = `skewY(${skewY}deg) rotate(${segmentAngle / 2}deg)`;
+
+        segmentElement.appendChild(span);
+        wheel.appendChild(segmentElement);
+    });
+}
+
+// --- Hàm quay vòng quay ---
+function spinWheel() {
+    if (isSpinning) return; // Không cho quay khi đang quay
+
     isSpinning = true;
     spinBtn.disabled = true;
-    result.textContent = '';
-    
-    // Số vòng quay (3-5 vòng) + góc ngẫu nhiên
-    const totalRotation = 1080 + Math.floor(Math.random() * 1080);
-    
-    // Thiết lập animation quay
-    wheel.style.transition = 'transform 4s ease-out';
-    wheel.style.transform = `rotate(${totalRotation}deg)`;
-    
-    // Xác định kết quả sau khi quay xong
-    setTimeout(() => {
-        // Tính toán phân đoạn trúng
-        const finalRotation = totalRotation % 360;
-        const anglePerItem = 360 / items.length;
-        let selectedIndex = Math.floor(finalRotation / anglePerItem);
-        selectedIndex = (items.length - selectedIndex) % items.length;
-        
-        // Hiển thị kết quả
-        result.textContent = `Kết quả: ${items[selectedIndex]}`;
-        
-        // Reset trạng thái
-        isSpinning = false;
-        spinBtn.disabled = false;
+    resultDiv.textContent = 'Đang quay...';
 
-        // Gửi sự kiện hoàn thành (nếu cần)
-        const event = new CustomEvent('game-completed', {
-            detail: { score: 100, result: items[selectedIndex] }
-        });
-        document.dispatchEvent(event);
-    }, 4000); // Thời gian quay = 4 giây
-});
+    // Chọn ngẫu nhiên một segment trúng thưởng
+    const randomIndex = Math.floor(Math.random() * numSegments);
+    const winningSegment = segments[randomIndex];
+
+    // Tính toán góc quay đích
+    // Mục tiêu: Đưa *giữa* segment trúng thưởng đến vị trí mũi tên (ví dụ: 270 độ hoặc -90 độ nếu mũi tên ở trên cùng)
+    // Góc của điểm giữa segment trúng thưởng: (randomIndex + 0.5) * segmentAngle
+    // Góc cần quay để mũi tên chỉ vào đó (quay ngược chiều kim đồng hồ):
+    const targetRotationMidpoint = 360 - (randomIndex * segmentAngle + segmentAngle / 2);
+
+    // Thêm nhiều vòng quay để tạo hiệu ứng (ví dụ: 5 vòng)
+    const randomExtraSpins = 5; // Số vòng quay thêm
+    const totalRotation = 360 * randomExtraSpins + targetRotationMidpoint;
+
+    // Thêm một chút ngẫu nhiên nhỏ vào góc cuối cùng để không phải lúc nào cũng dừng chính giữa
+    const randomOffset = (Math.random() - 0.5) * (segmentAngle * 0.6); // Ngẫu nhiên trong khoảng +/- 30% chiều rộng segment
+    const finalRotation = totalRotation + randomOffset;
+
+    // Áp dụng góc quay mới, cộng dồn với góc quay hiện tại
+    // Không cần cộng dồn nếu dùng absolute rotation như trên
+    // currentRotation += finalRotation; // Nếu muốn cộng dồn góc
+
+    wheel.style.transition = 'transform 4s ease-out'; // Đảm bảo transition được set trước khi quay
+    wheel.style.transform = `rotate(${finalRotation}deg)`;
+
+    // Lưu lại góc quay cuối cùng (chuẩn hóa về 0-360) để xử lý lần quay tiếp theo nếu cần
+    currentRotation = finalRotation % 360;
+}
+
+// --- Xử lý sau khi quay xong ---
+wheel.addEventListener('transitionend', () => {
+    if (!isSpinning) return; // Chỉ xử lý khi kết thúc lần quay thực sự
+
+    isSpinning = false;
+    spinBtn.disabled = false;
+
+    // Chuẩn hóa góc quay về khoảng 0-360 độ
+    const normalizedRotation = currentRotation < 0 ? currentRotation + 360 : currentRotation;
+
+    // Xác định segment trúng thưởng dựa trên góc quay cuối cùng
+    // Góc của mũi tên (ví dụ: 270 độ nếu ở trên cùng)
+    const pointerAngle = 270;
+    const winningIndex = Math.floor(((360 - normalizedRotation + pointerAngle) % 360) / segmentAngle);
+
+    // Đảm bảo index không bị lỗi do làm tròn số float
+    const finalWinningIndex = (winningIndex + numSegments) % numSegments;
+
+    const finalWinningSegment = segments[finalWinningIndex];
+
+    resultDiv.textContent = `Chúc mừng! Bạn nhận được: ${finalWinningSegment.text}`;
+
+    // Optional: Reset transition để góc quay được cập nhật ngay lập tức mà không có animation
+    // Điều này quan trọng nếu bạn muốn lần quay tiếp theo bắt đầu từ vị trí dừng hiện tại
+    // wheel.style.transition = 'none';
+    // wheel.style.transform = `rotate(${normalizedRotation}deg)`;
+    // // Trigger reflow để trình duyệt áp dụng thay đổi ngay lập tức
+    // wheel.offsetHeight;
+    // // Đặt lại transition cho lần quay sau
+    // wheel.style.transition = 'transform 4s ease-out';
+
+    // Cập nhật lại currentRotation nếu cần dùng cho lần quay sau (nếu không reset)
+    // currentRotation = normalizedRotation;
+
+}, false);
+
+// --- Gắn sự kiện click cho nút quay ---
+spinBtn.addEventListener('click', spinWheel);
+
+// --- Khởi tạo vòng quay ---
+createSegments();
+
+// --- Thêm Utility gọi về parent app theo yêu cầu từ CUSTOM_GAME_IMPLEMENTATION.md ---
+function sendGameStats(stats) {
+    if (window.parent && typeof window.parent.sendGameStats === 'function') {
+        window.parent.sendGameStats(stats);
+    }
+    
+    // Fallback nếu parent không có hàm sendGameStats
+    if (window.sendGameStats && typeof window.sendGameStats === 'function') {
+        window.sendGameStats(stats);
+    }
+    
+    console.log('Game stats:', stats);
+} 
