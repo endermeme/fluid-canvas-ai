@@ -1,3 +1,4 @@
+
 export const enhanceIframeContent = (content: string, title?: string): string => {
   // Clean the content
   let processedContent = content.replace(/```html|```/g, '');
@@ -114,6 +115,10 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
 </html>`;
   }
   
+  // Remove any references to gptengineer.js
+  processedContent = processedContent.replace(/<script[^>]*src=["']https:\/\/cdn\.gpteng\.co\/gptengineer\.js["'][^>]*><\/script>/g, '');
+  processedContent = processedContent.replace(/gptengineer\./g, 'game.');
+  
   // Add a meta tag for Content Security Policy to improve security
   if (!processedContent.includes('content-security-policy')) {
     const cspTag = `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">`;
@@ -127,6 +132,21 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
         scriptContent.includes('(function()') || 
         scriptContent.includes('(() =>')) {
       return formatScriptTag(match);
+    }
+    
+    // Check for syntax errors in the script content
+    try {
+      // Simple check for basic syntax errors
+      // eslint-disable-next-line no-new-func
+      new Function(scriptContent);
+    } catch (error) {
+      console.error('Syntax error detected in script:', error);
+      // Fix common syntax errors
+      scriptContent = scriptContent
+        .replace(/(\w+):/g, '"$1":') // Fix object literal syntax
+        .replace(/'/g, '"')          // Replace single quotes with double quotes
+        .replace(/,\s*}/g, '}')      // Remove trailing commas
+        .replace(/,\s*]/g, ']');     // Remove trailing commas in arrays
     }
     
     // Wrap in self-executing function with proper indentation
