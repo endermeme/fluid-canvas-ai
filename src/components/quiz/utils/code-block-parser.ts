@@ -1,4 +1,3 @@
-
 interface ParsedCode {
   html: string;
   css: string;
@@ -85,6 +84,28 @@ const parseCodeBlocks = (response: string): ParsedCode => {
     result.html = removeComments(result.html);
     result.css = removeComments(result.css);
     result.javascript = removeComments(result.javascript);
+
+    // Convert parsed blocks into a single HTML file with embedded CSS and JS
+    const combinedHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${result.title || "Interactive Game"}</title>
+  <style>
+    ${result.css}
+  </style>
+</head>
+<body>
+  ${result.html}
+  <script>
+    ${result.javascript}
+  </script>
+</body>
+</html>`;
+
+    // Update result with combined HTML
+    result.html = combinedHtml;
 
     return result;
   } catch (error) {
