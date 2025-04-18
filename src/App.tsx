@@ -24,7 +24,7 @@ const App = () => {
   }, []);
 
   return (
-    <ThemeProvider defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/quiz" replace />} />
