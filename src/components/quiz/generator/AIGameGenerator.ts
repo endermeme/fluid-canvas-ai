@@ -10,6 +10,7 @@ export class AIGameGenerator {
   private static instance: AIGameGenerator;
   private genAI: GoogleGenerativeAI;
   private model: any;
+  private canvasMode: boolean = true;
 
   constructor() {
     this.genAI = new GoogleGenerativeAI('AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA');
@@ -24,11 +25,17 @@ export class AIGameGenerator {
     return AIGameGenerator.instance;
   }
 
+  public setCanvasMode(enabled: boolean): void {
+    this.canvasMode = enabled;
+    logInfo('AIGameGenerator', `Canvas mode ${enabled ? 'enabled' : 'disabled'}`);
+  }
+
   public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
       logInfo('AIGameGenerator', `Generating game for topic: ${topic}`);
       
-      const prompt = buildGeminiPrompt(topic);
+      // Include canvas mode in the prompt building
+      const prompt = buildGeminiPrompt(topic, this.canvasMode);
       const result = await this.model.generateContent(prompt);
       const response = result.response.text();
       
