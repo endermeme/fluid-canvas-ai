@@ -1,5 +1,7 @@
+
 import { gameTypes } from "../gameTypes";
 
+// Ensure the interface is exported
 export interface MiniGame {
   title: string;
   description?: string;
