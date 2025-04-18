@@ -12,6 +12,7 @@ export class AIGameGenerator {
   private static instance: AIGameGenerator;
   private genAI: GoogleGenerativeAI;
   private model: any;
+  private canvasMode: boolean = true;
 
   constructor() {
     this.genAI = new GoogleGenerativeAI('AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA');
@@ -26,11 +27,16 @@ export class AIGameGenerator {
     return AIGameGenerator.instance;
   }
 
+  public setCanvasMode(mode: boolean): void {
+    this.canvasMode = mode;
+    logInfo('AIGameGenerator', `Canvas mode set to: ${mode}`);
+  }
+
   public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
       logInfo('AIGameGenerator', 'Starting game generation', { topic, settings });
       
-      const prompt = `Tạo một minigame tương tác về chủ đề "${topic}" với HTML, CSS và JavaScript đầy đủ. Game phải có giao diện đẹp, responsive và tương tác tốt với người dùng.`;
+      const prompt = `Tạo một minigame tương tác về chủ đề "${topic}" với HTML, CSS và JavaScript đầy đủ. Game phải có giao diện đẹp, responsive và tương tác tốt với người dùng.${this.canvasMode ? ' Sử dụng Canvas HTML5 để tạo đồ họa đẹp mắt và tương tác.' : ''}`;
       
       console.log("Sending prompt to Gemini:", prompt);
       
