@@ -121,8 +121,6 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
           <TabsContent value="code" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
             <CodeView
               htmlContent={miniGame.htmlContent}
-              cssContent={miniGame.cssContent}
-              jsContent={miniGame.jsContent}
             />
           </TabsContent>
         )}
