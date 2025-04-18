@@ -1,22 +1,12 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import QuickGameSelector from '@/components/quiz/QuickGameSelector';
-import CustomGameForm from '@/components/quiz/custom-games/CustomGameForm';
+import GameController from '@/components/quiz/custom-games/GameController';
 
 const Quiz: React.FC = () => {
-  const [showChat, setShowChat] = useState<boolean>(false);
   const navigate = useNavigate();
-
-  const handleToggleChat = () => {
-    setShowChat(!showChat);
-  };
-
-  const handleGameRequest = (topic: string) => {
-    // Simplified - just show that the request was received
-    console.log("Game requested:", topic);
-  };
 
   // Check if we're on the custom game route
   const isCustomGame = window.location.pathname === '/custom-game';
@@ -30,14 +20,13 @@ const Quiz: React.FC = () => {
     >
       <div className="h-full">
         {isCustomGame ? (
-          <CustomGameForm 
-            onGenerate={(content) => console.log("Game generated:", content)}
-            onCancel={() => navigate('/quiz')}
-          />
+          <GameController />
         ) : (
           <QuickGameSelector
-            onGameRequest={handleGameRequest}
-            onToggleChat={handleToggleChat}
+            onGameRequest={(topic) => {
+              // Navigate to custom game with topic as param
+              navigate(`/custom-game?topic=${encodeURIComponent(topic)}`);
+            }}
           />
         )}
       </div>

@@ -28,7 +28,7 @@ const GameController: React.FC<GameControllerProps> = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const handleGameGeneration = (content: string, game?: MiniGame) => {
+  const handleGameGeneration = async (content: string, game?: MiniGame) => {
     setCurrentTopic(content);
     
     if (game) {
@@ -43,9 +43,41 @@ const GameController: React.FC<GameControllerProps> = ({
         title: "Minigame Đã Sẵn Sàng",
         description: `Minigame "${game.title || content}" đã được tạo thành công.`,
       });
+      
+      setIsGenerating(false);
+      return;
     }
     
-    setIsGenerating(false);
+    try {
+      // Use AIGameGenerator to generate a new game
+      const gameGenerator = new AIGameGenerator();
+      const generatedGame = await gameGenerator.generateGame(content);
+      
+      if (generatedGame) {
+        setCurrentGame(generatedGame);
+        setShowForm(false);
+        
+        if (onGameGenerated) {
+          onGameGenerated(generatedGame);
+        }
+        
+        toast({
+          title: "Minigame Đã Sẵn Sàng",
+          description: `Minigame "${generatedGame.title || content}" đã được tạo thành công.`,
+        });
+      } else {
+        throw new Error("Không thể tạo game");
+      }
+    } catch (error) {
+      console.error("Error generating game:", error);
+      toast({
+        title: "Lỗi Tạo Game",
+        description: "Đã xảy ra lỗi khi tạo game. Vui lòng thử lại.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleBack = () => {
@@ -79,6 +111,11 @@ const GameController: React.FC<GameControllerProps> = ({
       });
     } catch (error) {
       console.error("Error sharing game:", error);
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Đã xảy ra lỗi khi chia sẻ game.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -118,21 +155,7 @@ const GameController: React.FC<GameControllerProps> = ({
         <CustomGameForm 
           onGenerate={(content, game) => {
             setIsGenerating(true);
-            // If game is provided, use it directly. Otherwise, we'll need to generate it
-            if (game) {
-              setTimeout(() => handleGameGeneration(content, game), 500);
-            } else {
-              // Here we would typically generate the game using an API
-              // For now we'll simulate with a mock game
-              setTimeout(() => {
-                const mockGame: MiniGame = {
-                  title: `Game about ${content}`,
-                  content: `<html><body><h1>Game about ${content}</h1><p>This is a mock game.</p></body></html>`,
-                  description: `A game about ${content}`
-                };
-                handleGameGeneration(content, mockGame);
-              }, 1500);
-            }
+            handleGameGeneration(content, game);
           }}
           onCancel={() => navigate('/')}
         />
