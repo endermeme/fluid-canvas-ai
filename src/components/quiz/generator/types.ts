@@ -3,7 +3,6 @@ export interface MiniGame {
   title: string;
   content: string;
   description?: string;
-  useCanvas?: boolean;
 }
 
 export interface GameApiResponse {
@@ -20,7 +19,6 @@ export interface APISettings {
 }
 
 export interface GameGenerationOptions {
-  useCanvas?: boolean;
   difficulty?: string;
   language?: string;
   timeLimit?: number;

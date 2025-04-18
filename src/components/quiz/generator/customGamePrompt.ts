@@ -1,3 +1,4 @@
+
 export interface GamePromptOptions {
   topic: string;
   useCanvas?: boolean;
@@ -15,32 +16,7 @@ export const generateCustomGamePrompt = (options: GamePromptOptions): string => 
     category = 'general'
   } = options;
 
-  const basePrompt = `
-Create an interactive HTML game based on: "${topic}"
-
-**IMPORTANT: Return code in markdown format with \`\`\`html blocks**
-
-**STRICT REQUIREMENTS:**
-- Start your response with a \`\`\`html block
-- Format code with proper line breaks and indentation
-- End your response with \`\`\` closing block
-- Use modern JavaScript (ES6+), no external libraries
-- Clean, readable, maintainable code with descriptive names
-- Strictly modular structure: init, update, render, game loop
-- Use semantic HTML5, responsive layout
-- No global variables unless absolutely needed
-- Implement proper event handling, game state management
-- Use localStorage if persistence is needed
-${useCanvas ? '- Use HTML5 Canvas for rendering' : ''}
-- Efficient rendering, proper sizing, smooth animations
-
-**Game content must match:**
-- Difficulty level: \`${difficulty}\`
-- Category: \`${category}\`
-- Language: \`${language === 'vi' ? 'Vietnamese' : 'English'}\`
-`;
-
-  return basePrompt;
+  return `Create an interactive game based on: "${topic}"`;
 };
 
 export const getGameInstructionsByType = (gameType: string): string => {

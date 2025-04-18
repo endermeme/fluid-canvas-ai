@@ -1,16 +1,9 @@
 
-import { GamePromptOptions, generateCustomGamePrompt } from './customGamePrompt';
-
 export const buildGeminiPrompt = (
   topic: string,
   useCanvas: boolean = true
 ): string => {
-  const options: GamePromptOptions = {
-    topic,
-    useCanvas
-  };
-
-  return generateCustomGamePrompt(options);
+  return `Create a game about ${topic}`;
 };
 
 export const getCanvasInstructions = (): string => {
