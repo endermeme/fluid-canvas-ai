@@ -14,7 +14,7 @@ interface CodeViewProps {
 
 const CodeView: React.FC<CodeViewProps> = ({ content, htmlContent }) => {
   const [codeToDisplay, setCodeToDisplay] = useState<string>('');
-  const [htmlCode, setCssCode, setJsCode] = useState<string[]>(['', '', '']);
+  const [htmlCssJs, setHtmlCssJs] = useState<string[]>(['', '', '']);
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<string>('full');
 
@@ -34,7 +34,7 @@ const CodeView: React.FC<CodeViewProps> = ({ content, htmlContent }) => {
       const extractedCss = styleMatch ? styleMatch[1].trim() : '';
       const extractedJs = scriptMatch ? scriptMatch[1].trim() : '';
       
-      setCssCode([extractedHtml, extractedCss, extractedJs]);
+      setHtmlCssJs([extractedHtml, extractedCss, extractedJs]);
     } catch (error) {
       console.error('Error extracting code sections:', error);
     }
