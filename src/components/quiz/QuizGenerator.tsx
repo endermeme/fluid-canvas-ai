@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, X, ArrowRight, Loader2, Gamepad, Share2, Link2, Copy } from 'lucide-react';
@@ -35,38 +34,14 @@ class AIGameGenerator {
       console.log("Đang tạo minigame cho chủ đề:", userMessage);
       console.log("Với các cài đặt:", settings);
       
-      // Default settings
-      const gameSettings = settings || {
-        difficulty: 'medium',
-        questionCount: 10,
-        timePerQuestion: 30,
-        category: 'general'
-      };
-      
-      const difficultyDescriptions = {
-        easy: "câu hỏi đơn giản, phù hợp cho trẻ em hoặc người mới bắt đầu",
-        medium: "câu hỏi có độ khó vừa phải, phù hợp cho hầu hết người chơi",
-        hard: "câu hỏi khó, đòi hỏi kiến thức chuyên sâu và tư duy nhanh"
-      };
-      
-      const categoryDescriptions = {
-        general: "kiến thức chung về nhiều lĩnh vực",
-        history: "các sự kiện lịch sử, nhân vật và giai đoạn lịch sử quan trọng",
-        science: "khoa học, phát minh, và nguyên lý khoa học",
-        geography: "địa lý, quốc gia, thủ đô và địa hình",
-        arts: "nghệ thuật, âm nhạc, hội họa và văn học",
-        sports: "thể thao, vận động viên và giải đấu",
-        math: "toán học, câu đố logic và tính toán"
-      };
-      
-      const prompt = `Tạo một minigame đơn giản và vui nhộn về chủ đề "${userMessage}" với ${gameSettings.questionCount} câu hỏi ở mức độ ${gameSettings.difficulty} (${difficultyDescriptions[gameSettings.difficulty as keyof typeof difficultyDescriptions]}) tập trung vào lĩnh vực ${gameSettings.category} (${categoryDescriptions[gameSettings.category as keyof typeof categoryDescriptions]}). Thời gian trả lời mỗi câu hỏi là ${gameSettings.timePerQuestion} giây.
+      const prompt = `Tạo một minigame tương tác đơn giản và vui nhộn về chủ đề "${userMessage}". 
 
 Yêu cầu chi tiết:
-- Tạo một minigame câu hỏi trắc nghiệm với đúng ${gameSettings.questionCount} câu hỏi
+- Tạo một minigame tương tác đơn giản (có thể là memory game, puzzle, matching game, v.v.)
 - Toàn bộ HTML, CSS và JavaScript phải nằm trong một file HTML duy nhất
 - Minigame phải có tính tương tác cao, dễ chơi và thú vị
 - Thiết kế phải màu sắc, bắt mắt, sinh động với nhiều màu sắc hài hòa
-- Có điểm số và thời gian đếm ngược ${gameSettings.timePerQuestion} giây cho mỗi câu hỏi
+- Có điểm số và thời gian nếu phù hợp với loại game
 - Có hướng dẫn rõ ràng và dễ hiểu
 - Đảm bảo trò chơi đơn giản, không phức tạp, phù hợp để chơi trong vài phút
 - Phải tương thích với các trình duyệt hiện đại
@@ -139,14 +114,12 @@ LƯU Ý QUAN TRỌNG:
     try {
       console.log("Đang phân tích kết quả minigame...");
       
-      // Tìm nội dung HTML
       let htmlContent = '';
       const htmlMatch = rawText.match(/```html([\s\S]*?)```/);
       
       if (htmlMatch && htmlMatch[1]) {
         htmlContent = htmlMatch[1].trim();
       } else if (!rawText.includes('```')) {
-        // Nếu không có định dạng markdown, xử lý text thô
         htmlContent = rawText.trim();
       }
       
@@ -155,7 +128,6 @@ LƯU Ý QUAN TRỌNG:
         return null;
       }
 
-      // Tạo đối tượng MiniGame
       return {
         title: `Minigame: ${topic}`,
         description: `Minigame tương tác về chủ đề ${topic}`,
