@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { MiniGame } from './generator/types';
@@ -28,8 +29,6 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   const [currentTopic, setCurrentTopic] = useState<string>(topic);
   const { toast } = useToast();
   const navigate = useNavigate();
-  
-  const gameGenerator = AIGameGenerator.getInstance();
   
   const [canvasMode] = useState<boolean>(true);
   
