@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
@@ -117,7 +118,21 @@ const GameController: React.FC<GameControllerProps> = ({
         <CustomGameForm 
           onGenerate={(content, game) => {
             setIsGenerating(true);
-            setTimeout(() => handleGameGeneration(content, game), 500);
+            // If game is provided, use it directly. Otherwise, we'll need to generate it
+            if (game) {
+              setTimeout(() => handleGameGeneration(content, game), 500);
+            } else {
+              // Here we would typically generate the game using an API
+              // For now we'll simulate with a mock game
+              setTimeout(() => {
+                const mockGame: MiniGame = {
+                  title: `Game about ${content}`,
+                  content: `<html><body><h1>Game about ${content}</h1><p>This is a mock game.</p></body></html>`,
+                  description: `A game about ${content}`
+                };
+                handleGameGeneration(content, mockGame);
+              }, 1500);
+            }
           }}
           onCancel={() => navigate('/')}
         />
