@@ -12,71 +12,24 @@ graph TD
     C -->|Gửi prompt| D[Google Gemini AI]
     D -->|Trả về HTML| C
     C -->|Render| E[iframe]
-    C -->|Lưu trữ| F[Game Storage]
 ```
 
-## Chi Tiết Các Component
+## Chi Tiết Luồng API
 
-### 1. ChatInterface (src/components/chat/ChatInterface.tsx)
-
-Component này xử lý việc nhập liệu từ người dùng:
+### 1. Xử Lý Input (ChatInterface -> Quiz)
 
 ```typescript
-// Hàm xử lý gửi tin nhắn
+// ChatInterface gửi topic đến Quiz thông qua callback
 const handleSendMessage = () => {
   if (!message.trim()) return;
   
-  // Thêm tin nhắn người dùng vào cuộc hội thoại
-  const userMessage = { 
-    role: 'user', 
-    message: message.trim(), 
-    timestamp: new Date() 
-  };
-  
-  // Gửi chủ đề đến Quiz component thông qua callback
   if (onQuizRequest) {
-    onQuizRequest(message.trim());
+    onQuizRequest(message.trim()); // Gửi chủ đề đến Quiz
   }
 };
 ```
 
-### 2. Quiz Component (src/pages/Quiz.tsx)
-
-Component chính điều phối toàn bộ luồng tạo minigame:
-
-```typescript
-const handleGameRequest = (requestedTopic: string) => {
-  if (!requestedTopic.trim()) {
-    toast({
-      title: "Chủ Đề Trống",
-      description: "Vui lòng cung cấp chủ đề cho minigame",
-      variant: "destructive",
-    });
-    return;
-  }
-  
-  setTopic(requestedTopic);
-  setShowSettings(true);
-};
-
-const handleStartGame = (settings: GameSettingsData) => {
-  setGameSettings(settings);
-  setShowSettings(false);
-  setIsGenerating(true);
-  
-  // Gọi hàm tạo minigame từ QuizGenerator
-  setTimeout(() => {
-    if (quizGeneratorRef.current) {
-      quizGeneratorRef.current.generateQuiz(topic, settings);
-    }
-    setIsGenerating(false);
-  }, 100);
-};
-```
-
-### 3. QuizGenerator (src/components/quiz/QuizGenerator.tsx)
-
-Component này xử lý việc tạo minigame thông qua Gemini AI:
+### 2. Tạo Prompt và Gọi API (QuizGenerator)
 
 ```typescript
 class AIGameGenerator {
@@ -88,105 +41,56 @@ class AIGameGenerator {
     this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
   }
 
-  async generateMiniGame(userMessage: string, settings?: GameSettingsData): Promise<MiniGame | null> {
+  async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
-      // Tạo prompt cho Gemini
-      const prompt = `Tạo một minigame tương tác đơn giản và vui nhộn về chủ đề "${userMessage}"...`;
+      // 1. Tạo prompt chi tiết
+      const prompt = `Tạo một minigame tương tác về chủ đề "${topic}"...`;
       
-      // Gửi yêu cầu đến Gemini
+      // 2. Gửi yêu cầu đến Gemini
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
       
-      // Xử lý kết quả
-      return this.parseMiniGameResponse(text, userMessage);
+      // 3. Xử lý phản hồi
+      return this.parseMiniGameResponse(text, topic);
     } catch (error) {
       console.error('Lỗi tạo Minigame:', error);
       return null;
     }
   }
-
-  // Xử lý phản hồi từ Gemini
-  parseMiniGameResponse(rawText: string, topic: string): MiniGame | null {
-    let htmlContent = '';
-    const htmlMatch = rawText.match(/```html([\s\S]*?)```/);
-    
-    if (htmlMatch && htmlMatch[1]) {
-      htmlContent = htmlMatch[1].trim();
-    } else if (!rawText.includes('```')) {
-      htmlContent = rawText.trim();
-    }
-    
-    return {
-      title: `Minigame: ${topic}`,
-      description: `Minigame tương tác về chủ đề ${topic}`,
-      htmlContent: htmlContent
-    };
-  }
 }
 ```
 
-### 4. Game Storage (src/utils/gameExport.ts)
-
-Module xử lý lưu trữ và chia sẻ minigame:
+### 3. Xử Lý Response
 
 ```typescript
-export const saveGameForSharing = (title: string, description: string, htmlContent: string): string => {
-  const id = uuidv4();
-  const now = Date.now();
-  const expiresAt = now + (48 * 60 * 60 * 1000); // 48 giờ
+// Hàm xử lý phản hồi từ Gemini
+parseMiniGameResponse(rawText: string, topic: string): MiniGame | null {
+  let htmlContent = '';
   
-  const game: StoredGame = {
-    id,
-    title,
-    description,
-    htmlContent,
-    createdAt: now,
-    expiresAt
+  // 1. Tách nội dung HTML từ markdown code block
+  const htmlMatch = rawText.match(/```html([\s\S]*?)```/);
+  
+  if (htmlMatch && htmlMatch[1]) {
+    // Lấy nội dung trong code block HTML
+    htmlContent = htmlMatch[1].trim();
+  } else if (!rawText.includes('```')) {
+    // Nếu không có code block, xử lý toàn bộ text
+    htmlContent = rawText.trim();
+  }
+  
+  // 2. Tạo đối tượng MiniGame
+  return {
+    title: `Minigame: ${topic}`,
+    description: `Minigame tương tác về chủ đề ${topic}`,
+    htmlContent: htmlContent
   };
-  
-  // Lưu vào localStorage
-  const gamesJson = localStorage.getItem('shared_games');
-  let games: StoredGame[] = gamesJson ? JSON.parse(gamesJson) : [];
-  games.push(game);
-  localStorage.setItem('shared_games', JSON.stringify(games));
-  
-  return `${getBaseUrl()}/${id}`;
-};
+}
 ```
 
-## Luồng Hoạt Động Chi Tiết
+## Cấu Trúc Response HTML
 
-1. **Nhập Chủ Đề**
-   - Người dùng nhập chủ đề vào ChatInterface
-   - ChatInterface gửi chủ đề đến Quiz component
-
-2. **Cấu Hình Game**
-   - Quiz component hiển thị GameSettings
-   - Người dùng có thể điều chỉnh:
-     - Độ khó (dễ/trung bình/khó)
-     - Số câu hỏi
-     - Thời gian mỗi câu
-     - Thể loại
-
-3. **Tạo Minigame**
-   - QuizGenerator nhận chủ đề và cài đặt
-   - Tạo prompt chi tiết cho Gemini AI
-   - Gửi yêu cầu và nhận phản hồi HTML/CSS/JS
-
-4. **Xử Lý & Hiển Thị**
-   - Phân tích phản hồi từ Gemini
-   - Tách nội dung HTML từ markdown
-   - Render trong iframe an toàn
-
-5. **Chia Sẻ Game**
-   - Lưu game vào localStorage
-   - Tạo URL chia sẻ (có hạn 48 giờ)
-   - Cho phép sao chép link
-
-## Cấu Trúc HTML Game
-
-Mỗi minigame được tạo ra có cấu trúc HTML chuẩn:
+Phản hồi từ Gemini được yêu cầu trả về một file HTML hoàn chỉnh với cấu trúc:
 
 ```html
 <!DOCTYPE html>
@@ -208,36 +112,32 @@ Mỗi minigame được tạo ra có cấu trúc HTML chuẩn:
 </html>
 ```
 
-## Bảo Mật & An Toàn
-
-1. **Sandbox iframe**
-   - Minigame chạy trong iframe với sandbox="allow-scripts allow-same-origin"
-   - Ngăn chặn truy cập vào DOM chính của ứng dụng
-
-2. **Kiểm Tra Nội Dung**
-   - Xác thực HTML trước khi render
-   - Lọc các script độc hại
-
-3. **Quản Lý Bộ Nhớ**
-   - Tự động xóa game hết hạn
-   - Giới hạn dung lượng lưu trữ
-
-## API References
-
-### 1. Game Settings Interface
+## Hiển Thị Trong iframe
 
 ```typescript
+// Component QuizGenerator render game trong iframe
+return (
+  <iframe
+    srcDoc={miniGame.htmlContent}
+    title={miniGame.title}
+    sandbox="allow-scripts allow-same-origin"
+    className="w-full h-full border-none"
+  />
+);
+```
+
+## API Interfaces
+
+```typescript
+// 1. Cấu trúc Settings
 interface GameSettingsData {
   difficulty: 'easy' | 'medium' | 'hard';
   questionCount: number;
   timePerQuestion: number;
   category: string;
 }
-```
 
-### 2. MiniGame Interface
-
-```typescript
+// 2. Cấu trúc MiniGame
 interface MiniGame {
   title: string;
   description: string;
@@ -245,46 +145,41 @@ interface MiniGame {
 }
 ```
 
-### 3. StoredGame Interface
+## Xử Lý Response Error
 
+1. **Lỗi Kết Nối API**
+   ```typescript
+   try {
+     const result = await this.model.generateContent(prompt);
+   } catch (error) {
+     console.error('Lỗi kết nối API:', error);
+     return null;
+   }
+   ```
+
+2. **Lỗi Parse HTML**
+   ```typescript
+   if (!htmlContent) {
+     console.error('Không tìm thấy nội dung HTML hợp lệ');
+     return null;
+   }
+   ```
+
+## Debug Flow
+
+1. Log request:
 ```typescript
-interface StoredGame {
-  id: string;
-  title: string;
-  description: string;
-  htmlContent: string;
-  createdAt: number;
-  expiresAt: number;
-}
+console.log("Đang tạo minigame cho chủ đề:", topic);
+console.log("Với các cài đặt:", settings);
 ```
 
-## Xử Lý Lỗi
+2. Log response:
+```typescript
+console.log("Kết quả minigame thô:", text.substring(0, 200) + "...");
+```
 
-Hệ thống có các cơ chế xử lý lỗi:
-
-1. **Lỗi Tạo Game**
-   - Hiển thị thông báo lỗi
-   - Cho phép thử lại
-
-2. **Lỗi Render**
-   - Fallback UI khi iframe không load được
-   - Thông báo lỗi rõ ràng
-
-3. **Lỗi Lưu Trữ**
-   - Xử lý khi localStorage đầy
-   - Xóa data cũ nếu cần
-
-## Tối Ưu Hiệu Năng
-
-1. **Lazy Loading**
-   - GameSettings load khi cần
-   - iframe render sau khi có content
-
-2. **Debouncing**
-   - Chờ user ngừng nhập
-   - Tránh gọi API liên tục
-
-3. **Caching**
-   - Lưu games đã tạo
-   - Tái sử dụng khi có thể
+3. Log parsed content:
+```typescript
+console.log("HTML đã xử lý:", htmlContent.substring(0, 200) + "...");
+```
 
