@@ -4,7 +4,6 @@ import { Send, Sparkles, BrainCircuit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlockType } from '@/lib/block-utils';
-import { useNavigate } from 'react-router-dom';
 
 interface Message {
   role: 'user' | 'ai';
@@ -22,14 +21,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
   const [conversation, setConversation] = useState<Message[]>([
     { 
       role: 'ai', 
-      message: 'Xin chào! Tôi là trợ lý AI. Hãy nhập chủ đề bạn muốn, tôi sẽ tạo minigame tương tác theo yêu cầu của bạn. Bạn có thể yêu cầu bất kỳ loại trò chơi nào: câu đố, xếp hình, trò chơi phản xạ, hoặc bất kỳ ý tưởng thú vị nào khác!', 
+      message: 'Xin chào! Tôi là trợ lý AI. Hãy nhập chủ đề bạn muốn, tôi sẽ tạo trang web tương tác hoàn chỉnh bằng HTML, CSS, JavaScript đầy đủ trong một file duy nhất. Web sẽ được hiển thị ngay để bạn trải nghiệm. Bạn có thể yêu cầu bất kỳ loại web nào: trò chơi, quiz tương tác, ứng dụng, portfolio, landing page...', 
       timestamp: new Date() 
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
   
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,10 +42,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
     setIsLoading(true);
     
     setTimeout(() => {
-      let aiResponse = "Tôi đang tạo minigame tương tác theo yêu cầu của bạn. Vui lòng đợi trong giây lát...";
+      let aiResponse = "Tôi đang tạo trang web đầy đủ theo yêu cầu của bạn. Trang web sẽ bao gồm toàn bộ code HTML, CSS và JavaScript trong một file HTML hoàn chỉnh, sẵn sàng để hiển thị. Vui lòng đợi trong giây lát...";
       
       // Sử dụng toàn bộ nội dung tin nhắn làm chủ đề
       const topic = message.trim();
+      
+      // Kích hoạt tạo web/quiz
+      if (onQuizRequest) {
+        onQuizRequest(topic);
+      }
       
       const aiMessage = {
         role: 'ai' as const, 
@@ -57,17 +60,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onCreateBlock, onQuizRequ
       
       setConversation(prev => [...prev, aiMessage]);
       setIsLoading(false);
-      
-      // Directly navigate to quiz page with the topic (skip settings)
-      if (window.location.pathname.includes('/quiz')) {
-        // We're already on the quiz page, just notify the parent
-        if (onQuizRequest) {
-          onQuizRequest(topic);
-        }
-      } else {
-        // Navigate to quiz page with the topic
-        navigate(`/quiz?topic=${encodeURIComponent(topic)}&autostart=true`);
-      }
     }, 500);
   };
   

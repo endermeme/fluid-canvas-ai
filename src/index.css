@@ -144,30 +144,6 @@
     @apply inline-block w-1.5 h-1.5 bg-primary rounded-full mx-0.5 animate-bounce-subtle;
     animation-delay: calc(var(--dot-index) * 0.15s);
   }
-  
-  .modern-input {
-    @apply rounded-lg border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20 focus:border-primary/40;
-  }
-  
-  .modern-button {
-    @apply transition-all active:scale-95 bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 rounded-lg shadow-md;
-  }
-  
-  .modern-card {
-    @apply backdrop-blur-sm bg-white/30 dark:bg-black/30 rounded-xl p-5 border border-white/20 dark:border-white/10 shadow-lg;
-  }
-  
-  .shimmer-effect {
-    @apply bg-shimmer bg-[length:200%_100%] animate-shimmer;
-  }
-  
-  .floating-element {
-    @apply animate-float;
-  }
-  
-  .breathing-element {
-    @apply animate-breathe;
-  }
 }
 
 .ai-suggestion {
@@ -223,29 +199,4 @@
 
 .version-marker {
   @apply absolute w-2 h-2 rounded-full bg-primary cursor-pointer transform -translate-y-1/2 top-1/2 transition-all hover:scale-125;
-}
-
-/* Modern UI element styles */
-.neo-button {
-  @apply px-4 py-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 
-         hover:bg-primary/10 hover:border-primary/30 transition-all duration-200
-         shadow-sm active:scale-95;
-}
-
-.neo-card {
-  @apply rounded-xl bg-white/10 backdrop-blur-lg border border-white/20 
-         shadow-lg overflow-hidden transition-all duration-300;
-}
-
-.text-gradient {
-  @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent;
-}
-
-.glow-effect {
-  @apply relative after:absolute after:inset-0 after:bg-glow-gradient after:opacity-0 
-         after:transition-opacity hover:after:opacity-100;
-}
-
-.glass-effect {
-  @apply bg-glass-gradient backdrop-blur-md border border-white/20;
 }

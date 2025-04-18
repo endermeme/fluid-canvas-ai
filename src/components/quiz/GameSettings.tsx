@@ -3,11 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { GameSettingsData, GameType } from './types';
+import { GameSettingsData } from '@/pages/Quiz';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Gamepad, BrainCircuit, Puzzle, Lightbulb, Clock4, Dices, HeartHandshake, PenTool } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { animateToolbarAppear } from '@/lib/animations';
+import { Gamepad, X } from 'lucide-react';
 
 interface GameSettingsProps {
   onStart: (settings: GameSettingsData) => void;
@@ -16,38 +14,21 @@ interface GameSettingsProps {
   inDrawer?: boolean;
   inModal?: boolean;
   onCancel?: () => void;
-  gameType?: GameType | null;
 }
 
-const GameSettings = ({ 
-  onStart, 
-  topic, 
-  initialSettings, 
-  inDrawer = false, 
-  inModal = false, 
-  onCancel,
-  gameType
-}: GameSettingsProps) => {
-  const isMobile = useIsMobile();
+const GameSettings = ({ onStart, topic, initialSettings, inDrawer = false, inModal = false, onCancel }: GameSettingsProps) => {
   const [settings, setSettings] = useState<GameSettingsData>({
     difficulty: 'medium',
     questionCount: 10,
     timePerQuestion: 30,
     category: 'general',
   });
-  const containerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (initialSettings) {
       setSettings(initialSettings);
     }
   }, [initialSettings]);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      animateToolbarAppear(containerRef.current);
-    }
-  }, []);
 
   const handleSliderChange = (name: keyof GameSettingsData, value: number[]) => {
     setSettings(prev => ({ ...prev, [name]: value[0] }));
@@ -57,6 +38,7 @@ const GameSettings = ({
     setSettings(prev => ({ ...prev, [name]: value }));
   };
 
+  // Adjust game category based on topic if possible
   useEffect(() => {
     if (topic) {
       if (topic.includes("Lịch Sử")) {
@@ -73,179 +55,100 @@ const GameSettings = ({
     }
   }, [topic]);
 
-  const handleStart = () => {
-    console.log("Starting game with settings:", settings);
-    onStart(settings);
-  };
-
-  useEffect(() => {
-    if (gameType) {
-      const sliderConfig = document.getElementById('questionCount') as HTMLInputElement;
-      const timeSlider = document.getElementById('timePerQuestion') as HTMLInputElement;
-      
-      if (gameType.id === 'memory') {
-        if (sliderConfig) sliderConfig.max = '12';
-        if (timeSlider) timeSlider.min = '1';
-      } else if (gameType.id === 'puzzle') {
-        if (sliderConfig) sliderConfig.max = '6';
-        if (timeSlider) timeSlider.min = '30';
-      } else if (gameType.id === 'reflex') {
-        if (sliderConfig) sliderConfig.max = '30';
-        if (timeSlider) timeSlider.min = '1';
-        if (timeSlider) timeSlider.max = '10';
-      }
-    }
-  }, [gameType]);
-
-  const getGameIcon = () => {
-    if (!gameType) return <Gamepad className="h-10 w-10 text-primary" />;
-    
-    switch (gameType.icon) {
-      case 'brain-circuit': return <BrainCircuit className="h-10 w-10 text-primary" />;
-      case 'puzzle-piece': return <Puzzle className="h-10 w-10 text-primary" />;
-      case 'light-bulb': return <Lightbulb className="h-10 w-10 text-primary" />;
-      case 'clock': return <Clock4 className="h-10 w-10 text-primary" />;
-      case 'dices': return <Dices className="h-10 w-10 text-primary" />;
-      case 'heart-handshake': return <HeartHandshake className="h-10 w-10 text-primary" />;
-      case 'pen-tool': return <PenTool className="h-10 w-10 text-primary" />;
-      default: return <Gamepad className="h-10 w-10 text-primary" />;
-    }
-  };
-
-  const getTimeLabel = () => {
-    if (gameType?.id === 'memory') return 'Thời Gian Hiển Thị:';
-    if (gameType?.id === 'reflex') return 'Thời Gian Phản Xạ:';
-    if (gameType?.id === 'drawing') return 'Thời Gian Vẽ:';
-    return 'Thời Gian Mỗi Câu:';
-  };
-
-  const getCountLabel = () => {
-    if (gameType?.id === 'memory') return 'Số Cặp Thẻ:';
-    if (gameType?.id === 'puzzle') return 'Số Mảnh Ghép:';
-    if (gameType?.id === 'reflex') return 'Số Lượt:';
-    if (gameType?.id === 'drawing') return 'Số Bản Vẽ:';
-    return 'Số Câu Hỏi:';
-  };
-
   return (
-    <div 
-      ref={containerRef} 
-      className={`${inDrawer || inModal ? '' : 'h-full w-full'} flex flex-col items-center justify-center py-4 ${inModal ? 'px-1' : 'px-4'}`}
-    >
-      <div className="w-full max-w-md">
-        <div className="flex flex-col items-center mb-6 relative">
-          <div className="absolute inset-0 blur-2xl bg-primary/10 rounded-full opacity-70"></div>
-          <div className="z-10 flex flex-col items-center">
-            <div className="flex items-center justify-center p-3 mb-4 rounded-full bg-primary/10 backdrop-blur-sm">
-              {getGameIcon()}
-            </div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              Cài Đặt Minigame
-            </h2>
-          </div>
+    <div className={`${inDrawer || inModal ? '' : 'h-full w-full'} flex flex-col items-center justify-center ${inModal ? 'p-0' : 'p-6'} bg-background`}>
+      <div className={`w-full max-w-md bg-card rounded-lg ${inModal ? '' : 'shadow-lg'} ${inModal ? 'p-0' : 'p-6'} ${inDrawer || inModal ? '' : 'border'}`}>
+        <div className="flex items-center justify-center mb-6">
+          <Gamepad className="h-10 w-10 text-primary mr-2" />
+          <h2 className="text-2xl font-bold">Cài Đặt Minigame</h2>
         </div>
 
         {topic && (
-          <div className="mb-6 text-center">
-            <div className="inline-block px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/20 to-primary/5 backdrop-blur-sm">
-              <h3 className="text-lg font-medium">{topic}</h3>
-            </div>
-            {gameType?.description && (
-              <p className="text-sm text-muted-foreground mt-2">{gameType.description}</p>
-            )}
+          <div className="mb-6">
+            <h3 className="text-lg font-medium mb-2">Chủ đề: <span className="text-primary">{topic}</span></h3>
           </div>
         )}
 
-        <div className="space-y-6 backdrop-blur-sm bg-card/30 rounded-xl p-5 border border-primary/10">
+        <div className="space-y-6">
           <div className="space-y-3">
-            <Label htmlFor="difficulty" className="flex items-center gap-2 text-base font-medium">
-              Độ Khó
-            </Label>
+            <Label htmlFor="difficulty">Độ Khó</Label>
             <Select 
               value={settings.difficulty} 
               onValueChange={(value) => handleSelectChange('difficulty', value)}
             >
-              <SelectTrigger className="rounded-lg border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20">
+              <SelectTrigger>
                 <SelectValue placeholder="Chọn độ khó" />
               </SelectTrigger>
-              <SelectContent className="rounded-lg border-primary/20 bg-white/95 backdrop-blur-lg shadow-lg">
-                <SelectItem value="easy" className="cursor-pointer focus:bg-primary/10">Dễ</SelectItem>
-                <SelectItem value="medium" className="cursor-pointer focus:bg-primary/10">Trung bình</SelectItem>
-                <SelectItem value="hard" className="cursor-pointer focus:bg-primary/10">Khó</SelectItem>
+              <SelectContent>
+                <SelectItem value="easy">Dễ</SelectItem>
+                <SelectItem value="medium">Trung bình</SelectItem>
+                <SelectItem value="hard">Khó</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <Label htmlFor="questionCount" className="text-base font-medium">{getCountLabel()}</Label>
-              <span className="px-3 py-1 bg-primary/10 rounded-full text-sm font-medium">{settings.questionCount}</span>
+            <div className="flex justify-between">
+              <Label htmlFor="questionCount">Số Câu Hỏi: {settings.questionCount}</Label>
             </div>
             <Slider 
               id="questionCount"
-              min={gameType?.id === 'drawing' ? 1 : (gameType?.id === 'puzzle' ? 2 : 3)} 
-              max={gameType?.id === 'memory' ? 12 : (gameType?.id === 'puzzle' ? 6 : 20)} 
+              min={5} 
+              max={20} 
               step={1} 
               value={[settings.questionCount]} 
               onValueChange={(value) => handleSliderChange('questionCount', value)}
-              className="cursor-pointer"
             />
           </div>
 
           <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <Label htmlFor="timePerQuestion" className="text-base font-medium">{getTimeLabel()}</Label>
-              <span className="px-3 py-1 bg-primary/10 rounded-full text-sm font-medium">{settings.timePerQuestion} giây</span>
+            <div className="flex justify-between">
+              <Label htmlFor="timePerQuestion">Thời Gian Mỗi Câu: {settings.timePerQuestion} giây</Label>
             </div>
             <Slider 
               id="timePerQuestion"
-              min={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 10} 
-              max={gameType?.id === 'reflex' ? 10 : (gameType?.id === 'drawing' ? 120 : 60)} 
-              step={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 5} 
+              min={10} 
+              max={60} 
+              step={5} 
               value={[settings.timePerQuestion]} 
               onValueChange={(value) => handleSliderChange('timePerQuestion', value)}
-              className="cursor-pointer"
             />
           </div>
 
-          {(!gameType || !(gameType.id === 'memory' || gameType.id === 'drawing' || gameType.id === 'reflex')) && (
-            <div className="space-y-3">
-              <Label htmlFor="category" className="flex items-center gap-2 text-base font-medium">
-                Thể Loại
-              </Label>
-              <Select 
-                value={settings.category} 
-                onValueChange={(value) => handleSelectChange('category', value)}
-              >
-                <SelectTrigger className="rounded-lg border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20">
-                  <SelectValue placeholder="Chọn thể loại" />
-                </SelectTrigger>
-                <SelectContent className="rounded-lg border-primary/20 bg-white/95 backdrop-blur-lg shadow-lg">
-                  <SelectItem value="general" className="cursor-pointer focus:bg-primary/10">Kiến thức chung</SelectItem>
-                  <SelectItem value="history" className="cursor-pointer focus:bg-primary/10">Lịch sử</SelectItem>
-                  <SelectItem value="science" className="cursor-pointer focus:bg-primary/10">Khoa học</SelectItem>
-                  <SelectItem value="geography" className="cursor-pointer focus:bg-primary/10">Địa lý</SelectItem>
-                  <SelectItem value="arts" className="cursor-pointer focus:bg-primary/10">Nghệ thuật</SelectItem>
-                  <SelectItem value="sports" className="cursor-pointer focus:bg-primary/10">Thể thao</SelectItem>
-                  <SelectItem value="math" className="cursor-pointer focus:bg-primary/10">Toán học</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="space-y-3">
+            <Label htmlFor="category">Thể Loại</Label>
+            <Select 
+              value={settings.category} 
+              onValueChange={(value) => handleSelectChange('category', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn thể loại" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="general">Kiến thức chung</SelectItem>
+                <SelectItem value="history">Lịch sử</SelectItem>
+                <SelectItem value="science">Khoa học</SelectItem>
+                <SelectItem value="geography">Địa lý</SelectItem>
+                <SelectItem value="arts">Nghệ thuật</SelectItem>
+                <SelectItem value="sports">Thể thao</SelectItem>
+                <SelectItem value="math">Toán học</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="pt-4 flex gap-3">
             {onCancel && (
               <Button 
                 variant="outline"
-                className="w-full transition-all border-primary/20 hover:border-primary/30 hover:bg-primary/5 active:scale-95 rounded-lg"
+                className="w-full"
                 onClick={onCancel}
               >
                 Hủy
               </Button>
             )}
             <Button 
-              className="w-full transition-all active:scale-95 bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 rounded-lg shadow-md shadow-primary/20"
-              onClick={handleStart}
+              className="w-full"
+              onClick={() => onStart(settings)}
             >
               Bắt Đầu Trò Chơi
             </Button>
