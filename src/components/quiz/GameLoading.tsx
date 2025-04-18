@@ -3,9 +3,10 @@ import React from 'react';
 
 interface GameLoadingProps {
   topic: string;
+  progress?: number; // Adding the missing progress prop
 }
 
-const GameLoading: React.FC<GameLoadingProps> = ({ topic }) => {
+const GameLoading: React.FC<GameLoadingProps> = ({ topic, progress }) => {
   return (
     <div className="h-full w-full flex flex-col items-center justify-center p-6">
       <div className="mb-4">
@@ -16,6 +17,15 @@ const GameLoading: React.FC<GameLoadingProps> = ({ topic }) => {
         Đang xây dựng trò chơi tương tác về "{topic || 'chủ đề được chọn'}".<br />
         Quá trình này có thể mất một vài giây.
       </p>
+      
+      {progress !== undefined && (
+        <div className="w-64 mt-4 bg-primary/10 rounded-full h-2.5 overflow-hidden">
+          <div 
+            className="bg-primary h-2.5 rounded-full transition-all" 
+            style={{width: `${Math.min(100, progress)}%`}}
+          ></div>
+        </div>
+      )}
     </div>
   );
 };
