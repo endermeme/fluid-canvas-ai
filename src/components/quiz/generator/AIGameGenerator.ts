@@ -3,6 +3,7 @@ import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { logInfo, logError } from './apiUtils';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { parseGeminiResponse } from './responseParser';
 import { DEFAULT_GENERATION_SETTINGS } from '@/constants/api-constants';
 
 export class AIGameGenerator {
@@ -33,24 +34,27 @@ export class AIGameGenerator {
     try {
       logInfo('AIGameGenerator', 'Starting game generation', { topic, settings });
       
-      const prompt = `Tạo một minigame tương tác về chủ đề "${topic}" với cấu trúc:
-      1. HTML: Chứa cấu trúc game và các thành phần UI
-      2. CSS: Style cho giao diện đẹp và responsive
-      3. JavaScript: Logic game và tương tác
-      ${this.canvasMode ? 'Sử dụng Canvas HTML5 để tạo đồ họa đẹp mắt và tương tác.' : ''}
+      const prompt = `Tạo một minigame tương tác về chủ đề "${topic}" với cấu trúc HTML, CSS và JavaScript. 
+      Yêu cầu:
       
-      Trả về định dạng:
-      \`\`\`html
-      <!-- HTML content -->
-      \`\`\`
+      1. HTML phải có cấu trúc rõ ràng và các thành phần UI được đặt tên class hợp lý
+      2. CSS phải responsive và có animation đẹp mắt
+      3. JavaScript phải xử lý tương tác người dùng mượt mà
+      ${this.canvasMode ? '\n4. Sử dụng Canvas HTML5 để tạo đồ họa đẹp mắt và tương tác.' : ''}
       
-      \`\`\`css
-      /* CSS styles */
-      \`\`\`
+      Trả về mã nguồn theo định dạng sau (không bao gồm backticks và tên ngôn ngữ):
       
-      \`\`\`js
-      // Game logic
-      \`\`\``;
+      ```html
+      <!-- Code HTML ở đây, không bao gồm thẻ DOCTYPE và html -->
+      ```
+      
+      ```css
+      /* Code CSS ở đây, không bao gồm thẻ style */
+      ```
+      
+      ```javascript
+      // Code JavaScript ở đây, không bao gồm thẻ script
+      ````;
       
       console.log("Sending prompt to Gemini:", prompt);
       
@@ -60,75 +64,12 @@ export class AIGameGenerator {
 
       console.log("Raw response from Gemini:", text.substring(0, 200) + "...");
       
-      return this.parseMiniGameResponse(text, topic);
+      // Use the parseGeminiResponse function to handle the response
+      return parseGeminiResponse(text, topic);
     } catch (error) {
       logError('AIGameGenerator', 'Error generating minigame', error);
       return null;
     }
   }
-
-  private parseMiniGameResponse(rawText: string, topic: string): MiniGame | null {
-    try {
-      let htmlContent = '';
-      let cssContent = '';
-      let jsContent = '';
-      
-      // Extract HTML, CSS, JS from markdown code blocks
-      const htmlMatch = rawText.match(/```html\n([\s\S]*?)```/);
-      const cssMatch = rawText.match(/```css\n([\s\S]*?)```/);
-      const jsMatch = rawText.match(/```js(?:cript)?\n([\s\S]*?)```/);
-      
-      if (htmlMatch && htmlMatch[1]) {
-        htmlContent = htmlMatch[1].trim();
-      }
-      
-      if (cssMatch && cssMatch[1]) {
-        cssContent = cssMatch[1].trim();
-      }
-      
-      if (jsMatch && jsMatch[1]) {
-        jsContent = jsMatch[1].trim();
-      }
-
-      // Create complete HTML document
-      const fullHtml = `<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minigame: ${topic}</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; }
-        .game-container { max-width: 800px; margin: 0 auto; }
-        ${cssContent}
-    </style>
-</head>
-<body>
-    <div class="game-container">
-        ${htmlContent}
-    </div>
-    <script>
-        ${jsContent}
-    </script>
-</body>
-</html>`;
-
-      console.log("Final processed HTML:", fullHtml.substring(0, 200) + "...");
-
-      return {
-        title: `Minigame: ${topic}`,
-        content: fullHtml,
-        htmlContent,
-        cssContent,
-        jsContent,
-        isSeparatedFiles: true
-      };
-    } catch (error) {
-      logError('AIGameGenerator', 'Error parsing minigame response', error);
-      return null;
-    }
-  }
 }
 
-export type { MiniGame };
