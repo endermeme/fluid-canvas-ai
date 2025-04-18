@@ -1,7 +1,5 @@
+import { GameType } from "../gameTypes";
 
-import { gameTypes } from "../gameTypes";
-
-// Ensure the interface is exported
 export interface MiniGame {
   title: string;
   description?: string;
@@ -12,24 +10,12 @@ export interface MiniGame {
   cssContent?: string;
   jsContent?: string;
   
-  // Flag to indicate if using separated files
+  // Flag to indicate if using separate files
   isSeparatedFiles?: boolean;
-  
-  // JSON structure for game definition
-  gameStructure?: {
-    html: string;
-    css: string;
-    javascript: string;
-    meta?: {
-      title?: string;
-      description?: string;
-      viewport?: string;
-    }
-  };
   
   items?: any[];
   useCanvas?: boolean;
-  gameType?: keyof typeof gameTypes;
+  gameType?: GameType;
 }
 
 export interface GameApiResponse {

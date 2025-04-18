@@ -1,9 +1,9 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { enhanceIframeContent } from '../utils/iframe-utils';
-import { logInfo } from '@/components/quiz/generator/apiUtils';
+import GameContainer from '../components/GameContainer';
 
 interface EnhancedGameViewProps {
   miniGame: {
@@ -30,74 +30,29 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [iframeError, setIframeError] = useState<string | null>(null);
-  const [iframeContent, setIframeContent] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Process and enhance the content when it changes
   useEffect(() => {
-    if (miniGame?.content) {
+    if (iframeRef.current && miniGame?.content) {
       try {
-        setIsLoading(true);
-        const contentToUse = miniGame.content;
-        
-        // Ensure we have valid HTML content with proper structure
-        let enhancedContent;
-        if (contentToUse.trim().startsWith('<!DOCTYPE html>') || contentToUse.trim().startsWith('<html')) {
-          enhancedContent = contentToUse;
-        } else {
-          enhancedContent = enhanceIframeContent(contentToUse, miniGame.title);
-        }
-        
-        setIframeContent(enhancedContent);
+        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
+        iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
-        
-        // Log for debugging
-        logInfo('EnhancedGameView', 'Setting iframe content:', { 
-          contentLength: contentToUse.length,
-          enhancedLength: enhancedContent.length,
-          firstFewChars: enhancedContent.substring(0, 100) + '...'
-        });
-      } catch (error) {
-        console.error("Error enhancing content:", error);
-        setIframeError("Không thể tải nội dung game. Vui lòng thử lại.");
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      setIframeError("Không có nội dung game để hiển thị.");
-      setIsLoading(false);
-    }
-  }, [miniGame]);
-
-  // Set the iframe content when it's ready
-  useEffect(() => {
-    if (iframeRef.current && iframeContent) {
-      try {
-        iframeRef.current.srcdoc = iframeContent;
       } catch (error) {
         console.error("Error setting iframe content:", error);
         setIframeError("Không thể tải nội dung game. Vui lòng thử lại.");
       }
     }
-  }, [iframeContent, iframeRef]);
+  }, [miniGame]);
 
   const refreshGame = () => {
-    if (iframeRef.current && iframeContent) {
+    if (iframeRef.current && miniGame?.content) {
       try {
-        // Force a refresh by setting srcdoc again
-        setIsLoading(true);
-        iframeRef.current.srcdoc = '';
-        setTimeout(() => {
-          if (iframeRef.current) {
-            iframeRef.current.srcdoc = iframeContent;
-            setIsLoading(false);
-          }
-        }, 50);
+        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
+        iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
       } catch (error) {
         console.error("Error refreshing game:", error);
         setIframeError("Không thể tải lại game. Vui lòng thử lại.");
-        setIsLoading(false);
       }
     }
   };
@@ -124,6 +79,23 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       }
     }
   };
+
+  // Sử dụng component GameContainer để hiển thị nếu có file tách biệt
+  if (miniGame.isSeparatedFiles) {
+    return (
+      <GameContainer
+        iframeRef={iframeRef}
+        content={miniGame.content}
+        title={miniGame.title}
+        error={iframeError}
+        onReload={refreshGame}
+        htmlContent={miniGame.htmlContent}
+        cssContent={miniGame.cssContent}
+        jsContent={miniGame.jsContent}
+        isSeparatedFiles={miniGame.isSeparatedFiles}
+      />
+    );
+  }
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -203,11 +175,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
               Tải lại
             </Button>
           </div>
-        ) : isLoading ? (
-          <div className="flex flex-col items-center justify-center h-full p-6">
-            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p>Đang tải game...</p>
-          </div>
         ) : (
           <iframe
             ref={iframeRef}
@@ -220,7 +187,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
               width: '100%',
               height: '100%'
             }}
-            onLoad={() => setIsLoading(false)}
           />
         )}
       </div>
