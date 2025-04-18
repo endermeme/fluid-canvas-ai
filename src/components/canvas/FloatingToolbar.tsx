@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { PlusCircle, Image, FileText, Code, Download, X } from 'lucide-react';
 import { BlockType } from '@/lib/block-utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface FloatingToolbarProps {
   onAddBlock: (type: BlockType, position?: { x: number; y: number }) => void;
@@ -13,6 +14,7 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
   onExport
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { toast } = useToast();
   
   return (
     <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30">

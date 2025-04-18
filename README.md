@@ -1,3 +1,4 @@
+
 # Welcome to your Lovable project
 
 ## Project info
@@ -34,6 +35,27 @@ npm i
 
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
+```
+
+**Troubleshooting npm Issues**
+
+If you encounter issues with `npm i` or `npm run dev`, try the following:
+
+```sh
+# Clear npm cache
+npm cache clean --force
+
+# Use Node.js version 16 or higher
+nvm use 16  # or higher version if available
+
+# Install dependencies with legacy peer deps flag
+npm i --legacy-peer-deps
+
+# If the above doesn't work, try with force flag
+npm i --force
+
+# For running dev server with more memory
+NODE_OPTIONS=--max_old_space_size=4096 npm run dev
 ```
 
 **Edit a file directly in GitHub**

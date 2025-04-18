@@ -1,176 +1,371 @@
-
-import React, { useState, useRef, useEffect } from 'react';
-import QuizGenerator from '@/components/quiz/QuizGenerator';
-import { SidebarProvider, Sidebar, SidebarContent, SidebarInset } from '@/components/ui/sidebar';
-import ChatInterface from '@/components/chat/ChatInterface';
-import { useCanvasState } from '@/hooks/useCanvasState';
-import { BlockType } from '@/lib/block-utils';
-import { useToast } from '@/hooks/use-toast';
-import GameSettings from '@/components/quiz/GameSettings';
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import { Settings } from 'lucide-react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useLocation } from 'react-router-dom';
-
-// Define the game settings interface
-export interface GameSettingsData {
-  difficulty: 'easy' | 'medium' | 'hard';
-  questionCount: number;
-  timePerQuestion: number;
-  category: string;
-}
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import QuizContainer from '@/components/quiz/QuizContainer';
+import GameLoading from '@/components/quiz/GameLoading';
+import CustomGameSettings from '@/components/quiz/custom-games/CustomGameSettings';
+import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
+import { tryGeminiGeneration } from '@/components/quiz/generator/geminiGenerator';
 
 const Quiz = () => {
-  const [topic, setTopic] = useState('');
-  const [showSettings, setShowSettings] = useState(false);
-  const [gameSettings, setGameSettings] = useState<GameSettingsData>({
-    difficulty: 'medium',
-    questionCount: 10,
-    timePerQuestion: 30,
-    category: 'general',
-  });
-  
-  const quizGeneratorRef = useRef<{ generateQuiz: (topic: string, settings?: GameSettingsData) => void }>(null);
-  const { addBlock } = useCanvasState();
-  const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
-  const location = useLocation();
-
-  useEffect(() => {
-    document.title = 'Minigame Tương Tác';
-    
-    // Parse URL parameters for direct game creation
-    const queryParams = new URLSearchParams(location.search);
-    const topicParam = queryParams.get('topic');
-    const autoStart = queryParams.get('autostart');
-    
-    if (topicParam) {
-      setTopic(topicParam);
-      
-      // Check for game settings in URL
-      const difficultyParam = queryParams.get('difficulty');
-      const questionCountParam = queryParams.get('questionCount');
-      const timePerQuestionParam = queryParams.get('timePerQuestion');
-      const categoryParam = queryParams.get('category');
-      
-      const urlSettings: GameSettingsData = {
-        difficulty: (difficultyParam as 'easy' | 'medium' | 'hard') || 'medium',
-        questionCount: questionCountParam ? parseInt(questionCountParam) : 10,
-        timePerQuestion: timePerQuestionParam ? parseInt(timePerQuestionParam) : 30,
-        category: categoryParam || 'general',
-      };
-      
-      setGameSettings(urlSettings);
-      
-      // If autostart is set, generate the quiz automatically
-      if (autoStart === 'true') {
-        setIsGenerating(true);
-        setTimeout(() => {
-          if (quizGeneratorRef.current) {
-            quizGeneratorRef.current.generateQuiz(topicParam, urlSettings);
-          }
-          setIsGenerating(false);
-        }, 100);
-      } else {
-        // If no autostart, show settings
-        setShowSettings(true);
-      }
-    }
-  }, [location.search]);
-
-  const handleCreateFromPrompt = (type: BlockType, content: string) => {
-    const canvasElement = document.querySelector('.canvas-grid');
-    const canvasRect = canvasElement?.getBoundingClientRect();
-    
-    const position = {
-      x: ((canvasRect?.width || 800) / 2) - 150,
-      y: ((canvasRect?.height || 600) / 2) - 100
-    };
-    
-    addBlock(type, position, canvasRect as DOMRect);
-  };
-
-  const handleGameRequest = (requestedTopic: string) => {
-    if (!requestedTopic.trim()) {
+  const [gameContent, setGameContent] = useState<string | null>(null);
+  const [gameTitle, setGameTitle] = useState('Game Tương Tác');
+  const [prompt, setPrompt] = useState('');
+  const [miniGame, setMiniGame] = useState<{ title: string, content: string } | null>(null);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  const handleGenerate = async (promptText: string, useCanvas: boolean = true) => {
+    if (!promptText.trim()) {
       toast({
-        title: "Chủ Đề Trống",
-        description: "Vui lòng cung cấp chủ đề cho minigame",
-        variant: "destructive",
+        title: "Lỗi",
+        description: "Vui lòng nhập yêu cầu cho trò chơi",
+        variant: "destructive"
       });
       return;
     }
-    
-    setTopic(requestedTopic);
-    setShowSettings(true);
-  };
-  
-  const handleStartGame = (settings: GameSettingsData) => {
-    setGameSettings(settings);
-    setShowSettings(false);
+
+    setPrompt(promptText);
+    setGameTitle(`Game: ${promptText.substring(0, 40)}${promptText.length > 40 ? '...' : ''}`);
     setIsGenerating(true);
+    setGameContent(null);
+    setMiniGame(null);
     
-    setTimeout(() => {
-      if (quizGeneratorRef.current) {
-        quizGeneratorRef.current.generateQuiz(topic, settings);
-      } else {
+    try {
+      const game = await tryGeminiGeneration(null, promptText, { 
+        useCanvas, 
+        category: 'general' 
+      });
+      
+      if (game) {
+        setGameContent(game.content);
+        setGameTitle(game.title || `Game: ${promptText.substring(0, 40)}...`);
+        setMiniGame({
+          title: game.title || `Game: ${promptText.substring(0, 40)}...`,
+          content: game.content
+        });
+        
         toast({
-          title: "Lỗi Hệ Thống",
-          description: "Không thể kết nối với trình tạo minigame. Vui lòng thử lại.",
-          variant: "destructive",
+          title: "Trò chơi đã được tạo",
+          description: "Trò chơi đã được tạo thành công với HTML, CSS và JavaScript",
+        });
+      } else {
+        throw new Error("Không thể tạo game");
+      }
+    } catch (error) {
+      console.error("Error generating game:", error);
+      
+      toast({
+        title: "Lỗi tạo game",
+        description: "Có lỗi xảy ra khi tạo game. Vui lòng thử lại.",
+        variant: "destructive"
+      });
+      
+      const fallbackHTML = generateFallbackGame(promptText);
+      setGameContent(fallbackHTML);
+      setGameTitle(`Game: ${promptText.substring(0, 40)}...`);
+      setMiniGame({
+        title: `Game: ${promptText.substring(0, 40)}...`,
+        content: fallbackHTML
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleReset = () => {
+    setGameContent(null);
+    setGameTitle('Game Tương Tác');
+    setPrompt('');
+    setMiniGame(null);
+  };
+
+  const handleShare = () => {
+    try {
+      if (gameContent) {
+        const shareUrl = window.location.origin + '/quiz?shared=true';
+        navigator.clipboard.writeText(shareUrl);
+        
+        toast({
+          title: "Đã sao chép liên kết",
+          description: "Liên kết đã được sao chép vào clipboard.",
         });
       }
-      setIsGenerating(false);
-    }, 100);
+    } catch (error) {
+      console.error("Lỗi khi chia sẻ:", error);
+    }
+  };
+
+  const generateFallbackGame = (promptText: string): string => {
+    return `
+      <!DOCTYPE html>
+      <html lang="vi">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Game Demo: ${promptText}</title>
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+          }
+          
+          body {
+            background-color: #f8f9fa;
+            color: #111827;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+          }
+          
+          .container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+          }
+          
+          h1 {
+            color: #4f46e5;
+            margin-bottom: 16px;
+            font-size: 24px;
+          }
+          
+          .game-content {
+            margin-top: 32px;
+            border: 1px solid #e5e7eb;
+            padding: 24px;
+            border-radius: 8px;
+            background-color: #f3f4f6;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+          }
+          
+          button {
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.2s;
+          }
+          
+          button:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+          }
+          
+          .score {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #4f46e5;
+          }
+          
+          .game-object {
+            width: 50px;
+            height: 50px;
+            background-color: #4f46e5;
+            border-radius: 50%;
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+          
+          .game-object:hover {
+            transform: scale(1.1);
+          }
+          
+          .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 6px;
+            font-style: italic;
+            background-color: #e0f2fe;
+            color: #075985;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Game Demo: ${promptText}</h1>
+          
+          <p>Đây là phiên bản demo của trò chơi dựa trên yêu cầu của bạn:</p>
+          <p><em>"${promptText}"</em></p>
+          
+          <div class="score">Điểm: <span id="score">0</span></div>
+          
+          <div class="game-content" id="gameArea">
+            <div class="message">Nhấp vào các đối tượng để tăng điểm</div>
+          </div>
+          
+          <div style="margin-top: 24px">
+            <button id="playButton">Bắt đầu chơi</button>
+            <button id="resetButton">Đặt lại</button>
+          </div>
+        </div>
+        
+        <script>
+          let score = 0;
+          let gameRunning = false;
+          let gameObjects = [];
+          let gameArea;
+          let scoreElement;
+          let gameTimer;
+          
+          document.addEventListener('DOMContentLoaded', function() {
+            gameArea = document.getElementById('gameArea');
+            scoreElement = document.getElementById('score');
+            
+            document.getElementById('playButton').addEventListener('click', startGame);
+            document.getElementById('resetButton').addEventListener('click', resetGame);
+          });
+          
+          function startGame() {
+            if (gameRunning) return;
+            
+            resetGame();
+            gameRunning = true;
+            document.getElementById('playButton').textContent = 'Đang chơi...';
+            
+            gameTimer = setInterval(createGameObject, 1500);
+            createGameObject();
+          }
+          
+          function resetGame() {
+            gameRunning = false;
+            score = 0;
+            scoreElement.textContent = score;
+            document.getElementById('playButton').textContent = 'Bắt đầu chơi';
+            
+            clearInterval(gameTimer);
+            gameObjects.forEach(obj => obj.element.remove());
+            gameObjects = [];
+          }
+          
+          function createGameObject() {
+            if (!gameRunning) return;
+            
+            const areaRect = gameArea.getBoundingClientRect();
+            const maxX = areaRect.width - 50;
+            const maxY = areaRect.height - 50;
+            
+            const element = document.createElement('div');
+            element.classList.add('game-object');
+            
+            const x = Math.floor(Math.random() * maxX);
+            const y = Math.floor(Math.random() * maxY);
+            
+            const colors = ['#4f46e5', '#06b6d4', '#ec4899', '#f97316', '#84cc16'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            element.style.left = x + 'px';
+            element.style.top = y + 'px';
+            element.style.backgroundColor = color;
+            
+            element.addEventListener('click', function() {
+              increaseScore(element);
+            });
+            
+            gameArea.appendChild(element);
+            
+            const gameObject = {
+              element: element,
+              createdAt: Date.now()
+            };
+            gameObjects.push(gameObject);
+            
+            setTimeout(() => {
+              if (gameObjects.includes(gameObject)) {
+                element.remove();
+                gameObjects = gameObjects.filter(obj => obj !== gameObject);
+              }
+            }, 3000);
+          }
+          
+          function increaseScore(element) {
+            score += 10;
+            scoreElement.textContent = score;
+            
+            element.style.transform = 'scale(1.5)';
+            element.style.opacity = '0';
+            
+            setTimeout(() => {
+              element.remove();
+              gameObjects = gameObjects.filter(obj => obj.element !== element);
+            }, 300);
+          }
+        </script>
+      </body>
+      </html>
+    `;
+  };
+
+  const renderContent = () => {
+    if (isGenerating) {
+      return <GameLoading topic={prompt} />;
+    }
+    
+    if (miniGame) {
+      return (
+        <div className="w-full h-full">
+          <EnhancedGameView 
+            miniGame={miniGame}
+            onBack={handleReset}
+            extraButton={
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={handleShare}
+                className="text-xs h-7"
+              >
+                Chia sẻ
+              </Button>
+            }
+          />
+        </div>
+      );
+    }
+    
+    return (
+      <CustomGameSettings 
+        onGenerate={handleGenerate}
+        isGenerating={isGenerating}
+      />
+    );
   };
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex flex-col w-full">
-        <div className="flex-1 flex overflow-hidden">
-          <Sidebar variant="inset" collapsible="icon">
-            <SidebarContent>
-              <ChatInterface 
-                onCreateBlock={handleCreateFromPrompt} 
-                onQuizRequest={handleGameRequest}
-              />
-            </SidebarContent>
-          </Sidebar>
-          
-          <SidebarInset className="flex-1 bg-background overflow-hidden p-0 relative">
-            {showSettings ? (
-              <GameSettings onStart={handleStartGame} topic={topic} />
-            ) : (
-              <div className="h-full relative">
-                <div className="absolute top-2 right-2 z-10">
-                  <Drawer>
-                    <DrawerTrigger asChild>
-                      <Button variant="outline" size="icon" className="rounded-full bg-background/50 backdrop-blur-sm">
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                    </DrawerTrigger>
-                    <DrawerContent>
-                      <div className="p-4 max-w-md mx-auto">
-                        <GameSettings 
-                          onStart={handleStartGame} 
-                          topic={topic} 
-                          initialSettings={gameSettings}
-                          inDrawer={true}
-                        />
-                      </div>
-                    </DrawerContent>
-                  </Drawer>
-                </div>
-                <QuizGenerator 
-                  ref={quizGeneratorRef} 
-                  topic={topic}
-                  gameSettings={gameSettings}
-                />
-              </div>
-            )}
-          </SidebarInset>
+    <div className="h-screen w-full bg-gradient-to-b from-background to-background/95 overflow-hidden">
+      <QuizContainer
+        title={miniGame ? miniGame.title : "Tạo Game Tùy Chỉnh"}
+        showBackButton={true}
+        showRefreshButton={false}
+        showHomeButton={true}
+        onBack={() => miniGame ? handleReset() : navigate('/')}
+        className="p-0 overflow-hidden"
+      >
+        <div className="w-full h-full overflow-hidden">
+          {renderContent()}
         </div>
-      </div>
-    </SidebarProvider>
+      </QuizContainer>
+    </div>
   );
 };
 

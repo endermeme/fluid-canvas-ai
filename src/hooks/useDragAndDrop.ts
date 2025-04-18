@@ -63,7 +63,9 @@ export const useDragAndDrop = ({
     setDragStartPos({ x: e.clientX, y: e.clientY });
   };
   
-  const handleEndDrag = () => {
+  const handleEndDrag = (e: MouseEvent) => {
+    if (!isDragging) return;
+    
     setIsDragging(false);
     setDraggedBlockId(null);
     
@@ -84,12 +86,23 @@ export const useDragAndDrop = ({
   
   useEffect(() => {
     if (isDragging) {
-      document.addEventListener('mousemove', handleDrag);
+      // Use passive: false to be able to preventDefault on mobile
+      const dragOptions = { passive: false };
+      
+      document.addEventListener('mousemove', handleDrag, dragOptions);
       document.addEventListener('mouseup', handleEndDrag);
+      document.addEventListener('touchmove', handleDrag as any, dragOptions);
+      document.addEventListener('touchend', handleEndDrag as any);
+      
+      // Prevent scrolling during drag
+      document.body.style.overflow = 'hidden';
       
       return () => {
         document.removeEventListener('mousemove', handleDrag);
         document.removeEventListener('mouseup', handleEndDrag);
+        document.removeEventListener('touchmove', handleDrag as any);
+        document.removeEventListener('touchend', handleEndDrag as any);
+        document.body.style.overflow = '';
       };
     }
   }, [isDragging, draggedBlockId, dragStartPos, selectedBlockIds, blocks]);
