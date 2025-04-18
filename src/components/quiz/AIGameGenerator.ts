@@ -18,7 +18,8 @@ export class AIGameGenerator {
 
   constructor(apiKey: string) {
     this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Update to use gemini-1.5-pro or gemini-1.0-pro instead of gemini-pro
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
   }
 
   async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
@@ -57,28 +58,40 @@ export class AIGameGenerator {
         Không trả lời bất kỳ điều gì khác ngoài đối tượng JSON.
       `;
 
+      console.log("Sending prompt to Gemini API:", topic);
+      
       const result = await this.model.generateContent(prompt);
       const response = result.response;
       const text = response.text();
+      
+      console.log("Received response from Gemini API");
       
       // Extract the JSON object from the response
       const jsonMatch = text.match(/{[\s\S]*}/);
       if (jsonMatch) {
         const jsonStr = jsonMatch[0];
-        const gameData = JSON.parse(jsonStr);
+        console.log("Extracted JSON from response");
         
-        return {
-          title: gameData.title,
-          description: gameData.description,
-          content: text,
-          instructionsHtml: gameData.instructionsHtml,
-          gameHtml: gameData.gameHtml,
-          gameScript: gameData.gameScript,
-          cssStyles: gameData.cssStyles
-        };
+        try {
+          const gameData = JSON.parse(jsonStr);
+          
+          return {
+            title: gameData.title,
+            description: gameData.description,
+            content: text,
+            instructionsHtml: gameData.instructionsHtml,
+            gameHtml: gameData.gameHtml,
+            gameScript: gameData.gameScript,
+            cssStyles: gameData.cssStyles
+          };
+        } catch (jsonError) {
+          console.error("Error parsing JSON from Gemini response:", jsonError);
+          throw new Error("Invalid JSON response from AI model");
+        }
+      } else {
+        console.error("No JSON found in response:", text);
+        throw new Error("No JSON found in AI response");
       }
-      
-      return null;
     } catch (error) {
       console.error("Error generating mini game:", error);
       return null;
