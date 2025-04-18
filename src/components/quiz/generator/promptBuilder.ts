@@ -1,26 +1,18 @@
 
+import { GameGenerationOptions } from './types';
 import { GamePromptOptions, generateCustomGamePrompt } from './customGamePrompt';
 
-export const buildGeminiPrompt = (
-  topic: string,
-  useCanvas: boolean = true
-): string => {
-  const options: GamePromptOptions = {
+export function buildGeminiPrompt(topic: string, useCanvas: boolean = true): string {
+  const prompt = generateCustomGamePrompt(
     topic,
+    {
+      difficulty: 'medium',
+      language: 'Vietnamese',
+      ageGroup: 'general',
+      gameType: 'interactive'
+    },
     useCanvas
-  };
-
-  return generateCustomGamePrompt(options);
-};
-
-export const getCanvasInstructions = (): string => {
-  return `
-    Canvas Game Development Guidelines:
-    1. Efficient game loop implementation
-    2. Dynamic canvas resizing
-    3. Precise collision detection
-    4. Optimized sprite animations
-    5. State management techniques
-    6. Performance-focused rendering
-  `;
-};
+  );
+  
+  return prompt;
+}

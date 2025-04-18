@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from './generator/AIGameGenerator';
@@ -186,6 +187,17 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
       <CustomGameForm 
         onCustomGameCreate={handleCustomGameCreate}
         onGameRequest={onGameRequest}
+        onGameGenerated={(topic) => {
+          setSelectedTopic(topic);
+          handleStartGame({
+            difficulty: 'medium',
+            questionCount: 10,
+            timePerQuestion: 30,
+            category: 'general',
+            useTimer: true
+          });
+        }}
+        onCancel={() => {}}
       />
       
       <GameGrid 
