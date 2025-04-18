@@ -2,9 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { enhanceIframeContent } from '../utils/iframe-utils';
-import GameContainer from '../components/GameContainer';
 import { logInfo } from '@/components/quiz/generator/apiUtils';
 
 interface EnhancedGameViewProps {
@@ -33,13 +31,23 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [iframeError, setIframeError] = useState<string | null>(null);
   const [iframeContent, setIframeContent] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
 
   // Process and enhance the content when it changes
   useEffect(() => {
     if (miniGame?.content) {
       try {
+        setIsLoading(true);
         const contentToUse = miniGame.content;
-        const enhancedContent = enhanceIframeContent(contentToUse, miniGame.title);
+        
+        // Ensure we have valid HTML content with proper structure
+        let enhancedContent;
+        if (contentToUse.trim().startsWith('<!DOCTYPE html>') || contentToUse.trim().startsWith('<html')) {
+          enhancedContent = contentToUse;
+        } else {
+          enhancedContent = enhanceIframeContent(contentToUse, miniGame.title);
+        }
+        
         setIframeContent(enhancedContent);
         setIframeError(null);
         
@@ -52,9 +60,12 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       } catch (error) {
         console.error("Error enhancing content:", error);
         setIframeError("Không thể tải nội dung game. Vui lòng thử lại.");
+      } finally {
+        setIsLoading(false);
       }
     } else {
       setIframeError("Không có nội dung game để hiển thị.");
+      setIsLoading(false);
     }
   }, [miniGame]);
 
@@ -74,16 +85,19 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     if (iframeRef.current && iframeContent) {
       try {
         // Force a refresh by setting srcdoc again
+        setIsLoading(true);
         iframeRef.current.srcdoc = '';
         setTimeout(() => {
           if (iframeRef.current) {
             iframeRef.current.srcdoc = iframeContent;
+            setIsLoading(false);
           }
         }, 50);
         setIframeError(null);
       } catch (error) {
         console.error("Error refreshing game:", error);
         setIframeError("Không thể tải lại game. Vui lòng thử lại.");
+        setIsLoading(false);
       }
     }
   };
@@ -189,6 +203,11 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
               Tải lại
             </Button>
           </div>
+        ) : isLoading ? (
+          <div className="flex flex-col items-center justify-center h-full p-6">
+            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p>Đang tải game...</p>
+          </div>
         ) : (
           <iframe
             ref={iframeRef}
@@ -201,6 +220,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
               width: '100%',
               height: '100%'
             }}
+            onLoad={() => setIsLoading(false)}
           />
         )}
       </div>

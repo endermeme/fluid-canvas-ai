@@ -48,11 +48,12 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
   
   // Generate combined content when component mounts or when relevant props change
   useEffect(() => {
-    // Create combined HTML content
-    let fullContent = '';
-    
-    if (isSeparatedFiles && htmlContent && cssContent && jsContent) {
-      fullContent = `
+    try {
+      // Create combined HTML content
+      let fullContent = '';
+      
+      if (isSeparatedFiles && htmlContent && cssContent && jsContent) {
+        fullContent = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,21 +71,30 @@ ${jsContent}
   </script>
 </body>
 </html>`;
-    } else {
-      fullContent = content || '';
+      } else {
+        fullContent = content || '';
+      }
+      
+      setCombinedContent(fullContent);
+      
+      // Log for debugging
+      logInfo('CustomGameContainer', 'Generated combined content:', {
+        isSeparatedFiles: isSeparatedFiles,
+        contentLength: fullContent.length,
+        hasOriginalContent: !!content,
+        hasHtml: !!htmlContent,
+        hasCss: !!cssContent,
+        hasJs: !!jsContent,
+        contentPreview: fullContent.substring(0, 200) + '...'
+      });
+    } catch (error) {
+      console.error('Error generating combined content:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tạo nội dung game. Vui lòng thử lại.",
+        variant: "destructive"
+      });
     }
-    
-    setCombinedContent(fullContent);
-    
-    // Log for debugging
-    logInfo('CustomGameContainer', 'Generated combined content:', {
-      isSeparatedFiles: isSeparatedFiles,
-      contentLength: fullContent.length,
-      hasOriginalContent: !!content,
-      hasHtml: !!htmlContent,
-      hasCss: !!cssContent,
-      hasJs: !!jsContent
-    });
   }, [content, htmlContent, cssContent, jsContent, isSeparatedFiles, title]);
   
   const handleBack = () => {
