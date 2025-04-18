@@ -43,7 +43,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
             <div className="p-2 rounded-lg bg-primary/10">
               <Code className="h-6 w-6 text-primary" />
             </div>
-            Tạo Game Tùy Chỉnh
+            Gemini Flash
           </h2>
           <p className="text-muted-foreground">Mô tả chi tiết game bạn muốn tạo và AI sẽ xây dựng nó cho bạn</p>
         </div>
@@ -67,7 +67,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
           <div className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg">
             <Info className="w-4 h-4 text-primary mt-1" />
             <p className="text-sm text-muted-foreground">
-              AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Càng mô tả chi tiết, game càng phù hợp với ý tưởng của bạn.
+              Gemini sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Càng mô tả chi tiết, game càng phù hợp với ý tưởng của bạn.
             </p>
           </div>
           
@@ -85,7 +85,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
               className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90"
             >
               <SparklesIcon className="h-4 w-4 mr-2" />
-              Tạo Game với AI
+              Tạo Game với Gemini Flash
             </Button>
           </div>
         </div>

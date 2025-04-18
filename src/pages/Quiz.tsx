@@ -13,7 +13,7 @@ const Quiz: React.FC = () => {
 
   return (
     <QuizContainer 
-      title={isCustomGame ? "Tạo Game Tùy Chỉnh" : "Interactive Learning Games"}
+      title={isCustomGame ? "Gemini Flash" : "Interactive Learning Games"}
       showBackButton={true}
       onBack={() => navigate('/')}
       showSettingsButton={false}

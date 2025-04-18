@@ -5,6 +5,7 @@ import { logInfo, logError, logSuccess } from './apiUtils';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { processGeminiHtml } from './direct-html-parser';
 import { buildGeminiPrompt } from './promptBuilder';
+import { GEMINI_API_KEY, GEMINI_MODELS } from '@/constants/api-constants';
 
 export class AIGameGenerator {
   private static instance: AIGameGenerator;
@@ -13,9 +14,9 @@ export class AIGameGenerator {
   private canvasMode: boolean = true;
 
   constructor() {
-    this.genAI = new GoogleGenerativeAI('AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA');
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-pro-preview-03-25" });
-    logInfo('AIGameGenerator', 'Initialized with Gemini API');
+    this.genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    this.model = this.genAI.getGenerativeModel({ model: GEMINI_MODELS.CUSTOM_GAME });
+    logInfo('AIGameGenerator', `Initialized with Gemini API using model: ${GEMINI_MODELS.CUSTOM_GAME}`);
   }
 
   public static getInstance(): AIGameGenerator {
