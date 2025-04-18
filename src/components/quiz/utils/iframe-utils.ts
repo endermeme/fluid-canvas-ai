@@ -1,3 +1,4 @@
+
 /**
  * Enhanced iframe utilities for custom games
  */
@@ -6,7 +7,24 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
   if (!content) return '';
 
   try {
-    // Check if content already has proper HTML structure or contains CSS/JS markers
+    // Try parsing as JSON first
+    try {
+      const gameStructure = JSON.parse(content);
+      if (gameStructure.html && gameStructure.css && gameStructure.javascript) {
+        return createFormattedHtml(
+          gameStructure.html,
+          gameStructure.css,
+          gameStructure.javascript,
+          gameStructure.meta?.title || title,
+          gameStructure.meta?.viewport
+        );
+      }
+    } catch (e) {
+      // Not JSON, continue with markdown parsing
+      console.log('Content is not in JSON format, trying markdown parsing');
+    }
+
+    // Check if content has markdown-style code blocks
     const hasCssSection = content.includes('css ');
     const hasJsSection = content.includes('js ');
     
@@ -34,11 +52,29 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       }
     }
 
-    // Add viewport meta and basic styling to ensure proper display
-    const viewportMeta = '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
-    
-    // Basic responsive styling
-    let responsiveStyles = `
+    return createFormattedHtml(htmlContent, cssContent, jsContent, title);
+
+  } catch (error) {
+    console.error('Error enhancing iframe content:', error);
+    return content;
+  }
+};
+
+/**
+ * Creates a formatted HTML document from separate HTML, CSS, and JS content
+ */
+const createFormattedHtml = (
+  html: string, 
+  css: string, 
+  js: string, 
+  title?: string,
+  viewport: string = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+): string => {
+  // Add viewport meta and basic styling
+  const viewportMeta = `<meta name="viewport" content="${viewport}">`;
+  
+  // Basic responsive styling
+  let responsiveStyles = `
 <style>
   html, body {
     margin: 0;
@@ -74,11 +110,11 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
   }
   
   /* User provided CSS */
-  ${cssContent ? `\n  ${cssContent.replace(/\n/g, '\n  ')}` : ''}
+  ${css ? `\n  ${css.replace(/\n/g, '\n  ')}` : ''}
 </style>`;
 
-    // Game communication utilities script
-    const gameCommsScript = `
+  // Game communication utilities script
+  const gameCommsScript = `
 <script>
 // Game communication utilities
 (function() {
@@ -157,11 +193,11 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
 })();
 
 /* User provided JavaScript */
-${jsContent ? `\n${jsContent}` : ''}
+${js ? `\n${js}` : ''}
 </script>`;
 
-    // Create properly formatted HTML structure
-    const formattedHtml = `
+  // Create properly formatted HTML structure
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -171,16 +207,10 @@ ${jsContent ? `\n${jsContent}` : ''}
   ${responsiveStyles}
 </head>
 <body>
-  ${htmlContent}
+  ${html}
   ${gameCommsScript}
 </body>
 </html>`;
-
-    return formattedHtml;
-  } catch (error) {
-    console.error('Error enhancing iframe content:', error);
-    return content;
-  }
 };
 
 /**
