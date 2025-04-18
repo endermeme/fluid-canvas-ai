@@ -1,4 +1,3 @@
-
 import { gameTypes } from "../gameTypes";
 
 export interface MiniGame {
