@@ -9,6 +9,7 @@ export class AIGameGenerator {
   private static instance: AIGameGenerator;
   private genAI: GoogleGenerativeAI;
   private model: any;
+  private canvasMode: boolean = true;
 
   constructor() {
     this.genAI = new GoogleGenerativeAI('AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA');
@@ -23,6 +24,11 @@ export class AIGameGenerator {
     return AIGameGenerator.instance;
   }
 
+  public setCanvasMode(mode: boolean): void {
+    this.canvasMode = mode;
+    logInfo('AIGameGenerator', `Canvas mode set to: ${mode}`);
+  }
+
   public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
       logInfo('AIGameGenerator', 'Starting game generation', { topic, settings });
@@ -31,6 +37,7 @@ export class AIGameGenerator {
       1. HTML: Chứa cấu trúc game và các thành phần UI
       2. CSS: Style cho giao diện đẹp và responsive
       3. JavaScript: Logic game và tương tác
+      ${this.canvasMode ? 'Sử dụng Canvas HTML5 để tạo đồ họa đẹp mắt và tương tác.' : ''}
       
       Trả về định dạng:
       \`\`\`html
