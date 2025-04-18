@@ -18,23 +18,21 @@
 - **Biểu hiện**: Ban đầu tất cả code được lưu trong cùng một file HTML
 - **Ảnh hưởng**: Khó bảo trì, quản lý và mở rộng code
 
-### 4. Vấn Đề NPM
-- **Mô tả**: Lệnh `npm i` và `npm run dev` không hoạt động bình thường
-- **Biểu hiện**: Không thể cài đặt dependencies hoặc chạy môi trường phát triển
-- **Ảnh hưởng**: Không thể phát triển hoặc kiểm thử ứng dụng localy
-
 ## Vị Trí File Liên Quan
 
-### 1. File Xử Lý Response
+### 1. File Code Game
+- **src/components/quiz/custom-games/lucky-wheel/index.html**: File HTML của game
+- **src/components/quiz/custom-games/lucky-wheel/styles.css**: File CSS của game
+- **src/components/quiz/custom-games/lucky-wheel/game.js**: File JavaScript của game
+
+### 2. File Xử Lý Response
 - **src/components/quiz/generator/responseParser.ts**: File xử lý và trích xuất code từ phản hồi AI
 - **src/components/quiz/generator/geminiGenerator.ts**: File gọi API Gemini và xử lý phản hồi
 
-### 2. File Khác
+### 3. File Khác
 - **src/components/quiz/generator/apiUtils.ts**: Công cụ hỗ trợ làm việc với API
 - **src/components/quiz/QuizGenerator.tsx**: Component chính để tạo game
 - **src/pages/Quiz.tsx**: Trang giao diện tạo game
-- **vite.config.ts**: File cấu hình Vite cho dự án
-- **package.json**: File quản lý dependencies và scripts
 
 ## Giải Pháp Đã Thực Hiện
 
@@ -47,13 +45,11 @@
 - Cải thiện `formatGameContent` để tạo nội dung HTML có cấu trúc đúng
 
 ### 3. Tách File
-- Thực hiện tách code thành các file riêng biệt cho tất cả custom game
-- Cập nhật hệ thống để tự động trích xuất và định dạng code khi nhận từ API
-
-### 4. Khắc Phục Vấn Đề NPM
-- Cập nhật file `vite.config.ts` để tối ưu hóa cấu hình dev server
-- Điều chỉnh cấu hình HMR (Hot Module Replacement) để giảm khởi động lại không cần thiết
-- Tăng timeout cho các thao tác npm để tránh lỗi timeout khi cài đặt gói lớn
+- Thực hiện tách code thành các file riêng biệt:
+  - HTML trong `index.html`
+  - CSS trong `styles.css`
+  - JavaScript trong `game.js`
+- Cập nhật `index.html` để load CSS và JavaScript từ các file riêng
 
 ## Cải Tiến Tiếp Theo
 
@@ -68,8 +64,3 @@
 ### 3. Tối Ưu Hóa Prompt Gemini
 - Cập nhật prompt để yêu cầu Gemini trả về code đã định dạng đúng
 - Thêm hướng dẫn cụ thể về cách trả về code trong các block markdown
-
-### 4. Cải Thiện Quy Trình Cài Đặt
-- Tạo script cài đặt tự động cho dự án
-- Thêm kiểm tra phiên bản Node.js và NPM khi khởi động
-- Bổ sung tài liệu hướng dẫn cài đặt chi tiết trong README

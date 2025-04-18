@@ -18,63 +18,21 @@ export const generateCustomGamePrompt = (options: GamePromptOptions): string => 
   const basePrompt = `
 Create an interactive HTML game based on: "${topic}"
 
-**CRITICAL FORMATTING REQUIREMENTS:**
-- Return code in markdown format with separate \`\`\`html, \`\`\`css, and \`\`\`js blocks
-- NEVER return a full HTML document - only return separate code blocks
-- NEVER put all code on one line - use proper line breaks and indentation for EACH section
-- Each HTML tag MUST be on its own line with proper indentation
-- Each CSS rule MUST have properties on separate lines
-- Each JavaScript function MUST have proper spacing and formatting
-- Format exactly like professional code in a modern IDE
-
-**EXAMPLE FORMAT (MANDATORY):**
-
-\`\`\`html
-<div class="container">
-  <h1>Game Title</h1>
-  <div class="game-area">
-    <!-- Game content -->
-  </div>
-</div>
-\`\`\`
-
-\`\`\`css
-.container {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.game-area {
-  background-color: #f5f5f5;
-  padding: 20px;
-  border-radius: 8px;
-}
-\`\`\`
-
-\`\`\`js
-document.addEventListener('DOMContentLoaded', () => {
-  // Game initialization
-  const gameArea = document.querySelector('.game-area');
-  
-  function startGame() {
-    console.log('Game started');
-    // Game logic
-  }
-  
-  startGame();
-});
-\`\`\`
+**IMPORTANT: Return code in markdown format with \`\`\`html blocks**
 
 **STRICT REQUIREMENTS:**
-- Well-structured, modular code with init, update, render functions
+- Start your response with a \`\`\`html block
+- Format code with proper line breaks and indentation
+- End your response with \`\`\` closing block
 - Use modern JavaScript (ES6+), no external libraries
-- Clean, descriptive variable and function names
-- Use semantic HTML5 with responsive layout
-- Proper event handling and game state management
+- Clean, readable, maintainable code with descriptive names
+- Strictly modular structure: init, update, render, game loop
+- Use semantic HTML5, responsive layout
+- No global variables unless absolutely needed
+- Implement proper event handling, game state management
 - Use localStorage if persistence is needed
-${useCanvas ? '- Use HTML5 Canvas for rendering with proper sizing and efficient drawing' : ''}
-- Smooth animations and transitions
+${useCanvas ? '- Use HTML5 Canvas for rendering' : ''}
+- Efficient rendering, proper sizing, smooth animations
 
 **Game content must match:**
 - Difficulty level: \`${difficulty}\`

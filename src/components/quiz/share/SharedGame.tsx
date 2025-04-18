@@ -13,7 +13,6 @@ const SharedGame: React.FC = () => {
   const [game, setGame] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [iframeError, setIframeError] = useState<string | null>(null);
   const [iframeRef] = useState(React.createRef<HTMLIFrameElement>());
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -49,7 +48,6 @@ const SharedGame: React.FC = () => {
     if (iframeRef.current) {
       const enhancedContent = enhanceIframeContent(game.htmlContent, game.title);
       iframeRef.current.srcdoc = enhancedContent;
-      setIframeError(null);
     }
   };
 
@@ -104,7 +102,6 @@ const SharedGame: React.FC = () => {
           iframeRef={iframeRef}
           content={enhancedContent}
           title={game.title}
-          error={iframeError}
           onReload={handleReload}
         />
       </main>

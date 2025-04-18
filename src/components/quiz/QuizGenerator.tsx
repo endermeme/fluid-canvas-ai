@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from './generator/AIGameGenerator';
@@ -211,11 +212,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
       <EnhancedGameView 
         miniGame={{
           title: miniGame.title || "Minigame Tương Tác",
-          content: miniGame.content || "",
-          htmlContent: miniGame.htmlContent || "",
-          cssContent: miniGame.cssContent || "",
-          jsContent: miniGame.jsContent || "",
-          isSeparatedFiles: miniGame.isSeparatedFiles || false
+          content: miniGame.content || ""
         }} 
         extraButton={
           <Button 

@@ -1,21 +1,9 @@
-import { GameType } from "../gameTypes";
 
 export interface MiniGame {
   title: string;
+  content: string;
   description?: string;
-  content?: string; // For backward compatibility
-  
-  // Separate files format
-  htmlContent?: string;
-  cssContent?: string;
-  jsContent?: string;
-  
-  // Flag to indicate if using separate files
-  isSeparatedFiles?: boolean;
-  
-  items?: any[];
   useCanvas?: boolean;
-  gameType?: GameType;
 }
 
 export interface GameApiResponse {

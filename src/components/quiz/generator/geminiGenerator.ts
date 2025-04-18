@@ -1,3 +1,4 @@
+
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -39,59 +40,20 @@ export const generateWithGemini = async (
     category: settings?.category || 'general'
   };
 
-  // Hướng dẫn định dạng code chi tiết hơn
+  // Add enhanced instructions for proper code formatting to the prompt
   const formattingInstructions = `
-FORMATTING REQUIREMENTS (CRITICAL - MUST FOLLOW):
-1. Code must be properly formatted with clear indentation and line breaks
-2. Separate code into distinct sections with proper spacing
-3. HTML tags should each be on their own lines with proper nesting indentation
-4. JavaScript functions should have clear structure and formatting
-5. CSS rules should be properly spaced with each property on a new line
-6. All opening and closing brackets should be properly aligned
-7. Each HTML, CSS, and JavaScript code block MUST be properly formatted - NOT all on one line
-8. Use the following format for code blocks:
-
-\`\`\`html
-<!-- HTML neatly formatted with indentation -->
-<div class="container">
-  <div class="game-area">
-    <h1>Game Title</h1>
-  </div>
-</div>
-\`\`\`
-
-\`\`\`css
-/* CSS neatly formatted */
-.container {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.game-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-\`\`\`
-
-\`\`\`js
-// JavaScript neatly formatted
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize game
-  const gameArea = document.querySelector('.game-area');
-  
-  function startGame() {
-    // Game logic
-    console.log('Game started');
-  }
-  
-  startGame();
-});
-\`\`\`
+IMPORTANT CODE FORMATTING INSTRUCTIONS:
+1. Provide well-formatted, properly indented HTML, CSS, and JavaScript code
+2. Use proper indentation with appropriate line breaks between HTML tags
+3. Keep JavaScript functions well-structured with proper spacing and line breaks
+4. Format CSS with proper spacing, indentation, and line breaks
+5. Ensure closing brackets and parentheses are properly aligned
+6. Use descriptive variable and function names
+7. Add comments to explain complex logic
+8. Remember that well-structured code is essential for the game to function correctly
 `;
 
-  // Tạo prompt với hướng dẫn định dạng
+  // Generate prompt with formatting instructions
   const prompt = generateCustomGamePrompt(promptOptions) + formattingInstructions;
 
   try {
@@ -135,19 +97,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const duration = measureExecutionTime(startTime);
     logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
     
-    // Phân tích và báo cáo về định dạng phản hồi
-    const hasMarkdownBlocks = text.includes('```html') && (text.includes('```css') || text.includes('```js'));
-    const isCompleteHtml = text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html');
-    const isOneLineHtml = text.includes('</head>') && !text.includes('\n</head>');
-    
-    console.log('%c Generated Game Code Format Analysis:', 'font-weight: bold; color: #6f42c1;');
-    console.log(`- Has markdown blocks: ${hasMarkdownBlocks ? 'Yes' : 'No'}`);
-    console.log(`- Is complete HTML: ${isCompleteHtml ? 'Yes' : 'No'}`);
-    console.log(`- Is one-line HTML: ${isOneLineHtml ? 'Yes' : 'No'}`);
-    console.log(`- Approximate length: ${text.length} characters`);
-    
-    console.log('%c Generated Game Code (First 500 chars):', 'font-weight: bold; color: #6f42c1;');
-    console.log(text.substring(0, 500) + '...');
+    console.log('%c Generated Game Code:', 'font-weight: bold; color: #6f42c1;');
+    console.log(text);
     
     let title = topic;
     const titleMatch = text.match(/<title>(.*?)<\/title>/i) || 
@@ -159,14 +110,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let content = text;
     
-    if (!isCompleteHtml && !hasMarkdownBlocks) {
-      // Nếu không phải là HTML hoàn chỉnh hoặc markdown blocks, thử tìm HTML
+    if (!content.trim().startsWith('<!DOCTYPE') && !content.trim().startsWith('<html')) {
       const htmlMatch = text.match(/<!DOCTYPE[\s\S]*<\/html>/i) || 
                         text.match(/<html[\s\S]*<\/html>/i);
       
       if (htmlMatch && htmlMatch[0]) {
         content = htmlMatch[0];
-        console.log('🔶 Gemini: Extracted HTML content from mixed response');
       }
     }
     
@@ -189,13 +138,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 const sanitizeGameCode = (content: string): string => {
   let sanitized = content;
-  
-  // Check if content is in one line and directly format it if needed
-  if (sanitized.includes('</head>') && !sanitized.includes('\n</head>')) {
-    console.log("🔶 Gemini: Detecting one-line HTML response, applying special formatting");
-    // Let responseParser handle the formatting
-    return sanitized;
-  }
   
   // Basic code cleanup while preserving line breaks and formatting
   sanitized = sanitized

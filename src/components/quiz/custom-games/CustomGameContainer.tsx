@@ -38,20 +38,9 @@ import { useToast } from '@/hooks/use-toast';
 interface CustomGameContainerProps {
   title?: string;
   content?: string;
-  htmlContent?: string;
-  cssContent?: string;
-  jsContent?: string;
-  isSeparatedFiles?: boolean;
 }
 
-const CustomGameContainer: React.FC<CustomGameContainerProps> = ({ 
-  title = "Minigame Tương Tác", 
-  content = "",
-  htmlContent = "",
-  cssContent = "",
-  jsContent = "",
-  isSeparatedFiles = false
-}) => {
+const CustomGameContainer: React.FC<CustomGameContainerProps> = ({ title = "Minigame Tương Tác", content = "" }) => {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState('game');
   const [showShareDialog, setShowShareDialog] = useState(false);
@@ -96,11 +85,7 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
   
   const [miniGame] = useState({
     title: title,
-    content: content,
-    htmlContent: htmlContent,
-    cssContent: cssContent,
-    jsContent: jsContent,
-    isSeparatedFiles: isSeparatedFiles
+    content: content
   });
   
   return (
@@ -115,7 +100,6 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
           <TabsList>
             <TabsTrigger value="game">Game</TabsTrigger>
             <TabsTrigger value="share">Chia sẻ</TabsTrigger>
-            {isSeparatedFiles && <TabsTrigger value="code">Code</TabsTrigger>}
           </TabsList>
         </div>
         
@@ -123,11 +107,7 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
           <EnhancedGameView 
             miniGame={{
               title: miniGame.title,
-              content: miniGame.content,
-              htmlContent: miniGame.htmlContent,
-              cssContent: miniGame.cssContent,
-              jsContent: miniGame.jsContent,
-              isSeparatedFiles: miniGame.isSeparatedFiles
+              content: miniGame.content
             }}
             onBack={handleBack}
           />
@@ -187,53 +167,6 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
             </Card>
           </div>
         </TabsContent>
-        
-        {isSeparatedFiles && (
-          <TabsContent value="code" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
-            <div className="max-w-4xl mx-auto space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Code Game</CardTitle>
-                  <CardDescription>
-                    Code của game được tách thành các phần HTML, CSS và JavaScript
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <Tabs defaultValue="html">
-                    <TabsList className="mb-4">
-                      <TabsTrigger value="html">HTML</TabsTrigger>
-                      <TabsTrigger value="css">CSS</TabsTrigger>
-                      <TabsTrigger value="js">JavaScript</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="html">
-                      <pre className="p-4 bg-gray-100 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
-                        <code>{miniGame.htmlContent}</code>
-                      </pre>
-                    </TabsContent>
-                    
-                    <TabsContent value="css">
-                      <pre className="p-4 bg-gray-100 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
-                        <code>{miniGame.cssContent}</code>
-                      </pre>
-                    </TabsContent>
-                    
-                    <TabsContent value="js">
-                      <pre className="p-4 bg-gray-100 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
-                        <code>{miniGame.jsContent}</code>
-                      </pre>
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-                <CardFooter>
-                  <div className="text-sm text-muted-foreground">
-                    Bạn có thể sao chép code để sử dụng trong các dự án khác.
-                  </div>
-                </CardFooter>
-              </Card>
-            </div>
-          </TabsContent>
-        )}
       </Tabs>
       
       {/* Dialog for entering player name */}
