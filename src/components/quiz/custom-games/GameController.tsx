@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
@@ -49,9 +48,8 @@ const GameController: React.FC<GameControllerProps> = ({
     }
     
     try {
-      // Use AIGameGenerator to generate a new game
       const gameGenerator = new AIGameGenerator();
-      const generatedGame = await gameGenerator.generateGame(content);
+      const generatedGame = await gameGenerator.generateMiniGame(content);
       
       if (generatedGame) {
         setCurrentGame(generatedGame);

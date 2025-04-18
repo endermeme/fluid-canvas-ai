@@ -27,6 +27,11 @@ const Quiz: React.FC = () => {
               // Navigate to custom game with topic as param
               navigate(`/custom-game?topic=${encodeURIComponent(topic)}`);
             }}
+            onToggleChat={() => {
+              // Since this is a required prop but we don't have chat functionality in this context,
+              // we'll provide a no-op function
+              console.log("Toggle chat requested but not implemented in this context");
+            }}
           />
         )}
       </div>
