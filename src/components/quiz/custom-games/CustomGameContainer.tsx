@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import QuizContainer from '@/components/quiz/QuizContainer';
@@ -31,8 +32,60 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
   const [activeTab, setActiveTab] = useState('game');
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
+  const [combinedContent, setCombinedContent] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Create the minigame state
+  const [miniGame] = useState({
+    title: title,
+    content: content,
+    htmlContent: htmlContent,
+    cssContent: cssContent,
+    jsContent: jsContent,
+    isSeparatedFiles: isSeparatedFiles
+  });
+  
+  // Generate combined content when component mounts or when relevant props change
+  useEffect(() => {
+    // Create combined HTML content
+    let fullContent = '';
+    
+    if (isSeparatedFiles && htmlContent && cssContent && jsContent) {
+      fullContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  <style>
+${cssContent}
+  </style>
+</head>
+<body>
+${htmlContent}
+  <script>
+${jsContent}
+  </script>
+</body>
+</html>`;
+    } else {
+      fullContent = content || '';
+    }
+    
+    setCombinedContent(fullContent);
+    
+    // Log for debugging
+    logInfo('CustomGameContainer', 'Generated combined content:', {
+      isSeparatedFiles: isSeparatedFiles,
+      contentLength: fullContent.length,
+      hasOriginalContent: !!content,
+      hasHtml: !!htmlContent,
+      hasCss: !!cssContent,
+      hasJs: !!jsContent
+    });
+  }, [content, htmlContent, cssContent, jsContent, isSeparatedFiles, title]);
   
   const handleBack = () => {
     navigate('/');
@@ -43,22 +96,41 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
       .then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+        
+        toast({
+          title: "Link đã được sao chép",
+          description: "Bạn có thể gửi link cho người khác để họ tham gia.",
+        });
       })
       .catch(err => {
         console.error('Không thể sao chép liên kết:', err);
+        toast({
+          title: "Lỗi sao chép",
+          description: "Không thể sao chép link",
+          variant: "destructive"
+        });
       });
   };
   
   const handleShareGame = async () => {
-    if (!miniGame) return;
+    if (!combinedContent) {
+      toast({
+        title: "Không có nội dung",
+        description: "Không thể chia sẻ game vì không có nội dung.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     try {
       const gameSession = await createGameSession(
         miniGame.title || "Minigame tương tác",
-        miniGame.content
+        combinedContent
       );
       
-      navigate(`/game/${gameSession.id}`);
+      const shareUrl = `${window.location.origin}/game/${gameSession.id}`;
+      setShareUrl(shareUrl);
+      setShowShareDialog(true);
       
       toast({
         title: "Game đã được chia sẻ",
@@ -66,45 +138,13 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
       });
     } catch (error) {
       console.error("Error sharing game:", error);
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Không thể chia sẻ game. Vui lòng thử lại sau.",
+        variant: "destructive"
+      });
     }
   };
-  
-  const [miniGame] = useState({
-    title: title,
-    content: content,
-    htmlContent: htmlContent,
-    cssContent: cssContent,
-    jsContent: jsContent,
-    isSeparatedFiles: isSeparatedFiles
-  });
-  
-  // Create combined HTML content
-  const combinedContent = isSeparatedFiles ? `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title}</title>
-  <style>
-    ${cssContent}
-  </style>
-</head>
-<body>
-  ${htmlContent}
-  <script>
-    ${jsContent}
-  </script>
-</body>
-</html>
-  ` : content;
-  
-  // Log content for debugging
-  logInfo('CustomGameContainer', 'Game content:', {
-    hasContent: !!content,
-    hasHtmlContent: !!htmlContent,
-    contentLength: combinedContent.length
-  });
   
   return (
     <QuizContainer
@@ -126,8 +166,7 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
           <EnhancedGameView 
             miniGame={{
               title: miniGame.title,
-              content: combinedContent,
-              isSeparatedFiles: false
+              content: combinedContent
             }}
             onBack={handleBack}
           />
@@ -143,9 +182,7 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
         </TabsContent>
         
         <TabsContent value="code" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
-          <CodeView 
-            content={combinedContent}
-          />
+          <CodeView content={combinedContent} />
         </TabsContent>
       </Tabs>
       

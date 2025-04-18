@@ -1,7 +1,10 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { logInfo } from '@/components/quiz/generator/apiUtils';
+import { Button } from '@/components/ui/button';
+import { Copy } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface CodeViewProps {
   content?: string;
@@ -9,24 +12,69 @@ interface CodeViewProps {
 }
 
 const CodeView: React.FC<CodeViewProps> = ({ content, htmlContent }) => {
-  const codeToDisplay = htmlContent || content || '';
+  const [codeToDisplay, setCodeToDisplay] = useState<string>('');
+  const { toast } = useToast();
 
-  // Log the content for debugging
-  logInfo('CodeView', 'Displaying code content:', { length: codeToDisplay.length });
+  useEffect(() => {
+    // Prioritize content if both are provided
+    const displayContent = content || htmlContent || '';
+    setCodeToDisplay(displayContent);
+    
+    // Log for debugging
+    logInfo('CodeView', 'Setting code content:', { 
+      contentLength: displayContent.length,
+      contentStart: displayContent.substring(0, 100) + '...'
+    });
+  }, [content, htmlContent]);
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(codeToDisplay)
+      .then(() => {
+        toast({
+          title: "Đã sao chép",
+          description: "Code đã được sao chép vào clipboard",
+        });
+      })
+      .catch(err => {
+        console.error('Không thể sao chép code:', err);
+        toast({
+          title: "Lỗi sao chép",
+          description: "Không thể sao chép code",
+          variant: "destructive"
+        });
+      });
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Game Code</CardTitle>
-          <CardDescription>
-            Complete HTML file with embedded CSS and JavaScript
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Game Code</CardTitle>
+            <CardDescription>
+              Complete HTML file with embedded CSS and JavaScript
+            </CardDescription>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleCopyCode} 
+            className="text-xs"
+          >
+            <Copy className="h-3.5 w-3.5 mr-1.5" />
+            Sao chép code
+          </Button>
         </CardHeader>
         <CardContent>
-          <pre className="p-4 bg-gray-100 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
-            <code>{codeToDisplay}</code>
-          </pre>
+          {codeToDisplay ? (
+            <pre className="p-4 bg-gray-100 dark:bg-gray-800 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
+              <code>{codeToDisplay}</code>
+            </pre>
+          ) : (
+            <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-md text-center text-muted-foreground">
+              Không có code nào để hiển thị
+            </div>
+          )}
         </CardContent>
         <CardFooter>
           <div className="text-sm text-muted-foreground">
