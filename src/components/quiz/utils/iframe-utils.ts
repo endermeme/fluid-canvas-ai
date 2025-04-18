@@ -1,4 +1,3 @@
-
 /**
  * Enhanced iframe utilities for custom games
  */
@@ -38,8 +37,8 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     // Add viewport meta and basic styling to ensure proper display
     const viewportMeta = '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
     
-    // Basic responsive styling to ensure content fits well in iframe
-    const responsiveStyles = `
+    // Basic responsive styling
+    let responsiveStyles = `
 <style>
   html, body {
     margin: 0;
@@ -73,10 +72,12 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     margin: 0 auto;
     padding: 0;
   }
+  
+  /* User provided CSS */
   ${cssContent ? `\n  ${cssContent.replace(/\n/g, '\n  ')}` : ''}
 </style>`;
-    
-    // Add game communication channel
+
+    // Game communication utilities script
     const gameCommsScript = `
 <script>
 // Game communication utilities
@@ -155,13 +156,12 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
   });
 })();
 
+/* User provided JavaScript */
 ${jsContent ? `\n${jsContent}` : ''}
 </script>`;
 
-    // Properly format the fruit puzzle game
-    if (hasCssSection || hasJsSection) {
-      // Create a complete HTML document with structured sections
-      return `
+    // Create properly formatted HTML structure
+    const formattedHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -175,31 +175,11 @@ ${jsContent ? `\n${jsContent}` : ''}
   ${gameCommsScript}
 </body>
 </html>`;
-    } else if (content.includes('</body>')) {
-      // Insert the script before the closing body tag for existing HTML
-      return content
-        .replace(/<\/head>/, `${viewportMeta}${responsiveStyles}</head>`)
-        .replace('</body>', `${gameCommsScript}</body>`);
-    } else {
-      // Content doesn't have a body tag, create a minimal HTML document
-      return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  ${viewportMeta}
-  <title>${title || 'Interactive Game'}</title>
-  ${responsiveStyles}
-</head>
-<body>
-  ${content}
-  ${gameCommsScript}
-</body>
-</html>`;
-    }
+
+    return formattedHtml;
   } catch (error) {
     console.error('Error enhancing iframe content:', error);
-    return content; // Return original content on error
+    return content;
   }
 };
 
