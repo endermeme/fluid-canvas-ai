@@ -1,59 +1,39 @@
 
+import { createFormattedHtml } from './html-formatter';
+import { parseJsonContent, parseMarkdownContent } from './content-parser';
+
 /**
  * Enhanced iframe utilities for custom games
  */
-
 export const enhanceIframeContent = (content: string, title?: string): string => {
   if (!content) return '';
 
   try {
     // Try parsing as JSON first
-    try {
-      const gameStructure = JSON.parse(content);
-      if (gameStructure.html && gameStructure.css && gameStructure.javascript) {
-        return createFormattedHtml(
-          gameStructure.html,
-          gameStructure.css,
-          gameStructure.javascript,
-          gameStructure.meta?.title || title,
-          gameStructure.meta?.viewport
-        );
-      }
-    } catch (e) {
-      // Not JSON, continue with markdown parsing
-      console.log('Content is not in JSON format, trying markdown parsing');
+    const jsonStructure = parseJsonContent(content);
+    if (jsonStructure) {
+      return createFormattedHtml(
+        jsonStructure.html,
+        jsonStructure.css,
+        jsonStructure.javascript,
+        jsonStructure.meta?.title || title,
+        jsonStructure.meta?.viewport
+      );
     }
 
-    // Check if content has markdown-style code blocks
-    const hasCssSection = content.includes('css ');
-    const hasJsSection = content.includes('js ');
-    
-    // Extract CSS and JS if they exist in the content
-    let htmlContent = content;
-    let cssContent = '';
-    let jsContent = '';
-    
-    if (hasCssSection || hasJsSection) {
-      // Split content into HTML, CSS, and JS sections
-      const sections = content.split(/\s*(css|js)\s+/);
-      
-      if (sections.length >= 1) {
-        htmlContent = sections[0].trim();
-      }
-      
-      for (let i = 1; i < sections.length; i += 2) {
-        if (i + 1 < sections.length) {
-          if (sections[i] === 'css') {
-            cssContent = sections[i + 1].trim();
-          } else if (sections[i] === 'js') {
-            jsContent = sections[i + 1].trim();
-          }
-        }
-      }
+    // Try parsing as markdown-style blocks
+    const markdownStructure = parseMarkdownContent(content);
+    if (markdownStructure) {
+      return createFormattedHtml(
+        markdownStructure.html,
+        markdownStructure.css,
+        markdownStructure.javascript,
+        title
+      );
     }
 
-    return createFormattedHtml(htmlContent, cssContent, jsContent, title);
-
+    // If no parsing succeeded, wrap the content in basic HTML
+    return wrapContentInHtml(content, title);
   } catch (error) {
     console.error('Error enhancing iframe content:', error);
     return content;
@@ -61,188 +41,12 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
 };
 
 /**
- * Creates a formatted HTML document from separate HTML, CSS, and JS content
- */
-const createFormattedHtml = (
-  html: string, 
-  css: string, 
-  js: string, 
-  title?: string,
-  viewport: string = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
-): string => {
-  // Add viewport meta and basic styling
-  const viewportMeta = `<meta name="viewport" content="${viewport}">`;
-  
-  // Basic responsive styling
-  let responsiveStyles = `
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    box-sizing: border-box;
-  }
-  
-  body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    line-height: 1.5;
-    color: #333;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  img, canvas {
-    max-width: 100%;
-    height: auto;
-    display: block;
-  }
-  
-  * {
-    box-sizing: border-box;
-  }
-  
-  .container, .game-container, #game, .game, main {
-    width: 100%;
-    margin: 0 auto;
-    padding: 0;
-  }
-  
-  /* User provided CSS */
-  ${css ? `\n  ${css.replace(/\n/g, '\n  ')}` : ''}
-</style>`;
-
-  // Game communication utilities script
-  const gameCommsScript = `
-<script>
-// Game communication utilities
-(function() {
-  // Send game stats to parent
-  window.sendGameStats = function(stats) {
-    if (window.parent) {
-      window.parent.postMessage({
-        type: 'gameStats',
-        payload: stats
-      }, '*');
-    }
-  };
-  
-  // Game completion handler
-  window.completeGame = function(score) {
-    window.sendGameStats({
-      completed: true,
-      score: score,
-      completedAt: new Date().toISOString()
-    });
-  };
-
-  // Setup window error handling
-  window.addEventListener('error', function(event) {
-    console.error('Game error:', event.error);
-    if (window.parent) {
-      window.parent.postMessage({
-        type: 'gameError',
-        payload: {
-          message: event.message,
-          source: event.filename,
-          line: event.lineno,
-          column: event.colno
-        }
-      }, '*');
-    }
-  });
-  
-  // Send resize message to parent
-  function reportHeight() {
-    if (window.parent) {
-      const height = Math.max(
-        document.body.scrollHeight,
-        document.body.offsetHeight,
-        document.documentElement.clientHeight,
-        document.documentElement.scrollHeight,
-        document.documentElement.offsetHeight
-      );
-      
-      window.parent.postMessage({
-        type: 'setHeight',
-        height: height
-      }, '*');
-    }
-  }
-  
-  // Report height on load and resize
-  window.addEventListener('load', reportHeight);
-  window.addEventListener('resize', reportHeight);
-  
-  // Set up a mutation observer to detect DOM changes and report height
-  var observer = new MutationObserver(function() {
-    reportHeight();
-  });
-  
-  // Start observing when DOM is ready
-  document.addEventListener('DOMContentLoaded', function() {
-    observer.observe(document.body, { 
-      childList: true, 
-      subtree: true,
-      attributes: true,
-      characterData: true
-    });
-    reportHeight();
-  });
-})();
-
-/* User provided JavaScript */
-${js ? `\n${js}` : ''}
-</script>`;
-
-  // Create properly formatted HTML structure
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  ${viewportMeta}
-  <title>${title || 'Interactive Game'}</title>
-  ${responsiveStyles}
-</head>
-<body>
-  ${html}
-  ${gameCommsScript}
-</body>
-</html>`;
-};
-
-/**
  * Wrap content in iframe-safe HTML if it's not already HTML
  */
 export const wrapContentInHtml = (content: string, title?: string): string => {
-  // Check if content is already HTML (has html tags)
   if (content.includes('<html') || content.includes('<!DOCTYPE html>')) {
-    return enhanceIframeContent(content, title);
+    return content;
   }
   
-  // Wrap in minimal HTML
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title || 'Interactive Content'}</title>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 0;
-      padding: 20px;
-      max-width: 100%;
-      overflow-x: hidden;
-      box-sizing: border-box;
-    }
-  </style>
-</head>
-<body>
-  ${content}
-</body>
-</html>`;
+  return createFormattedHtml(content, '', '', title);
 };
