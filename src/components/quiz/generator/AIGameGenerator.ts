@@ -34,6 +34,7 @@ export class AIGameGenerator {
     try {
       logInfo('AIGameGenerator', 'Starting game generation', { topic, settings });
       
+      // Fix: Properly escape backticks in the prompt string
       const prompt = `Tạo một minigame tương tác về chủ đề "${topic}" với cấu trúc HTML, CSS và JavaScript. 
       Yêu cầu:
       
@@ -44,17 +45,17 @@ export class AIGameGenerator {
       
       Trả về mã nguồn theo định dạng sau (không bao gồm backticks và tên ngôn ngữ):
       
-      ```html
+      \`\`\`html
       <!-- Code HTML ở đây, không bao gồm thẻ DOCTYPE và html -->
-      ```
+      \`\`\`
       
-      ```css
+      \`\`\`css
       /* Code CSS ở đây, không bao gồm thẻ style */
-      ```
+      \`\`\`
       
-      ```javascript
+      \`\`\`javascript
       // Code JavaScript ở đây, không bao gồm thẻ script
-      ````;
+      \`\`\``;
       
       console.log("Sending prompt to Gemini:", prompt);
       
@@ -72,4 +73,3 @@ export class AIGameGenerator {
     }
   }
 }
-
