@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vòng Quay May Mắn</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 500px;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 30px;
+        }
+        
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: #fff;
+            border: 8px solid #3498db;
+            position: relative;
+            overflow: hidden;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid #e74c3c;
+            z-index: 2;
+        }
+        
+        .segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            left: 0;
+            top: 0;
+        }
+        
+        .segment span {
+            transform: rotate(60deg);
+            width: 100px;
+            text-align: center;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            font-size: 14px;
+        }
+        
+        button {
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        
+        button:hover {
+            background-color: #c0392b;
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 25px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Vòng Quay May Mắn</h1>
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <div class="wheel"></div>
+        </div>
+        <button id="spin">QUAY NGAY</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const wheel = document.querySelector('.wheel');
+            const spinBtn = document.getElementById('spin');
+            const result = document.getElementById('result');
+            
+            // Các phần thưởng
+            const prizes = [
+                { text: '50 Điểm', color: '#e74c3c' },
+                { text: 'Mất lượt', color: '#7f8c8d' },
+                { text: '100 Điểm', color: '#2ecc71' },
+                { text: '20 Điểm', color: '#f1c40f' },
+                { text: 'Thêm lượt', color: '#9b59b6' },
+                { text: '10 Điểm', color: '#3498db' }
+            ];
+            
+            // Tạo các phần tử segment
+            function createSegments() {
+                const segmentAngle = 360 / prizes.length;
+                
+                prizes.forEach((prize, index) => {
+                    const segment = document.createElement('div');
+                    segment.className = 'segment';
+                    
+                    // Xoay segment theo vị trí
+                    segment.style.transform = `rotate(${index * segmentAngle}deg)`;
+                    segment.style.backgroundColor = prize.color;
+                    
+                    const text = document.createElement('span');
+                    text.textContent = prize.text;
+                    
+                    segment.appendChild(text);
+                    wheel.appendChild(segment);
+                });
+            }
+            
+            // Xử lý sự kiện quay
+            let canSpin = true;
+            let currentRotation = 0;
+            
+            spinBtn.addEventListener('click', function() {
+                if (!canSpin) return;
+                
+                // Disable button khi đang quay
+                spinBtn.disabled = true;
+                canSpin = false;
+                result.textContent = 'Đang quay...';
+                
+                // Chọn giải thưởng ngẫu nhiên
+                const prizeIndex = Math.floor(Math.random() * prizes.length);
+                
+                // Tính góc quay
+                const segmentAngle = 360 / prizes.length;
+                const targetAngle = 360 - (prizeIndex * segmentAngle) - (segmentAngle / 2);
+                const rotations = 5; // Số vòng quay thêm
+                
+                // Góc quay cuối cùng
+                const finalRotation = currentRotation + (360 * rotations) + targetAngle;
+                currentRotation = finalRotation % 360;
+                
+                // Animation xoay
+                wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.83, 0.67)';
+                wheel.style.transform = `rotate(${finalRotation}deg)`;
+                
+                // Hiển thị kết quả sau khi quay xong
+                setTimeout(function() {
+                    const prize = prizes[prizeIndex];
+                    result.textContent = `Chúc mừng! Bạn nhận được: ${prize.text}`;
+                    
+                    // Báo cáo kết quả game
+                    const score = prize.text.includes('Điểm') ? parseInt(prize.text) : 0;
+                    
+                    // Gửi event đến parent nếu cần
+                    const event = new CustomEvent('game-completed', {
+                        detail: { score: score }
+                    });
+                    document.dispatchEvent(event);
+                    
+                    // Reset trạng thái
+                    spinBtn.disabled = false;
+                    canSpin = true;
+                }, 4100);
+            });
+            
+            // Khởi tạo vòng quay
+            createSegments();
+        });
+    </script>
+</body>
+</html> 
