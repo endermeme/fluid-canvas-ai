@@ -1,109 +1,78 @@
 
-const canvas = document.getElementById('game-canvas');
-const ctx = canvas.getContext('2d');
-const spinButton = document.getElementById('spin-button');
-const resultDisplay = document.getElementById('result-display');
+const wheel = document.querySelector('.wheel');
+const spinBtn = document.getElementById('spin-btn');
+const resultDiv = document.getElementById('result');
 
-const wheelOptions = [
-  "Win $10", "Lose", "Win $5", "Extra Spin",
-  "Win $2", "Lose", "Win $1", "Free Try"
+const segments = [
+  { text: '10 Điểm', color: '#f1c40f' },
+  { text: 'Mất lượt', color: '#e74c3c' }, 
+  { text: '20 Điểm', color: '#3498db' },
+  { text: 'Thêm lượt', color: '#2ecc71' },
+  { text: '50 Điểm', color: '#f39c12' },
+  { text: 'Chúc MM Lần Sau', color: '#9b59b6' },
+  { text: '100 Điểm', color: '#1abc9c' },
+  { text: 'Thử Lại', color: '#7f8c8d' }
 ];
 
-const wheelColors = [
-  "#e74c3c", "#3498db", "#2ecc71", "#f39c12",
-  "#9b59b6", "#1abc9c", "#d35400", "#34495e"
-];
+const numSegments = segments.length;
+const segmentAngle = 360 / numSegments;
+let currentRotation = 0;
+let isSpinning = false;
 
-let rotationAngle = 0;
-let spinning = false;
-let spinTimeout = null;
-
-function init() {
-  drawWheel();
-  spinButton.addEventListener('click', handleSpin);
-}
-
-function drawWheel() {
-  const wheelRadius = canvas.width / 2;
-  const centerX = wheelRadius;
-  const centerY = wheelRadius;
-  const arc = Math.PI * 2 / wheelOptions.length;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  for (let i = 0; i < wheelOptions.length; i++) {
-    const angle = i * arc + rotationAngle;
+function createSegments() {
+  segments.forEach((segment, index) => {
+    const segmentElement = document.createElement('div');
+    segmentElement.classList.add('segment');
     
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, wheelRadius, angle, angle + arc, false);
-    ctx.lineTo(centerX, centerY);
-    ctx.fillStyle = wheelColors[i % wheelColors.length];
-    ctx.fill();
-    ctx.closePath();
+    const rotation = segmentAngle * index;
+    const skewY = 90 - segmentAngle;
     
-    ctx.save();
-    ctx.fillStyle = 'white';
-    ctx.font = '16px sans-serif';
-    ctx.translate(
-      centerX + Math.cos(angle + arc / 2) * wheelRadius / 2,
-      centerY + Math.sin(angle + arc / 2) * wheelRadius / 2
-    );
-    ctx.rotate(angle + arc / 2 + Math.PI / 2);
-    ctx.fillText(wheelOptions[i], -ctx.measureText(wheelOptions[i]).width / 2, 0);
-    ctx.restore();
-  }
-
-  // Draw pointer
-  ctx.fillStyle = 'black';
-  ctx.beginPath();
-  ctx.moveTo(centerX + wheelRadius + 10, centerY);
-  ctx.lineTo(centerX + wheelRadius + 20, centerY - 10);
-  ctx.lineTo(centerX + wheelRadius + 20, centerY + 10);
-  ctx.closePath();
-  ctx.fill();
-}
-
-function spinWheel(duration) {
-  const start = performance.now();
-  const animationSpeed = 0.01; // Adjust for smoother spin
-
-  function animate(time) {
-    const timeFraction = (time - start) / duration;
+    segmentElement.style.transform = `rotate(${rotation}deg) skewY(-${skewY}deg)`;
+    segmentElement.style.backgroundColor = segment.color;
     
-    if (timeFraction < 1) {
-      rotationAngle += animationSpeed * (1 - timeFraction); //Ease out effect
-      drawWheel();
-      requestAnimationFrame(animate);
-    } else {
-      spinning = false;
-      rotationAngle %= (2 * Math.PI);
-      drawWheel();
-      determineResult();
-    }
-  }
-
-  requestAnimationFrame(animate);
+    const span = document.createElement('span');
+    span.textContent = segment.text;
+    span.style.transform = `skewY(${skewY}deg) rotate(${segmentAngle / 2}deg)`;
+    
+    segmentElement.appendChild(span);
+    wheel.appendChild(segmentElement);
+  });
 }
 
-function handleSpin() {
-  if (spinning) return;
+function spinWheel() {
+  if (isSpinning) return;
   
-  spinning = true;
-  resultDisplay.textContent = "";
-  spinButton.disabled = true;
-  spinWheel(3000); // 3 seconds spin duration
+  isSpinning = true;
+  spinBtn.disabled = true;
+  resultDiv.textContent = 'Đang quay...';
+  
+  const randomIndex = Math.floor(Math.random() * numSegments);
+  const targetRotationMidpoint = 360 - (randomIndex * segmentAngle + segmentAngle / 2);
+  const randomExtraSpins = 5;
+  const totalRotation = 360 * randomExtraSpins + targetRotationMidpoint;
+  const randomOffset = (Math.random() - 0.5) * (segmentAngle * 0.6);
+  const finalRotation = totalRotation + randomOffset;
+  
+  wheel.style.transition = 'transform 4s ease-out';
+  wheel.style.transform = `rotate(${finalRotation}deg)`;
+  
+  currentRotation = finalRotation % 360;
 }
 
-function determineResult() {
-  const winningAngle = rotationAngle % (2 * Math.PI);
-  const arc = Math.PI * 2 / wheelOptions.length;
-  let winningIndex = wheelOptions.length - 1 - Math.floor(winningAngle / arc);
+wheel.addEventListener('transitionend', () => {
+  if (!isSpinning) return;
   
-  if (winningIndex < 0) winningIndex = 0;
+  isSpinning = false;
+  spinBtn.disabled = false;
   
-  const result = wheelOptions[winningIndex];
-  resultDisplay.textContent = "You landed on: " + result;
-  spinButton.disabled = false;
-}
+  const normalizedRotation = currentRotation < 0 ? currentRotation + 360 : currentRotation;
+  const pointerAngle = 270;
+  const winningIndex = Math.floor(((360 - normalizedRotation + pointerAngle) % 360) / segmentAngle);
+  const finalWinningIndex = (winningIndex + numSegments) % numSegments;
+  const finalWinningSegment = segments[finalWinningIndex];
+  
+  resultDiv.textContent = `Chúc mừng! Bạn nhận được: ${finalWinningSegment.text}`;
+}, false);
 
-init();
+spinBtn.addEventListener('click', spinWheel);
+createSegments();
