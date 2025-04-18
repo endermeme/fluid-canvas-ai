@@ -9,7 +9,7 @@ export const GEMINI_API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 // Gemini Model configurations
 export const GEMINI_MODELS = {
-  CUSTOM_GAME: "gemini-2.0-flash",
+  CUSTOM_GAME: "gemini-2.5-pro-preview-03-25",
   PRESET_GAME: "gemini-2.5-pro-preview-03-25"
 };
 

@@ -28,7 +28,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro-preview-03-25" });
 
 interface PresetGameManagerProps {
   gameType: string;

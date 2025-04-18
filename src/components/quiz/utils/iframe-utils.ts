@@ -1,4 +1,3 @@
-
 export const enhanceIframeContent = (content: string, title?: string): string => {
   // Clean the content
   let processedContent = content.replace(/```html|```/g, '');
@@ -24,6 +23,9 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
   
   // Format HTML with proper indentation and line breaks
   processedContent = formatHtmlContent(processedContent);
+  
+  // Fix comments that might "eat" code
+  processedContent = fixInlineComments(processedContent);
   
   // Optimized CSS styles with proper formatting
   const optimizedStyles = `
@@ -318,6 +320,32 @@ const formatHtmlContent = (html: string): string => {
     return formattedHtml;
   } catch (error) {
     console.error('Error formatting HTML content:', error);
+    return html;
+  }
+};
+
+/**
+ * Tách comments và code thành các dòng riêng biệt để tránh lỗi comments "nuốt" code
+ */
+const fixInlineComments = (html: string): string => {
+  if (!html || typeof html !== 'string') return html;
+  
+  try {
+    // Tìm và sửa các dòng comment JavaScript
+    return html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (match, scriptContent) => {
+      // Tách comment và code thành các dòng riêng
+      let fixedScript = scriptContent.replace(/(\/\/[^\n]*)(let|const|var|function)/g, '$1\n$2');
+      
+      // Đảm bảo comment và khai báo biến được tách thành dòng riêng
+      fixedScript = fixedScript.replace(/(\/\/[^\n]*[\w\d]+)\s*=\s*/g, '$1\n$2 = ');
+      
+      // Sửa function easeOut có tham số đúng
+      fixedScript = fixedScript.replace(/function\s+easeOut\s*\(\$2\)\s*{/, 'function easeOut(t, b, c, d) {');
+      
+      return match.replace(scriptContent, fixedScript);
+    });
+  } catch (error) {
+    console.error('Error fixing inline comments:', error);
     return html;
   }
 };

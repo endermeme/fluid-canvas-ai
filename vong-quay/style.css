@@ -1,0 +1,108 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    overflow: hidden; /* Tránh scrollbar khi quay */
+}
+
+.wheel-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pointer {
+    position: absolute;
+    top: -30px; /* Điều chỉnh vị trí mũi tên */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 30px;
+    color: #e74c3c; /* Màu đỏ */
+    z-index: 10;
+    /* Animation nhỏ cho mũi tên nếu muốn */
+    /* animation: bounce 1s infinite ease-in-out; */
+}
+
+/* @keyframes bounce {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, -8px); }
+} */
+
+.wheel {
+    position: relative;
+    width: 350px; /* Kích thước vòng quay */
+    height: 350px;
+    border-radius: 50%;
+    border: 8px solid #34495e; /* Viền ngoài */
+    background-color: #ecf0f1; /* Màu nền dự phòng */
+    overflow: hidden; /* Cắt bỏ phần thừa của các segment */
+    transition: transform 4s ease-out; /* Thời gian và kiểu animation quay */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.segment {
+    position: absolute;
+    width: 50%; /* Chiếm nửa vòng tròn */
+    height: 50%; /* Chiếm nửa vòng tròn */
+    top: 0;
+    left: 50%;
+    transform-origin: 0% 100%; /* Quay quanh tâm dưới bên trái của segment (tức là tâm vòng tròn) */
+    display: flex;
+    justify-content: center; /* Căn giữa nội dung theo chiều ngang */
+    align-items: center; /* Căn giữa nội dung theo chiều dọc */
+    box-sizing: border-box;
+    padding-left: 30px; /* Đẩy text ra ngoài tâm */
+    border-left: 2px solid rgba(0, 0, 0, 0.1); /* Đường kẻ phân chia mờ */
+}
+
+.segment span {
+    display: block;
+    transform: rotate(90deg); /* Xoay chữ cho dễ đọc */
+    transform-origin: center center;
+    color: #333;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+    max-width: 80%; /* Giới hạn chiều rộng chữ */
+    white-space: nowrap; /* Ngăn chữ xuống dòng */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Thêm ... nếu chữ quá dài */
+}
+
+#spin-btn {
+    margin-top: 25px;
+    padding: 12px 25px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    background-color: #2980b9; /* Màu xanh dương */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+#spin-btn:hover {
+    background-color: #3498db;
+}
+
+#spin-btn:active {
+    transform: scale(0.95);
+}
+
+#spin-btn:disabled {
+    background-color: #bdc3c7; /* Màu xám khi bị vô hiệu hóa */
+    cursor: not-allowed;
+}
+
+#result {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #2c3e50;
+    min-height: 25px; /* Đảm bảo không bị nhảy layout khi chưa có kết quả */
+} 
