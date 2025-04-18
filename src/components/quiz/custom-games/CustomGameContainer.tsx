@@ -1,37 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Share2, Users, Clock, Copy, Check } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { QRCodeSVG } from 'qrcode.react';
 
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
+import ShareGameDialog from './components/ShareGameDialog';
+import CodeView from './components/CodeView';
+import ShareInfoView from './components/ShareInfoView';
 import { createGameSession } from '@/utils/gameParticipation';
 import { useToast } from '@/hooks/use-toast';
 
@@ -134,146 +109,32 @@ const CustomGameContainer: React.FC<CustomGameContainerProps> = ({
         </TabsContent>
         
         <TabsContent value="share" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
-          <div className="max-w-md mx-auto space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Chia sẻ game</CardTitle>
-                <CardDescription>
-                  Chia sẻ game này với bạn bè để họ có thể tham gia chơi
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-center p-4 bg-white rounded-lg">
-                  <QRCodeSVG value={shareUrl} size={200} />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="share-link">Liên kết chia sẻ</Label>
-                  <div className="flex">
-                    <Input 
-                      id="share-link" 
-                      value={shareUrl} 
-                      readOnly 
-                      className="rounded-r-none"
-                    />
-                    <Button 
-                      variant="outline" 
-                      className="rounded-l-none"
-                      onClick={handleCopyLink}
-                    >
-                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full">
-                  <Users className="h-4 w-4 mr-2" />
-                  Tham gia game
-                </Button>
-              </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Thông tin game</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tiêu đề:</span>
-                  <span className="font-medium">{miniGame.title}</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <ShareInfoView
+            shareUrl={shareUrl}
+            copied={copied}
+            onCopyLink={handleCopyLink}
+            title={miniGame.title}
+          />
         </TabsContent>
         
         {isSeparatedFiles && (
           <TabsContent value="code" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
-            <div className="max-w-4xl mx-auto space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Code Game</CardTitle>
-                  <CardDescription>
-                    Code của game được tách thành các phần HTML, CSS và JavaScript
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <Tabs defaultValue="html">
-                    <TabsList className="mb-4">
-                      <TabsTrigger value="html">HTML</TabsTrigger>
-                      <TabsTrigger value="css">CSS</TabsTrigger>
-                      <TabsTrigger value="js">JavaScript</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="html">
-                      <pre className="p-4 bg-gray-100 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
-                        <code>{miniGame.htmlContent}</code>
-                      </pre>
-                    </TabsContent>
-                    
-                    <TabsContent value="css">
-                      <pre className="p-4 bg-gray-100 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
-                        <code>{miniGame.cssContent}</code>
-                      </pre>
-                    </TabsContent>
-                    
-                    <TabsContent value="js">
-                      <pre className="p-4 bg-gray-100 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
-                        <code>{miniGame.jsContent}</code>
-                      </pre>
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-                <CardFooter>
-                  <div className="text-sm text-muted-foreground">
-                    Bạn có thể sao chép code để sử dụng trong các dự án khác.
-                  </div>
-                </CardFooter>
-              </Card>
-            </div>
+            <CodeView
+              htmlContent={miniGame.htmlContent}
+              cssContent={miniGame.cssContent}
+              jsContent={miniGame.jsContent}
+            />
           </TabsContent>
         )}
       </Tabs>
       
-      {/* Dialog for entering player name */}
-      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Chia sẻ game</DialogTitle>
-            <DialogDescription>
-              Sao chép hoặc quét mã QR để chia sẻ game này với bạn bè
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col items-center space-y-4 py-4">
-            <div className="p-4 bg-white rounded-lg">
-              <QRCodeSVG value={shareUrl} size={200} />
-            </div>
-            
-            <div className="w-full space-y-2">
-              <Label htmlFor="share-link">Liên kết chia sẻ</Label>
-              <div className="flex">
-                <Input 
-                  id="share-link" 
-                  value={shareUrl} 
-                  readOnly 
-                  className="rounded-r-none"
-                />
-                <Button 
-                  variant="outline" 
-                  className="rounded-l-none"
-                  onClick={handleCopyLink}
-                >
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setShowShareDialog(false)}>Đóng</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ShareGameDialog
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+        shareUrl={shareUrl}
+        copied={copied}
+        onCopyLink={handleCopyLink}
+      />
     </QuizContainer>
   );
 };
