@@ -2,25 +2,22 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { parseCodeBlocks } from '../utils/code-block-parser';
 
 interface CodeViewProps {
-  htmlContent?: string;
-  cssContent?: string;
-  jsContent?: string;
+  content: string;
 }
 
-const CodeView: React.FC<CodeViewProps> = ({
-  htmlContent,
-  cssContent,
-  jsContent,
-}) => {
+const CodeView: React.FC<CodeViewProps> = ({ content }) => {
+  const parsedCode = parseCodeBlocks(content);
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Code Game</CardTitle>
+          <CardTitle>{parsedCode.title || "Code Game"}</CardTitle>
           <CardDescription>
-            Code của game được tách thành các phần HTML, CSS và JavaScript
+            {parsedCode.description || "Code của game được tách thành các phần HTML, CSS và JavaScript"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -33,19 +30,19 @@ const CodeView: React.FC<CodeViewProps> = ({
             
             <TabsContent value="html">
               <pre className="p-4 bg-gray-100 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
-                <code>{htmlContent}</code>
+                <code>{parsedCode.html || "No HTML content"}</code>
               </pre>
             </TabsContent>
             
             <TabsContent value="css">
               <pre className="p-4 bg-gray-100 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
-                <code>{cssContent}</code>
+                <code>{parsedCode.css || "No CSS content"}</code>
               </pre>
             </TabsContent>
             
             <TabsContent value="js">
               <pre className="p-4 bg-gray-100 rounded-md overflow-auto max-h-[500px] text-sm font-mono">
-                <code>{jsContent}</code>
+                <code>{parsedCode.javascript || "No JavaScript content"}</code>
               </pre>
             </TabsContent>
           </Tabs>

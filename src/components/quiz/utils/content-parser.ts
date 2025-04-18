@@ -1,4 +1,3 @@
-
 /**
  * Utilities for parsing game content
  */
@@ -32,36 +31,21 @@ export const parseJsonContent = (content: string): GameStructure | null => {
 /**
  * Parses content as markdown-style blocks
  */
+import { parseCodeBlocks, ParsedCode } from './code-block-parser';
+
 export const parseMarkdownContent = (content: string): GameStructure | null => {
   try {
-    const hasCssSection = content.includes('css ');
-    const hasJsSection = content.includes('js ');
+    const parsedCode: ParsedCode = parseCodeBlocks(content);
     
-    let htmlContent = content;
-    let cssContent = '';
-    let jsContent = '';
-    
-    if (hasCssSection || hasJsSection) {
-      const sections = content.split(/\s*(css|js)\s+/);
-      
-      if (sections.length >= 1) {
-        htmlContent = sections[0].trim();
-      }
-      
-      for (let i = 1; i < sections.length; i += 2) {
-        if (i + 1 < sections.length) {
-          if (sections[i] === 'css') {
-            cssContent = sections[i + 1].trim();
-          } else if (sections[i] === 'js') {
-            jsContent = sections[i + 1].trim();
-          }
-        }
-      }
-      
+    if (parsedCode.html || parsedCode.css || parsedCode.javascript) {
       return {
-        html: htmlContent,
-        css: cssContent,
-        javascript: jsContent
+        html: parsedCode.html,
+        css: parsedCode.css,
+        javascript: parsedCode.javascript,
+        meta: {
+          title: parsedCode.title,
+          description: parsedCode.description
+        }
       };
     }
   } catch (e) {
