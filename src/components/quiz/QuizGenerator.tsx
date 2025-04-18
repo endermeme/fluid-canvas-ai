@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { AIGameGenerator } from './generator/AIGameGenerator';
 import { MiniGame } from './generator/types';
 import GameLoading from './GameLoading';
 import GameError from './GameError';
@@ -13,7 +11,7 @@ import { createGameSession } from '@/utils/gameParticipation';
 import { Button } from '@/components/ui/button';
 import { Share2 } from 'lucide-react';
 import { GEMINI_API_KEY, GEMINI_MODELS } from '@/constants/api-constants';
-import { supabase } from '@/integrations/supabase/client';
+import { tryGeminiGeneration } from './generator/geminiGenerator';
 
 interface QuizGeneratorProps {
   topic?: string;
@@ -44,8 +42,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
   
   useEffect(() => {
     localStorage.setItem('canvas_mode', 'true');
-    gameGenerator.setCanvasMode(true);
-  }, [gameGenerator]);
+  }, []);
 
   useImperativeHandle(ref, () => ({
     generateQuiz: (topic: string, settings?: GameSettingsData) => {
@@ -116,7 +113,7 @@ const QuizGenerator = forwardRef<{ generateQuiz: (topic: string, settings?: Game
     console.log("Using model:", GEMINI_MODELS.CUSTOM_GAME);
 
     try {      
-      const game = await gameGenerator.generateMiniGame(topic, settings);
+      const game = await tryGeminiGeneration(null, topic, settings);
       
       if (game) {
         console.log("Minigame generated successfully:", game.title);
