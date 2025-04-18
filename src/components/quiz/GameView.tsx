@@ -1,11 +1,9 @@
-
 import React, { useEffect, useRef, useState } from 'react';
-import { MiniGame } from './generator/types'; // Fixed import from types.ts instead of AIGameGenerator
+import { MiniGame } from './generator/types';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { enhanceIframeContent } from './utils/iframe-utils';
-import GameViewHeader from './components/GameViewHeader';
 import GameContainer from './components/GameContainer';
 
 interface GameViewProps {
@@ -143,15 +141,6 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      <GameViewHeader
-        onBack={handleBackToHome}
-        onReload={handleReloadGame}
-        onShare={handleShare}
-        score={gameStats.score}
-        shareInProgress={shareInProgress}
-        extraButton={extraButton}
-      />
-      
       <GameContainer
         iframeRef={iframeRef}
         content={enhancedContent}
