@@ -20,6 +20,7 @@ export interface APISettings {
 }
 
 export interface GameGenerationOptions {
+  useCanvas?: boolean;
   difficulty?: string;
   language?: string;
   timeLimit?: number;

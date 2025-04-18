@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
@@ -7,6 +6,7 @@ import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
+import { Share2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createGameSession } from '@/utils/gameParticipation';
 import QuizContainer from '../QuizContainer';
@@ -27,42 +27,32 @@ const GameController: React.FC<GameControllerProps> = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const handleGameGeneration = async (content: string, game?: MiniGame) => {
+  const handleGameGeneration = (content: string, game?: MiniGame) => {
     setCurrentTopic(content);
-    setIsGenerating(true);
     
     if (game) {
       setCurrentGame(game);
       setShowForm(false);
-      if (onGameGenerated) onGameGenerated(game);
-      setIsGenerating(false);
-      return;
+      
+      if (onGameGenerated) {
+        onGameGenerated(game);
+      }
+      
+      toast({
+        title: "Minigame Đã Sẵn Sàng",
+        description: `Minigame "${game.title || content}" đã được tạo thành công.`,
+      });
     }
     
-    try {
-      const gameGenerator = new AIGameGenerator();
-      const generatedGame = await gameGenerator.generateMiniGame(content);
-      
-      if (generatedGame) {
-        setCurrentGame(generatedGame);
-        setShowForm(false);
-        if (onGameGenerated) onGameGenerated(generatedGame);
-        toast({
-          title: "Game Đã Sẵn Sàng",
-          description: `Game "${generatedGame.title || content}" đã được tạo thành công.`,
-        });
-      } else {
-        throw new Error("Không thể tạo game");
-      }
-    } catch (error) {
-      console.error("Error generating game:", error);
-      toast({
-        title: "Lỗi Tạo Game",
-        description: "Đã xảy ra lỗi khi tạo game. Vui lòng thử lại.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
+    setIsGenerating(false);
+  };
+
+  const handleBack = () => {
+    if (currentGame) {
+      setCurrentGame(null);
+      setShowForm(true);
+    } else {
+      navigate('/');
     }
   };
 
@@ -76,64 +66,78 @@ const GameController: React.FC<GameControllerProps> = ({
     
     try {
       const gameSession = await createGameSession(
-        currentGame.title || "Game Tương Tác",
+        currentGame.title || "Minigame tương tác",
         currentGame.content
       );
       
       navigate(`/game/${gameSession.id}`);
+      
       toast({
         title: "Game đã được chia sẻ",
         description: "Bạn có thể gửi link cho người khác để họ tham gia.",
       });
     } catch (error) {
       console.error("Error sharing game:", error);
-      toast({
-        title: "Lỗi chia sẻ",
-        description: "Đã xảy ra lỗi khi chia sẻ game.",
-        variant: "destructive"
-      });
     }
   };
 
-  const handleBack = () => {
-    navigate('/');
-  };
-
   const getContainerTitle = () => {
-    if (isGenerating) return `Đang tạo game: ${currentTopic}`;
-    if (currentGame) return currentGame.title || "Game Tương Tác";
+    if (isGenerating) {
+      return `Đang tạo game: ${currentTopic}`;
+    }
+    if (currentGame) {
+      return currentGame.title || "Minigame Tương Tác";
+    }
     return "Tạo Game Tùy Chỉnh";
   };
 
   const renderContent = () => {
     if (isGenerating) {
       return <GameLoading topic={currentTopic} />;
-    }
+    } 
     
     if (currentGame) {
       return (
-        <EnhancedGameView 
-          miniGame={{
-            title: currentGame.title || "Game Tương Tác",
-            content: currentGame.content || ""
-          }} 
-          onBack={handleBack}
-          onNewGame={handleNewGame}
-          onShare={handleShareGame}
-        />
+        <div className="w-full h-full">
+          <EnhancedGameView 
+            miniGame={{
+              title: currentGame.title || "Minigame Tương Tác",
+              content: currentGame.content || ""
+            }} 
+            onBack={handleBack}
+            onNewGame={handleNewGame}
+            onShare={handleShareGame}
+          />
+        </div>
       );
-    }
+    } 
     
     if (showForm) {
       return (
         <CustomGameForm 
-          onGenerate={(content, game) => handleGameGeneration(content, game)}
-          onCancel={handleBack}
+          onGenerate={(content, game) => {
+            setIsGenerating(true);
+            setTimeout(() => handleGameGeneration(content, game), 500);
+          }}
+          onCancel={() => navigate('/')}
         />
       );
     }
     
-    return null;
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
+        <div className="p-6 bg-background/90 rounded-xl shadow-lg border border-primary/10 max-w-md w-full">
+          <p className="text-center mb-4">Không có nội dung trò chơi. Vui lòng tạo mới.</p>
+          <Button 
+            onClick={handleNewGame} 
+            className="w-full"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Tạo Game Mới
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   return (

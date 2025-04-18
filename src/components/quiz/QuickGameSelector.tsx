@@ -1,9 +1,15 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { AIGameGenerator } from './generator/AIGameGenerator';
 import { MiniGame } from './generator/types';
-import { GameType } from './types';
+import GameLoading from './GameLoading';
+import GameError from './GameError';
+import GameView from './GameView';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import GameSettings from './GameSettings';
+import { GameSettingsData, GameType } from './types';
 import { gameTypes } from './gameTypes';
+import { animateBlockCreation } from '@/lib/animations';
 import { 
   BrainCircuit, 
   Puzzle, 
@@ -21,7 +27,7 @@ import {
   RotateCcw, 
   Layers, 
   FlaskConical, 
-  ImageIcon, 
+  ImageIcon as Image, 
   Shuffle, 
   Check, 
   X, 
@@ -29,12 +35,18 @@ import {
   Zap, 
   Target, 
   Plane, 
-  ArrowUpDown, 
+  ArrowUpDown as SortAsc, 
   Calculator, 
   BadgeDollarSign, 
   Blocks, 
   Gamepad
 } from 'lucide-react';
+
+import GameHeader from './quick-game-selector/GameHeader';
+import CustomGameForm from './quick-game-selector/CustomGameForm';
+import GameGrid from './quick-game-selector/GameGrid';
+
+const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
 interface QuickGameSelectorProps {
   onGameRequest: (topic: string) => void;
@@ -42,10 +54,28 @@ interface QuickGameSelectorProps {
 }
 
 const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, onToggleChat }) => {
+  const [selectedGame, setSelectedGame] = useState<MiniGame | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<string>("");
+  const [showSettings, setShowSettings] = useState(false);
   const { toast } = useToast();
+  
+  const gameGenerator = AIGameGenerator.getInstance();
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentGameType, setCurrentGameType] = useState<GameType | null>(null);
+  
+  useEffect(() => {
+    const gameButtons = containerRef.current?.querySelectorAll('.game-button');
+    gameButtons?.forEach((button, index) => {
+      setTimeout(() => {
+        if (button instanceof HTMLElement) {
+          animateBlockCreation(button);
+        }
+      }, index * 40); // Faster animation for more items
+    });
+  }, []);
 
   const getIconComponent = (iconName: string) => {
     switch(iconName) {
@@ -65,7 +95,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
       case 'rotate-ccw': return <RotateCcw size={28} />;
       case 'layers': return <Layers size={28} />;
       case 'flask-conical': return <FlaskConical size={28} />;
-      case 'image': return <ImageIcon size={28} />;
+      case 'image': return <Image size={28} />;
       case 'shuffle': return <Shuffle size={28} />;
       case 'check': return <Check size={28} />;
       case 'x-mark': return <X size={28} />;
@@ -73,7 +103,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
       case 'zap': return <Zap size={28} />;
       case 'target': return <Target size={28} />;
       case 'plane': return <Plane size={28} />;
-      case 'sort-asc': return <ArrowUpDown size={28} />;
+      case 'sort-asc': return <SortAsc size={28} />;
       case 'calculator': return <Calculator size={28} />;
       case 'badge-dollar-sign': return <BadgeDollarSign size={28} />;
       case 'blocks': return <Blocks size={28} />;
@@ -84,38 +114,99 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
   const handleTopicSelect = (gameType: GameType) => {
     setSelectedTopic(gameType.description);
     setCurrentGameType(gameType);
-    toast({
-      title: "Game Selection",
-      description: `Selected game: ${gameType.name}`,
-    });
+    setShowSettings(true);
   };
 
   const handleCustomGameCreate = () => {
     onToggleChat();
   };
+  
+  const handleStartGame = async (settings: GameSettingsData) => {
+    setShowSettings(false);
+    if (!selectedTopic) return;
+    
+    setIsLoading(true);
+    setErrorMessage(null);
+    
+    try {
+      const game = await gameGenerator.generateMiniGame(selectedTopic, settings);
+      
+      if (game) {
+        setSelectedGame(game);
+        toast({
+          title: "Minigame Đã Sẵn Sàng",
+          description: `Đã tạo minigame về "${currentGameType?.name || selectedTopic}"`,
+        });
+      } else {
+        throw new Error('Không thể tạo minigame');
+      }
+    } catch (error) {
+      console.error('Lỗi Tạo Minigame:', error);
+      setErrorMessage('Không thể tạo minigame. Vui lòng thử lại hoặc chọn chủ đề khác.');
+      toast({
+        title: "Lỗi Tạo Minigame",
+        description: "Có vấn đề khi tạo minigame. Vui lòng thử lại với chủ đề khác.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancelSettings = () => {
+    setShowSettings(false);
+    setSelectedTopic("");
+    setCurrentGameType(null);
+  };
+
+  if (isLoading) {
+    return <GameLoading topic={selectedTopic || currentGameType?.name || "minigame"} />;
+  }
+
+  if (errorMessage) {
+    return <GameError 
+      errorMessage={errorMessage} 
+      onRetry={() => setErrorMessage(null)} 
+      topic="minigame" 
+    />;
+  }
+
+  if (selectedGame) {
+    return (
+      <div className="h-full relative">
+        <GameView miniGame={selectedGame} />
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} className="flex flex-col items-center h-full w-full bg-gradient-to-b from-background to-background/80 p-4 md:p-6 overflow-auto">
-      <div className="w-full max-w-4xl mb-6">
-        <h1 className="text-3xl font-bold mb-2 text-center">Game Selection</h1>
-        <p className="text-muted-foreground text-center mb-6">Choose from our curated selection of educational games</p>
-      </div>
+      <GameHeader onTitleClick={() => {}} />
+
+      <CustomGameForm 
+        onCustomGameCreate={handleCustomGameCreate}
+        onGameRequest={onGameRequest}
+      />
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-4xl">
-        {gameTypes.map((gameType) => (
-          <button
-            key={gameType.id}
-            className="game-button flex flex-col items-center justify-center p-4 bg-card hover:bg-card/80 rounded-xl border border-border shadow hover:shadow-md transition-all duration-200"
-            onClick={() => handleTopicSelect(gameType)}
-          >
-            <div className="w-14 h-14 flex items-center justify-center rounded-full bg-primary/10 mb-3">
-              {getIconComponent(gameType.icon)}
-            </div>
-            <h3 className="font-medium text-lg mb-1">{gameType.name}</h3>
-            <p className="text-xs text-muted-foreground text-center">{gameType.description}</p>
-          </button>
-        ))}
-      </div>
+      <GameGrid 
+        gameTypes={gameTypes} 
+        onTopicSelect={handleTopicSelect} 
+        getIconComponent={getIconComponent}
+      />
+      
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-lg border-white/20">
+          <DialogTitle>Điều chỉnh game {currentGameType?.name || ""}</DialogTitle>
+          <GameSettings 
+            topic={selectedTopic}
+            onStart={handleStartGame}
+            initialSettings={currentGameType?.defaultSettings}
+            onCancel={handleCancelSettings}
+            inModal={true}
+            gameType={currentGameType}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

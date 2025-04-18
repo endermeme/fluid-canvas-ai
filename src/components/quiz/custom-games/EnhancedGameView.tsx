@@ -1,9 +1,8 @@
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import GameContainer from '../components/GameContainer';
 import { enhanceIframeContent } from '../utils/iframe-utils';
 
 interface EnhancedGameViewProps {
@@ -29,6 +28,32 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const [iframeError, setIframeError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (iframeRef.current && miniGame?.content) {
+      try {
+        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
+        iframeRef.current.srcdoc = enhancedContent;
+        setIframeError(null);
+      } catch (error) {
+        console.error("Error setting iframe content:", error);
+        setIframeError("Không thể tải nội dung game. Vui lòng thử lại.");
+      }
+    }
+  }, [miniGame]);
+
+  const refreshGame = () => {
+    if (iframeRef.current && miniGame?.content) {
+      try {
+        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
+        iframeRef.current.srcdoc = enhancedContent;
+        setIframeError(null);
+      } catch (error) {
+        console.error("Error refreshing game:", error);
+        setIframeError("Không thể tải lại game. Vui lòng thử lại.");
+      }
+    }
+  };
+
+  useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
@@ -47,20 +72,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         });
       } else {
         document.exitFullscreen();
-      }
-    }
-  };
-
-  const refreshGame = () => {
-    setIframeError(null);
-    // This forces the iframe to reload the content
-    if (iframeRef.current) {
-      try {
-        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
-        iframeRef.current.srcdoc = enhancedContent;
-      } catch (error) {
-        console.error("Error refreshing game:", error);
-        setIframeError("Không thể tải lại game. Vui lòng thử lại.");
       }
     }
   };
@@ -131,13 +142,33 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         </div>
       </div>
       
-      <GameContainer
-        iframeRef={iframeRef}
-        content={miniGame.content}
-        title={miniGame.title}
-        error={iframeError}
-        onReload={refreshGame}
-      />
+      <div className="flex-1 relative overflow-hidden">
+        {iframeError ? (
+          <div className="flex flex-col items-center justify-center h-full p-6 bg-destructive/10">
+            <p className="text-destructive mb-4">{iframeError}</p>
+            <Button 
+              variant="outline" 
+              onClick={refreshGame}
+            >
+              <RefreshCw className="h-4 w-4 mr-1.5" />
+              Tải lại
+            </Button>
+          </div>
+        ) : (
+          <iframe
+            ref={iframeRef}
+            className="w-full h-full"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
+            title={miniGame.title || "Minigame"}
+            style={{
+              border: 'none',
+              display: 'block',
+              width: '100%',
+              height: '100%'
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };

@@ -13,7 +13,7 @@ import {
   DEFAULT_GENERATION_SETTINGS 
 } from '@/constants/api-constants';
 import { buildGeminiPrompt } from './promptBuilder';
-import { processGeminiHtml } from './direct-html-parser';
+import { generateCustomGamePrompt } from './customGamePrompt';
 
 const SOURCE = "GEMINI";
 
@@ -40,25 +40,21 @@ export const generateWithGemini = async (
     category: settings?.category || 'general'
   };
 
-  // Add instructions for direct HTML generation
-  const directHtmlInstructions = `
-IMPORTANT INSTRUCTIONS:
-Create a complete interactive game about "${topic}" using HTML, CSS, and JavaScript. 
-The output should be a fully functional HTML page that can be loaded directly in a browser.
-
-Your response should follow this format:
-1. Generate HTML with embedded CSS and JavaScript (no need to separate them into different files)
-2. Do not include any explanations or markdown - ONLY provide the HTML code
-3. Make sure the game is responsive and works on different screen sizes
-4. Add proper error handling in JavaScript code
-5. Make the game visually appealing with CSS
-6. Ensure the game is interactive and engaging
-
-Remember to include DOCTYPE, html, head, and body tags in your response.
+  // Add enhanced instructions for proper code formatting to the prompt
+  const formattingInstructions = `
+IMPORTANT CODE FORMATTING INSTRUCTIONS:
+1. Provide well-formatted, properly indented HTML, CSS, and JavaScript code
+2. Use proper indentation with appropriate line breaks between HTML tags
+3. Keep JavaScript functions well-structured with proper spacing and line breaks
+4. Format CSS with proper spacing, indentation, and line breaks
+5. Ensure closing brackets and parentheses are properly aligned
+6. Use descriptive variable and function names
+7. Add comments to explain complex logic
+8. Remember that well-structured code is essential for the game to function correctly
 `;
 
-  // Generate prompt
-  const prompt = buildGeminiPrompt(topic) + directHtmlInstructions;
+  // Generate prompt with formatting instructions
+  const prompt = generateCustomGamePrompt(promptOptions) + formattingInstructions;
 
   try {
     logInfo(SOURCE, `Sending request to Gemini API`);
@@ -101,25 +97,65 @@ Remember to include DOCTYPE, html, head, and body tags in your response.
     const duration = measureExecutionTime(startTime);
     logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
     
-    console.log('%c Generated Game HTML:', 'font-weight: bold; color: #6f42c1;');
-    console.log(text.substring(0, 500) + '...');
+    console.log('%c Generated Game Code:', 'font-weight: bold; color: #6f42c1;');
+    console.log(text);
     
-    // Process the HTML directly without separating files
-    const miniGame = processGeminiHtml(text);
+    let title = topic;
+    const titleMatch = text.match(/<title>(.*?)<\/title>/i) || 
+                      text.match(/<h1[^>]*>(.*?)<\/h1>/i);
+    
+    if (titleMatch && titleMatch[1]) {
+      title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
+    }
+    
+    let content = text;
+    
+    if (!content.trim().startsWith('<!DOCTYPE') && !content.trim().startsWith('<html')) {
+      const htmlMatch = text.match(/<!DOCTYPE[\s\S]*<\/html>/i) || 
+                        text.match(/<html[\s\S]*<\/html>/i);
+      
+      if (htmlMatch && htmlMatch[0]) {
+        content = htmlMatch[0];
+      }
+    }
+    
+    content = sanitizeGameCode(content);
+    
+    const game: MiniGame = {
+      title: title,
+      content: content,
+      useCanvas: useCanvas
+    };
     
     logSuccess(SOURCE, "Game generated successfully");
     
-    return miniGame;
+    return game;
   } catch (error) {
     logError(SOURCE, "Error generating with Gemini", error);
     throw error;
   }
 };
 
-// Sanitize game code to ensure it works properly
 const sanitizeGameCode = (content: string): string => {
   let sanitized = content;
   
+  // Basic code cleanup while preserving line breaks and formatting
+  sanitized = sanitized
+    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+    .replace(/\/\/[^\n]*/g, '') // Remove single-line comments
+    .trim();
+  
+  // Fix common JavaScript issues while preserving formatting
+  sanitized = sanitized.replace(
+    /requestAnimationFrame\s*\(\s*\)/g, 
+    'requestAnimationFrame(gameLoop)'
+  );
+  
+  sanitized = sanitized.replace(
+    /addEventListener\s*\(\s*['"]([^'"]+)['"]\s*,\s*([^,)]+)\s*\)/g,
+    'addEventListener("$1", $2)'
+  );
+
   // Add error handling script while preserving formatting
   if (!sanitized.includes('window.onerror')) {
     sanitized = sanitized.replace(
@@ -139,7 +175,6 @@ const sanitizeGameCode = (content: string): string => {
   return sanitized;
 };
 
-// Retry mechanism for Gemini API calls
 export const tryGeminiGeneration = async (
   model: any,
   topic: string, 
