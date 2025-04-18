@@ -1,19 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { GameSettingsData, GameType } from './types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { 
-  Gamepad, BrainCircuit, Puzzle, Lightbulb, Clock4, Dices, 
-  HeartHandshake, PenTool, Timer, Trophy, Clock, Medal, Type
-} from 'lucide-react';
+import { Gamepad, BrainCircuit, Puzzle, Lightbulb, Clock4, Dices, HeartHandshake, PenTool } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { animateToolbarAppear } from '@/lib/animations';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 
 interface GameSettingsProps {
   onStart: (settings: GameSettingsData) => void;
@@ -40,10 +34,6 @@ const GameSettings = ({
     questionCount: 10,
     timePerQuestion: 30,
     category: 'general',
-    totalTime: 0,
-    bonusTime: 0,
-    useTimer: true,
-    prompt: topic || ''
   });
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -52,13 +42,6 @@ const GameSettings = ({
       setSettings(initialSettings);
     }
   }, [initialSettings]);
-
-  useEffect(() => {
-    // Update prompt in settings when topic changes
-    if (topic && topic !== settings.prompt) {
-      setSettings(prev => ({ ...prev, prompt: topic }));
-    }
-  }, [topic, settings.prompt]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -72,21 +55,6 @@ const GameSettings = ({
 
   const handleSelectChange = (name: keyof GameSettingsData, value: string) => {
     setSettings(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSwitchChange = (name: keyof GameSettingsData, checked: boolean) => {
-    setSettings(prev => ({ ...prev, [name]: checked }));
-  };
-
-  const handleInputChange = (name: keyof GameSettingsData, value: string) => {
-    if (name === 'prompt') {
-      setSettings(prev => ({ ...prev, prompt: value }));
-    } else {
-      const numValue = parseInt(value);
-      if (!isNaN(numValue)) {
-        setSettings(prev => ({ ...prev, [name]: numValue }));
-      }
-    }
   };
 
   useEffect(() => {
@@ -164,7 +132,7 @@ const GameSettings = ({
       ref={containerRef} 
       className={`${inDrawer || inModal ? '' : 'h-full w-full'} flex flex-col items-center justify-center py-4 ${inModal ? 'px-1' : 'px-4'}`}
     >
-      <Card className="w-full max-w-md bg-background/60 backdrop-blur-sm border-primary/20 p-6 shadow-lg">
+      <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-6 relative">
           <div className="absolute inset-0 blur-2xl bg-primary/10 rounded-full opacity-70"></div>
           <div className="z-10 flex flex-col items-center">
@@ -177,24 +145,21 @@ const GameSettings = ({
           </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Prompt Input - Replace Category */}
-          <div className="space-y-3">
-            <Label htmlFor="prompt" className="flex items-center gap-2 text-base font-medium">
-              <Type className="h-4 w-4 text-primary" /> Nội dung trò chơi
-            </Label>
-            <Textarea
-              id="prompt"
-              value={settings.prompt || ''}
-              onChange={(e) => handleInputChange('prompt', e.target.value)}
-              placeholder="Nhập nội dung chi tiết cho trò chơi (ví dụ: Từ vựng tiếng Anh về động vật)"
-              className="min-h-[100px] border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20"
-            />
+        {topic && (
+          <div className="mb-6 text-center">
+            <div className="inline-block px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/20 to-primary/5 backdrop-blur-sm">
+              <h3 className="text-lg font-medium">{topic}</h3>
+            </div>
+            {gameType?.description && (
+              <p className="text-sm text-muted-foreground mt-2">{gameType.description}</p>
+            )}
           </div>
-          
+        )}
+
+        <div className="space-y-6 backdrop-blur-sm bg-card/30 rounded-xl p-5 border border-primary/10">
           <div className="space-y-3">
             <Label htmlFor="difficulty" className="flex items-center gap-2 text-base font-medium">
-              <Trophy className="h-4 w-4 text-primary" /> Độ Khó
+              Độ Khó
             </Label>
             <Select 
               value={settings.difficulty} 
@@ -213,9 +178,7 @@ const GameSettings = ({
 
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <Label htmlFor="questionCount" className="text-base font-medium flex items-center gap-2">
-                <Medal className="h-4 w-4 text-primary" /> {getCountLabel()}
-              </Label>
+              <Label htmlFor="questionCount" className="text-base font-medium">{getCountLabel()}</Label>
               <span className="px-3 py-1 bg-primary/10 rounded-full text-sm font-medium">{settings.questionCount}</span>
             </div>
             <Slider 
@@ -229,69 +192,45 @@ const GameSettings = ({
             />
           </div>
 
-          <div className="flex items-center space-x-2 pb-2">
-            <Switch 
-              id="useTimer" 
-              checked={settings.useTimer !== false}
-              onCheckedChange={(checked) => handleSwitchChange('useTimer', checked)} 
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="timePerQuestion" className="text-base font-medium">{getTimeLabel()}</Label>
+              <span className="px-3 py-1 bg-primary/10 rounded-full text-sm font-medium">{settings.timePerQuestion} giây</span>
+            </div>
+            <Slider 
+              id="timePerQuestion"
+              min={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 10} 
+              max={gameType?.id === 'reflex' ? 10 : (gameType?.id === 'drawing' ? 120 : 60)} 
+              step={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 5} 
+              value={[settings.timePerQuestion]} 
+              onValueChange={(value) => handleSliderChange('timePerQuestion', value)}
+              className="cursor-pointer"
             />
-            <Label htmlFor="useTimer" className="text-base font-medium flex items-center gap-2">
-              <Timer className="h-4 w-4 text-primary" /> Sử dụng bộ đếm thời gian
-            </Label>
           </div>
 
-          {settings.useTimer !== false && (
-            <>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="timePerQuestion" className="text-base font-medium flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-primary" /> {getTimeLabel()}
-                  </Label>
-                  <span className="px-3 py-1 bg-primary/10 rounded-full text-sm font-medium">{settings.timePerQuestion} giây</span>
-                </div>
-                <Slider 
-                  id="timePerQuestion"
-                  min={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 10} 
-                  max={gameType?.id === 'reflex' ? 10 : (gameType?.id === 'drawing' ? 120 : 60)} 
-                  step={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 5} 
-                  value={[settings.timePerQuestion]} 
-                  onValueChange={(value) => handleSliderChange('timePerQuestion', value)}
-                  className="cursor-pointer"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
-                    <Clock4 className="h-4 w-4 text-primary" /> Tổng thời gian (giây)
-                  </Label>
-                  <Input
-                    id="totalTime"
-                    type="number"
-                    min="0"
-                    placeholder="0 = không giới hạn"
-                    value={settings.totalTime || 0}
-                    onChange={(e) => handleInputChange('totalTime', e.target.value)}
-                    className="border-primary/20 bg-white/50 focus-visible:ring-primary/30"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="bonusTime" className="text-sm font-medium flex items-center gap-2">
-                    <Timer className="h-4 w-4 text-primary" /> Thời gian thưởng (giây)
-                  </Label>
-                  <Input
-                    id="bonusTime"
-                    type="number"
-                    min="0"
-                    placeholder="Thời gian thưởng mỗi câu"
-                    value={settings.bonusTime || 0}
-                    onChange={(e) => handleInputChange('bonusTime', e.target.value)}
-                    className="border-primary/20 bg-white/50 focus-visible:ring-primary/30"
-                  />
-                </div>
-              </div>
-            </>
+          {(!gameType || !(gameType.id === 'memory' || gameType.id === 'drawing' || gameType.id === 'reflex')) && (
+            <div className="space-y-3">
+              <Label htmlFor="category" className="flex items-center gap-2 text-base font-medium">
+                Thể Loại
+              </Label>
+              <Select 
+                value={settings.category} 
+                onValueChange={(value) => handleSelectChange('category', value)}
+              >
+                <SelectTrigger className="rounded-lg border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20">
+                  <SelectValue placeholder="Chọn thể loại" />
+                </SelectTrigger>
+                <SelectContent className="rounded-lg border-primary/20 bg-white/95 backdrop-blur-lg shadow-lg">
+                  <SelectItem value="general" className="cursor-pointer focus:bg-primary/10">Kiến thức chung</SelectItem>
+                  <SelectItem value="history" className="cursor-pointer focus:bg-primary/10">Lịch sử</SelectItem>
+                  <SelectItem value="science" className="cursor-pointer focus:bg-primary/10">Khoa học</SelectItem>
+                  <SelectItem value="geography" className="cursor-pointer focus:bg-primary/10">Địa lý</SelectItem>
+                  <SelectItem value="arts" className="cursor-pointer focus:bg-primary/10">Nghệ thuật</SelectItem>
+                  <SelectItem value="sports" className="cursor-pointer focus:bg-primary/10">Thể thao</SelectItem>
+                  <SelectItem value="math" className="cursor-pointer focus:bg-primary/10">Toán học</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           )}
 
           <div className="pt-4 flex gap-3">
@@ -312,7 +251,7 @@ const GameSettings = ({
             </Button>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

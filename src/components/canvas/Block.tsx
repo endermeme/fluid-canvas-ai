@@ -27,7 +27,6 @@ const Block: React.FC<BlockProps> = ({
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showResizeHandles, setShowResizeHandles] = useState(false);
-  const [isPressed, setIsPressed] = useState(false);
   const blockRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   
@@ -62,22 +61,6 @@ const Block: React.FC<BlockProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // Add touch press effect
-  const handleMouseDown = () => {
-    setIsPressed(true);
-  };
-
-  const handleMouseUp = () => {
-    setIsPressed(false);
-  };
-
-  useEffect(() => {
-    document.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      document.removeEventListener('mouseup', handleMouseUp);
     };
   }, []);
   
@@ -176,37 +159,11 @@ const Block: React.FC<BlockProps> = ({
       </>
     );
   };
-
-  // Create ripple effect on click
-  const createRippleEffect = (e: React.MouseEvent) => {
-    const element = blockRef.current;
-    if (!element) return;
-    
-    const rect = element.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height) * 1.5;
-    
-    const x = e.clientX - rect.left - size/2;
-    const y = e.clientY - rect.top - size/2;
-    
-    const ripple = document.createElement('span');
-    ripple.style.width = ripple.style.height = `${size}px`;
-    ripple.style.left = `${x}px`;
-    ripple.style.top = `${y}px`;
-    ripple.className = 'absolute rounded-full bg-primary/20 pointer-events-none transform animate-ripple';
-    
-    element.appendChild(ripple);
-    
-    setTimeout(() => {
-      if (element.contains(ripple)) {
-        ripple.remove();
-      }
-    }, 600);
-  };
   
   return (
     <div
       ref={blockRef}
-      className={`canvas-block absolute ${isSelected ? 'block-selected shadow-lg' : 'shadow-md'} ${isPressed ? 'scale-[0.98]' : ''} transition-transform duration-150 relative overflow-hidden`}
+      className={`canvas-block absolute ${isSelected ? 'block-selected' : ''}`}
       style={{
         left: `${block.position.x}px`,
         top: `${block.position.y}px`,
@@ -216,32 +173,29 @@ const Block: React.FC<BlockProps> = ({
       }}
       onClick={(e) => {
         onSelect(block.id, e.shiftKey);
-        createRippleEffect(e);
         e.stopPropagation();
       }}
       onMouseEnter={() => setShowResizeHandles(true)}
       onMouseLeave={() => setShowResizeHandles(false)}
-      onMouseDown={handleMouseDown}
     >
       {/* Block header with drag handle */}
       <div 
-        className="absolute top-0 left-0 right-0 h-8 flex items-center justify-between px-2 cursor-move opacity-40 hover:opacity-100 transition-opacity duration-200 bg-background/50 backdrop-blur-sm"
+        className="absolute top-0 left-0 right-0 h-6 flex items-center justify-between px-1 cursor-move opacity-30 hover:opacity-100 transition-opacity duration-200"
         onMouseDown={(e) => onStartDrag(e, block.id)}
       >
         <div className="flex items-center space-x-1">
           {getBlockIcon()}
-          <span className="text-xs text-muted-foreground ml-1">
+          <span className="text-xs text-muted-foreground">
             {new Date(block.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
         
         <div className="flex items-center">
           <button
-            className="p-1.5 rounded-full hover:bg-secondary/70 transition-colors"
+            className="p-1 rounded hover:bg-secondary/50 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               setShowMenu(!showMenu);
-              createRippleEffect(e);
             }}
           >
             <MoreHorizontal size={14} />
@@ -250,7 +204,7 @@ const Block: React.FC<BlockProps> = ({
       </div>
       
       {/* Block content */}
-      <div className="pt-8 h-full p-1">
+      <div className="pt-6 h-full">
         {renderBlockContent()}
       </div>
       

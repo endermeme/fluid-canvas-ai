@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { X, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { animateBlockCreation } from '@/lib/animations';
 
 interface GameErrorProps {
   errorMessage: string;
@@ -10,33 +11,30 @@ interface GameErrorProps {
 }
 
 const GameError: React.FC<GameErrorProps> = ({ errorMessage, onRetry, topic }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (containerRef.current) {
+      animateBlockCreation(containerRef.current);
+    }
+  }, []);
+  
   return (
-    <div className="flex flex-col items-center justify-center h-full bg-gradient-to-b from-background to-background/80 p-6">
-      <div className="mb-6 bg-destructive/10 p-4 rounded-full">
-        <AlertTriangle className="h-12 w-12 text-destructive" />
+    <div 
+      ref={containerRef}
+      className="flex flex-col items-center justify-center h-full w-full space-y-6 opacity-0 scale-95"
+    >
+      <div className="text-red-500 bg-red-100 dark:bg-red-950/30 p-4 rounded-full">
+        <X size={48} />
       </div>
-      
-      <h2 className="text-2xl font-bold text-center mb-4 text-destructive">
-        Không thể tạo minigame
-      </h2>
-      
-      <p className="text-center text-muted-foreground max-w-md mb-6">
-        {errorMessage}
-      </p>
-      
-      <p className="text-center text-sm text-muted-foreground mb-8">
-        Chủ đề: <span className="font-medium">{topic}</span>
-      </p>
-      
-      <div className="flex gap-4">
-        <Button 
-          onClick={onRetry}
-          className="bg-primary/90 hover:bg-primary flex items-center gap-2"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Thử lại
-        </Button>
-      </div>
+      <p className="text-lg text-center max-w-md px-4">{errorMessage}</p>
+      <Button 
+        onClick={onRetry} 
+        size="lg"
+        className="transition-transform active:scale-95"
+      >
+        <RefreshCw className="mr-2 h-4 w-4" /> Thử Lại
+      </Button>
     </div>
   );
 };
