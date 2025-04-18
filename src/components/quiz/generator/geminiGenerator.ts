@@ -1,4 +1,3 @@
-
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
@@ -123,8 +122,7 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
     
     const game: MiniGame = {
       title: title,
-      content: content,
-      useCanvas: useCanvas
+      content: content
     };
     
     logSuccess(SOURCE, "Game generated successfully");

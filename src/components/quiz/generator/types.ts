@@ -3,6 +3,7 @@ export interface MiniGame {
   title: string;
   content: string;
   description?: string;
+  useCanvas?: boolean;
 }
 
 export interface GameApiResponse {

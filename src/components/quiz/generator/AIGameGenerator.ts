@@ -8,6 +8,7 @@ import { logInfo } from './apiUtils';
  */
 export class AIGameGenerator {
   private static instance: AIGameGenerator;
+  private canvasMode: boolean = true;
 
   /**
    * Create a new AIGameGenerator
@@ -25,6 +26,15 @@ export class AIGameGenerator {
       AIGameGenerator.instance = new AIGameGenerator();
     }
     return AIGameGenerator.instance;
+  }
+
+  /**
+   * Set canvas mode for game generation
+   * @param useCanvas boolean flag to enable/disable canvas mode
+   */
+  public setCanvasMode(useCanvas: boolean): void {
+    this.canvasMode = useCanvas;
+    logInfo('AIGameGenerator', `Canvas mode ${useCanvas ? 'enabled' : 'disabled'}`);
   }
 
   /**
