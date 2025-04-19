@@ -1,4 +1,11 @@
 
+/**
+ * Module xử lý và định dạng CSS
+ */
+
+/**
+ * Định dạng và chuẩn hóa CSS
+ */
 export const formatCss = (css: string): string => {
   if (!css) return '';
   
@@ -15,6 +22,9 @@ export const formatCss = (css: string): string => {
   }
 };
 
+/**
+ * Thêm CSS cơ bản khi không có CSS
+ */
 export const addBaseStyles = (): string => {
   return `
   /* Base responsive styles */
@@ -51,4 +61,20 @@ export const addBaseStyles = (): string => {
     font-size: 16px;
   }
   `;
+};
+
+/**
+ * Tối ưu CSS bằng cách gom nhóm và loại bỏ trùng lặp
+ */
+export const optimizeCss = (css: string): string => {
+  // Loại bỏ comments không cần thiết
+  let optimized = css.replace(/\/\*(?!!)[\s\S]*?\*\//g, '');
+  
+  // Loại bỏ khoảng trắng không cần thiết
+  optimized = optimized.replace(/\s+/g, ' ').trim();
+  
+  // Nén các thuộc tính đơn giản
+  optimized = optimized.replace(/\s*:\s*/g, ':').replace(/\s*;\s*/g, ';');
+  
+  return optimized;
 };

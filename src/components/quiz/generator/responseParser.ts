@@ -3,52 +3,99 @@ import { formatHtml, validateHtmlStructure } from '@/utils/html-processor';
 import { formatCss, addBaseStyles } from '@/utils/css-processor';
 import { formatJavaScript, addErrorHandling } from '@/utils/js-processor';
 import { MiniGame } from './types';
+import { injectDebugUtils } from '@/utils/iframe-handler';
+import { logInfo, logError } from './apiUtils';
 
+const SOURCE = "RESPONSE_PARSER";
+
+/**
+ * Phân tích và xử lý phản hồi từ Gemini AI thành MiniGame
+ */
 export const parseGeminiResponse = (text: string, topic: string): MiniGame => {
-  console.log("🔷 Bắt đầu phân tích phản hồi");
+  logInfo(SOURCE, "Bắt đầu phân tích phản hồi");
   
   try {
-    // Extract code blocks
+    // Trích xuất các khối code
     const { html, css, js } = extractCodeBlocks(text);
     
-    // Format each part
+    // Định dạng từng phần
     const formattedHtml = formatHtml(html);
     const formattedCss = css ? formatCss(css) : addBaseStyles();
     const formattedJs = js ? addErrorHandling(formatJavaScript(js)) : '';
     
-    // Combine into final HTML
+    // Tạo HTML cuối cùng
     const finalContent = createFinalHtml(formattedHtml, formattedCss, formattedJs);
     
+    // Thêm debug utils
+    const contentWithDebug = injectDebugUtils(finalContent);
+    
+    // Validate cấu trúc HTML
+    if (!validateHtmlStructure(contentWithDebug)) {
+      logInfo(SOURCE, "Phát hiện HTML không hợp lệ, tự động sửa chữa");
+    }
+    
     return {
-      title: topic,
+      title: extractTitle(topic, formattedHtml),
       description: "Generated game content",
-      content: finalContent
+      content: contentWithDebug
     };
   } catch (error) {
-    console.error("❌ Lỗi khi xử lý phản hồi:", error);
+    logError(SOURCE, "Lỗi khi xử lý phản hồi", error);
     return createErrorGame(topic);
   }
 };
 
+/**
+ * Trích xuất các khối code từ phản hồi Markdown
+ */
 const extractCodeBlocks = (text: string): { html: string, css: string, js: string } => {
   let html = '', css = '', js = '';
   
-  // Extract HTML
+  // Trích xuất HTML (tìm khối markdown hoặc trực tiếp HTML)
   const htmlMatch = text.match(/```html\n([\s\S]*?)```/) || text.match(/<html[\s\S]*?<\/html>/);
   if (htmlMatch) html = htmlMatch[1] || htmlMatch[0];
   
-  // Extract CSS
+  // Trích xuất CSS
   const cssMatch = text.match(/```css\n([\s\S]*?)```/);
   if (cssMatch) css = cssMatch[1];
   
-  // Extract JavaScript
+  // Trích xuất JavaScript
   const jsMatch = text.match(/```(js|javascript)\n([\s\S]*?)```/);
   if (jsMatch) js = jsMatch[2];
   
   return { html, css, js };
 };
 
+/**
+ * Trích xuất tiêu đề từ HTML hoặc sử dụng chủ đề
+ */
+const extractTitle = (topic: string, html: string): string => {
+  const titleMatch = html.match(/<title>(.*?)<\/title>/i) || 
+                     html.match(/<h1[^>]*>(.*?)<\/h1>/i);
+                     
+  return titleMatch && titleMatch[1] ? 
+    titleMatch[1].replace(/<[^>]*>/g, '').trim() : 
+    topic;
+};
+
+/**
+ * Tạo HTML cuối cùng kết hợp HTML, CSS và JavaScript
+ */
 const createFinalHtml = (html: string, css: string, js: string): string => {
+  // Nếu đã có HTML đầy đủ, chèn CSS và JS vào
+  if (html.includes('<html')) {
+    // Chèn CSS vào head
+    html = html.replace('</head>', `<style>${css}</style></head>`);
+    
+    // Chèn JS vào trước đóng body
+    if (js) {
+      html = html.replace('</body>', `<script>${js}</script></body>`);
+    }
+    
+    return html;
+  }
+  
+  // Nếu chỉ có fragment HTML, tạo trang HTML đầy đủ
   return `
 <!DOCTYPE html>
 <html>
@@ -60,11 +107,14 @@ const createFinalHtml = (html: string, css: string, js: string): string => {
 </head>
 <body>
   ${html}
-  <script>${js}</script>
+  ${js ? `<script>${js}</script>` : ''}
 </body>
 </html>`;
 };
 
+/**
+ * Tạo game lỗi khi không thể phân tích phản hồi
+ */
 const createErrorGame = (topic: string): MiniGame => {
   const errorHtml = `
 <!DOCTYPE html>

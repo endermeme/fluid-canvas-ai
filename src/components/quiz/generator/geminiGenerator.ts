@@ -4,13 +4,19 @@ import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { logInfo, logError, logWarning, logSuccess, measureExecutionTime } from './apiUtils';
 import { makeGeminiRequest } from './api/geminiClient';
-import { sanitizeGameCode } from './utils/codeSanitizer';
-import { extractGameContent } from './utils/contentExtractor';
+import { parseGeminiResponse } from './responseParser';
 import { buildGeminiPrompt } from './promptBuilder';
 import { generateCustomGamePrompt } from './customGamePrompt';
+import { formatHtml } from '@/utils/html-processor';
+import { formatCss, addBaseStyles } from '@/utils/css-processor';
+import { formatJavaScript, addErrorHandling } from '@/utils/js-processor';
+import { injectDebugUtils } from '@/utils/iframe-handler';
 
 const SOURCE = "GEMINI";
 
+/**
+ * Tạo ra game với Gemini AI
+ */
 export const generateWithGemini = async (
   topic: string, 
   settings?: GameSettingsData
@@ -38,11 +44,11 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
 2. Use proper HTML structure with DOCTYPE, html, head, and body tags
 3. Include all JavaScript inside a SINGLE script tag at the end of the body
 4. Format all CSS and JavaScript code with proper indentation
-5. Use template literals correctly with backticks (\\\`) not regular quotes for dynamic content
+5. Use template literals correctly with backticks (\`) not regular quotes for dynamic content
 6. Use clear parameter names in function declarations (NOT $2 or placeholder variables)
 7. Include proper error handling for canvas operations
 8. Make sure all HTML elements are properly closed
-9. DO NOT include markdown syntax (\\\`\\\`\\\`) in your response
+9. DO NOT include markdown syntax (\`\`\`) in your response
 `;
 
   const prompt = generateCustomGamePrompt(promptOptions) + formattingInstructions;
@@ -58,8 +64,8 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
     console.log('%c Generated Game Code:', 'font-weight: bold; color: #6f42c1;');
     console.log(text);
     
-    const game = extractGameContent(text, topic, useCanvas);
-    game.content = sanitizeGameCode(game.content);
+    // Sử dụng parser mới để xử lý response
+    const game = parseGeminiResponse(text, topic);
     
     logSuccess(SOURCE, "Game generated successfully");
     
@@ -70,6 +76,9 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
   }
 };
 
+/**
+ * Thử tạo game với Gemini và thử lại nếu thất bại
+ */
 export const tryGeminiGeneration = async (
   model: any,
   topic: string, 

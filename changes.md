@@ -1,56 +1,32 @@
 
-# Các thay đổi đã thực hiện trong codebase
+# Tối ưu hóa codebase - Tổng quan thay đổi
 
-## 1. Tối ưu hóa xử lý iframe
+## 1. Cải thiện cấu trúc và loại bỏ trùng lặp
 
-### Vấn đề:
-- Nhiều hàm trùng lặp xử lý HTML/CSS/JS giữa các file
-- Code quá dài và khó bảo trì trong file iframe-utils.ts
-- Lỗi CSS và JS không hoạt động trong iframe
+### Files đã xóa:
+- `src/components/quiz/generator/AIGameGenerator.ts` - trùng lặp với geminiGenerator.ts
+- `src/components/quiz/utils/iframe-utils.ts` - được thay thế bởi các module cụ thể hơn
+- `src/utils/iframe-utils.ts` - quá dài và được tách thành các module nhỏ hơn
 
-### Giải pháp:
-- Tái cấu trúc và đơn giản hóa `setupIframe()` và `enhanceIframeContent()`
-- Thêm xử lý đặc biệt cho CSS để đảm bảo nó được áp dụng
-- Cải thiện cơ chế thực thi JavaScript trong iframe
+### Files tối ưu và tách thành module nhỏ:
+- Chuyển `responseParser.ts` sang sử dụng hệ thống xử lý mới
+- Tách các hàm xử lý HTML, CSS, JS thành các module riêng biệt
+- Giảm độ phức tạp của mã nguồn
 
-## 2. Tối ưu hóa xử lý phản hồi từ Gemini
+## 2. Quy trình xử lý code mới
 
-### Vấn đề:
-- Nhiều file trùng lặp xử lý parse phản hồi từ Gemini
-- Code không đồng nhất giữa các file xử lý
+Quy trình xử lý Gemini response mới:
+1. Gemini trả về markdown với code HTML/CSS/JS
+2. `responseParser.ts` trích xuất code và gửi cho các processor chuyên biệt
+3. `html-processor.ts` xử lý và định dạng HTML
+4. `css-processor.ts` xử lý và tối ưu CSS
+5. `js-processor.ts` sửa lỗi JavaScript
+6. `iframe-handler.ts` xử lý hiển thị và tương tác iframe
 
-### Giải pháp:
-- Hợp nhất logic xử lý vào một chuỗi rõ ràng:
-  - `responseParser.ts` → trích xuất code từ markdown
-  - `codeSanitizer.ts` → làm sạch và sửa lỗi trong code
-  - `iframe-utils.ts` → xử lý hiển thị trong iframe
+## 3. Ưu điểm của cấu trúc mới
 
-## 3. Files và chức năng có thể xóa bỏ
-
-### Files trùng lặp:
-- `src/utils/iframe-utils.ts` vs `src/components/quiz/utils/iframe-utils.ts`
-- `src/components/quiz/quick-game-selector/index.tsx` vs `src/components/quiz/QuickGameSelector.tsx`
-- `src/components/quiz/generator/AIGameGenerator.ts` vs `src/components/quiz/generator/geminiGenerator.ts`
-
-### Files không sử dụng:
-- `src/components/quiz/generator/fallbackGenerator.ts`
-
-## 4. Tách các file dài thành modules nhỏ hơn
-
-### File quá dài (>200 dòng):
-- `src/components/quiz/utils/iframe-utils.ts` (242 dòng)
-- `src/components/quiz/generator/responseParser.ts` (247 dòng) 
-- `src/components/quiz/QuizGenerator.tsx` (241 dòng)
-- `src/utils/iframe-utils.ts` (521 dòng)
-
-### Đề xuất:
-- Tách các file này thành nhiều modules nhỏ với chức năng chuyên biệt
-- Ví dụ: tách riêng xử lý CSS, JavaScript và HTML thành các modules riêng
-
-## 5. Thống nhất cách tiếp cận
-
-Thay vì có nhiều cách xử lý khác nhau, thống nhất thành một quy trình xử lý:
-1. Trích xuất HTML, CSS, JS từ phản hồi markdown (responseParser)
-2. Làm sạch và sửa lỗi phổ biến (codeSanitizer)
-3. Định dạng và tối ưu hóa (formatters)
-4. Tải và hiển thị trong iframe (iframe-utils)
+- Code ngắn gọn, tập trung và dễ bảo trì hơn
+- Mỗi module có một nhiệm vụ rõ ràng
+- Dễ dàng mở rộng và thêm tính năng mới
+- Hiệu suất tốt hơn
+- Giảm trùng lặp code

@@ -1,14 +1,21 @@
 
+/**
+ * Module xử lý và định dạng HTML
+ */
+
+/**
+ * Định dạng và chuẩn hóa HTML
+ */
 export const formatHtml = (html: string): string => {
   if (!html) return '';
   
   try {
-    // Clean HTML content
+    // Làm sạch nội dung HTML
     let cleanHtml = html
       .replace(/```html|```/g, '')
       .replace(/`/g, '');
 
-    // Add DOCTYPE and HTML structure if missing
+    // Thêm DOCTYPE và cấu trúc HTML nếu thiếu
     if (!cleanHtml.includes('<!DOCTYPE html>')) {
       if (cleanHtml.includes('<html')) {
         cleanHtml = `<!DOCTYPE html>${cleanHtml}`;
@@ -34,7 +41,27 @@ export const formatHtml = (html: string): string => {
   }
 };
 
+/**
+ * Xác thực cấu trúc HTML có đầy đủ các thẻ cần thiết
+ */
 export const validateHtmlStructure = (html: string): boolean => {
   const requiredTags = ['<!DOCTYPE html>', '<html', '<head>', '<body>'];
   return requiredTags.every(tag => html.includes(tag));
+};
+
+/**
+ * Hoàn thiện HTML với metadata và viewport
+ */
+export const enhanceHtml = (html: string, title: string = 'Interactive Game'): string => {
+  // Thêm metadata nếu thiếu
+  if (!html.includes('<meta name="viewport"')) {
+    html = html.replace('</head>', `  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n</head>`);
+  }
+  
+  // Thêm title nếu thiếu
+  if (!html.includes('<title>')) {
+    html = html.replace('</head>', `  <title>${title}</title>\n</head>`);
+  }
+  
+  return html;
 };

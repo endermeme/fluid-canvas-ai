@@ -1,11 +1,18 @@
 
+/**
+ * Module quản lý và tối ưu hóa iframe
+ */
+
+/**
+ * Thiết lập iframe với nội dung và xử lý các sự kiện
+ */
 export const setupIframe = (iframe: HTMLIFrameElement, content: string): void => {
   if (!iframe) return;
   
-  // Set content
+  // Thiết lập nội dung
   iframe.srcdoc = content;
   
-  // Handle load event
+  // Xử lý sự kiện load
   iframe.onload = () => {
     const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document;
     if (!iframeDocument) {
@@ -13,7 +20,7 @@ export const setupIframe = (iframe: HTMLIFrameElement, content: string): void =>
       return;
     }
 
-    // Rerun scripts to ensure execution
+    // Chạy lại scripts để đảm bảo thực thi
     const scripts = iframeDocument.getElementsByTagName('script');
     Array.from(scripts).forEach(oldScript => {
       const newScript = iframeDocument.createElement('script');
@@ -26,6 +33,9 @@ export const setupIframe = (iframe: HTMLIFrameElement, content: string): void =>
   };
 };
 
+/**
+ * Thêm các công cụ debug vào iframe
+ */
 export const injectDebugUtils = (content: string): string => {
   const debugScript = `
 <script>
@@ -41,4 +51,37 @@ export const injectDebugUtils = (content: string): string => {
 </body>`;
 
   return content.replace('</body>', debugScript);
+};
+
+/**
+ * Thêm responsive hooks vào iframe
+ */
+export const addResponsiveHooks = (content: string): string => {
+  const resizeScript = `
+<script>
+  // Tự động điều chỉnh kích thước canvas
+  function resizeCanvases() {
+    const canvases = document.querySelectorAll('canvas');
+    canvases.forEach(canvas => {
+      const width = canvas.offsetWidth;
+      const height = canvas.offsetHeight;
+      const ratio = window.devicePixelRatio || 1;
+      
+      if (canvas.width !== width * ratio || canvas.height !== height * ratio) {
+        canvas.width = width * ratio;
+        canvas.height = height * ratio;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.scale(ratio, ratio);
+        }
+      }
+    });
+  }
+  
+  window.addEventListener('resize', resizeCanvases);
+  document.addEventListener('DOMContentLoaded', resizeCanvases);
+</script>
+</body>`;
+
+  return content.replace('</body>', resizeScript);
 };
