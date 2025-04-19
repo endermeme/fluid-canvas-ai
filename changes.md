@@ -43,4 +43,5 @@ Quy trình xử lý Gemini response mới:
 - Sửa lỗi constructor private của AIGameGenerator
 - Sửa lỗi export và re-export của interface MiniGame trong AIGameGenerator.ts và types.ts
 - Sửa lỗi TypeScript với export type thay vì export để tương thích với isolatedModules
+- Sửa lỗi "The requested module doesn't provide an export named: 'MiniGame'" bằng cách làm cho category trở thành tùy chọn trong GameSettingsData
 
