@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { enhanceIframeContent } from '@/utils/iframe-utils';
+import { enhanceIframeContent } from '@/components/quiz/custom-games/utils/iframe-utils';
 import IframeDemoLayout from '@/components/layout/IframeDemoLayout';
 
 export default function IframeDemo() {

@@ -570,9 +570,8 @@ const getOptimizedStyles = (): string => {
   `;
 };
 
-// Add new exports to make the API clearer
+// Xuất các hàm phụ trợ
 export {
-  enhanceIframeContent,
   formatHtmlContent,
   fixJavaScriptErrors,
   fixInlineComments,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { enhanceIframeContent } from '@/utils/iframe-utils';
+import { enhanceIframeContent } from '@/components/quiz/custom-games/utils/iframe-utils';
 
 export default function IframeDemo() {
   const [iframeHtml, setIframeHtml] = useState<string>('');
@@ -13,7 +13,6 @@ export default function IframeDemo() {
       setIsLoading(true);
       setError(null);
       
-      // Gọi API endpoint để lấy nội dung HTML
       const response = await fetch('/api/get-iframe-demo');
       
       if (!response.ok) {
@@ -22,7 +21,6 @@ export default function IframeDemo() {
       
       const htmlContent = await response.text();
       
-      // Xử lý nội dung HTML bằng utility function
       const enhancedHtml = enhanceIframeContent(htmlContent);
       setIframeHtml(enhancedHtml);
     } catch (err) {
@@ -95,4 +93,4 @@ export default function IframeDemo() {
       </div>
     </div>
   );
-} 
+}
