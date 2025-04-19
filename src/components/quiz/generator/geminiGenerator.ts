@@ -1,5 +1,4 @@
 
-import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
@@ -16,6 +15,39 @@ import { buildGeminiPrompt } from './promptBuilder';
 import { generateCustomGamePrompt } from './customGamePrompt';
 
 const SOURCE = "GEMINI";
+
+// Thêm export MiniGame từ file types
+export { MiniGame } from './types';
+
+// Tạo lớp AIGameGenerator để giữ tương thích với code cũ
+export class AIGameGenerator {
+  private static instance: AIGameGenerator | null = null;
+  private canvasMode: boolean = true;
+
+  private constructor() {}
+
+  public static getInstance(): AIGameGenerator {
+    if (!AIGameGenerator.instance) {
+      AIGameGenerator.instance = new AIGameGenerator();
+    }
+    return AIGameGenerator.instance;
+  }
+
+  public setCanvasMode(mode: boolean): void {
+    this.canvasMode = mode;
+  }
+
+  public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
+    // Sử dụng biến canvasMode từ instance
+    const useCanvasMode = settings?.useCanvas !== undefined ? settings.useCanvas : this.canvasMode;
+    const updatedSettings = {
+      ...settings,
+      useCanvas: useCanvasMode
+    };
+    
+    return tryGeminiGeneration(null, topic, updatedSettings);
+  }
+}
 
 export const generateWithGemini = async (
   topic: string, 

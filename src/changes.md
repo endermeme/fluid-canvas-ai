@@ -1,4 +1,26 @@
+
 # Changes Log
+
+## Fixed Type Exports and Module Imports
+
+### Files Updated:
+1. Fixed exports and made GeminiGenerator compatible with AIGameGenerator interface:
+   - src/components/quiz/generator/geminiGenerator.ts
+   - Added exports for AIGameGenerator class and MiniGame type
+   - Created compatible API with old code
+
+2. Created missing templates index:
+   - src/components/quiz/preset-games/templates/index.ts
+   - Added game templates export for module resolution
+
+### Details:
+- Fixed TypeScript errors with module imports
+- Implemented AIGameGenerator class in geminiGenerator.ts to maintain backward compatibility
+- Added proper exports for MiniGame type
+- Created index.ts for templates to fix module resolution
+- Maintained consistent API interfaces across the application
+
+## Previous Changes
 
 ## Additional Cleanup - Import Updates
 
@@ -15,8 +37,6 @@
 - Fixed all imports to use geminiGenerator.ts instead of removed AIGameGenerator.ts
 - Maintained consistent import paths
 - No functionality changes
-
-## Previous Changes
 
 ## Cleanup Redundant Files
 
