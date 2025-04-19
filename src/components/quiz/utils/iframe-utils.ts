@@ -10,24 +10,18 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     parsed: processedContent
   });
 
-  // Fix template literals syntax - add missing backticks around string templates
+  // Fix template literals syntax - add missing backticks and correct rotate() syntax
   processedContent = processedContent
-    .replace(/=\s*Spins Left:\s*\$\{spinsLeft\}\s*\|\s*Score:\s*\$\{score\};/g, 
-             '= `Spins Left: ${spinsLeft} | Score: ${score}`;')
-    .replace(/=\s*Result:\s*\$\{winningSegment\.label\};/g, 
-             '= `Result: ${winningSegment.label}`;')
-    .replace(/\+=\s*\|\s*Game Over!\s*Final Score:\s*\$\{score\};/g, 
-             '+= ` | Game Over! Final Score: ${score}`;')
-    .replace(/=\s*rotate\(\$\{rotationAmount\}rad\);/g,
-             '= `rotate(${rotationAmount}rad)`;')
-    .replace(/=\s*rotate\(\$\{currentRotation\}rad\);/g,
-             '= `rotate(${currentRotation}rad)`;');
-
-  // Fix return statement not in function
-  processedContent = processedContent.replace(
-    /if \(!ctx\) \{ console\.error\('Canvas context not available'\); return; \}/g,
-    'if (!ctx) { console.error(\'Canvas context not available\'); return; }'
-  );
+    .replace(/resultDisplay\.textContent\s*=\s*Result:\s*\$\{winningSegment\.label\};/g, 
+             'resultDisplay.textContent = `Result: ${winningSegment.label}`;')
+    .replace(/gameStateDisplay\.textContent\s*=\s*Spins Left:\s*\$\{spinsLeft\}\s*\|\s*Score:\s*\$\{score\};/g, 
+             'gameStateDisplay.textContent = `Spins Left: ${spinsLeft} | Score: ${score}`;')
+    .replace(/resultDisplay\.textContent\s*\+=\s*\|\s*Game Over!\s*Final Score:\s*\$\{score\};/g, 
+             'resultDisplay.textContent += ` | Game Over! Final Score: ${score}`;')
+    .replace(/canvas\.style\.transform\s*=\s*rotate\(\$\{rotationAmount\}rad\);/g,
+             'canvas.style.transform = `rotate(${rotationAmount}rad)`;')
+    .replace(/canvas\.style\.transform\s*=\s*rotate\(\$\{currentRotation\}rad\);/g,
+             'canvas.style.transform = `rotate(${currentRotation}rad)`;');
 
   // Add basic HTML structure if missing
   if (!processedContent.includes('<!DOCTYPE html>')) {
