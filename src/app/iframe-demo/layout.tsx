@@ -1,11 +1,15 @@
+import type { Metadata } from 'next';
 
-import React from 'react';
+export const metadata: Metadata = {
+  title: 'Canvas Demo Preview',
+  description: 'Xem trước demo tương tác với Canvas HTML5',
+};
 
-interface IframeDemoLayoutProps {
+export default function IframeDemoLayout({
+  children,
+}: {
   children: React.ReactNode;
-}
-
-export default function IframeDemoLayout({ children }: IframeDemoLayoutProps) {
+}) {
   return (
     <div className="min-h-screen py-8 px-4 bg-gradient-to-b from-indigo-50 to-white">
       {children}
