@@ -1,4 +1,3 @@
-
 # Danh sách file không sử dụng hoặc có thể xóa
 
 Dưới đây là danh sách các file không còn được sử dụng hoặc có chức năng trùng lặp trong dự án:

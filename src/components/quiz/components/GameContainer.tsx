@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
-import { enhanceIframeContent, setupIframe } from '../utils/iframe-utils';
+import { enhanceIframeContent } from '../utils/iframe-utils';
 
 interface GameContainerProps {
   iframeRef: React.RefObject<HTMLIFrameElement>;
@@ -30,20 +29,9 @@ const GameContainer: React.FC<GameContainerProps> = ({
     }
   }, [externalError]);
 
-  // Đảm bảo content được format đúng và JavaScript hoạt động
-  useEffect(() => {
-    if (iframeRef.current && content) {
-      try {
-        const enhancedContent = enhanceIframeContent(content, title);
-        setupIframe(iframeRef.current, enhancedContent);
-        setLocalError(null);
-      } catch (error) {
-        console.error("Error setting iframe content:", error);
-        setLocalError("Không thể tải nội dung game. Vui lòng thử lại.");
-      }
-    }
-  }, [content, title, key]);
-
+  // Ensure content is properly formatted
+  const formattedContent = content ? enhanceIframeContent(content, title) : '';
+  
   const handleReload = () => {
     setLoading(true);
     setLocalError(null);
@@ -59,10 +47,10 @@ const GameContainer: React.FC<GameContainerProps> = ({
     <div 
       className={`relative rounded-xl overflow-hidden bg-gradient-to-b from-blue-50 to-white shadow-xl border border-gray-200 w-full mx-auto transition-all duration-300 ${showFullscreen ? 'fixed inset-0 z-50 rounded-none m-0 max-w-none' : ''}`}
       style={{ 
-        height: showFullscreen ? '100vh' : '92vh',
-        minHeight: '650px',
-        maxHeight: showFullscreen ? '100vh' : '1200px',
-        maxWidth: showFullscreen ? '100vw' : '1800px'
+        height: showFullscreen ? '100vh' : '92vh', // Tăng chiều cao lên 92vh khi không ở chế độ toàn màn hình
+        minHeight: '650px', // Tăng chiều cao tối thiểu lên 650px
+        maxHeight: showFullscreen ? '100vh' : '1200px', // Tăng chiều cao tối đa lên 1200px khi không ở chế độ toàn màn hình
+        maxWidth: showFullscreen ? '100vw' : '1800px' // Tăng chiều rộng tối đa lên 1800px khi không ở chế độ toàn màn hình
       }}
     >
       {/* Nút chuyển đổi chế độ toàn màn hình */}
@@ -105,13 +93,14 @@ const GameContainer: React.FC<GameContainerProps> = ({
         </div>
       )}
       
-      {/* Game iframe with key for forcing reload */}
+      {/* Game iframe */}
       <iframe
         ref={iframeRef}
         key={key}
         title={title || "Game"}
+        srcDoc={formattedContent}
         className="w-full h-full border-0 rounded-xl shadow-inner"
-        sandbox="allow-scripts allow-same-origin"
+        sandbox="allow-scripts"
         onLoad={() => setLoading(false)}
         onError={() => {
           setLocalError("Không thể tải nội dung game. Vui lòng thử lại sau.");
