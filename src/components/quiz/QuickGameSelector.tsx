@@ -184,8 +184,22 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
       <GameHeader onTitleClick={() => {}} />
 
       <CustomGameForm 
-        onCustomGameCreate={handleCustomGameCreate}
-        onGameRequest={onGameRequest}
+        onGenerate={(content, game) => {
+          if (game) {
+            setIsLoading(true);
+            setTimeout(() => {
+              setSelectedGame(game);
+              setIsLoading(false);
+              toast({
+                title: "Minigame Đã Sẵn Sàng",
+                description: `Đã tạo minigame về "${content}"`,
+              });
+            }, 500);
+          } else {
+            onGameRequest(content);
+          }
+        }}
+        onCancel={handleCustomGameCreate}
       />
       
       <GameGrid 

@@ -1,5 +1,18 @@
 
+
 # Changes Log
+
+## Fixed CustomGameForm Props in QuickGameSelector
+
+### Files Updated:
+1. Updated CustomGameForm usage in QuickGameSelector.tsx:
+   - Replaced `onCustomGameCreate` prop with properly structured `onGenerate` and `onCancel` props
+   - Fixed TypeScript error by matching the expected props interface from CustomGameForm
+
+### Details:
+- Fixed TypeScript error TS2322 related to incorrect props being passed to CustomGameForm
+- Updated component to use the correct props structure as defined in CustomGameForm.tsx
+- Maintained same functionality while fixing the type error
 
 ## Fixed CustomGameForm Import
 
@@ -115,3 +128,4 @@
 - Updated main iframe-utils.ts to use new modules
 - Improved code organization and maintainability
 - Fixed all import paths to use new file structure
+
