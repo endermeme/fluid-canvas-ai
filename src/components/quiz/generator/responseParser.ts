@@ -1,3 +1,4 @@
+
 import { GameApiResponse, MiniGame } from './types';
 
 export function parseGeminiResponse(response: string): MiniGame | null {

@@ -65,7 +65,7 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
     console.log(text);
     
     // Sử dụng parser mới để xử lý response
-    const game = parseGeminiResponse(text, topic);
+    const game = parseGeminiResponse(text);
     
     logSuccess(SOURCE, "Game generated successfully");
     

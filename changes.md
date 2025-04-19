@@ -1,3 +1,4 @@
+
 # Tối ưu hóa codebase - Tổng quan thay đổi
 
 ## 1. Cải thiện cấu trúc và loại bỏ trùng lặp
@@ -46,3 +47,4 @@ Quy trình xử lý Gemini response mới:
 
 - Đơn giản hóa xử lý HTML trong responseParser.ts để giữ nguyên mã HTML gốc
 - Bỏ qua các bước xử lý phức tạp với HTML thuần
+- Sửa lỗi trong geminiGenerator.ts với hàm parseGeminiResponse nhận thừa tham số
