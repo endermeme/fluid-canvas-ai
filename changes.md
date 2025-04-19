@@ -38,3 +38,6 @@
 - Cải thiện việc xử lý và hiển thị trò chơi trong iframe
 - Tối ưu hóa các processor cho HTML, CSS và JavaScript
 
+## 4. Sửa lỗi bị thiếu module
+- Tạo thư mục templates và file index.ts trong src/preset-games để giải quyết lỗi "Cannot find module './templates'"
+- Đảm bảo tất cả game templates có placeholder để tránh lỗi khi build
