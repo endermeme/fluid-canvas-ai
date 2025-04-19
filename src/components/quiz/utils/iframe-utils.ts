@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export const enhanceIframeContent = (content: string, title?: string): string => {
@@ -7,9 +8,15 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
   
   console.log('📝 Bắt đầu xử lý HTML & JavaScript...');
   
+  // Kiểm tra xem đã có cấu trúc HTML đầy đủ chưa
+  const hasDoctype = processedContent.includes('<!DOCTYPE html>');
+  const hasHtmlTag = processedContent.includes('<html');
+  const hasHeadTag = processedContent.includes('<head>');
+  const hasBodyTag = processedContent.includes('<body>');
+  
   // Add DOCTYPE and HTML structure if missing
-  if (!processedContent.includes('<!DOCTYPE html>')) {
-    if (processedContent.includes('<html')) {
+  if (!hasDoctype) {
+    if (hasHtmlTag) {
       processedContent = `<!DOCTYPE html>${processedContent}`;
     } else {
       processedContent = `<!DOCTYPE html>
@@ -27,7 +34,7 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     console.log('🔄 Đã thêm doctype và cấu trúc HTML');
   }
   
-  // Fix JavaScript - make sure all code in script tags is correct
+  // Xử lý JavaScript trong thẻ script
   processedContent = processedContent.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (match, scriptContent) => {
     // Fix template literals
     let fixedScript = scriptContent
@@ -35,7 +42,7 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       .replace(/(\w+\.textContent\s*=\s*)([^;"`']*)\$\{([^}]+)\}([^;"`']*);/g, "$1`$2${$3}$4`;")
       .replace(/\\`/g, '`'); // Fix escaped backticks
     
-    // Add function parameter name fixes
+    // Fix function parameters
     fixedScript = fixedScript.replace(/function\s+(\w+)\s*\(\$2\)/g, (match, funcName) => {
       if (funcName === 'drawSegment') return 'function drawSegment(index, color, text)';
       if (funcName === 'spinWheel') return 'function spinWheel()';
@@ -43,7 +50,7 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       return `function ${funcName}(param)`;
     });
     
-    // Add error handling for DOM element selections
+    // Add error handling for DOM elements
     fixedScript = fixedScript.replace(
       /const\s+(\w+)\s*=\s*document\.getElementById\(['"]([^'"]+)['"]\);((?!\s*if\s*\(!\1\)))/g,
       "const $1 = document.getElementById('$2');\nif (!$1) { console.error('Element #$2 not found'); } else { $3"
@@ -87,102 +94,107 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
 </body>`);
   }
   
-  // Optimized base styles for games
-  const baseStyles = `
-<style>
-  /* Base styles for games */
-  html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-  
-  body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background-color: #f8f9fa;
-    box-sizing: border-box;
-  }
-  
-  /* Game container */
-  .container, .game-container, #game-container {
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  /* Canvas element */
-  canvas {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    margin: 0 auto;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Buttons */
-  button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    background: #4f46e5;
-    color: white;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 500;
-    margin: 10px 0;
-    transition: background 0.2s, transform 0.1s;
-  }
-  
-  button:hover {
-    background: #4338ca;
-  }
-  
-  button:active {
-    transform: translateY(1px);
-  }
-  
-  /* Wheel games specific */
-  .wheel {
-    transition: transform 4s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  
-  /* Animations */
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  .fade-in {
-    animation: fadeIn 0.5s ease forwards;
-  }
-  
-  /* Responsive design */
-  @media (max-width: 768px) {
-    canvas {
-      max-width: 90%;
+  // Đảm bảo rằng CSS được giữ nguyên
+  const styleTagRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+  const styleMatches = [...processedContent.matchAll(styleTagRegex)];
+  const hasStyles = styleMatches.length > 0;
+
+  // Thêm base styles nếu chưa có style nào
+  if (!hasStyles && processedContent.includes('</head>')) {
+    const baseStyles = `
+  <style>
+    /* Base styles for games */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     
-    button {
-      padding: 8px 16px;
-      font-size: 14px;
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background-color: #f8f9fa;
+      box-sizing: border-box;
     }
-  }
-</style>`;
-  
-  // Add base styles to head
-  if (!processedContent.includes('<style id="base-game-styles">')) {
+    
+    /* Game container */
+    .container, .game-container, #game-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    /* Canvas element */
+    canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Buttons */
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background: #4f46e5;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      margin: 10px 0;
+      transition: background 0.2s, transform 0.1s;
+    }
+    
+    button:hover {
+      background: #4338ca;
+    }
+    
+    button:active {
+      transform: translateY(1px);
+    }
+    
+    /* Wheel games specific */
+    .wheel {
+      transition: transform 4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+      canvas {
+        max-width: 90%;
+      }
+      
+      button {
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+    }
+  </style>`;
+    
     processedContent = processedContent.replace('</head>', `${baseStyles}\n</head>`);
+    console.log('🎨 Đã thêm CSS cơ bản cho game');
   }
   
   console.log('✅ HTML/CSS/JS đã được xử lý thành công');
@@ -210,9 +222,14 @@ export const setupIframe = (iframe: HTMLIFrameElement, content: string): void =>
       // Đảm bảo tất cả scripts được thực thi
       const scripts = iframeDocument.querySelectorAll('script');
       scripts.forEach(originalScript => {
+        // Clone và thêm các script vào lại document để đảm bảo thực thi
         const script = iframeDocument.createElement('script');
+        
+        Array.from(originalScript.attributes).forEach(attr => {
+          script.setAttribute(attr.name, attr.value);
+        });
+        
         script.textContent = originalScript.textContent;
-        if (originalScript.src) script.src = originalScript.src;
         iframeDocument.body.appendChild(script);
       });
       
@@ -221,4 +238,4 @@ export const setupIframe = (iframe: HTMLIFrameElement, content: string): void =>
       console.error('Lỗi khi kích hoạt JavaScript trong iframe:', error);
     }
   };
-}
+};
