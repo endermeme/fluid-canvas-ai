@@ -12,8 +12,15 @@
 ## 2. Cải thiện xử lý lỗi và logging
 - Thêm kiểm tra lỗi chi tiết hơn trong geminiClient
 - Cải thiện định dạng và sanitize code
+- Sửa lỗi JavaScript không đồng bộ với HTML trong iframe
 
-## 3. Tối ưu hóa cấu trúc thư mục
+## 3. Sửa đổi các hàm xử lý iframe
+- Cải thiện iframe-utils.ts để xử lý đúng JavaScript
+- Thêm hàm setupIframe để đảm bảo JavaScript trong iframe được kích hoạt
+- Sửa các vấn đề với template literals và backticks
+- Đảm bảo DOMContentLoaded sự kiện được xử lý đúng
+
+## 4. Tối ưu hóa cấu trúc thư mục
 - Tổ chức lại các file theo chức năng
 - Tách biệt rõ ràng giữa API, utils và generator chính
 

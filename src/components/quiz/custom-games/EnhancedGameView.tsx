@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { enhanceIframeContent } from '../utils/iframe-utils';
+import { enhanceIframeContent, setupIframe } from '../utils/iframe-utils';
 
 interface EnhancedGameViewProps {
   miniGame: {
@@ -31,7 +31,9 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     if (iframeRef.current && miniGame?.content) {
       try {
         const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
-        iframeRef.current.srcdoc = enhancedContent;
+        if (iframeRef.current) {
+          setupIframe(iframeRef.current, enhancedContent);
+        }
         setIframeError(null);
       } catch (error) {
         console.error("Error setting iframe content:", error);
@@ -44,7 +46,9 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     if (iframeRef.current && miniGame?.content) {
       try {
         const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
-        iframeRef.current.srcdoc = enhancedContent;
+        if (iframeRef.current) {
+          setupIframe(iframeRef.current, enhancedContent);
+        }
         setIframeError(null);
       } catch (error) {
         console.error("Error refreshing game:", error);
