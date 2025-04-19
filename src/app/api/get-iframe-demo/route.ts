@@ -2,24 +2,10 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    // Lấy file name từ query params nếu có 
-    const { searchParams } = new URL(request.url);
-    const fileName = searchParams.get('file') || 'wheel-demo';
-    
     // Đường dẫn đến file HTML demo
-    const filePath = path.join(process.cwd(), `src/components/quiz/demo/${fileName}.html`);
-    
-    // Kiểm tra file có tồn tại không
-    if (!fs.existsSync(filePath)) {
-      return new NextResponse(`File demo "${fileName}.html" không tồn tại`, { 
-        status: 404,
-        headers: {
-          'Content-Type': 'text/plain',
-        },
-      });
-    }
+    const filePath = path.join(process.cwd(), 'src/components/quiz/demo/iframe-test.html');
     
     // Đọc nội dung file
     const fileContent = fs.readFileSync(filePath, 'utf8');

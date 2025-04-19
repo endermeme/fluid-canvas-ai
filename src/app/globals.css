@@ -40,7 +40,7 @@ body {
 }
 
 .iframe-wrapper {
-  @apply border border-gray-200 rounded-lg overflow-hidden bg-white mt-4 shadow-md;
+  @apply border border-gray-200 rounded-lg overflow-hidden bg-white mt-4;
 }
 
 .iframe-header {
@@ -48,11 +48,7 @@ body {
 }
 
 .iframe-container {
-  @apply p-0;
-}
-
-.iframe-container iframe {
-  @apply shadow-inner;
+  @apply p-1 bg-gray-50;
 }
 
 .demo-button {
@@ -65,19 +61,4 @@ body {
 
 .error-message {
   @apply p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg mt-4;
-}
-
-/* Wheel demo specific styles */
-.wheel-demo {
-  @apply bg-gray-900 text-white p-4;
-}
-
-.wheel-container {
-  @apply relative mx-auto my-4;
-  max-width: 500px;
-}
-
-.wheel-marker {
-  @apply absolute z-10 left-1/2 transform -translate-x-1/2;
-  top: -25px;
 } 

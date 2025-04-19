@@ -1,23 +1,20 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { enhanceIframeContent } from '@/utils/iframe-utils';
 
 export default function IframeDemo() {
   const [iframeHtml, setIframeHtml] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDemo, setSelectedDemo] = useState<string>('wheel-demo');
-  
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const fetchAndProcessHtml = async (demoFile = selectedDemo) => {
+  const fetchAndProcessHtml = async () => {
     try {
       setIsLoading(true);
       setError(null);
       
       // Gọi API endpoint để lấy nội dung HTML
-      const response = await fetch(`/api/get-iframe-demo?file=${demoFile}`);
+      const response = await fetch('/api/get-iframe-demo');
       
       if (!response.ok) {
         throw new Error(`Không thể tải nội dung. Trạng thái: ${response.status}`);
@@ -36,12 +33,6 @@ export default function IframeDemo() {
     }
   };
 
-  // Change demo
-  const changeDemo = (demoFile: string) => {
-    setSelectedDemo(demoFile);
-    fetchAndProcessHtml(demoFile);
-  };
-
   useEffect(() => {
     fetchAndProcessHtml();
   }, []);
@@ -55,26 +46,17 @@ export default function IframeDemo() {
       
       <div className="demo-content">
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
+          <div>
             <button 
-              onClick={() => fetchAndProcessHtml()}
+              onClick={fetchAndProcessHtml}
               className="demo-button"
             >
               Tải lại nội dung
             </button>
-            
-            <select 
-              value={selectedDemo}
-              onChange={(e) => changeDemo(e.target.value)}
-              className="bg-white text-gray-800 border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="wheel-demo">Vòng Quay May Mắn</option>
-              <option value="iframe-test">Canvas Vẽ Tay</option>
-            </select>
           </div>
           
           <div className="text-sm text-gray-500">
-            <span className="bg-gray-100 px-2 py-1 rounded">{selectedDemo}.html</span>
+            <span className="bg-gray-100 px-2 py-1 rounded">iframe-test.html</span>
           </div>
         </div>
         
@@ -95,23 +77,15 @@ export default function IframeDemo() {
         {!isLoading && !error && (
           <div className="iframe-wrapper">
             <div className="iframe-header">
-              <span className="font-medium">
-                {selectedDemo === 'wheel-demo' ? 'Vòng Quay May Mắn' : 'Interactive Canvas Demo'}
-              </span>
-              <span className="text-xs text-gray-500">
-                {selectedDemo === 'wheel-demo' ? 'Canvas 400 x 400' : 'Canvas 500 x 300'}
-              </span>
+              <span className="font-medium">Interactive Canvas Demo</span>
+              <span className="text-xs text-gray-500">Kích thước: 500 x 300</span>
             </div>
             
-            <div className="iframe-container bg-gray-900">
+            <div className="iframe-container">
               <iframe 
-                ref={iframeRef}
                 srcDoc={iframeHtml}
                 className="w-full"
-                style={{ 
-                  height: selectedDemo === 'wheel-demo' ? '700px' : '600px',
-                  backgroundColor: selectedDemo === 'wheel-demo' ? '#1e2130' : '#f9f9f9' 
-                }}
+                style={{ height: '600px' }}
                 sandbox="allow-scripts allow-popups allow-same-origin"
                 title="Demo Content"
               />
