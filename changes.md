@@ -1,4 +1,3 @@
-
 # Tối ưu hóa codebase - Tổng quan thay đổi
 
 ## 1. Cải thiện cấu trúc và loại bỏ trùng lặp
@@ -45,3 +44,5 @@ Quy trình xử lý Gemini response mới:
 - Sửa lỗi TypeScript với export type thay vì export để tương thích với isolatedModules
 - Sửa lỗi "The requested module doesn't provide an export named: 'MiniGame'" bằng cách làm cho category trở thành tùy chọn trong GameSettingsData
 
+- Đơn giản hóa xử lý HTML trong responseParser.ts để giữ nguyên mã HTML gốc
+- Bỏ qua các bước xử lý phức tạp với HTML thuần
