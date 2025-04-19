@@ -1,4 +1,4 @@
-
+import { debugLog } from '@/utils/debug-utils';
 import { formatHtmlContent } from './html-processor';
 import { fixInlineComments, fixJavaScriptErrors } from './js-processor';
 import { getOptimizedStyles, fixDuplicatedStyles } from './css-processor';
@@ -7,6 +7,11 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
   // Clean the content
   let processedContent = content.replace(/```html|```/g, '');
   processedContent = processedContent.replace(/`/g, '');
+  
+  debugLog('iframe-utils.ts', {
+    original: content,
+    parsed: processedContent
+  });
   
   console.log('📝 Bắt đầu xử lý HTML & JavaScript...');
   
