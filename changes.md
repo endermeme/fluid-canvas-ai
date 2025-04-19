@@ -4,14 +4,15 @@
 ## 1. Cải thiện cấu trúc và loại bỏ trùng lặp
 
 ### Files đã xóa:
-- `src/components/quiz/generator/AIGameGenerator.ts` - trùng lặp với geminiGenerator.ts
 - `src/components/quiz/utils/iframe-utils.ts` - được thay thế bởi các module cụ thể hơn
 - `src/utils/iframe-utils.ts` - quá dài và được tách thành các module nhỏ hơn
 
-### Files tối ưu và tách thành module nhỏ:
-- Chuyển `responseParser.ts` sang sử dụng hệ thống xử lý mới
-- Tách các hàm xử lý HTML, CSS, JS thành các module riêng biệt
-- Giảm độ phức tạp của mã nguồn
+### Files đã thêm và tối ưu:
+- `src/components/quiz/generator/AIGameGenerator.ts` - đã tái cấu trúc lại với mẫu singleton
+- `src/utils/iframe-handler.ts` - xử lý iframe một cách hiệu quả hơn
+- `src/utils/html-processor.ts` - xử lý HTML
+- `src/utils/css-processor.ts` - xử lý CSS
+- `src/utils/js-processor.ts` - xử lý JavaScript
 
 ## 2. Quy trình xử lý code mới
 

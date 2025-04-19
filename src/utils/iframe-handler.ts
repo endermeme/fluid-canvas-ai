@@ -1,87 +1,118 @@
 
 /**
- * Module quản lý và tối ưu hóa iframe
+ * Module xử lý iframe và hiển thị nội dung game
  */
 
 /**
- * Thiết lập iframe với nội dung và xử lý các sự kiện
+ * Nâng cao nội dung iframe với các tính năng bổ sung
  */
-export const setupIframe = (iframe: HTMLIFrameElement, content: string): void => {
-  if (!iframe) return;
+export const enhanceIframeContent = (content: string, title: string = 'Interactive Game'): string => {
+  if (!content) return '';
   
-  // Thiết lập nội dung
-  iframe.srcdoc = content;
-  
-  // Xử lý sự kiện load
-  iframe.onload = () => {
-    const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document;
-    if (!iframeDocument) {
-      console.error('Cannot access iframe document');
-      return;
-    }
-
-    // Chạy lại scripts để đảm bảo thực thi
-    const scripts = iframeDocument.getElementsByTagName('script');
-    Array.from(scripts).forEach(oldScript => {
-      const newScript = iframeDocument.createElement('script');
-      Array.from(oldScript.attributes).forEach(attr => {
-        newScript.setAttribute(attr.name, attr.value);
-      });
-      newScript.textContent = oldScript.textContent;
-      oldScript.parentNode?.replaceChild(newScript, oldScript);
-    });
-  };
-};
-
-/**
- * Thêm các công cụ debug vào iframe
- */
-export const injectDebugUtils = (content: string): string => {
-  const debugScript = `
+  try {
+    // Thêm tập lệnh giao tiếp với ứng dụng chính nếu chưa có
+    if (!content.includes('window.parent.postMessage')) {
+      const communicationScript = `
 <script>
-  window.onerror = function(msg, url, line, col, error) {
-    console.error('Game error:', { msg, line, col });
-    return true;
-  };
-  
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('Game initialized');
-  });
-</script>
-</body>`;
-
-  return content.replace('</body>', debugScript);
-};
-
-/**
- * Thêm responsive hooks vào iframe
- */
-export const addResponsiveHooks = (content: string): string => {
-  const resizeScript = `
-<script>
-  // Tự động điều chỉnh kích thước canvas
-  function resizeCanvases() {
-    const canvases = document.querySelectorAll('canvas');
-    canvases.forEach(canvas => {
-      const width = canvas.offsetWidth;
-      const height = canvas.offsetHeight;
-      const ratio = window.devicePixelRatio || 1;
-      
-      if (canvas.width !== width * ratio || canvas.height !== height * ratio) {
-        canvas.width = width * ratio;
-        canvas.height = height * ratio;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.scale(ratio, ratio);
-        }
-      }
-    });
+// Communication with parent window
+function sendGameStats(stats) {
+  if (window.parent) {
+    window.parent.postMessage({
+      type: 'gameStats',
+      payload: stats
+    }, '*');
   }
-  
-  window.addEventListener('resize', resizeCanvases);
-  document.addEventListener('DOMContentLoaded', resizeCanvases);
-</script>
-</body>`;
+}
 
-  return content.replace('</body>', resizeScript);
+// Khi game hoàn thành
+function gameCompleted(score) {
+  sendGameStats({
+    completed: true,
+    score: score,
+    totalTime: performance.now() / 1000
+  });
+}
+
+// Khi game bắt đầu
+document.addEventListener('DOMContentLoaded', function() {
+  // Đảm bảo tất cả các liên kết mở trong tab mới
+  document.querySelectorAll('a').forEach(link => {
+    if (link.getAttribute('href') && !link.getAttribute('target')) {
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+    }
+  });
+  
+  // Ghi lại bắt đầu trò chơi
+  sendGameStats({
+    started: true,
+    timestamp: new Date().toISOString()
+  });
+});
+</script>`;
+
+      // Chèn vào trước thẻ đóng </body>
+      if (content.includes('</body>')) {
+        content = content.replace('</body>', `${communicationScript}\n</body>`);
+      } else {
+        content += communicationScript;
+      }
+    }
+    
+    // Đảm bảo sandbox cho iframe
+    if (!content.includes('<meta http-equiv="Content-Security-Policy"')) {
+      const cspMeta = `<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:;">`;
+      
+      if (content.includes('</head>')) {
+        content = content.replace('</head>', `  ${cspMeta}\n</head>`);
+      } else if (content.includes('<head>')) {
+        content = content.replace('<head>', `<head>\n  ${cspMeta}`);
+      }
+    }
+    
+    return content;
+  } catch (error) {
+    console.error('Error enhancing iframe content:', error);
+    return content;
+  }
+};
+
+/**
+ * Xử lý các sự kiện từ iframe
+ */
+export const setupIframeEventListener = (callback: (data: any) => void): () => void => {
+  const messageHandler = (event: MessageEvent) => {
+    if (event.data && typeof event.data === 'object') {
+      callback(event.data);
+    }
+  };
+  
+  window.addEventListener('message', messageHandler);
+  
+  // Return cleanup function
+  return () => window.removeEventListener('message', messageHandler);
+};
+
+/**
+ * Làm mới iframe
+ */
+export const reloadIframe = (iframeRef: React.RefObject<HTMLIFrameElement>, content: string): boolean => {
+  try {
+    if (iframeRef.current) {
+      // Clearing iframe
+      iframeRef.current.src = 'about:blank';
+      
+      // Set new content after a small delay
+      setTimeout(() => {
+        if (iframeRef.current) {
+          iframeRef.current.srcdoc = content;
+        }
+      }, 100);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Error reloading iframe:', error);
+    return false;
+  }
 };
