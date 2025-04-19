@@ -1,6 +1,17 @@
 
 # Changes Log
 
+## Fixed CustomGameForm Import
+
+### Files Updated:
+1. Updated import for CustomGameForm in QuickGameSelector.tsx:
+   - Changed import path from './quick-game-selector/CustomGameForm' to './custom-games/CustomGameForm'
+
+### Details:
+- Fixed TypeScript error regarding missing module
+- Properly redirected import to use the component from custom-games directory instead
+- Maintained same functionality while removing the dependency on the deleted file
+
 ## Removed Duplicate CustomGameForm Component
 
 ### Files Removed:

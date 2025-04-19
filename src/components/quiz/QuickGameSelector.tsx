@@ -43,7 +43,7 @@ import {
 } from 'lucide-react';
 
 import GameHeader from './quick-game-selector/GameHeader';
-import CustomGameForm from './quick-game-selector/CustomGameForm';
+import CustomGameForm from './custom-games/CustomGameForm';
 import GameGrid from './quick-game-selector/GameGrid';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
