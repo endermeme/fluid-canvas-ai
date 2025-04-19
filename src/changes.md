@@ -1,6 +1,17 @@
 
 # Changes Log
 
+## Removed Duplicate CustomGameForm Component
+
+### Files Removed:
+1. Removed duplicate CustomGameForm component:
+   - src/components/quiz/quick-game-selector/CustomGameForm.tsx
+
+### Details:
+- Removed redundant CustomGameForm.tsx file from quick-game-selector directory
+- This component was a duplicate of src/components/quiz/custom-games/CustomGameForm.tsx
+- Reduced code duplication and improved maintainability
+
 ## Fixed MiniGame Type Export and Import Issues
 
 ### Files Updated:
