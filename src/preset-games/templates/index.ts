@@ -3,35 +3,35 @@ import React from 'react';
 
 // Placeholder components until real implementations are created
 const QuizTemplate: React.FC<any> = (props) => {
-  return <div>{"Quiz Template (Placeholder)"}</div>;
+  return <div>Quiz Template (Placeholder)</div>;
 };
 
 const FlashcardsTemplate: React.FC<any> = (props) => {
-  return <div>{"Flashcards Template (Placeholder)"}</div>;
+  return <div>Flashcards Template (Placeholder)</div>;
 };
 
 const MatchingTemplate: React.FC<any> = (props) => {
-  return <div>{"Matching Template (Placeholder)"}</div>;
+  return <div>Matching Template (Placeholder)</div>;
 };
 
 const MemoryTemplate: React.FC<any> = (props) => {
-  return <div>{"Memory Template (Placeholder)"}</div>;
+  return <div>Memory Template (Placeholder)</div>;
 };
 
 const OrderingTemplate: React.FC<any> = (props) => {
-  return <div>{"Ordering Template (Placeholder)"}</div>;
+  return <div>Ordering Template (Placeholder)</div>;
 };
 
 const WordSearchTemplate: React.FC<any> = (props) => {
-  return <div>{"WordSearch Template (Placeholder)"}</div>;
+  return <div>WordSearch Template (Placeholder)</div>;
 };
 
 const PictionaryTemplate: React.FC<any> = (props) => {
-  return <div>{"Pictionary Template (Placeholder)"}</div>;
+  return <div>Pictionary Template (Placeholder)</div>;
 };
 
 const TrueFalseTemplate: React.FC<any> = (props) => {
-  return <div>{"TrueFalse Template (Placeholder)"}</div>;
+  return <div>TrueFalse Template (Placeholder)</div>;
 };
 
 // Map game types to template components
