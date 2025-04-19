@@ -1,12 +1,11 @@
 
 export const enhanceIframeContent = (content: string, title?: string): string => {
-  // Clean the content
+  // Loại bỏ cú pháp markdown nếu có
   let processedContent = content.replace(/```html|```/g, '');
-  processedContent = processedContent.replace(/`/g, '');
   
   console.log('📝 Bắt đầu xử lý HTML & JavaScript...');
   
-  // Add DOCTYPE and HTML structure if missing
+  // Thêm DOCTYPE và cấu trúc HTML nếu thiếu
   if (!processedContent.includes('<!DOCTYPE html>')) {
     if (processedContent.includes('<html')) {
       processedContent = `<!DOCTYPE html>${processedContent}`;
@@ -26,46 +25,432 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     console.log('🔄 Đã thêm doctype và cấu trúc HTML');
   }
   
-  // Format HTML with proper indentation and line breaks
+  // Chuẩn hóa HTML với indentation phù hợp
   processedContent = formatHtmlContent(processedContent);
-  console.log('🔄 Đã định dạng HTML với thụt lề phù hợp');
   
-  // Fix comments that might "eat" code
-  processedContent = fixInlineComments(processedContent);
-  console.log('🔄 Đã sửa các comment "ăn" mất code');
+  // Sửa lỗi comments
+  processedContent = fixComments(processedContent);
   
-  // Fix common JavaScript errors
+  // Sửa lỗi JavaScript phổ biến
   processedContent = fixJavaScriptErrors(processedContent);
-  console.log('🔄 Đã sửa các lỗi JavaScript phổ biến');
   
-  // Fix duplicated styles by limiting to one style tag in head
+  // Sửa lỗi style trùng lặp
   processedContent = fixDuplicatedStyles(processedContent);
-  console.log('🔄 Đã sửa các style CSS trùng lặp');
   
-  // Add optimization CSS styles at the end, after fixing duplicated styles
-  const optimizedStyles = getOptimizedStyles();
+  // Thêm CSS cơ bản cho responsive
+  processedContent = addBaseStyles(processedContent);
   
-  // Ensure we only have one style tag in head
-  if (processedContent.includes('<head>') && !processedContent.includes('<style id="optimized-iframe-styles">')) {
-    processedContent = processedContent.replace('<head>', `<head>\n  <style id="optimized-iframe-styles">\n${optimizedStyles}\n  </style>`);
-    console.log('🔄 Đã thêm CSS tối ưu vào head');
+  // Thêm debug và utility scripts
+  processedContent = addDebugUtilities(processedContent);
+  
+  console.log('✅ HTML/CSS/JS đã được xử lý thành công');
+  return processedContent;
+};
+
+/**
+ * Định dạng nội dung HTML với thụt đầu dòng phù hợp
+ */
+const formatHtmlContent = (html: string): string => {
+  if (!html || typeof html !== 'string') return '';
+  
+  try {
+    // Bảo vệ nội dung trong các thẻ script và style
+    const scriptTags: string[] = [];
+    const styleTags: string[] = [];
+    
+    // Trích xuất và thay thế script tags bằng placeholders
+    let processedHtml = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, (match) => {
+      const placeholder = `__SCRIPT_PLACEHOLDER_${scriptTags.length}__`;
+      scriptTags.push(match);
+      return placeholder;
+    });
+    
+    // Trích xuất và thay thế style tags bằng placeholders
+    processedHtml = processedHtml.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, (match) => {
+      const placeholder = `__STYLE_PLACEHOLDER_${styleTags.length}__`;
+      styleTags.push(match);
+      return placeholder;
+    });
+    
+    // Định dạng cấu trúc HTML
+    processedHtml = processedHtml
+      // Thêm line breaks sau thẻ mở
+      .replace(/(<[^\/!][^>]*>)(?!\s*[\r\n])/g, '$1\n')
+      // Thêm line breaks trước thẻ đóng
+      .replace(/(?<!\s*[\r\n])(<\/[^>]+>)/g, '\n$1')
+      // Thêm line breaks sau thẻ tự đóng
+      .replace(/(<[^>]*\/>)(?!\s*[\r\n])/g, '$1\n')
+      // Thêm line breaks sau comments và DOCTYPE
+      .replace(/(<!(?:DOCTYPE|--)[^>]*>)(?!\s*[\r\n])/g, '$1\n')
+      // Loại bỏ multiple empty lines
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
+      .trim();
+    
+    // Thêm indentation
+    const lines = processedHtml.split('\n');
+    let indentLevel = 0;
+    let formattedHtml = '';
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      
+      // Trường hợp đặc biệt cho DOCTYPE không được thụt lề
+      if (line.startsWith('<!DOCTYPE')) {
+        formattedHtml += line + '\n';
+        continue;
+      }
+      
+      // Giảm indent cho các thẻ đóng
+      if (line.startsWith('</') && !line.startsWith('</script') && !line.startsWith('</style')) {
+        indentLevel = Math.max(0, indentLevel - 1);
+      }
+      
+      // Thêm indentation hiện tại
+      formattedHtml += '  '.repeat(indentLevel) + line + '\n';
+      
+      // Tăng indent sau các thẻ mở, nhưng không phải cho thẻ tự đóng hoặc thẻ đặc biệt
+      if (line.match(/<[^\/!][^>]*>/) && 
+          !line.match(/<[^>]*\/>/) && 
+          !line.match(/<(script|style|link|meta|br|hr|img|input)[^>]*>/i)) {
+        indentLevel++;
+      }
+    }
+    
+    // Khôi phục script tags với định dạng
+    scriptTags.forEach((script, index) => {
+      const placeholder = `__SCRIPT_PLACEHOLDER_${index}__`;
+      
+      // Định dạng nội dung JavaScript
+      const formattedScript = script.replace(/<script[^>]*>([\s\S]*?)<\/script>/i, (match, jsContent) => {
+        const formattedJs = formatJavaScript(jsContent);
+        return `<script>\n${formattedJs}\n</script>`;
+      });
+      
+      formattedHtml = formattedHtml.replace(placeholder, formattedScript);
+    });
+    
+    // Khôi phục style tags với định dạng
+    styleTags.forEach((style, index) => {
+      const placeholder = `__STYLE_PLACEHOLDER_${index}__`;
+      
+      // Định dạng nội dung CSS
+      const formattedStyle = style.replace(/<style[^>]*>([\s\S]*?)<\/style>/i, (match, cssContent) => {
+        const formattedCss = formatCss(cssContent);
+        return `<style>\n  ${formattedCss}\n</style>`;
+      });
+      
+      formattedHtml = formattedHtml.replace(placeholder, formattedStyle);
+    });
+    
+    return formattedHtml;
+  } catch (error) {
+    console.error('Error formatting HTML content:', error);
+    return html;
+  }
+};
+
+/**
+ * Định dạng mã JavaScript với indentation phù hợp
+ */
+const formatJavaScript = (code: string): string => {
+  if (!code || typeof code !== 'string') return '';
+  
+  try {
+    // Định dạng JS cơ bản
+    let formatted = code
+      // Thêm line breaks sau dấu chấm phẩy, dấu ngoặc mở và trước dấu ngoặc đóng
+      .replace(/;(?!\n)/g, ';\n')
+      .replace(/{(?!\n)/g, '{\n')
+      .replace(/(?<!\n)}/g, '\n}')
+      // Thêm line breaks sau function declarations
+      .replace(/function\s+(\w+)\s*\([^)]*\)\s*{/g, 'function $1($2) {\n')
+      // Định dạng if statements với line breaks
+      .replace(/if\s*\([^)]+\)\s*{/g, match => match + '\n')
+      // Định dạng for loops với line breaks
+      .replace(/for\s*\([^)]+\)\s*{/g, match => match + '\n')
+      // Định dạng khai báo biến với line breaks
+      .replace(/(const|let|var)\s+([^;]+);/g, '$1 $2;\n')
+      // Dọn dẹp dòng trống thừa
+      .replace(/\n\s*\n\s*\n/g, '\n\n');
+    
+    // Thêm indentation thích hợp
+    const lines = formatted.split('\n');
+    let indentLevel = 1; // Bắt đầu với 1 cấp độ vì chúng ta đang ở trong script tag
+    let indentedCode = '';
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) {
+        indentedCode += '\n';
+        continue;
+      }
+      
+      // Giảm indent cho dấu ngoặc đóng
+      if (line.startsWith('}')) {
+        indentLevel = Math.max(0, indentLevel - 1);
+      }
+      
+      // Thêm indentation hiện tại
+      indentedCode += '  '.repeat(indentLevel) + line + '\n';
+      
+      // Tăng indent sau dấu ngoặc mở
+      if (line.endsWith('{')) {
+        indentLevel++;
+      }
+    }
+    
+    return indentedCode;
+  } catch (error) {
+    console.error('Error formatting JavaScript:', error);
+    return '  ' + code.trim().split('\n').join('\n  ');
+  }
+};
+
+/**
+ * Định dạng CSS 
+ */
+const formatCss = (code: string): string => {
+  if (!code || typeof code !== 'string') return '';
+  
+  try {
+    // Định dạng CSS cơ bản
+    let formattedCss = code
+      .replace(/\s*\{\s*/g, ' {\n  ')
+      .replace(/;\s*/g, ';\n  ')
+      .replace(/\s*}\s*/g, '\n}\n')
+      .replace(/\n\s*\n/g, '\n')
+      .trim();
+    
+    return formattedCss;
+  } catch (error) {
+    console.error('Error formatting CSS:', error);
+    return code;
+  }
+};
+
+/**
+ * Sửa lỗi cho comments bị "ăn" code
+ */
+const fixComments = (html: string): string => {
+  if (!html || typeof html !== 'string') return html;
+  
+  try {
+    // Tìm và sửa các dòng comment JavaScript
+    return html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (match, scriptContent) => {
+      // Tách comment và code thành các dòng riêng
+      let fixedScript = scriptContent.replace(/(\/\/[^\n]*)(let|const|var|function)/g, '$1\n$2');
+      
+      // Đảm bảo comment và khai báo biến được tách thành dòng riêng
+      fixedScript = fixedScript.replace(/(\/\/[^\n]*[\w\d]+)\s*=\s*/g, '$1\n$2 = ');
+      
+      // Sửa các tham số function thành tên có ý nghĩa
+      fixedScript = fixedScript.replace(/function\s+easeOut\s*\(\$2\)\s*{/, 'function easeOut(t, b, c, d) {');
+      
+      return match.replace(scriptContent, fixedScript);
+    });
+  } catch (error) {
+    console.error('Error fixing comments:', error);
+    return html;
+  }
+};
+
+/**
+ * Sửa lỗi JavaScript phổ biến
+ */
+const fixJavaScriptErrors = (html: string): string => {
+  if (!html || typeof html !== 'string') return html;
+  
+  try {
+    return html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (match, scriptContent) => {
+      let fixedScript = scriptContent;
+      
+      // Sửa lỗi tham số placeholder $2 trong khai báo hàm
+      fixedScript = fixedScript.replace(
+        /function\s+(\w+)\s*\(\$2\)/g, 
+        (match, funcName) => {
+          // Xác định tham số dựa vào tên hàm
+          if (funcName === 'drawSegment') return 'function drawSegment(index, color, text)';
+          if (funcName === 'getWinningSegment') return 'function getWinningSegment(finalAngle)';
+          if (funcName === 'drawWheel') return 'function drawWheel()';
+          if (funcName === 'spinWheel') return 'function spinWheel()';
+          if (funcName.includes('ease') || funcName.includes('animate')) return `function ${funcName}(t, b, c, d)`;
+          
+          // Mặc định không tham số
+          return `function ${funcName}()`;
+        }
+      );
+      
+      // Sửa lỗi template literals không có backticks
+      fixedScript = fixedScript.replace(
+        /(\w+\.style\.transform\s*=\s*)rotate\(\$\{([^}]+)\}([^)]*)\);/g,
+        (match, prefix, content, suffix) => {
+          return `${prefix}\`rotate(\${${content}}${suffix})\`;`;
+        }
+      );
+      
+      // Sửa lỗi template literals trong textContent
+      fixedScript = fixedScript.replace(
+        /(\w+\.textContent\s*=\s*)([^;`"']*)(\$\{)([^}]+)(\})([^;]*);/g,
+        (match, prefix, before, interpStart, content, interpEnd, after) => {
+          if (!before.includes('`') && !after.includes('`')) {
+            return `${prefix}\`${before}${interpStart}${content}${interpEnd}${after}\`;`;
+          }
+          return match;
+        }
+      );
+      
+      // Sửa lỗi setTimeout không có tham số time
+      fixedScript = fixedScript.replace(
+        /setTimeout\s*\(\s*([^,)]+)\s*\)\s*;/g,
+        'setTimeout($1, 0);'
+      );
+      
+      // Thêm kiểm tra ctx cho canvas
+      if (fixedScript.includes('canvas.getContext') && 
+          !fixedScript.includes('if (!ctx)') &&
+          fixedScript.includes('ctx.')) {
+        fixedScript = fixedScript.replace(
+          /const\s+ctx\s*=\s*canvas\.getContext\(['"]2d['"]\);/,
+          `const ctx = canvas.getContext('2d');\n  if (!ctx) { console.error('Không thể lấy 2d context từ canvas'); return; }`
+        );
+      }
+      
+      return match.replace(scriptContent, fixedScript);
+    });
+  } catch (error) {
+    console.error('Error fixing JavaScript errors:', error);
+    return html;
+  }
+};
+
+/**
+ * Sửa lỗi style CSS trùng lặp
+ */
+const fixDuplicatedStyles = (html: string): string => {
+  if (!html.includes('<style')) return html;
+
+  try {
+    // Trích xuất tất cả style tags
+    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+    const styleMatches = Array.from(html.matchAll(styleRegex));
+    
+    if (styleMatches.length <= 1) return html; // Không có trùng lặp
+    
+    // Kết hợp tất cả style vào một
+    let combinedStyles = '';
+    styleMatches.forEach(match => {
+      combinedStyles += match[1] + '\n';
+    });
+    
+    // Loại bỏ tất cả style tags
+    let processedHtml = html.replace(styleRegex, '');
+    
+    // Thêm lại một style tag duy nhất trong head
+    if (processedHtml.includes('<head>')) {
+      processedHtml = processedHtml.replace('<head>', `<head>\n  <style>\n${combinedStyles}\n  </style>`);
+    } else {
+      // Nếu không có head tag, thêm nó vào
+      processedHtml = processedHtml.replace('<html>', '<html>\n<head>\n  <style>\n${combinedStyles}\n  </style>\n</head>');
+    }
+    
+    return processedHtml;
+  } catch (error) {
+    console.error('Error fixing duplicated styles:', error);
+    return html;
+  }
+};
+
+/**
+ * Thêm CSS cơ bản cho game
+ */
+const addBaseStyles = (html: string): string => {
+  const baseStyles = `
+    /* Base CSS for responsive games */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+    }
+    
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    
+    /* Containers */
+    .container, .game-container, #game-container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    /* Canvas */
+    canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+    
+    /* Controls */
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      background: #4f46e5;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.2s;
+    }
+    
+    button:hover:not(:disabled) {
+      background: #4338ca;
+    }
+    
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(20px); }
+      to { transform: translateY(0); }
+    }
+  `;
+  
+  if (html.includes('<head>') && !html.includes('<style id="base-game-styles">')) {
+    return html.replace('</head>', `  <style id="base-game-styles">${baseStyles}\n  </style>\n</head>`);
   }
   
-  // Add a meta tag for Content Security Policy to improve security
-  if (!processedContent.includes('content-security-policy')) {
-    const cspTag = `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">`;
-    processedContent = processedContent.replace('</head>', `  ${cspTag}\n</head>`);
-    console.log('🔄 Đã thêm Content Security Policy');
-  }
-  
-  // Thêm debug utility script vào cuối body
+  return html;
+};
+
+/**
+ * Thêm debug utilities vào cuối body
+ */
+const addDebugUtilities = (html: string): string => {
   const debugScript = `
 <script>
-  // Utility để debug các game - hiển thị lỗi trong iframe
+  // Debug utilities cho game trong iframe
   window.onerror = function(message, source, lineno, colno, error) {
     console.error('🔴 Lỗi Game:', message);
     
-    // Tạo error overlay nếu chưa có
+    // Tạo error overlay để hiển thị lỗi
     if (!document.getElementById('error-overlay')) {
       const overlay = document.createElement('div');
       overlay.id = 'error-overlay';
@@ -95,31 +480,26 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     return true; // Ngăn lỗi hiển thị trong console
   };
   
-  // Utility để log thông báo game
-  window.gameLog = function(message) {
-    console.log('🎮 Game:', message);
-  };
-  
-  // Auto-resize cho canvas elements
+  // Auto-resize cho canvas
   document.addEventListener('DOMContentLoaded', function() {
     console.log('Game đã được khởi tạo thành công');
     
-    // Thêm animation cho các elements khi trang load
+    // Thêm animation cho các thành phần khi trang tải
     document.querySelectorAll('h1, h2, h3, p, button, .card, .item, .box').forEach((el, index) => {
-      el.style.opacity = '0';
-      el.style.animation = \`fadeIn 0.5s ease \${index * 0.1}s forwards, slideUp 0.5s ease \${index * 0.1}s forwards\`;
+      if (!el.style.animation) {
+        el.style.opacity = '0';
+        el.style.animation = \`fadeIn 0.5s ease \${index * 0.1}s forwards, slideUp 0.5s ease \${index * 0.1}s forwards\`;
+      }
     });
     
-    // Tự động resize canvas
+    // Tự động điều chỉnh kích thước canvas
     const resizeCanvases = function() {
       const canvases = document.querySelectorAll('canvas');
       canvases.forEach(canvas => {
-        // Đảm bảo canvas responsive trong container của nó
         if (canvas.parentElement && !canvas.hasAttribute('data-auto-sized')) {
           const parentWidth = canvas.parentElement.clientWidth;
-          // Giữ nguyên aspect ratio
           const aspectRatio = canvas.width / canvas.height;
-          const newWidth = Math.min(parentWidth * 0.95, canvas.width); // Giới hạn kích thước tối đa
+          const newWidth = Math.min(parentWidth * 0.95, canvas.width);
           canvas.style.width = newWidth + 'px';
           canvas.style.height = (newWidth / aspectRatio) + 'px';
           canvas.setAttribute('data-auto-sized', 'true');
@@ -127,446 +507,14 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       });
     };
     
-    // Resize ngay khi load và khi thay đổi kích thước màn hình
     resizeCanvases();
     window.addEventListener('resize', resizeCanvases);
   });
 </script>`;
   
-  processedContent = processedContent.replace('</body>', `${debugScript}\n</body>`);
-  console.log('🔄 Đã thêm debug utility script');
-  
-  console.log('✅ Đã hoàn thành xử lý! Code sẵn sàng để chạy.');
-  return processedContent;
-};
-
-/**
- * Sửa lỗi trùng lặp style trong HTML
- */
-const fixDuplicatedStyles = (html: string): string => {
-  if (!html.includes('<style')) return html;
-
-  try {
-    // Extract all style tags
-    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-    const styleMatches = Array.from(html.matchAll(styleRegex));
-    
-    if (styleMatches.length <= 1) return html; // No duplication
-    
-    // Combine all styles into one
-    let combinedStyles = '';
-    styleMatches.forEach(match => {
-      combinedStyles += match[1] + '\n';
-    });
-    
-    // Remove all style tags
-    let processedHtml = html.replace(styleRegex, '');
-    
-    // Add back single style tag in head
-    if (processedHtml.includes('<head>')) {
-      processedHtml = processedHtml.replace('<head>', `<head>\n  <style>\n${combinedStyles}\n  </style>`);
-    } else {
-      // If no head tag, add it
-      processedHtml = processedHtml.replace('<html>', '<html>\n<head>\n  <style>\n${combinedStyles}\n  </style>\n</head>');
-    }
-    
-    return processedHtml;
-  } catch (error) {
-    console.error('Error fixing duplicated styles:', error);
-    return html;
+  if (!html.includes('window.onerror')) {
+    return html.replace('</body>', `${debugScript}\n</body>`);
   }
-};
-
-/**
- * Format JavaScript code with proper indentation and line breaks
- */
-const formatJavaScript = (code: string): string => {
-  if (!code || typeof code !== 'string') return '';
   
-  try {
-    // Basic JS formatting
-    let formatted = code
-      // Add line breaks after semicolons, opening braces, and before closing braces
-      .replace(/;(?!\n)/g, ';\n')
-      .replace(/{(?!\n)/g, '{\n')
-      .replace(/(?<!\n)}/g, '\n}')
-      // Add line breaks after function declarations
-      .replace(/function\s+(\w+)\s*\([^)]*\)\s*{/g, 'function $1($2) {\n')
-      // Format if statements with line breaks
-      .replace(/if\s*\([^)]+\)\s*{/g, match => match + '\n')
-      // Format for loops with line breaks
-      .replace(/for\s*\([^)]+\)\s*{/g, match => match + '\n')
-      // Format variable declarations with line breaks
-      .replace(/(const|let|var)\s+([^;]+);/g, '$1 $2;\n')
-      // Clean up excessive empty lines
-      .replace(/\n\s*\n\s*\n/g, '\n\n');
-    
-    // Add proper indentation
-    const lines = formatted.split('\n');
-    let indentLevel = 1; // Start with 1 level as we're inside a self-executing function
-    let indentedCode = '';
-    
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) {
-        indentedCode += '\n';
-        continue;
-      }
-      
-      // Decrease indent for closing braces
-      if (line.startsWith('}')) {
-        indentLevel = Math.max(0, indentLevel - 1);
-      }
-      
-      // Add current indentation
-      indentedCode += '  '.repeat(indentLevel) + line + '\n';
-      
-      // Increase indent after opening braces
-      if (line.endsWith('{')) {
-        indentLevel++;
-      }
-    }
-    
-    return indentedCode;
-  } catch (error) {
-    console.error('Error formatting JavaScript:', error);
-    return '  ' + code.trim().split('\n').join('\n  ');
-  }
-};
-
-/**
- * Format a script tag with proper indentation
- */
-const formatScriptTag = (scriptTag: string): string => {
-  if (!scriptTag || typeof scriptTag !== 'string') return '';
-  
-  try {
-    // Extract content between script tags
-    const content = scriptTag.match(/<script[^>]*>([\s\S]*?)<\/script>/i)?.[1] || '';
-    
-    if (!content.trim()) {
-      return '<script>\n</script>';
-    }
-    
-    // Get attributes from opening tag
-    const attributes = scriptTag.match(/<script([^>]*)>/i)?.[1] || '';
-    
-    // Format the script content with indentation
-    const formattedContent = formatJavaScript(content);
-    
-    // Return formatted script tag
-    return `<script${attributes}>\n${formattedContent}</script>`;
-  } catch (error) {
-    console.error('Error formatting script tag:', error);
-    return scriptTag;
-  }
-};
-
-/**
- * Format HTML content with proper indentation and line breaks
- */
-const formatHtmlContent = (html: string): string => {
-  if (!html || typeof html !== 'string') return '';
-  
-  try {
-    // Preserve content in script and style tags
-    const scriptTags: string[] = [];
-    const styleTags: string[] = [];
-    
-    // Extract and replace script tags with placeholders
-    let processedHtml = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, (match) => {
-      const placeholder = `__SCRIPT_PLACEHOLDER_${scriptTags.length}__`;
-      scriptTags.push(match);
-      return placeholder;
-    });
-    
-    // Extract and replace style tags with placeholders
-    processedHtml = processedHtml.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, (match) => {
-      const placeholder = `__STYLE_PLACEHOLDER_${styleTags.length}__`;
-      styleTags.push(match);
-      return placeholder;
-    });
-    
-    // Format HTML structure
-    processedHtml = processedHtml
-      // Add line breaks after opening tags
-      .replace(/(<[^\/!][^>]*>)(?!\s*[\r\n])/g, '$1\n')
-      // Add line breaks before closing tags
-      .replace(/(?<!\s*[\r\n])(<\/[^>]+>)/g, '\n$1')
-      // Add line breaks after self-closing tags
-      .replace(/(<[^>]*\/>)(?!\s*[\r\n])/g, '$1\n')
-      // Add line breaks after comments and DOCTYPE
-      .replace(/(<!(?:DOCTYPE|--)[^>]*>)(?!\s*[\r\n])/g, '$1\n')
-      // Clean up excessive empty lines
-      .replace(/\n\s*\n\s*\n/g, '\n\n')
-      .trim();
-    
-    // Apply indentation
-    const lines = processedHtml.split('\n');
-    let indentLevel = 0;
-    let formattedHtml = '';
-    
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-      
-      // Special case for DOCTYPE which doesn't get indented
-      if (line.startsWith('<!DOCTYPE')) {
-        formattedHtml += line + '\n';
-        continue;
-      }
-      
-      // Decrease indent for closing tags
-      if (line.startsWith('</') && !line.startsWith('</script') && !line.startsWith('</style')) {
-        indentLevel = Math.max(0, indentLevel - 1);
-      }
-      
-      // Add current indentation
-      formattedHtml += '  '.repeat(indentLevel) + line + '\n';
-      
-      // Increase indent after opening tags, but not for self-closing or special tags
-      if (line.match(/<[^\/!][^>]*>/) && 
-          !line.match(/<[^>]*\/>/) && 
-          !line.match(/<(script|style|link|meta|br|hr|img|input)[^>]*>/i)) {
-        indentLevel++;
-      }
-    }
-    
-    // Restore script tags
-    scriptTags.forEach((script, index) => {
-      const placeholder = `__SCRIPT_PLACEHOLDER_${index}__`;
-      formattedHtml = formattedHtml.replace(placeholder, formatScriptTag(script));
-    });
-    
-    // Restore style tags with formatting
-    styleTags.forEach((style, index) => {
-      const placeholder = `__STYLE_PLACEHOLDER_${index}__`;
-      
-      // Format the CSS content
-      const formattedStyle = style.replace(/<style[^>]*>([\s\S]*?)<\/style>/i, (match, cssContent) => {
-        const formattedCss = cssContent
-          .replace(/{/g, ' {\n  ')
-          .replace(/;/g, ';\n  ')
-          .replace(/}/g, '\n}')
-          .replace(/\s+/g, ' ')
-          .replace(/\n\s*\n/g, '\n')
-          .trim();
-        
-        return `<style>\n  ${formattedCss}\n</style>`;
-      });
-      
-      formattedHtml = formattedHtml.replace(placeholder, formattedStyle);
-    });
-    
-    return formattedHtml;
-  } catch (error) {
-    console.error('Error formatting HTML content:', error);
-    return html;
-  }
-};
-
-/**
- * Tách comments và code thành các dòng riêng biệt để tránh lỗi comments "nuốt" code
- */
-const fixInlineComments = (html: string): string => {
-  if (!html || typeof html !== 'string') return html;
-  
-  try {
-    // Tìm và sửa các dòng comment JavaScript
-    return html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (match, scriptContent) => {
-      // Tách comment và code thành các dòng riêng
-      let fixedScript = scriptContent.replace(/(\/\/[^\n]*)(let|const|var|function)/g, '$1\n$2');
-      
-      // Đảm bảo comment và khai báo biến được tách thành dòng riêng
-      fixedScript = fixedScript.replace(/(\/\/[^\n]*[\w\d]+)\s*=\s*/g, '$1\n$2 = ');
-      
-      // Sửa function easeOut có tham số đúng
-      fixedScript = fixedScript.replace(/function\s+easeOut\s*\(\$2\)\s*{/, 'function easeOut(t, b, c, d) {');
-      
-      return match.replace(scriptContent, fixedScript);
-    });
-  } catch (error) {
-    console.error('Error fixing inline comments:', error);
-    return html;
-  }
-};
-
-/**
- * Sửa lỗi JavaScript tổng quát từ AI
- * - Xử lý các vấn đề phổ biến trong mã được tạo bởi AI
- */
-const fixJavaScriptErrors = (html: string): string => {
-  if (!html || typeof html !== 'string') return html;
-  
-  try {
-    // Xử lý lỗi trong các thẻ script
-    return html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (match, scriptContent) => {
-      console.log('🔍 Đang sửa JavaScript...');
-      
-      // Sửa lỗi tham số $2 trong các khai báo hàm
-      let fixedScript = scriptContent.replace(
-        /function\s+(\w+)\s*\(\$2\)/g, 
-        (match, funcName) => {
-          console.log(`  🛠️ Sửa hàm ${funcName} có tham số $2`);
-          
-          // Dựa vào tên hàm để xác định tham số phù hợp
-          if (funcName === 'drawSegment') return 'function drawSegment(index)';
-          if (funcName === 'getWinningSegment') return 'function getWinningSegment(finalAngle)';
-          if (funcName === 'drawWheel' || funcName === 'spinWheel') return `function ${funcName}()`;
-          
-          // Với các hàm khác, mặc định không có tham số
-          return `function ${funcName}()`;
-        }
-      );
-      
-      // Sửa lỗi template literals không có backticks
-      fixedScript = fixedScript.replace(
-        /(\w+\.style\.transform\s*=\s*)rotate\(\$\{([^}]+)\}([^)]*)\);/g,
-        (match, prefix, content, suffix) => {
-          return `${prefix}\`rotate(\${${content}}${suffix})\`;`;
-        }
-      );
-      
-      // Sửa lỗi template literals trong textContent
-      fixedScript = fixedScript.replace(
-        /(\w+\.textContent\s*=\s*)([^;`"']*)(\$\{)([^}]+)(\})([^;]*);/g,
-        (match, prefix, before, interpStart, content, interpEnd, after) => {
-          // Chỉ thêm backtick nếu chưa có
-          if (!before.includes('`') && !after.includes('`')) {
-            return `${prefix}\`${before}${interpStart}${content}${interpEnd}${after}\`;`;
-          }
-          return match;
-        }
-      );
-      
-      // Fix lỗi phổ biến: gọi setTimeout không có tham số time
-      fixedScript = fixedScript.replace(
-        /setTimeout\s*\(\s*([^,)]+)\s*\)\s*;/g,
-        'setTimeout($1, 0);'
-      );
-      
-      // Thêm xử lý cho lỗi canvas không lấy context 2d
-      if (fixedScript.includes('canvas.getContext') && 
-          !fixedScript.includes('if (!ctx)') &&
-          fixedScript.includes('ctx.')) {
-        fixedScript = fixedScript.replace(
-          /const\s+ctx\s*=\s*canvas\.getContext\(['"]2d['"]\);/,
-          `const ctx = canvas.getContext('2d');\n  if (!ctx) { console.error('Không thể lấy 2d context từ canvas'); return; }`
-        );
-      }
-      
-      return match.replace(scriptContent, fixedScript);
-    });
-  } catch (error) {
-    console.error('Error fixing JavaScript errors:', error);
-    return html;
-  }
-};
-
-/**
- * Get optimized styles for the iframe content
- */
-const getOptimizedStyles = (): string => {
-  return `
-    /* Reset CSS */
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
-    
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      line-height: 1.6;
-      font-size: 16px;
-    }
-    
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    
-    /* Typography */
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 0.8em;
-      margin-bottom: 0.5em;
-      line-height: 1.4;
-      font-weight: 600;
-    }
-    
-    h1 { font-size: 2.25rem; }
-    h2 { font-size: 1.75rem; }
-    h3 { font-size: 1.5rem; }
-    
-    p { margin-bottom: 1rem; }
-    
-    /* Canvas and containers */
-    canvas {
-      display: block;
-      max-width: 100%;
-      height: auto;
-      margin: 0 auto;
-    }
-    
-    /* Container styles */
-    .container, .game-container, #game-container {
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1rem;
-    }
-    
-    /* Button styles */
-    button {
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      font-weight: 500;
-      color: white;
-      background-color: #4f46e5;
-      border: none;
-      border-radius: 0.375rem;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    
-    button:hover:not(:disabled) {
-      background-color: #4338ca;
-    }
-    
-    button:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-    
-    /* Animations */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    
-    @keyframes slideUp {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    
-    /* Wheel specific styles */
-    .wheel-container {
-      position: relative;
-      margin: 1rem auto;
-      max-width: 100%;
-    }
-    
-    /* Responsive styles */
-    @media (max-width: 768px) {
-      body { padding: 10px; }
-      h1 { font-size: 1.75rem; }
-      button { padding: 0.6rem 1.2rem; }
-    }
-  `;
+  return html;
 };

@@ -47,11 +47,11 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
 2. Use proper HTML structure with DOCTYPE, html, head, and body tags
 3. Include all JavaScript inside a SINGLE script tag at the end of the body
 4. Format all CSS and JavaScript code with proper indentation
-5. Use template literals correctly with backticks (\`) not regular quotes for dynamic content
+5. Use template literals correctly with backticks (\\\`) not regular quotes for dynamic content
 6. Use clear parameter names in function declarations (NOT $2 or placeholder variables)
 7. Include proper error handling for canvas operations
 8. Make sure all HTML elements are properly closed
-9. DO NOT include markdown syntax (\`\`\`) in your response
+9. DO NOT include markdown syntax (\\\`\\\`\\\`) in your response
 `;
 
   // Generate prompt with formatting instructions
@@ -111,6 +111,7 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
     
     let content = text;
     
+    // Trích xuất đoạn mã HTML hoàn chỉnh nếu có
     if (!content.trim().startsWith('<!DOCTYPE') && !content.trim().startsWith('<html')) {
       const htmlMatch = text.match(/<!DOCTYPE[\s\S]*<\/html>/i) || 
                         text.match(/<html[\s\S]*<\/html>/i);
@@ -120,6 +121,7 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
       }
     }
     
+    // Làm sạch và chuẩn hóa mã
     content = sanitizeGameCode(content);
     
     const game: MiniGame = {
@@ -140,26 +142,27 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
 const sanitizeGameCode = (content: string): string => {
   let sanitized = content;
   
-  // Remove markdown code block syntax if present
+  // Loại bỏ cú pháp markdown code block nếu có
   sanitized = sanitized.replace(/```html|```/g, '');
   
-  // Fix function parameters
+  // Sửa tham số hàm
   sanitized = sanitized.replace(/function\s+(\w+)\s*\(\$2\)/g, (match, funcName) => {
-    if (funcName === 'drawSegment') return 'function drawSegment(index)';
+    if (funcName === 'drawSegment') return 'function drawSegment(index, color, text)';
     if (funcName === 'getWinningSegment') return 'function getWinningSegment(finalAngle)';
     if (funcName === 'spinWheel') return 'function spinWheel()';
     if (funcName === 'drawWheel') return 'function drawWheel()';
+    if (funcName.includes('ease') || funcName.includes('animate')) return `function ${funcName}(t, b, c, d)`;
     return match;
   });
   
-  // Fix template literals
+  // Sửa template literals
   sanitized = sanitized.replace(/(\w+\.style\.transform\s*=\s*)rotate\(\$\{([^}]+)\}([^)]*)\)/g, 
     "$1`rotate(${$2}$3)`");
   
   sanitized = sanitized.replace(/(\w+\.textContent\s*=\s*)([^;"`']*)\$\{([^}]+)\}([^;"`']*);/g, 
     "$1`$2${$3}$4`;");
   
-  // Add error handling for canvas context
+  // Thêm kiểm tra lỗi cho canvas context
   if (sanitized.includes('getContext') && !sanitized.includes('if (!ctx)')) {
     sanitized = sanitized.replace(
       /const\s+ctx\s*=\s*canvas\.getContext\(['"]2d['"]\);/g,
@@ -167,7 +170,7 @@ const sanitizeGameCode = (content: string): string => {
     );
   }
   
-  // Add error handling script
+  // Thêm script bắt lỗi
   if (!sanitized.includes('window.onerror')) {
     sanitized = sanitized.replace(
       /<\/body>/,

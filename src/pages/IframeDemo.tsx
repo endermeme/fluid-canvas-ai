@@ -39,8 +39,8 @@ export default function IframeDemo() {
 
   return (
     <IframeDemoLayout>
-      <div className="demo-container">
-        <div className="demo-header">
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-6">
           <h1 className="text-2xl font-bold">Canvas Demo Preview</h1>
           <p className="text-blue-600">Xem trước nội dung demo tương tác</p>
         </div>
@@ -63,7 +63,7 @@ export default function IframeDemo() {
           
           {isLoading && (
             <div className="p-8 text-center bg-gray-50 border border-gray-200 rounded-lg">
-              <div className="loading-spinner mb-2"></div>
+              <div className="inline-block w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-2"></div>
               <p>Đang tải nội dung demo...</p>
             </div>
           )}
