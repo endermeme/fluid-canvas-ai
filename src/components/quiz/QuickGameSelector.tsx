@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { AIGameGenerator } from './generator/AIGameGenerator';
+import { AIGameGenerator } from './generator/geminiGenerator';
 import { MiniGame } from './generator/types';
 import GameLoading from './GameLoading';
 import GameError from './GameError';

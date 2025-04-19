@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { SparklesIcon, Info, Code } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { AIGameGenerator } from '../generator/AIGameGenerator';
+import { AIGameGenerator } from '../generator/geminiGenerator';
 import { MiniGame } from '../generator/types';
 import { GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';

@@ -1,5 +1,23 @@
 # Changes Log
 
+## Additional Cleanup - Import Updates
+
+### Files Updated:
+1. Updated AIGameGenerator imports to use geminiGenerator.ts:
+   - src/components/chat/ChatInterface.tsx
+   - src/components/quiz/GameView.tsx
+   - src/components/quiz/QuickGameSelector.tsx
+   - src/components/quiz/QuizGenerator.tsx
+   - src/components/quiz/custom-games/CustomGameForm.tsx
+   - src/components/quiz/custom-games/GameController.tsx
+
+### Details:
+- Fixed all imports to use geminiGenerator.ts instead of removed AIGameGenerator.ts
+- Maintained consistent import paths
+- No functionality changes
+
+## Previous Changes
+
 ## Cleanup Redundant Files
 
 ### Files Removed:
@@ -14,8 +32,6 @@
 - Consolidated game generation logic into geminiGenerator.ts
 - Updated all imports to use correct paths
 - Cleaned up project structure
-
-## Previous Changes
 
 ## Iframe Processing Restructuring
 

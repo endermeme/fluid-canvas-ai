@@ -1,6 +1,5 @@
-
 import React, { useEffect, useRef, useState } from 'react';
-import { MiniGame } from './generator/AIGameGenerator';
+import { MiniGame } from './generator/geminiGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { saveGameForSharing } from '@/utils/gameExport';

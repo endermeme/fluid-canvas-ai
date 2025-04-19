@@ -6,7 +6,7 @@ import { BlockType } from '@/lib/block-utils';
 import { useNavigate } from 'react-router-dom';
 import HistoryPanel from '@/components/history/HistoryPanel';
 import { Switch } from '@/components/ui/switch';
-import { AIGameGenerator } from '@/components/quiz/generator/AIGameGenerator';
+import { AIGameGenerator } from '@/components/quiz/generator/geminiGenerator';
 
 interface Message {
   role: 'user' | 'ai';
