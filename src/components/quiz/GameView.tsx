@@ -1,9 +1,10 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/AIGameGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { saveGameForSharing } from '@/utils/gameExport';
-import { enhanceIframeContent } from './utils/iframe-utils';
+import { enhanceIframeContent } from './custom-games/utils/iframe-utils';
 import GameViewHeader from './components/GameViewHeader';
 import GameContainer from './components/GameContainer';
 

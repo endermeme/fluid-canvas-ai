@@ -1,4 +1,3 @@
-
 export const enhanceIframeContent = (content: string, title?: string): string => {
   // Clean the content
   let processedContent = content.replace(/```html|```/g, '');
@@ -569,4 +568,13 @@ const getOptimizedStyles = (): string => {
       button { padding: 0.6rem 1.2rem; }
     }
   `;
+};
+
+// Add new exports to make the API clearer
+export {
+  enhanceIframeContent,
+  formatHtmlContent,
+  fixJavaScriptErrors,
+  fixInlineComments,
+  getOptimizedStyles
 };

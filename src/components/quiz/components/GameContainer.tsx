@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
-import { enhanceIframeContent } from '../utils/iframe-utils';
+import { enhanceIframeContent } from '../../custom-games/utils/iframe-utils';
 
 interface GameContainerProps {
   iframeRef: React.RefObject<HTMLIFrameElement>;
@@ -22,14 +22,12 @@ const GameContainer: React.FC<GameContainerProps> = ({
   const [localError, setLocalError] = useState<string | null>(null);
   const [showFullscreen, setShowFullscreen] = useState(false);
 
-  // Xử lý khi có lỗi từ bên ngoài truyền vào
   useEffect(() => {
     if (externalError) {
       setLocalError(externalError);
     }
   }, [externalError]);
 
-  // Ensure content is properly formatted
   const formattedContent = content ? enhanceIframeContent(content, title) : '';
   
   const handleReload = () => {
@@ -47,13 +45,12 @@ const GameContainer: React.FC<GameContainerProps> = ({
     <div 
       className={`relative rounded-xl overflow-hidden bg-gradient-to-b from-blue-50 to-white shadow-xl border border-gray-200 w-full mx-auto transition-all duration-300 ${showFullscreen ? 'fixed inset-0 z-50 rounded-none m-0 max-w-none' : ''}`}
       style={{ 
-        height: showFullscreen ? '100vh' : '92vh', // Tăng chiều cao lên 92vh khi không ở chế độ toàn màn hình
-        minHeight: '650px', // Tăng chiều cao tối thiểu lên 650px
-        maxHeight: showFullscreen ? '100vh' : '1200px', // Tăng chiều cao tối đa lên 1200px khi không ở chế độ toàn màn hình
-        maxWidth: showFullscreen ? '100vw' : '1800px' // Tăng chiều rộng tối đa lên 1800px khi không ở chế độ toàn màn hình
+        height: showFullscreen ? '100vh' : '92vh',
+        minHeight: '650px',
+        maxHeight: showFullscreen ? '100vh' : '1200px',
+        maxWidth: showFullscreen ? '100vw' : '1800px'
       }}
     >
-      {/* Nút chuyển đổi chế độ toàn màn hình */}
       <button 
         className="absolute top-2 right-2 z-30 px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm font-medium flex items-center gap-1.5"
         onClick={toggleFullscreen}
@@ -61,7 +58,6 @@ const GameContainer: React.FC<GameContainerProps> = ({
         {showFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}
       </button>
       
-      {/* Hiển thị lỗi khi có */}
       {!!localError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-white p-8 z-20">
           <div className="flex items-center gap-2 text-red-500 font-bold text-xl mb-4">
@@ -79,7 +75,6 @@ const GameContainer: React.FC<GameContainerProps> = ({
         </div>
       )}
       
-      {/* Loading spinner */}
       {loading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 z-10">
           <div className="relative">
@@ -93,7 +88,6 @@ const GameContainer: React.FC<GameContainerProps> = ({
         </div>
       )}
       
-      {/* Game iframe */}
       <iframe
         ref={iframeRef}
         key={key}
