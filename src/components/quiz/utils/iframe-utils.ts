@@ -1,3 +1,4 @@
+import React from 'react';
 
 export const enhanceIframeContent = (content: string, title?: string): string => {
   // Clean the content - remove all markdown code blocks and backtick artifacts
@@ -194,12 +195,8 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
 export const setupIframe = (iframe: HTMLIFrameElement, content: string): void => {
   if (!iframe) return;
   
-  // Tạo đối tượng Blob để tải nội dung vào iframe
-  const blob = new Blob([content], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  
-  // Sử dụng srcDoc để nạp nội dung trực tiếp
-  iframe.srcDoc = content;
+  // Sử dụng srcdoc thay vì srcDoc
+  iframe.srcdoc = content;
   
   // Thêm event listener để theo dõi khi iframe đã tải xong
   iframe.onload = () => {
