@@ -1,4 +1,3 @@
-
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
@@ -13,11 +12,12 @@ import {
 } from '@/constants/api-constants';
 import { buildGeminiPrompt } from './promptBuilder';
 import { generateCustomGamePrompt } from './customGamePrompt';
+import type { MiniGame, GameApiResponse } from './types';
 
 const SOURCE = "GEMINI";
 
-// Thêm export MiniGame từ file types
-export { MiniGame } from './types';
+// Export the MiniGame type for use in other files
+export type { MiniGame } from './types';
 
 // Tạo lớp AIGameGenerator để giữ tương thích với code cũ
 export class AIGameGenerator {

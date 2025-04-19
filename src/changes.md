@@ -1,6 +1,22 @@
 
 # Changes Log
 
+## Fixed MiniGame Type Export and Import Issues
+
+### Files Updated:
+1. Fixed MiniGame type export and resolved TypeScript errors:
+   - src/components/quiz/generator/geminiGenerator.ts - Fixed import/export of MiniGame type
+   - Made proper TypeScript imports with 'import type' syntax
+   - Ensured MiniGame type is properly used throughout the file
+
+### Details:
+- Fixed runtime error with MiniGame export from types.ts
+- Properly imported the MiniGame type from types.ts
+- Used correct TypeScript syntax for type imports
+- Fixed all TypeScript errors in geminiGenerator.ts
+
+## Previous Changes
+
 ## Fixed Type Exports and Module Imports
 
 ### Files Updated:
