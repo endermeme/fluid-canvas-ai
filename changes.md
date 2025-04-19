@@ -31,3 +31,10 @@ Quy trình xử lý Gemini response mới:
 - Dễ dàng mở rộng và thêm tính năng mới
 - Hiệu suất tốt hơn
 - Giảm trùng lặp code
+
+## 4. Các sửa lỗi gần đây
+
+- Thêm hàm `injectDebugUtils` vào `iframe-handler.ts` để hỗ trợ debug
+- Bổ sung `GameSettingsData` interface trong `types.ts` 
+- Thêm thuộc tính `isSeparatedFiles` vào `MiniGame` interface
+- Sửa các lỗi liên quan đến import và export của các module

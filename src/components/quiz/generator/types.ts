@@ -4,6 +4,7 @@ export interface MiniGame {
   content: string;
   description?: string;
   useCanvas?: boolean;
+  isSeparatedFiles?: boolean;
 }
 
 export interface GameApiResponse {
@@ -25,4 +26,13 @@ export interface GameGenerationOptions {
   language?: string;
   timeLimit?: number;
   category?: string;
+}
+
+export interface GameSettingsData {
+  difficulty?: 'easy' | 'medium' | 'hard';
+  questionCount?: number;
+  timePerQuestion?: number;
+  category?: string;
+  useCanvas?: boolean;
+  language?: string;
 }

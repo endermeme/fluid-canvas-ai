@@ -116,3 +116,100 @@ export const reloadIframe = (iframeRef: React.RefObject<HTMLIFrameElement>, cont
     return false;
   }
 };
+
+/**
+ * Thiết lập iframe
+ */
+export const setupIframe = (iframeElement: HTMLIFrameElement, content: string): void => {
+  if (!iframeElement) return;
+  
+  try {
+    iframeElement.srcdoc = content;
+  } catch (error) {
+    console.error('Error setting iframe content:', error);
+  }
+};
+
+/**
+ * Thêm công cụ debug vào nội dung iframe
+ */
+export const injectDebugUtils = (content: string): string => {
+  if (!content) return '';
+  
+  try {
+    // Thêm công cụ debug nếu chưa có
+    if (!content.includes('console.gameLog')) {
+      const debugScript = `
+<script>
+// Debug utilities
+window.gameErrors = [];
+window.gameWarnings = [];
+window.gameInfos = [];
+
+// Ghi đè console để ghi lại lỗi
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+const originalConsoleLog = console.log;
+const originalConsoleInfo = console.info;
+
+console.error = function() {
+  window.gameErrors.push(Array.from(arguments).join(' '));
+  originalConsoleError.apply(console, arguments);
+  
+  // Gửi lỗi đến cửa sổ chính
+  if (window.parent) {
+    window.parent.postMessage({
+      type: 'gameError',
+      payload: Array.from(arguments).join(' ')
+    }, '*');
+  }
+};
+
+console.warn = function() {
+  window.gameWarnings.push(Array.from(arguments).join(' '));
+  originalConsoleWarn.apply(console, arguments);
+};
+
+console.info = function() {
+  window.gameInfos.push(Array.from(arguments).join(' '));
+  originalConsoleInfo.apply(console, arguments);
+};
+
+console.gameLog = function(type, message) {
+  switch(type) {
+    case 'error':
+      console.error(message);
+      break;
+    case 'warn':
+      console.warn(message);
+      break;
+    case 'info':
+      console.info(message);
+      break;
+    default:
+      originalConsoleLog(message);
+  }
+};
+
+// Lắng nghe lỗi không bắt được
+window.addEventListener('error', function(event) {
+  console.error('Uncaught error:', event.message);
+});
+</script>`;
+
+      // Chèn vào sau mở thẻ <head>
+      if (content.includes('<head>')) {
+        content = content.replace('<head>', `<head>\n${debugScript}`);
+      } else if (content.includes('<!DOCTYPE html>')) {
+        content = content.replace('<!DOCTYPE html>', `<!DOCTYPE html>\n<head>${debugScript}</head>`);
+      } else {
+        content = `<head>${debugScript}</head>${content}`;
+      }
+    }
+    
+    return content;
+  } catch (error) {
+    console.error('Error injecting debug utils:', error);
+    return content;
+  }
+};
