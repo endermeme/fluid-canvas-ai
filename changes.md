@@ -52,3 +52,6 @@ Quy trình xử lý Gemini response mới:
 - Thêm tính năng fallback game khi không thể kết nối tới API Gemini
 - Thêm timeout cho API request để tránh chờ quá lâu
 - Cải thiện cơ chế xử lý lỗi và tạo trò chơi dự phòng khi mạng không ổn định
+
+- Sửa lỗi hiển thị CSS do chưa xóa hoàn toàn markdown đánh dấu trong HTML response
+- Cải thiện việc xóa markdown trong responseParser.ts

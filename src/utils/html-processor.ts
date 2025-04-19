@@ -10,10 +10,11 @@ export const formatHtml = (html: string): string => {
   if (!html) return '';
   
   try {
-    // Làm sạch nội dung HTML
+    // Làm sạch nội dung HTML triệt để hơn
     let cleanHtml = html
-      .replace(/```html|```/g, '')
-      .replace(/`/g, '');
+      .replace(/```html|```css|```javascript|```js|```/g, '')  // Xóa tất cả các đánh dấu code block
+      .replace(/`/g, '')  // Xóa các backtick đơn
+      .trim();  // Cắt bỏ khoảng trắng thừa
 
     // Thêm DOCTYPE và cấu trúc HTML nếu thiếu
     if (!cleanHtml.includes('<!DOCTYPE html>')) {
@@ -64,4 +65,23 @@ export const enhanceHtml = (html: string, title: string = 'Interactive Game'): s
   }
   
   return html;
+};
+
+/**
+ * Xóa tất cả các đánh dấu Markdown từ chuỗi
+ */
+export const removeMarkdown = (text: string): string => {
+  if (!text) return '';
+  
+  return text
+    .replace(/```(html|css|javascript|js)?([\s\S]*?)```/g, '$2')  // Xóa code blocks với tên ngôn ngữ
+    .replace(/`([^`]+)`/g, '$1')  // Xóa inline code
+    .replace(/\*\*([^*]+)\*\*/g, '$1')  // Xóa bold
+    .replace(/\*([^*]+)\*/g, '$1')  // Xóa italic
+    .replace(/#{1,6}\s+([^\n]+)/g, '$1')  // Xóa headings
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')  // Xóa links
+    .replace(/>\s*([^\n]+)/g, '$1')  // Xóa blockquotes
+    .replace(/- ([^\n]+)/g, '$1')  // Xóa unordered lists
+    .replace(/\d+\.\s+([^\n]+)/g, '$1')  // Xóa ordered lists
+    .trim();
 };

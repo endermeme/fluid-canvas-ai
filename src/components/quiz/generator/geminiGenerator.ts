@@ -64,7 +64,7 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
     console.log('%c Generated Game Code:', 'font-weight: bold; color: #6f42c1;');
     console.log(text);
     
-    // Sử dụng parser mới để xử lý response
+    // Sử dụng parser để xử lý response
     const game = parseGeminiResponse(text);
     
     logSuccess(SOURCE, "Game generated successfully");
