@@ -1,57 +1,40 @@
 
 # Tối ưu hóa codebase - Tổng quan thay đổi
 
-## 1. Cải thiện cấu trúc và loại bỏ trùng lặp
+## 1. Refactor toàn bộ cấu trúc hệ thống
 
-### Files đã xóa:
-- `src/components/quiz/utils/iframe-utils.ts` - được thay thế bởi các module cụ thể hơn
-- `src/utils/iframe-utils.ts` - quá dài và được tách thành các module nhỏ hơn
+### Cấu trúc thư mục mới:
+- `src/preset-games/` - Chứa tất cả mã nguồn liên quan đến game có sẵn
+- `src/custom-games/` - Chứa tất cả mã nguồn liên quan đến game tùy chỉnh
+- `src/core/` - Các thành phần cốt lõi và utilities được chia sẻ
+- `src/ui/` - Các component UI được tái sử dụng
+- `src/types/` - Các định nghĩa kiểu dữ liệu
+- `src/services/` - Các dịch vụ như API, storage, v.v.
 
-### Files đã thêm và tối ưu:
-- `src/components/quiz/generator/AIGameGenerator.ts` - đã tái cấu trúc lại với mẫu singleton
-- `src/utils/iframe-handler.ts` - xử lý iframe một cách hiệu quả hơn
-- `src/utils/html-processor.ts` - xử lý HTML
-- `src/utils/css-processor.ts` - xử lý CSS
-- `src/utils/js-processor.ts` - xử lý JavaScript
+### Lợi ích của cấu trúc mới:
+- Tổ chức rõ ràng, dễ hiểu hơn
+- Phân tách rõ ràng giữa các tính năng
+- Dễ dàng mở rộng và bảo trì
+- Giảm sự phụ thuộc giữa các module
+- Tránh trùng lặp code
+- Cải thiện hiệu suất của ứng dụng
 
-## 2. Quy trình xử lý code mới
+### Các thành phần chính:
+1. **Core** - Các utility và logic cốt lõi
+2. **UI** - Các component giao diện có thể tái sử dụng
+3. **Preset Games** - Các trò chơi đã được định nghĩa sẵn
+4. **Custom Games** - Chức năng tạo và quản lý trò chơi tùy chỉnh
+5. **Services** - Các dịch vụ API và xử lý dữ liệu
+6. **Types** - Các định nghĩa kiểu dữ liệu
 
-Quy trình xử lý Gemini response mới:
-1. Gemini trả về markdown với code HTML/CSS/JS
-2. `responseParser.ts` trích xuất code và gửi cho các processor chuyên biệt
-3. `html-processor.ts` xử lý và định dạng HTML
-4. `css-processor.ts` xử lý và tối ưu CSS
-5. `js-processor.ts` sửa lỗi JavaScript
-6. `iframe-handler.ts` xử lý hiển thị và tương tác iframe
+## 2. Cải tiến trong việc xử lý Gemini API
+- Cải thiện xử lý lỗi và timeout
+- Thêm cơ chế fallback khi mạng không ổn định
+- Tối ưu hóa quá trình phân tích phản hồi từ AI
+- Loại bỏ triệt để các đánh dấu markdown từ HTML response
 
-## 3. Ưu điểm của cấu trúc mới
-
-- Code ngắn gọn, tập trung và dễ bảo trì hơn
-- Mỗi module có một nhiệm vụ rõ ràng
-- Dễ dàng mở rộng và thêm tính năng mới
-- Hiệu suất tốt hơn
-- Giảm trùng lặp code
-
-## 4. Các sửa lỗi gần đây
-
-- Thêm hàm `injectDebugUtils` vào `iframe-handler.ts` để hỗ trợ debug
-- Bổ sung `GameSettingsData` interface trong `types.ts` 
-- Thêm thuộc tính `isSeparatedFiles` vào `MiniGame` interface
-- Sửa các lỗi liên quan đến import và export của các module
-- Sửa lỗi import MiniGame trong các file khác nhau
-- Cập nhật interface GameSettingsData để thuộc tính category là tùy chọn
-- Sửa lỗi constructor private của AIGameGenerator
-- Sửa lỗi export và re-export của interface MiniGame trong AIGameGenerator.ts và types.ts
-- Sửa lỗi TypeScript với export type thay vì export để tương thích với isolatedModules
-- Sửa lỗi "The requested module doesn't provide an export named: 'MiniGame'" bằng cách làm cho category trở thành tùy chọn trong GameSettingsData
-
-- Đơn giản hóa xử lý HTML trong responseParser.ts để giữ nguyên mã HTML gốc
-- Bỏ qua các bước xử lý phức tạp với HTML thuần
-- Sửa lỗi trong geminiGenerator.ts với hàm parseGeminiResponse nhận thừa tham số
-- Sửa lỗi mạng trong geminiClient.ts bằng cách thêm xử lý lỗi chi tiết hơn
-- Thêm tính năng fallback game khi không thể kết nối tới API Gemini
-- Thêm timeout cho API request để tránh chờ quá lâu
-- Cải thiện cơ chế xử lý lỗi và tạo trò chơi dự phòng khi mạng không ổn định
-
+## 3. Xử lý CSS và hiển thị
 - Sửa lỗi hiển thị CSS do chưa xóa hoàn toàn markdown đánh dấu trong HTML response
-- Cải thiện việc xóa markdown trong responseParser.ts
+- Cải thiện việc xử lý và hiển thị trò chơi trong iframe
+- Tối ưu hóa các processor cho HTML, CSS và JavaScript
+

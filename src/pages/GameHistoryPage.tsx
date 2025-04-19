@@ -1,297 +1,141 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getRemainingTime } from '@/utils/gameExport';
-import { StoredGame } from '@/utils/types';
-import QuizContainer from '@/components/quiz/QuizContainer';
 import { Button } from '@/components/ui/button';
-import { Plus, Clock, ExternalLink, Search, Trash2, Share2, Filter } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { ArrowLeft, Trash2, Play, Clock } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Card } from '@/components/ui/card';
+import { STORAGE_KEYS } from '@/core/utils/constants';
+import { StoredGame } from '@/types/game';
 
 const GameHistoryPage: React.FC = () => {
   const [games, setGames] = useState<StoredGame[]>([]);
-  const [filteredGames, setFilteredGames] = useState<StoredGame[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'expiring'>('newest');
-  const [deleteGameId, setDeleteGameId] = useState<string | null>(null);
   const navigate = useNavigate();
-  
+  const { toast } = useToast();
+
   useEffect(() => {
-    loadGames();
+    // Load games from localStorage
+    try {
+      const storedGames = localStorage.getItem(STORAGE_KEYS.GAME_HISTORY);
+      if (storedGames) {
+        setGames(JSON.parse(storedGames));
+      }
+    } catch (error) {
+      console.error('Error loading game history:', error);
+    }
   }, []);
-  
-  useEffect(() => {
-    filterAndSortGames();
-  }, [games, searchTerm, sortBy]);
-  
-  const loadGames = () => {
-    const gamesJson = localStorage.getItem('shared_games');
-    if (gamesJson) {
-      const parsedGames: StoredGame[] = JSON.parse(gamesJson);
-      const now = Date.now();
-      const validGames = parsedGames.filter(game => {
-        const expiryTime = typeof game.expiresAt === 'number' 
-          ? game.expiresAt 
-          : game.expiresAt.getTime();
-        return expiryTime > now;
-      });
-      setGames(validGames);
-    } else {
-      setGames([]);
-    }
+
+  const handleBack = () => {
+    navigate(-1);
   };
-  
-  const filterAndSortGames = () => {
-    let result = [...games];
-    
-    // Filter by search term
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(game => 
-        game.title.toLowerCase().includes(term) || 
-        game.description.toLowerCase().includes(term)
-      );
-    }
-    
-    // Sort games
-    switch (sortBy) {
-      case 'newest':
-        result.sort((a, b) => {
-          const timeA = typeof a.createdAt === 'number' ? a.createdAt : a.createdAt.getTime();
-          const timeB = typeof b.createdAt === 'number' ? b.createdAt : b.createdAt.getTime();
-          return timeB - timeA;
-        });
-        break;
-      case 'oldest':
-        result.sort((a, b) => {
-          const timeA = typeof a.createdAt === 'number' ? a.createdAt : a.createdAt.getTime();
-          const timeB = typeof b.createdAt === 'number' ? b.createdAt : b.createdAt.getTime();
-          return timeA - timeB;
-        });
-        break;
-      case 'expiring':
-        result.sort((a, b) => {
-          const timeA = typeof a.expiresAt === 'number' ? a.expiresAt : a.expiresAt.getTime();
-          const timeB = typeof b.expiresAt === 'number' ? b.expiresAt : b.expiresAt.getTime();
-          return timeA - timeB;
-        });
-        break;
-    }
-    
-    setFilteredGames(result);
+
+  const handlePlayGame = (game: StoredGame) => {
+    // Create a slug from the title
+    const slug = game.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
+    navigate(`/play/history/${slug}/${game.id}`);
   };
-  
-  const handleGameClick = (gameId: string) => {
-    navigate(`/game/${gameId}`);
-  };
-  
-  const handleCreateNew = () => {
-    navigate('/custom-game');
-  };
-  
-  const handleShareGame = (gameId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const shareUrl = `${window.location.origin}/game/${gameId}`;
-    navigator.clipboard.writeText(shareUrl)
-      .then(() => {
-        alert('Đã sao chép liên kết vào clipboard!');
-      })
-      .catch(err => {
-        console.error('Không thể sao chép liên kết:', err);
-      });
-  };
-  
+
   const handleDeleteGame = (gameId: string) => {
-    const gamesJson = localStorage.getItem('shared_games');
-    if (gamesJson) {
-      const parsedGames: StoredGame[] = JSON.parse(gamesJson);
-      const updatedGames = parsedGames.filter(game => game.id !== gameId);
-      localStorage.setItem('shared_games', JSON.stringify(updatedGames));
-      setGames(updatedGames);
+    const updatedGames = games.filter(game => game.id !== gameId);
+    setGames(updatedGames);
+    
+    // Save updated games to localStorage
+    try {
+      localStorage.setItem(STORAGE_KEYS.GAME_HISTORY, JSON.stringify(updatedGames));
+      
+      toast({
+        title: "Game đã xóa",
+        description: "Game đã được xóa khỏi lịch sử",
+      });
+    } catch (error) {
+      console.error('Error saving game history:', error);
+      
+      toast({
+        title: "Lỗi",
+        description: "Không thể xóa game khỏi lịch sử",
+        variant: "destructive",
+      });
     }
   };
-  
-  const formatDate = (timestamp: number | Date) => {
-    const date = typeof timestamp === 'number' ? new Date(timestamp) : timestamp;
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
+
+  const formatDate = (date: number | Date) => {
+    return new Date(date).toLocaleDateString('vi-VN', {
       year: 'numeric',
+      month: 'short',
+      day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });
   };
-  
+
   return (
-    <QuizContainer
-      title="Lịch Sử Game"
-      showBackButton={true}
-      onBack={() => navigate('/')}
-    >
-      <div className="p-4 h-full overflow-auto">
-        <div className="mb-6 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Tìm kiếm game..."
-                className="pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <Select value={sortBy} onValueChange={(value: 'newest' | 'oldest' | 'expiring') => setSortBy(value)}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Sắp xếp theo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Mới nhất</SelectItem>
-                <SelectItem value="oldest">Cũ nhất</SelectItem>
-                <SelectItem value="expiring">Sắp hết hạn</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={handleCreateNew} className="flex items-center gap-2">
-              <Plus size={16} />
-              Tạo Game Mới
-            </Button>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              {filteredGames.length} game {searchTerm ? 'phù hợp với tìm kiếm' : 'đã tạo'}
-            </p>
-          </div>
+    <div className="min-h-screen p-4 md:p-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center mb-6">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleBack}
+            className="mr-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Quay lại
+          </Button>
+          <h1 className="text-2xl font-bold">Lịch Sử Game</h1>
         </div>
         
-        {filteredGames.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-[50vh] p-8 border rounded-lg bg-muted/20">
-            <p className="text-center mb-4 text-muted-foreground">
-              {searchTerm 
-                ? 'Không tìm thấy game nào phù hợp với tìm kiếm' 
-                : 'Chưa có game nào được tạo'}
-            </p>
-            <Button onClick={handleCreateNew} className="flex items-center gap-2">
-              <Plus size={16} />
-              Tạo Game Mới
-            </Button>
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredGames.map(game => (
-              <Card 
-                key={game.id}
-                className="group hover:shadow-md transition-all cursor-pointer"
-                onClick={() => handleGameClick(game.id)}
-              >
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg line-clamp-1">{game.title}</CardTitle>
-                  <CardDescription className="line-clamp-2">{game.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <div className="flex items-center text-xs text-muted-foreground mb-2">
-                    <Clock size={14} className="mr-1" />
-                    <span>Còn lại: {getRemainingTime(game.expiresAt)}</span>
+        <div className="space-y-4">
+          {games.length === 0 ? (
+            <Card className="p-6 text-center">
+              <p className="text-muted-foreground mb-4">Bạn chưa có game nào trong lịch sử</p>
+              <Button onClick={() => navigate('/custom-games')}>
+                Tạo Game Mới
+              </Button>
+            </Card>
+          ) : (
+            games.map(game => (
+              <Card key={game.id} className="p-4 hover:bg-primary/5 transition-colors">
+                <div className="flex justify-between items-center">
+                  <div className="flex-1">
+                    <h3 className="font-medium">{game.title}</h3>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Clock className="h-3 w-3 mr-1" />
+                      <span>{formatDate(game.createdAt)}</span>
+                    </div>
+                    {game.description && (
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                        {game.description}
+                      </p>
+                    )}
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    Tạo ngày: {formatDate(game.createdAt)}
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between pt-2 border-t">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-8 text-xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleGameClick(game.id);
-                    }}
-                  >
-                    <ExternalLink size={12} className="mr-1" />
-                    Mở
-                  </Button>
-                  <div className="flex gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-8 text-xs"
-                      onClick={(e) => handleShareGame(game.id, e)}
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePlayGame(game)}
+                      className="bg-primary/5 border-primary/20"
                     >
-                      <Share2 size={12} className="mr-1" />
-                      Chia sẻ
+                      <Play className="h-4 w-4 mr-1" />
+                      Chơi
                     </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-8 text-xs text-destructive hover:text-destructive"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteGameId(game.id);
-                          }}
-                        >
-                          <Trash2 size={12} className="mr-1" />
-                          Xóa
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Xác nhận xóa game</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Bạn có chắc chắn muốn xóa game "{game.title}"? Hành động này không thể hoàn tác.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Hủy</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (deleteGameId) {
-                                handleDeleteGame(deleteGameId);
-                                setDeleteGameId(null);
-                              }
-                            }}
-                          >
-                            Xóa
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteGame(game.id)}
+                      className="bg-destructive/5 border-destructive/20 hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
                   </div>
-                </CardFooter>
+                </div>
               </Card>
-            ))}
-          </div>
-        )}
+            ))
+          )}
+        </div>
       </div>
-    </QuizContainer>
+    </div>
   );
 };
 

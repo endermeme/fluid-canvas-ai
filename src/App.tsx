@@ -1,33 +1,30 @@
 
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import Quiz from './pages/Quiz';
-import PresetGamesPage from './components/quiz/preset-games/PresetGamesPage';
-import GameSharePage from './pages/GameSharePage';
-import GameHistoryPage from './pages/GameHistoryPage';
-import GameController from './components/quiz/custom-games/GameController';
-import SharedGame from './pages/SharedGame';
-import TeacherDashboard from './components/quiz/share/TeacherDashboard';
-import IframeDemo from './pages/IframeDemo';
+import { Toaster } from '@/components/ui/toaster';
+import Index from '@/pages/Index';
+import Quiz from '@/pages/Quiz';
+import PresetGamesPage from '@/pages/PresetGamesPage';
+import CustomGamesPage from '@/pages/CustomGamesPage';
+import GameHistoryPage from '@/pages/GameHistoryPage';
+import PlayGamePage from '@/pages/PlayGamePage';
+import NotFoundPage from '@/pages/NotFoundPage';
 
-function App() {
+const App: React.FC = () => {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/quiz" element={<Quiz />} />
-      <Route path="/preset-games" element={<PresetGamesPage />} />
-      <Route path="/game/:gameId" element={<GameSharePage />} />
-      <Route path="/game/:gameType/:slug/:gameId" element={<GameSharePage />} />
-      <Route path="/game-history" element={<GameHistoryPage />} />
-      <Route path="/custom-game" element={<GameController />} />
-      <Route path="/quiz/shared/:id" element={<SharedGame />} />
-      <Route path="/play/:gameId" element={<SharedGame />} />
-      <Route path="/play/:gameType/:slug/:gameId" element={<SharedGame />} />
-      <Route path="/game/:gameId/dashboard" element={<TeacherDashboard />} />
-      <Route path="/play/:gameType/:slug/:gameId/dashboard" element={<TeacherDashboard />} />
-      <Route path="/iframe-demo" element={<IframeDemo />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/quiz" element={<Quiz />} />
+        <Route path="/preset-games" element={<PresetGamesPage />} />
+        <Route path="/custom-games" element={<CustomGamesPage />} />
+        <Route path="/game-history" element={<GameHistoryPage />} />
+        <Route path="/play/:type/:slug/:id" element={<PlayGamePage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+      <Toaster />
+    </>
   );
-}
+};
 
 export default App;
