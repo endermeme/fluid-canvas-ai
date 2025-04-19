@@ -145,3 +145,14 @@
 - Resolved syntax errors preventing proper template string parsing
 - Ensured correct display of dynamic content
 - Improved code readability and functionality
+
+## Removed iframe-utils Files
+
+### Files Removed:
+1. Removed src/components/quiz/utils/iframe-utils.ts
+2. Removed src/components/quiz/custom-games/utils/iframe-utils.ts
+
+### Details:
+- Removed iframe utilities and filtering mechanisms
+- Simplified HTML content processing pipeline
+- Removed unnecessary code processing steps
