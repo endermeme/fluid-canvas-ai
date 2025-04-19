@@ -1,3 +1,4 @@
+
 # Tối ưu hóa codebase - Tổng quan thay đổi
 
 ## 1. Cải thiện cấu trúc và loại bỏ trùng lặp
@@ -43,10 +44,3 @@ Quy trình xử lý Gemini response mới:
 - Sửa lỗi export và re-export của interface MiniGame trong AIGameGenerator.ts và types.ts
 - Sửa lỗi TypeScript với export type thay vì export để tương thích với isolatedModules
 
-## 5. Cập nhật gần đây
-
-- Thêm ASCII art console mới với nhiều lệnh Linux hơn
-- Cập nhật interface GameSettingsData với category là optional
-- Sửa lỗi TypeScript với export type
-- Bổ sung thêm các lệnh Linux phổ biến trong console
-- Thêm hướng dẫn 'help' để hiển thị danh sách lệnh có sẵn

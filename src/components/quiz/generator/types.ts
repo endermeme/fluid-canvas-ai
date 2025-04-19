@@ -1,3 +1,4 @@
+
 export interface MiniGame {
   title: string;
   content: string;
@@ -30,8 +31,8 @@ export interface GameGenerationOptions {
 export interface GameSettingsData {
   difficulty?: 'easy' | 'medium' | 'hard';
   questionCount?: number;
-  timePerQuestion?: number; 
-  category?: string;
+  timePerQuestion?: number;
+  category?: string; // Make category optional here to match usage pattern
   useCanvas?: boolean;
   language?: string;
 }
