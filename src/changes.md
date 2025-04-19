@@ -1,5 +1,21 @@
-
 # Changes Log
+
+## Cleanup Redundant Files
+
+### Files Removed:
+1. Removed duplicate and unused files:
+   - quick-game-selector/index.tsx (duplicate of QuickGameSelector.tsx)
+   - generator/AIGameGenerator.ts (functionality merged into geminiGenerator.ts)
+   - generator/fallbackGenerator.ts (unused)
+   - generator/responseParser.ts (unused)
+
+### Details:
+- Removed redundant files to improve maintainability
+- Consolidated game generation logic into geminiGenerator.ts
+- Updated all imports to use correct paths
+- Cleaned up project structure
+
+## Previous Changes
 
 ## Iframe Processing Restructuring
 
