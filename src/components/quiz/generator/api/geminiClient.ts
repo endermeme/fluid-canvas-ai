@@ -35,29 +35,50 @@ export const makeGeminiRequest = async ({ prompt }: GeminiRequest): Promise<Gemi
     }
   };
 
-  const response = await fetch(getApiEndpoint(), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload)
-  });
+  try {
+    // Thêm timeout để tránh chờ quá lâu
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 giây timeout
+    
+    const response = await fetch(getApiEndpoint(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    if (!text) {
+      throw new Error('No content returned from API');
+    }
+
+    return {
+      text,
+      status: response.status,
+      statusText: response.statusText
+    };
+  } catch (error) {
+    logError(SOURCE, "Network error when calling Gemini API", error);
+    
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out. Vui lòng thử lại sau.');
+    }
+    
+    if (error.message.includes('NetworkError')) {
+      throw new Error('Không thể kết nối đến API. Vui lòng kiểm tra kết nối mạng và thử lại.');
+    }
+    
+    throw error;
   }
-
-  const result = await response.json();
-  const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-  if (!text) {
-    throw new Error('No content returned from API');
-  }
-
-  return {
-    text,
-    status: response.status,
-    statusText: response.statusText
-  };
 };

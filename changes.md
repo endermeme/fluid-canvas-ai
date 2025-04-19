@@ -48,3 +48,7 @@ Quy trình xử lý Gemini response mới:
 - Đơn giản hóa xử lý HTML trong responseParser.ts để giữ nguyên mã HTML gốc
 - Bỏ qua các bước xử lý phức tạp với HTML thuần
 - Sửa lỗi trong geminiGenerator.ts với hàm parseGeminiResponse nhận thừa tham số
+- Sửa lỗi mạng trong geminiClient.ts bằng cách thêm xử lý lỗi chi tiết hơn
+- Thêm tính năng fallback game khi không thể kết nối tới API Gemini
+- Thêm timeout cho API request để tránh chờ quá lâu
+- Cải thiện cơ chế xử lý lỗi và tạo trò chơi dự phòng khi mạng không ổn định
