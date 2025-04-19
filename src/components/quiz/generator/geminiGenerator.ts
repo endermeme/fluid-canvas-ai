@@ -2,16 +2,10 @@
 import { MiniGame } from './types';
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
-import { 
-  logInfo, logError, logWarning, logSuccess, 
-  measureExecutionTime
-} from './apiUtils';
-import { 
-  GEMINI_MODELS, 
-  API_VERSION, 
-  getApiEndpoint,
-  DEFAULT_GENERATION_SETTINGS 
-} from '@/constants/api-constants';
+import { logInfo, logError, logWarning, logSuccess, measureExecutionTime } from './apiUtils';
+import { makeGeminiRequest } from './api/geminiClient';
+import { sanitizeGameCode } from './utils/codeSanitizer';
+import { extractGameContent } from './utils/contentExtractor';
 import { buildGeminiPrompt } from './promptBuilder';
 import { generateCustomGamePrompt } from './customGamePrompt';
 
@@ -25,8 +19,6 @@ export const generateWithGemini = async (
   const useCanvas = settings?.useCanvas !== undefined ? settings.useCanvas : true;
   
   logInfo(SOURCE, `Starting game generation for "${topic}"`, {
-    model: GEMINI_MODELS.CUSTOM_GAME,
-    apiVersion: API_VERSION,
     type: gameType?.name || "Not specified",
     settings: settings || {},
     canvasMode: useCanvas ? "enabled" : "disabled"
@@ -40,7 +32,6 @@ export const generateWithGemini = async (
     category: settings?.category || 'general'
   };
 
-  // Add enhanced instructions for proper code formatting to the prompt
   const formattingInstructions = `
 IMPORTANT CODE FORMATTING INSTRUCTIONS:
 1. Return a SINGLE, complete, self-contained HTML file with all CSS and JavaScript included
@@ -54,46 +45,12 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
 9. DO NOT include markdown syntax (\\\`\\\`\\\`) in your response
 `;
 
-  // Generate prompt with formatting instructions
   const prompt = generateCustomGamePrompt(promptOptions) + formattingInstructions;
 
   try {
-    logInfo(SOURCE, `Sending request to Gemini API`);
-    
     const startTime = Date.now();
     
-    const payload = {
-      contents: [{
-        parts: [{text: prompt}]
-      }],
-      generationConfig: {
-        ...DEFAULT_GENERATION_SETTINGS,
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 8192
-      }
-    };
-    
-    const response = await fetch(getApiEndpoint(), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload)
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
-    }
-    
-    const result = await response.json();
-    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    
-    if (!text) {
-      throw new Error('No content returned from API');
-    }
+    const { text } = await makeGeminiRequest({ prompt });
     
     const duration = measureExecutionTime(startTime);
     logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
@@ -101,34 +58,8 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
     console.log('%c Generated Game Code:', 'font-weight: bold; color: #6f42c1;');
     console.log(text);
     
-    let title = topic;
-    const titleMatch = text.match(/<title>(.*?)<\/title>/i) || 
-                      text.match(/<h1[^>]*>(.*?)<\/h1>/i);
-    
-    if (titleMatch && titleMatch[1]) {
-      title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
-    }
-    
-    let content = text;
-    
-    // Trích xuất đoạn mã HTML hoàn chỉnh nếu có
-    if (!content.trim().startsWith('<!DOCTYPE') && !content.trim().startsWith('<html')) {
-      const htmlMatch = text.match(/<!DOCTYPE[\s\S]*<\/html>/i) || 
-                        text.match(/<html[\s\S]*<\/html>/i);
-      
-      if (htmlMatch && htmlMatch[0]) {
-        content = htmlMatch[0];
-      }
-    }
-    
-    // Làm sạch và chuẩn hóa mã
-    content = sanitizeGameCode(content);
-    
-    const game: MiniGame = {
-      title: title,
-      content: content,
-      useCanvas: useCanvas
-    };
+    const game = extractGameContent(text, topic, useCanvas);
+    game.content = sanitizeGameCode(game.content);
     
     logSuccess(SOURCE, "Game generated successfully");
     
@@ -137,54 +68,6 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
     logError(SOURCE, "Error generating with Gemini", error);
     throw error;
   }
-};
-
-const sanitizeGameCode = (content: string): string => {
-  let sanitized = content;
-  
-  // Loại bỏ cú pháp markdown code block nếu có
-  sanitized = sanitized.replace(/```html|```/g, '');
-  
-  // Sửa tham số hàm
-  sanitized = sanitized.replace(/function\s+(\w+)\s*\(\$2\)/g, (match, funcName) => {
-    if (funcName === 'drawSegment') return 'function drawSegment(index, color, text)';
-    if (funcName === 'getWinningSegment') return 'function getWinningSegment(finalAngle)';
-    if (funcName === 'spinWheel') return 'function spinWheel()';
-    if (funcName === 'drawWheel') return 'function drawWheel()';
-    if (funcName.includes('ease') || funcName.includes('animate')) return `function ${funcName}(t, b, c, d)`;
-    return match;
-  });
-  
-  // Sửa template literals
-  sanitized = sanitized.replace(/(\w+\.style\.transform\s*=\s*)rotate\(\$\{([^}]+)\}([^)]*)\)/g, 
-    "$1`rotate(${$2}$3)`");
-  
-  sanitized = sanitized.replace(/(\w+\.textContent\s*=\s*)([^;"`']*)\$\{([^}]+)\}([^;"`']*);/g, 
-    "$1`$2${$3}$4`;");
-  
-  // Thêm kiểm tra lỗi cho canvas context
-  if (sanitized.includes('getContext') && !sanitized.includes('if (!ctx)')) {
-    sanitized = sanitized.replace(
-      /const\s+ctx\s*=\s*canvas\.getContext\(['"]2d['"]\);/g,
-      "const ctx = canvas.getContext('2d');\n  if (!ctx) { console.error('Canvas context not available'); return; }"
-    );
-  }
-  
-  // Thêm script bắt lỗi
-  if (!sanitized.includes('window.onerror')) {
-    sanitized = sanitized.replace(
-      /<\/body>/,
-      `  <script>
-    window.onerror = (message, source, lineno, colno, error) => {
-      console.error('Game error:', { message, source, lineno, colno, stack: error?.stack });
-      return true;
-    };
-  </script>
-</body>`
-    );
-  }
-  
-  return sanitized;
 };
 
 export const tryGeminiGeneration = async (
