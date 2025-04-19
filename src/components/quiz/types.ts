@@ -3,7 +3,7 @@ export interface GameSettingsData {
   difficulty?: 'easy' | 'medium' | 'hard';
   questionCount?: number;
   timePerQuestion?: number;
-  category?: string; // Đổi từ required thành optional (thêm dấu ?)
+  category: string;
   prompt?: string;
   useCanvas?: boolean;
   totalTime?: number;
