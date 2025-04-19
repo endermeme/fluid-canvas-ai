@@ -4,21 +4,24 @@
 ## Iframe Processing Restructuring
 
 ### Files Reorganized:
-1. Moved iframe utilities from `/utils/iframe-utils.ts` to `/components/quiz/custom-games/utils/iframe-utils.ts`
-2. Updated imports in related files to point to new location
-3. Simplified iframe processing structure
+1. Split iframe-utils.ts into multiple focused files:
+   - html-processor.ts: HTML formatting and processing
+   - js-processor.ts: JavaScript fixes and enhancements
+   - css-processor.ts: CSS optimization and styling
+   - iframe-utils.ts: Main orchestrator file
+2. Updated imports to maintain functionality
+3. Fixed import paths in all dependent files
 
 ### Main Changes:
-- Centralized iframe processing in custom games module
+- Split large iframe-utils.ts file into smaller, focused modules
 - Maintained same functionality but improved organization
-- Updated all related import paths
-- Fixed duplicate export issues in iframe-utils.ts
-- Corrected import paths in:
-  - src/app/iframe-demo/page.tsx
-  - src/pages/IframeDemo.tsx
-  - src/components/quiz/components/GameContainer.tsx
+- Each module has a single responsibility
+- Fixed duplicate exports and import issues
+- Main iframe-utils.ts now orchestrates the other modules
 
 ### Details:
-- Changed imports from `@/utils/iframe-utils` to `@/components/quiz/custom-games/utils/iframe-utils`
-- Removed duplicate export declarations in iframe-utils.ts
-- Removed old file from utils directory
+- Created new utility files for HTML, JS, and CSS processing
+- Moved specific functions to their respective modules
+- Updated main iframe-utils.ts to use new modules
+- Improved code organization and maintainability
+- Fixed all import paths to use new file structure
