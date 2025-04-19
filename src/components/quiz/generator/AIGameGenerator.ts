@@ -114,5 +114,8 @@ export class AIGameGenerator {
   }
 }
 
+// Export interface MiniGame từ file này để tương thích với code cũ
+export { MiniGame } from './types';
+
 // Duy trì khả năng tương thích với API cũ
 export default AIGameGenerator;

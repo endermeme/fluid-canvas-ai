@@ -38,3 +38,7 @@ Quy trình xử lý Gemini response mới:
 - Bổ sung `GameSettingsData` interface trong `types.ts` 
 - Thêm thuộc tính `isSeparatedFiles` vào `MiniGame` interface
 - Sửa các lỗi liên quan đến import và export của các module
+- Sửa lỗi import MiniGame trong các file khác nhau
+- Cập nhật interface GameSettingsData để thuộc tính category là tùy chọn
+- Sửa lỗi constructor private của AIGameGenerator
+
