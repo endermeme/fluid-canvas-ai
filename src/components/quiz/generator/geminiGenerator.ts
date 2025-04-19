@@ -47,11 +47,11 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
 2. Use proper HTML structure with DOCTYPE, html, head, and body tags
 3. Include all JavaScript inside a SINGLE script tag at the end of the body
 4. Format all CSS and JavaScript code with proper indentation
-5. Use template literals correctly with backticks (`) not regular quotes for dynamic content
+5. Use template literals correctly with backticks (\`) not regular quotes for dynamic content
 6. Use clear parameter names in function declarations (NOT $2 or placeholder variables)
 7. Include proper error handling for canvas operations
 8. Make sure all HTML elements are properly closed
-9. DO NOT include markdown syntax (```) in your response
+9. DO NOT include markdown syntax (\`\`\`) in your response
 `;
 
   // Generate prompt with formatting instructions
