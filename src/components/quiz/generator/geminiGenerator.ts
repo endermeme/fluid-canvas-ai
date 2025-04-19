@@ -43,14 +43,15 @@ export const generateWithGemini = async (
   // Add enhanced instructions for proper code formatting to the prompt
   const formattingInstructions = `
 IMPORTANT CODE FORMATTING INSTRUCTIONS:
-1. Provide well-formatted, properly indented HTML, CSS, and JavaScript code
-2. Use proper indentation with appropriate line breaks between HTML tags
-3. Keep JavaScript functions well-structured with proper spacing and line breaks
-4. Format CSS with proper spacing, indentation, and line breaks
-5. Ensure closing brackets and parentheses are properly aligned
-6. Use descriptive variable and function names
-7. Add comments to explain complex logic
-8. Remember that well-structured code is essential for the game to function correctly
+1. Return a SINGLE, complete, self-contained HTML file with all CSS and JavaScript included
+2. Use proper HTML structure with DOCTYPE, html, head, and body tags
+3. Include all JavaScript inside a SINGLE script tag at the end of the body
+4. Format all CSS and JavaScript code with proper indentation
+5. Use template literals correctly with backticks (`) not regular quotes for dynamic content
+6. Use clear parameter names in function declarations (NOT $2 or placeholder variables)
+7. Include proper error handling for canvas operations
+8. Make sure all HTML elements are properly closed
+9. DO NOT include markdown syntax (```) in your response
 `;
 
   // Generate prompt with formatting instructions
@@ -139,36 +140,44 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
 const sanitizeGameCode = (content: string): string => {
   let sanitized = content;
   
-  // Basic code cleanup while preserving line breaks and formatting
-  sanitized = sanitized
-    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
-    .replace(/\/\/[^\n]*/g, '') // Remove single-line comments
-    .trim();
+  // Remove markdown code block syntax if present
+  sanitized = sanitized.replace(/```html|```/g, '');
   
-  // Fix common JavaScript issues while preserving formatting
-  sanitized = sanitized.replace(
-    /requestAnimationFrame\s*\(\s*\)/g, 
-    'requestAnimationFrame(gameLoop)'
-  );
+  // Fix function parameters
+  sanitized = sanitized.replace(/function\s+(\w+)\s*\(\$2\)/g, (match, funcName) => {
+    if (funcName === 'drawSegment') return 'function drawSegment(index)';
+    if (funcName === 'getWinningSegment') return 'function getWinningSegment(finalAngle)';
+    if (funcName === 'spinWheel') return 'function spinWheel()';
+    if (funcName === 'drawWheel') return 'function drawWheel()';
+    return match;
+  });
   
-  sanitized = sanitized.replace(
-    /addEventListener\s*\(\s*['"]([^'"]+)['"]\s*,\s*([^,)]+)\s*\)/g,
-    'addEventListener("$1", $2)'
-  );
-
-  // Add error handling script while preserving formatting
+  // Fix template literals
+  sanitized = sanitized.replace(/(\w+\.style\.transform\s*=\s*)rotate\(\$\{([^}]+)\}([^)]*)\)/g, 
+    "$1`rotate(${$2}$3)`");
+  
+  sanitized = sanitized.replace(/(\w+\.textContent\s*=\s*)([^;"`']*)\$\{([^}]+)\}([^;"`']*);/g, 
+    "$1`$2${$3}$4`;");
+  
+  // Add error handling for canvas context
+  if (sanitized.includes('getContext') && !sanitized.includes('if (!ctx)')) {
+    sanitized = sanitized.replace(
+      /const\s+ctx\s*=\s*canvas\.getContext\(['"]2d['"]\);/g,
+      "const ctx = canvas.getContext('2d');\n  if (!ctx) { console.error('Canvas context not available'); return; }"
+    );
+  }
+  
+  // Add error handling script
   if (!sanitized.includes('window.onerror')) {
     sanitized = sanitized.replace(
       /<\/body>/,
-      `
-  <script>
+      `  <script>
     window.onerror = (message, source, lineno, colno, error) => {
       console.error('Game error:', { message, source, lineno, colno, stack: error?.stack });
       return true;
     };
   </script>
-</body>
-`
+</body>`
     );
   }
   
