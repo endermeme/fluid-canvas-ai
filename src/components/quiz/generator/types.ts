@@ -32,7 +32,7 @@ export interface GameSettingsData {
   difficulty?: 'easy' | 'medium' | 'hard';
   questionCount?: number;
   timePerQuestion?: number;
-  category?: string;
+  category?: string; // Make category optional here to match usage pattern
   useCanvas?: boolean;
   language?: string;
 }
