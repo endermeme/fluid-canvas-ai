@@ -14,6 +14,7 @@ interface GameHeaderProps {
   title?: string;
   onRefresh?: () => void;
   onShare?: () => void;
+  extraButton?: React.ReactNode;
 }
 
 const GameHeader: React.FC<GameHeaderProps> = ({
@@ -25,7 +26,8 @@ const GameHeader: React.FC<GameHeaderProps> = ({
   totalItems,
   title,
   onRefresh,
-  onShare
+  onShare,
+  extraButton
 }) => {
   return (
     <div className="mb-4 mt-12">
@@ -78,6 +80,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({
               <Share2 className="h-4 w-4" />
             </Button>
           )}
+          {extraButton}
         </div>
       </div>
       <Progress value={progress} className="h-2 bg-secondary" />
