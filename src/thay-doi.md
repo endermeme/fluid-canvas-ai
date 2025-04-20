@@ -7,9 +7,6 @@
 3. Cập nhật GameHeader để bổ sung các tính năng onRefresh và onShare
 
 ## Ngày 20/04/2025
-1. Sửa lỗi TypeScript trong `GameView.tsx` - Bổ sung các thuộc tính bắt buộc (progress, currentItem, totalItems) cho GameHeader
-
-## Ngày 21/04/2025
 1. Xóa và viết lại toàn bộ phần header và navigation trong GameView
 2. Đơn giản hóa giao diện và chức năng điều hướng
 
@@ -17,3 +14,9 @@
 1. Sửa lỗi type trong GameView.tsx - Xóa prop onLoad từ GameContainer
 2. Tạo lại GameHeader.tsx vì các template game vẫn cần sử dụng
 3. Cập nhật đường dẫn import GameHeader trong các file template game
+
+## Ngày 23/04/2025
+1. Cập nhật GameHeader.tsx để sử dụng giao diện chung cho tất cả các game
+2. Thêm các nút điều hướng mới: Tạo mới, Chia sẻ, Lịch sử
+3. Đơn giản hóa giao diện header và loại bỏ các nút chồng chéo
+

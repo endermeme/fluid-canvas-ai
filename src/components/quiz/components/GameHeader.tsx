@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, RefreshCw, Share2 } from 'lucide-react';
+import { ArrowLeft, Plus, Share2, History } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { useNavigate } from 'react-router-dom';
 
 export interface GameHeaderProps {
   title?: string;
@@ -12,9 +13,7 @@ export interface GameHeaderProps {
   currentItem: number;
   totalItems: number;
   onBack?: () => void;
-  onRefresh?: () => void;
   onShare?: () => Promise<void>;
-  extraButton?: React.ReactNode;
 }
 
 const GameHeader: React.FC<GameHeaderProps> = ({
@@ -25,10 +24,10 @@ const GameHeader: React.FC<GameHeaderProps> = ({
   currentItem,
   totalItems,
   onBack,
-  onRefresh,
   onShare,
-  extraButton
 }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="p-4 space-y-2">
       <div className="flex items-center justify-between mb-2">
@@ -36,12 +35,11 @@ const GameHeader: React.FC<GameHeaderProps> = ({
           {onBack && (
             <Button 
               variant="ghost" 
-              size="sm" 
+              size="icon"
               onClick={onBack}
-              className="h-8 px-2"
+              className="h-8 w-8"
             >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              <span>Quay lại</span>
+              <ArrowLeft className="h-4 w-4" />
             </Button>
           )}
           
@@ -60,30 +58,35 @@ const GameHeader: React.FC<GameHeaderProps> = ({
               {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
             </div>
           )}
-          
-          {onRefresh && (
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={onRefresh}
-              className="h-8 w-8 p-0"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-          )}
+
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate('/')}
+            className="h-8 w-8"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
           
           {onShare && (
             <Button 
               variant="ghost" 
-              size="sm"
+              size="icon"
               onClick={onShare}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8"
             >
               <Share2 className="h-4 w-4" />
             </Button>
           )}
-
-          {extraButton}
+          
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate('/game-history')}
+            className="h-8 w-8"
+          >
+            <History className="h-4 w-4" />
+          </Button>
         </div>
       </div>
       
