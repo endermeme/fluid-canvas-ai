@@ -64,3 +64,15 @@ Chi tiết:
 - Cập nhật chức năng chia sẻ để sử dụng bảng games
 - Thêm RLS policies cho bảng games
 - Tối ưu hóa URL chia sẻ với slug từ tiêu đề game
+
+## 2025-04-20: Update preset game API endpoint
+
+### Files được cập nhật:
+- src/components/quiz/preset-games/PresetGameManager.tsx
+
+### Chi tiết thay đổi:
+- Cập nhật endpoint API cho preset games để khớp với cấu trúc của custom games
+- Sử dụng chung một format request/response
+- Đơn giản hóa logic gọi API và xử lý response
+- Cải thiện xử lý lỗi và loading states
+- Thêm toast notifications để thông báo trạng thái
