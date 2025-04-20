@@ -100,3 +100,18 @@ Chi tiết:
 - Sửa lỗi TypeScript error TS2554: Expected 1 arguments, but got 4
 - Đơn giản hóa quy trình xử lý lỗi hình ảnh
 - Đảm bảo tính nhất quán giữa các component con
+
+## 2025-04-20: Tái cấu trúc toàn bộ các Game Templates
+
+### Files được tạo mới:
+- src/components/quiz/preset-games/templates/GameWrapper.tsx
+
+### Files được cập nhật:
+- src/components/quiz/preset-games/templates/PictionaryTemplate.tsx
+
+### Chi tiết thay đổi:
+- Tạo GameWrapper.tsx để tách biệt logic header và nội dung game
+- Sửa lỗi đường dẫn import trong các template game
+- Chuẩn hóa cách sử dụng GameHeader và GameControls
+- Cải thiện luồng điều hướng giữa các màn hình game
+- Đơn giản hóa việc bảo trì code bằng cách tách logic ra các thành phần riêng biệt

@@ -78,3 +78,10 @@
    - Sửa TypeScript error TS2554 liên quan đến số lượng tham số trong hàm xử lý lỗi
    - Đảm bảo hiển thị hình ảnh thay thế khi xảy ra lỗi
    - Đơn giản hóa logic xử lý hình ảnh
+
+## Ngày 03/05/2025
+1. Tái cấu trúc toàn bộ các Game Templates:
+   - Tạo GameWrapper.tsx để bọc và tách biệt logic header với nội dung game
+   - Sửa lỗi đường dẫn import trong PictionaryTemplate.tsx
+   - Đảm bảo tính nhất quán trong việc sử dụng GameHeader và GameControls
+   - Chuẩn hóa luồng điều hướng và xử lý onBack trong tất cả các game
