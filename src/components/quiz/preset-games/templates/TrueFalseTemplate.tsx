@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import GameWrapper from './GameWrapper';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import GameHeader from '../../components/GameHeader';
@@ -151,18 +152,16 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     const percentage = Math.round((score / questions.length) * 100);
     
     return (
-      <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
-        <GameHeader 
-          onBack={onBack}
-          progress={100}
-          timeLeft={totalTimeLeft}
-          score={score}
-          currentItem={questions.length}
-          totalItems={questions.length}
-          title="Kết quả"
-          onShare={handleShare}
-        />
-
+      <GameWrapper
+        onBack={onBack}
+        progress={100}
+        timeLeft={totalTimeLeft}
+        score={score}
+        currentItem={questions.length}
+        totalItems={questions.length}
+        title="Kết quả"
+        onShare={handleShare}
+      >
         <Card className="flex-grow flex items-center justify-center p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
           <div className="w-full max-w-md">
             <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả</h2>
@@ -190,7 +189,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
             <GameControls onRestart={handleRestart} />
           </div>
         </Card>
-      </div>
+      </GameWrapper>
     );
   }
 
@@ -198,18 +197,15 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
-      <GameHeader 
-        onBack={onBack}
-        progress={progress}
-        timeLeft={timeLeft}
-        score={score}
-        currentItem={currentQuestion + 1}
-        totalItems={questions.length}
-        onShare={handleShare}
-      />
-
-      <Card className="flex-grow p-6 mb-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
+    <GameWrapper
+      onBack={onBack}
+      progress={progress}
+      timeLeft={timeLeft}
+      score={score}
+      currentItem={currentQuestion + 1}
+      totalItems={questions.length}
+    >
+      <Card className="flex-grow p-6 mb-4">
         <h2 className="text-xl font-semibold mb-6">{question.statement}</h2>
         
         <div className="grid grid-cols-2 gap-4 mb-4">
@@ -263,7 +259,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
         disabled={currentAnswer === null}
         isLastItem={isLastQuestion}
       />
-    </div>
+    </GameWrapper>
   );
 };
 

@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, Clock, ArrowLeft, Trophy } from 'lucide-react';
+import GameWrapper from './GameWrapper';
 
 interface MatchingTemplateProps {
   content: any;
@@ -231,40 +231,14 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
   };
 
   return (
-    <div className="flex flex-col p-4 h-full">
-      {/* Header with navigation, progress and timer */}
-      <div className="relative mb-4">
-        {onBack && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onBack} 
-            className="absolute top-0 left-0 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Quay lại</span>
-          </Button>
-        )}
-        
-        <div className="flex justify-between items-center mb-2 mt-12">
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
-            Đã ghép: {matchedPairs}/{totalPairs}
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
-              <Trophy className="h-4 w-4 mr-1 text-yellow-500" />
-              Điểm: {score}
-            </div>
-            <div className="text-sm font-medium flex items-center px-3 py-1 bg-primary/10 rounded-full">
-              <Clock className="h-4 w-4 mr-1" />
-              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-            </div>
-          </div>
-        </div>
-        <Progress value={progressPercentage} className="h-2" />
-      </div>
-
-      {/* Game content */}
+    <GameWrapper
+      onBack={onBack}
+      progress={progressPercentage}
+      timeLeft={timeLeft}
+      score={score}
+      currentItem={matchedPairs}
+      totalItems={totalPairs}
+    >
       {gameWon ? (
         <div className="flex-grow flex items-center justify-center">
           <Card className="p-6 text-center max-w-md">
@@ -352,7 +326,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
           Làm lại
         </Button>
       </div>
-    </div>
+    </GameWrapper>
   );
 };
 

@@ -5,6 +5,7 @@ import { Toggle } from '@/components/ui/toggle';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import GameHeader from '../../components/GameHeader';
 import GameControls from '../../components/GameControls';
+import GameWrapper from './GameWrapper';
 
 interface FlashcardsTemplateProps {
   content: any;
@@ -146,16 +147,15 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
   }
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
-      <GameHeader 
-        onBack={onBack}
-        progress={progress}
-        timeLeft={timeRemaining}
-        currentItem={currentCard}
-        totalItems={cards.length}
-        title={`Thẻ ${currentCard + 1}/${cards.length}`}
-      />
-
+    <GameWrapper
+      onBack={onBack}
+      progress={progress}
+      timeLeft={timeRemaining}
+      score={undefined}
+      currentItem={currentCard + 1}
+      totalItems={cards.length}
+    >
+      {/* Move existing UI content here */}
       <div className="flex-grow flex items-center justify-center mb-4 perspective-1000">
         <div 
           className="w-full max-w-4xl aspect-[3/2] cursor-pointer relative group"
@@ -237,7 +237,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
           className="mt-2"
         />
       </div>
-    </div>
+    </GameWrapper>
   );
 };
 

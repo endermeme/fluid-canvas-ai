@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import GameWrapper from './GameWrapper';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -242,121 +243,130 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
   const progress = ((currentSentence + 1) / sentences.length) * 100;
 
   return (
-    <div className="flex flex-col p-4 h-full">
-      <div className="mb-4 relative">
-        {onBack && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onBack} 
-            className="absolute top-0 left-0 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Quay lại</span>
-          </Button>
-        )}
-        
-        <div className="flex justify-between items-center mb-2 mt-12">
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
-            Câu {currentSentence + 1}/{sentences.length}
-          </div>
-          <div className="text-sm font-medium flex items-center px-3 py-1 bg-primary/10 rounded-full">
-            <Clock className="h-4 w-4 mr-1" />
-            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-          </div>
-        </div>
-        <Progress value={progress} className="h-2" />
-      </div>
-
-      <div className="flex-grow">
-        <div className="mb-4 text-center">
-          <h3 className="text-lg font-medium mb-1">Sắp xếp lại từng từ để tạo thành câu hoàn chỉnh</h3>
-          <p className="text-muted-foreground text-sm">Chọn từ theo đúng thứ tự</p>
-        </div>
-        
-        <Card className="p-4 mb-4 min-h-[100px] flex flex-wrap gap-2 items-start content-start border border-primary/30 bg-background/80">
-          {orderedWords.map((word, index) => (
-            <button
-              key={`ordered-${index}`}
-              onClick={() => handleWordRemove(word, index)}
-              disabled={isChecking}
-              className={`py-2 px-3 rounded-lg ${
-                isChecking 
-                  ? sentences[currentSentence].correctOrder[index] === sentences[currentSentence].words.indexOf(word)
-                    ? 'bg-green-100 border border-green-500'
-                    : 'bg-red-100 border border-red-500'
-                  : 'bg-primary/20 hover:bg-primary/30'
-              }`}
+    <GameWrapper
+      onBack={onBack}
+      progress={progress}
+      timeLeft={timeLeft}
+      score={score}
+      currentItem={currentSentence + 1}
+      totalItems={sentences.length}
+    >
+      <div className="flex flex-col p-4 h-full">
+        <div className="mb-4 relative">
+          {onBack && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onBack} 
+              className="absolute top-0 left-0 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
             >
-              {word}
-            </button>
-          ))}
-          {orderedWords.length === 0 && (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground p-4">
-              <p>Chọn từ bên dưới để bắt đầu sắp xếp</p>
-            </div>
-          )}
-        </Card>
-        
-        <div className="p-4 bg-secondary/20 rounded-lg mb-4 flex flex-wrap gap-2 border border-primary/10">
-          {shuffledWords.map((word, index) => (
-            <button
-              key={`shuffled-${index}`}
-              onClick={() => handleWordSelect(word, index)}
-              disabled={isChecking}
-              className="py-2 px-3 bg-secondary hover:bg-secondary/80 rounded-lg"
-            >
-              {word}
-            </button>
-          ))}
-        </div>
-        
-        <div className="grid grid-cols-3 gap-2">
-          <Button
-            variant="outline"
-            onClick={handleShuffleWords}
-            disabled={isChecking || shuffledWords.length === 0}
-            size="sm"
-          >
-            <Shuffle className="h-4 w-4 mr-1" />
-            Xáo trộn
-          </Button>
-          
-          {content?.settings?.showHints && (
-            <Button
-              variant="outline"
-              onClick={handleHint}
-              disabled={isChecking || hasShownHint}
-              className={hasShownHint ? 'opacity-50' : ''}
-              size="sm"
-            >
-              <Lightbulb className="h-4 w-4 mr-1" />
-              Gợi ý
+              <ArrowLeft className="h-4 w-4" />
+              <span>Quay lại</span>
             </Button>
           )}
           
-          <Button
-            onClick={handleCheck}
-            disabled={orderedWords.length !== sentences[currentSentence].words.length || isChecking}
-            className={orderedWords.length !== sentences[currentSentence].words.length ? 'opacity-50' : ''}
-            size="sm"
-          >
-            <Check className="h-4 w-4 mr-1" />
-            Kiểm tra
-          </Button>
+          <div className="flex justify-between items-center mb-2 mt-12">
+            <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+              Câu {currentSentence + 1}/{sentences.length}
+            </div>
+            <div className="text-sm font-medium flex items-center px-3 py-1 bg-primary/10 rounded-full">
+              <Clock className="h-4 w-4 mr-1" />
+              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+            </div>
+          </div>
+          <Progress value={progress} className="h-2" />
         </div>
+
+        <div className="flex-grow">
+          <div className="mb-4 text-center">
+            <h3 className="text-lg font-medium mb-1">Sắp xếp lại từng từ để tạo thành câu hoàn chỉnh</h3>
+            <p className="text-muted-foreground text-sm">Chọn từ theo đúng thứ tự</p>
+          </div>
+          
+          <Card className="p-4 mb-4 min-h-[100px] flex flex-wrap gap-2 items-start content-start border border-primary/30 bg-background/80">
+            {orderedWords.map((word, index) => (
+              <button
+                key={`ordered-${index}`}
+                onClick={() => handleWordRemove(word, index)}
+                disabled={isChecking}
+                className={`py-2 px-3 rounded-lg ${
+                  isChecking 
+                    ? sentences[currentSentence].correctOrder[index] === sentences[currentSentence].words.indexOf(word)
+                      ? 'bg-green-100 border border-green-500'
+                      : 'bg-red-100 border border-red-500'
+                    : 'bg-primary/20 hover:bg-primary/30'
+                }`}
+              >
+                {word}
+              </button>
+            ))}
+            {orderedWords.length === 0 && (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground p-4">
+                <p>Chọn từ bên dưới để bắt đầu sắp xếp</p>
+              </div>
+            )}
+          </Card>
+          
+          <div className="p-4 bg-secondary/20 rounded-lg mb-4 flex flex-wrap gap-2 border border-primary/10">
+            {shuffledWords.map((word, index) => (
+              <button
+                key={`shuffled-${index}`}
+                onClick={() => handleWordSelect(word, index)}
+                disabled={isChecking}
+                className="py-2 px-3 bg-secondary hover:bg-secondary/80 rounded-lg"
+              >
+                {word}
+              </button>
+            ))}
+          </div>
+          
+          <div className="grid grid-cols-3 gap-2">
+            <Button
+              variant="outline"
+              onClick={handleShuffleWords}
+              disabled={isChecking || shuffledWords.length === 0}
+              size="sm"
+            >
+              <Shuffle className="h-4 w-4 mr-1" />
+              Xáo trộn
+            </Button>
+            
+            {content?.settings?.showHints && (
+              <Button
+                variant="outline"
+                onClick={handleHint}
+                disabled={isChecking || hasShownHint}
+                className={hasShownHint ? 'opacity-50' : ''}
+                size="sm"
+              >
+                <Lightbulb className="h-4 w-4 mr-1" />
+                Gợi ý
+              </Button>
+            )}
+            
+            <Button
+              onClick={handleCheck}
+              disabled={orderedWords.length !== sentences[currentSentence].words.length || isChecking}
+              className={orderedWords.length !== sentences[currentSentence].words.length ? 'opacity-50' : ''}
+              size="sm"
+            >
+              <Check className="h-4 w-4 mr-1" />
+              Kiểm tra
+            </Button>
+          </div>
+        </div>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRestart}
+          className="mt-3 w-full bg-background/70 border-primary/20"
+        >
+          <RefreshCw className="h-4 w-4 mr-1" />
+          Làm lại
+        </Button>
       </div>
-      
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleRestart}
-        className="mt-3 w-full bg-background/70 border-primary/20"
-      >
-        <RefreshCw className="h-4 w-4 mr-1" />
-        Làm lại
-      </Button>
-    </div>
+    </GameWrapper>
   );
 };
 

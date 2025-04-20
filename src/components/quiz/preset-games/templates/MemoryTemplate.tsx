@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import GameHeader from '../../components/GameHeader';
 import GameControls from '../../components/GameControls';
 import { Trophy } from 'lucide-react';
+import GameWrapper from './GameWrapper';
 
 interface MemoryTemplateProps {
   content: any;
@@ -159,72 +160,17 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
     return <div className="p-4">Không có dữ liệu trò chơi ghi nhớ</div>;
   }
 
-  if (gameWon) {
-    return (
-      <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
-        <GameHeader 
-          onBack={onBack}
-          progress={100}
-          timeLeft={timeLeft}
-          score={moves}
-          currentItem={totalPairs}
-          totalItems={totalPairs}
-          title="Chúc mừng!"
-          onShare={handleShare}
-        />
-
-        <Card className="flex-grow flex items-center justify-center p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
-          <div>
-            <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
-            <p className="mb-2 text-lg">Bạn đã hoàn thành trò chơi với {moves} lượt.</p>
-            <p className="mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
-            
-            <GameControls onRestart={handleRestart} />
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  if (gameOver) {
-    return (
-      <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
-        <GameHeader 
-          onBack={onBack}
-          progress={(matchedPairs / totalPairs) * 100}
-          timeLeft={0}
-          score={moves}
-          currentItem={matchedPairs}
-          totalItems={totalPairs}
-          title="Hết thời gian!"
-          onShare={handleShare}
-        />
-
-        <Card className="flex-grow flex items-center justify-center p-8 text-center bg-gradient-to-br from-destructive/5 to-background backdrop-blur-sm border-destructive/20">
-          <div>
-            <h2 className="text-3xl font-bold mb-4 text-destructive">Hết thời gian!</h2>
-            <p className="mb-4 text-lg">Bạn đã tìm được {matchedPairs} trong tổng số {totalPairs} cặp thẻ.</p>
-            
-            <GameControls onRestart={handleRestart} />
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  const progress = (matchedPairs / totalPairs) * 100;
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
-      <GameHeader 
-        onBack={onBack}
-        progress={(matchedPairs / totalPairs) * 100}
-        timeLeft={timeLeft}
-        score={moves}
-        currentItem={matchedPairs}
-        totalItems={totalPairs}
-        onShare={handleShare}
-      />
-
+    <GameWrapper
+      onBack={onBack}
+      progress={progress}
+      timeLeft={timeLeft}
+      score={moves}
+      currentItem={matchedPairs}
+      totalItems={totalPairs}
+    >
       <div className="flex-grow grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         {cards.map((card, index) => (
           <div 
@@ -244,9 +190,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
           </div>
         ))}
       </div>
-
-      <GameControls onRestart={handleRestart} />
-    </div>
+    </GameWrapper>
   );
 };
 

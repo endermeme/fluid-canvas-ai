@@ -1,4 +1,3 @@
-
 # Lịch sử thay đổi mã nguồn
 
 ## Ngày 21/04/2023
@@ -85,3 +84,15 @@
    - Sửa lỗi đường dẫn import trong PictionaryTemplate.tsx
    - Đảm bảo tính nhất quán trong việc sử dụng GameHeader và GameControls
    - Chuẩn hóa luồng điều hướng và xử lý onBack trong tất cả các game
+
+## Ngày 04/05/2025
+1. Tái cấu trúc toàn bộ template game:
+   - Tạo GameWrapper.tsx để bọc tất cả các game template
+   - Xóa header riêng lẻ khỏi các template game
+   - Tái cấu trúc FlashcardsTemplate để sử dụng GameWrapper
+   - Tái cấu trúc MatchingTemplate để sử dụng GameWrapper
+   - Tái cấu trúc MemoryTemplate để sử dụng GameWrapper
+   - Tái cấu trúc OrderingTemplate để sử dụng GameWrapper
+   - Tái cấu trúc PictionaryTemplate để sử dụng GameWrapper
+   - Tái cấu trúc TrueFalseTemplate để sử dụng GameWrapper
+   - Đảm bảo tính nhất quán của header trong tất cả các game

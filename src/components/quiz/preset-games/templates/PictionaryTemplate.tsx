@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
+import GameWrapper from './GameWrapper';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -40,7 +40,6 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
   const isLastItem = currentItem === items.length - 1;
   const progress = ((currentItem + 1) / items.length) * 100;
 
-  // Added handleImageError function to fix the type error
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     setImageError(true);
     setImageLoaded(true);
@@ -186,17 +185,15 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
   const item = items[currentItem];
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
-      <GameHeader 
-        onBack={onBack}
-        progress={progress}
-        timeLeft={timeLeft}
-        score={score}
-        currentItem={currentItem + 1}
-        totalItems={items.length}
-      />
-
-      <Card className="flex-grow p-6 mb-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
+    <GameWrapper
+      onBack={onBack}
+      progress={progress}
+      timeLeft={timeLeft}
+      score={score}
+      currentItem={currentItem + 1}
+      totalItems={items.length}
+    >
+      <Card className="flex-grow p-6 mb-4">
         <PictionaryImage 
           imageUrl={item.imageUrl}
           answer={item.answer}
@@ -238,7 +235,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
           isLastItem={isLastItem}
         />
       </div>
-    </div>
+    </GameWrapper>
   );
 };
 
