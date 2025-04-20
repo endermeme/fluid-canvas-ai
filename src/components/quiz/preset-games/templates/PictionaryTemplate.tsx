@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,8 +34,11 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
   const [processedItems, setProcessedItems] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(true);
   const { toast } = useToast();
-
+  
   const rawItems = gameContent?.items || [];
+  const items = processedItems;
+  const isLastItem = currentItem === items.length - 1;
+  const progress = ((currentItem + 1) / items.length) * 100;
 
   useEffect(() => {
     console.log("PictionaryTemplate - Game content:", gameContent);
@@ -72,17 +76,11 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
     };
     
     processItems();
-  }, [gameContent]);
-
-  const items = processedItems;
-  const isLastItem = currentItem === items.length - 1;
+  }, [gameContent, rawItems, topic]);
 
   useEffect(() => {
     if (timeLeft > 0 && timerRunning && !isProcessing) {
-      const timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1);
-      }, 1000);
-      
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
     } else if (timeLeft === 0 && timerRunning && !isProcessing) {
       handleNextItem();
@@ -92,7 +90,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
         variant: "destructive",
       });
     }
-  }, [timeLeft, timerRunning, isProcessing, toast]);
+  }, [timeLeft, timerRunning, isProcessing]);
 
   const handleOptionSelect = (option: string) => {
     if (selectedOption !== null || isProcessing) return;
@@ -105,7 +103,6 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
       toast({
         title: "Chính xác!",
         description: "Bạn đã đoán đúng hình ảnh.",
-        variant: "default",
       });
     } else {
       toast({
@@ -136,7 +133,6 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
     toast({
       title: "Đã hiện gợi ý",
       description: "Thời gian đã bị giảm 5 giây.",
-      variant: "default",
     });
   };
 
@@ -150,31 +146,6 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
     setTimerRunning(true);
     setImageLoaded(false);
     setImageError(false);
-  };
-
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-    setImageError(false);
-  };
-
-  const handleImageErrorEvent = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    setImageError(true);
-    setImageLoaded(true);
-    const img = e.currentTarget;
-    const itemAnswer = items[currentItem]?.answer || topic;
-    img.src = generatePlaceholderImage(600, 400, itemAnswer);
-    img.alt = `Không thể tải hình ảnh: ${itemAnswer}`;
-  };
-
-  const handleShare = async () => {
-    try {
-      toast({
-        title: "Chức năng chia sẻ",
-        description: "Chức năng chia sẻ đang được phát triển.",
-      });
-    } catch (error) {
-      console.error("Error sharing:", error);
-    }
   };
 
   if (!gameContent || !items.length || isProcessing) {
@@ -197,14 +168,12 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
         title={gameContent.title}
         topic={topic}
         onBack={onBack}
-        onShare={handleShare}
         onRestart={handleRestart}
       />
     );
   }
 
   const item = items[currentItem];
-  const progress = ((currentItem + 1) / items.length) * 100;
 
   return (
     <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
@@ -215,7 +184,6 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
         score={score}
         currentItem={currentItem + 1}
         totalItems={items.length}
-        onShare={handleShare}
       />
 
       <Card className="flex-grow p-6 mb-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
@@ -224,8 +192,8 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
           answer={item.answer}
           imageLoaded={imageLoaded}
           imageError={imageError}
-          onLoad={handleImageLoad}
-          onError={handleImageErrorEvent}
+          onLoad={() => setImageLoaded(true)}
+          onError={(e) => handleImageError(e, setImageError, setImageLoaded, item.answer || topic)}
         />
         
         <PictionaryHint 

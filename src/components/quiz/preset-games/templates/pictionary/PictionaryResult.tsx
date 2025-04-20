@@ -10,7 +10,7 @@ interface PictionaryResultProps {
   title: string;
   topic: string;
   onBack?: () => void;
-  onShare?: () => void;
+  onShare?: () => Promise<void>;
   onRestart: () => void;
 }
 
