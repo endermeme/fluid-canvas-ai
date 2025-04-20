@@ -20,3 +20,7 @@
 2. Thêm các nút điều hướng mới: Tạo mới, Chia sẻ, Lịch sử
 3. Đơn giản hóa giao diện header và loại bỏ các nút chồng chéo
 
+## Ngày 24/04/2025
+1. Chuẩn hóa GameHeader trong tất cả các template game (Quiz, TrueFalse, Memory)
+2. Loại bỏ các nút chức năng riêng lẻ trong PresetGameManager
+3. Thêm chức năng chia sẻ mặc định cho tất cả các template game

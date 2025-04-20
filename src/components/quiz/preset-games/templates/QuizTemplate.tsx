@@ -141,6 +141,17 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
     setGameStarted(true);
   };
 
+  const handleShare = async () => {
+    try {
+      toast({
+        title: "Chức n��ng chia sẻ",
+        description: "Chức năng chia sẻ đang được phát triển.",
+      });
+    } catch (error) {
+      console.error("Error sharing:", error);
+    }
+  };
+
   if (!content || !questions.length) {
     return <div className="p-4">Không có dữ liệu câu hỏi</div>;
   }
@@ -158,6 +169,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
           currentItem={questions.length}
           totalItems={questions.length}
           title="Kết quả"
+          onShare={handleShare}
         />
 
         <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
@@ -199,8 +211,9 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
         progress={progress}
         timeLeft={timeLeft}
         score={score}
-        currentItem={currentQuestion}
+        currentItem={currentQuestion + 1}
         totalItems={questions.length}
+        onShare={handleShare}
       />
 
       <Card className="flex-grow p-6 mb-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">

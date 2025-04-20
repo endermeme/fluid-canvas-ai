@@ -144,6 +144,17 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
     }
   };
 
+  const handleShare = async () => {
+    try {
+      toast({
+        title: "Chức năng chia sẻ",
+        description: "Chức năng chia sẻ đang được phát triển.",
+      });
+    } catch (error) {
+      console.error("Error sharing:", error);
+    }
+  };
+
   if (!content || !memoryCards.length) {
     return <div className="p-4">Không có dữ liệu trò chơi ghi nhớ</div>;
   }
@@ -159,6 +170,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
           currentItem={totalPairs}
           totalItems={totalPairs}
           title="Chúc mừng!"
+          onShare={handleShare}
         />
 
         <Card className="flex-grow flex items-center justify-center p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
@@ -186,6 +198,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
           currentItem={matchedPairs}
           totalItems={totalPairs}
           title="Hết thời gian!"
+          onShare={handleShare}
         />
 
         <Card className="flex-grow flex items-center justify-center p-8 text-center bg-gradient-to-br from-destructive/5 to-background backdrop-blur-sm border-destructive/20">
@@ -209,6 +222,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
         score={moves}
         currentItem={matchedPairs}
         totalItems={totalPairs}
+        onShare={handleShare}
       />
 
       <div className="flex-grow grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
