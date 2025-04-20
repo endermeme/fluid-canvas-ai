@@ -1,12 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import GameHeader from '../../components/GameHeader';
 import GameControls from '../../components/GameControls';
-import { HelpCircle, Image } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { generatePixabayImage, handleImageError, generatePlaceholderImage } from '../../generator/imageInstructions';
+import PictionaryImage from './pictionary/PictionaryImage';
+import PictionaryOptions from './pictionary/PictionaryOptions';
+import PictionaryHint from './pictionary/PictionaryHint';
+import PictionaryResult from './pictionary/PictionaryResult';
 
 interface PictionaryTemplateProps {
   data?: any;
@@ -187,55 +190,21 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
   }
 
   if (showResult) {
-    const percentage = Math.round((score / items.length) * 100);
-    
     return (
-      <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
-        <GameHeader 
-          onBack={onBack}
-          progress={100}
-          timeLeft={0}
-          score={score}
-          currentItem={items.length}
-          totalItems={items.length}
-          title="Kết quả"
-          onShare={handleShare}
-        />
-
-        <Card className="flex-grow flex items-center justify-center p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
-          <div className="w-full max-w-md">
-            <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả</h2>
-            <p className="text-lg mb-4">
-              Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
-            </p>
-            
-            <div className="mb-6">
-              <div className="flex justify-between mb-2">
-                <span>Điểm của bạn</span>
-                <span className="font-bold">{percentage}%</span>
-              </div>
-              <div className="h-3 bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary transition-all duration-500 ease-out"
-                  style={{ width: `${percentage}%` }}
-                />
-              </div>
-            </div>
-            
-            <div className="text-4xl font-bold mb-6 text-primary">
-              {score} / {items.length}
-            </div>
-            
-            <GameControls onRestart={handleRestart} />
-          </div>
-        </Card>
-      </div>
+      <PictionaryResult 
+        score={score}
+        totalItems={items.length}
+        title={gameContent.title}
+        topic={topic}
+        onBack={onBack}
+        onShare={handleShare}
+        onRestart={handleRestart}
+      />
     );
   }
 
   const item = items[currentItem];
   const progress = ((currentItem + 1) / items.length) * 100;
-  const options = item.options || [];
 
   return (
     <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
@@ -250,56 +219,26 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
       />
 
       <Card className="flex-grow p-6 mb-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
-        <div className="relative w-full max-w-md aspect-video mx-auto mb-4 bg-secondary/30 rounded-lg overflow-hidden border border-primary/20">
-          {!imageLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          )}
-          
-          {imageError ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-              <Image className="h-12 w-12 text-muted-foreground mb-2" />
-              <p className="text-muted-foreground">Không thể tải hình ảnh</p>
-            </div>
-          ) : (
-            <img 
-              src={item.imageUrl} 
-              alt={`Hình ảnh: ${item.answer}`}
-              className={`w-full h-full object-contain ${imageLoaded ? 'opacity-100' : 'opacity-0'}`} 
-              onLoad={handleImageLoad}
-              onError={handleImageErrorEvent}
-            />
-          )}
-        </div>
+        <PictionaryImage 
+          imageUrl={item.imageUrl}
+          answer={item.answer}
+          imageLoaded={imageLoaded}
+          imageError={imageError}
+          onLoad={handleImageLoad}
+          onError={handleImageErrorEvent}
+        />
         
-        {showHint && (
-          <div className="mb-4 p-3 bg-primary/10 rounded-lg text-center max-w-md mx-auto">
-            <p className="font-medium">Gợi ý:</p>
-            <p>{item.hint}</p>
-          </div>
-        )}
+        <PictionaryHint 
+          hint={item.hint}
+          show={showHint}
+        />
         
-        <div className="w-full max-w-md grid grid-cols-2 gap-2 mx-auto">
-          {options.map((option: string, index: number) => (
-            <button
-              key={index}
-              onClick={() => handleOptionSelect(option)}
-              className={`w-full p-3 text-center rounded-lg transition-colors ${
-                selectedOption === option 
-                  ? selectedOption === item.answer
-                    ? 'bg-green-100 border-green-500 border'
-                    : 'bg-red-100 border-red-500 border'
-                  : selectedOption !== null && option === item.answer
-                    ? 'bg-green-100 border-green-500 border'
-                    : 'bg-secondary hover:bg-secondary/80 border-transparent border'
-              }`}
-              disabled={selectedOption !== null}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
+        <PictionaryOptions 
+          options={item.options}
+          selectedOption={selectedOption}
+          correctAnswer={item.answer}
+          onSelect={handleOptionSelect}
+        />
       </Card>
 
       <div className="flex gap-2">

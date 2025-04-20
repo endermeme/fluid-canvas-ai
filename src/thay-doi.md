@@ -1,4 +1,3 @@
-
 # Lịch sử thay đổi mã nguồn
 
 ## Ngày 21/04/2023
@@ -63,3 +62,11 @@
    - Thêm import Button từ '@/components/ui/button'
    - Đảm bảo sử dụng đúng component Button cho nút gợi ý và điều hướng
 
+## Ngày 01/05/2025
+1. Refactor PictionaryTemplate.tsx into smaller components:
+   - Created PictionaryImage.tsx for image display logic
+   - Created PictionaryOptions.tsx for options grid
+   - Created PictionaryHint.tsx for hint display
+   - Created PictionaryResult.tsx for result screen
+   - Simplified main PictionaryTemplate.tsx file
+   - Improved code organization and maintainability
