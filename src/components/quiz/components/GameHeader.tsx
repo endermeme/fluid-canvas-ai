@@ -36,17 +36,15 @@ const GameHeader: React.FC<GameHeaderProps> = ({
     <div className="p-4 space-y-2">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          {onBack && (
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => navigate('/')}
-              className="h-8 w-8"
-              title="Quay lại"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          )}
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={onBack ? onBack : () => navigate('/')}
+            className="h-8 w-8"
+            title="Quay lại"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
           
           <h2 className="text-xl font-bold">{title || `Câu ${currentItem}/${totalItems}`}</h2>
         </div>

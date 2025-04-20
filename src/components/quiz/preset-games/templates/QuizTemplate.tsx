@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -98,7 +99,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
         
         toast({
           title: "Chính xác! +1 điểm",
-          description: `Câu trả lời của bạn đúng. +${bonusTime}s thời gian thư��ng.`,
+          description: `Câu trả lời của bạn đúng. +${bonusTime}s thời gian thưởng.`,
           variant: "default",
         });
       } else {
@@ -144,7 +145,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
   const handleShare = async () => {
     try {
       toast({
-        title: "Chức n��ng chia sẻ",
+        title: "Chức năng chia sẻ",
         description: "Chức năng chia sẻ đang được phát triển.",
       });
     } catch (error) {
@@ -160,7 +161,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
     const percentage = Math.round((score / questions.length) * 100);
     
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80 relative">
+      <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
         <GameHeader 
           onBack={onBack}
           progress={100}
@@ -172,30 +173,32 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
           onShare={handleShare}
         />
 
-        <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
-          <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả</h2>
-          <p className="text-lg mb-4">
-            Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
-          </p>
-          
-          <div className="mb-6">
-            <div className="flex justify-between mb-2">
-              <span>Điểm của bạn</span>
-              <span className="font-bold">{percentage}%</span>
+        <Card className="flex-grow flex items-center justify-center p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
+          <div className="w-full max-w-md">
+            <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả</h2>
+            <p className="text-lg mb-4">
+              Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
+            </p>
+            
+            <div className="mb-6">
+              <div className="flex justify-between mb-2">
+                <span>Điểm của bạn</span>
+                <span className="font-bold">{percentage}%</span>
+              </div>
+              <div className="h-3 bg-secondary rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-primary transition-all duration-500 ease-out"
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
             </div>
-            <div className="h-3 bg-secondary rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-primary transition-all duration-500 ease-out"
-                style={{ width: `${percentage}%` }}
-              />
+            
+            <div className="text-4xl font-bold mb-6 text-primary">
+              {score} / {questions.length}
             </div>
+            
+            <GameControls onRestart={handleRestart} className="mt-4" />
           </div>
-          
-          <div className="text-4xl font-bold mb-6 text-primary">
-            {score} / {questions.length}
-          </div>
-          
-          <GameControls onRestart={handleRestart} className="mt-4" />
         </Card>
       </div>
     );

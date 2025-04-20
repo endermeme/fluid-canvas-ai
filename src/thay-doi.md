@@ -1,3 +1,4 @@
+
 # Lịch sử thay đổi mã nguồn
 
 ## Ngày 21/04/2023
@@ -49,3 +50,10 @@
    - Chuyển logic điều hướng về trang chủ vào nút mũi tên
    - Thêm title cho các nút để cải thiện UX
    - Sửa lại các chức năng điều hướng cho đúng
+
+## Ngày 29/04/2025
+1. Cập nhật tất cả các template game để sử dụng GameHeader.tsx thống nhất:
+   - Chuẩn hóa việc sử dụng GameHeader trong QuizTemplate, TrueFalseTemplate, MemoryTemplate và PictionaryTemplate
+   - Đảm bảo các nút có chức năng đồng nhất trên tất cả các game
+   - Gỡ bỏ các phần header riêng lẻ trong các template
+   - Điều chỉnh cách truyền props để thống nhất giữa các template
