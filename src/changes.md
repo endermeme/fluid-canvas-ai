@@ -89,3 +89,14 @@ Chi tiết:
 - Đồng bộ cấu hình API với custom game generator
 - Sử dụng các hằng số từ api-constants.ts
 - Cập nhật cấu trúc request body để phù hợp với API mới
+
+## 2025-04-20: Sửa lỗi trong PictionaryTemplate.tsx
+
+### Files được cập nhật:
+- src/components/quiz/preset-games/templates/PictionaryTemplate.tsx
+
+### Chi tiết thay đổi:
+- Thêm function handleImageError để xử lý lỗi khi không thể tải hình ảnh
+- Sửa lỗi TypeScript error TS2554: Expected 1 arguments, but got 4
+- Đơn giản hóa quy trình xử lý lỗi hình ảnh
+- Đảm bảo tính nhất quán giữa các component con

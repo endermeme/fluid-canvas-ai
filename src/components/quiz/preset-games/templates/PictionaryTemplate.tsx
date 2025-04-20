@@ -3,10 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import GameHeader from '../../components/GameHeader';
-import GameControls from '../../components/GameControls';
+import GameHeader from '../../../components/GameHeader';
+import GameControls from '../../../components/GameControls';
 import { HelpCircle } from 'lucide-react';
-import { generatePixabayImage, handleImageError, generatePlaceholderImage } from '../../generator/imageInstructions';
+import { generatePixabayImage, generatePlaceholderImage } from '../../generator/imageInstructions';
 import PictionaryImage from './pictionary/PictionaryImage';
 import PictionaryOptions from './pictionary/PictionaryOptions';
 import PictionaryHint from './pictionary/PictionaryHint';
@@ -39,6 +39,16 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
   const items = processedItems;
   const isLastItem = currentItem === items.length - 1;
   const progress = ((currentItem + 1) / items.length) * 100;
+
+  // Added handleImageError function to fix the type error
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    setImageError(true);
+    setImageLoaded(true);
+    const img = e.currentTarget;
+    const itemAnswer = items[currentItem]?.answer || topic;
+    img.src = generatePlaceholderImage(600, 400, itemAnswer);
+    img.alt = `Không thể tải hình ảnh: ${itemAnswer}`;
+  };
 
   useEffect(() => {
     console.log("PictionaryTemplate - Game content:", gameContent);
@@ -193,7 +203,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
           imageLoaded={imageLoaded}
           imageError={imageError}
           onLoad={() => setImageLoaded(true)}
-          onError={(e) => handleImageError(e, setImageError, setImageLoaded, item.answer || topic)}
+          onError={handleImageError}
         />
         
         <PictionaryHint 

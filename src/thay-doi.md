@@ -1,3 +1,4 @@
+
 # Lịch sử thay đổi mã nguồn
 
 ## Ngày 21/04/2023
@@ -70,3 +71,10 @@
    - Created PictionaryResult.tsx for result screen
    - Simplified main PictionaryTemplate.tsx file
    - Improved code organization and maintainability
+
+## Ngày 02/05/2025
+1. Sửa lỗi trong PictionaryTemplate.tsx:
+   - Thêm hàm handleImageError để xử lý lỗi hình ảnh
+   - Sửa TypeScript error TS2554 liên quan đến số lượng tham số trong hàm xử lý lỗi
+   - Đảm bảo hiển thị hình ảnh thay thế khi xảy ra lỗi
+   - Đơn giản hóa logic xử lý hình ảnh
