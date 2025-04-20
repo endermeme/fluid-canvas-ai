@@ -1,3 +1,4 @@
+
 # Lịch sử thay đổi mã nguồn
 
 ## 2025-04-20: Dọn dẹp và tổ chức lại cấu trúc thư mục
@@ -76,3 +77,15 @@ Chi tiết:
 - Đơn giản hóa logic gọi API và xử lý response
 - Cải thiện xử lý lỗi và loading states
 - Thêm toast notifications để thông báo trạng thái
+
+## 2025-04-20: Sửa lỗi Gemini API endpoint
+
+### Files được cập nhật:
+- src/components/quiz/preset-games/PresetGameManager.tsx
+
+### Chi tiết thay đổi:
+- Sửa lỗi 404 từ Gemini API
+- Cập nhật từ `v1` sang `v1beta` để phù hợp với model gemini-2.5-pro-preview-03-25
+- Đồng bộ cấu hình API với custom game generator
+- Sử dụng các hằng số từ api-constants.ts
+- Cập nhật cấu trúc request body để phù hợp với API mới

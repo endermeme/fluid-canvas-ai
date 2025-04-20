@@ -23,12 +23,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Copy, Check } from 'lucide-react';
 
-// Import Gemini API 
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
-const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro-preview-03-25" });
+// Import API constants
+import { 
+  GEMINI_API_KEY, 
+  GEMINI_MODELS, 
+  getApiEndpoint, 
+  DEFAULT_GENERATION_SETTINGS 
+} from '@/constants/api-constants';
 
 interface PresetGameManagerProps {
   gameType: string;
@@ -81,13 +82,6 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
     }, 300);
 
     try {
-      const generationConfig = {
-        temperature: 0.7,
-        topK: 1,
-        topP: 0.95,
-        maxOutputTokens: 8000,
-      };
-
       const difficultyLevel = gameSettings.difficulty;
       const questionCount = gameSettings.questionCount;
       const timePerQuestion = gameSettings.timePerQuestion;
@@ -138,9 +132,42 @@ Output must be valid JSON. `;
 
       console.log("Sending prompt to Gemini:", gamePrompt);
 
-      const result = await model.generateContent(gamePrompt);
-      const response = await result.response;
-      const text = response.text();
+      // Cấu trúc request đúng cho API v1beta của Gemini
+      const payload = {
+        contents: [{
+          role: "user",
+          parts: [{text: gamePrompt}]
+        }],
+        generationConfig: {
+          ...DEFAULT_GENERATION_SETTINGS,
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 8192
+        }
+      };
+
+      // Sử dụng endpoint từ hằng số API
+      const response = await fetch(getApiEndpoint(GEMINI_MODELS.PRESET_GAME), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`API Error: ${response.status} ${response.statusText}`, errorText);
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+      if (!text) {
+        throw new Error('No content returned from API');
+      }
 
       console.log("Received response from Gemini:", text);
 
