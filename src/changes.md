@@ -24,3 +24,15 @@
 ### Lý do:
 - Sửa lỗi không tìm thấy component CustomGameForm
 - Đảm bảo tính nhất quán trong việc sử dụng component
+
+## 2025-04-20: Thống nhất GameHeader và cập nhật tính năng chia sẻ
+- Thống nhất sử dụng GameHeader từ preset-games
+- Loại bỏ phiên bản GameHeader dư thừa
+- Cập nhật import paths trong các file liên quan
+
+### Files đã sửa:
+- src/components/quiz/preset-games/templates/GameWrapper.tsx
+
+### Lý do:
+- Tối ưu hóa cấu trúc và giảm trùng lặp code
+- Thống nhất cách thức chia sẻ game trong toàn bộ ứng dụng
