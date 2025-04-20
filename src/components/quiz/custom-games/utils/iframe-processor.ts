@@ -6,28 +6,26 @@ export const enhanceIframeContent = (htmlContent: string, title?: string): strin
   if (!htmlContent) return '';
   
   try {
+    const cleanedContent = htmlContent
+      .replace(/```(html|css|javascript)?/g, '')  
+      .replace(/`{1,3}/g, '')                    
+      .replace(/\*\*/g, '')                      
+      .replace(/\\n/g, '\n')                     
+      .replace(/^> /gm, '')                      
+      .trim();
+
+    let processedContent = cleanedContent;
+    
     // Add title if provided
     if (title) {
-      htmlContent = htmlContent.replace(/<title>.*?<\/title>/i, `<title>${title}</title>`);
-      if (!htmlContent.includes('<title>')) {
-        htmlContent = htmlContent.replace(/<head>/i, `<head>\n  <title>${title}</title>`);
+      processedContent = processedContent.replace(/<title>.*?<\/title>/i, `<title>${title}</title>`);
+      if (!processedContent.includes('<title>')) {
+        processedContent = processedContent.replace(/<head>/i, `<head>\n  <title>${title}</title>`);
       }
     }
+
+    return processedContent;
     
-    // Add error handling script
-    if (!htmlContent.includes('window.onerror')) {
-      const errorScript = `
-  <script>
-    window.onerror = (message, source, lineno, colno, error) => {
-      console.error('Game error:', { message, source, lineno, colno, stack: error?.stack });
-      return true;
-    };
-  </script>`;
-      
-      htmlContent = htmlContent.replace('</body>', `${errorScript}\n</body>`);
-    }
-    
-    return htmlContent;
   } catch (error) {
     console.error('Error enhancing iframe content:', error);
     return htmlContent;
