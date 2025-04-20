@@ -10,6 +10,7 @@ import GameSettings from './GameSettings';
 import { GameSettingsData, GameType } from './types';
 import { gameTypes } from './gameTypes';
 import { animateBlockCreation } from '@/lib/animations';
+import CustomGameForm from './custom-games/CustomGameForm';
 import { 
   BrainCircuit, 
   Puzzle, 
@@ -175,7 +176,6 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     );
   }
 
-  // Game grid rendering will need to be updated
   const renderGameGrid = () => (
     <div ref={containerRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 max-w-6xl w-full">
       {gameTypes.map((gameType) => (
