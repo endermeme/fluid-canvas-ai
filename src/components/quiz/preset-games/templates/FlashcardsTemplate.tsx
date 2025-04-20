@@ -37,7 +37,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
   const cards = content?.cards || [];
   const flipTime = content?.settings?.flipTime || 5;
 
-  // Loại bỏ một trong hai khai báo progress 
   const progress = ((currentCard + 1) / cards.length) * 100;
 
   useEffect(() => {

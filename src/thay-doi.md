@@ -13,3 +13,7 @@
 1. Xóa và viết lại toàn bộ phần header và navigation trong GameView
 2. Đơn giản hóa giao diện và chức năng điều hướng
 
+## Ngày 22/04/2025
+1. Sửa lỗi type trong GameView.tsx - Xóa prop onLoad từ GameContainer
+2. Tạo lại GameHeader.tsx vì các template game vẫn cần sử dụng
+3. Cập nhật đường dẫn import GameHeader trong các file template game

@@ -111,11 +111,9 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack }) => {
         title={miniGame.title}
         error={iframeError}
         onReload={handleReloadGame}
-        onLoad={handleIframeLoad}
       />
     </div>
   );
 };
 
 export default GameView;
-
