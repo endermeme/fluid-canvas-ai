@@ -1,4 +1,3 @@
-
 # Lịch sử thay đổi mã nguồn
 
 ## Ngày 21/04/2023
@@ -43,3 +42,10 @@
    - Điều chỉnh chức năng nút ArrowLeft để gọi hàm onBack được truyền vào thay vì luôn quay về trang chủ
    - Đảm bảo nút chia sẻ (Share2) được kích hoạt đúng với callback onShare
    - Đặt lại tiêu đề nút để phù hợp với chức năng
+
+## Ngày 28/04/2025
+1. Cập nhật GameHeader.tsx để trở thành component độc lập:
+   - Đảm bảo tính nhất quán của header trong tất cả các game template
+   - Chuyển logic điều hướng về trang chủ vào nút mũi tên
+   - Thêm title cho các nút để cải thiện UX
+   - Sửa lại các chức năng điều hướng cho đúng

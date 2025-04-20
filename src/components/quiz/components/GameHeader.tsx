@@ -40,7 +40,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={onBack}
+              onClick={() => navigate('/')}
               className="h-8 w-8"
               title="Quay lại"
             >
@@ -80,6 +80,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({
               size="icon"
               onClick={onShare}
               className="h-8 w-8"
+              title="Chia sẻ"
             >
               <Share2 className="h-4 w-4" />
             </Button>
@@ -90,6 +91,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({
             size="icon"
             onClick={() => navigate('/game-history')}
             className="h-8 w-8"
+            title="Lịch sử"
           >
             <History className="h-4 w-4" />
           </Button>
@@ -102,6 +104,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({
               size="icon"
               onClick={onRefresh}
               className="h-8 w-8"
+              title="Làm mới"
             >
               <History className="h-4 w-4" />
             </Button>
