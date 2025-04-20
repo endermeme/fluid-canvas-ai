@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 import { enhanceIframeContent } from './utils/iframe-processor';
@@ -43,16 +44,18 @@ const GameContainer: React.FC<GameContainerProps> = ({
   
   return (
     <div 
-      className={`relative rounded-xl overflow-hidden bg-gradient-to-b from-blue-50 to-white shadow-xl border border-gray-200 w-full mx-auto transition-all duration-300 ${showFullscreen ? 'fixed inset-0 z-50 rounded-none m-0 max-w-none' : ''}`}
+      className={`relative rounded-lg overflow-hidden bg-gradient-to-b from-background/50 to-background shadow-xl border border-border/50 w-full mx-auto transition-all duration-300 ${
+        showFullscreen ? 'fixed inset-0 z-50 rounded-none m-0 max-w-none' : ''
+      }`}
       style={{ 
-        height: showFullscreen ? '100vh' : '92vh',
-        minHeight: '650px',
-        maxHeight: showFullscreen ? '100vh' : '1200px',
-        maxWidth: showFullscreen ? '100vw' : '1800px'
+        height: showFullscreen ? '100vh' : '95vh',
+        minHeight: '700px',
+        maxHeight: showFullscreen ? '100vh' : '100vh',
+        maxWidth: showFullscreen ? '100vw' : '100%'
       }}
     >
       <button 
-        className="absolute top-2 right-2 z-30 px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm font-medium flex items-center gap-1.5"
+        className="absolute top-2 right-2 z-30 px-3 py-1.5 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition text-sm font-medium flex items-center gap-1.5"
         onClick={toggleFullscreen}
       >
         {showFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}
@@ -93,8 +96,8 @@ const GameContainer: React.FC<GameContainerProps> = ({
         key={key}
         title={title || "Game"}
         srcDoc={formattedContent}
-        className="w-full h-full border-0 rounded-xl shadow-inner"
-        sandbox="allow-scripts"
+        className="w-full h-full border-0 rounded-lg shadow-inner bg-background"
+        sandbox="allow-scripts allow-same-origin"
         onLoad={() => setLoading(false)}
         onError={() => {
           setLocalError("Không thể tải nội dung game. Vui lòng thử lại sau.");
@@ -103,7 +106,6 @@ const GameContainer: React.FC<GameContainerProps> = ({
         style={{
           width: '100%',
           height: '100%',
-          backgroundColor: 'white',
           display: loading ? 'none' : 'block',
           opacity: loading ? 0 : 1,
           transition: 'opacity 0.3s ease-in-out'
