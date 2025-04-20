@@ -1,4 +1,54 @@
+
 # Changes Log
+
+## Created Simplified iframe-utils.ts Replacement
+
+### Files Created:
+1. Created src/components/quiz/utils/iframe-utils.ts:
+   - Simple implementation with minimal HTML processing
+   - Only adds title and error handling to content
+   - No complex code transformations
+
+2. Created src/components/quiz/custom-games/utils/iframe-utils.ts:
+   - Re-exports functions from main utils file for backward compatibility
+
+### Details:
+- Replaced deleted iframe-utils.ts with simplified version
+- Fixed import errors in multiple files
+- Removed complex HTML/JS/CSS processing logic
+- Simplified approach to generate cleaner output
+
+## Previous Changes
+
+## Removed iframe-utils Files
+
+### Files Removed:
+1. Removed src/components/quiz/utils/iframe-utils.ts
+2. Removed src/components/quiz/custom-games/utils/iframe-utils.ts
+
+### Details:
+- Removed iframe utilities and filtering mechanisms
+- Simplified HTML content processing pipeline
+- Removed unnecessary code processing steps
+
+## Template Literal and Rotation Syntax Fixes
+
+### Files Updated:
+1. src/components/quiz/utils/iframe-utils.ts
+
+### Changes:
+- Fixed missing backticks in template literals
+- Corrected `rotate()` function syntax to use template literals
+- Specifically addressed:
+  - `resultDisplay.textContent`
+  - `gameStateDisplay.textContent`
+  - Final score display
+  - Canvas rotation transformations
+
+### Motivation:
+- Resolved syntax errors preventing proper template string parsing
+- Ensured correct display of dynamic content
+- Improved code readability and functionality
 
 ## Fixed CustomGameForm Props in QuickGameSelector
 
@@ -127,32 +177,3 @@
 - Improved code organization and maintainability
 - Fixed all import paths to use new file structure
 
-## Template Literal and Rotation Syntax Fixes
-
-### Files Updated:
-1. src/components/quiz/utils/iframe-utils.ts
-
-### Changes:
-- Fixed missing backticks in template literals
-- Corrected `rotate()` function syntax to use template literals
-- Specifically addressed:
-  - `resultDisplay.textContent`
-  - `gameStateDisplay.textContent`
-  - Final score display
-  - Canvas rotation transformations
-
-### Motivation:
-- Resolved syntax errors preventing proper template string parsing
-- Ensured correct display of dynamic content
-- Improved code readability and functionality
-
-## Removed iframe-utils Files
-
-### Files Removed:
-1. Removed src/components/quiz/utils/iframe-utils.ts
-2. Removed src/components/quiz/custom-games/utils/iframe-utils.ts
-
-### Details:
-- Removed iframe utilities and filtering mechanisms
-- Simplified HTML content processing pipeline
-- Removed unnecessary code processing steps
