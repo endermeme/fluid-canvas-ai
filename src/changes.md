@@ -94,3 +94,12 @@ Chi tiết:
 ### Files được cập nhật:
 - src/components/quiz/custom-games/GameContainer.tsx
 - src/changes.md
+
+## 2025-04-20: Cập nhật API endpoints cho preset games
+- Thay đổi endpoint và URL trong PresetGameManager.tsx để sử dụng API custom game
+- Đơn giản hóa response handling
+- Tối ưu hóa quá trình tạo game với canvas mode
+
+### Files được cập nhật:
+- src/components/quiz/preset-games/PresetGameManager.tsx
+- src/changes.md

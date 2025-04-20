@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw, Share2 } from 'lucide-react';
@@ -36,7 +35,11 @@ interface PresetGameManagerProps {
   initialTopic?: string;
 }
 
-const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack, initialTopic = "Learn interactively" }) => {
+const PresetGameManager: React.FC<PresetGameManagerProps> = ({ 
+  gameType, 
+  onBack, 
+  initialTopic = "Learn interactively"
+}) => {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [gameContent, setGameContent] = useState(null);
@@ -88,120 +91,38 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
         maxOutputTokens: 8000,
       };
 
-      const difficultyLevel = gameSettings.difficulty;
-      const questionCount = gameSettings.questionCount;
-      const timePerQuestion = gameSettings.timePerQuestion;
-      const category = gameSettings.category;
-      const totalTime = gameSettings.totalTime;
-      const bonusTime = gameSettings.bonusTime;
-      const promptContent = gameSettings.prompt || prompt;
+      const result = await model.generateContent({
+        contents: [{
+          parts: [{
+            text: `Create an interactive HTML5 game with canvas about ${prompt}. The game should be educational and fun. Use this configuration: ${JSON.stringify({
+              type,
+              settings: gameSettings
+            })}`
+          }]
+        }],
+        generationConfig
+      });
 
-      let gamePrompt = `Create content for a ${type} game with the following requirements:
-- Topic: ${promptContent}
-- Difficulty: ${difficultyLevel}
-- Number of items: ${questionCount}
-- Time per item: ${timePerQuestion} seconds
-- Category: ${category}
-- Total time limit: ${totalTime || 'not specified'} seconds
-- Bonus time: ${bonusTime || 'not specified'} seconds
-
-Output must be valid JSON. `;
-
-      switch(type) {
-        case 'quiz':
-          gamePrompt += `JSON format: { "title": "title", "questions": [{"question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 5}} }`;
-          break;
-        case 'flashcards':
-          gamePrompt += `JSON format: { "title": "title", "cards": [{"front": "front", "back": "back", "hint": "hint (if any)"}], "settings": {"autoFlip": true, "flipTime": ${timePerQuestion}, "totalTime": ${totalTime || 180}} }`;
-          break;
-        case 'matching':
-          gamePrompt += `JSON format: { "title": "title", "pairs": [{"left": "left content", "right": "right content"}], "settings": {"timeLimit": ${totalTime || 60}, "bonusTimePerMatch": ${bonusTime || 5}} }`;
-          break;
-        case 'memory':
-          gamePrompt += `JSON format: { "title": "title", "cards": [{"id": id_number, "content": "content", "matched": false, "flipped": false}], "settings": {"timeLimit": ${totalTime || 120}, "allowHints": true, "hintPenalty": ${bonusTime || 5}} }`;
-          break;
-        case 'ordering':
-          gamePrompt += `JSON format: { "title": "title", "sentences": [{"words": ["word 1", "word 2", "word 3"], "correctOrder": [0, 1, 2]}], "settings": {"timeLimit": ${totalTime || 180}, "showHints": true, "bonusTimePerCorrect": ${bonusTime || 10}} }`;
-          break;
-        case 'wordsearch':
-          gamePrompt += `JSON format: { "title": "title", "description": "description", "words": [{"word": "word 1", "found": false}, {"word": "word 2", "found": false}], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "settings": {"timeLimit": ${totalTime || 300}, "allowDiagonalWords": true, "showWordList": true, "bonusTimePerWord": ${bonusTime || 15}} }`;
-          break;
-        case 'pictionary':
-          gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "image URL", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }`;
-          break;
-        case 'truefalse':
-          gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
-          break;
-      }
-
-      gamePrompt += " Return only JSON, no additional text.";
-
-      console.log("Sending prompt to Gemini:", gamePrompt);
-
-      const result = await model.generateContent(gamePrompt);
       const response = await result.response;
       const text = response.text();
-
-      console.log("Received response from Gemini:", text);
+      
+      clearInterval(progressInterval);
+      setGenerationProgress(100);
 
       try {
-        const jsonStr = text.includes('```json') 
-          ? text.split('```json')[1].split('```')[0].trim() 
-          : text.includes('```') 
-            ? text.split('```')[1].split('```')[0].trim() 
-            : text;
-
-        console.log("Parsed JSON string:", jsonStr);
-
-        const parsedContent = JSON.parse(jsonStr);
-
-        if (!parsedContent.settings) {
-          parsedContent.settings = {};
-        }
-
-        switch(type) {
-          case 'quiz':
-            parsedContent.settings.timePerQuestion = timePerQuestion;
-            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
-            parsedContent.settings.bonusTimePerCorrect = bonusTime || 5;
-            break;
-          case 'flashcards':
-            parsedContent.settings.flipTime = timePerQuestion;
-            parsedContent.settings.totalTime = totalTime || 180;
-            break;
-          case 'matching':
-          case 'memory':
-            parsedContent.settings.timeLimit = totalTime || 120;
-            break;
-          case 'ordering':
-            parsedContent.settings.timeLimit = totalTime || 180;
-            parsedContent.settings.bonusTimePerCorrect = bonusTime || 10;
-            break;
-          case 'wordsearch':
-            parsedContent.settings.timeLimit = totalTime || 300;
-            parsedContent.settings.bonusTimePerWord = bonusTime || 15;
-            break;
-          case 'pictionary':
-            parsedContent.settings.timePerQuestion = timePerQuestion;
-            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
-            break;
-          case 'truefalse':
-            parsedContent.settings.timePerQuestion = timePerQuestion;
-            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
-            parsedContent.settings.bonusTimePerCorrect = bonusTime || 3;
-            break;
-        }
-
-        clearInterval(progressInterval);
-        setGenerationProgress(100);
+        const gameContent = {
+          title: `${type} game: ${prompt}`,
+          content: text,
+          settings: gameSettings
+        };
 
         setTimeout(() => {
           setGenerating(false);
           setLoading(false);
-          setGameContent(parsedContent);
+          setGameContent(gameContent);
         }, 500);
 
-        return parsedContent;
+        return gameContent;
       } catch (parseError) {
         console.error("Error parsing AI response:", parseError);
         clearInterval(progressInterval);
