@@ -1,4 +1,3 @@
-
 # Lịch sử thay đổi mã nguồn
 
 ## 2025-04-20: Dọn dẹp và tổ chức lại cấu trúc thư mục
@@ -87,3 +86,11 @@ Chi tiết:
 - Loại bỏ các đoạn CSS không sử dụng để giảm kích thước bundle
 - Cập nhật lại đường dẫn import trong tất cả các file liên quan
 - Tối ưu hóa code để dễ bảo trì và nhất quán trong toàn ứng dụng
+
+## 2025-04-20: Sửa lỗi import trong GameContainer.tsx
+- Cập nhật đường dẫn import trong GameContainer.tsx từ './utils/iframe-processor' thành '@/utils/iframe-utils'
+- Sửa lỗi build do đường dẫn import không chính xác
+
+### Files được cập nhật:
+- src/components/quiz/custom-games/GameContainer.tsx
+- src/changes.md

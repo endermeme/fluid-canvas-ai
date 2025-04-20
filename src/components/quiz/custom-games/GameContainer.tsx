@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
-import { enhanceIframeContent } from './utils/iframe-processor';
+import { enhanceIframeContent } from '@/utils/iframe-utils';
 
 interface GameContainerProps {
   iframeRef: React.RefObject<HTMLIFrameElement>;
