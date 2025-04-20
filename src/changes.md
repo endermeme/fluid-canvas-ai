@@ -37,3 +37,12 @@
 
 ### Files được cập nhật:
 - src/components/quiz/custom-games/GameContainer.tsx
+
+## 2025-04-20: Dọn dẹp file giao diện không cần thiết
+
+### Files đã xóa:
+- src/components/quiz/GameHeader.tsx  
+- src/components/quiz/components/header-buttons/** (toàn bộ thư mục)
+- src/components/quiz/components/GameViewHeader.tsx
+
+Lý do: Tối ưu hóa cấu trúc project bằng cách loại bỏ các component giao diện trùng lặp và không cần thiết.

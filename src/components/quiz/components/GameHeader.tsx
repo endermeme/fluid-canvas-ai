@@ -1,15 +1,20 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Home, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Home, RefreshCw, Share2, Maximize } from 'lucide-react';
 
 interface GameHeaderProps {
   title: string;
   onBack?: () => void;
   onHome?: () => void;
   onRefresh?: () => void;
+  onShare?: () => void;
+  onFullscreen?: () => void;
   showHomeButton?: boolean;
   showRefreshButton?: boolean;
+  showShareButton?: boolean;
+  showFullscreenButton?: boolean;
+  score?: number;
   extraButton?: React.ReactNode;
 }
 
@@ -18,8 +23,13 @@ const GameHeader: React.FC<GameHeaderProps> = ({
   onBack,
   onHome,
   onRefresh,
+  onShare,
+  onFullscreen,
   showHomeButton = true,
   showRefreshButton = true,
+  showShareButton = true,
+  showFullscreenButton = true,
+  score,
   extraButton
 }) => {
   return (
@@ -37,6 +47,11 @@ const GameHeader: React.FC<GameHeaderProps> = ({
           </Button>
         )}
         <h1 className="text-lg font-medium truncate">{title}</h1>
+        {score !== undefined && (
+          <div className="ml-4 px-3 py-1 bg-primary/10 rounded-full text-sm font-medium">
+            Điểm: {score}
+          </div>
+        )}
       </div>
       
       <div className="flex items-center gap-2">
@@ -59,6 +74,28 @@ const GameHeader: React.FC<GameHeaderProps> = ({
             className="h-8 w-8"
           >
             <Home className="h-4 w-4" />
+          </Button>
+        )}
+
+        {showShareButton && onShare && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onShare}
+            className="h-8 w-8"
+          >
+            <Share2 className="h-4 w-4" />
+          </Button>
+        )}
+
+        {showFullscreenButton && onFullscreen && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onFullscreen}
+            className="h-8 w-8"
+          >
+            <Maximize className="h-4 w-4" />
           </Button>
         )}
         
