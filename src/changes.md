@@ -1,3 +1,4 @@
+
 # Lịch sử thay đổi mã nguồn
 
 ## 2025-04-20: Dọn dẹp và tổ chức lại cấu trúc thư mục
@@ -64,3 +65,25 @@ Chi tiết:
 - Cập nhật chức năng chia sẻ để sử dụng bảng games
 - Thêm RLS policies cho bảng games
 - Tối ưu hóa URL chia sẻ với slug từ tiêu đề game
+
+## 2025-04-20: Dọn dẹp utility trùng lặp và tối ưu CSS
+
+### Files đã xóa:
+- src/components/quiz/custom-games/utils/iframe-utils.ts
+- src/components/quiz/custom-games/utils/iframe-processor.ts
+
+### Files được tạo mới:
+- src/utils/iframe-utils.ts (Phiên bản hợp nhất và tối ưu)
+
+### Files được cập nhật:
+- src/components/quiz/GameView.tsx
+- src/components/quiz/components/GameContainer.tsx
+- src/components/quiz/share/SharedGame.tsx
+- src/components/quiz/custom-games/EnhancedGameView.tsx
+- src/app/globals.css
+
+Chi tiết:
+- Thống nhất các utility function vào một file chung trong thư mục utils
+- Loại bỏ các đoạn CSS không sử dụng để giảm kích thước bundle
+- Cập nhật lại đường dẫn import trong tất cả các file liên quan
+- Tối ưu hóa code để dễ bảo trì và nhất quán trong toàn ứng dụng

@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -26,7 +27,7 @@ body {
     rgb(var(--background-start-rgb));
 }
 
-/* Demo iframe styles */
+/* Các class chung được sử dụng trong ứng dụng */
 .demo-container {
   @apply max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden;
 }
@@ -49,14 +50,6 @@ body {
 
 .iframe-container {
   @apply p-1 bg-gray-50;
-}
-
-.demo-button {
-  @apply bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition-colors font-medium;
-}
-
-.loading-spinner {
-  @apply inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500;
 }
 
 .error-message {
