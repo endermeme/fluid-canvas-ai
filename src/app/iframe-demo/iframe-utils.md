@@ -17,3 +17,4 @@
 - Giữ nguyên API để tương thích ngược
 - Chỉ thực hiện xử lý HTML tối thiểu
 - Tạo phiên bản đơn giản để giải quyết lỗi import
+

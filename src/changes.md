@@ -1,5 +1,39 @@
 # Changes Log
 
+## Simplified Project Structure - Keep Only Essential Files
+
+### Files Kept:
+1. In preset-games directory:
+   - templates/QuizTemplate.tsx
+   - templates/FlashcardsTemplate.tsx
+   - templates/MatchingTemplate.tsx
+   - templates/MemoryTemplate.tsx 
+   - templates/OrderingTemplate.tsx
+   - templates/WordSearchTemplate.tsx
+   - templates/PictionaryTemplate.tsx
+   - templates/TrueFalseTemplate.tsx
+   - templates/index.ts
+   - PresetGameManager.tsx
+   - GameSelector.tsx
+
+2. In custom-games directory:
+   - CustomGameContainer.tsx
+   - CustomGameForm.tsx
+   - CustomGameSettings.tsx
+   - EnhancedGameView.tsx
+   - GameController.tsx
+   - utils/iframe-utils.ts
+   - utils/html-processor.ts
+   - utils/js-processor.ts
+   - utils/css-processor.ts
+
+### Details:
+- Kept only essential files for game functionality
+- Maintained core game templates and custom game features
+- Simplified folder structure while preserving functionality
+
+## Previous Changes
+
 ## Removed Lucky Wheel Game Code
 
 ### Files Removed:

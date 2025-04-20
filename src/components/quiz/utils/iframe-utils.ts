@@ -34,3 +34,4 @@ export const enhanceIframeContent = (htmlContent: string, title?: string): strin
     return htmlContent;
   }
 };
+
