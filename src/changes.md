@@ -1,3 +1,4 @@
+
 # Lịch sử thay đổi mã nguồn
 
 ## 2025-04-20: Dọn dẹp và tổ chức lại cấu trúc thư mục
@@ -99,6 +100,15 @@ Chi tiết:
 - Thay đổi endpoint và URL trong PresetGameManager.tsx để sử dụng API custom game
 - Đơn giản hóa response handling
 - Tối ưu hóa quá trình tạo game với canvas mode
+
+### Files được cập nhật:
+- src/components/quiz/preset-games/PresetGameManager.tsx
+- src/changes.md
+
+## 2025-04-20: Sửa lỗi cấu trúc API Gemini trong PresetGameManager
+- Thêm thuộc tính 'role' bắt buộc vào structure của API request
+- Cập nhật cấu trúc dữ liệu gửi tới Gemini API để phù hợp với định dạng mới
+- Sửa lỗi TypeScript type mismatch trong contents array
 
 ### Files được cập nhật:
 - src/components/quiz/preset-games/PresetGameManager.tsx

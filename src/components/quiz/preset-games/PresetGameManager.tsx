@@ -93,6 +93,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
 
       const result = await model.generateContent({
         contents: [{
+          role: "user",
           parts: [{
             text: `Create an interactive HTML5 game with canvas about ${prompt}. The game should be educational and fun. Use this configuration: ${JSON.stringify({
               type,
@@ -364,15 +365,12 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
     try {
       if (!gameContent) return;
       
-      // Get HTML content from the game
       const gameContainer = document.getElementById('game-container');
       let html = gameContainer?.innerHTML || '';
       
-      // Encode game content as a data attribute to ensure we can retrieve it later
       const encodedContent = encodeURIComponent(JSON.stringify(gameContent));
       html = `<div data-game-content="${encodedContent}">${html}</div>`;
       
-      // Save game to Supabase - ensure we provide all 4 parameters
       const shareUrl = await saveGameForSharing(
         gameContent.title || getGameTypeName(),
         gameType,
@@ -380,7 +378,6 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({
         html
       );
       
-      // Update state with the generated URL - now it's a full URL
       if (shareUrl) {
         setShareUrl(shareUrl);
         setShowShareDialog(true);
