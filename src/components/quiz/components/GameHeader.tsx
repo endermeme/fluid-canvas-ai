@@ -2,16 +2,18 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Clock, Trophy } from 'lucide-react';
+import { ArrowLeft, Clock, Trophy, RefreshCw, Share2 } from 'lucide-react';
 
 interface GameHeaderProps {
   onBack?: () => void;
   progress: number;
-  timeLeft: number;
+  timeLeft?: number;
   score?: number;
   currentItem: number;
   totalItems: number;
   title?: string;
+  onRefresh?: () => void;
+  onShare?: () => void;
 }
 
 const GameHeader: React.FC<GameHeaderProps> = ({
@@ -21,7 +23,9 @@ const GameHeader: React.FC<GameHeaderProps> = ({
   score,
   currentItem,
   totalItems,
-  title
+  title,
+  onRefresh,
+  onShare
 }) => {
   return (
     <div className="mb-4 mt-12">
@@ -48,10 +52,32 @@ const GameHeader: React.FC<GameHeaderProps> = ({
               <span>Điểm: {score}</span>
             </div>
           )}
-          <div className="text-sm font-medium flex items-center px-3 py-1 bg-primary/10 rounded-full">
-            <Clock className="h-4 w-4 mr-1" />
-            <span>{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
-          </div>
+          {timeLeft !== undefined && (
+            <div className="text-sm font-medium flex items-center px-3 py-1 bg-primary/10 rounded-full">
+              <Clock className="h-4 w-4 mr-1" />
+              <span>{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
+            </div>
+          )}
+          {onRefresh && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onRefresh}
+              className="bg-primary/10 hover:bg-primary/20"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          )}
+          {onShare && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onShare}
+              className="bg-primary/10 hover:bg-primary/20"
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
       <Progress value={progress} className="h-2 bg-secondary" />

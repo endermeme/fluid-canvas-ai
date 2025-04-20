@@ -35,8 +35,10 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
   const { toast } = useToast();
 
   const cards = content?.cards || [];
-  const progress = ((currentCard + 1) / cards.length) * 100;
   const flipTime = content?.settings?.flipTime || 5;
+
+  // Loại bỏ một trong hai khai báo progress 
+  const progress = ((currentCard + 1) / cards.length) * 100;
 
   useEffect(() => {
     if (cards.length > 0) {
@@ -143,8 +145,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
   if (!content || !cards.length) {
     return <div className="p-4">Không có dữ liệu thẻ ghi nhớ</div>;
   }
-
-  const progress = ((currentCard + 1) / cards.length) * 100;
 
   return (
     <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
