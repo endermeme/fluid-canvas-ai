@@ -1,5 +1,21 @@
-
 # Changes Log
+
+## Removed Lucky Wheel Game Code
+
+### Files Removed:
+1. Removed all files in vong-quay/ directory:
+   - index.html
+   - style.css
+   - script.js
+   - game.js and game.cjs
+   - All parser and utility files
+   - Integration demo files
+   - Example HTML files
+
+### Details:
+- Completely removed lucky wheel game implementation
+- Cleaned up project structure
+- Removed unused code and examples
 
 ## Created Simplified iframe-utils.ts Replacement
 
@@ -176,4 +192,3 @@
 - Updated main iframe-utils.ts to use new modules
 - Improved code organization and maintainability
 - Fixed all import paths to use new file structure
-
