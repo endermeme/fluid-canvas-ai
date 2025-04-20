@@ -8,7 +8,6 @@ import GameHistoryPage from './pages/GameHistoryPage';
 import GameController from './components/quiz/custom-games/GameController';
 import SharedGame from './pages/SharedGame';
 import TeacherDashboard from './components/quiz/share/TeacherDashboard';
-import IframeDemo from './pages/IframeDemo';
 
 function App() {
   return (
@@ -25,7 +24,6 @@ function App() {
       <Route path="/play/:gameType/:slug/:gameId" element={<SharedGame />} />
       <Route path="/game/:gameId/dashboard" element={<TeacherDashboard />} />
       <Route path="/play/:gameType/:slug/:gameId/dashboard" element={<TeacherDashboard />} />
-      <Route path="/iframe-demo" element={<IframeDemo />} />
     </Routes>
   );
 }
