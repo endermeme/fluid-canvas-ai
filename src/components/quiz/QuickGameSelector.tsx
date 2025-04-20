@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIGameGenerator } from './generator/geminiGenerator';
@@ -42,9 +43,8 @@ import {
   Gamepad
 } from 'lucide-react';
 
-import GameHeader from './quick-game-selector/GameHeader';
+import { Button } from '@/components/ui/button';
 import CustomGameForm from './custom-games/CustomGameForm';
-import GameGrid from './quick-game-selector/GameGrid';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -181,7 +181,15 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
 
   return (
     <div ref={containerRef} className="flex flex-col items-center h-full w-full bg-gradient-to-b from-background to-background/80 p-4 md:p-6 overflow-auto">
-      <GameHeader onTitleClick={() => {}} />
+      {/* Header */}
+      <div className="w-full flex items-center justify-center mb-8">
+        <div className="flex items-center gap-3">
+          <School className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+            Minigames Giáo Dục
+          </h1>
+        </div>
+      </div>
 
       <CustomGameForm 
         onGenerate={(content, game) => {
@@ -202,11 +210,25 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
         onCancel={handleCustomGameCreate}
       />
       
-      <GameGrid 
-        gameTypes={gameTypes} 
-        onTopicSelect={handleTopicSelect} 
-        getIconComponent={getIconComponent}
-      />
+      {/* Game Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full mt-6">
+        {gameTypes.map((gameType, index) => (
+          <Button
+            key={index}
+            variant="outline"
+            className="game-button flex flex-col items-center justify-center h-32 p-4 border border-border/40 rounded-lg hover:bg-accent/80 hover:border-accent transition-all"
+            onClick={() => handleTopicSelect(gameType)}
+          >
+            <div className="bg-primary/10 text-primary p-2 rounded-full mb-2">
+              {getIconComponent(gameType.icon)}
+            </div>
+            <span className="font-medium text-foreground">{gameType.name}</span>
+            <span className="text-xs text-muted-foreground text-center mt-1">
+              {gameType.description}
+            </span>
+          </Button>
+        ))}
+      </div>
       
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-lg border-white/20">
