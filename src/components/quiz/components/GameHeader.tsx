@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Plus, Share2, History } from 'lucide-react';
@@ -39,9 +40,9 @@ const GameHeader: React.FC<GameHeaderProps> = ({
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate('/')}
+              onClick={onBack}
               className="h-8 w-8"
-              title="Trang chủ"
+              title="Quay lại"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>

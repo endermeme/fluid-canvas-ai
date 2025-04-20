@@ -1,3 +1,4 @@
+
 # Lịch sử thay đổi mã nguồn
 
 ## Ngày 21/04/2023
@@ -36,3 +37,9 @@
    - Chuyển chức năng về trang chủ cho nút mũi tên (ArrowLeft)
    - Chuyển chức năng mở preset game cho nút Plus
    - Đơn giản hóa thanh điều hướng
+
+## Ngày 27/04/2025
+1. Sửa lỗi trong GameHeader.tsx:
+   - Điều chỉnh chức năng nút ArrowLeft để gọi hàm onBack được truyền vào thay vì luôn quay về trang chủ
+   - Đảm bảo nút chia sẻ (Share2) được kích hoạt đúng với callback onShare
+   - Đặt lại tiêu đề nút để phù hợp với chức năng
