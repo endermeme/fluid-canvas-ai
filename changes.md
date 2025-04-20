@@ -1,12 +1,12 @@
+# Recent Changes - API Version Update
 
-# Recent Changes - Cleanup Headers and Quick Game Selector
-
-## Files Deleted:
-1. src/components/quiz/preset-games/components/headers/GameHeader.tsx
-2. src/components/quiz/quick-game-selector/* (entire directory)
+## Files Modified:
+1. src/constants/api-constants.ts
+- Updated API version to use v1beta consistently
+- Removed deprecated v1 references
+- Updated API endpoint generation to use beta version
 
 ## Purpose:
-- Remove redundant header implementations
-- Clean up unused quick game selector components
-- Simplify component hierarchy
-
+- Ensure consistent API versioning across the application
+- Update to latest Gemini API beta version 
+- Remove deprecated v1 references

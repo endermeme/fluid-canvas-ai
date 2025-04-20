@@ -1,23 +1,6 @@
 
 # Lịch sử thay đổi mã nguồn
 
-## 2025-04-20: Sửa lỗi import sau khi xóa file headers và quick-game-selector
-- Sửa lỗi import trong `src/components/quiz/preset-games/templates/GameWrapper.tsx`
-- Sửa lỗi import trong `src/components/quiz/QuickGameSelector.tsx`
-- Tái cấu trúc component GameWrapper.tsx với header tích hợp
-- Tái cấu trúc QuickGameSelector.tsx để không phụ thuộc vào các component đã xóa
-
-## 2025-04-20: Dọn dẹp Headers và Quick Game Selector
-
-### Files đã xóa:
-1. src/components/quiz/preset-games/components/headers/GameHeader.tsx
-2. src/components/quiz/quick-game-selector/* (entire directory)
-
-Lý do:
-- Xóa các triển khai header trùng lặp
-- Dọn dẹp các component quick game selector không cần thiết
-- Đơn giản hóa cấu trúc thành phần
-
 ## 2025-04-20: Dọn dẹp và tổ chức lại cấu trúc thư mục
 - Xóa thư mục demo và các file liên quan 
 - Xóa các file không cần thiết trong quick-game-selector
