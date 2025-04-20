@@ -24,3 +24,9 @@
 1. Chuẩn hóa GameHeader trong tất cả các template game (Quiz, TrueFalse, Memory)
 2. Loại bỏ các nút chức năng riêng lẻ trong PresetGameManager
 3. Thêm chức năng chia sẻ mặc định cho tất cả các template game
+
+## Ngày 25/04/2025
+1. Điều chỉnh các nút trên GameHeader.tsx
+2. Sửa chức năng nút quay lại (ArrowLeft) để thực hiện chức năng đúng
+3. Thay đổi nút Home thành chức năng quay lại trang preset game
+4. Thay đổi nút Plus thành chức năng quay về trang chủ

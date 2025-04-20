@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Plus, Share2, History } from 'lucide-react';
+import { ArrowLeft, Plus, Share2, History, Home } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,6 +14,8 @@ export interface GameHeaderProps {
   totalItems: number;
   onBack?: () => void;
   onShare?: () => Promise<void>;
+  extraButton?: React.ReactNode;
+  onRefresh?: () => void;
 }
 
 const GameHeader: React.FC<GameHeaderProps> = ({
@@ -25,6 +27,8 @@ const GameHeader: React.FC<GameHeaderProps> = ({
   totalItems,
   onBack,
   onShare,
+  extraButton,
+  onRefresh,
 }) => {
   const navigate = useNavigate();
 
@@ -62,8 +66,19 @@ const GameHeader: React.FC<GameHeaderProps> = ({
           <Button 
             variant="ghost" 
             size="icon"
+            onClick={() => navigate('/preset-games')}
+            className="h-8 w-8"
+            title="Quay lại"
+          >
+            <Home className="h-4 w-4" />
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="icon"
             onClick={() => navigate('/')}
             className="h-8 w-8"
+            title="Trang chủ"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -87,6 +102,19 @@ const GameHeader: React.FC<GameHeaderProps> = ({
           >
             <History className="h-4 w-4" />
           </Button>
+
+          {extraButton}
+          
+          {onRefresh && (
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={onRefresh}
+              className="h-8 w-8"
+            >
+              <History className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
       
