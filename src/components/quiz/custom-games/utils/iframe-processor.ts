@@ -24,27 +24,6 @@ export const enhanceIframeContent = (htmlContent: string, title?: string): strin
       }
     }
 
-    // Add error handling script
-    if (!processedContent.includes('window.onerror')) {
-      const errorScript = `
-  <script>
-    window.onerror = (message, source, lineno, colno, error) => {
-      console.error('Game error:', { message, source, lineno, colno, stack: error?.stack });
-      return true;
-    };
-    
-    // API để giao tiếp với game container
-    window.reportGameStats = (stats) => {
-      window.parent.postMessage({
-        type: 'gameStats',
-        payload: stats
-      }, '*');
-    };
-  </script>`;
-      
-      processedContent = processedContent.replace('</body>', `${errorScript}\n</body>`);
-    }
-
     return processedContent;
     
   } catch (error) {

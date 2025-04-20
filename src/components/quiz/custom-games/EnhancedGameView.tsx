@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { enhanceIframeContent } from '@/utils/iframe-utils';
+import { enhanceIframeContent } from './utils/iframe-utils';
 
 interface EnhancedGameViewProps {
   miniGame: {

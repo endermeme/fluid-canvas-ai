@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getSharedGame } from '@/utils/gameExport';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Eye } from 'lucide-react';
-import { enhanceIframeContent } from '@/utils/iframe-utils';
+import { enhanceIframeContent } from '../utils/iframe-utils';
 import GameContainer from '../components/GameContainer';
 import { useToast } from '@/hooks/use-toast';
 
