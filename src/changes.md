@@ -1,3 +1,4 @@
+
 # Lịch sử thay đổi mã nguồn
 
 ## 2025-04-20: Dọn dẹp và tổ chức lại cấu trúc thư mục
@@ -46,3 +47,10 @@
 - src/components/quiz/components/GameViewHeader.tsx
 
 Lý do: Tối ưu hóa cấu trúc project bằng cách loại bỏ các component giao diện trùng lặp và không cần thiết.
+
+## 2025-04-20: Sửa lỗi import sau khi xóa file GameViewHeader.tsx
+
+### Files được cập nhật:
+- src/components/quiz/GameView.tsx
+
+Chi tiết: Cập nhật import từ GameViewHeader (đã bị xóa) sang GameHeader mới và điều chỉnh lại props tương ứng.

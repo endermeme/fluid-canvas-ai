@@ -1,10 +1,11 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/geminiGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { enhanceIframeContent } from './custom-games/utils/iframe-utils';
-import GameViewHeader from './components/GameViewHeader';
+import GameHeader from './components/GameHeader';
 import GameContainer from './components/GameContainer';
 
 interface GameViewProps {
@@ -142,12 +143,12 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      <GameViewHeader
+      <GameHeader
+        title={miniGame.title || "Minigame tương tác"}
         onBack={handleBackToHome}
-        onReload={handleReloadGame}
+        onRefresh={handleReloadGame}
         onShare={handleShare}
         score={gameStats.score}
-        shareInProgress={shareInProgress}
         extraButton={extraButton}
       />
       
