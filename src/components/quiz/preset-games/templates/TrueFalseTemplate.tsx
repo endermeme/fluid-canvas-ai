@@ -1,61 +1,56 @@
 import React, { useState, useEffect } from 'react';
-import GameWrapper from './GameWrapper';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import GameHeader from '../../components/GameHeader';
-import GameControls from '../../components/GameControls';
-import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, CheckCircle, XCircle } from 'lucide-react';
+import GameWrapper from './GameWrapper';
 
 interface TrueFalseTemplateProps {
   data?: any;
   content?: any;
   topic: string;
   onBack?: () => void;
+  gameId?: string;
 }
 
-const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, topic, onBack }) => {
+const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, topic, onBack, gameId }) => {
   const gameContent = content || data;
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<Array<boolean | null>>([]);
+  const [selectedOption, setSelectedOption] = useState<boolean | null>(null);
   const [score, setScore] = useState(0);
-  const [showExplanation, setShowExplanation] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(gameContent?.settings?.timePerQuestion || 15);
-  const [totalTimeLeft, setTotalTimeLeft] = useState(gameContent?.settings?.totalTime || 150);
-  const [timerRunning, setTimerRunning] = useState(true);
   const [showResult, setShowResult] = useState(false);
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(gameContent?.settings?.timePerQuestion || 20);
+  const [totalTimeLeft, setTotalTimeLeft] = useState(gameContent?.settings?.totalTime || 300);
+  const [timerRunning, setTimerRunning] = useState(true);
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
   const questions = gameContent?.questions || [];
   const isLastQuestion = currentQuestion === questions.length - 1;
-  const currentAnswer = userAnswers[currentQuestion];
 
   useEffect(() => {
     if (!gameStarted && questions.length > 0) {
       setGameStarted(true);
       
-      const questionTime = gameContent?.settings?.timePerQuestion || 15;
+      const questionTime = gameContent?.settings?.timePerQuestion || 20;
       const totalTime = gameContent?.settings?.totalTime || (questions.length * questionTime);
       
       setTimeLeft(questionTime);
       setTotalTimeLeft(totalTime);
-      
-      console.log(`Game initialized with ${questionTime}s per question and ${totalTime}s total time`);
-      console.log("Game content:", gameContent);
-      console.log("Questions:", questions);
     }
   }, [gameContent, questions, gameStarted]);
 
   useEffect(() => {
-    if (timeLeft > 0 && timerRunning) {
+    if (timeLeft > 0 && timerRunning && !isAnswered) {
       const timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
       
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && timerRunning) {
+    } else if (timeLeft === 0 && timerRunning && !isAnswered) {
       setTimerRunning(false);
+      setIsAnswered(true);
       
       toast({
         title: "Hết thời gian!",
@@ -63,7 +58,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
         variant: "destructive",
       });
     }
-  }, [timeLeft, timerRunning, toast]);
+  }, [timeLeft, timerRunning, isAnswered, toast]);
 
   useEffect(() => {
     if (totalTimeLeft > 0 && gameStarted && !showResult) {
@@ -83,28 +78,36 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     }
   }, [totalTimeLeft, gameStarted, showResult, toast]);
 
-  const handleAnswer = (answer: boolean) => {
-    if (currentAnswer !== null) return;
-
-    const newAnswers = [...userAnswers];
-    newAnswers[currentQuestion] = answer;
-    setUserAnswers(newAnswers);
-    setShowExplanation(gameContent?.settings?.showExplanation ?? true);
-    setTimerRunning(false);
-
-    const isCorrect = answer === questions[currentQuestion].isTrue;
+  const handleOptionSelect = (option: boolean) => {
+    if (isAnswered) return;
     
-    if (isCorrect) {
+    setSelectedOption(option);
+    setIsAnswered(true);
+    setTimerRunning(false);
+    
+    if (option === questions[currentQuestion].isTrue) {
       setScore(score + 1);
-      toast({
-        title: "Chính xác! +1 điểm",
-        description: "Câu trả lời của bạn đúng.",
-        variant: "default",
-      });
+      
+      if (gameContent?.settings?.bonusTimePerCorrect) {
+        const bonusTime = gameContent.settings.bonusTimePerCorrect;
+        setTotalTimeLeft(prev => prev + bonusTime);
+        
+        toast({
+          title: "Chính xác! +1 điểm",
+          description: `Câu trả lời của bạn đúng. +${bonusTime}s thời gian thưởng.`,
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Chính xác! +1 điểm",
+          description: "Câu trả lời của bạn đúng.",
+          variant: "default",
+        });
+      }
     } else {
       toast({
         title: "Không chính xác!",
-        description: "Câu trả lời của bạn không đúng.",
+        description: `Đáp án đúng là: ${questions[currentQuestion].isTrue ? 'Đúng' : 'Sai'}`,
         variant: "destructive",
       });
     }
@@ -115,33 +118,23 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
       setShowResult(true);
     } else {
       setCurrentQuestion(currentQuestion + 1);
-      setShowExplanation(false);
-      setTimeLeft(gameContent?.settings?.timePerQuestion || 15);
+      setSelectedOption(null);
+      setIsAnswered(false);
+      setTimeLeft(gameContent?.settings?.timePerQuestion || 20);
       setTimerRunning(true);
     }
   };
 
   const handleRestart = () => {
     setCurrentQuestion(0);
-    setUserAnswers([]);
+    setSelectedOption(null);
     setScore(0);
-    setShowExplanation(false);
     setShowResult(false);
-    setTimeLeft(gameContent?.settings?.timePerQuestion || 15);
-    setTotalTimeLeft(gameContent?.settings?.totalTime || 150);
+    setIsAnswered(false);
+    setTimeLeft(gameContent?.settings?.timePerQuestion || 20);
+    setTotalTimeLeft(gameContent?.settings?.totalTime || 300);
     setTimerRunning(true);
     setGameStarted(true);
-  };
-
-  const handleShare = async () => {
-    try {
-      toast({
-        title: "Chức năng chia sẻ",
-        description: "Chức năng chia sẻ đang được phát triển.",
-      });
-    } catch (error) {
-      console.error("Error sharing:", error);
-    }
   };
 
   if (!gameContent || !questions.length) {
@@ -160,7 +153,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
         currentItem={questions.length}
         totalItems={questions.length}
         title="Kết quả"
-        onShare={handleShare}
+        gameId={gameId}
       >
         <Card className="flex-grow flex items-center justify-center p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
           <div className="w-full max-w-md">
@@ -186,7 +179,12 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
               {score} / {questions.length}
             </div>
             
-            <GameControls onRestart={handleRestart} />
+            <button
+              onClick={handleRestart}
+              className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition mt-4"
+            >
+              Chơi lại
+            </button>
           </div>
         </Card>
       </GameWrapper>
@@ -204,61 +202,83 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
       score={score}
       currentItem={currentQuestion + 1}
       totalItems={questions.length}
+      title={gameContent.title || "Đúng/Sai"}
+      gameId={gameId}
     >
-      <Card className="flex-grow p-6 mb-4">
-        <h2 className="text-xl font-semibold mb-6">{question.statement}</h2>
+      <Card className="flex-grow p-6 mb-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
+        <h2 className="text-xl font-semibold mb-6 text-primary">{question.statement}</h2>
         
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <button 
-            className={`p-6 flex items-center justify-center rounded-lg transition-colors ${
-              currentAnswer === true 
-                ? currentAnswer === question.isTrue
-                  ? 'bg-green-500 hover:bg-green-600 text-white'
-                  : 'bg-red-500 hover:bg-red-600 text-white'
-                : 'bg-primary/80 hover:bg-primary text-white'
-            }`}
-            onClick={() => handleAnswer(true)}
-            disabled={currentAnswer !== null}
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+          <button
+            onClick={() => handleOptionSelect(true)}
+            disabled={isAnswered}
+            className={`flex items-center justify-center gap-2 p-4 rounded-lg transition-all duration-200 ${
+              isAnswered ? 
+                selectedOption === true ?
+                  selectedOption === question.isTrue ?
+                    'bg-green-100 border-green-500 border shadow-md' :
+                    'bg-red-100 border-red-500 border shadow-md' :
+                  question.isTrue === true ?
+                    'bg-green-100 border-green-500 border shadow-md' :
+                    'bg-secondary/50' :
+                'bg-secondary/50 hover:bg-secondary/80 border-transparent border hover:shadow-md'
+            } w-full sm:w-48 text-center py-8`}
           >
-            <CheckCircle className="h-7 w-7 mr-2" />
-            <span className="text-lg font-medium">Đúng</span>
+            {isAnswered && selectedOption === true ? (
+              selectedOption === question.isTrue ? (
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              ) : (
+                <XCircle className="h-6 w-6 text-red-600" />
+              )
+            ) : isAnswered && question.isTrue === true ? (
+              <CheckCircle className="h-6 w-6 text-green-600" />
+            ) : (
+              <ThumbsUp className="h-6 w-6" />
+            )}
+            <span className="font-medium text-lg">Đúng</span>
           </button>
           
-          <button 
-            className={`p-6 flex items-center justify-center rounded-lg transition-colors ${
-              currentAnswer === false 
-                ? currentAnswer === question.isTrue
-                  ? 'bg-green-500 hover:bg-green-600 text-white'
-                  : 'bg-red-500 hover:bg-red-600 text-white'
-                : 'bg-primary/80 hover:bg-primary text-white'
-            }`}
-            onClick={() => handleAnswer(false)}
-            disabled={currentAnswer !== null}
+          <button
+            onClick={() => handleOptionSelect(false)}
+            disabled={isAnswered}
+            className={`flex items-center justify-center gap-2 p-4 rounded-lg transition-all duration-200 ${
+              isAnswered ? 
+                selectedOption === false ?
+                  selectedOption === question.isTrue ?
+                    'bg-green-100 border-green-500 border shadow-md' :
+                    'bg-red-100 border-red-500 border shadow-md' :
+                  question.isTrue === false ?
+                    'bg-green-100 border-green-500 border shadow-md' :
+                    'bg-secondary/50' :
+                'bg-secondary/50 hover:bg-secondary/80 border-transparent border hover:shadow-md'
+            } w-full sm:w-48 text-center py-8`}
           >
-            <XCircle className="h-7 w-7 mr-2" />
-            <span className="text-lg font-medium">Sai</span>
+            {isAnswered && selectedOption === false ? (
+              selectedOption === question.isTrue ? (
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              ) : (
+                <XCircle className="h-6 w-6 text-red-600" />
+              )
+            ) : isAnswered && question.isTrue === false ? (
+              <CheckCircle className="h-6 w-6 text-green-600" />
+            ) : (
+              <ThumbsDown className="h-6 w-6" />
+            )}
+            <span className="font-medium text-lg">Sai</span>
           </button>
         </div>
-        
-        {showExplanation && (
-          <div className={`p-4 rounded-lg mt-4 ${question.isTrue ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-            <div className="flex items-start">
-              <AlertCircle className={`h-5 w-5 mr-2 mt-0.5 ${question.isTrue ? 'text-green-600' : 'text-red-600'}`} />
-              <div>
-                <p className="font-medium mb-1">Giải thích:</p>
-                <p>{question.explanation}</p>
-              </div>
-            </div>
-          </div>
-        )}
       </Card>
-
-      <GameControls 
-        onRestart={handleRestart}
-        onNext={handleNextQuestion}
-        disabled={currentAnswer === null}
-        isLastItem={isLastQuestion}
-      />
+      
+      {isAnswered && (
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={handleNextQuestion}
+            className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition"
+          >
+            {isLastQuestion ? 'Xem kết quả' : 'Câu hỏi tiếp theo'}
+          </button>
+        </div>
+      )}
     </GameWrapper>
   );
 };

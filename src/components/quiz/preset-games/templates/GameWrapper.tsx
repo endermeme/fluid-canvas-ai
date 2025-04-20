@@ -1,19 +1,19 @@
-
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import GameHeader from '../../components/GameHeader';
+import { Progress } from '@/components/ui/progress';
+import { Clock, BrainCircuit } from 'lucide-react';
+import GameHeader from '../components/headers/GameHeader';
 
 interface GameWrapperProps {
   children: React.ReactNode;
-  progress: number;
+  onBack?: () => void;
+  progress?: number;
   timeLeft?: number;
   score?: number;
-  currentItem: number;
-  totalItems: number;
+  currentItem?: number;
+  totalItems?: number;
+  onShare?: () => void;
   title?: string;
-  onShare?: () => Promise<void>;
-  onBack?: () => void;
-  onRefresh?: () => void;
+  gameId?: string;
 }
 
 /**
@@ -22,42 +22,48 @@ interface GameWrapperProps {
  */
 const GameWrapper: React.FC<GameWrapperProps> = ({
   children,
-  progress,
-  timeLeft,
-  score,
-  currentItem,
-  totalItems,
-  title,
-  onShare,
-  onBack,
-  onRefresh
+  progress = 0,
+  timeLeft = 0,
+  score = 0,
+  currentItem = 0,
+  totalItems = 0,
+  title = "Quiz Game",
+  gameId,
 }) => {
-  const navigate = useNavigate();
-
-  // Xử lý quay lại mặc định nếu không có callback onBack riêng
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      navigate('/preset-games');
-    }
+  // Format time as MM:SS
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
-      <GameHeader 
-        onBack={handleBack}
-        progress={progress}
-        timeLeft={timeLeft}
-        score={score}
-        currentItem={currentItem}
-        totalItems={totalItems}
-        title={title}
-        onShare={onShare}
-        onRefresh={onRefresh}
-      />
+    <div className="flex flex-col h-screen bg-background overflow-hidden relative">
+      {/* Header */}
+      <GameHeader title={title} gameId={gameId} />
       
-      <div className="flex-grow flex flex-col">
+      {/* Progress bar */}
+      <Progress value={progress} className="w-full h-1.5 bg-secondary/40" />
+      
+      {/* Game stats */}
+      <div className="bg-background px-4 py-2 flex justify-between items-center border-b">
+        <div className="flex items-center space-x-2">
+          <Clock className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium">{formatTime(timeLeft)}</span>
+        </div>
+        
+        <div className="flex items-center space-x-1">
+          <span className="text-sm font-medium">{currentItem}/{totalItems}</span>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <BrainCircuit className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium">{score} pt</span>
+        </div>
+      </div>
+      
+      {/* Game content */}
+      <div className="flex-grow overflow-auto p-4">
         {children}
       </div>
     </div>

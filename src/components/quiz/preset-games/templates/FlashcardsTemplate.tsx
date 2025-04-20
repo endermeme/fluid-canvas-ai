@@ -1,241 +1,235 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Toggle } from '@/components/ui/toggle';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import GameHeader from '../../components/GameHeader';
-import GameControls from '../../components/GameControls';
+import { ChevronLeft, ChevronRight, RotateCw, Repeat } from 'lucide-react';
 import GameWrapper from './GameWrapper';
 
 interface FlashcardsTemplateProps {
-  content: any;
+  data?: any;
+  content?: any;
   topic: string;
   onBack?: () => void;
+  gameId?: string;
 }
 
-interface Flashcard {
-  front: string;
-  back: string;
-}
-
-interface FlashcardsContent {
-  cards: Flashcard[];
-  settings: {
-    autoFlip: boolean;
-    flipTime: number;
-  };
-}
-
-const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic, onBack }) => {
-  const [currentCard, setCurrentCard] = useState(0);
+const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, topic, onBack, gameId }) => {
+  const gameContent = content || data;
+  
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [cardsState, setCardsState] = useState<Array<'unreviewed' | 'known' | 'unknown'>>([]);
-  const [autoFlip, setAutoFlip] = useState(content?.settings?.autoFlip || false);
-  const [flipTimer, setFlipTimer] = useState<NodeJS.Timeout | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [reviewedCards, setReviewedCards] = useState<number[]>([]);
+  const [timeLeft, setTimeLeft] = useState(gameContent?.settings?.timeLimit || 300);
+  const [showResult, setShowResult] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
-  const cards = content?.cards || [];
-  const flipTime = content?.settings?.flipTime || 5;
-
-  const progress = ((currentCard + 1) / cards.length) * 100;
+  const cards = gameContent?.cards || [];
+  const totalCards = cards.length;
 
   useEffect(() => {
-    if (cards.length > 0) {
-      setCardsState(new Array(cards.length).fill('unreviewed'));
+    if (!gameStarted && cards.length > 0) {
+      setGameStarted(true);
+      setTimeLeft(gameContent?.settings?.timeLimit || 300);
     }
-  }, [cards.length]);
+  }, [gameContent, cards, gameStarted]);
 
   useEffect(() => {
-    if (autoFlip && !isFlipped) {
-      setTimeRemaining(flipTime);
-      const countdownTimer = setInterval(() => {
-        setTimeRemaining(prev => {
-          if (prev <= 1) {
-            clearInterval(countdownTimer);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
+    if (timeLeft > 0 && gameStarted && !showResult) {
       const timer = setTimeout(() => {
-        setIsFlipped(true);
-        clearInterval(countdownTimer);
-      }, flipTime * 1000);
+        setTimeLeft(timeLeft - 1);
+      }, 1000);
       
-      setFlipTimer(timer);
+      return () => clearTimeout(timer);
+    } else if (timeLeft === 0 && gameStarted && !showResult) {
+      setShowResult(true);
       
-      return () => {
-        clearTimeout(timer);
-        clearInterval(countdownTimer);
-      };
+      toast({
+        title: "Thời gian đã hết",
+        description: "Hãy xem kết quả học tập của bạn.",
+        variant: "default",
+      });
     }
+  }, [timeLeft, gameStarted, showResult, toast]);
 
-    return () => {
-      if (flipTimer) clearTimeout(flipTimer);
-    };
-  }, [currentCard, isFlipped, autoFlip, flipTime]);
-
-  const handleFlip = () => {
-    if (flipTimer) {
-      clearTimeout(flipTimer);
-    }
+  const handleFlipCard = () => {
     setIsFlipped(!isFlipped);
-  };
-
-  const handlePrevCard = () => {
-    if (currentCard > 0) {
-      setCurrentCard(currentCard - 1);
-      setIsFlipped(false);
+    
+    // Thêm thẻ vào danh sách đã xem qua khi lật sang mặt sau
+    if (!isFlipped && !reviewedCards.includes(currentCardIndex)) {
+      setReviewedCards([...reviewedCards, currentCardIndex]);
     }
   };
 
   const handleNextCard = () => {
-    if (currentCard < cards.length - 1) {
-      setCurrentCard(currentCard + 1);
+    if (currentCardIndex < cards.length - 1) {
+      setCurrentCardIndex(currentCardIndex + 1);
+      setIsFlipped(false);
+    } else {
+      setShowResult(true);
+      
+      toast({
+        title: "Hoàn thành",
+        description: "Bạn đã xem qua tất cả các thẻ.",
+        variant: "default",
+      });
+    }
+  };
+
+  const handlePrevCard = () => {
+    if (currentCardIndex > 0) {
+      setCurrentCardIndex(currentCardIndex - 1);
       setIsFlipped(false);
     }
   };
 
-  const handleMarkCard = (status: 'known' | 'unknown') => {
-    const newCardsState = [...cardsState];
-    newCardsState[currentCard] = status;
-    setCardsState(newCardsState);
-    
-    if (status === 'known') {
-      toast({
-        title: "Đã thuộc!",
-        description: "Đã đánh dấu thẻ này là đã thuộc.",
-        variant: "default",
-      });
-    } else {
-      toast({
-        title: "Chưa thuộc!",
-        description: "Đã đánh dấu thẻ này là chưa thuộc.",
-        variant: "destructive",
-      });
-    }
-    
-    if (currentCard < cards.length - 1) {
-      handleNextCard();
-    }
-  };
-
   const handleRestart = () => {
-    setCurrentCard(0);
+    setCurrentCardIndex(0);
     setIsFlipped(false);
-    setCardsState(new Array(cards.length).fill('unreviewed'));
-    toast({
-      title: "Làm lại từ đầu",
-      description: "Đã đặt lại tất cả thẻ ghi nhớ.",
-      variant: "default",
-    });
+    setReviewedCards([]);
+    setTimeLeft(gameContent?.settings?.timeLimit || 300);
+    setShowResult(false);
+    setGameStarted(true);
   };
 
-  const toggleAutoFlip = () => {
-    setAutoFlip(!autoFlip);
-    toast({
-      title: autoFlip ? "Đã tắt tự động lật" : "Đã bật tự động lật",
-      description: autoFlip ? "Thẻ sẽ không tự động lật." : `Thẻ sẽ tự động lật sau ${flipTime} giây.`,
-      variant: "default",
-    });
-  };
-
-  if (!content || !cards.length) {
-    return <div className="p-4">Không có dữ liệu thẻ ghi nhớ</div>;
+  if (!gameContent || !cards.length) {
+    return <div className="p-4">Không có dữ liệu thẻ học</div>;
   }
+
+  if (showResult) {
+    const percentage = Math.round((reviewedCards.length / totalCards) * 100);
+    
+    return (
+      <GameWrapper
+        onBack={onBack}
+        progress={100}
+        timeLeft={timeLeft}
+        score={reviewedCards.length}
+        currentItem={totalCards}
+        totalItems={totalCards}
+        title="Kết quả"
+        gameId={gameId}
+      >
+        <Card className="flex-grow flex items-center justify-center p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
+          <div className="w-full max-w-md">
+            <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả</h2>
+            <p className="text-lg mb-4">
+              Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
+            </p>
+            
+            <div className="mb-6">
+              <div className="flex justify-between mb-2">
+                <span>Thẻ đã học</span>
+                <span className="font-bold">{percentage}%</span>
+              </div>
+              <div className="h-3 bg-secondary rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-primary transition-all duration-500 ease-out"
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
+            </div>
+            
+            <div className="text-4xl font-bold mb-6 text-primary">
+              {reviewedCards.length} / {totalCards}
+            </div>
+            
+            <div className="space-x-4">
+              <Button onClick={handleRestart} className="mt-4">
+                <Repeat className="mr-2 h-4 w-4" />
+                Học lại
+              </Button>
+              <Button variant="outline" onClick={onBack} className="mt-4">
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Quay lại
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </GameWrapper>
+    );
+  }
+
+  const card = cards[currentCardIndex];
+  const progress = ((currentCardIndex + 1) / totalCards) * 100;
 
   return (
     <GameWrapper
       onBack={onBack}
       progress={progress}
-      timeLeft={timeRemaining}
-      score={undefined}
-      currentItem={currentCard + 1}
-      totalItems={cards.length}
+      timeLeft={timeLeft}
+      score={reviewedCards.length}
+      currentItem={currentCardIndex + 1}
+      totalItems={totalCards}
+      title={gameContent.title || "Flashcards"}
+      gameId={gameId}
     >
-      {/* Move existing UI content here */}
-      <div className="flex-grow flex items-center justify-center mb-4 perspective-1000">
-        <div 
-          className="w-full max-w-4xl aspect-[3/2] cursor-pointer relative group"
-          onClick={handleFlip}
-          style={{
-            transformStyle: 'preserve-3d',
-            transition: 'transform 0.6s',
-            transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
-          }}
+      <div className="flex flex-col h-full justify-between">
+        <Card 
+          className="flex-grow flex items-center justify-center p-8 cursor-pointer bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20 select-none"
+          onClick={handleFlipCard}
         >
-          <Card 
-            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-2 border-primary/20 shadow-lg group-hover:shadow-xl transition-all duration-300"
-            style={{ backfaceVisibility: 'hidden' }}
-          >
-            <div className="text-center max-w-full">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                Nhấn để lật thẻ
-                {autoFlip && !isFlipped && (
-                  <div className="mt-1 flex items-center justify-center gap-1">
-                    <span>Tự động lật sau {timeRemaining}s</span>
+          <div className="w-full h-full flex flex-col items-center justify-center text-center p-4">
+            {!isFlipped ? (
+              <>
+                <div className="text-xs mb-2 text-gray-500">Nhấp để xem mặt sau</div>
+                <div className="text-2xl font-bold mb-4">{card.front}</div>
+                {card.image && (
+                  <div className="mt-4 max-w-xs mx-auto">
+                    <img 
+                      src={card.image} 
+                      alt={card.front} 
+                      className="rounded-md max-h-40 object-contain"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
                   </div>
                 )}
-              </div>
-              <div className="text-3xl font-bold text-primary/90 break-words whitespace-pre-wrap">
-                {cards[currentCard].front}
-              </div>
-            </div>
-          </Card>
-          
-          <Card 
-            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm border-2 border-primary/30 shadow-lg"
-            style={{
-              backfaceVisibility: 'hidden',
-              transform: 'rotateY(180deg)'
-            }}
+              </>
+            ) : (
+              <>
+                <div className="text-xs mb-2 text-gray-500">Nhấp để xem mặt trước</div>
+                <div className="text-xl">{card.back}</div>
+              </>
+            )}
+          </div>
+        </Card>
+        
+        <div className="flex justify-between items-center mt-4 px-2">
+          <Button 
+            onClick={handlePrevCard} 
+            disabled={currentCardIndex === 0}
+            variant="outline"
+            size="sm"
+            className="px-3"
           >
-            <div className="text-center max-w-full">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                Mặt sau
-              </div>
-              <div className="text-2xl text-primary/90 break-words whitespace-pre-wrap">
-                {cards[currentCard].back}
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <button
-            onClick={handlePrevCard}
-            disabled={currentCard === 0}
-            className="flex items-center justify-center px-4 py-2 rounded-lg bg-background/70 border border-primary/20 hover:bg-background/90 transition-colors disabled:opacity-50"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
+            <ChevronLeft className="h-5 w-5" />
             Trước
-          </button>
+          </Button>
           
-          <button
-            onClick={handleFlip}
-            className="col-span-2 px-4 py-2 rounded-lg bg-background/70 border border-primary/20 hover:bg-background/90 transition-colors"
-          >
-            {isFlipped ? "Xem mặt trước" : "Lật thẻ"}
-          </button>
+          <div className="text-sm text-gray-500">
+            {currentCardIndex + 1} / {totalCards}
+          </div>
           
-          <button
+          <Button 
             onClick={handleNextCard}
-            disabled={currentCard === cards.length - 1}
-            className="flex items-center justify-center px-4 py-2 rounded-lg bg-background/70 border border-primary/20 hover:bg-background/90 transition-colors disabled:opacity-50"
+            variant="outline"
+            size="sm"
+            className="px-3"
           >
             Tiếp
-            <ArrowRight className="h-4 w-4 ml-1" />
-          </button>
+            <ChevronRight className="h-5 w-5" />
+          </Button>
         </div>
-
-        <GameControls 
-          onRestart={handleRestart}
-          className="mt-2"
-        />
+        
+        <div className="flex justify-center mt-4">
+          <Button 
+            onClick={handleFlipCard} 
+            className="mx-2"
+          >
+            <RotateCw className="h-4 w-4 mr-2" />
+            Lật thẻ
+          </Button>
+        </div>
       </div>
     </GameWrapper>
   );

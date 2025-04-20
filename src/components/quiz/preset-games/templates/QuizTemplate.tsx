@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -11,9 +10,10 @@ interface QuizTemplateProps {
   content?: any;
   topic: string;
   onBack?: () => void;
+  gameId?: string;
 }
 
-const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBack }) => {
+const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBack, gameId }) => {
   const gameContent = content || data;
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -170,6 +170,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
         totalItems={questions.length}
         title="Kết quả"
         onShare={handleShare}
+        gameId={gameId}
       >
         <Card className="flex-grow flex items-center justify-center p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
           <div className="w-full max-w-md">
@@ -213,7 +214,9 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
       score={score}
       currentItem={currentQuestion + 1}
       totalItems={questions.length}
+      title={gameContent.title || "Quiz Game"}
       onShare={handleShare}
+      gameId={gameId}
     >
       <Card className="flex-grow p-6 mb-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
         <h2 className="text-xl font-semibold mb-6 text-primary">{question.question}</h2>
@@ -248,19 +251,23 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
                     {String.fromCharCode(65 + index)}
                   </div>
                 )}
-                <span>{option}</span>
+                <span className="flex-grow">{option}</span>
               </div>
             </button>
           ))}
         </div>
       </Card>
-
-      <GameControls 
-        onRestart={handleRestart}
-        onNext={isAnswered ? handleNextQuestion : undefined}
-        disabled={!isAnswered}
-        isLastItem={isLastQuestion}
-      />
+      
+      {isAnswered && (
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={handleNextQuestion}
+            className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition"
+          >
+            {isLastQuestion ? 'Xem kết quả' : 'Câu hỏi tiếp theo'}
+          </button>
+        </div>
+      )}
     </GameWrapper>
   );
 };
