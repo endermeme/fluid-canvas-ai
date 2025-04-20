@@ -166,6 +166,9 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
         onShare={handleShare}
         score={gameStats.score}
         extraButton={extraButton}
+        progress={100} // Adding the missing required props
+        currentItem={1}
+        totalItems={1}
       />
       
       <GameContainer
