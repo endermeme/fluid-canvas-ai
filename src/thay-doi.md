@@ -57,3 +57,9 @@
    - Đảm bảo các nút có chức năng đồng nhất trên tất cả các game
    - Gỡ bỏ các phần header riêng lẻ trong các template
    - Điều chỉnh cách truyền props để thống nhất giữa các template
+
+## Ngày 30/04/2025
+1. Sửa lỗi trong PictionaryTemplate.tsx:
+   - Thêm import Button từ '@/components/ui/button'
+   - Đảm bảo sử dụng đúng component Button cho nút gợi ý và điều hướng
+
