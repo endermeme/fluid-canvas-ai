@@ -86,6 +86,33 @@ export type Database = {
         }
         Relationships: []
       }
+      visitor_logs: {
+        Row: {
+          browser: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          os: string
+          timestamp: string | null
+        }
+        Insert: {
+          browser: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          os: string
+          timestamp?: string | null
+        }
+        Update: {
+          browser?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          os?: string
+          timestamp?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
