@@ -1,4 +1,3 @@
-
 # Lịch sử thay đổi mã nguồn
 
 ## 2025-04-20: Dọn dẹp và tổ chức lại cấu trúc thư mục
@@ -27,3 +26,14 @@
 - Xóa route iframe-demo khỏi App.tsx
 - Đơn giản hóa cấu trúc thư mục
 
+## 2025-04-20: Cập nhật giao diện game và header
+- Tạo component GameHeader.tsx mới để thống nhất header cho tất cả các game
+- Cập nhật GameContainer.tsx để hiển thị game ở chế độ toàn màn hình và căn giữa
+- Thêm các hiệu ứng blur và gradient cho header và container
+- Cải thiện UI/UX với các animation mượt mà hơn
+
+### Files được tạo mới:
+- src/components/quiz/components/GameHeader.tsx
+
+### Files được cập nhật:
+- src/components/quiz/custom-games/GameContainer.tsx
