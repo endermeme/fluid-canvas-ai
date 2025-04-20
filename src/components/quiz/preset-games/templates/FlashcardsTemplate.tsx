@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, RefreshCw, Check, X, Clock, Shuffle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Toggle } from '@/components/ui/toggle';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import GameHeader from '../../components/GameHeader';
+import GameControls from '../../components/GameControls';
 
 interface FlashcardsTemplateProps {
   content: any;
   topic: string;
   onBack?: () => void;
+}
+
+interface Flashcard {
+  front: string;
+  back: string;
+}
+
+interface FlashcardsContent {
+  cards: Flashcard[];
+  settings: {
+    autoFlip: boolean;
+    flipTime: number;
+  };
 }
 
 const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic, onBack }) => {
@@ -132,42 +144,22 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
     return <div className="p-4">Không có dữ liệu thẻ ghi nhớ</div>;
   }
 
-  const stats = {
-    known: cardsState.filter(state => state === 'known').length,
-    unknown: cardsState.filter(state => state === 'unknown').length,
-    unreviewed: cardsState.filter(state => state === 'unreviewed').length
-  };
+  const progress = ((currentCard + 1) / cards.length) * 100;
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative overflow-hidden">
-      {onBack && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onBack} 
-          className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Quay lại</span>
-        </Button>
-      )}
+    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
+      <GameHeader 
+        onBack={onBack}
+        progress={progress}
+        timeLeft={timeRemaining}
+        currentItem={currentCard}
+        totalItems={cards.length}
+        title={`Thẻ ${currentCard + 1}/${cards.length}`}
+      />
 
-      <div className="mb-4 mt-12">
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
-            Thẻ {currentCard + 1}/{cards.length}
-          </div>
-          <div className="text-sm font-medium flex space-x-3">
-            <span className="px-3 py-1 bg-green-100/30 text-green-600 rounded-full">Đã thuộc: {stats.known}</span>
-            <span className="px-3 py-1 bg-red-100/30 text-red-600 rounded-full">Chưa thuộc: {stats.unknown}</span>
-          </div>
-        </div>
-        <Progress value={progress} className="h-2 bg-secondary" />
-      </div>
-
-      <div className="flex-grow flex items-center justify-center mb-4 perspective-1000 overflow-hidden">
+      <div className="flex-grow flex items-center justify-center mb-4 perspective-1000">
         <div 
-          className="w-full max-w-4xl aspect-[3/2] cursor-pointer relative group px-4"
+          className="w-full max-w-4xl aspect-[3/2] cursor-pointer relative group"
           onClick={handleFlip}
           style={{
             transformStyle: 'preserve-3d',
@@ -176,17 +168,14 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
           }}
         >
           <Card 
-            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-2 border-primary/20 shadow-lg group-hover:shadow-xl transition-all duration-300 overflow-auto"
-            style={{
-              backfaceVisibility: 'hidden'
-            }}
+            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-2 border-primary/20 shadow-lg group-hover:shadow-xl transition-all duration-300"
+            style={{ backfaceVisibility: 'hidden' }}
           >
             <div className="text-center max-w-full">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
                 Nhấn để lật thẻ
                 {autoFlip && !isFlipped && (
-                  <div className="mt-1 flex items-center justify-center">
-                    <Clock className="h-3 w-3 mr-1 text-primary/60" />
+                  <div className="mt-1 flex items-center justify-center gap-1">
                     <span>Tự động lật sau {timeRemaining}s</span>
                   </div>
                 )}
@@ -198,14 +187,16 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
           </Card>
           
           <Card 
-            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm border-2 border-primary/30 shadow-lg overflow-auto"
+            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm border-2 border-primary/30 shadow-lg"
             style={{
               backfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)'
             }}
           >
             <div className="text-center max-w-full">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Mặt sau</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                Mặt sau
+              </div>
               <div className="text-2xl text-primary/90 break-words whitespace-pre-wrap">
                 {cards[currentCard].back}
               </div>
@@ -214,81 +205,38 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 bg-background/40 p-3 rounded-lg backdrop-blur-sm border border-primary/10 shadow-sm">
-        <div className="grid grid-cols-4 gap-2">
-          <Button
-            variant="outline"
+      <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button
             onClick={handlePrevCard}
             disabled={currentCard === 0}
-            className="bg-background/70 border-primary/20"
-            size="sm"
+            className="flex items-center justify-center px-4 py-2 rounded-lg bg-background/70 border border-primary/20 hover:bg-background/90 transition-colors disabled:opacity-50"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Trước
-          </Button>
+          </button>
           
-          <Button
-            variant="outline"
+          <button
             onClick={handleFlip}
-            className="col-span-2 bg-background/70 border-primary/20"
-            size="sm"
+            className="col-span-2 px-4 py-2 rounded-lg bg-background/70 border border-primary/20 hover:bg-background/90 transition-colors"
           >
             {isFlipped ? "Xem mặt trước" : "Lật thẻ"}
-          </Button>
+          </button>
           
-          <Button
-            variant="outline"
+          <button
             onClick={handleNextCard}
             disabled={currentCard === cards.length - 1}
-            className="bg-background/70 border-primary/20"
-            size="sm"
+            className="flex items-center justify-center px-4 py-2 rounded-lg bg-background/70 border border-primary/20 hover:bg-background/90 transition-colors disabled:opacity-50"
           >
             Tiếp
             <ArrowRight className="h-4 w-4 ml-1" />
-          </Button>
+          </button>
         </div>
-        
-        <div className="flex gap-2 justify-between">
-          <Button
-            variant={autoFlip ? "default" : "outline"}
-            size="sm"
-            className={`flex-1 ${autoFlip ? 'bg-primary/90' : 'bg-background/70 border-primary/20'}`}
-            onClick={toggleAutoFlip}
-          >
-            <Clock className="h-4 w-4 mr-1" />
-            {autoFlip ? "Tắt lật tự động" : "Bật lật tự động"}
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRestart}
-            className="bg-background/70 border-primary/20 flex-1"
-          >
-            <RefreshCw className="h-4 w-4 mr-1" />
-            Làm lại
-          </Button>
-        </div>
-        
-        <ToggleGroup type="single" variant="outline" className="grid grid-cols-2">
-          <ToggleGroupItem
-            value="unknown"
-            onClick={() => handleMarkCard('unknown')}
-            className="border border-red-300 text-red-600 data-[state=on]:bg-red-100 data-[state=on]:text-red-700"
-          >
-            <X className="mr-2 h-4 w-4" />
-            Chưa thuộc
-          </ToggleGroupItem>
-          
-          <ToggleGroupItem
-            value="known"
-            onClick={() => handleMarkCard('known')}
-            className="border border-green-300 text-green-600 data-[state=on]:bg-green-100 data-[state=on]:text-green-700"
-          >
-            <Check className="mr-2 h-4 w-4" />
-            Đã thuộc
-          </ToggleGroupItem>
-        </ToggleGroup>
+
+        <GameControls 
+          onRestart={handleRestart}
+          className="mt-2"
+        />
       </div>
     </div>
   );

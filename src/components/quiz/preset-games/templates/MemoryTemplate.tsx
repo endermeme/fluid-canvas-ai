@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Clock, Trophy, Lightbulb, ArrowLeft } from 'lucide-react';
+import GameHeader from '../../components/GameHeader';
+import GameControls from '../../components/GameControls';
+import { Trophy } from 'lucide-react';
 
 interface MemoryTemplateProps {
   content: any;
@@ -11,8 +11,15 @@ interface MemoryTemplateProps {
   onBack?: () => void;
 }
 
+interface MemoryCard {
+  id: number;
+  content: string;
+  matched: boolean;
+  flipped: boolean;
+}
+
 const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack }) => {
-  const [cards, setCards] = useState<Array<{id: number, content: string, matched: boolean, flipped: boolean}>>([]);
+  const [cards, setCards] = useState<MemoryCard[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [matchedPairs, setMatchedPairs] = useState<number>(0);
   const [moves, setMoves] = useState<number>(0);
@@ -119,41 +126,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
     setFlippedCards([...flippedCards, index]);
   };
 
-  const handleHint = () => {
-    const unmatchedCards = cards.filter(card => !card.matched && !card.flipped);
-    
-    if (unmatchedCards.length > 0) {
-      const randomCard = unmatchedCards[Math.floor(Math.random() * unmatchedCards.length)];
-      const randomCardIndex = cards.findIndex(card => card.id === randomCard.id);
-      
-      const matchingCardIndex = cards.findIndex((card, idx) => 
-        card.content === randomCard.content && idx !== randomCardIndex
-      );
-      
-      setCards(cards.map((card, idx) => 
-        idx === randomCardIndex || idx === matchingCardIndex 
-          ? {...card, flipped: true} 
-          : card
-      ));
-      
-      setTimeout(() => {
-        setCards(cards.map((card, idx) => 
-          (idx === randomCardIndex || idx === matchingCardIndex) && !card.matched 
-            ? {...card, flipped: false} 
-            : card
-        ));
-      }, 1000);
-      
-      setTimeLeft(Math.max(0, timeLeft - 10));
-      
-      toast({
-        title: "Đã dùng gợi ý",
-        description: "Thời gian bị trừ 10 giây.",
-        variant: "default",
-      });
-    }
-  };
-
   const handleRestart = () => {
     if (memoryCards.length > 0) {
       const shuffledCards = [...memoryCards].sort(() => Math.random() - 0.5).map(card => ({
@@ -176,112 +148,90 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
     return <div className="p-4">Không có dữ liệu trò chơi ghi nhớ</div>;
   }
 
-  const progressPercentage = (matchedPairs / totalPairs) * 100;
+  if (gameWon) {
+    return (
+      <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
+        <GameHeader 
+          onBack={onBack}
+          progress={100}
+          timeLeft={timeLeft}
+          score={moves}
+          currentItem={totalPairs}
+          totalItems={totalPairs}
+          title="Chúc mừng!"
+        />
 
-  return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
-      {onBack && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onBack} 
-          className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Quay lại</span>
-        </Button>
-      )}
-
-      <div className="mb-4 mt-12">
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
-            Cặp đã ghép: {matchedPairs}/{totalPairs}
-          </div>
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full flex items-center">
-            <Clock className="h-4 w-4 mr-1 text-primary" />
-            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-          </div>
-        </div>
-        <Progress value={progressPercentage} className="h-2 bg-secondary" />
-      </div>
-
-      {gameWon ? (
-        <div className="flex-grow flex items-center justify-center">
-          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-primary/5 to-secondary/20 backdrop-blur-sm border-primary/20">
+        <Card className="flex-grow flex items-center justify-center p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
+          <div>
             <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
             <h2 className="text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
             <p className="mb-2 text-lg">Bạn đã hoàn thành trò chơi với {moves} lượt.</p>
             <p className="mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
-            <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
-          </Card>
-        </div>
-      ) : gameOver ? (
-        <div className="flex-grow flex items-center justify-center">
-          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-destructive/5 to-background backdrop-blur-sm border-destructive/20">
+            
+            <GameControls onRestart={handleRestart} />
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (gameOver) {
+    return (
+      <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
+        <GameHeader 
+          onBack={onBack}
+          progress={(matchedPairs / totalPairs) * 100}
+          timeLeft={0}
+          score={moves}
+          currentItem={matchedPairs}
+          totalItems={totalPairs}
+          title="Hết thời gian!"
+        />
+
+        <Card className="flex-grow flex items-center justify-center p-8 text-center bg-gradient-to-br from-destructive/5 to-background backdrop-blur-sm border-destructive/20">
+          <div>
             <h2 className="text-3xl font-bold mb-4 text-destructive">Hết thời gian!</h2>
             <p className="mb-4 text-lg">Bạn đã tìm được {matchedPairs} trong tổng số {totalPairs} cặp thẻ.</p>
-            <Button onClick={handleRestart} className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
-          </Card>
-        </div>
-      ) : (
-        <div className="flex-grow">
-          <div className="grid grid-cols-3 md:grid-cols-4 gap-3 mb-4">
-            {cards.map((card, index) => (
-              <div 
-                key={index}
-                className={`aspect-square flex items-center justify-center rounded-xl cursor-pointer transition-all duration-300 transform ${
-                  card.flipped || card.matched 
-                    ? 'bg-gradient-to-br from-primary/20 to-primary/5 border-primary/30 border-2 scale-105 shadow-lg hover:shadow-xl' 
-                    : 'bg-gradient-to-br from-secondary/80 to-secondary/20 border-transparent border-2 hover:scale-105'
-                } ${!canFlip ? 'pointer-events-none' : ''}`}
-                onClick={() => handleCardClick(index)}
-              >
-                {(card.flipped || card.matched) ? (
-                  <div className="text-2xl font-bold text-primary/90">{card.content}</div>
-                ) : (
-                  <div className="text-2xl font-bold text-secondary/80">?</div>
-                )}
-              </div>
-            ))}
-          </div>
-          
-          <div className="flex items-center justify-between mt-3">
-            <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
-              Lượt đã chơi: {moves}
-            </div>
             
-            <div className="flex gap-2">
-              {content?.settings?.allowHints && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleHint}
-                  className="bg-gradient-to-r from-primary/10 to-background border-primary/20"
-                >
-                  <Lightbulb className="h-4 w-4 mr-1 text-yellow-500" />
-                  Gợi ý (-10s)
-                </Button>
-              )}
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRestart}
-                className="bg-gradient-to-r from-secondary/50 to-background border-primary/20"
-              >
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Làm lại
-              </Button>
-            </div>
+            <GameControls onRestart={handleRestart} />
           </div>
-        </div>
-      )}
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
+      <GameHeader 
+        onBack={onBack}
+        progress={(matchedPairs / totalPairs) * 100}
+        timeLeft={timeLeft}
+        score={moves}
+        currentItem={matchedPairs}
+        totalItems={totalPairs}
+      />
+
+      <div className="flex-grow grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+        {cards.map((card, index) => (
+          <div 
+            key={index}
+            className={`aspect-square flex items-center justify-center rounded-xl cursor-pointer transition-all duration-300 transform ${
+              card.flipped || card.matched 
+                ? 'bg-gradient-to-br from-primary/20 to-primary/5 border-primary/30 border-2 scale-105 shadow-lg hover:shadow-xl' 
+                : 'bg-gradient-to-br from-secondary/80 to-secondary/20 border-transparent border-2 hover:scale-105'
+            } ${!canFlip ? 'pointer-events-none' : ''}`}
+            onClick={() => handleCardClick(index)}
+          >
+            {(card.flipped || card.matched) ? (
+              <div className="text-2xl font-bold text-primary/90">{card.content}</div>
+            ) : (
+              <div className="text-2xl font-bold text-secondary/80">?</div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <GameControls onRestart={handleRestart} />
     </div>
   );
 };
