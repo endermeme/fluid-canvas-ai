@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { MiniGame } from './generator/geminiGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { saveGameForSharing } from '@/utils/gameExport';
+import { supabase } from '@/integrations/supabase/client';
 import { enhanceIframeContent } from './custom-games/utils/iframe-utils';
 import GameHeader from './components/GameHeader';
 import GameContainer from './components/GameContainer';
@@ -23,22 +23,31 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
   const navigate = useNavigate();
 
   useEffect(() => {
-    const saveGameToHistory = async () => {
+    const saveGameToDb = async () => {
       if (miniGame && miniGame.content) {
         try {
-          await saveGameForSharing(
-            miniGame.title || "Minigame tương tác", 
-            "custom-game",
-            miniGame.content,
-            miniGame.content
-          );
+          const { data, error } = await supabase
+            .from('games')
+            .insert({
+              title: miniGame.title || "Minigame tương tác",
+              game_type: "custom-game",
+              html_content: miniGame.content,
+              is_published: true,
+              description: `Custom game: ${miniGame.title || "Minigame tương tác"}`
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+          
+          console.log("Game saved successfully:", data);
         } catch (e) {
-          console.error("Error saving game to history:", e);
+          console.error("Error saving game to database:", e);
         }
       }
     };
     
-    saveGameToHistory();
+    saveGameToDb();
   }, [miniGame]);
 
   const handleShare = async () => {
@@ -47,18 +56,25 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) =>
     try {
       setShareInProgress(true);
       
-      const shareUrl = await saveGameForSharing(
-        miniGame.title || "Minigame tương tác",
-        "custom-game",
-        miniGame.content,
-        miniGame.content
-      );
+      const { data, error } = await supabase
+        .from('games')
+        .insert({
+          title: miniGame.title || "Minigame tương tác",
+          game_type: "custom-game",
+          html_content: miniGame.content,
+          is_published: true,
+          description: `Shared game: ${miniGame.title || "Minigame tương tác"}`
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Create a slug from the title for more descriptive URL
+      const slug = (miniGame.title || "minigame").toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
+      const shareUrl = `${window.location.origin}/play/custom-game/${slug}/${data.id}`;
       
-      if (!shareUrl) {
-        throw new Error("Không thể tạo URL chia sẻ");
-      }
-      
-      navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(shareUrl);
       
       toast({
         title: "Link Chia Sẻ Đã Được Sao Chép",

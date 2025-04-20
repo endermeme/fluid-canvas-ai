@@ -1,4 +1,3 @@
-
 # Lịch sử thay đổi mã nguồn
 
 ## 2025-04-20: Dọn dẹp và tổ chức lại cấu trúc thư mục
@@ -54,3 +53,14 @@ Lý do: Tối ưu hóa cấu trúc project bằng cách loại bỏ các compone
 - src/components/quiz/GameView.tsx
 
 Chi tiết: Cập nhật import từ GameViewHeader (đã bị xóa) sang GameHeader mới và điều chỉnh lại props tương ứng.
+
+## 2025-04-20: Tích hợp lưu trữ game với Supabase
+
+### Files được cập nhật:
+- src/components/quiz/GameView.tsx
+
+Chi tiết:
+- Thêm chức năng lưu game vào bảng games trong Supabase
+- Cập nhật chức năng chia sẻ để sử dụng bảng games
+- Thêm RLS policies cho bảng games
+- Tối ưu hóa URL chia sẻ với slug từ tiêu đề game
