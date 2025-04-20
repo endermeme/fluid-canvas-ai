@@ -1,5 +1,20 @@
 # Changes Log
 
+## Clean Up Project Structure - Remove Unnecessary Files
+
+### Files Removed:
+1. Removed processor utility files:
+   - custom-games/utils/js-processor.ts
+   - custom-games/utils/css-processor.ts
+   - custom-games/utils/html-processor.ts
+2. Removed duplicate dialog component:
+   - quick-game-selector/CustomGameDialog.tsx
+
+### Details:
+- Removed unnecessary processor utilities after simplifying iframe handling
+- Removed duplicate dialog component
+- Updated unused-files.md to track future cleanup tasks
+
 ## Simplified Project Structure - Keep Only Essential Files
 
 ### Files Kept:
@@ -23,9 +38,6 @@
    - EnhancedGameView.tsx
    - GameController.tsx
    - utils/iframe-utils.ts
-   - utils/html-processor.ts
-   - utils/js-processor.ts
-   - utils/css-processor.ts
 
 ### Details:
 - Kept only essential files for game functionality

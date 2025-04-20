@@ -10,40 +10,41 @@ Dưới đây là danh sách các file không còn được sử dụng hoặc c
 | `src/components/quiz/generator/fallbackGenerator.ts` | Không được import trong bất kỳ file nào khác trong project. Hàm `createFallbackGame` không được gọi từ bất kỳ đâu. | ✅ Đã xóa |
 | `src/components/quiz/generator/responseParser.ts` | Hàm `parseGeminiResponse` không được import và sử dụng ở bất kỳ đâu. Chức năng parse đã được xử lý trong `geminiGenerator.ts` với hàm `sanitizeGameCode`. | ✅ Đã xóa |
 
-## 2. File trùng lặp chức năng
+## 2. File trùng lặp chức năng 
 
 | Đường dẫn | Lý do trùng lặp | Thay thế bởi | Trạng thái |
 |-----------|----------------|-------------|------------|
-| `src/components/quiz/generator/AIGameGenerator.ts` | Làm nhiệm vụ tương tự như `geminiGenerator.ts` nhưng ít tính năng hơn. Cả hai đều sử dụng Gemini API nhưng `geminiGenerator.ts` có xử lý lỗi tốt hơn. | `src/components/quiz/generator/geminiGenerator.ts` | ✅ Đã hợp nhất |
 | `src/components/quiz/quick-game-selector/index.tsx` | Trùng lặp với `src/components/quiz/QuickGameSelector.tsx`. Cả hai chứa code tương tự nhau. | `src/components/quiz/QuickGameSelector.tsx` | ✅ Đã xóa |
-| `src/components/quiz/quick-game-selector/CustomGameForm.tsx` | Trùng lặp chức năng với `src/components/quiz/custom-games/CustomGameForm.tsx`. | `src/components/quiz/custom-games/CustomGameForm.tsx` | ✅ Đã xóa |
+| `src/components/quiz/quick-game-selector/CustomGameDialog.tsx` | Có thể không còn sử dụng sau khi đã có CustomGameForm trong thư mục custom-games | `src/components/quiz/custom-games/CustomGameForm.tsx` | 🔄 Cần xóa |
 
-## 3. File có thể xóa hoặc không tối ưu
+## 3. File có thể xóa hoặc cần tối ưu
 
 | Đường dẫn | Mô tả | Đề xuất |
 |-----------|-------|--------|
-| `src/components/quiz/quick-game-selector/CustomGameDialog.tsx` | Có thể không còn sử dụng sau khi đã có CustomGameForm trong thư mục custom-games | Xem xét xóa nếu không có import trong project |
-| `src/components/quiz/custom-games/CustomGameContainer.tsx` | File dài (215 dòng), có khả năng chức năng trùng lặp với các component khác | Tách thành các component nhỏ hơn |
+| `src/components/quiz/custom-games/CustomGameContainer.tsx` | File dài (215 dòng), có khả năng chức năng trùng lặp | Tách thành các component nhỏ hơn |
+| `src/components/quiz/generator/geminiGenerator.ts` | File dài (243 dòng) | Tách thành các module nhỏ hơn |
+| `src/components/quiz/custom-games/CustomGameForm.tsx` | File dài (242 dòng) | Tách thành các component nhỏ hơn |
 
-## 4. Các file ngoài dự án
+## 4. File không còn cần thiết sau khi đã đơn giản hóa
 
-| Đường dẫn | Mô tả |
-|-----------|-------|
-| `vong-quay/simple-parser.cjs` | Là file parse trong thư mục `vong-quay` bên ngoài `src`, không thuộc dự án chính. |
-| `vong-quay/direct-html-parser.js` | Là file parse trong thư mục `vong-quay` bên ngoài `src`, không thuộc dự án chính. |
+| Đường dẫn | Lý do |
+|-----------|--------|
+| `src/components/quiz/custom-games/utils/js-processor.ts` | Chức năng xử lý JavaScript đã đơn giản hóa |
+| `src/components/quiz/custom-games/utils/css-processor.ts` | Chức năng xử lý CSS đã đơn giản hóa |
+| `src/components/quiz/custom-games/utils/html-processor.ts` | Chức năng xử lý HTML đã đơn giản hóa |
 
 ## 5. Gợi ý cải thiện cấu trúc dự án
 
-1. **Refactor các file dài**:
-   - `src/components/quiz/generator/geminiGenerator.ts` (243 dòng) - nên tách thành các module nhỏ hơn
-   - `src/components/quiz/custom-games/CustomGameContainer.tsx` (215 dòng) - nên tách thành các component nhỏ hơn
-   - `src/components/quiz/QuizGenerator.tsx` (240 dòng) - nên chia thành các hooks hoặc component nhỏ hơn
-   - `src/components/quiz/custom-games/CustomGameForm.tsx` (242 dòng) - nên tách thành các component nhỏ hơn
-   - `src/components/quiz/QuickGameSelector.tsx` (215 dòng) - nên tách thành các component nhỏ hơn
+1. **Tối ưu hóa cấu trúc thư mục**:
+   - `/preset-games`: Giữ các template game có sẵn
+   - `/custom-games`: Giữ chức năng tạo game tùy chỉnh
+   - `/utils`: Di chuyển các utility function vào đây
+   - `/hooks`: Tách các custom hooks vào thư mục riêng
 
-2. **Xem xét tách các file với nhiều chức năng**:
-   - Tách logic tạo game thành các module riêng biệt
-   - Tách logic hiển thị thành các component UI riêng biệt
-   - Tạo các hook tùy chỉnh cho các chức năng phức tạp
+2. **Giảm kích thước file**:
+   - Mỗi component không nên quá 200 dòng
+   - Tách các logic phức tạp thành custom hooks
+   - Tách các UI component thành các file riêng
 
-> **Lưu ý quan trọng**: Trước khi xóa bất kỳ file nào, hãy kiểm tra kỹ các references để đảm bảo không ảnh hưởng đến hoạt động của ứng dụng. Các file trong mục "Đã xóa" đã được kiểm tra và xác nhận là an toàn để xóa.
+> **Lưu ý**: Hãy xem xét kỹ mối quan hệ giữa các file trước khi xóa để tránh ảnh hưởng đến chức năng của ứng dụng.
+
