@@ -1,4 +1,3 @@
-
 # Lịch sử thay đổi mã nguồn
 
 ## Ngày 21/04/2023
@@ -30,3 +29,10 @@
 2. Sửa chức năng nút quay lại (ArrowLeft) để thực hiện chức năng đúng
 3. Thay đổi nút Home thành chức năng quay lại trang preset game
 4. Thay đổi nút Plus thành chức năng quay về trang chủ
+
+## Ngày 26/04/2025
+1. Cập nhật GameHeader.tsx:
+   - Xóa nút Home
+   - Chuyển chức năng về trang chủ cho nút mũi tên (ArrowLeft)
+   - Chuyển chức năng mở preset game cho nút Plus
+   - Đơn giản hóa thanh điều hướng
