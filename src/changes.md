@@ -1,4 +1,18 @@
+
 # Lịch sử thay đổi mã nguồn
+
+## 2025-04-21: Cập nhật GameHeader.tsx để hỗ trợ các props mới
+- Thêm props `title`, `progress`, `timeLeft`, `score`, `currentItem`, `totalItems` vào GameHeader
+- Cập nhật interface GameHeaderProps để phù hợp với các component đang sử dụng
+- Sửa lỗi TypeScript trong GameWrapper và PictionaryResult
+
+### Files đã sửa:
+- src/components/quiz/preset-games/components/headers/GameHeader.tsx
+
+### Lý do:
+- Sửa lỗi TypeScript khi truyền props không tồn tại vào GameHeader
+- Đảm bảo tính nhất quán trong việc sử dụng GameHeader giữa các component
+- Hỗ trợ các tính năng hiển thị tiến trình và thông tin game
 
 ## 2025-04-20: Xóa thư mục quick-game-selector
 - Xóa toàn bộ thư mục src/components/quiz/quick-game-selector/
@@ -47,35 +61,6 @@
 ### Lý do:
 - Sửa lỗi không tìm thấy module GameHeader
 - Đảm bảo tính nhất quán trong việc sử dụng component sau khi thống nhất header
-
-## 2025-04-21: Cập nhật GameHeader.tsx để hỗ trợ các props mới
-- Thêm props `onBack`, `progress`, `timeLeft`, `score`, `currentItem`, `totalItems`, `onShare` vào GameHeader
-- Cập nhật logic xử lý các props mới
-
-### Files đã sửa:
-- src/components/quiz/preset-games/components/headers/GameHeader.tsx
-
-### Lý do:
-- Sửa lỗi TypeScript trong PictionaryResult.tsx
-- Đảm bảo tương thích với các component sử dụng GameHeader
-- Thống nhất cách sử dụng header trong tất cả các game template
-
-## 2025-04-21: Sửa lỗi không có dữ liệu cho các game template
-- Cập nhật OrderingTemplate.tsx để xử lý đúng cấu trúc dữ liệu từ API
-- Sửa lỗi khởi tạo trong MemoryTemplate.tsx và FlashcardsTemplate.tsx
-- Cập nhật xử lý dữ liệu trong TrueFalseTemplate.tsx
-- Đồng bộ hóa giao diện giữa các template
-
-### Files đã sửa:
-- src/components/quiz/preset-games/templates/OrderingTemplate.tsx
-- src/components/quiz/preset-games/templates/MemoryTemplate.tsx
-- src/components/quiz/preset-games/templates/FlashcardsTemplate.tsx
-- src/components/quiz/preset-games/templates/TrueFalseTemplate.tsx
-
-### Lý do:
-- Sửa lỗi "Không có dữ liệu cho trò chơi" trong các template
-- Đồng bộ hóa cách xử lý dữ liệu giữa các game
-- Cải thiện giao diện người dùng
 
 ## 2025-04-21: Làm lại GameHeader tối giản, hài hòa giao diện
 - Làm lại GameHeader cho preset-games: bỏ tên game, chỉ còn icon back, home, settings, share, history; style sạch, trung tính sáng, không dùng màu nền nổi bật.

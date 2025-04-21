@@ -8,12 +8,19 @@ interface GameHeaderProps {
   gameId?: string;
   onBack?: () => void;
   onShare?: () => Promise<void>;
+  title?: string;
+  progress?: number;
+  timeLeft?: number;
+  score?: number;
+  currentItem?: number;
+  totalItems?: number;
 }
 
 const GameHeader: React.FC<GameHeaderProps> = ({
   gameId,
   onBack,
   onShare,
+  title,
 }) => {
   const navigate = useNavigate();
   const [showShareModal, setShowShareModal] = useState(false);
