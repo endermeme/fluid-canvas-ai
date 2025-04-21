@@ -48,3 +48,15 @@
 ### Lý do:
 - Sửa lỗi không tìm thấy module GameHeader
 - Đảm bảo tính nhất quán trong việc sử dụng component sau khi thống nhất header
+
+## 2025-04-21: Cập nhật GameHeader.tsx để hỗ trợ các props mới
+- Thêm props `onBack`, `progress`, `timeLeft`, `score`, `currentItem`, `totalItems`, `onShare` vào GameHeader
+- Cập nhật logic xử lý các props mới
+
+### Files đã sửa:
+- src/components/quiz/preset-games/components/headers/GameHeader.tsx
+
+### Lý do:
+- Sửa lỗi TypeScript trong PictionaryResult.tsx
+- Đảm bảo tương thích với các component sử dụng GameHeader
+- Thống nhất cách sử dụng header trong tất cả các game template
