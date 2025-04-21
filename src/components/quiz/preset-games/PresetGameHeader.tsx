@@ -44,12 +44,13 @@ const PresetGameHeader: React.FC<PresetGameHeaderProps> = ({ onShare, showShare 
         
         {showShare && onShare && (
           <Button
-            variant="ghost"
-            size="icon"
-            className="hover:bg-primary/10"
+            variant="default"
+            size="sm"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1"
             onClick={onShare}
           >
-            <Share2 className="h-5 w-5" />
+            <Share2 className="h-4 w-4" />
+            Chia sẻ
           </Button>
         )}
       </div>

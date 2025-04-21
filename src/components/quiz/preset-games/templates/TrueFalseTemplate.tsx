@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import PresetGameHeader from '../PresetGameHeader';
 import { Button } from '@/components/ui/button';
@@ -122,10 +121,10 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     setGameStarted(true);
   };
 
-  if (!gameContent || !questions.length) {
+  if (!content || !questions.length) {
     return (
       <div className="p-4">
-        <PresetGameHeader showShare={false} />
+        <PresetGameHeader />
         <div>Không có dữ liệu câu hỏi</div>
       </div>
     );
@@ -136,7 +135,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     const percentage = Math.round((correctAnswers / questions.length) * 100);
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 relative">
-        <PresetGameHeader onShare={onShare}/>
+        <PresetGameHeader onShare={onShare} />
         <Card className="max-w-md w-full p-6 text-center mt-6">
           <h2 className="text-2xl font-bold mb-4">Kết Quả</h2>
           <p className="text-lg mb-4">
@@ -172,7 +171,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
 
   return (
     <div className="flex flex-col p-0 h-full relative">
-      <PresetGameHeader onShare={onShare}/>
+      <PresetGameHeader onShare={onShare} />
       <div className="mb-4 mt-6 px-4">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium">
