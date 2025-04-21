@@ -36,3 +36,15 @@
 ### Lý do:
 - Tối ưu hóa cấu trúc và giảm trùng lặp code
 - Thống nhất cách thức chia sẻ game trong toàn bộ ứng dụng
+
+## 2025-04-21: Sửa lỗi import GameHeader
+- Cập nhật đường dẫn import GameHeader trong PresetGameManager.tsx
+- Cập nhật đường dẫn import GameHeader trong PictionaryResult.tsx
+
+### Files đã sửa:
+- src/components/quiz/preset-games/PresetGameManager.tsx
+- src/components/quiz/preset-games/templates/pictionary/PictionaryResult.tsx
+
+### Lý do:
+- Sửa lỗi không tìm thấy module GameHeader
+- Đảm bảo tính nhất quán trong việc sử dụng component sau khi thống nhất header
