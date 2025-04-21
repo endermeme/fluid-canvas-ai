@@ -22,6 +22,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Copy, Check } from 'lucide-react';
+import PresetGameHeader from './PresetGameHeader';
 
 // Import API constants
 import { 
@@ -371,34 +372,12 @@ Output must be valid JSON. `;
 
     return (
       <div className="flex flex-col h-full">
-        <div className="flex justify-between items-center mb-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleRetry}
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Tạo lại
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleShare}
-          >
-            <Share2 className="h-4 w-4 mr-2" />
-            Chia sẻ
-          </Button>
-        </div>
-        
-        <div id="game-container" className="flex-1">
-          <GameTemplate 
-            data={gameContent} 
-            onBack={handleRetry}
-            topic={initialTopic || ""}
-            content={gameContent}
-          />
-        </div>
+        <GameTemplate 
+          data={gameContent} 
+          onBack={handleRetry}
+          topic={initialTopic || ""}
+          content={gameContent}
+        />
       </div>
     );
   };
@@ -526,25 +505,15 @@ Output must be valid JSON. `;
   if (showSettings) {
     return (
       <div className="p-4">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">{getGameTypeName()}</h2>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Quay lại
-          </Button>
+        <PresetGameHeader />
+        <div className="mt-4">
+          <GameSettings 
+            initialSettings={settings}
+            onStart={handleStartGame}
+            onCancel={onBack}
+            topic={initialTopic || ""}
+          />
         </div>
-        
-        <GameSettings 
-          initialSettings={settings}
-          onStart={handleStartGame}
-          onCancel={onBack}
-          topic={initialTopic || ""}
-        />
       </div>
     );
   }
@@ -568,7 +537,8 @@ Output must be valid JSON. `;
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
-        <Card className="p-6 max-w-md">
+        <PresetGameHeader />
+        <Card className="p-6 max-w-md mt-4">
           <div className="text-center">
             <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
             <p className="text-gray-500 mb-4">{error}</p>
@@ -587,27 +557,9 @@ Output must be valid JSON. `;
 
   return (
     <div className="flex flex-col h-full">
+      <PresetGameHeader />
       {loading ? (
-        <GameLoading 
-          topic={initialTopic || ""}
-        />
-      ) : showSettings ? (
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">{getGameTypeName()}</h2>
-            <Button variant="ghost" size="sm" onClick={onBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Quay lại
-            </Button>
-          </div>
-          
-          <GameSettings 
-            initialSettings={settings}
-            onStart={handleStartGame}
-            onCancel={onBack}
-            topic={initialTopic || ""}
-          />
-        </div>
+        <GameLoading topic={initialTopic || ""} />
       ) : (
         renderGameTemplate()
       )}
