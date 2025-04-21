@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, ArrowLeft, Plus, Share, History, X } from 'lucide-react';
@@ -7,35 +6,14 @@ import { QRCodeSVG } from 'qrcode.react';
 interface GameHeaderProps {
   title: string;
   gameId?: string;
-  onBack?: () => void;
-  progress?: number;
-  timeLeft?: number;
-  score?: number;
-  currentItem?: number;
-  totalItems?: number;
-  onShare?: () => Promise<void>;
 }
 
-const GameHeader: React.FC<GameHeaderProps> = ({ 
-  title, 
-  gameId,
-  onBack,
-  progress,
-  timeLeft,
-  score,
-  currentItem,
-  totalItems,
-  onShare
-}) => {
+const GameHeader: React.FC<GameHeaderProps> = ({ title, gameId }) => {
   const navigate = useNavigate();
   const [showShareModal, setShowShareModal] = useState(false);
 
   const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      navigate('/preset-games');
-    }
+    navigate('/preset-games');
   };
 
   const handleHome = () => {
@@ -48,9 +26,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({
   };
 
   const handleShare = () => {
-    if (onShare) {
-      onShare();
-    } else if (gameId) {
+    if (gameId) {
       setShowShareModal(true);
     }
   };
@@ -111,7 +87,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({
             onClick={handleShare}
             className="bg-green-500 hover:bg-green-600 px-3 py-2 rounded-md text-white flex items-center"
             aria-label="Chia sẻ"
-            disabled={!gameId && !onShare}
+            disabled={!gameId}
           >
             <Share size={18} className="mr-1" />
             <span>Chia sẻ</span>

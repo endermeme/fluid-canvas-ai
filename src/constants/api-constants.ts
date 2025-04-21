@@ -16,10 +16,10 @@ export const GEMINI_MODELS = {
 // API Version
 export const API_VERSION = "v1beta";
 
-// API Base URL 
+// API Base URL
 export const API_BASE_URL = "https://generativelanguage.googleapis.com";
 
-// Full API Endpoint with beta version
+// Full API Endpoint
 export const getApiEndpoint = (model = GEMINI_MODELS.CUSTOM_GAME) => 
   `${API_BASE_URL}/${API_VERSION}/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -31,9 +31,8 @@ export const DEFAULT_GENERATION_SETTINGS = {
   maxOutputTokens: 8192,
 };
 
-// Request timeout in milliseconds  
-export const REQUEST_TIMEOUT = 60000;
+// Request timeout in milliseconds
+export const REQUEST_TIMEOUT = 60000; // 60 seconds
 
 // Maximum retry attempts for API calls
 export const MAX_RETRY_ATTEMPTS = 3;
-

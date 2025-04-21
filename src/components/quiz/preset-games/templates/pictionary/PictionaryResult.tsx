@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import GameHeader from '../../components/headers/GameHeader';
+import GameHeader from '../../../components/GameHeader';
 import GameControls from '../../../components/GameControls';
 
 interface PictionaryResultProps {

@@ -9,7 +9,7 @@ import GameLoading from '../GameLoading';
 import { GameSettingsData } from '../types';
 import { Card } from '@/components/ui/card';
 import { saveGameForSharing } from '@/utils/gameExport';
-import GameHeader from './components/headers/GameHeader';
+import GameHeader from '../components/GameHeader';
 import { 
   Dialog,
   DialogContent,
