@@ -36,3 +36,14 @@
 - Fix triệt để lỗi "không có dữ liệu trò chơi" ở 4 game cuối.
 - Tối ưu trải nghiệm, giao diện header trên thiết bị di động.
 - Loading/Empty UI rõ ràng cho người dùng.
+
+## 2025-04-22: Fix lỗi thiếu thư viện react-beautiful-dnd
+- Cài đặt gói react-beautiful-dnd và @types/react-beautiful-dnd
+- Fix lỗi "Failed to resolve import" trong OrderingTemplate.tsx
+
+### Files đã sửa:
+- src/changes.md
+- package.json (dependencies)
+
+### Lý do:
+- Fix lỗi build không thành công do thiếu thư viện kéo-thả cho OrderingTemplate
