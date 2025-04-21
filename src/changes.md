@@ -1,4 +1,3 @@
-
 # Lịch sử thay đổi mã nguồn
 
 ## 2025-04-20: Xóa thư mục quick-game-selector
@@ -77,3 +76,16 @@
 - Sửa lỗi "Không có dữ liệu cho trò chơi" trong các template
 - Đồng bộ hóa cách xử lý dữ liệu giữa các game
 - Cải thiện giao diện người dùng
+
+## 2025-04-21: Làm lại GameHeader tối giản, hài hòa giao diện
+- Làm lại GameHeader cho preset-games: bỏ tên game, chỉ còn icon back, home, settings, share, history; style sạch, trung tính sáng, không dùng màu nền nổi bật.
+- Bo góc, spacing và hiệu ứng nhẹ, loại bỏ nền và màu đậm gây sặc sỡ.
+- Dùng icon lucide-react đúng guideline.
+- Modal chia sẻ giữ nguyên logic, làm mờ nhẹ, nền trắng, nút nh�� nhàng.
+
+### File đã sửa:
+- src/components/quiz/preset-games/components/headers/GameHeader.tsx
+
+### Lý do:
+- Làm đồng bộ và sạch giao diện, dễ chịu hơn cho mắt, tránh sự lòe loẹt/sặc sỡ của header cũ.
+- Đáp ứng yêu cầu UX/UI từ người dùng, đồng nhất với phần còn lại của app.
