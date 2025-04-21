@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +16,9 @@ interface FlashcardsTemplateProps {
 const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, topic, onBack, gameId }) => {
   const gameContent = content || data;
   
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [reviewedCards, setReviewedCards] = useState<number[]>([]);
@@ -25,80 +27,60 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
-  // Xử lý khác biệt cấu trúc dữ liệu
   const rawCards = gameContent?.cards || gameContent?.flashcards || [];
   const [processedCards, setProcessedCards] = useState<any[]>([]);
   const totalCards = processedCards.length;
 
-  // Xử lý dữ liệu thẻ
   useEffect(() => {
+    setLoading(true);
+    setError(null);
     if (gameContent) {
-      console.log("Flashcards game content:", gameContent);
-      processCardData();
-    }
-  }, [gameContent]);
-
-  const processCardData = () => {
-    if (!rawCards || rawCards.length === 0) {
-      console.error("No card data available", gameContent);
-      return;
-    }
-
-    let formatted = [];
-    
-    // Kiểm tra cấu trúc dữ liệu và định dạng phù hợp
-    if (rawCards[0].front !== undefined && rawCards[0].back !== undefined) {
-      // Format 1: { front: "...", back: "..." }
-      formatted = rawCards;
-    } else if (rawCards[0].term !== undefined && rawCards[0].definition !== undefined) {
-      // Format 2: { term: "...", definition: "..." }
-      formatted = rawCards.map((card: any) => ({
-        front: card.term,
-        back: card.definition,
-        hint: card.hint
-      }));
-    } else if (Array.isArray(rawCards) && typeof rawCards[0] === 'object') {
-      // Format 3: Các định dạng khác, thử đoán các trường
-      formatted = rawCards.map((card: any) => {
-        const keys = Object.keys(card);
+      try {
+        let formatted = [];
         
-        // Thử đoán các trường
-        const frontField = keys.find(k => 
-          ['front', 'question', 'term', 'title', 'header'].includes(k.toLowerCase())
-        ) || keys[0];
-        
-        const backField = keys.find(k => 
-          ['back', 'answer', 'definition', 'content', 'description'].includes(k.toLowerCase())
-        ) || keys[1];
-        
-        return {
-          front: card[frontField],
-          back: card[backField],
-          hint: card.hint || card.clue || null
-        };
-      });
-    } else {
-      // Format 4: Mảng đơn giản
-      formatted = rawCards.map((card: any, index: number) => {
-        if (typeof card === 'string') {
-          // Nếu là string, tạo thẻ đơn giản
-          return {
-            front: `Thẻ ${index + 1}`,
-            back: card
-          };
+        if (rawCards?.length === 0) {
+          setError("Không có dữ liệu thẻ học.");
+          setProcessedCards([]);
+        } else if (rawCards[0].front !== undefined && rawCards[0].back !== undefined) {
+          formatted = rawCards;
+        } else if (rawCards[0].term !== undefined && rawCards[0].definition !== undefined) {
+          formatted = rawCards.map((card: any) => ({
+            front: card.term,
+            back: card.definition,
+            hint: card.hint
+          }));
+        } else if (Array.isArray(rawCards) && typeof rawCards[0] === 'object') {
+          formatted = rawCards.map((card: any) => {
+            const keys = Object.keys(card);
+            const frontField = keys.find(k => ['front', 'question', 'term', 'title', 'header'].includes(k.toLowerCase())) || keys[0];
+            const backField = keys.find(k => ['back', 'answer', 'definition', 'content', 'description'].includes(k.toLowerCase())) || keys[1];
+            return {
+              front: card[frontField],
+              back: card[backField],
+              hint: card.hint || card.clue || null
+            };
+          });
         } else {
-          // Giả sử đây là một đối tượng không có cấu trúc rõ ràng
-          return {
-            front: JSON.stringify(card).substring(0, 50),
-            back: JSON.stringify(card)
-          };
+          formatted = rawCards.map((card: any, index: number) => {
+            if (typeof card === 'string') {
+              return { front: `Thẻ ${index+1}`, back: card };
+            }
+            return {
+              front: JSON.stringify(card).substring(0, 50),
+              back: JSON.stringify(card)
+            };
+          });
         }
-      });
+        setProcessedCards(formatted);
+        setError(null);
+      } catch (err) {
+        setError("Lỗi xử lý dữ liệu thẻ học.");
+      }
+    } else {
+      setError("Không có dữ liệu thẻ học.");
     }
-    
-    setProcessedCards(formatted);
-    console.log("Processed cards:", formatted);
-  };
+    setLoading(false);
+  }, [gameContent, rawCards]);
 
   useEffect(() => {
     if (!gameStarted && processedCards.length > 0) {
@@ -128,7 +110,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
   const handleFlipCard = () => {
     setIsFlipped(!isFlipped);
     
-    // Thêm thẻ vào danh sách đã xem qua khi lật sang mặt sau
     if (!isFlipped && !reviewedCards.includes(currentCardIndex)) {
       setReviewedCards([...reviewedCards, currentCardIndex]);
     }
@@ -165,14 +146,31 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
     setGameStarted(true);
   };
 
-  if (!gameContent) {
-    console.error("No game content provided");
-    return <div className="p-4">Không có dữ liệu thẻ học</div>;
+  if (loading) {
+    return (
+      <GameWrapper
+        gameId={gameId}
+        onBack={onBack}
+        title={gameContent?.title || "Flashcards"}
+      >
+        <div className="text-center py-8 text-lg text-gray-500">Đang tải thẻ học...</div>
+      </GameWrapper>
+    );
   }
 
-  if (!processedCards || processedCards.length === 0) {
-    console.error("No processed cards available", gameContent);
-    return <div className="p-4">Đang tải dữ liệu thẻ học...</div>;
+  if (error || !processedCards.length) {
+    return (
+      <GameWrapper
+        gameId={gameId}
+        onBack={onBack}
+        title={gameContent?.title || "Flashcards"}
+      >
+        <div className="text-center py-8 text-red-500">
+          {error || "Không có dữ liệu thẻ học."}
+          <div className="text-sm text-gray-400 mt-1">Vui lòng chọn topic hoặc thử lại sau.</div>
+        </div>
+      </GameWrapper>
+    );
   }
 
   if (showResult) {

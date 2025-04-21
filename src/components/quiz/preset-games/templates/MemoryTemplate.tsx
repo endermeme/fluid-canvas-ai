@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,9 +25,61 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
   const [gameComplete, setGameComplete] = useState(false);
   const [timeLeft, setTimeLeft] = useState(gameContent?.settings?.timeLimit || 120);
   const [gameStarted, setGameStarted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Khởi tạo trò chơi
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      let items = [];
+      if (content?.pairs?.length) {
+        items = content.pairs;
+      } else if (data?.pairs?.length) {
+        items = data.pairs;
+      }
+
+      if (!items || !Array.isArray(items) || items.length === 0) {
+        setError("Không có dữ liệu cho trò chơi.");
+      } else {
+        setGamePairs(items);
+        setError(null);
+      }
+    } catch (err) {
+      setError("Dữ liệu trò chơi không hợp lệ!");
+    }
+    setLoading(false);
+  }, [data, content]);
+
+  if (loading) {
+    return (
+      <GameWrapper
+        title="Ghi nhớ"
+        gameId={gameId}
+        onBack={onBack}
+      >
+        <div className="text-center py-8 text-lg text-gray-500">Đang tải trò chơi...</div>
+      </GameWrapper>
+    )
+  }
+
+  if (error) {
+    return (
+      <GameWrapper
+        title="Ghi nhớ"
+        gameId={gameId}
+        onBack={onBack}
+      >
+        <div className="text-center py-8 text-red-500">
+          {error}<br />
+          <span className="text-sm text-gray-400">Vui lòng chọn topic hoặc thử lại!</span>
+        </div>
+      </GameWrapper>
+    )
+  }
+
   useEffect(() => {
     if (gameContent) {
       console.log("Memory game content:", gameContent);
@@ -40,7 +91,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
     }
   }, [gameContent, gameStarted]);
 
-  // Cài đặt đếm ngược thời gian
   useEffect(() => {
     if (timeLeft > 0 && gameStarted && !gameComplete) {
       const timer = setTimeout(() => {
@@ -59,19 +109,15 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
     }
   }, [timeLeft, gameStarted, gameComplete, toast]);
 
-  // Khởi tạo các thẻ bài cho trò chơi
   const initializeGame = () => {
-    // Có thể nhận dữ liệu ở 3 dạng khác nhau
     const rawCardData = gameContent?.cards || gameContent?.pairs || [];
     console.log("Raw card data:", rawCardData);
     
     let gameCards = [];
     
-    // Trường hợp 1: Sử dụng cấu trúc "cards" với "id" sẵn có (từ API)
     if (rawCardData.length > 0 && 'id' in rawCardData[0]) {
       gameCards = [...rawCardData];
     } 
-    // Trường hợp 2: Sử dụng cấu trúc "pairs" với "first" và "second" (từ sample data)
     else if (rawCardData.length > 0 && ('first' in rawCardData[0] || 'second' in rawCardData[0])) {
       for (let i = 0; i < rawCardData.length; i++) {
         gameCards.push({
@@ -91,7 +137,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
         });
       }
     }
-    // Trường hợp 3: Nếu là cách khác, tạo thẻ mặc định
     else if (rawCardData.length > 0) {
       for (let i = 0; i < rawCardData.length; i += 2) {
         if (i + 1 < rawCardData.length) {
@@ -116,7 +161,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
       }
     }
     
-    // Xáo trộn các thẻ bài
     gameCards = shuffleCards(gameCards);
     console.log("Initialized game cards:", gameCards);
     
@@ -130,7 +174,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
     setTimeLeft(gameContent?.settings?.timeLimit || 120);
   };
 
-  // Xáo trộn các thẻ bài
   const shuffleCards = (cards: any[]) => {
     const shuffled = [...cards];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -140,23 +183,18 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
     return shuffled;
   };
 
-  // Xử lý khi người chơi lật thẻ bài
   const handleCardClick = (index: number) => {
-    // Không cho phép click khi đang kiểm tra hoặc thẻ đã được ghép đôi
     if (isChecking || flippedIndices.includes(index) || cards[index]?.matched) {
       return;
     }
     
-    // Nếu đã lật 2 thẻ, không cho lật thêm
     if (flippedIndices.length === 2) {
       return;
     }
     
-    // Thêm thẻ hiện tại vào danh sách thẻ đã lật
     const newFlippedIndices = [...flippedIndices, index];
     setFlippedIndices(newFlippedIndices);
     
-    // Nếu đã lật đủ 2 thẻ, kiểm tra xem chúng có ghép đôi không
     if (newFlippedIndices.length === 2) {
       setMoves(moves + 1);
       setIsChecking(true);
@@ -164,9 +202,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
       const firstIndex = newFlippedIndices[0];
       const secondIndex = newFlippedIndices[1];
       
-      // Kiểm tra xem 2 thẻ có cùng cặp không
       if (cards[firstIndex].pairId === cards[secondIndex].pairId) {
-        // Tạo mảng thẻ mới với 2 thẻ đã ghép đôi
         const newCards = cards.map((card, idx) => {
           if (idx === firstIndex || idx === secondIndex) {
             return { ...card, matched: true };
@@ -174,7 +210,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
           return card;
         });
         
-        // Nếu là một cặp, thêm vào danh sách cặp đã ghép đôi
         const newMatchedPairs = [...matchedPairs, cards[firstIndex].pairId];
         setMatchedPairs(newMatchedPairs);
         setScore(score + 1);
@@ -182,7 +217,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
         setFlippedIndices([]);
         setIsChecking(false);
         
-        // Kiểm tra xem trò chơi đã hoàn thành chưa
         const totalPairs = Math.floor(cards.length / 2);
         if (newMatchedPairs.length === totalPairs) {
           setGameComplete(true);
@@ -199,7 +233,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
           });
         }
       } else {
-        // Nếu không phải một cặp, úp thẻ lại sau một khoảng thời gian
         setTimeout(() => {
           setFlippedIndices([]);
           setIsChecking(false);
@@ -208,7 +241,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
     }
   };
 
-  // Khởi động lại trò chơi
   const handleRestart = () => {
     initializeGame();
     setGameStarted(true);
@@ -219,7 +251,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
     return <div className="p-4">Không có dữ liệu cho trò chơi</div>;
   }
 
-  // Kiểm tra nếu không có dữ liệu thẻ
   if (!cards || cards.length === 0) {
     console.error("No cards initialized", gameContent);
     return <div className="p-4">Đang tải dữ liệu thẻ chơi...</div>;
