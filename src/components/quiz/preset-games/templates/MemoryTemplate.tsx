@@ -8,10 +8,9 @@ import { RefreshCw, Clock, Trophy, Lightbulb, ArrowLeft } from 'lucide-react';
 interface MemoryTemplateProps {
   content: any;
   topic: string;
-  onBack?: () => void;
 }
 
-const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack }) => {
+const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   const [cards, setCards] = useState<Array<{id: number, content: string, matched: boolean, flipped: boolean}>>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [matchedPairs, setMatchedPairs] = useState<number>(0);
@@ -180,18 +179,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, onBack 
 
   return (
     <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
-      {onBack && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onBack} 
-          className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Quay lại</span>
-        </Button>
-      )}
-
       <div className="mb-4 mt-12">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">

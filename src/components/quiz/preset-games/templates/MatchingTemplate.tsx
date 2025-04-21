@@ -1,15 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Clock, ArrowLeft, Trophy } from 'lucide-react';
+import { RefreshCw, Clock, Trophy } from 'lucide-react';
 
 interface MatchingTemplateProps {
   content: any;
   topic: string;
-  onBack?: () => void;
 }
 
 interface MatchingItem {
@@ -18,7 +16,7 @@ interface MatchingItem {
   matched: boolean;
 }
 
-const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onBack }) => {
+const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) => {
   const [leftItems, setLeftItems] = useState<MatchingItem[]>([]);
   const [rightItems, setRightItems] = useState<MatchingItem[]>([]);
   const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
@@ -34,7 +32,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
   const totalPairs = pairs.length;
   const difficulty = content?.settings?.difficulty || "medium";
 
-  // Initialize the game
   useEffect(() => {
     if (pairs.length > 0) {
       const shuffledLeftItems = pairs.map((pair: any, index: number) => ({
@@ -61,7 +58,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
     }
   }, [pairs, content?.settings?.timeLimit]);
 
-  // Timer countdown
   useEffect(() => {
     if (timeLeft > 0 && !gameOver && !gameWon) {
       const timer = setTimeout(() => {
@@ -79,7 +75,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
     }
   }, [timeLeft, gameOver, gameWon, toast]);
 
-  // Check if all pairs are matched
   useEffect(() => {
     if (matchedPairs === totalPairs && totalPairs > 0 && !gameWon) {
       setGameWon(true);
@@ -95,13 +90,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
   }, [matchedPairs, totalPairs, gameWon, toast]);
 
   const calculateFinalScore = () => {
-    // Base score from matched pairs
     const baseScore = matchedPairs * 10;
-    
-    // Time bonus - more time left = more bonus
     const timeBonus = Math.floor(timeLeft / 5);
-    
-    // Difficulty multiplier
     let difficultyMultiplier = 1;
     switch (difficulty) {
       case "easy": difficultyMultiplier = 1; break;
@@ -116,7 +106,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
   const handleLeftItemClick = (id: number) => {
     if (gameOver || gameWon) return;
     
-    // If the item is already matched, do nothing
     if (leftItems.find(item => item.id === id)?.matched) return;
     
     setSelectedLeft(id);
@@ -125,19 +114,15 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
   const handleRightItemClick = (id: number) => {
     if (gameOver || gameWon) return;
     
-    // If the item is already matched, do nothing
     if (rightItems.find(item => item.id === id)?.matched) return;
     
     setSelectedRight(id);
   };
 
-  // Check if selected items match
   useEffect(() => {
-    // Only run this effect when both items are selected
     if (selectedLeft !== null && selectedRight !== null) {
       const checkMatch = () => {
         if (selectedLeft === selectedRight) {
-          // Match found
           setLeftItems(prevLeftItems => 
             prevLeftItems.map(item => 
               item.id === selectedLeft ? {...item, matched: true} : item
@@ -152,7 +137,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
           
           setMatchedPairs(prev => prev + 1);
           
-          // Update score immediately for feedback
           setScore(prev => prev + 10);
           
           toast({
@@ -161,7 +145,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
             variant: "default",
           });
         } else {
-          // No match - penalty for wrong matches
           setScore(prev => Math.max(0, prev - 2));
           
           toast({
@@ -172,10 +155,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
         }
       };
       
-      // Execute match check only once
       checkMatch();
       
-      // Reset selections after a short delay
       const timer = setTimeout(() => {
         setSelectedLeft(null);
         setSelectedRight(null);
@@ -183,7 +164,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
       
       return () => clearTimeout(timer);
     }
-  }, [selectedLeft, selectedRight, toast]); // Remove dependencies that cause infinite loop
+  }, [selectedLeft, selectedRight, toast]);
 
   const handleRestart = () => {
     if (pairs.length > 0) {
@@ -217,12 +198,10 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
 
   const progressPercentage = (matchedPairs / totalPairs) * 100;
 
-  // Determine item size based on content length and difficulty
   const getItemSize = (text: string) => {
     if (difficulty === "hard") return "min-h-14 text-sm";
     if (difficulty === "easy") return "min-h-16 text-lg";
     
-    // Default medium difficulty sizing
     return text.length > 15 
       ? "min-h-16 text-sm" 
       : text.length > 8 
@@ -232,20 +211,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
 
   return (
     <div className="flex flex-col p-4 h-full">
-      {/* Header with navigation, progress and timer */}
       <div className="relative mb-4">
-        {onBack && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onBack} 
-            className="absolute top-0 left-0 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Quay lại</span>
-          </Button>
-        )}
-        
         <div className="flex justify-between items-center mb-2 mt-12">
           <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
             Đã ghép: {matchedPairs}/{totalPairs}
@@ -264,7 +230,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
         <Progress value={progressPercentage} className="h-2" />
       </div>
 
-      {/* Game content */}
       {gameWon ? (
         <div className="flex-grow flex items-center justify-center">
           <Card className="p-6 text-center max-w-md">
@@ -292,7 +257,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
         </div>
       ) : (
         <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Left column */}
           <Card className="p-3 bg-background/50 border border-primary/10">
             <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột A</h3>
             <div className="space-y-2">
@@ -315,7 +279,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
             </div>
           </Card>
           
-          {/* Right column */}
           <Card className="p-3 bg-background/50 border border-primary/10">
             <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột B</h3>
             <div className="space-y-2">
@@ -340,7 +303,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, onB
         </div>
       )}
 
-      {/* Controls */}
       <div className="mt-4">
         <Button 
           variant="outline" 

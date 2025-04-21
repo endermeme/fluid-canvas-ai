@@ -9,10 +9,9 @@ interface QuizTemplateProps {
   data?: any;
   content?: any;
   topic: string;
-  onBack?: () => void;
 }
 
-const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBack }) => {
+const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => {
   const gameContent = content || data;
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -150,18 +149,6 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
     
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80 relative">
-        {onBack && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onBack} 
-            className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Quay lại</span>
-          </Button>
-        )}
-
         <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
           <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả</h2>
           <p className="text-lg mb-4">
@@ -202,18 +189,6 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
 
   return (
     <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
-      {onBack && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onBack} 
-          className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Quay lại</span>
-        </Button>
-      )}
-
       <div className="mb-4 mt-12">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">

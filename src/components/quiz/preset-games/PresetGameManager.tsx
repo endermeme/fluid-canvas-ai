@@ -60,6 +60,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && gameContent && !gameStartTime) {
@@ -505,15 +506,32 @@ Output must be valid JSON. `;
   if (showSettings) {
     return (
       <div className="p-4">
-        <PresetGameHeader />
-        <div className="mt-4">
-          <GameSettings 
-            initialSettings={settings}
-            onStart={handleStartGame}
-            onCancel={onBack}
-            topic={initialTopic || ""}
-          />
-        </div>
+        <header className="flex justify-between items-center mb-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hover:bg-primary/10"
+            onClick={() => navigate("/")}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+
+          <Button
+            variant="default"
+            size="sm"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1"
+            onClick={handleShare}
+          >
+            <Share2 className="h-4 w-4" />
+            Chia sẻ
+          </Button>
+        </header>
+        <GameSettings 
+          initialSettings={settings}
+          onStart={handleStartGame}
+          onCancel={onBack}
+          topic={initialTopic || ""}
+        />
       </div>
     );
   }

@@ -131,10 +131,8 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   }
 
   if (showResult) {
-    const correctAnswers = userAnswers.filter((answer, index) => answer === questions[index].isTrue).length;
-    const percentage = Math.round((correctAnswers / questions.length) * 100);
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 relative">
+      <div className="flex flex-col items-center justify-center h-full p-6">
         <PresetGameHeader onShare={onShare} />
         <Card className="max-w-md w-full p-6 text-center mt-6">
           <h2 className="text-2xl font-bold mb-4">Kết Quả</h2>
@@ -144,12 +142,12 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
           <div className="mb-6">
             <div className="flex justify-between mb-2">
               <span>Điểm của bạn</span>
-              <span className="font-bold">{percentage}%</span>
+              <span className="font-bold">{Math.round((userAnswers.filter((answer, index) => answer === questions[index].isTrue).length / questions.length) * 100)}%</span>
             </div>
-            <Progress value={percentage} className="h-3" />
+            <Progress value={Math.round((userAnswers.filter((answer, index) => answer === questions[index].isTrue).length / questions.length) * 100)} className="h-3" />
           </div>
           <div className="text-2xl font-bold mb-6">
-            {correctAnswers} / {questions.length}
+            {userAnswers.filter((answer, index) => answer === questions[index].isTrue).length} / {questions.length}
           </div>
           <div className="text-sm mb-4 text-muted-foreground">
             Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
