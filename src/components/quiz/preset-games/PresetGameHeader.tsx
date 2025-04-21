@@ -4,7 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, History, Plus, Share2 } from "lucide-react";
 
-const PresetGameHeader = () => {
+interface PresetGameHeaderProps {
+  onShare?: () => void;
+  showShare?: boolean;
+}
+
+const PresetGameHeader: React.FC<PresetGameHeaderProps> = ({ onShare, showShare = true }) => {
   const navigate = useNavigate();
 
   return (
@@ -36,6 +41,17 @@ const PresetGameHeader = () => {
         >
           <History className="h-5 w-5" />
         </Button>
+        
+        {showShare && onShare && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hover:bg-primary/10"
+            onClick={onShare}
+          >
+            <Share2 className="h-5 w-5" />
+          </Button>
+        )}
       </div>
     </header>
   );
