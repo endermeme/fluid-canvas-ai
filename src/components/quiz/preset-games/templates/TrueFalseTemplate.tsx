@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, CheckCircle, XCircle, Repeat } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import GameWrapper from './GameWrapper';
 
 interface TrueFalseTemplateProps {
@@ -13,147 +14,211 @@ interface TrueFalseTemplateProps {
   gameId?: string;
 }
 
-const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({
-  data,
-  content,
-  topic,
-  onBack,
-  gameId,
-}) => {
+const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, topic, onBack, gameId }) => {
   const gameContent = content || data;
-
-  const [questions, setQuestions] = useState<any[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<boolean[]>([]);
+  
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedOption, setSelectedOption] = useState<boolean | null>(null);
+  const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(gameContent?.settings?.timeLimit || 300);
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(gameContent?.settings?.timePerQuestion || 20);
+  const [totalTimeLeft, setTotalTimeLeft] = useState(gameContent?.settings?.totalTime || 300);
+  const [timerRunning, setTimerRunning] = useState(true);
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
+  // Xử lý các dạng dữ liệu câu hỏi khác nhau
+  const [processedQuestions, setProcessedQuestions] = useState<any[]>([]);
+  
+  // Xử lý dữ liệu câu hỏi
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      let questions = [];
-      if (content?.questions?.length) {
-        questions = content.questions;
-      } else if (data?.questions?.length) {
-        questions = data.questions;
-      }
-
-      if (!questions || !Array.isArray(questions) || questions.length === 0) {
-        setError("Không có dữ liệu cho trò chơi.");
-      } else {
-        setQuestions(questions);
-        setError(null);
-      }
-    } catch (err) {
-      setError("Dữ liệu trò chơi không hợp lệ!");
+    if (gameContent) {
+      console.log("True/False game content:", gameContent);
+      processQuestionData();
     }
-    setLoading(false);
-  }, [data, content]);
+  }, [gameContent]);
+
+  const processQuestionData = () => {
+    const rawQuestions = gameContent?.questions || gameContent?.statements || [];
+    if (!rawQuestions || rawQuestions.length === 0) {
+      console.error("No question data available", gameContent);
+      return;
+    }
+
+    let formatted = [];
+    
+    // Kiểm tra cấu trúc dữ liệu và định dạng phù hợp
+    if (rawQuestions[0].statement !== undefined && 'isTrue' in rawQuestions[0]) {
+      // Format 1: { statement: "...", isTrue: true/false, explanation: "..." }
+      formatted = rawQuestions;
+    } else if (rawQuestions[0].text !== undefined && 'correct' in rawQuestions[0]) {
+      // Format 2: { text: "...", correct: true/false, explanation: "..." }
+      formatted = rawQuestions.map((q: any) => ({
+        statement: q.text,
+        isTrue: q.correct,
+        explanation: q.explanation || q.feedback
+      }));
+    } else if (Array.isArray(rawQuestions)) {
+      // Format 3: Các định dạng khác, thử đoán các trường
+      formatted = rawQuestions.map((q: any) => {
+        const statementField = Object.keys(q).find(k => 
+          ['statement', 'text', 'question', 'content'].includes(k.toLowerCase())
+        ) || Object.keys(q)[0];
+        
+        const isTrueField = Object.keys(q).find(k => 
+          ['istrue', 'correct', 'answer', 'value'].includes(k.toLowerCase())
+        );
+        
+        const explanationField = Object.keys(q).find(k => 
+          ['explanation', 'feedback', 'description', 'detail'].includes(k.toLowerCase())
+        );
+        
+        return {
+          statement: q[statementField],
+          isTrue: isTrueField ? q[isTrueField] : Math.random() > 0.5, // Mặc định ngẫu nhiên nếu không có
+          explanation: explanationField ? q[explanationField] : ''
+        };
+      });
+    }
+    
+    setProcessedQuestions(formatted);
+    console.log("Processed questions:", formatted);
+  };
+
+  // Xác định số lượng câu hỏi
+  const isLastQuestion = currentQuestion === processedQuestions.length - 1;
 
   useEffect(() => {
-    if (!gameStarted && questions.length > 0) {
+    if (!gameStarted && processedQuestions.length > 0) {
       setGameStarted(true);
-      setTimeLeft(gameContent?.settings?.timeLimit || 300);
+      
+      const questionTime = gameContent?.settings?.timePerQuestion || 20;
+      const totalTime = gameContent?.settings?.totalTime || (processedQuestions.length * questionTime);
+      
+      setTimeLeft(questionTime);
+      setTotalTimeLeft(totalTime);
     }
-  }, [gameContent, questions, gameStarted]);
+  }, [gameContent, processedQuestions, gameStarted]);
 
   useEffect(() => {
-    if (timeLeft > 0 && gameStarted && !showResult) {
+    if (timeLeft > 0 && timerRunning && !isAnswered) {
       const timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
       
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && gameStarted && !showResult) {
-      setShowResult(true);
+    } else if (timeLeft === 0 && timerRunning && !isAnswered) {
+      setTimerRunning(false);
+      setIsAnswered(true);
       
       toast({
-        title: "Thời gian đã hết",
-        description: "Hãy xem kết quả của bạn.",
-        variant: "default",
+        title: "Hết thời gian!",
+        description: "Bạn đã không trả lời kịp thời.",
+        variant: "destructive",
       });
     }
-  }, [timeLeft, gameStarted, showResult, toast]);
+  }, [timeLeft, timerRunning, isAnswered, toast]);
 
-  const handleAnswer = (answer: boolean) => {
-    setUserAnswers([...userAnswers, answer]);
-
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    } else {
+  useEffect(() => {
+    if (totalTimeLeft > 0 && gameStarted && !showResult) {
+      const timer = setTimeout(() => {
+        setTotalTimeLeft(totalTimeLeft - 1);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    } else if (totalTimeLeft === 0 && gameStarted && !showResult) {
       setShowResult(true);
       
       toast({
-        title: "Hoàn thành",
-        description: "Bạn đã trả lời hết các câu hỏi.",
-        variant: "default",
+        title: "Trò chơi kết thúc",
+        description: "Đã hết thời gian. Hãy xem kết quả của bạn.",
+        variant: "destructive",
       });
+    }
+  }, [totalTimeLeft, gameStarted, showResult, toast]);
+
+  const handleOptionSelect = (option: boolean) => {
+    if (isAnswered) return;
+    
+    setSelectedOption(option);
+    setIsAnswered(true);
+    setTimerRunning(false);
+    
+    const question = processedQuestions[currentQuestion];
+    if (option === question.isTrue) {
+      setScore(score + 1);
+      
+      if (gameContent?.settings?.bonusTimePerCorrect) {
+        const bonusTime = gameContent.settings.bonusTimePerCorrect;
+        setTotalTimeLeft(prev => prev + bonusTime);
+        
+        toast({
+          title: "Chính xác! +1 điểm",
+          description: `Câu trả lời của bạn đúng. +${bonusTime}s thời gian thưởng.`,
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Chính xác! +1 điểm",
+          description: "Câu trả lời của bạn đúng.",
+          variant: "default",
+        });
+      }
+    } else {
+      toast({
+        title: "Không chính xác!",
+        description: `Đáp án đúng là: ${question.isTrue ? 'Đúng' : 'Sai'}`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleNextQuestion = () => {
+    if (isLastQuestion) {
+      setShowResult(true);
+    } else {
+      setCurrentQuestion(currentQuestion + 1);
+      setSelectedOption(null);
+      setIsAnswered(false);
+      setTimeLeft(gameContent?.settings?.timePerQuestion || 20);
+      setTimerRunning(true);
     }
   };
 
   const handleRestart = () => {
-    setCurrentQuestionIndex(0);
-    setUserAnswers([]);
+    setCurrentQuestion(0);
+    setSelectedOption(null);
+    setScore(0);
     setShowResult(false);
-    setTimeLeft(gameContent?.settings?.timeLimit || 300);
+    setIsAnswered(false);
+    setTimeLeft(gameContent?.settings?.timePerQuestion || 20);
+    setTotalTimeLeft(gameContent?.settings?.totalTime || 300);
+    setTimerRunning(true);
     setGameStarted(true);
   };
 
-  const calculateScore = () => {
-    let score = 0;
-    for (let i = 0; i < questions.length; i++) {
-      if (questions[i].correctAnswer === userAnswers[i]) {
-        score++;
-      }
-    }
-    return score;
-  };
-
-  if (loading) {
-    return (
-      <GameWrapper
-        title="Đúng / Sai"
-        gameId={gameId}
-        onBack={onBack}
-      >
-        <div className="text-center py-8 text-lg text-gray-500">Đang tải trò chơi...</div>
-      </GameWrapper>
-    )
+  if (!gameContent) {
+    console.error("No game content provided");
+    return <div className="p-4">Không có dữ liệu cho trò chơi</div>;
   }
 
-  if (error) {
-    return (
-      <GameWrapper
-        title="Đúng / Sai"
-        gameId={gameId}
-        onBack={onBack}
-      >
-        <div className="text-center py-8 text-red-500">
-          {error}
-          <div className="text-sm text-gray-400 mt-1">Bạn vui lòng chọn topic hoặc thử lại!</div>
-        </div>
-      </GameWrapper>
-    )
+  if (!processedQuestions || processedQuestions.length === 0) {
+    console.error("No processed questions available", gameContent);
+    return <div className="p-4">Đang tải dữ liệu câu hỏi...</div>;
   }
 
   if (showResult) {
-    const score = calculateScore();
-    const percentage = Math.round((score / questions.length) * 100);
-
+    const percentage = Math.round((score / processedQuestions.length) * 100);
+    
     return (
       <GameWrapper
         onBack={onBack}
         progress={100}
-        timeLeft={timeLeft}
+        timeLeft={totalTimeLeft}
         score={score}
-        currentItem={questions.length}
-        totalItems={questions.length}
+        currentItem={processedQuestions.length}
+        totalItems={processedQuestions.length}
         title="Kết quả"
         gameId={gameId}
       >
@@ -166,7 +231,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({
             
             <div className="mb-6">
               <div className="flex justify-between mb-2">
-                <span>Điểm số</span>
+                <span>Điểm của bạn</span>
                 <span className="font-bold">{percentage}%</span>
               </div>
               <div className="h-3 bg-secondary rounded-full overflow-hidden">
@@ -178,63 +243,116 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({
             </div>
             
             <div className="text-4xl font-bold mb-6 text-primary">
-              {score} / {questions.length}
+              {score} / {processedQuestions.length}
             </div>
             
-            <div className="space-x-4">
-              <Button onClick={handleRestart} className="mt-4">
-                Chơi lại
-              </Button>
-              <Button variant="outline" onClick={onBack} className="mt-4">
-                Quay lại
-              </Button>
-            </div>
+            <Button onClick={handleRestart} className="mt-4">
+              <Repeat className="mr-2 h-4 w-4" />
+              Chơi lại
+            </Button>
           </div>
         </Card>
       </GameWrapper>
     );
   }
 
-  const currentQuestion = questions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+  const question = processedQuestions[currentQuestion];
+  const progress = ((currentQuestion + 1) / processedQuestions.length) * 100;
 
   return (
     <GameWrapper
       onBack={onBack}
       progress={progress}
       timeLeft={timeLeft}
-      score={calculateScore()}
-      currentItem={currentQuestionIndex + 1}
-      totalItems={questions.length}
-      title={gameContent.title || "Đúng / Sai"}
+      score={score}
+      currentItem={currentQuestion + 1}
+      totalItems={processedQuestions.length}
+      title={gameContent.title || "Đúng/Sai"}
       gameId={gameId}
     >
-      <div className="flex flex-col h-full justify-between">
-        <Card className="flex-grow flex items-center justify-center p-8 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
-          <div className="w-full h-full flex flex-col items-center justify-center text-center">
-            <div className="text-2xl font-bold mb-4">{currentQuestion.question}</div>
-          </div>
-        </Card>
+      <Card className="flex-grow p-6 mb-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
+        <h2 className="text-xl font-semibold mb-6 text-primary">{question.statement}</h2>
         
-        <div className="flex justify-around items-center mt-4 px-2">
-          <Button 
-            onClick={() => handleAnswer(true)}
-            className="w-24"
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+          <button
+            onClick={() => handleOptionSelect(true)}
+            disabled={isAnswered}
+            className={`flex items-center justify-center gap-2 p-4 rounded-lg transition-all duration-200 ${
+              isAnswered ? 
+                selectedOption === true ?
+                  selectedOption === question.isTrue ?
+                    'bg-green-100 border-green-500 border shadow-md' :
+                    'bg-red-100 border-red-500 border shadow-md' :
+                  question.isTrue === true ?
+                    'bg-green-100 border-green-500 border shadow-md' :
+                    'bg-secondary/50' :
+                'bg-secondary/50 hover:bg-secondary/80 border-transparent border hover:shadow-md'
+            } w-full sm:w-48 text-center py-8`}
           >
-            <Check className="h-4 w-4 mr-2" />
-            Đúng
-          </Button>
+            {isAnswered && selectedOption === true ? (
+              selectedOption === question.isTrue ? (
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              ) : (
+                <XCircle className="h-6 w-6 text-red-600" />
+              )
+            ) : isAnswered && question.isTrue === true ? (
+              <CheckCircle className="h-6 w-6 text-green-600" />
+            ) : (
+              <ThumbsUp className="h-6 w-6" />
+            )}
+            <span className="font-medium text-lg">Đúng</span>
+          </button>
           
-          <Button 
-            onClick={() => handleAnswer(false)}
-            className="w-24"
+          <button
+            onClick={() => handleOptionSelect(false)}
+            disabled={isAnswered}
+            className={`flex items-center justify-center gap-2 p-4 rounded-lg transition-all duration-200 ${
+              isAnswered ? 
+                selectedOption === false ?
+                  selectedOption === question.isTrue ?
+                    'bg-green-100 border-green-500 border shadow-md' :
+                    'bg-red-100 border-red-500 border shadow-md' :
+                  question.isTrue === false ?
+                    'bg-green-100 border-green-500 border shadow-md' :
+                    'bg-secondary/50' :
+                'bg-secondary/50 hover:bg-secondary/80 border-transparent border hover:shadow-md'
+            } w-full sm:w-48 text-center py-8`}
           >
-            <X className="h-4 w-4 mr-2" />
-            Sai
+            {isAnswered && selectedOption === false ? (
+              selectedOption === question.isTrue ? (
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              ) : (
+                <XCircle className="h-6 w-6 text-red-600" />
+              )
+            ) : isAnswered && question.isTrue === false ? (
+              <CheckCircle className="h-6 w-6 text-green-600" />
+            ) : (
+              <ThumbsDown className="h-6 w-6" />
+            )}
+            <span className="font-medium text-lg">Sai</span>
+          </button>
+        </div>
+        
+        {isAnswered && question.explanation && (
+          <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+            <p className="font-medium mb-1">Giải thích:</p>
+            <p>{question.explanation}</p>
+          </div>
+        )}
+      </Card>
+      
+      {isAnswered && (
+        <div className="flex justify-center mt-4">
+          <Button
+            onClick={handleNextQuestion}
+            className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition"
+          >
+            {isLastQuestion ? 'Xem kết quả' : 'Câu hỏi tiếp theo'}
           </Button>
         </div>
-      </div>
+      )}
     </GameWrapper>
   );
 };
+
 export default TrueFalseTemplate;
