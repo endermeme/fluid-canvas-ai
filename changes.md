@@ -1,9 +1,16 @@
+
 # Quyết định & Lịch sử chỉnh sửa
 
 ## 2025-04-21: Thiết kế lại header các game preset, loại bỏ tên game
 - Tạo mới: src/components/quiz/preset-games/PresetGameHeader.tsx (header preset mới, tối giản, chỉ còn các nút icon quay về, tạo mới, lịch sử, chia sẻ)
 - Cập nhật: src/components/quiz/preset-games/templates/TrueFalseTemplate.tsx sử dụng PresetGameHeader, không còn tên game trên header
 - Điều chỉnh lại các props cho đồng bộ
+
+## 2025-04-21: Sửa lỗi thiếu files types
+- Tạo mới: src/components/quiz/types.ts (định nghĩa các types chung cho module quiz)
+- Tạo mới: src/components/quiz/generator/types.ts (định nghĩa các types cho MiniGame và GameGenerator)
+- Tạo mới: src/components/quiz/generator/promptBuilder.ts (hàm xây dựng prompt cho API)
+- Tạo mới: src/components/quiz/custom-games/utils/iframe-processor.ts (re-export từ iframe-utils.ts)
 
 # Lịch sử thay đổi mã nguồn
 
