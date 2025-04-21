@@ -60,3 +60,20 @@
 - Sửa lỗi TypeScript trong PictionaryResult.tsx
 - Đảm bảo tương thích với các component sử dụng GameHeader
 - Thống nhất cách sử dụng header trong tất cả các game template
+
+## 2025-04-21: Sửa lỗi không có dữ liệu cho các game template
+- Cập nhật OrderingTemplate.tsx để xử lý đúng cấu trúc dữ liệu từ API
+- Sửa lỗi khởi tạo trong MemoryTemplate.tsx và FlashcardsTemplate.tsx
+- Cập nhật xử lý dữ liệu trong TrueFalseTemplate.tsx
+- Đồng bộ hóa giao diện giữa các template
+
+### Files đã sửa:
+- src/components/quiz/preset-games/templates/OrderingTemplate.tsx
+- src/components/quiz/preset-games/templates/MemoryTemplate.tsx
+- src/components/quiz/preset-games/templates/FlashcardsTemplate.tsx
+- src/components/quiz/preset-games/templates/TrueFalseTemplate.tsx
+
+### Lý do:
+- Sửa lỗi "Không có dữ liệu cho trò chơi" trong các template
+- Đồng bộ hóa cách xử lý dữ liệu giữa các game
+- Cải thiện giao diện người dùng

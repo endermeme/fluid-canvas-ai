@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,15 +25,87 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
-  const cards = gameContent?.cards || [];
-  const totalCards = cards.length;
+  // Xử lý khác biệt cấu trúc dữ liệu
+  const rawCards = gameContent?.cards || gameContent?.flashcards || [];
+  const [processedCards, setProcessedCards] = useState<any[]>([]);
+  const totalCards = processedCards.length;
+
+  // Xử lý dữ liệu thẻ
+  useEffect(() => {
+    if (gameContent) {
+      console.log("Flashcards game content:", gameContent);
+      processCardData();
+    }
+  }, [gameContent]);
+
+  const processCardData = () => {
+    if (!rawCards || rawCards.length === 0) {
+      console.error("No card data available", gameContent);
+      return;
+    }
+
+    let formatted = [];
+    
+    // Kiểm tra cấu trúc dữ liệu và định dạng phù hợp
+    if (rawCards[0].front !== undefined && rawCards[0].back !== undefined) {
+      // Format 1: { front: "...", back: "..." }
+      formatted = rawCards;
+    } else if (rawCards[0].term !== undefined && rawCards[0].definition !== undefined) {
+      // Format 2: { term: "...", definition: "..." }
+      formatted = rawCards.map((card: any) => ({
+        front: card.term,
+        back: card.definition,
+        hint: card.hint
+      }));
+    } else if (Array.isArray(rawCards) && typeof rawCards[0] === 'object') {
+      // Format 3: Các định dạng khác, thử đoán các trường
+      formatted = rawCards.map((card: any) => {
+        const keys = Object.keys(card);
+        
+        // Thử đoán các trường
+        const frontField = keys.find(k => 
+          ['front', 'question', 'term', 'title', 'header'].includes(k.toLowerCase())
+        ) || keys[0];
+        
+        const backField = keys.find(k => 
+          ['back', 'answer', 'definition', 'content', 'description'].includes(k.toLowerCase())
+        ) || keys[1];
+        
+        return {
+          front: card[frontField],
+          back: card[backField],
+          hint: card.hint || card.clue || null
+        };
+      });
+    } else {
+      // Format 4: Mảng đơn giản
+      formatted = rawCards.map((card: any, index: number) => {
+        if (typeof card === 'string') {
+          // Nếu là string, tạo thẻ đơn giản
+          return {
+            front: `Thẻ ${index + 1}`,
+            back: card
+          };
+        } else {
+          // Giả sử đây là một đối tượng không có cấu trúc rõ ràng
+          return {
+            front: JSON.stringify(card).substring(0, 50),
+            back: JSON.stringify(card)
+          };
+        }
+      });
+    }
+    
+    setProcessedCards(formatted);
+    console.log("Processed cards:", formatted);
+  };
 
   useEffect(() => {
-    if (!gameStarted && cards.length > 0) {
+    if (!gameStarted && processedCards.length > 0) {
       setGameStarted(true);
       setTimeLeft(gameContent?.settings?.timeLimit || 300);
     }
-  }, [gameContent, cards, gameStarted]);
+  }, [gameContent, processedCards, gameStarted]);
 
   useEffect(() => {
     if (timeLeft > 0 && gameStarted && !showResult) {
@@ -62,7 +135,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
   };
 
   const handleNextCard = () => {
-    if (currentCardIndex < cards.length - 1) {
+    if (currentCardIndex < processedCards.length - 1) {
       setCurrentCardIndex(currentCardIndex + 1);
       setIsFlipped(false);
     } else {
@@ -92,8 +165,14 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
     setGameStarted(true);
   };
 
-  if (!gameContent || !cards.length) {
+  if (!gameContent) {
+    console.error("No game content provided");
     return <div className="p-4">Không có dữ liệu thẻ học</div>;
+  }
+
+  if (!processedCards || processedCards.length === 0) {
+    console.error("No processed cards available", gameContent);
+    return <div className="p-4">Đang tải dữ liệu thẻ học...</div>;
   }
 
   if (showResult) {
@@ -150,7 +229,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
     );
   }
 
-  const card = cards[currentCardIndex];
+  const card = processedCards[currentCardIndex];
   const progress = ((currentCardIndex + 1) / totalCards) * 100;
 
   return (

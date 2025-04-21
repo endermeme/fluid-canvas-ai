@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ThumbsUp, ThumbsDown, CheckCircle, XCircle } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, CheckCircle, XCircle, Repeat } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import GameWrapper from './GameWrapper';
 
 interface TrueFalseTemplateProps {
@@ -26,20 +28,78 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
-  const questions = gameContent?.questions || [];
-  const isLastQuestion = currentQuestion === questions.length - 1;
+  // Xử lý các dạng dữ liệu câu hỏi khác nhau
+  const [processedQuestions, setProcessedQuestions] = useState<any[]>([]);
+  
+  // Xử lý dữ liệu câu hỏi
+  useEffect(() => {
+    if (gameContent) {
+      console.log("True/False game content:", gameContent);
+      processQuestionData();
+    }
+  }, [gameContent]);
+
+  const processQuestionData = () => {
+    const rawQuestions = gameContent?.questions || gameContent?.statements || [];
+    if (!rawQuestions || rawQuestions.length === 0) {
+      console.error("No question data available", gameContent);
+      return;
+    }
+
+    let formatted = [];
+    
+    // Kiểm tra cấu trúc dữ liệu và định dạng phù hợp
+    if (rawQuestions[0].statement !== undefined && 'isTrue' in rawQuestions[0]) {
+      // Format 1: { statement: "...", isTrue: true/false, explanation: "..." }
+      formatted = rawQuestions;
+    } else if (rawQuestions[0].text !== undefined && 'correct' in rawQuestions[0]) {
+      // Format 2: { text: "...", correct: true/false, explanation: "..." }
+      formatted = rawQuestions.map((q: any) => ({
+        statement: q.text,
+        isTrue: q.correct,
+        explanation: q.explanation || q.feedback
+      }));
+    } else if (Array.isArray(rawQuestions)) {
+      // Format 3: Các định dạng khác, thử đoán các trường
+      formatted = rawQuestions.map((q: any) => {
+        const statementField = Object.keys(q).find(k => 
+          ['statement', 'text', 'question', 'content'].includes(k.toLowerCase())
+        ) || Object.keys(q)[0];
+        
+        const isTrueField = Object.keys(q).find(k => 
+          ['istrue', 'correct', 'answer', 'value'].includes(k.toLowerCase())
+        );
+        
+        const explanationField = Object.keys(q).find(k => 
+          ['explanation', 'feedback', 'description', 'detail'].includes(k.toLowerCase())
+        );
+        
+        return {
+          statement: q[statementField],
+          isTrue: isTrueField ? q[isTrueField] : Math.random() > 0.5, // Mặc định ngẫu nhiên nếu không có
+          explanation: explanationField ? q[explanationField] : ''
+        };
+      });
+    }
+    
+    setProcessedQuestions(formatted);
+    console.log("Processed questions:", formatted);
+  };
+
+  // Xác định số lượng câu hỏi
+  const isLastQuestion = currentQuestion === processedQuestions.length - 1;
 
   useEffect(() => {
-    if (!gameStarted && questions.length > 0) {
+    if (!gameStarted && processedQuestions.length > 0) {
       setGameStarted(true);
       
       const questionTime = gameContent?.settings?.timePerQuestion || 20;
-      const totalTime = gameContent?.settings?.totalTime || (questions.length * questionTime);
+      const totalTime = gameContent?.settings?.totalTime || (processedQuestions.length * questionTime);
       
       setTimeLeft(questionTime);
       setTotalTimeLeft(totalTime);
     }
-  }, [gameContent, questions, gameStarted]);
+  }, [gameContent, processedQuestions, gameStarted]);
 
   useEffect(() => {
     if (timeLeft > 0 && timerRunning && !isAnswered) {
@@ -85,7 +145,8 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     setIsAnswered(true);
     setTimerRunning(false);
     
-    if (option === questions[currentQuestion].isTrue) {
+    const question = processedQuestions[currentQuestion];
+    if (option === question.isTrue) {
       setScore(score + 1);
       
       if (gameContent?.settings?.bonusTimePerCorrect) {
@@ -107,7 +168,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     } else {
       toast({
         title: "Không chính xác!",
-        description: `Đáp án đúng là: ${questions[currentQuestion].isTrue ? 'Đúng' : 'Sai'}`,
+        description: `Đáp án đúng là: ${question.isTrue ? 'Đúng' : 'Sai'}`,
         variant: "destructive",
       });
     }
@@ -137,12 +198,18 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     setGameStarted(true);
   };
 
-  if (!gameContent || !questions.length) {
-    return <div className="p-4">Không có dữ liệu câu hỏi</div>;
+  if (!gameContent) {
+    console.error("No game content provided");
+    return <div className="p-4">Không có dữ liệu cho trò chơi</div>;
+  }
+
+  if (!processedQuestions || processedQuestions.length === 0) {
+    console.error("No processed questions available", gameContent);
+    return <div className="p-4">Đang tải dữ liệu câu hỏi...</div>;
   }
 
   if (showResult) {
-    const percentage = Math.round((score / questions.length) * 100);
+    const percentage = Math.round((score / processedQuestions.length) * 100);
     
     return (
       <GameWrapper
@@ -150,8 +217,8 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
         progress={100}
         timeLeft={totalTimeLeft}
         score={score}
-        currentItem={questions.length}
-        totalItems={questions.length}
+        currentItem={processedQuestions.length}
+        totalItems={processedQuestions.length}
         title="Kết quả"
         gameId={gameId}
       >
@@ -176,23 +243,21 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
             </div>
             
             <div className="text-4xl font-bold mb-6 text-primary">
-              {score} / {questions.length}
+              {score} / {processedQuestions.length}
             </div>
             
-            <button
-              onClick={handleRestart}
-              className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition mt-4"
-            >
+            <Button onClick={handleRestart} className="mt-4">
+              <Repeat className="mr-2 h-4 w-4" />
               Chơi lại
-            </button>
+            </Button>
           </div>
         </Card>
       </GameWrapper>
     );
   }
 
-  const question = questions[currentQuestion];
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
+  const question = processedQuestions[currentQuestion];
+  const progress = ((currentQuestion + 1) / processedQuestions.length) * 100;
 
   return (
     <GameWrapper
@@ -201,7 +266,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
       timeLeft={timeLeft}
       score={score}
       currentItem={currentQuestion + 1}
-      totalItems={questions.length}
+      totalItems={processedQuestions.length}
       title={gameContent.title || "Đúng/Sai"}
       gameId={gameId}
     >
@@ -267,16 +332,23 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
             <span className="font-medium text-lg">Sai</span>
           </button>
         </div>
+        
+        {isAnswered && question.explanation && (
+          <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+            <p className="font-medium mb-1">Giải thích:</p>
+            <p>{question.explanation}</p>
+          </div>
+        )}
       </Card>
       
       {isAnswered && (
         <div className="flex justify-center mt-4">
-          <button
+          <Button
             onClick={handleNextQuestion}
             className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition"
           >
             {isLastQuestion ? 'Xem kết quả' : 'Câu hỏi tiếp theo'}
-          </button>
+          </Button>
         </div>
       )}
     </GameWrapper>

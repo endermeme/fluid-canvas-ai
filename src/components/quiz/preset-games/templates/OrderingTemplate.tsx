@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -19,7 +20,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
   
   const [currentSet, setCurrentSet] = useState(0);
   const [items, setItems] = useState<string[]>([]);
-  const [correctOrder, setCorrectOrder] = useState<string[]>([]);
+  const [correctOrder, setCorrectOrder] = useState<number[]>([]);
   const [score, setScore] = useState(0);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -29,7 +30,8 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
-  const sets = gameContent?.sets || [];
+  // Xử lý cấu trúc dữ liệu khác nhau giữa API và sample data
+  const sets = gameContent?.sentences || gameContent?.sets || [];
   const isLastSet = currentSet === sets.length - 1;
 
   useEffect(() => {
@@ -91,14 +93,30 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
   const initializeCurrentSet = () => {
     if (sets.length > 0 && currentSet < sets.length) {
       const set = sets[currentSet];
-      setCorrectOrder(set.correctOrder);
       
-      // Tạo mảng items sắp xếp ngẫu nhiên từ correct order
-      const randomizedItems = [...set.correctOrder].sort(() => Math.random() - 0.5);
-      setItems(randomizedItems);
+      // Kiểm tra cấu trúc dữ liệu để xử lý tương thích với cả API và sample data
+      if (set.words && set.correctOrder) {
+        // Đây là cấu trúc từ API
+        setItems([...set.words]); // Tạo một bản sao mảng để tránh tham chiếu
+        setCorrectOrder(set.correctOrder);
+        
+        // Xáo trộn các từ
+        const randomizedItems = [...set.words].sort(() => Math.random() - 0.5);
+        setItems(randomizedItems);
+      } else if (set.correctOrder && typeof set.correctOrder === 'string') {
+        // Trường hợp correctOrder là một chuỗi đã sắp xếp
+        const words = set.correctOrder.split(' ');
+        setCorrectOrder(words.map((_, index) => index));
+        
+        // Xáo trộn các từ
+        const randomizedItems = [...words].sort(() => Math.random() - 0.5);
+        setItems(randomizedItems);
+      }
       
       setIsAnswered(false);
       setIsCorrect(false);
+    } else {
+      console.error("No valid set found at index", currentSet);
     }
   };
 
@@ -131,7 +149,22 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
   const handleCheck = () => {
     setIsAnswered(true);
     
-    const isSequenceCorrect = items.every((item, index) => item === correctOrder[index]);
+    // Kiểm tra thứ tự
+    const set = sets[currentSet];
+    let isSequenceCorrect = false;
+    
+    if (set.words && set.correctOrder) {
+      // Lấy thứ tự đúng dựa theo correctOrder
+      const correctWords = set.correctOrder.map((idx: number) => set.words[idx]);
+      isSequenceCorrect = items.every((item, index) => item === correctWords[index]);
+    } else {
+      // Dùng phương pháp kiểm tra khác nếu cấu trúc dữ liệu khác
+      isSequenceCorrect = items.every((item, index) => {
+        const expectedIndex = correctOrder[index];
+        return item === set.words[expectedIndex];
+      });
+    }
+    
     setIsCorrect(isSequenceCorrect);
     
     if (isSequenceCorrect) {
@@ -182,8 +215,17 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
     setGameStarted(true);
   };
 
-  if (!gameContent || !sets.length) {
+  // Kiểm tra nếu không có dữ liệu hoặc dữ liệu không đúng định dạng
+  console.log("Game content:", gameContent);
+  console.log("Sets:", sets);
+  
+  if (!gameContent) {
     return <div className="p-4">Không có dữ liệu cho trò chơi</div>;
+  }
+  
+  if (!sets || sets.length === 0) {
+    console.error("No valid sets found in game content:", gameContent);
+    return <div className="p-4">Không có dữ liệu câu đố cho trò chơi</div>;
   }
 
   if (showResult) {
@@ -261,8 +303,8 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
               >
                 {items.map((item, index) => (
                   <Draggable 
-                    key={item} 
-                    draggableId={item} 
+                    key={`item-${index}-${item}`} 
+                    draggableId={`item-${index}-${item}`} 
                     index={index}
                     isDragDisabled={isAnswered}
                   >
@@ -273,9 +315,11 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
                         {...provided.dragHandleProps}
                         className={`p-4 rounded-lg border ${
                           isAnswered 
-                            ? item === correctOrder[index]
+                            ? isCorrect
                               ? 'bg-green-100 border-green-500 shadow-md'
-                              : 'bg-red-100 border-red-500 shadow-md'
+                              : index < correctOrder.length && items[index] !== (set.words ? set.words[correctOrder[index]] : '')
+                                ? 'bg-red-100 border-red-500 shadow-md'
+                                : 'bg-white border-gray-200 shadow-sm'
                             : 'bg-white border-gray-200 shadow-sm hover:shadow-md'
                         } relative transition-all duration-200`}
                       >
@@ -303,12 +347,13 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
                             </div>
                           )}
                           
-                          {isAnswered && (
-                            item === correctOrder[index] ? (
-                              <CheckCircle className="h-5 w-5 text-green-600" />
-                            ) : (
-                              <XCircle className="h-5 w-5 text-red-600" />
-                            )
+                          {isAnswered && isCorrect && (
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                          )}
+                          
+                          {isAnswered && !isCorrect && index < correctOrder.length && 
+                            items[index] !== (set.words ? set.words[correctOrder[index]] : '') && (
+                            <XCircle className="h-5 w-5 text-red-600" />
                           )}
                         </div>
                       </div>

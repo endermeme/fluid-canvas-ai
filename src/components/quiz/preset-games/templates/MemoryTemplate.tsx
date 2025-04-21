@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,9 +30,13 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
 
   // Khởi tạo trò chơi
   useEffect(() => {
-    if (!gameStarted && gameContent?.pairs) {
-      setGameStarted(true);
-      initializeGame();
+    if (gameContent) {
+      console.log("Memory game content:", gameContent);
+      
+      if (!gameStarted) {
+        setGameStarted(true);
+        initializeGame();
+      }
     }
   }, [gameContent, gameStarted]);
 
@@ -56,28 +61,64 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
 
   // Khởi tạo các thẻ bài cho trò chơi
   const initializeGame = () => {
-    const pairs = gameContent?.pairs || [];
+    // Có thể nhận dữ liệu ở 3 dạng khác nhau
+    const rawCardData = gameContent?.cards || gameContent?.pairs || [];
+    console.log("Raw card data:", rawCardData);
     
-    // Tạo bộ thẻ bài với cả 2 phần của mỗi cặp
     let gameCards = [];
-    for (let i = 0; i < pairs.length; i++) {
-      gameCards.push({
-        id: i * 2,
-        pairId: i,
-        value: pairs[i].first,
-        matched: false
-      });
-      
-      gameCards.push({
-        id: i * 2 + 1,
-        pairId: i,
-        value: pairs[i].second,
-        matched: false
-      });
+    
+    // Trường hợp 1: Sử dụng cấu trúc "cards" với "id" sẵn có (từ API)
+    if (rawCardData.length > 0 && 'id' in rawCardData[0]) {
+      gameCards = [...rawCardData];
+    } 
+    // Trường hợp 2: Sử dụng cấu trúc "pairs" với "first" và "second" (từ sample data)
+    else if (rawCardData.length > 0 && ('first' in rawCardData[0] || 'second' in rawCardData[0])) {
+      for (let i = 0; i < rawCardData.length; i++) {
+        gameCards.push({
+          id: i * 2,
+          pairId: i,
+          content: rawCardData[i].first || rawCardData[i].left,
+          matched: false,
+          flipped: false
+        });
+        
+        gameCards.push({
+          id: i * 2 + 1,
+          pairId: i,
+          content: rawCardData[i].second || rawCardData[i].right,
+          matched: false,
+          flipped: false
+        });
+      }
+    }
+    // Trường hợp 3: Nếu là cách khác, tạo thẻ mặc định
+    else if (rawCardData.length > 0) {
+      for (let i = 0; i < rawCardData.length; i += 2) {
+        if (i + 1 < rawCardData.length) {
+          const pairId = Math.floor(i / 2);
+          
+          gameCards.push({
+            id: i,
+            pairId: pairId,
+            content: rawCardData[i].content || rawCardData[i],
+            matched: false,
+            flipped: false
+          });
+          
+          gameCards.push({
+            id: i + 1,
+            pairId: pairId,
+            content: rawCardData[i + 1].content || rawCardData[i + 1],
+            matched: false,
+            flipped: false
+          });
+        }
+      }
     }
     
     // Xáo trộn các thẻ bài
     gameCards = shuffleCards(gameCards);
+    console.log("Initialized game cards:", gameCards);
     
     setCards(gameCards);
     setFlippedIndices([]);
@@ -102,7 +143,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
   // Xử lý khi người chơi lật thẻ bài
   const handleCardClick = (index: number) => {
     // Không cho phép click khi đang kiểm tra hoặc thẻ đã được ghép đôi
-    if (isChecking || flippedIndices.includes(index) || matchedPairs.includes(cards[index].pairId)) {
+    if (isChecking || flippedIndices.includes(index) || cards[index]?.matched) {
       return;
     }
     
@@ -125,14 +166,25 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
       
       // Kiểm tra xem 2 thẻ có cùng cặp không
       if (cards[firstIndex].pairId === cards[secondIndex].pairId) {
+        // Tạo mảng thẻ mới với 2 thẻ đã ghép đôi
+        const newCards = cards.map((card, idx) => {
+          if (idx === firstIndex || idx === secondIndex) {
+            return { ...card, matched: true };
+          }
+          return card;
+        });
+        
         // Nếu là một cặp, thêm vào danh sách cặp đã ghép đôi
-        setMatchedPairs([...matchedPairs, cards[firstIndex].pairId]);
+        const newMatchedPairs = [...matchedPairs, cards[firstIndex].pairId];
+        setMatchedPairs(newMatchedPairs);
         setScore(score + 1);
+        setCards(newCards);
         setFlippedIndices([]);
         setIsChecking(false);
         
         // Kiểm tra xem trò chơi đã hoàn thành chưa
-        if (matchedPairs.length + 1 === gameContent?.pairs?.length) {
+        const totalPairs = Math.floor(cards.length / 2);
+        if (newMatchedPairs.length === totalPairs) {
           setGameComplete(true);
           toast({
             title: "Chúc mừng!",
@@ -162,11 +214,18 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
     setGameStarted(true);
   };
 
-  if (!gameContent || !gameContent.pairs) {
+  if (!gameContent) {
+    console.error("No game content provided");
     return <div className="p-4">Không có dữ liệu cho trò chơi</div>;
   }
 
-  const totalPairs = gameContent.pairs.length;
+  // Kiểm tra nếu không có dữ liệu thẻ
+  if (!cards || cards.length === 0) {
+    console.error("No cards initialized", gameContent);
+    return <div className="p-4">Đang tải dữ liệu thẻ chơi...</div>;
+  }
+
+  const totalPairs = Math.floor(cards.length / 2);
   const progress = (matchedPairs.length / totalPairs) * 100;
 
   return (
@@ -211,21 +270,21 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, o
             <div className={`grid gap-3 w-full ${cards.length <= 12 ? 'md:grid-cols-4 grid-cols-3' : 'md:grid-cols-6 grid-cols-4'}`}>
               {cards.map((card, index) => (
                 <div
-                  key={card.id}
+                  key={card.id || index}
                   onClick={() => handleCardClick(index)}
                   className={`
                     aspect-[3/4] flex items-center justify-center rounded-lg cursor-pointer text-center p-1
                     transition-all duration-300 transform
-                    ${flippedIndices.includes(index) || matchedPairs.includes(card.pairId)
+                    ${flippedIndices.includes(index) || card.matched
                       ? 'bg-primary/20 shadow-md scale-105'
                       : 'bg-secondary shadow-inner scale-100'
                     }
-                    ${matchedPairs.includes(card.pairId) ? 'ring-2 ring-green-500' : ''}
+                    ${card.matched ? 'ring-2 ring-green-500' : ''}
                   `}
                 >
-                  {flippedIndices.includes(index) || matchedPairs.includes(card.pairId) ? (
+                  {flippedIndices.includes(index) || card.matched ? (
                     <span className="text-sm md:text-base font-medium p-1 break-words w-full">
-                      {card.value}
+                      {card.content}
                     </span>
                   ) : (
                     <span className="opacity-0">?</span>
