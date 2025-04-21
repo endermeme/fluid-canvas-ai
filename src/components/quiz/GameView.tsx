@@ -5,17 +5,20 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { enhanceIframeContent } from './custom-games/utils/iframe-utils';
+import GameHeader from './components/GameHeader';
 import GameContainer from './components/GameContainer';
 
 interface GameViewProps {
   miniGame: MiniGame;
   onBack?: () => void;
+  extraButton?: React.ReactNode;
 }
 
-const GameView: React.FC<GameViewProps> = ({ miniGame, onBack }) => {
+const GameView: React.FC<GameViewProps> = ({ miniGame, onBack, extraButton }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { toast } = useToast();
   const [iframeError, setIframeError] = useState<string | null>(null);
+  const [shareInProgress, setShareInProgress] = useState(false);
   const [gameStats, setGameStats] = useState<{score?: number; completed?: boolean; totalTime?: number}>({});
   const navigate = useNavigate();
 
@@ -27,7 +30,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack }) => {
             .from('games')
             .insert({
               title: miniGame.title || "Minigame tương tác",
-              game_type: "custom-game", 
+              game_type: "custom-game",
               html_content: miniGame.content,
               is_published: true,
               description: `Custom game: ${miniGame.title || "Minigame tương tác"}`
@@ -36,6 +39,7 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack }) => {
             .single();
 
           if (error) throw error;
+          
           console.log("Game saved successfully:", data);
         } catch (e) {
           console.error("Error saving game to database:", e);
@@ -46,6 +50,56 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack }) => {
     saveGameToDb();
   }, [miniGame]);
 
+  const handleShare = async () => {
+    if (shareInProgress) return;
+    
+    try {
+      setShareInProgress(true);
+      
+      const { data, error } = await supabase
+        .from('games')
+        .insert({
+          title: miniGame.title || "Minigame tương tác",
+          game_type: "custom-game",
+          html_content: miniGame.content,
+          is_published: true,
+          description: `Shared game: ${miniGame.title || "Minigame tương tác"}`
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Create a slug from the title for more descriptive URL
+      const slug = (miniGame.title || "minigame").toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
+      const shareUrl = `${window.location.origin}/play/custom-game/${slug}/${data.id}`;
+      
+      await navigator.clipboard.writeText(shareUrl);
+      
+      toast({
+        title: "Link Chia Sẻ Đã Được Sao Chép",
+        description: "Đã sao chép liên kết vào clipboard. Link có hiệu lực trong 48 giờ.",
+      });
+    } catch (error) {
+      console.error("Share error:", error);
+      toast({
+        title: "Lỗi Chia Sẻ",
+        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
+        variant: "destructive",
+      });
+    } finally {
+      setShareInProgress(false);
+    }
+  };
+
+  const handleBackToHome = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate('/');
+    }
+  };
+  
   const handleReloadGame = () => {
     if (iframeRef.current) {
       try {
@@ -105,6 +159,15 @@ const GameView: React.FC<GameViewProps> = ({ miniGame, onBack }) => {
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
+      <GameHeader
+        title={miniGame.title || "Minigame tương tác"}
+        onBack={handleBackToHome}
+        onRefresh={handleReloadGame}
+        onShare={handleShare}
+        score={gameStats.score}
+        extraButton={extraButton}
+      />
+      
       <GameContainer
         iframeRef={iframeRef}
         content={enhancedContent}

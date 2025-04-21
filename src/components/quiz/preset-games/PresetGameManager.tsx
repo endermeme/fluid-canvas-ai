@@ -9,7 +9,6 @@ import GameLoading from '../GameLoading';
 import { GameSettingsData } from '../types';
 import { Card } from '@/components/ui/card';
 import { saveGameForSharing } from '@/utils/gameExport';
-import GameHeader from './components/headers/GameHeader';
 import { 
   Dialog,
   DialogContent,
@@ -372,7 +371,27 @@ Output must be valid JSON. `;
 
     return (
       <div className="flex flex-col h-full">
-        <div className="flex-1" id="game-container">
+        <div className="flex justify-between items-center mb-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleRetry}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Tạo lại
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShare}
+          >
+            <Share2 className="h-4 w-4 mr-2" />
+            Chia sẻ
+          </Button>
+        </div>
+        
+        <div id="game-container" className="flex-1">
           <GameTemplate 
             data={gameContent} 
             onBack={handleRetry}
@@ -568,7 +587,30 @@ Output must be valid JSON. `;
 
   return (
     <div className="flex flex-col h-full">
-      {renderGameTemplate()}
+      {loading ? (
+        <GameLoading 
+          topic={initialTopic || ""}
+        />
+      ) : showSettings ? (
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">{getGameTypeName()}</h2>
+            <Button variant="ghost" size="sm" onClick={onBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Quay lại
+            </Button>
+          </div>
+          
+          <GameSettings 
+            initialSettings={settings}
+            onStart={handleStartGame}
+            onCancel={onBack}
+            topic={initialTopic || ""}
+          />
+        </div>
+      ) : (
+        renderGameTemplate()
+      )}
       
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
         <DialogContent className="sm:max-w-md">

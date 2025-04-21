@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import GameControls from '../../components/GameControls';
-import { CheckCircle, XCircle } from 'lucide-react';
-import GameWrapper from './GameWrapper';
+import { CheckCircle, XCircle, RefreshCw, Clock, ArrowLeft, ChevronRight } from 'lucide-react';
 
 interface QuizTemplateProps {
   data?: any;
   content?: any;
   topic: string;
   onBack?: () => void;
-  gameId?: string;
 }
 
-const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBack, gameId }) => {
+const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBack }) => {
   const gameContent = content || data;
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -99,7 +98,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
         
         toast({
           title: "Chính xác! +1 điểm",
-          description: `Câu trả lời của bạn đúng. +${bonusTime}s thời gian thưởng.`,
+          description: `Câu trả lời của bạn đúng. +${bonusTime}s thời gian thư��ng.`,
           variant: "default",
         });
       } else {
@@ -142,18 +141,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
     setGameStarted(true);
   };
 
-  const handleShare = async () => {
-    try {
-      toast({
-        title: "Chức năng chia sẻ",
-        description: "Chức năng chia sẻ đang được phát triển.",
-      });
-    } catch (error) {
-      console.error("Error sharing:", error);
-    }
-  };
-
-  if (!content || !questions.length) {
+  if (!gameContent || !questions.length) {
     return <div className="p-4">Không có dữ liệu câu hỏi</div>;
   }
 
@@ -161,64 +149,94 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
     const percentage = Math.round((score / questions.length) * 100);
     
     return (
-      <GameWrapper
-        onBack={onBack}
-        progress={100}
-        timeLeft={totalTimeLeft}
-        score={score}
-        currentItem={questions.length}
-        totalItems={questions.length}
-        title="Kết quả"
-        onShare={handleShare}
-        gameId={gameId}
-      >
-        <Card className="flex-grow flex items-center justify-center p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
-          <div className="w-full max-w-md">
-            <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả</h2>
-            <p className="text-lg mb-4">
-              Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
-            </p>
-            
-            <div className="mb-6">
-              <div className="flex justify-between mb-2">
-                <span>Điểm của bạn</span>
-                <span className="font-bold">{percentage}%</span>
-              </div>
-              <div className="h-3 bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary transition-all duration-500 ease-out"
-                  style={{ width: `${percentage}%` }}
-                />
-              </div>
+      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80 relative">
+        {onBack && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onBack} 
+            className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Quay lại</span>
+          </Button>
+        )}
+
+        <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
+          <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả</h2>
+          <p className="text-lg mb-4">
+            Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
+          </p>
+          
+          <div className="mb-6">
+            <div className="flex justify-between mb-2">
+              <span>Điểm của bạn</span>
+              <span className="font-bold">{percentage}%</span>
             </div>
-            
-            <div className="text-4xl font-bold mb-6 text-primary">
-              {score} / {questions.length}
-            </div>
-            
-            <GameControls onRestart={handleRestart} className="mt-4" />
+            <Progress value={percentage} className="h-3 bg-secondary" />
           </div>
+          
+          <div className="text-4xl font-bold mb-6 text-primary">
+            {score} / {questions.length}
+          </div>
+          
+          <div className="text-sm mb-4 text-muted-foreground">
+            Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
+          </div>
+          
+          <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Chơi Lại
+          </Button>
         </Card>
-      </GameWrapper>
+      </div>
     );
   }
 
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
+  
+  const minutesLeft = Math.floor(totalTimeLeft / 60);
+  const secondsLeft = totalTimeLeft % 60;
+  const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
 
   return (
-    <GameWrapper
-      onBack={onBack}
-      progress={progress}
-      timeLeft={timeLeft}
-      score={score}
-      currentItem={currentQuestion + 1}
-      totalItems={questions.length}
-      title={gameContent.title || "Quiz Game"}
-      onShare={handleShare}
-      gameId={gameId}
-    >
-      <Card className="flex-grow p-6 mb-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
+    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
+      {onBack && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onBack} 
+          className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Quay lại</span>
+        </Button>
+      )}
+
+      <div className="mb-4 mt-12">
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+            Câu hỏi {currentQuestion + 1}/{questions.length}
+          </div>
+          <div className="text-sm font-medium flex items-center gap-2">
+            <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full">
+              <Clock className="h-4 w-4 mr-1 text-primary" />
+              {timeLeft}s
+            </div>
+            <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full text-primary/80">
+              <Clock className="h-4 w-4 mr-1" />
+              {formattedTotalTime}
+            </div>
+            <div className="px-3 py-1 bg-primary/10 rounded-full">
+              Điểm: <span className="font-bold">{score}</span>
+            </div>
+          </div>
+        </div>
+        <Progress value={progress} className="h-2 bg-secondary" />
+      </div>
+
+      <Card className="p-6 mb-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
         <h2 className="text-xl font-semibold mb-6 text-primary">{question.question}</h2>
         
         <div className="space-y-3">
@@ -229,10 +247,10 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
               className={`w-full p-4 text-left rounded-lg transition-all duration-200 ${
                 selectedOption === index 
                   ? selectedOption === question.correctAnswer
-                    ? 'bg-green-100 border-green-500 border shadow-md'
-                    : 'bg-red-100 border-red-500 border shadow-md'
+                    ? 'bg-green-100/50 border-green-500 border shadow-md'
+                    : 'bg-red-100/50 border-red-500 border shadow-md'
                   : isAnswered && index === question.correctAnswer
-                    ? 'bg-green-100 border-green-500 border shadow-md'
+                    ? 'bg-green-100/50 border-green-500 border shadow-md'
                     : 'bg-secondary/50 hover:bg-secondary/80 border-transparent border hover:shadow-md'
               }`}
               disabled={isAnswered}
@@ -251,24 +269,35 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, onBac
                     {String.fromCharCode(65 + index)}
                   </div>
                 )}
-                <span className="flex-grow">{option}</span>
+                <span>{option}</span>
               </div>
             </button>
           ))}
         </div>
       </Card>
-      
-      {isAnswered && (
-        <div className="flex justify-center mt-4">
-          <button
-            onClick={handleNextQuestion}
-            className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition"
-          >
-            {isLastQuestion ? 'Xem kết quả' : 'Câu hỏi tiếp theo'}
-          </button>
-        </div>
-      )}
-    </GameWrapper>
+
+      <div className="mt-auto flex space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRestart}
+          className="bg-background/70 border-primary/20 flex-1"
+        >
+          <RefreshCw className="h-4 w-4 mr-1" />
+          Làm lại
+        </Button>
+        
+        <Button 
+          onClick={handleNextQuestion} 
+          disabled={!isAnswered}
+          className={`flex-1 ${isAnswered ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary' : 'bg-primary/50'}`}
+          size="sm"
+        >
+          {isLastQuestion ? 'Xem Kết Quả' : 'Câu Tiếp Theo'}
+          <ChevronRight className="h-4 w-4 ml-1" />
+        </Button>
+      </div>
+    </div>
   );
 };
 

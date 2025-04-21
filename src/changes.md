@@ -1,76 +1,91 @@
 
 # Lịch sử thay đổi mã nguồn
 
-## 2025-04-21: Cập nhật GameHeader.tsx để hỗ trợ các props mới
-- Thêm props `title`, `progress`, `timeLeft`, `score`, `currentItem`, `totalItems` vào GameHeader
-- Cập nhật interface GameHeaderProps để phù hợp với các component đang sử dụng
-- Sửa lỗi TypeScript trong GameWrapper và PictionaryResult
-
-### Files đã sửa:
-- src/components/quiz/preset-games/components/headers/GameHeader.tsx
-
-### Lý do:
-- Sửa lỗi TypeScript khi truyền props không tồn tại vào GameHeader
-- Đảm bảo tính nhất quán trong việc sử dụng GameHeader giữa các component
-- Hỗ trợ các tính năng hiển thị tiến trình và thông tin game
-
-## 2025-04-20: Xóa thư mục quick-game-selector
-- Xóa toàn bộ thư mục src/components/quiz/quick-game-selector/
-- Loại bỏ các component không còn sử dụng
-- Chuẩn bị cho việc tái cấu trúc giao diện game selector
+## 2025-04-20: Dọn dẹp và tổ chức lại cấu trúc thư mục
+- Xóa thư mục demo và các file liên quan 
+- Xóa các file không cần thiết trong quick-game-selector
+- Di chuyển utility functions vào thư mục game tương ứng
+- Đơn giản hóa cấu trúc project
+- Cập nhật lại các đường dẫn import
 
 ### Files đã xóa:
-- src/components/quiz/quick-game-selector/**
+- src/components/quiz/demo/**
+- src/pages/IframeDemo.tsx
+- src/app/iframe-demo/**
+- public/iframe-test.html
+- src/components/quiz/quick-game-selector/index.tsx
+- src/components/quiz/quick-game-selector/CustomGameDialog.tsx
+- src/utils/iframe-demo-utils.ts
+- src/utils/iframe-utils.ts
 
-### Lý do:
-- Tối ưu hóa cấu trúc thư mục
-- Loại bỏ các component trùng lặp
-- Chuẩn bị cho việc refactor giao diện game selector
+### Files được tạo mới/di chuyển:
+- src/components/quiz/custom-games/utils/iframe-processor.ts
 
-## 2025-04-20: Sửa lỗi tham chiếu component
-- Thêm import CustomGameForm vào QuickGameSelector.tsx
-- Cập nhật tham chiếu đến component bị thiếu
+### Chi tiết thay đổi:
+- Di chuyển các utility functions vào thư mục tương ứng
+- Cập nhật các import path trong các file liên quan
+- Xóa route iframe-demo khỏi App.tsx
+- Đơn giản hóa cấu trúc thư mục
 
-### Files đã sửa:
-- src/components/quiz/QuickGameSelector.tsx
+## 2025-04-20: Cập nhật giao diện game và header
+- Tạo component GameHeader.tsx mới để thống nhất header cho tất cả các game
+- Cập nhật GameContainer.tsx để hiển thị game ở chế độ toàn màn hình và căn giữa
+- Thêm các hiệu ứng blur và gradient cho header và container
+- Cải thiện UI/UX với các animation mượt mà hơn
 
-### Lý do:
-- Sửa lỗi không tìm thấy component CustomGameForm
-- Đảm bảo tính nhất quán trong việc sử dụng component
+### Files được tạo mới:
+- src/components/quiz/components/GameHeader.tsx
 
-## 2025-04-20: Thống nhất GameHeader và cập nhật tính năng chia sẻ
-- Thống nhất sử dụng GameHeader từ preset-games
-- Loại bỏ phiên bản GameHeader dư thừa
-- Cập nhật import paths trong các file liên quan
+### Files được cập nhật:
+- src/components/quiz/custom-games/GameContainer.tsx
 
-### Files đã sửa:
-- src/components/quiz/preset-games/templates/GameWrapper.tsx
+## 2025-04-20: Dọn dẹp file giao diện không cần thiết
 
-### Lý do:
-- Tối ưu hóa cấu trúc và giảm trùng lặp code
-- Thống nhất cách thức chia sẻ game trong toàn bộ ứng dụng
+### Files đã xóa:
+- src/components/quiz/GameHeader.tsx  
+- src/components/quiz/components/header-buttons/** (toàn bộ thư mục)
+- src/components/quiz/components/GameViewHeader.tsx
 
-## 2025-04-21: Sửa lỗi import GameHeader
-- Cập nhật đường dẫn import GameHeader trong PresetGameManager.tsx
-- Cập nhật đường dẫn import GameHeader trong PictionaryResult.tsx
+Lý do: Tối ưu hóa cấu trúc project bằng cách loại bỏ các component giao diện trùng lặp và không cần thiết.
 
-### Files đã sửa:
+## 2025-04-20: Sửa lỗi import sau khi xóa file GameViewHeader.tsx
+
+### Files được cập nhật:
+- src/components/quiz/GameView.tsx
+
+Chi tiết: Cập nhật import từ GameViewHeader (đã bị xóa) sang GameHeader mới và điều chỉnh lại props tương ứng.
+
+## 2025-04-20: Tích hợp lưu trữ game với Supabase
+
+### Files được cập nhật:
+- src/components/quiz/GameView.tsx
+
+Chi tiết:
+- Thêm chức năng lưu game vào bảng games trong Supabase
+- Cập nhật chức năng chia sẻ để sử dụng bảng games
+- Thêm RLS policies cho bảng games
+- Tối ưu hóa URL chia sẻ với slug từ tiêu đề game
+
+## 2025-04-20: Update preset game API endpoint
+
+### Files được cập nhật:
 - src/components/quiz/preset-games/PresetGameManager.tsx
-- src/components/quiz/preset-games/templates/pictionary/PictionaryResult.tsx
 
-### Lý do:
-- Sửa lỗi không tìm thấy module GameHeader
-- Đảm bảo tính nhất quán trong việc sử dụng component sau khi thống nhất header
+### Chi tiết thay đổi:
+- Cập nhật endpoint API cho preset games để khớp với cấu trúc của custom games
+- Sử dụng chung một format request/response
+- Đơn giản hóa logic gọi API và xử lý response
+- Cải thiện xử lý lỗi và loading states
+- Thêm toast notifications để thông báo trạng thái
 
-## 2025-04-21: Làm lại GameHeader tối giản, hài hòa giao diện
-- Làm lại GameHeader cho preset-games: bỏ tên game, chỉ còn icon back, home, settings, share, history; style sạch, trung tính sáng, không dùng màu nền nổi bật.
-- Bo góc, spacing và hiệu ứng nhẹ, loại bỏ nền và màu đậm gây sặc sỡ.
-- Dùng icon lucide-react đúng guideline.
-- Modal chia sẻ giữ nguyên logic, làm mờ nhẹ, nền trắng, nút nh�� nhàng.
+## 2025-04-20: Sửa lỗi Gemini API endpoint
 
-### File đã sửa:
-- src/components/quiz/preset-games/components/headers/GameHeader.tsx
+### Files được cập nhật:
+- src/components/quiz/preset-games/PresetGameManager.tsx
 
-### Lý do:
-- Làm đồng bộ và sạch giao diện, dễ chịu hơn cho mắt, tránh sự lòe loẹt/sặc sỡ của header cũ.
-- Đáp ứng yêu cầu UX/UI từ người dùng, đồng nhất với phần còn lại của app.
+### Chi tiết thay đổi:
+- Sửa lỗi 404 từ Gemini API
+- Cập nhật từ `v1` sang `v1beta` để phù hợp với model gemini-2.5-pro-preview-03-25
+- Đồng bộ cấu hình API với custom game generator
+- Sử dụng các hằng số từ api-constants.ts
+- Cập nhật cấu trúc request body để phù hợp với API mới
