@@ -1,4 +1,3 @@
-
 // Các loại game và cài đặt
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
@@ -36,7 +35,6 @@ export interface GameSettingsData {
   shuffleItems?: boolean;
   allowPartialMatching?: boolean;
   bonusTimePerMatch?: number;
-  hintPenalty?: number;
   allowMultipleAttempts?: boolean;
   autoAdvance?: boolean;
   gridSize?: number;
