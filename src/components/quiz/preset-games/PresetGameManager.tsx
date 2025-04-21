@@ -24,7 +24,6 @@ import { Label } from '@/components/ui/label';
 import { Copy, Check } from 'lucide-react';
 import PresetGameHeader from './PresetGameHeader';
 
-// Import API constants
 import { 
   GEMINI_API_KEY, 
   GEMINI_MODELS, 
@@ -134,7 +133,6 @@ Output must be valid JSON. `;
 
       console.log("Sending prompt to Gemini:", gamePrompt);
 
-      // Cấu trúc request đúng cho API v1beta của Gemini
       const payload = {
         contents: [{
           role: "user",
@@ -149,7 +147,6 @@ Output must be valid JSON. `;
         }
       };
 
-      // Sử dụng endpoint từ hằng số API
       const response = await fetch(getApiEndpoint(GEMINI_MODELS.PRESET_GAME), {
         method: 'POST',
         headers: {
@@ -450,15 +447,12 @@ Output must be valid JSON. `;
     try {
       if (!gameContent) return;
       
-      // Get HTML content from the game
       const gameContainer = document.getElementById('game-container');
       let html = gameContainer?.innerHTML || '';
       
-      // Encode game content as a data attribute to ensure we can retrieve it later
       const encodedContent = encodeURIComponent(JSON.stringify(gameContent));
       html = `<div data-game-content="${encodedContent}">${html}</div>`;
       
-      // Save game to Supabase - ensure we provide all 4 parameters
       const shareUrl = await saveGameForSharing(
         gameContent.title || getGameTypeName(),
         gameType,
@@ -466,7 +460,6 @@ Output must be valid JSON. `;
         html
       );
       
-      // Update state with the generated URL - now it's a full URL
       if (shareUrl) {
         setShareUrl(shareUrl);
         setShowShareDialog(true);
@@ -506,26 +499,10 @@ Output must be valid JSON. `;
   if (showSettings) {
     return (
       <div className="p-4">
-        <header className="flex justify-between items-center mb-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hover:bg-primary/10"
-            onClick={() => navigate("/")}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-
-          <Button
-            variant="default"
-            size="sm"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1"
-            onClick={handleShare}
-          >
-            <Share2 className="h-4 w-4" />
-            Chia sẻ
-          </Button>
-        </header>
+        <PresetGameHeader
+          onShare={gameContent ? handleShare : undefined}
+          showShare={!!gameContent}
+        />
         <GameSettings 
           initialSettings={settings}
           onStart={handleStartGame}
@@ -555,7 +532,10 @@ Output must be valid JSON. `;
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
-        <PresetGameHeader />
+        <PresetGameHeader 
+          onShare={undefined}
+          showShare={false}
+        />
         <Card className="p-6 max-w-md mt-4">
           <div className="text-center">
             <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
@@ -575,7 +555,10 @@ Output must be valid JSON. `;
 
   return (
     <div className="flex flex-col h-full">
-      <PresetGameHeader />
+      <PresetGameHeader 
+        onShare={gameContent ? handleShare : undefined}
+        showShare={!!gameContent}
+      />
       {loading ? (
         <GameLoading topic={initialTopic || ""} />
       ) : (
