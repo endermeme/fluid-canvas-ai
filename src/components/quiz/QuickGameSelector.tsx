@@ -10,6 +10,7 @@ import GameSettings from './GameSettings';
 import { GameSettingsData, GameType } from './types';
 import { gameTypes } from './gameTypes';
 import { animateBlockCreation } from '@/lib/animations';
+import CustomGameForm from './custom-games/CustomGameForm';
 import { 
   BrainCircuit, 
   Puzzle, 
@@ -41,10 +42,6 @@ import {
   Blocks, 
   Gamepad
 } from 'lucide-react';
-
-import GameHeader from './quick-game-selector/GameHeader';
-import CustomGameForm from './custom-games/CustomGameForm';
-import GameGrid from './quick-game-selector/GameGrid';
 
 const API_KEY = 'AIzaSyAvlzK-Meq-uEiTpAs4XHnWdiAmSE1kQiA';
 
@@ -179,9 +176,39 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
     );
   }
 
+  const renderGameGrid = () => (
+    <div ref={containerRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 max-w-6xl w-full">
+      {gameTypes.map((gameType) => (
+        <button
+          key={gameType.id}
+          onClick={() => handleTopicSelect(gameType)}
+          className="game-button relative overflow-hidden rounded-xl transition-all duration-300 group"
+        >
+          <div className="p-4 flex flex-col items-center justify-center gap-3 relative z-0">
+            <div className="p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-all duration-300 transform group-hover:scale-110">
+              {getIconComponent(gameType.icon)}
+            </div>
+            <h3 className="font-medium text-sm text-center line-clamp-2 h-10 text-primary/90">
+              {gameType.name}
+            </h3>
+          </div>
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <div ref={containerRef} className="flex flex-col items-center h-full w-full bg-gradient-to-b from-background to-background/80 p-4 md:p-6 overflow-auto">
-      <GameHeader onTitleClick={() => {}} />
+      <div className="text-primary mb-4 animate-float-in">
+        <div className="relative">
+          <div className="absolute inset-0 blur-xl bg-primary/20 rounded-full animate-pulse-soft"></div>
+          <GraduationCap size={56} className="relative z-10 text-primary" />
+        </div>
+      </div>
+      
+      <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-fade-in cursor-pointer">
+        Minigames Giáo Dục
+      </h2>
 
       <CustomGameForm 
         onGenerate={(content, game) => {
@@ -202,11 +229,7 @@ const QuickGameSelector: React.FC<QuickGameSelectorProps> = ({ onGameRequest, on
         onCancel={handleCustomGameCreate}
       />
       
-      <GameGrid 
-        gameTypes={gameTypes} 
-        onTopicSelect={handleTopicSelect} 
-        getIconComponent={getIconComponent}
-      />
+      {renderGameGrid()}
       
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-lg border-white/20">
