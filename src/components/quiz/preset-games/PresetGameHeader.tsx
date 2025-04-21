@@ -9,7 +9,10 @@ interface PresetGameHeaderProps {
   showShare?: boolean;
 }
 
-const PresetGameHeader: React.FC<PresetGameHeaderProps> = ({ onShare, showShare = true }) => {
+const PresetGameHeader: React.FC<PresetGameHeaderProps> = ({ 
+  onShare, 
+  showShare = true 
+}) => {
   const navigate = useNavigate();
 
   return (
