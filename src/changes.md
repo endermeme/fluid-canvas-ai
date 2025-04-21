@@ -1,6 +1,19 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 2025-04-21: Fix lỗi build và thiếu dependencies (react-beautiful-dnd)
+- Cài đặt react-beautiful-dnd và @types/react-beautiful-dnd
+- Sửa lỗi `setGamePairs` không được khai báo trong MemoryTemplate.tsx
+- Cập nhật file changes.md để ghi lại các sửa đổi
+
+### Files đã sửa:
+- src/components/quiz/preset-games/templates/MemoryTemplate.tsx
+- src/changes.md
+- package.json (dependencies)
+
+### Lý do:
+- Fix lỗi build không thành công do thiếu dependencies và biến không khai báo
+
 ## 2025-04-21: Fix lỗi dữ liệu, tối ưu UI Header cho 4 game preset cuối + mobile
 - Update GameHeader.tsx (responsive UI, gọn đẹp cho mobile)
 - Sửa lại logic xử lý dữ liệu & loading UI cho:
