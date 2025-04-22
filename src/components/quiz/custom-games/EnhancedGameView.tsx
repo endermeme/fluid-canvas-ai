@@ -1,7 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { RefreshCw, Maximize, ArrowLeft, Share2, PlusCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+
+import React, { useRef, useEffect, useState } from 'react';
 import { enhanceIframeContent } from './utils/iframe-utils';
 
 interface EnhancedGameViewProps {
@@ -9,21 +7,16 @@ interface EnhancedGameViewProps {
     title?: string;
     content: string;
   };
-  onBack?: () => void;
-  onNewGame?: () => void;
-  onShare?: () => void;
-  extraButton?: React.ReactNode;
+  onReload?: () => void;
+  className?: string;
 }
 
 const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({ 
   miniGame, 
-  onBack,
-  onNewGame,
-  onShare,
-  extraButton
+  onReload,
+  className
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [iframeError, setIframeError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,6 +38,10 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
         iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
+        
+        if (onReload) {
+          onReload();
+        }
       } catch (error) {
         console.error("Error refreshing game:", error);
         setIframeError("Không thể tải lại game. Vui lòng thử lại.");
@@ -52,106 +49,18 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     }
   };
 
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
-  }, []);
-
-  const toggleFullscreen = () => {
-    if (iframeRef.current) {
-      if (!document.fullscreenElement) {
-        iframeRef.current.requestFullscreen().catch(err => {
-          console.error(`Error attempting to enable fullscreen: ${err.message}`);
-        });
-      } else {
-        document.exitFullscreen();
-      }
-    }
-  };
-
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="flex justify-between items-center p-1.5 bg-background/80 backdrop-blur-md border-b border-primary/10 z-10">
-        <div className="flex items-center gap-1">
-          {onBack && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={onBack} 
-              className="w-7 h-7 p-0"
-              title="Quay lại"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-            </Button>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-1">
-          {extraButton}
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={refreshGame} 
-            className="w-7 h-7 p-0"
-            title="Tải lại"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={toggleFullscreen} 
-            className="w-7 h-7 p-0"
-            title="Toàn màn hình"
-          >
-            <Maximize className="h-3.5 w-3.5" />
-          </Button>
-          
-          {onNewGame && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onNewGame} 
-              className="h-7 px-2 text-xs"
-            >
-              <PlusCircle className="h-3 w-3 mr-1" />
-              Game mới
-            </Button>
-          )}
-          
-          {onShare && miniGame?.content && (
-            <Button 
-              variant="default" 
-              size="sm" 
-              onClick={onShare} 
-              className="h-7 px-2 text-xs"
-            >
-              <Share2 className="h-3 w-3 mr-1" />
-              Chia sẻ
-            </Button>
-          )}
-        </div>
-      </div>
-      
+    <div className={`w-full h-full flex flex-col ${className || ''}`}>      
       <div className="flex-1 relative overflow-hidden">
         {iframeError ? (
           <div className="flex flex-col items-center justify-center h-full p-6 bg-destructive/10">
             <p className="text-destructive mb-4">{iframeError}</p>
-            <Button 
-              variant="outline" 
+            <button 
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
               onClick={refreshGame}
             >
-              <RefreshCw className="h-4 w-4 mr-1.5" />
               Tải lại
-            </Button>
+            </button>
           </div>
         ) : (
           <iframe
