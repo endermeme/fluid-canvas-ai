@@ -1,5 +1,22 @@
 # Lịch sử thay đổi mã nguồn
 
+## 24/04/2024 - Chuẩn hóa giao diện và tổ chức lại mã nguồn cho custom game
+
+### Tệp đã tạo mới:
+- `src/components/quiz/custom-games/CustomGameHeader.tsx`: Tạo component header mới cho custom game với giao diện chuẩn hóa
+- `src/components/quiz/custom-games/utils/customGameAPI.ts`: Tách riêng logic xử lý Supabase cho custom game
+
+### Chi tiết thay đổi:
+1. Tạo CustomGameHeader component:
+   - Sử dụng cùng thiết kế và layout với PresetGameHeader
+   - Thêm các props để kiểm soát hiển thị nút chia sẻ
+   - Thêm các nút điều hướng và chức năng
+
+2. Tách logic Supabase:
+   - Tạo các hàm riêng biệt cho CRUD operations
+   - Thêm TypeScript interfaces cho custom game data
+   - Cải thiện xử lý lỗi và logging
+
 ## 24/04/2024 - Cập nhật logic hiển thị nút chia sẻ trong PresetGameHeader
 
 ### Tệp đã chỉnh sửa:
