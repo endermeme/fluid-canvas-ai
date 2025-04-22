@@ -4,7 +4,6 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, ChevronRight, HelpCircle, Clock, Image, ArrowLeft } from 'lucide-react';
-import { generateImage, generatePlaceholderImage, handleImageError } from '../../generator/imageInstructions';
 
 interface PictionaryTemplateProps {
   data?: any;
@@ -47,7 +46,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
             item.imageUrl = await generateImage(item.imageSearchTerm);
           } catch (error) {
             console.error("Error fetching image:", error);
-            item.imageUrl = generatePlaceholderImage(400, 300, item.answer || topic);
+            item.imageUrl = generatePlaceholder(item.answer || topic);
           }
         } else if (!item.imageUrl) {
           const searchTerm = item.answer || topic;
@@ -55,7 +54,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
             item.imageUrl = await generateImage(searchTerm);
           } catch (error) {
             console.error("Error generating image:", error);
-            item.imageUrl = generatePlaceholderImage(400, 300, searchTerm);
+            item.imageUrl = generatePlaceholder(searchTerm);
           }
         }
       }
@@ -150,12 +149,49 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
     setImageError(false);
   };
 
+  const generatePlaceholder = (text: string) => `/placeholder.svg`;
+  
+  const generateImage = async (searchTerm: string): Promise<string> => {
+    try {
+      const encodedTerm = encodeURIComponent(searchTerm);
+      const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=images|imageinfo&generator=search&gsrlimit=5&gsrsearch=${encodedTerm}&iiprop=url&origin=*`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (data.query && data.query.pages) {
+        const pages = Object.values(data.query.pages);
+        for (const page of pages) {
+          if (page.images && page.images.length > 0) {
+            const imageName = page.images[0].title;
+            const imageInfoUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(imageName)}&prop=imageinfo&iiprop=url&format=json&origin=*`;
+            
+            const imageInfoResponse = await fetch(imageInfoUrl);
+            const imageInfoData = await imageInfoResponse.json();
+            
+            if (imageInfoData.query && imageInfoData.query.pages) {
+              const imagePages = Object.values(imageInfoData.query.pages);
+              if (imagePages[0].imageinfo && imagePages[0].imageinfo.length > 0) {
+                return imagePages[0].imageinfo[0].url;
+              }
+            }
+          }
+        }
+      }
+      
+      return generatePlaceholder(searchTerm);
+    } catch (error) {
+      console.error("Error fetching image:", error);
+      return generatePlaceholder(searchTerm);
+    }
+  };
+
   const handleImageErrorEvent = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     setImageError(true);
     setImageLoaded(true);
     const img = e.currentTarget;
     const itemAnswer = items[currentItem]?.answer || topic;
-    img.src = generatePlaceholderImage(600, 400, itemAnswer);
+    img.src = generatePlaceholder(itemAnswer);
     img.alt = `Không thể tải hình ảnh: ${itemAnswer}`;
   };
 

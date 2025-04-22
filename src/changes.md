@@ -1,24 +1,16 @@
-
 # Lịch sử thay đổi mã nguồn
 
-## 2025-04-22: Đơn giản hóa tạo ảnh cho game
-- Xóa tích hợp Pixabay và các đoạn mã liên quan
-- Đơn giản hóa việc xử lý hình ảnh chỉ sử dụng API của Wikipedia
-- Xóa các tập lệnh tạo hình ảnh không cần thiết
-- Cập nhật prompt để phản ánh yêu cầu hình ảnh đơn giản
-- Xóa các tiện ích tạo hình ảnh phức tạp
-- Thêm fallback đến hình ảnh placeholder đơn giản
+## 2025-04-22: Xóa các file xử lý hình ảnh không cần thiết
+- Xóa file imageGenerator.ts và imageInstructions.ts
+- Đơn giản hóa việc xử lý hình ảnh
 
-### Files được cập nhật:
-- src/components/quiz/generator/customGamePrompt.ts
+### Files đã xóa:
+- src/components/quiz/generator/imageGenerator.ts
 - src/components/quiz/generator/imageInstructions.ts
-- src/components/quiz/preset-games/templates/PictionaryTemplate.tsx
 
 ### Chi tiết:
-- Đơn giản hóa quá trình tìm kiếm và xử lý hình ảnh
-- Xóa tất cả mã và phụ thuộc liên quan đến Pixabay
-- Cập nhật prompts để chỉ đề cập đến hình ảnh Wikipedia
-- Cải thiện xử lý lỗi với fallback placeholder đơn giản
+- Tiếp tục đơn giản hóa mã nguồn
+- Loại bỏ các file xử lý hình ảnh phức tạp không cần thiết
 
 ## 2025-04-20: Dọn dẹp và tổ chức lại cấu trúc thư mục
 - Xóa thư mục demo và các file liên quan 
