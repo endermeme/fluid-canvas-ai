@@ -7,11 +7,13 @@ import { ArrowLeft, History, Plus, Share2 } from "lucide-react";
 interface PresetGameHeaderProps {
   onShare?: () => void;
   showShare?: boolean;
+  isGameCreated?: boolean; // New prop to control share button visibility
 }
 
 const PresetGameHeader: React.FC<PresetGameHeaderProps> = ({ 
   onShare, 
-  showShare = true 
+  showShare = true,
+  isGameCreated = false
 }) => {
   const navigate = useNavigate();
 
@@ -45,7 +47,7 @@ const PresetGameHeader: React.FC<PresetGameHeaderProps> = ({
           <History className="h-5 w-5" />
         </Button>
         
-        {showShare && onShare && (
+        {showShare && onShare && isGameCreated && (
           <Button
             variant="default"
             size="sm"

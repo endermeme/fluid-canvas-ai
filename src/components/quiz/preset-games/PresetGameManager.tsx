@@ -500,7 +500,10 @@ Output must be valid JSON. `;
     <div className="flex flex-col h-full">
       {showSettings ? (
         <div className="p-4">
-          <PresetGameHeader showShare={false} />
+          <PresetGameHeader 
+            showShare={false} 
+            isGameCreated={false}
+          />
           <GameSettings 
             initialSettings={settings}
             onStart={handleStartGame}
@@ -520,7 +523,10 @@ Output must be valid JSON. `;
         </div>
       ) : error ? (
         <div className="flex flex-col items-center justify-center h-full">
-          <PresetGameHeader showShare={false} />
+          <PresetGameHeader 
+            showShare={false} 
+            isGameCreated={false}
+          />
           <Card className="p-6 max-w-md mt-4">
             <div className="text-center">
               <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
@@ -540,9 +546,9 @@ Output must be valid JSON. `;
           <PresetGameHeader 
             onShare={handleShare}
             showShare={true}
+            isGameCreated={!!gameContent}
           />
           {renderGameTemplate()}
-          
           <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
