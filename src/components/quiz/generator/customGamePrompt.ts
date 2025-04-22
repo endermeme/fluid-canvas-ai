@@ -28,11 +28,11 @@ Create a simple, ready-to-play HTML game about: "${topic}"
 - Category: ${category}
 
 **IMAGE GUIDELINES:**
-- ONLY use images from Wikipedia API with Pixabay as fallback
+- ONLY use images from Wikipedia API
 - NEVER include direct image URLs or external resources
-- For each image needed, provide a descriptive search term
+- For each image needed, provide a descriptive search term 
 - Use English search terms for better results
-- Example search term format: "red apple fruit close up photo"
+- Example: "red apple fruit"
 
 **CODE REQUIREMENTS:**
 - Return complete HTML file with all CSS/JS included

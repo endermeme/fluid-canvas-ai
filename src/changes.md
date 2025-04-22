@@ -1,4 +1,3 @@
-
 # Lịch sử thay đổi mã nguồn
 
 ## 2025-04-20: Dọn dẹp và tổ chức lại cấu trúc thư mục
@@ -89,3 +88,21 @@ Chi tiết:
 - Đồng bộ cấu hình API với custom game generator
 - Sử dụng các hằng số từ api-constants.ts
 - Cập nhật cấu trúc request body để phù hợp với API mới
+
+## 2025-04-22: Simplify image handling
+- Removed Pixabay integration and related code
+- Simplified image handling to use only Wikipedia API
+- Removed unnecessary image generation scripts
+- Updated prompt to reflect simplified image requirements
+- Removed complex image generation utilities
+- Added failback to simple placeholder image
+
+### Files updated:
+- src/components/quiz/generator/customGamePrompt.ts
+- src/components/quiz/generator/imageInstructions.ts
+
+### Details:
+- Simplified image search and handling process
+- Removed all Pixabay-related code and dependencies
+- Updated prompts to only mention Wikipedia images
+- Improved error handling with simple placeholder fallback
