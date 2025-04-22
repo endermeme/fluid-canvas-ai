@@ -16,18 +16,40 @@ export const generateCustomGamePrompt = (options: GamePromptOptions): string => 
   } = options;
 
   const basePrompt = `
-Create an interactive HTML game based on: "${topic}"
+Create a simple, ready-to-play HTML game about: "${topic}"
 
-**IMPORTANT: Return code in markdown format with \`\`\`html blocks**
-- NO COMMENT CODE , NO COMMENT , NO BLACKSPLASHEEEEEEEEE
-- Start your response with a \`\`\`html block
-- Format code with proper line breaks and indentation
-- End your response with \`\`\` closing block
+**IMPORTANT GAME REQUIREMENTS:**
+- Game must be playable immediately without complex setup
+- Keep the UI clean and intuitive
+- Focus on core gameplay mechanics only
+- Support both desktop and mobile play
+- Language: ${language === 'vi' ? 'Vietnamese' : 'English'}
+- Difficulty: ${difficulty}
+- Category: ${category}
 
-**Game content must match:**
-- Difficulty level: \`${difficulty}\`
-- Category: \`${category}\`
-- Language: \`${language === 'vi' ? 'Vietnamese' : 'English'}\`
+**IMAGE GUIDELINES:**
+- ONLY use images from Wikipedia API with Pixabay as fallback
+- NEVER include direct image URLs or external resources
+- For each image needed, provide a descriptive search term
+- Use English search terms for better results
+- Example search term format: "red apple fruit close up photo"
+
+**CODE REQUIREMENTS:**
+- Return complete HTML file with all CSS/JS included
+- NO EXTERNAL DEPENDENCIES or CDN links
+- Start with \`\`\`html
+- Format code properly with indentation
+- End with \`\`\`
+- NO COMMENTS in the code
+
+**GAME STRUCTURE:**
+1. Clear game title and simple instructions
+2. Immediate start button
+3. Core gameplay area
+4. Basic score/progress display
+5. Quick restart option
+
+Focus on making the game instantly playable and fun!
 `;
 
   return basePrompt;
