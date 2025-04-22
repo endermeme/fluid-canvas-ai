@@ -1,5 +1,15 @@
+# Lịch sử thay đổi mã nguồn
 
-# Thay đổi trong dự án
+## 24/04/2024 - Cập nhật hiển thị nút chia sẻ trong PresetGameManager
+
+### Tệp đã chỉnh sửa:
+- `src/components/quiz/preset-games/PresetGameManager.tsx`: Điều chỉnh vị trí hiển thị nút chia sẻ.
+
+### Thay đổi chi tiết:
+1. Thay đổi logic hiển thị nút chia sẻ:
+   - Ẩn nút chia sẻ trong giai đoạn cài đặt và khi có lỗi
+   - Hiển thị nút chia sẻ khi game đã được tạo thành công
+2. Chỉnh sửa cấu trúc JSX để hiển thị PresetGameHeader với các props phù hợp trong từng trạng thái
 
 ## 23/04/2024 - Cập nhật PresetGameHeader
 

@@ -496,112 +496,92 @@ Output must be valid JSON. `;
       });
   };
 
-  if (showSettings) {
-    return (
-      <div className="p-4">
-        <PresetGameHeader
-          onShare={gameContent ? handleShare : undefined}
-          showShare={!!gameContent}
-        />
-        <GameSettings 
-          initialSettings={settings}
-          onStart={handleStartGame}
-          onCancel={onBack}
-          topic={initialTopic || ""}
-        />
-      </div>
-    );
-  }
-
-  if (generating) {
-    return <GameLoading topic={initialTopic || ""} progress={generationProgress} />;
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg font-medium">Đang tạo trò chơi {getGameTypeName()}...</p>
-          <p className="text-sm text-muted-foreground mt-2">Quá trình này có thể mất vài giây</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full">
-        <PresetGameHeader 
-          onShare={undefined}
-          showShare={false}
-        />
-        <Card className="p-6 max-w-md mt-4">
-          <div className="text-center">
-            <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
-            <p className="text-gray-500 mb-4">{error}</p>
-            <div className="flex gap-2">
-              <Button onClick={onBack}>Quay lại</Button>
-              <Button onClick={handleRetry} variant="outline">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Thử lại
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col h-full">
-      <PresetGameHeader 
-        onShare={gameContent ? handleShare : undefined}
-        showShare={!!gameContent}
-      />
-      {loading ? (
-        <GameLoading topic={initialTopic || ""} />
-      ) : (
-        renderGameTemplate()
-      )}
-      
-      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Chia sẻ game</DialogTitle>
-            <DialogDescription>
-              Chia sẻ game này với bạn bè để họ có thể tham gia chơi
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col items-center space-y-4 py-4">
-            <div className="p-4 bg-white rounded-lg">
-              <QRCodeSVG value={shareUrl} size={200} />
-            </div>
-            
-            <div className="w-full space-y-2">
-              <Label htmlFor="share-link">Liên kết chia sẻ</Label>
-              <div className="flex">
-                <Input 
-                  id="share-link" 
-                  value={shareUrl} 
-                  readOnly 
-                  className="rounded-r-none"
-                />
-                <Button 
-                  variant="outline" 
-                  className="rounded-l-none"
-                  onClick={handleCopyLink}
-                >
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+      {showSettings ? (
+        <div className="p-4">
+          <PresetGameHeader showShare={false} />
+          <GameSettings 
+            initialSettings={settings}
+            onStart={handleStartGame}
+            onCancel={onBack}
+            topic={initialTopic || ""}
+          />
+        </div>
+      ) : generating ? (
+        <GameLoading topic={initialTopic || ""} progress={generationProgress} />
+      ) : loading ? (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-lg font-medium">Đang tạo trò chơi {getGameTypeName()}...</p>
+            <p className="text-sm text-muted-foreground mt-2">Quá trình này có thể mất vài giây</p>
+          </div>
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center h-full">
+          <PresetGameHeader showShare={false} />
+          <Card className="p-6 max-w-md mt-4">
+            <div className="text-center">
+              <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
+              <p className="text-gray-500 mb-4">{error}</p>
+              <div className="flex gap-2">
+                <Button onClick={onBack}>Quay lại</Button>
+                <Button onClick={handleRetry} variant="outline">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Thử lại
                 </Button>
               </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setShowShareDialog(false)}>Đóng</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </Card>
+        </div>
+      ) : (
+        <>
+          <PresetGameHeader 
+            onShare={handleShare}
+            showShare={true}
+          />
+          {renderGameTemplate()}
+          
+          <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Chia sẻ game</DialogTitle>
+                <DialogDescription>
+                  Chia sẻ game này với bạn bè để họ có thể tham gia chơi
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col items-center space-y-4 py-4">
+                <div className="p-4 bg-white rounded-lg">
+                  <QRCodeSVG value={shareUrl} size={200} />
+                </div>
+                
+                <div className="w-full space-y-2">
+                  <Label htmlFor="share-link">Liên kết chia sẻ</Label>
+                  <div className="flex">
+                    <Input 
+                      id="share-link" 
+                      value={shareUrl} 
+                      readOnly 
+                      className="rounded-r-none"
+                    />
+                    <Button 
+                      variant="outline" 
+                      className="rounded-l-none"
+                      onClick={handleCopyLink}
+                    >
+                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => setShowShareDialog(false)}>Đóng</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   );
 };
