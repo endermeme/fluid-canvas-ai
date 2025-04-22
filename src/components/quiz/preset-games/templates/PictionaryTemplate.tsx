@@ -5,6 +5,23 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, ChevronRight, HelpCircle, Clock, Image, ArrowLeft } from 'lucide-react';
 
+interface WikiImageInfo {
+  url: string;
+}
+
+interface WikiPage {
+  images?: {
+    title: string;
+  }[];
+  imageinfo?: WikiImageInfo[];
+}
+
+interface WikiQueryResponse {
+  query?: {
+    pages?: Record<string, WikiPage>;
+  };
+}
+
 interface PictionaryTemplateProps {
   data?: any;
   content?: any;
@@ -157,20 +174,20 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
       const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=images|imageinfo&generator=search&gsrlimit=5&gsrsearch=${encodedTerm}&iiprop=url&origin=*`;
       
       const response = await fetch(url);
-      const data = await response.json();
+      const data = await response.json() as WikiQueryResponse;
       
       if (data.query && data.query.pages) {
-        const pages = Object.values(data.query.pages);
+        const pages = Object.values(data.query.pages) as WikiPage[];
         for (const page of pages) {
           if (page.images && page.images.length > 0) {
             const imageName = page.images[0].title;
             const imageInfoUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(imageName)}&prop=imageinfo&iiprop=url&format=json&origin=*`;
             
             const imageInfoResponse = await fetch(imageInfoUrl);
-            const imageInfoData = await imageInfoResponse.json();
+            const imageInfoData = await imageInfoResponse.json() as WikiQueryResponse;
             
             if (imageInfoData.query && imageInfoData.query.pages) {
-              const imagePages = Object.values(imageInfoData.query.pages);
+              const imagePages = Object.values(imageInfoData.query.pages) as WikiPage[];
               if (imagePages[0].imageinfo && imagePages[0].imageinfo.length > 0) {
                 return imagePages[0].imageinfo[0].url;
               }
