@@ -82,28 +82,30 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
         )}
         
         {showGameControls && onNewGame && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 px-2 text-xs"
-            onClick={onNewGame}
-          >
-            <PlusCircle className="h-4 w-4 mr-1" />
-            Game mới
-          </Button>
-        )}
-        
-        {/* Nút chia sẻ */}
-        {showShare && onShare && isGameCreated && (
-          <Button
-            variant="default"
-            size="sm"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1"
-            onClick={onShare}
-          >
-            <Share2 className="h-4 w-4" />
-            Chia sẻ
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 px-2 text-xs"
+              onClick={onNewGame}
+            >
+              <PlusCircle className="h-4 w-4 mr-1" />
+              Game mới
+            </Button>
+            
+            {/* Nút Chia sẻ được làm nổi bật */}
+            {showShare && onShare && isGameCreated && (
+              <Button
+                variant="default"
+                size="sm"
+                className="h-8 px-3 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1 transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95"
+                onClick={onShare}
+              >
+                <Share2 className="h-4 w-4 mr-1" />
+                Chia sẻ
+              </Button>
+            )}
+          </div>
         )}
       </div>
     </header>

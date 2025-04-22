@@ -1,5 +1,17 @@
-
 # Lịch sử thay đổi mã nguồn
+
+## 2025-04-22: Cải thiện giao diện nút chia sẻ trong CustomGameHeader
+- Thêm nút chia sẻ cạnh nút "Game mới"
+- Tối ưu hóa giao diện và tương tác của nút chia sẻ
+
+### Files đã cập nhật:
+- src/components/quiz/custom-games/CustomGameHeader.tsx
+
+### Chi tiết:
+- Đặt nút "Chia sẻ" cạnh nút "Game mới"
+- Thêm hiệu ứng hover và active scale để làm nổi bật nút
+- Duy trì logic điều kiện hiển thị nút như cũ
+- Cải thiện trải nghiệm người dùng với thiết kế nút mới
 
 ## 2025-04-22: Sửa lỗi TypeScript trong EnhancedGameView.tsx
 - Thêm lại các props đã bị xóa để duy trì tính tương thích với các component khác
