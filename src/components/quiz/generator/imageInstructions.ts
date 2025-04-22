@@ -26,6 +26,28 @@ export const topicToImageDescription = (topic: string): string => {
 };
 
 /**
+ * Generate a placeholder image with text
+ * @param width Width of the placeholder image
+ * @param height Height of the placeholder image
+ * @param text Text to display on the placeholder
+ * @returns A data URL for the placeholder image
+ */
+export const generatePlaceholderImage = (width: number = 400, height: number = 300, text: string = 'Image not available'): string => {
+  return `/placeholder.svg`;
+};
+
+/**
+ * Handle image loading errors
+ * @param event Image error event
+ * @param fallbackText Text to display on placeholder
+ */
+export const handleImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>, fallbackText: string = 'Image not available'): void => {
+  const img = event.currentTarget;
+  img.src = generatePlaceholderImage(400, 300, fallbackText);
+  img.alt = `Cannot load image: ${fallbackText}`;
+};
+
+/**
  * Generate a Wikipedia image search URL
  * @param keyword Search keyword
  * @returns Wikipedia API search URL

@@ -1,4 +1,24 @@
+
 # Lịch sử thay đổi mã nguồn
+
+## 2025-04-22: Đơn giản hóa tạo ảnh cho game
+- Xóa tích hợp Pixabay và các đoạn mã liên quan
+- Đơn giản hóa việc xử lý hình ảnh chỉ sử dụng API của Wikipedia
+- Xóa các tập lệnh tạo hình ảnh không cần thiết
+- Cập nhật prompt để phản ánh yêu cầu hình ảnh đơn giản
+- Xóa các tiện ích tạo hình ảnh phức tạp
+- Thêm fallback đến hình ảnh placeholder đơn giản
+
+### Files được cập nhật:
+- src/components/quiz/generator/customGamePrompt.ts
+- src/components/quiz/generator/imageInstructions.ts
+- src/components/quiz/preset-games/templates/PictionaryTemplate.tsx
+
+### Chi tiết:
+- Đơn giản hóa quá trình tìm kiếm và xử lý hình ảnh
+- Xóa tất cả mã và phụ thuộc liên quan đến Pixabay
+- Cập nhật prompts để chỉ đề cập đến hình ảnh Wikipedia
+- Cải thiện xử lý lỗi với fallback placeholder đơn giản
 
 ## 2025-04-20: Dọn dẹp và tổ chức lại cấu trúc thư mục
 - Xóa thư mục demo và các file liên quan 
@@ -88,21 +108,3 @@ Chi tiết:
 - Đồng bộ cấu hình API với custom game generator
 - Sử dụng các hằng số từ api-constants.ts
 - Cập nhật cấu trúc request body để phù hợp với API mới
-
-## 2025-04-22: Simplify image handling
-- Removed Pixabay integration and related code
-- Simplified image handling to use only Wikipedia API
-- Removed unnecessary image generation scripts
-- Updated prompt to reflect simplified image requirements
-- Removed complex image generation utilities
-- Added failback to simple placeholder image
-
-### Files updated:
-- src/components/quiz/generator/customGamePrompt.ts
-- src/components/quiz/generator/imageInstructions.ts
-
-### Details:
-- Simplified image search and handling process
-- Removed all Pixabay-related code and dependencies
-- Updated prompts to only mention Wikipedia images
-- Improved error handling with simple placeholder fallback

@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, ChevronRight, HelpCircle, Clock, Image, ArrowLeft } from 'lucide-react';
-import { generatePixabayImage, handleImageError, generatePlaceholderImage } from '../../generator/imageInstructions';
+import { generateImage, generatePlaceholderImage, handleImageError } from '../../generator/imageInstructions';
 
 interface PictionaryTemplateProps {
   data?: any;
@@ -44,21 +44,19 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
         
         if (item.imageSearchTerm && !item.imageUrl) {
           try {
-            item.imageUrl = await generatePixabayImage(item.imageSearchTerm);
+            item.imageUrl = await generateImage(item.imageSearchTerm);
           } catch (error) {
             console.error("Error fetching image:", error);
             item.imageUrl = generatePlaceholderImage(400, 300, item.answer || topic);
           }
-        } else if (item.imageUrl && !item.imageUrl.includes('pixabay.com')) {
-          try {
-            const searchTerm = item.answer || topic;
-            item.imageUrl = await generatePixabayImage(searchTerm);
-          } catch (error) {
-            console.error("Error replacing non-Pixabay image:", error);
-            item.imageUrl = generatePlaceholderImage(400, 300, item.answer || topic);
-          }
         } else if (!item.imageUrl) {
-          item.imageUrl = generatePlaceholderImage(400, 300, item.answer || topic);
+          const searchTerm = item.answer || topic;
+          try {
+            item.imageUrl = await generateImage(searchTerm);
+          } catch (error) {
+            console.error("Error generating image:", error);
+            item.imageUrl = generatePlaceholderImage(400, 300, searchTerm);
+          }
         }
       }
       
@@ -177,7 +175,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
         )}
         <div className="text-center">
           <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg font-medium">Đang tải hình ảnh từ Pixabay...</p>
+          <p className="text-lg font-medium">Đang tải hình ảnh từ Wikipedia...</p>
           <p className="text-sm text-muted-foreground mt-2">Vui lòng đợi trong giây lát</p>
         </div>
       </div>
