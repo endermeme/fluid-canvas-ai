@@ -27,13 +27,6 @@ Create a simple, ready-to-play HTML game about: "${topic}"
 - Difficulty: ${difficulty}
 - Category: ${category}
 
-**IMAGE GUIDELINES:**
-- ONLY use images from Wikipedia API
-- NEVER include direct image URLs or external resources
-- For each image needed, provide a descriptive search term 
-- Use English search terms for better results
-- Example: "red apple fruit"
-
 **CODE REQUIREMENTS:**
 - Return complete HTML file with all CSS/JS included
 - NO EXTERNAL DEPENDENCIES or CDN links
