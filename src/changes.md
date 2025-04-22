@@ -1,6 +1,18 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 2025-04-22: Sửa lỗi TypeScript trong EnhancedGameView.tsx
+- Thêm lại các props đã bị xóa để duy trì tính tương thích với các component khác
+- Giữ lại các props trong interface nhưng không sử dụng trong component
+
+### Files đã cập nhật:
+- src/components/quiz/custom-games/EnhancedGameView.tsx
+
+### Chi tiết:
+- Đã thêm lại các props `onBack`, `onNewGame`, `onShare` và `extraButton` vào interface `EnhancedGameViewProps`
+- Đã đổi tên các params với dấu gạch dưới để biểu thị chúng không được sử dụng
+- Đảm bảo tính tương thích ngược với các component đang sử dụng EnhancedGameView
+
 ## 2025-04-22: Loại bỏ header trùng lặp trong custom game components
 - Xóa phần header trùng lặp trong EnhancedGameView.tsx
 - Chuyển các nút chức năng vào CustomGameHeader.tsx
@@ -41,5 +53,3 @@
 ### Chi tiết:
 - Tiếp tục đơn giản hóa mã nguồn
 - Loại bỏ các file xử lý hình ảnh phức tạp không cần thiết
-
-

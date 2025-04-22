@@ -9,12 +9,23 @@ interface EnhancedGameViewProps {
   };
   onReload?: () => void;
   className?: string;
+  // Thêm lại các props đã bị xóa trước đó
+  onBack?: () => void;
+  onNewGame?: () => void;
+  onShare?: () => void;
+  extraButton?: React.ReactNode;
 }
 
 const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({ 
   miniGame, 
   onReload,
-  className
+  className,
+  // Chúng ta giữ các props này trong interface nhưng không sử dụng trong component
+  // vì chúng đã được chuyển sang CustomGameHeader
+  onBack: _onBack,
+  onNewGame: _onNewGame,
+  onShare: _onShare,
+  extraButton: _extraButton
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeError, setIframeError] = useState<string | null>(null);
