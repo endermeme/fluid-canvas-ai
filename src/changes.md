@@ -75,3 +75,18 @@
 
 ### Chi tiết:
 - Cập nhật văn bản nút để phản ánh chính xác hơn chức năng tạo game
+
+## 2025-04-23: Cập nhật QuizContainer với chức năng chia sẻ game
+- Thêm nút chia sẻ game với chức năng tương tự như PresetGameManager
+- Thêm dialog hiển thị QR code và đường dẫn chia sẻ
+- Tích hợp với gameExport.ts để lưu và tạo link chia sẻ game
+
+### Files đã cập nhật:
+- src/components/quiz/QuizContainer.tsx
+
+### Chi tiết:
+- Thêm nút chia sẻ game với hiệu ứng nổi bật
+- Thêm dialog hiển thị QR code và đường dẫn chia sẻ
+- Tích hợp với hàm saveGameForSharing từ utils/gameExport.ts
+- Thêm thông báo toast cho các tương tác
+- Thêm chức năng sao chép đường dẫn vào clipboard
