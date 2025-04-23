@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,6 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
       </Button>
 
       <div className="flex gap-2">
-        {/* Các nút điều hướng */}
         <Button
           variant="ghost"
           size="icon"
@@ -56,7 +54,6 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
           <History className="h-5 w-5" />
         </Button>
         
-        {/* Các nút điều khiển game */}
         {showGameControls && onRefresh && (
           <Button
             variant="ghost"
@@ -90,10 +87,9 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
               onClick={onNewGame}
             >
               <PlusCircle className="h-4 w-4 mr-1" />
-              Game mới
+              Tạo mới
             </Button>
             
-            {/* Nút Chia sẻ được làm nổi bật */}
             {showShare && onShare && isGameCreated && (
               <Button
                 variant="default"

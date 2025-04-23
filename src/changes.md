@@ -65,3 +65,13 @@
 ### Chi tiết:
 - Tiếp tục đơn giản hóa mã nguồn
 - Loại bỏ các file xử lý hình ảnh phức tạp không cần thiết
+
+## 2025-04-22: Cập nhật nhãn nút trong CustomGameHeader
+- Thay đổi nhãn "Game mới" thành "Tạo mới"
+- Giữ nguyên chức năng và giao diện của nút
+
+### Files đã cập nhật:
+- src/components/quiz/custom-games/CustomGameHeader.tsx
+
+### Chi tiết:
+- Cập nhật văn bản nút để phản ánh chính xác hơn chức năng tạo game
