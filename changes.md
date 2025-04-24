@@ -1,4 +1,26 @@
+
 # Lịch sử thay đổi mã nguồn
+
+## 24/04/2024 - Cập nhật chức năng chia sẻ game trong QuizContainer
+
+### Tệp đã chỉnh sửa:
+- `src/components/quiz/container/QuizHeader.tsx`: Thêm và hiển thị rõ ràng nút chia sẻ game với hiệu ứng hover
+- `src/components/quiz/QuizContainer.tsx`: Đảm bảo nút chia sẻ được hiển thị và hoạt động khi có nội dung game
+- `src/components/quiz/container/ShareDialog.tsx`: Cải thiện giao diện dialog chia sẻ
+
+### Chi tiết thay đổi:
+1. `QuizHeader.tsx`:
+   - Thêm nút chia sẻ với icon Share2 từ lucide-react
+   - Thêm hiệu ứng hover scale cho nút chia sẻ
+   - Hiển thị nút chỉ khi showShareButton và isGameCreated đều là true
+
+2. `QuizContainer.tsx`:
+   - Đảm bảo truyền đúng props từ QuizContainer đến QuizHeader
+   - Kiểm tra lại logic hiển thị nút chia sẻ
+
+3. `ShareDialog.tsx`:
+   - Tối ưu hóa UI của dialog chia sẻ với QR code rõ ràng
+   - Cải thiện UX khi sao chép liên kết
 
 ## 24/04/2024 - Chuẩn hóa giao diện và tổ chức lại mã nguồn cho custom game
 
