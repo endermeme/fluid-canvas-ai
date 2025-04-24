@@ -1,3 +1,4 @@
+
 # Lịch sử thay đổi mã nguồn
 
 ## 24/04/2024 - Cập nhật giao diện CustomGameHeader
@@ -196,3 +197,13 @@
    - Giữ nguyên logic chính và props
    - Cải thiện khả năng bảo trì code
    - Giảm kích thước file từ 300+ dòng xuống còn khoảng 150 dòng
+
+## 2025-04-24: Sửa lỗi thiếu import icon trong CustomGameHeader
+
+### Files đã cập nhật:
+- `src/components/quiz/custom-games/CustomGameHeader.tsx`: Thêm import các icon còn thiếu
+
+### Chi tiết thay đổi:
+1. Thêm import icons RefreshCw và Maximize từ thư viện lucide-react
+2. Đảm bảo tất cả các icon được sử dụng đều được import đúng cách
+3. Sửa lỗi TypeScript: Cannot find name 'RefreshCw' và 'Maximize'

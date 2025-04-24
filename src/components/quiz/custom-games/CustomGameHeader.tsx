@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, History, Plus } from "lucide-react";
+import { ArrowLeft, History, Plus, RefreshCw, Maximize } from "lucide-react";
 
 interface CustomGameHeaderProps {
   onRefresh?: () => void;
