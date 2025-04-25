@@ -1,6 +1,14 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, PlusCircle, Share2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { QRCodeSVG } from 'qrcode.react';
+import { Copy, Check } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { saveGameForSharing } from '@/utils/gameExport';
 
 interface QuizHeaderProps {
   showBackButton?: boolean;
@@ -11,6 +19,8 @@ interface QuizHeaderProps {
   onCreate?: () => void;
   onShare?: () => void;
   headerRight?: React.ReactNode;
+  gameData?: any;
+  gameType?: string;
 }
 
 const QuizHeader: React.FC<QuizHeaderProps> = ({
@@ -21,33 +31,139 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
   onBack,
   onCreate,
   onShare,
-  headerRight
+  headerRight,
+  gameData,
+  gameType = 'custom'
 }) => {
-  return (
-    <div className="flex justify-between items-center bg-background/90 backdrop-blur-md px-2 py-1.5 border-b border-primary/10 shadow-sm">
-      {showBackButton && (
-        <Button variant="ghost" size="sm" onClick={onBack} className="w-7 h-7 p-0" title="Quay lại">
-          <ArrowLeft className="h-3.5 w-3.5" />
-        </Button>
-      )}
-      
-      {headerRight}
-      
-      {showCreateButton && (
-        <Button variant="outline" size="sm" onClick={onCreate} className="h-7 px-2 text-xs" title="Tạo mới">
-          <PlusCircle className="h-3 w-3 mr-1" />
-          Tạo
-        </Button>
-      )}
+  const [shareUrl, setShareUrl] = useState('');
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
 
-      {showShareButton && isGameCreated && (
-        <Button variant="default" size="sm" onClick={onShare} className="h-7 px-3 bg-primary text-primary-foreground hover:bg-primary/90" title="Chia sẻ game">
-          <Share2 className="h-3 w-3 mr-1" />
-          Chia sẻ
-        </Button>
-      )}
-    </div>
+  const handleShare = async () => {
+    if (!gameData || !onShare) return;
+
+    try {
+      const gameContainer = document.getElementById('game-container');
+      let html = gameContainer?.innerHTML || '';
+      
+      const encodedContent = encodeURIComponent(JSON.stringify(gameData));
+      html = `<div data-game-content="${encodedContent}">${html}</div>`;
+      
+      const url = await saveGameForSharing(
+        gameData.title || 'Custom Game',
+        gameType,
+        gameData,
+        html
+      );
+      
+      if (url) {
+        setShareUrl(url);
+        setShowShareDialog(true);
+        
+        if (onShare) {
+          onShare();
+        }
+
+        toast({
+          title: "Game đã được chia sẻ",
+          description: "Đường dẫn đã được tạo để chia sẻ trò chơi.",
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing game:', error);
+      toast({
+        title: "Không thể chia sẻ game",
+        description: "Đã xảy ra lỗi khi tạo đường dẫn. Vui lòng thử lại.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(err => {
+        console.error('Không thể sao chép liên kết:', err);
+      });
+  };
+
+  return (
+    <>
+      <div className="flex justify-between items-center bg-background/90 backdrop-blur-md px-2 py-1.5 border-b border-primary/10 shadow-sm">
+        {showBackButton && (
+          <Button variant="ghost" size="sm" onClick={onBack} className="w-7 h-7 p-0" title="Quay lại">
+            <ArrowLeft className="h-3.5 w-3.5" />
+          </Button>
+        )}
+        
+        {headerRight}
+        
+        <div className="flex items-center gap-2">
+          {showCreateButton && (
+            <Button variant="outline" size="sm" onClick={onCreate} className="h-7 px-2 text-xs" title="Tạo mới">
+              <PlusCircle className="h-3 w-3 mr-1" />
+              Tạo
+            </Button>
+          )}
+
+          {showShareButton && isGameCreated && (
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={handleShare} 
+              className="h-7 px-3 bg-primary text-primary-foreground hover:bg-primary/90" 
+              title="Chia sẻ game"
+            >
+              <Share2 className="h-3 w-3 mr-1" />
+              Chia sẻ
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Chia sẻ game</DialogTitle>
+            <DialogDescription>
+              Chia sẻ game này với bạn bè để họ có thể tham gia chơi
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <div className="p-4 bg-white rounded-lg">
+              <QRCodeSVG value={shareUrl} size={200} />
+            </div>
+            
+            <div className="w-full space-y-2">
+              <Label htmlFor="share-link">Liên kết chia sẻ</Label>
+              <div className="flex">
+                <Input 
+                  id="share-link" 
+                  value={shareUrl} 
+                  readOnly 
+                  className="rounded-r-none"
+                />
+                <Button 
+                  variant="outline" 
+                  className="rounded-l-none"
+                  onClick={handleCopyLink}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowShareDialog(false)}>Đóng</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
-export default QuizHeader; 
+export default QuizHeader;
