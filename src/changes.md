@@ -1,4 +1,3 @@
-
 # Lịch sử thay đổi mã nguồn
 
 ## 25/04/2024 - Kiểm tra cấu trúc thư mục custom game
@@ -83,22 +82,16 @@
 2. Truyền đúng props `onShare` và `showShare` từ PresetGameManager sang PresetGameHeader
 3. Chỉ hiển thị nút chia sẻ khi có game content
 
-## 25/04/2024 - Cập nhật QuizHeader với chức năng chia sẻ game
-- Tích hợp chức năng chia sẻ game với QR code và link
-- Thêm props để hỗ trợ chia sẻ game tùy chỉnh
-- Tích hợp với Supabase để lưu và chia sẻ game
-- Thêm thông báo toast cho các tương tác
-- Thêm chức năng sao chép đường dẫn vào clipboard
-
+## 25/04/2024 - Chuẩn hóa QuizHeader và sửa chức năng chia sẻ
 ### Tệp đã chỉnh sửa:
-- `src/components/quiz/QuizHeader.tsx`: Cập nhật component với chức năng chia sẻ
+- `src/components/quiz/QuizHeader.tsx`: Cập nhật logic chia sẻ và giao diện header
 
 ### Chi tiết thay đổi:
-1. Thêm Dialog hiển thị QR code và link chia sẻ
-2. Tích hợp với saveGameForSharing từ utils/gameExport
-3. Thêm các props mới: gameData và gameType
-4. Cập nhật giao diện và thêm thông báo toast
-5. Thêm chức năng sao chép link vào clipboard
+1. Sửa lại cách xử lý chia sẻ game để phù hợp với cả custom game và preset game
+2. Cải thiện việc kiểm tra dữ liệu game trước khi chia sẻ
+3. Thêm thông báo lỗi khi không có dữ liệu game
+4. Cập nhật giao diện header để thống nhất giữa các loại game
+5. Tối ưu hóa UX với các thông báo toast
 
 ## 25/04/2024 - Sửa lỗi chia sẻ game không hoạt động
 - Cải thiện quá trình lưu trữ và tạo link chia sẻ cho custom game

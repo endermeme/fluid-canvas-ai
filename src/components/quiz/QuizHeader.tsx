@@ -42,7 +42,14 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
   const { toast } = useToast();
 
   const handleShare = async () => {
-    if (!gameData || !onShare) return;
+    if (!gameData) {
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Không thể chia sẻ game vì chưa có dữ liệu",
+        variant: "destructive"
+      });
+      return;
+    }
     
     try {
       setIsSharing(true);
@@ -51,22 +58,11 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
         description: "Đang lưu game và tạo liên kết chia sẻ...",
       });
 
-      // Lấy nội dung HTML từ game-container
-      const gameContainer = document.getElementById('game-container');
-      let html = gameContainer?.innerHTML || '';
-      
-      // Mã hóa nội dung game vào HTML để có thể phục hồi dễ dàng
-      if (gameData) {
-        const encodedContent = encodeURIComponent(JSON.stringify(gameData));
-        html = `<div data-game-content="${encodedContent}">${html}</div>`;
-      }
-      
-      // Lưu game vào Supabase và lấy URL chia sẻ
       const url = await saveGameForSharing(
-        gameData.title || 'Custom Game',
+        gameData.title || 'Game tương tác',
         gameType,
         gameData,
-        html
+        gameData.content || ''
       );
       
       if (url) {
