@@ -22,7 +22,6 @@ export type { MiniGame } from './types';
 // Tạo lớp AIGameGenerator để giữ tương thích với code cũ
 export class AIGameGenerator {
   private static instance: AIGameGenerator | null = null;
-  private canvasMode: boolean = true;
 
   private constructor() {}
 
@@ -33,19 +32,8 @@ export class AIGameGenerator {
     return AIGameGenerator.instance;
   }
 
-  public setCanvasMode(mode: boolean): void {
-    this.canvasMode = mode;
-  }
-
   public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
-    // Sử dụng biến canvasMode từ instance
-    const useCanvasMode = settings?.useCanvas !== undefined ? settings.useCanvas : this.canvasMode;
-    const updatedSettings = {
-      ...settings,
-      useCanvas: useCanvasMode
-    };
-    
-    return tryGeminiGeneration(null, topic, updatedSettings);
+    return tryGeminiGeneration(null, topic, settings);
   }
 }
 
@@ -53,9 +41,6 @@ export const generateWithGemini = async (
   topic: string, 
   settings?: GameSettingsData
 ): Promise<MiniGame | null> => {
-  const gameType = getGameTypeByTopic(topic);
-  const useCanvas = settings?.useCanvas !== undefined ? settings.useCanvas : true;
-  
   logInfo(SOURCE, `Starting game generation for "${topic}"`, {
     model: GEMINI_MODELS.CUSTOM_GAME,
     apiVersion: API_VERSION,
@@ -64,8 +49,7 @@ export const generateWithGemini = async (
 
   const promptOptions = {
     topic,
-    useCanvas,
-    language: settings?.language || 'en',
+    language: settings?.language || 'vi',
     difficulty: settings?.difficulty || 'medium',
     category: settings?.category || 'general'
   };
@@ -155,7 +139,7 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
     const game: MiniGame = {
       title: title,
       content: content,
-      useCanvas: useCanvas
+      useCanvas: true
     };
     
     logSuccess(SOURCE, "Game generated successfully");

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -20,7 +21,6 @@ interface CustomGameFormProps {
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel }) => {
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [useCanvas, setUseCanvas] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -58,15 +58,11 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     console.log('%c 🤖 Model', 'font-weight: bold; color: #6f42c1;', GEMINI_MODELS.CUSTOM_GAME);
     console.log('%c 🤖 API Version', 'font-weight: bold; color: #6f42c1;', API_VERSION);
     console.log('%c 🤖 API Endpoint', 'font-weight: bold; color: #6f42c1;', `${API_BASE_URL}/${API_VERSION}/models/${GEMINI_MODELS.CUSTOM_GAME}:generateContent`);
-    console.log('%c 🎨 Canvas Mode', 'font-weight: bold; color: #6f42c1;', useCanvas ? 'Enabled' : 'Disabled');
     console.groupEnd();
 
     setIsGenerating(true);
     
     try {
-      // Set canvas mode according to the toggle
-      gameGenerator.setCanvasMode(useCanvas);
-      
       // Minimal settings
       const settings: GameSettingsData = {
         category: 'custom'
@@ -179,22 +175,10 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
         
         <div className="space-y-4">
           <div>
-            <div className="flex justify-between items-center">
-              <Label htmlFor="content" className="flex items-center gap-2 text-base">
-                <SparklesIcon className="h-4 w-4 text-primary" /> 
-                Mô tả game của bạn
-              </Label>
-              <div className="flex items-center gap-2">
-                <Label htmlFor="use-canvas" className="text-sm cursor-pointer">Canvas mode</Label>
-                <input
-                  id="use-canvas"
-                  type="checkbox"
-                  checked={useCanvas}
-                  onChange={(e) => setUseCanvas(e.target.checked)}
-                  className="h-4 w-4 accent-primary cursor-pointer"
-                />
-              </div>
-            </div>
+            <Label htmlFor="content" className="flex items-center gap-2 text-base">
+              <SparklesIcon className="h-4 w-4 text-primary" /> 
+              Mô tả game của bạn
+            </Label>
             <Textarea
               id="content"
               placeholder={getPlaceholderText()}
@@ -210,7 +194,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
               <Info className="w-4 h-4 text-primary mt-1" />
               <p className="text-sm text-muted-foreground">
                 AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Bạn càng mô tả chi tiết, AI càng tạo ra game phù hợp với ý tưởng của bạn.
-                {useCanvas && " Canvas mode sẽ tạo game sử dụng HTML5 Canvas cho hiệu ứng đồ họa tốt hơn."}
               </p>
             </div>
           </div>
