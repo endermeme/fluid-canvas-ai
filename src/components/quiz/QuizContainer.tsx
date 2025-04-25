@@ -6,6 +6,19 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from "@/lib/utils";
 import { saveGameForSharing } from '@/utils/gameExport';
+import { ShareDialog } from '../quiz/container/ShareDialog';
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { QRCodeSVG } from 'qrcode.react';
+import { Copy, Check } from 'lucide-react';
 
 interface QuizContainerProps {
   children: React.ReactNode;
@@ -56,6 +69,15 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
   const { toast } = useToast();
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate(-1);
+    }
+  };
 
   const handleRefresh = () => {
     if (onRefresh) {
@@ -246,43 +268,11 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
       )}
 
       {/* Share Dialog */}
-      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Chia sẻ game</DialogTitle>
-            <DialogDescription>
-              Chia sẻ game này với bạn bè để họ có thể tham gia chơi
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col items-center space-y-4 py-4">
-            <div className="p-4 bg-white rounded-lg">
-              <QRCodeSVG value={shareUrl} size={200} />
-            </div>
-            
-            <div className="w-full space-y-2">
-              <Label htmlFor="share-link">Liên kết chia sẻ</Label>
-              <div className="flex">
-                <Input 
-                  id="share-link" 
-                  value={shareUrl} 
-                  readOnly 
-                  className="rounded-r-none"
-                />
-                <Button 
-                  variant="outline" 
-                  className="rounded-l-none"
-                  onClick={handleCopyLink}
-                >
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setShowShareDialog(false)}>Đóng</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ShareDialog 
+        open={showShareDialog} 
+        onOpenChange={setShowShareDialog}
+        shareUrl={shareUrl}
+      />
     </div>
   );
 };
