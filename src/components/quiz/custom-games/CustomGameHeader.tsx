@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,6 @@ interface CustomGameHeaderProps {
   onRefresh?: () => void;
   onFullscreen?: () => void;
   onNewGame?: () => void;
-  onBack?: () => void; // Thêm thuộc tính onBack
   showShare?: boolean;
   isGameCreated?: boolean;
   showGameControls?: boolean;
@@ -20,20 +18,11 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
   onRefresh,
   onFullscreen,
   onNewGame,
-  onBack,  // Thêm prop này vào destructuring
   showShare = true,
   isGameCreated = false,
   showGameControls = false
 }) => {
   const navigate = useNavigate();
-
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      navigate("/");
-    }
-  };
 
   return (
     <header className="flex justify-between items-center p-3 bg-background/80 backdrop-blur-md border-b sticky top-0 z-20">
@@ -41,7 +30,7 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
         variant="ghost"
         size="icon"
         className="hover:bg-primary/10"
-        onClick={handleBack}
+        onClick={() => navigate("/")}
       >
         <ArrowLeft className="h-5 w-5" />
       </Button>

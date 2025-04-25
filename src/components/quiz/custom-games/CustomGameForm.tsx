@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -44,7 +43,8 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     setIsGenerating(true);
     
     try {
-      // Đã xóa việc gọi setCanvasMode
+      // Luôn sử dụng canvas mode
+      gameGenerator.setCanvasMode(true);
       
       // Minimal settings
       const settings: GameSettingsData = {
