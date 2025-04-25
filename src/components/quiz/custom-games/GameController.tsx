@@ -43,6 +43,12 @@ const GameController: React.FC<GameControllerProps> = ({
         title: "Minigame Đã Sẵn Sàng",
         description: `Minigame "${game.title || content}" đã được tạo thành công.`,
       });
+
+      localStorage.setItem('lastCreatedGame', JSON.stringify({
+        content: content,
+        game: game,
+        timestamp: Date.now()
+      }));
     }
     
     setIsGenerating(false);
@@ -58,6 +64,7 @@ const GameController: React.FC<GameControllerProps> = ({
   };
 
   const handleNewGame = () => {
+    localStorage.removeItem('lastCreatedGame');
     setCurrentGame(null);
     setShowForm(true);
   };
@@ -68,7 +75,6 @@ const GameController: React.FC<GameControllerProps> = ({
     try {
       setIsSharing(true);
       
-      // Tạo session game (sẽ được gọi sau khi game đã được lưu vào Supabase từ EnhancedGameView)
       const gameSession = await createGameSession(
         currentGame.title || "Minigame tương tác",
         currentGame.content
@@ -133,6 +139,25 @@ const GameController: React.FC<GameControllerProps> = ({
           }}
           onCancel={() => navigate('/')}
         />
+      );
+    }
+    
+    const savedGame = localStorage.getItem('lastCreatedGame');
+    if (savedGame) {
+      const { game } = JSON.parse(savedGame);
+      return (
+        <div className="w-full h-full">
+          <EnhancedGameView 
+            miniGame={{
+              title: game.title || "Minigame Tương Tác",
+              content: game.content || ""
+            }} 
+            onBack={handleBack}
+            onNewGame={handleNewGame}
+            onShare={handleShareGame}
+            hideHeader={false}
+          />
+        </div>
       );
     }
     
