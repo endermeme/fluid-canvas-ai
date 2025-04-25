@@ -6,11 +6,13 @@ export interface CustomGameData {
   content: string;
   gameType: string;
   description?: string;
+  settings?: any;
 }
 
 export const saveCustomGame = async (gameData: CustomGameData) => {
   try {
-    const { data, error } = await supabase
+    // First save to games table
+    const { data: gameEntry, error: gameError } = await supabase
       .from('games')
       .insert([{
         title: gameData.title,
@@ -23,8 +25,26 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
       .select()
       .single();
 
-    if (error) throw error;
-    return data;
+    if (gameError) throw gameError;
+
+    // Then save additional data to custom_games table
+    const { data: customGame, error: customError } = await supabase
+      .from('custom_games')
+      .insert([{
+        game_id: gameEntry.id,
+        game_data: {
+          title: gameData.title,
+          content: gameData.content,
+          type: gameData.gameType
+        },
+        settings: gameData.settings || {}
+      }])
+      .select()
+      .single();
+
+    if (customError) throw customError;
+    
+    return { ...gameEntry, customData: customGame };
   } catch (error) {
     console.error('Error saving custom game:', error);
     throw error;
@@ -33,14 +53,14 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
 
 export const getCustomGame = async (gameId: string) => {
   try {
-    const { data, error } = await supabase
+    const { data: game, error: gameError } = await supabase
       .from('games')
-      .select('*')
+      .select('*, custom_games(*)')
       .eq('id', gameId)
       .single();
 
-    if (error) throw error;
-    return data;
+    if (gameError) throw gameError;
+    return game;
   } catch (error) {
     console.error('Error fetching custom game:', error);
     throw error;
@@ -49,7 +69,8 @@ export const getCustomGame = async (gameId: string) => {
 
 export const updateCustomGame = async (gameId: string, gameData: Partial<CustomGameData>) => {
   try {
-    const { data, error } = await supabase
+    // Update games table
+    const { data: gameUpdate, error: gameError } = await supabase
       .from('games')
       .update({
         title: gameData.title,
@@ -61,8 +82,26 @@ export const updateCustomGame = async (gameId: string, gameData: Partial<CustomG
       .select()
       .single();
 
-    if (error) throw error;
-    return data;
+    if (gameError) throw gameError;
+
+    // Update custom_games table
+    const { data: customUpdate, error: customError } = await supabase
+      .from('custom_games')
+      .update({
+        game_data: {
+          title: gameData.title,
+          content: gameData.content,
+          type: gameData.gameType
+        },
+        settings: gameData.settings || {}
+      })
+      .eq('game_id', gameId)
+      .select()
+      .single();
+
+    if (customError) throw customError;
+    
+    return { ...gameUpdate, customData: customUpdate };
   } catch (error) {
     console.error('Error updating custom game:', error);
     throw error;
@@ -71,6 +110,7 @@ export const updateCustomGame = async (gameId: string, gameData: Partial<CustomG
 
 export const deleteCustomGame = async (gameId: string) => {
   try {
+    // Due to CASCADE delete, removing from games will also remove from custom_games
     const { error } = await supabase
       .from('games')
       .delete()
@@ -87,7 +127,7 @@ export const listCustomGames = async () => {
   try {
     const { data, error } = await supabase
       .from('games')
-      .select('*')
+      .select('*, custom_games(*)')
       .eq('is_preset', false)
       .order('created_at', { ascending: false });
 
@@ -98,3 +138,4 @@ export const listCustomGames = async () => {
     throw error;
   }
 };
+

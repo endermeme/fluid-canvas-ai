@@ -105,3 +105,15 @@
 3. Mã hóa dữ liệu game vào nội dung HTML để dễ dàng khôi phục
 4. Kiểm tra URL trả về trước khi hiển thị dialog chia sẻ
 5. Xử lý lỗi chi tiết hơn và hiển thị thông báo phù hợp
+
+## 25/04/2024 - Tích hợp Supabase với custom games
+### Tệp đã chỉnh sửa:
+- `src/components/quiz/custom-games/utils/customGameAPI.ts`: Cập nhật để sử dụng bảng custom_games mới
+- `src/components/quiz/custom-games/EnhancedGameView.tsx`: Cập nhật logic chia sẻ game
+
+### Chi tiết thay đổi:
+1. Thêm các hàm mới để tương tác với bảng custom_games
+2. Cập nhật logic lưu trữ để sử dụng cả bảng games và custom_games
+3. Thêm các trường dữ liệu mới cho custom games
+4. Cải thiện xử lý lỗi và thông báo
+5. Tối ưu hóa quá trình lưu trữ và chia sẻ game

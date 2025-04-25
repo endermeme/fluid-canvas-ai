@@ -11,12 +11,11 @@ interface EnhancedGameViewProps {
   };
   onReload?: () => void;
   className?: string;
-  // Thêm lại các props đã bị xóa trước đó
   onBack?: () => void;
   onNewGame?: () => void;
   onShare?: () => void;
   extraButton?: React.ReactNode;
-  hideHeader?: boolean; // Thêm prop để ẩn header
+  hideHeader?: boolean;
 }
 
 const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({ 
@@ -27,7 +26,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   onNewGame,
   onShare,
   extraButton,
-  hideHeader = false // Mặc định hiển thị header
+  hideHeader = false
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeError, setIframeError] = useState<string | null>(null);
@@ -42,7 +41,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
         
-        // Thêm event listener cho iframe để biết khi nào đã load xong
         iframeRef.current.onload = () => {
           console.log("Iframe đã được tải xong");
           setIsIframeLoaded(true);
@@ -65,7 +63,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     }
     
     try {
-      // Lưu game vào Supabase khi người dùng bấm nút chia sẻ
       const gameData = {
         title: miniGame.title || "Minigame tương tác",
         content: miniGame.content,
@@ -81,8 +78,13 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       const savedGame = await saveCustomGame(gameData);
       
       if (savedGame && onShare) {
-        onShare(); // Gọi hàm chia sẻ từ parent component
+        onShare();
       }
+      
+      toast({
+        title: "Đã lưu game",
+        description: "Game đã được lưu và sẵn sàng để chia sẻ.",
+      });
     } catch (error) {
       console.error("Lỗi khi chia sẻ game:", error);
       toast({
@@ -137,7 +139,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           onRefresh={refreshGame}
           onFullscreen={handleFullscreen}
           showShare={true}
-          isGameCreated={isIframeLoaded} // Hiển thị nút chia sẻ khi iframe đã load xong
+          isGameCreated={isIframeLoaded}
           showGameControls={true}
         />
       )}
