@@ -1,4 +1,23 @@
+
 # Lịch sử thay đổi mã nguồn
+
+## 25/04/2024 - Kiểm tra cấu trúc thư mục custom game
+
+### Thư mục chính: `/src/components/quiz/custom-games/`
+1. **GameController.tsx** - Quản lý tạo và hiển thị các game tùy chỉnh
+2. **CustomGameForm.tsx** - Form nhập dữ liệu để tạo game mới
+3. **EnhancedGameView.tsx** - Hiển thị game đã được tạo trong iframe
+4. **CustomGameHeader.tsx** - Header riêng cho trang custom game
+
+### Thư mục utility: `/src/components/quiz/custom-games/utils/`
+1. **customGameAPI.ts** - Các hàm tương tác với Supabase để lưu và quản lý game
+
+### Các file hỗ trợ custom game khác:
+1. **/src/components/quiz/generator/customGamePrompt.ts** - Chứa logic tạo prompt
+2. **/src/components/quiz/generator/geminiGenerator.ts** - Quản lý logic tạo game với AI
+3. **/src/components/quiz/generator/types.ts** - Định nghĩa các kiểu dữ liệu
+4. **/src/components/quiz/utils/iframe-utils.ts** - Tiện ích xử lý nội dung iframe
+5. **/src/components/quiz/QuizHeader.tsx** - Header chung cho các trang quiz
 
 ## 24/04/2024 - Chuẩn hóa giao diện và tổ chức lại mã nguồn cho custom game
 
@@ -52,3 +71,4 @@
 1. Thêm PresetGameHeader vào mỗi trạng thái giao diện trong PresetGameManager
 2. Truyền đúng props `onShare` và `showShare` từ PresetGameManager sang PresetGameHeader
 3. Chỉ hiển thị nút chia sẻ khi có game content
+
