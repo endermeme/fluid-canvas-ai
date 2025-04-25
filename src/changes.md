@@ -90,3 +90,24 @@
 - Tích hợp với hàm saveGameForSharing từ utils/gameExport.ts
 - Thêm thông báo toast cho các tương tác
 - Thêm chức năng sao chép đường dẫn vào clipboard
+
+## 2025-04-24: Tái cấu trúc QuizContainer thành các components nhỏ hơn
+
+### Files đã tạo mới:
+- `src/components/quiz/container/ShareDialog.tsx`: Component dialog chia sẻ game
+- `src/components/quiz/container/QuizHeader.tsx`: Component header của quiz container
+
+### Chi tiết thay đổi:
+1. Tách ShareDialog thành component riêng:
+   - Di chuyển logic chia sẻ và copy link
+   - Tách UI dialog hiển thị QR code và link chia sẻ
+
+2. Tách QuizHeader thành component riêng:
+   - Di chuyển tất cả logic điều hướng và nút bấm
+   - Tách giao diện header để dễ quản lý hơn
+
+3. Cập nhật QuizContainer:
+   - Sử dụng các components mới tạo
+   - Giữ nguyên logic chính và props
+   - Cải thiện khả năng bảo trì code
+   - Giảm kích thước file từ 300+ dòng xuống còn khoảng 150 dòng

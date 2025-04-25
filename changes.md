@@ -1,54 +1,105 @@
+
 # Lịch sử thay đổi mã nguồn
 
-## 24/04/2024 - Chuẩn hóa giao diện và tổ chức lại mã nguồn cho custom game
+## 25/04/2025 - Cập nhật phân tích dự án
 
-### Tệp đã tạo mới:
-- `src/components/quiz/custom-games/CustomGameHeader.tsx`: Tạo component header mới cho custom game với giao diện chuẩn hóa
-- `src/components/quiz/custom-games/utils/customGameAPI.ts`: Tách riêng logic xử lý Supabase cho custom game
+### Tệp đã chỉnh sửa:
+- `project-analysis.md`: Cập nhật thông tin mới về cấu trúc và tình trạng dự án
 
 ### Chi tiết thay đổi:
-1. Tạo CustomGameHeader component:
-   - Sử dụng cùng thiết kế và layout với PresetGameHeader
-   - Thêm các props để kiểm soát hiển thị nút chia sẻ
-   - Thêm các nút điều hướng và chức năng
+1. Thêm phần "Các cập nhật gần đây" để phản ánh những thay đổi mới nhất
+2. Cập nhật các thông tin về việc xóa chế độ Canvas và các type liên quan
+3. Cập nhật kế hoạch cải thiện dự án
 
-2. Tách logic Supabase:
-   - Tạo các hàm riêng biệt cho CRUD operations
-   - Thêm TypeScript interfaces cho custom game data
-   - Cải thiện xử lý lỗi và logging
-
-## 24/04/2024 - Cập nhật logic hiển thị nút chia sẻ trong PresetGameHeader
+## 25/04/2024 - Xóa chế độ Canvas và đơn giản hóa giao diện tạo game
 
 ### Tệp đã chỉnh sửa:
-- `src/components/quiz/preset-games/PresetGameHeader.tsx`: Thêm prop isGameCreated để kiểm soát hiển thị nút chia sẻ
-- `src/components/quiz/preset-games/PresetGameManager.tsx`: Cập nhật việc truyền props cho PresetGameHeader
+- `src/components/quiz/custom-games/CustomGameForm.tsx`: Xóa toggle chế độ Canvas
+- `src/components/quiz/generator/geminiGenerator.ts`: Xóa chế độ Canvas và type
 
-### Thay đổi chi tiết:
-1. Thêm prop `isGameCreated` vào PresetGameHeader để kiểm soát việc hiển thị nút chia sẻ
-2. Chỉ hiển thị nút chia sẻ khi:
-   - Game đã được tạo thành công (có gameContent)
-   - Không ở trạng thái setting hoặc loading
-   - Không có lỗi xảy ra
-3. Cải thiện logic hiển thị để rõ ràng và nhất quán hơn
+### Chi tiết thay đổi:
+1. Xóa chế độ Canvas:
+   - Loại bỏ toggle chế độ Canvas khỏi form tạo game
+   - Xóa các tham số liên quan đến Canvas trong generator
+   - Đơn giản hóa logic tạo game
 
-## 23/04/2024 - Cập nhật PresetGameHeader
+2. Tối ưu hóa generator:
+   - Xóa các type không cần thiết
+   - Đặt tiếng Việt làm ngôn ngữ mặc định
+   - Cải thiện hiển thị thông báo
 
-### Tệp đã chỉnh sửa:
-- `src/components/quiz/preset-games/PresetGameHeader.tsx`: Thêm props `onShare` và `showShare` để hỗ trợ chức năng chia sẻ và hiển thị nút chia sẻ.
+## 2025-04-22: Cập nhật nhãn nút trong CustomGameHeader
+- Thay đổi nhãn "Game mới" thành "Tạo mới"
+- Giữ nguyên chức năng và giao diện của nút
 
-### Thay đổi chi tiết:
-1. Thêm interface `PresetGameHeaderProps` với các thuộc tính:
-   - `onShare?`: Hàm callback khi nhấn nút chia sẻ
-   - `showShare?`: Boolean để ẩn/hiện nút chia sẻ (mặc định là true)
-2. Thêm nút Share2 trong header để chia sẻ trò chơi
-3. Nút chia sẻ chỉ hiển thị khi cả `showShare` là true và `onShare` được cung cấp
+### Files đã cập nhật:
+- src/components/quiz/custom-games/CustomGameHeader.tsx
 
-## 24/04/2024 - Cập nhật PresetGameManager
+### Chi tiết:
+- Cập nhật văn bản nút để phản ánh chính xác hơn chức năng tạo game
 
-### Tệp đã chỉnh sửa:
-- `src/components/quiz/preset-games/PresetGameManager.tsx`: Cập nhật để sử dụng đúng nút chia sẻ từ PresetGameHeader.
+## 2025-04-22: Xóa các file xử lý hình ảnh không cần thiết
+- Xóa file imageGenerator.ts và imageInstructions.ts
+- Đơn giản hóa việc xử lý hình ảnh
 
-### Thay đổi chi tiết:
-1. Thêm PresetGameHeader vào mỗi trạng thái giao diện trong PresetGameManager
-2. Truyền đúng props `onShare` và `showShare` từ PresetGameManager sang PresetGameHeader
-3. Chỉ hiển thị nút chia sẻ khi có game content
+### Files đã xóa:
+- src/components/quiz/generator/imageGenerator.ts
+- src/components/quiz/generator/imageInstructions.ts
+
+### Chi tiết:
+- Tiếp tục đơn giản hóa mã nguồn
+- Loại bỏ các file xử lý hình ảnh phức tạp không cần thiết
+
+## 2025-04-22: Sửa lỗi TypeScript trong PictionaryTemplate
+- Cập nhật các kiểu dữ liệu cho API Wikipedia
+- Thêm các interface cần thiết để xử lý phản hồi từ API
+- Khắc phục lỗi Property 'images' và 'imageinfo' không tồn tại trên kiểu 'unknown'
+
+### Files đã cập nhật:
+- src/components/quiz/preset-games/templates/PictionaryTemplate.tsx
+
+### Chi tiết:
+- Thêm kiểu dữ liệu cho các đối tượng phản hồi từ Wikipedia API
+- Chuyển đổi kiểu dữ liệu unknown thành kiểu cụ thể
+- Thêm các kiểm tra kiểu dữ liệu trước khi truy cập thuộc tính
+
+## 2025-04-22: Loại bỏ header trùng lặp trong custom game components
+- Xóa phần header trùng lặp trong EnhancedGameView.tsx
+- Chuyển các nút chức năng vào CustomGameHeader.tsx
+- Cải thiện cấu trúc mã nguồn, giảm trùng lặp
+
+### Files đã cập nhật:
+- src/components/quiz/custom-games/EnhancedGameView.tsx
+- src/components/quiz/custom-games/CustomGameHeader.tsx
+
+### Chi tiết:
+- Đã xóa phần header trùng lặp trong EnhancedGameView.tsx
+- Loại bỏ hoàn toàn phần header và các nút điều khiển trùng lặp
+- Giữ lại chức năng chính là hiển thị iframe với nội dung game
+- Đã nâng cấp CustomGameHeader.tsx với các nút: Tải lại game, Toàn màn hình, và Game mới
+- Cải thiện nút Chia sẻ đã có sẵn
+
+## 2025-04-22: Sửa lỗi TypeScript trong EnhancedGameView.tsx
+- Thêm lại các props đã bị xóa để duy trì tính tương thích với các component khác
+- Giữ lại các props trong interface nhưng không sử dụng trong component
+
+### Files đã cập nhật:
+- src/components/quiz/custom-games/EnhancedGameView.tsx
+
+### Chi tiết:
+- Đã thêm lại các props `onBack`, `onNewGame`, `onShare` và `extraButton` vào interface `EnhancedGameViewProps`
+- Đã đổi tên các params với dấu gạch dưới để biểu thị chúng không được sử dụng
+- Đảm bảo tính tương thích ngược với các component đang sử dụng EnhancedGameView
+
+## 2025-04-22: Cải thiện giao diện nút chia sẻ trong CustomGameHeader
+- Thêm nút chia sẻ cạnh nút "Game mới"
+- Tối ưu hóa giao diện và tương tác của nút chia sẻ
+
+### Files đã cập nhật:
+- src/components/quiz/custom-games/CustomGameHeader.tsx
+
+### Chi tiết:
+- Đặt nút "Chia sẻ" cạnh nút "Game mới"
+- Thêm hiệu ứng hover và active scale để làm nổi bật nút
+- Duy trì logic điều kiện hiển thị nút như cũ
+- Cải thiện trải nghiệm người dùng với thiết kế nút mới
