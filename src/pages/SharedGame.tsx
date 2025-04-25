@@ -69,7 +69,7 @@ const SharedGame: React.FC = () => {
     );
   }
 
-  if (game.gameType && gameTemplates[game.gameType as keyof typeof gameTemplates]) {
+  if (game?.gameType && gameTemplates[game.gameType as keyof typeof gameTemplates]) {
     const GameTemplate = gameTemplates[game.gameType as keyof typeof gameTemplates];
     
     return (

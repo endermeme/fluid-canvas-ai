@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { enhanceIframeContent } from '../utils/iframe-utils';
 import { saveCustomGame } from './utils/customGameAPI';
@@ -64,10 +65,10 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     
     try {
       const gameData = {
-        title: miniGame.title || "Minigame tương tác",
+        title: miniGame.title || "Game tương tác",
         content: miniGame.content,
         gameType: 'custom',
-        description: "Game tạo tự động bởi AI"
+        description: "Game tùy chỉnh được tạo với AI"
       };
       
       toast({
@@ -77,14 +78,22 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       
       const savedGame = await saveCustomGame(gameData);
       
-      if (savedGame && onShare) {
-        onShare();
+      if (savedGame) {
+        // Generate share URL using game ID
+        const shareUrl = `${window.location.origin}/game/${savedGame.id}`;
+        
+        if (onShare) {
+          onShare();
+        }
+
+        // Copy to clipboard
+        await navigator.clipboard.writeText(shareUrl);
+        
+        toast({
+          title: "Đã lưu game",
+          description: "Đường dẫn đã được sao chép vào clipboard",
+        });
       }
-      
-      toast({
-        title: "Đã lưu game",
-        description: "Game đã được lưu và sẵn sàng để chia sẻ.",
-      });
     } catch (error) {
       console.error("Lỗi khi chia sẻ game:", error);
       toast({

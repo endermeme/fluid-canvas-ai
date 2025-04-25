@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface CustomGameData {
   title: string;
-  content: string;
+  content: string; 
   gameType: string;
   description?: string;
   settings?: any;
@@ -11,14 +11,14 @@ export interface CustomGameData {
 
 export const saveCustomGame = async (gameData: CustomGameData) => {
   try {
-    // First save to games table
+    // First save to games table with HTML content
     const { data: gameEntry, error: gameError } = await supabase
       .from('games')
       .insert([{
         title: gameData.title,
         html_content: gameData.content,
-        game_type: gameData.gameType,
-        description: gameData.description,
+        game_type: 'custom',
+        description: gameData.description || 'Custom interactive game',
         is_preset: false,
         content_type: 'html'
       }])
@@ -43,7 +43,8 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
       .single();
 
     if (customError) throw customError;
-    
+
+    // Return combined data
     return { ...gameEntry, customData: customGame };
   } catch (error) {
     console.error('Error saving custom game:', error);
@@ -53,6 +54,7 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
 
 export const getCustomGame = async (gameId: string) => {
   try {
+    // Get game data from both tables
     const { data: game, error: gameError } = await supabase
       .from('games')
       .select('*, custom_games(*)')
