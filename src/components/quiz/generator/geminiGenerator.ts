@@ -59,9 +59,7 @@ export const generateWithGemini = async (
   logInfo(SOURCE, `Starting game generation for "${topic}"`, {
     model: GEMINI_MODELS.CUSTOM_GAME,
     apiVersion: API_VERSION,
-    type: gameType?.name || "Not specified",
-    settings: settings || {},
-    canvasMode: useCanvas ? "enabled" : "disabled"
+    settings: settings || {}
   });
 
   const promptOptions = {
