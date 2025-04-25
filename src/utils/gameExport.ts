@@ -65,6 +65,16 @@ export const saveGameForSharing = async (
     
     // Format the HTML content for better readability
     const formattedHtmlContent = formatHtmlContent(enhancedHtml);
+
+    // Lấy địa chỉ IP của người tạo (nếu có thể)
+    let creatorIp = null;
+    try {
+      const { data: ipData } = await fetch('https://api.ipify.org?format=json')
+        .then(res => res.json());
+      creatorIp = ipData.ip;
+    } catch (e) {
+      console.log("Không thể lấy địa chỉ IP:", e);
+    }
     
     const { data: game, error } = await supabase
       .from('games')
@@ -74,6 +84,7 @@ export const saveGameForSharing = async (
         html_content: formattedHtmlContent,
         content_type: 'html',
         is_published: true,
+        creator_ip: creatorIp,
         description: description || `Shared game: ${title}`
       })
       .select()
@@ -129,6 +140,13 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
     }
     
     console.log("Đã tìm thấy game:", game);
+    
+    // Kiểm tra xem game đã hết hạn chưa
+    const expireDate = new Date(game.expires_at);
+    if (expireDate < new Date()) {
+      console.error("Game đã hết hạn:", expireDate);
+      return null;
+    }
   
     // Try to parse the HTML content to extract game data if possible
     let parsedContent = null;
@@ -168,8 +186,12 @@ export const getRemainingTime = (expiresAt: Date | number): string => {
   
   if (diff <= 0) return 'Đã hết hạn';
   
-  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   
+  if (days > 0) {
+    return `${days}d ${hours}h`;
+  }
   return `${hours}h ${minutes}m`;
 };

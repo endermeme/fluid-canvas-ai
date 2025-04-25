@@ -13,6 +13,16 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
   try {
     console.log("Đang lưu game tùy chỉnh:", gameData);
     
+    // Lấy IP người tạo nếu có thể (dùng cho RLS policy)
+    let creatorIp = null;
+    try {
+      const { data: ipData } = await fetch('https://api.ipify.org?format=json')
+        .then(res => res.json());
+      creatorIp = ipData?.ip;
+    } catch (e) {
+      console.log("Không thể lấy địa chỉ IP:", e);
+    }
+    
     // Tạo nội dung game với dữ liệu được mã hóa để dễ khôi phục
     const encodedContent = encodeURIComponent(JSON.stringify({
       title: gameData.title,
@@ -32,7 +42,8 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
         description: gameData.description || 'Game tương tác tùy chỉnh',
         is_preset: false,
         content_type: 'html',
-        expires_at: new Date(Date.now() + (48 * 60 * 60 * 1000)).toISOString() // 48 giờ
+        creator_ip: creatorIp,
+        is_published: true
       }])
       .select()
       .single();
@@ -67,6 +78,14 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
 
     if (customError) {
       console.error("Lỗi khi lưu custom_games:", customError);
+      
+      // Nếu lỗi khi lưu custom_games, thử xóa game đã tạo để tránh dữ liệu rác
+      try {
+        await supabase.from('games').delete().eq('id', gameEntry.id);
+      } catch (deleteErr) {
+        console.error("Lỗi khi xóa game sau khi lưu custom_games thất bại:", deleteErr);
+      }
+      
       throw customError;
     }
 
@@ -107,6 +126,14 @@ export const getCustomGame = async (gameId: string) => {
     }
     
     console.log("Đã tìm thấy game:", game);
+    
+    // Kiểm tra xem game đã hết hạn chưa
+    const expireDate = new Date(game.expires_at);
+    if (expireDate < new Date()) {
+      console.error("Game đã hết hạn:", expireDate);
+      throw new Error("Game đã hết hạn");
+    }
+    
     return game;
   } catch (error) {
     console.error('Error fetching custom game:', error);
@@ -204,5 +231,52 @@ export const listCustomGames = async () => {
   } catch (error) {
     console.error('Error listing custom games:', error);
     throw error;
+  }
+};
+
+export const recordGameParticipant = async (gameId: string, name: string) => {
+  try {
+    // Lấy IP người chơi nếu có thể
+    let ipAddress = null;
+    try {
+      const { data: ipData } = await fetch('https://api.ipify.org?format=json')
+        .then(res => res.json());
+      ipAddress = ipData?.ip;
+    } catch (e) {
+      console.log("Không thể lấy địa chỉ IP:", e);
+    }
+    
+    const { data, error } = await supabase
+      .from('game_participants')
+      .insert({
+        game_id: gameId,
+        name,
+        ip_address: ipAddress
+      })
+      .select()
+      .single();
+      
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error recording game participant:', error);
+    // Không báo lỗi ra ngoài để không ảnh hưởng trải nghiệm người dùng
+    return null;
+  }
+};
+
+export const getGameParticipants = async (gameId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('game_participants')
+      .select('*')
+      .eq('game_id', gameId)
+      .order('timestamp', { ascending: false });
+      
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error getting game participants:', error);
+    return [];
   }
 };

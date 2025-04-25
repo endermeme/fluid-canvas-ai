@@ -192,6 +192,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           isGameCreated={isIframeLoaded}
           showGameControls={true}
           isSharing={isSharing}
+          gameTitle={miniGame?.title}
         />
       )}
       

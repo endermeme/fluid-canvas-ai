@@ -1,6 +1,12 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 25/04/2025 - Cập nhật cấu trúc Supabase và khắc phục lỗi chia sẻ game
+- Đã tạo lại cấu trúc cơ sở dữ liệu Supabase với bảng games, custom_games, và game_participants
+- Đã cải thiện cơ chế lưu và chia sẻ game tùy chỉnh
+- Đã sửa lỗi liên kết chia sẻ hết hạn
+- Đã tối ưu hóa mã nguồn trong các file liên quan đến chia sẻ game
+
 ## 25/04/2025 - Sửa lỗi chia sẻ game tùy chỉnh không lưu vào Supabase
 - Đã sửa lỗi trong EnhancedGameView.tsx khi chia sẻ game tùy chỉnh
 - Đã cải thiện xử lý lưu game vào Supabase và tạo link chia sẻ
@@ -32,14 +38,9 @@
 - `customGameAPI.ts`: Quản lý việc lưu và truy xuất game từ Supabase
 - `QuizHeader.tsx`: Hiển thị nút chia sẻ và dialog QR code
 
-## 25/04/2025 - Cập nhật cấu hình Vite để cho phép tất cả host
-- Đã thêm các tên miền vào `allowedHosts` trong `vite.config.ts`: aurabusiness.tech, aurabusiness.tech:8080
-- Đã thêm tùy chọn `.ngrok-free.app` để cho phép tất cả các subdomain ngrok
-- Đã thêm tùy chọn `all` để cho phép tất cả các host khi cần thiết
-- Nguyên nhân lỗi: Vite mặc định chỉ cho phép một số host cụ thể
-
-## 25/04/2025 - Ghi chú về vấn đề Node.js phiên bản cũ
-- Dự án Vite yêu cầu Node.js v14.18+ hoặc 16+
-- Node.js v10.19.0 không hỗ trợ cú pháp import ES modules mà Vite sử dụng
-- Cần nâng cấp Node.js lên phiên bản mới hơn để chạy dự án
-- Có thể sử dụng NVM (Node Version Manager) để dễ dàng cài đặt và quản lý các phiên bản Node.js
+## 25/04/2025 - Cập nhật cấu trúc Supabase
+- Đã cải thiện cấu trúc bảng dữ liệu trong Supabase
+- Đã thêm bảng game_participants để theo dõi người chơi
+- Đã thêm các chỉ mục để tối ưu hiệu suất truy vấn
+- Đã thêm các chính sách bảo mật (RLS) để bảo vệ dữ liệu
+- Đã cập nhật API để làm việc với cấu trúc mới
