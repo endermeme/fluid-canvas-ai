@@ -38,18 +38,30 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
   const [shareUrl, setShareUrl] = useState('');
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const { toast } = useToast();
 
   const handleShare = async () => {
     if (!gameData || !onShare) return;
-
+    
     try {
+      setIsSharing(true);
+      toast({
+        title: "Đang xử lý",
+        description: "Đang lưu game và tạo liên kết chia sẻ...",
+      });
+
+      // Lấy nội dung HTML từ game-container
       const gameContainer = document.getElementById('game-container');
       let html = gameContainer?.innerHTML || '';
       
-      const encodedContent = encodeURIComponent(JSON.stringify(gameData));
-      html = `<div data-game-content="${encodedContent}">${html}</div>`;
+      // Mã hóa nội dung game vào HTML để có thể phục hồi dễ dàng
+      if (gameData) {
+        const encodedContent = encodeURIComponent(JSON.stringify(gameData));
+        html = `<div data-game-content="${encodedContent}">${html}</div>`;
+      }
       
+      // Lưu game vào Supabase và lấy URL chia sẻ
       const url = await saveGameForSharing(
         gameData.title || 'Custom Game',
         gameType,
@@ -69,6 +81,8 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
           title: "Game đã được chia sẻ",
           description: "Đường dẫn đã được tạo để chia sẻ trò chơi.",
         });
+      } else {
+        throw new Error("Không nhận được URL chia sẻ");
       }
     } catch (error) {
       console.error('Error sharing game:', error);
@@ -77,6 +91,8 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
         description: "Đã xảy ra lỗi khi tạo đường dẫn. Vui lòng thử lại.",
         variant: "destructive"
       });
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -85,9 +101,19 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
       .then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+        
+        toast({
+          title: "Đã sao chép",
+          description: "Đường dẫn đã được sao chép vào clipboard.",
+        });
       })
       .catch(err => {
         console.error('Không thể sao chép liên kết:', err);
+        toast({
+          title: "Lỗi sao chép",
+          description: "Không thể sao chép liên kết. Vui lòng thử lại.",
+          variant: "destructive"
+        });
       });
   };
 
@@ -114,12 +140,13 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
             <Button 
               variant="default" 
               size="sm" 
-              onClick={handleShare} 
+              onClick={handleShare}
+              disabled={isSharing} 
               className="h-7 px-3 bg-primary text-primary-foreground hover:bg-primary/90" 
               title="Chia sẻ game"
             >
               <Share2 className="h-3 w-3 mr-1" />
-              Chia sẻ
+              {isSharing ? 'Đang xử lý...' : 'Chia sẻ'}
             </Button>
           )}
         </div>
