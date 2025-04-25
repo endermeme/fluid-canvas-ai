@@ -1,5 +1,22 @@
 # Lịch sử thay đổi mã nguồn
 
+## 25/04/2024 - Cập nhật giao diện và ngôn ngữ game tùy chỉnh
+
+### Tệp đã chỉnh sửa:
+- `src/components/quiz/generator/customGamePrompt.ts`: Cập nhật prompt để tạo game bằng tiếng Việt
+- `src/components/quiz/custom-games/CustomGameHeader.tsx`: Đơn giản hóa giao diện, bỏ nút chia sẻ
+
+### Chi tiết thay đổi:
+1. Cập nhật prompt tạo game:
+   - Thay đổi ngôn ngữ mặc định thành tiếng Việt
+   - Cập nhật hướng dẫn và yêu cầu bằng tiếng Việt
+   - Tối ưu cấu trúc prompt
+
+2. Đơn giản hóa CustomGameHeader:
+   - Bỏ nút chia sẻ
+   - Thay thế nút "Tạo mới" bằng biểu tượng dấu cộng
+   - Tối giản các props không cần thiết
+
 ## 24/04/2024 - Chuẩn hóa giao diện và tổ chức lại mã nguồn cho custom game
 
 ### Tệp đã tạo mới:
