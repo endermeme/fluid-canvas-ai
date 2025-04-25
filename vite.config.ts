@@ -16,6 +16,12 @@ export default defineConfig(({ mode }) => ({
       // Tăng thời gian chờ để tránh khởi động lại quá nhanh
       timeout: 5000
     },
+    // Thêm cấu hình allowedHosts
+    allowedHosts: [
+      'localhost', 
+      '127.0.0.1', 
+      'e3cb-109-123-231-70.ngrok-free.app'
+    ],
   },
   plugins: [
     react(),
@@ -48,4 +54,3 @@ export default defineConfig(({ mode }) => ({
     keepNames: true,
   },
 }));
-
