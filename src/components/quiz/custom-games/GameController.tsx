@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
 import { AIGameGenerator } from '../generator/geminiGenerator';
@@ -23,10 +24,29 @@ const GameController: React.FC<GameControllerProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentGame, setCurrentGame] = useState<MiniGame | null>(null);
   const [currentTopic, setCurrentTopic] = useState<string>(initialTopic);
-  const [showForm, setShowForm] = useState(!currentGame);
+  const [showForm, setShowForm] = useState(true);
   const [isSharing, setIsSharing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Khi trang được tải, kiểm tra xem có game đã lưu không
+  useEffect(() => {
+    const savedGame = localStorage.getItem('lastCreatedGame');
+    if (savedGame) {
+      try {
+        const { game, content } = JSON.parse(savedGame);
+        if (game) {
+          setCurrentGame(game);
+          setCurrentTopic(content || "");
+          setShowForm(false);
+        }
+      } catch (error) {
+        console.error("Lỗi khi đọc game đã lưu:", error);
+        // Xóa dữ liệu lưu trữ không hợp lệ
+        localStorage.removeItem('lastCreatedGame');
+      }
+    }
+  }, []);
   
   const handleGameGeneration = (content: string, game?: MiniGame) => {
     setCurrentTopic(content);
@@ -142,29 +162,11 @@ const GameController: React.FC<GameControllerProps> = ({
       );
     }
     
-    const savedGame = localStorage.getItem('lastCreatedGame');
-    if (savedGame) {
-      const { game } = JSON.parse(savedGame);
-      return (
-        <div className="w-full h-full">
-          <EnhancedGameView 
-            miniGame={{
-              title: game.title || "Minigame Tương Tác",
-              content: game.content || ""
-            }} 
-            onBack={handleBack}
-            onNewGame={handleNewGame}
-            onShare={handleShareGame}
-            hideHeader={false}
-          />
-        </div>
-      );
-    }
-    
+    // Thay đổi logic ở đây - không tự chuyển hướng
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
         <div className="p-6 bg-background/90 rounded-xl shadow-lg border border-primary/10 max-w-md w-full">
-          <p className="text-center mb-4">Không có nội dung trò chơi. Vui lòng tạo mới.</p>
+          <p className="text-center mb-4">Không tìm thấy nội dung trò chơi. Vui lòng tạo mới.</p>
           <Button 
             onClick={handleNewGame} 
             className="w-full"
