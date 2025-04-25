@@ -164,6 +164,7 @@ const GameSharePage: React.FC = () => {
               content: game.htmlContent
             }}
             onBack={handleBack}
+            hideHeader={true}
             extraButton={
               <Button 
                 size="sm" 

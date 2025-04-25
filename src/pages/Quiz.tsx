@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import GameLoading from '@/components/quiz/GameLoading';
-import CustomGameSettings from '@/components/quiz/custom-games/CustomGameSettings';
+import CustomGameForm from '@/components/quiz/custom-games/CustomGameForm';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import { tryGeminiGeneration } from '@/components/quiz/generator/geminiGenerator';
 
@@ -17,7 +17,18 @@ const Quiz = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const handleGenerate = async (promptText: string, useCanvas: boolean = true) => {
+  const handleGenerate = async (promptText: string, game?: any) => {
+    if (game) {
+      // Nếu đã có game được tạo từ CustomGameForm
+      setGameContent(game.content);
+      setGameTitle(game.title || `Game: ${promptText.substring(0, 40)}...`);
+      setMiniGame({
+        title: game.title || `Game: ${promptText.substring(0, 40)}...`,
+        content: game.content
+      });
+      return;
+    }
+    
     if (!promptText.trim()) {
       toast({
         title: "Lỗi",
@@ -35,7 +46,7 @@ const Quiz = () => {
     
     try {
       const game = await tryGeminiGeneration(null, promptText, { 
-        useCanvas, 
+        useCanvas: true, 
         category: 'general' 
       });
       
@@ -324,48 +335,35 @@ const Quiz = () => {
     
     if (miniGame) {
       return (
-        <div className="w-full h-full">
-          <EnhancedGameView 
-            miniGame={miniGame}
-            onBack={handleReset}
-            extraButton={
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={handleShare}
-                className="text-xs h-7"
-              >
-                Chia sẻ
-              </Button>
-            }
-          />
-        </div>
+        <EnhancedGameView 
+          miniGame={miniGame}
+          onBack={handleReset}
+          onShare={handleShare}
+          hideHeader={true}
+        />
       );
     }
     
     return (
-      <CustomGameSettings 
+      <CustomGameForm 
         onGenerate={handleGenerate}
-        isGenerating={isGenerating}
+        onCancel={() => navigate('/')}
       />
     );
   };
 
   return (
-    <div className="h-screen w-full bg-gradient-to-b from-background to-background/95 overflow-hidden">
-      <QuizContainer
-        title={miniGame ? miniGame.title : "Tạo Game Tùy Chỉnh"}
-        showBackButton={true}
-        showRefreshButton={false}
-        showHomeButton={true}
-        onBack={() => miniGame ? handleReset() : navigate('/')}
-        className="p-0 overflow-hidden"
-      >
-        <div className="w-full h-full overflow-hidden">
-          {renderContent()}
-        </div>
-      </QuizContainer>
-    </div>
+    <QuizContainer 
+      title={gameTitle}
+      showBackButton={true}
+      onBack={() => navigate('/')}
+      showSettingsButton={false}
+      showCreateButton={!!miniGame}
+      onCreate={handleReset}
+      isCreatingGame={!miniGame && !isGenerating}
+    >
+      {renderContent()}
+    </QuizContainer>
   );
 };
 

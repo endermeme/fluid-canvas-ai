@@ -6,7 +6,7 @@ import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
-import { Share2, PlusCircle } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createGameSession } from '@/utils/gameParticipation';
 import QuizContainer from '../QuizContainer';
@@ -24,6 +24,7 @@ const GameController: React.FC<GameControllerProps> = ({
   const [currentGame, setCurrentGame] = useState<MiniGame | null>(null);
   const [currentTopic, setCurrentTopic] = useState<string>(initialTopic);
   const [showForm, setShowForm] = useState(!currentGame);
+  const [isSharing, setIsSharing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -62,9 +63,12 @@ const GameController: React.FC<GameControllerProps> = ({
   };
   
   const handleShareGame = async () => {
-    if (!currentGame) return;
+    if (!currentGame || isSharing) return;
     
     try {
+      setIsSharing(true);
+      
+      // Tạo session game (sẽ được gọi sau khi game đã được lưu vào Supabase từ EnhancedGameView)
       const gameSession = await createGameSession(
         currentGame.title || "Minigame tương tác",
         currentGame.content
@@ -78,6 +82,13 @@ const GameController: React.FC<GameControllerProps> = ({
       });
     } catch (error) {
       console.error("Error sharing game:", error);
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Không thể tạo liên kết chia sẻ. Vui lòng thử lại.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -107,6 +118,7 @@ const GameController: React.FC<GameControllerProps> = ({
             onBack={handleBack}
             onNewGame={handleNewGame}
             onShare={handleShareGame}
+            hideHeader={false}
           />
         </div>
       );
@@ -143,12 +155,13 @@ const GameController: React.FC<GameControllerProps> = ({
   return (
     <QuizContainer
       title={getContainerTitle()}
-      showBackButton={true}
+      showBackButton={false}
       onBack={handleBack}
       showSettingsButton={false}
-      showCreateButton={!isGenerating && !showForm}
+      showCreateButton={false}
       onCreate={handleNewGame}
       className="p-0 overflow-hidden"
+      isCreatingGame={showForm}
     >
       <div className="h-full w-full overflow-hidden">
         {renderContent()}

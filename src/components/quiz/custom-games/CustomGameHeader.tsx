@@ -81,13 +81,13 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
         {showGameControls && onNewGame && (
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
-              size="sm"
-              className="h-8 px-2 text-xs"
+              variant="ghost"
+              size="icon"
+              className="hover:bg-primary/10"
               onClick={onNewGame}
+              title="Tạo mới"
             >
-              <PlusCircle className="h-4 w-4 mr-1" />
-              Tạo mới
+              <PlusCircle className="h-5 w-5" />
             </Button>
             
             {showShare && onShare && isGameCreated && (
