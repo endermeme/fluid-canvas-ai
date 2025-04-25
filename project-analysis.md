@@ -1,3 +1,4 @@
+
 # Phân tích dự án Web
 
 ## Cấu trúc dự án
@@ -53,6 +54,23 @@ src/
    - Các game có thể được chia sẻ qua URL
    - Có bảng điều khiển cho giáo viên (TeacherDashboard)
 
+## Các cập nhật gần đây
+
+1. **Đơn giản hóa giao diện**:
+   - Đã xóa chế độ Canvas và tất cả type liên quan
+   - Đã xóa toggle chế độ Canvas trong CustomGameForm
+   - Đã đơn giản hóa giao diện tạo game
+
+2. **Tối ưu hóa quá trình tạo game**:
+   - Đặt tiếng Việt làm ngôn ngữ mặc định cho game
+   - Đơn giản hóa đối tượng logging
+   - Loại bỏ các trường không cần thiết (type, canvasMode)
+
+3. **Cải thiện UX**:
+   - Thay đổi nút "Tạo mới" thành biểu tượng "+"
+   - Xóa nút chia sẻ không hoạt động
+   - Tập trung vào trải nghiệm người dùng đơn giản
+
 ## Vấn đề trùng lặp và xung đột
 
 ### 1. Trùng lặp component GameContainer
@@ -76,10 +94,6 @@ import { enhanceIframeContent } from './utils/iframe-processor';
 
 Đây có thể là nguyên nhân dẫn đến lỗi "Đã chặn việc tải mô-đun từ iframe-utils.ts" vì đường dẫn import không đúng.
 
-### 3. Cấu hình Vite có vấn đề
-
-Cấu hình trong `vite.config.ts` đã tạo server với cổng 8080, nhưng một số import có thể đang tìm file từ URL absolute (như lỗi đã mô tả) thay vì import tương đối.
-
 ## Các file cần xóa hoặc điều chỉnh
 
 1. **Xem xét gộp hai GameContainer thành một**:
@@ -97,4 +111,6 @@ Cấu hình trong `vite.config.ts` đã tạo server với cổng 8080, nhưng m
 1. Chuẩn hóa cấu trúc thư mục và xóa các thành phần trùng lặp
 2. Thống nhất cách import và sử dụng các utility function
 3. Điều chỉnh cấu hình Vite để tránh lỗi khi tải module
-4. Cải thiện hệ thống xử lý lỗi khi tải iframe để hiển thị lỗi rõ ràng hơn 
+4. Cải thiện hệ thống xử lý lỗi khi tải iframe để hiển thị lỗi rõ ràng hơn
+5. Tách file `geminiGenerator.ts` thành các module nhỏ hơn để dễ bảo trì
+6. Xóa hoàn toàn các type và code liên quan đến chế độ Canvas đã không còn sử dụng
