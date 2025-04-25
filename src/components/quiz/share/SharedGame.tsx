@@ -26,10 +26,14 @@ const SharedGame: React.FC = () => {
       }
 
       try {
+        console.log("Đang tải game có ID:", id);
         const loadedGame = await getSharedGame(id);
+        
         if (loadedGame) {
+          console.log("Đã tải game thành công:", loadedGame);
           setGame(loadedGame);
         } else {
+          console.error("Không tìm thấy game có ID:", id);
           setError('Game không tồn tại hoặc đã hết hạn');
         }
       } catch (err) {
@@ -45,9 +49,23 @@ const SharedGame: React.FC = () => {
   const handleReload = () => {
     if (!game) return;
     
-    if (iframeRef.current) {
-      const enhancedContent = enhanceIframeContent(game.htmlContent, game.title);
-      iframeRef.current.srcdoc = enhancedContent;
+    try {
+      if (iframeRef.current) {
+        const enhancedContent = enhanceIframeContent(game.htmlContent, game.title);
+        iframeRef.current.srcdoc = enhancedContent;
+        
+        toast({
+          title: "Đã tải lại",
+          description: "Game đã được tải lại thành công",
+        });
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải lại game:", error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải lại game",
+        variant: "destructive"
+      });
     }
   };
 
@@ -71,6 +89,19 @@ const SharedGame: React.FC = () => {
         </Button>
       </div>
     );
+  }
+
+  // Parse game content data if available
+  let gameContent = null;
+  try {
+    // Try to find encoded data in the HTML content
+    const contentMatch = game.htmlContent.match(/data-game-content="([^"]*)"/);
+    if (contentMatch && contentMatch[1]) {
+      gameContent = JSON.parse(decodeURIComponent(contentMatch[1]));
+      console.log("Đã trích xuất dữ liệu game:", gameContent);
+    }
+  } catch (error) {
+    console.error("Lỗi khi phân tích dữ liệu game:", error);
   }
 
   const enhancedContent = enhanceIframeContent(game.htmlContent, game.title);

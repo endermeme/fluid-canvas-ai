@@ -7,7 +7,7 @@ export interface StoredGame {
   gameType: string;
   content: any;
   htmlContent: string;
-  description?: string; // Changed to optional to match types.ts
+  description?: string;
   expiresAt: Date | number;
   createdAt: Date | number;
 }
@@ -56,73 +56,109 @@ export const saveGameForSharing = async (
   htmlContent: string,
   description?: string
 ): Promise<string> => {
-  // Format the HTML content for better readability
-  const formattedHtmlContent = formatHtmlContent(htmlContent);
+  console.log("Đang lưu game để chia sẻ:", { title, gameType });
   
-  const { data: game, error } = await supabase
-    .from('games')
-    .insert({
-      title,
-      game_type: gameType,
-      html_content: formattedHtmlContent,
-      content_type: 'html',
-      is_published: true,
-      description: description || `Shared game: ${title}`
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
+  try {
+    // Mã hóa nội dung game để có thể khôi phục sau này
+    const encodedContent = encodeURIComponent(JSON.stringify(content));
+    const enhancedHtml = `<div data-game-type="${gameType}" data-game-content="${encodedContent}">${htmlContent}</div>`;
+    
+    // Format the HTML content for better readability
+    const formattedHtmlContent = formatHtmlContent(enhancedHtml);
+    
+    const { data: game, error } = await supabase
+      .from('games')
+      .insert({
+        title,
+        game_type: gameType,
+        html_content: formattedHtmlContent,
+        content_type: 'html',
+        is_published: true,
+        description: description || `Shared game: ${title}`
+      })
+      .select()
+      .single();
   
-  // Create a slug from the title
-  const slug = title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
-  
-  // Return the full URL with game type and slug in the path
-  const baseUrl = window.location.origin;
-  return `${baseUrl}/play/${gameType}/${slug}/${game.id}`;
+    if (error) {
+      console.error("Lỗi khi lưu game vào Supabase:", error);
+      throw error;
+    }
+    
+    console.log("Game đã được lưu thành công với ID:", game.id);
+    
+    // Create a slug from the title
+    const slug = title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
+    
+    // Return the full URL with game type and slug in the path
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/play/${gameType}/${slug}/${game.id}`;
+  } catch (error) {
+    console.error("Lỗi trong quá trình lưu game:", error);
+    throw error;
+  }
 };
 
 export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
-  // Extract the actual UUID from the path if it contains type/slug format
-  let gameId = id;
-  if (id.includes('/')) {
-    // Get the last segment which should be the UUID
-    const segments = id.split('/');
-    gameId = segments[segments.length - 1];
-  }
-
-  const { data: game, error } = await supabase
-    .from('games')
-    .select('*')
-    .eq('id', gameId)
-    .single();
-
-  if (error || !game) return null;
-
-  // Try to parse the HTML content to extract game data if possible
-  let parsedContent = null;
-  if (game.html_content && game.html_content.includes('data-game-content')) {
-    try {
-      // Extract the content from a data attribute if it exists in the HTML
-      const contentMatch = game.html_content.match(/data-game-content="([^"]*)"/);
-      if (contentMatch && contentMatch[1]) {
-        parsedContent = JSON.parse(decodeURIComponent(contentMatch[1]));
-      }
-    } catch (e) {
-      console.error('Error parsing game content from HTML:', e);
+  console.log("Đang lấy game với ID:", id);
+  
+  try {
+    // Extract the actual UUID from the path if it contains type/slug format
+    let gameId = id;
+    if (id.includes('/')) {
+      // Get the last segment which should be the UUID
+      const segments = id.split('/');
+      gameId = segments[segments.length - 1];
     }
+  
+    console.log("Đang truy vấn Supabase với ID:", gameId);
+    
+    const { data: game, error } = await supabase
+      .from('games')
+      .select('*')
+      .eq('id', gameId)
+      .single();
+  
+    if (error) {
+      console.error("Lỗi khi lấy game từ Supabase:", error);
+      return null;
+    }
+    
+    if (!game) {
+      console.error("Game không tồn tại trong Supabase");
+      return null;
+    }
+    
+    console.log("Đã tìm thấy game:", game);
+  
+    // Try to parse the HTML content to extract game data if possible
+    let parsedContent = null;
+    if (game.html_content && game.html_content.includes('data-game-content')) {
+      try {
+        // Extract the content from a data attribute if it exists in the HTML
+        const contentMatch = game.html_content.match(/data-game-content="([^"]*)"/);
+        if (contentMatch && contentMatch[1]) {
+          parsedContent = JSON.parse(decodeURIComponent(contentMatch[1]));
+          console.log("Đã giải mã dữ liệu game:", parsedContent);
+        }
+      } catch (e) {
+        console.error('Error parsing game content from HTML:', e);
+      }
+    }
+  
+    return {
+      id: game.id,
+      title: game.title,
+      gameType: game.game_type,
+      content: parsedContent || {},
+      htmlContent: game.html_content,
+      description: game.description || `Shared game: ${game.title}`,
+      expiresAt: new Date(game.expires_at).getTime(),
+      createdAt: new Date(game.created_at).getTime()
+    };
+  } catch (error) {
+    console.error("Lỗi trong quá trình lấy game:", error);
+    return null;
   }
-
-  return {
-    id: game.id,
-    title: game.title,
-    gameType: game.game_type,
-    content: parsedContent || {},
-    htmlContent: game.html_content,
-    description: game.description || `Shared game: ${game.title}`,
-    expiresAt: new Date(game.expires_at).getTime(),
-    createdAt: new Date(game.created_at).getTime()
-  };
 };
 
 export const getRemainingTime = (expiresAt: Date | number): string => {

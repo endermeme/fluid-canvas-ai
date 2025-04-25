@@ -13,17 +13,26 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
   try {
     console.log("Đang lưu game tùy chỉnh:", gameData);
     
-    // Save to games table with proper HTML content and metadata
+    // Tạo nội dung game với dữ liệu được mã hóa để dễ khôi phục
+    const encodedContent = encodeURIComponent(JSON.stringify({
+      title: gameData.title,
+      type: gameData.gameType,
+      content: gameData.content
+    }));
+    
+    const enhancedHtmlContent = `<div data-game-type="${gameData.gameType}" data-game-content="${encodedContent}">${gameData.content}</div>`;
+    
+    // Lưu vào bảng games với nội dung HTML và metadata đầy đủ
     const { data: gameEntry, error: gameError } = await supabase
       .from('games')
       .insert([{
         title: gameData.title,
-        html_content: gameData.content,
+        html_content: enhancedHtmlContent,
         game_type: 'custom',
         description: gameData.description || 'Game tương tác tùy chỉnh',
         is_preset: false,
         content_type: 'html',
-        expires_at: new Date(Date.now() + (48 * 60 * 60 * 1000)).toISOString() // 48 hours
+        expires_at: new Date(Date.now() + (48 * 60 * 60 * 1000)).toISOString() // 48 giờ
       }])
       .select()
       .single();
@@ -35,7 +44,7 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
 
     console.log("Game đã được lưu vào games với ID:", gameEntry.id);
 
-    // Save additional game data to custom_games table
+    // Lưu dữ liệu game bổ sung vào bảng custom_games
     const { data: customGame, error: customError } = await supabase
       .from('custom_games')
       .insert([{
@@ -44,7 +53,8 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
           title: gameData.title,
           content: gameData.content,
           type: gameData.gameType,
-          version: '1.0'
+          version: '1.0',
+          createdAt: new Date().toISOString()
         },
         settings: gameData.settings || {
           allowSharing: true,
@@ -61,7 +71,13 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
     }
 
     console.log("Dữ liệu game tùy chỉnh đã được lưu:", customGame);
-    return { ...gameEntry, customData: customGame };
+    
+    // Trả về ID của game đã lưu để tạo URL chia sẻ
+    return { 
+      id: gameEntry.id,
+      title: gameData.title,
+      gameUrl: `${window.location.origin}/game/${gameEntry.id}`
+    };
   } catch (error) {
     console.error('Error saving custom game:', error);
     throw error;
@@ -100,12 +116,23 @@ export const getCustomGame = async (gameId: string) => {
 
 export const updateCustomGame = async (gameId: string, gameData: Partial<CustomGameData>) => {
   try {
+    // Cập nhật nội dung HTML với dữ liệu được mã hóa
+    const encodedContent = gameData.content ? encodeURIComponent(JSON.stringify({
+      title: gameData.title,
+      type: gameData.gameType,
+      content: gameData.content
+    })) : null;
+    
+    const enhancedHtmlContent = gameData.content ? 
+      `<div data-game-type="${gameData.gameType}" data-game-content="${encodedContent}">${gameData.content}</div>` : 
+      undefined;
+    
     // Update games table with basic game info
     const { data: gameUpdate, error: gameError } = await supabase
       .from('games')
       .update({
         title: gameData.title,
-        html_content: gameData.content,
+        html_content: enhancedHtmlContent,
         description: gameData.description,
         updated_at: new Date().toISOString()
       })

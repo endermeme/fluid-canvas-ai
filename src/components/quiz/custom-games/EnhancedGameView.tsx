@@ -4,6 +4,12 @@ import { enhanceIframeContent } from '../utils/iframe-utils';
 import { saveCustomGame } from './utils/customGameAPI';
 import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { QRCodeSVG } from 'qrcode.react';
+import { Copy, Check } from 'lucide-react';
 
 interface EnhancedGameViewProps {
   miniGame: {
@@ -34,6 +40,9 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const [isIframeLoaded, setIsIframeLoaded] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isSharing, setIsSharing] = useState<boolean>(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -83,33 +92,57 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         }
       };
       
-      const savedGame = await saveCustomGame(gameData);
+      const result = await saveCustomGame(gameData);
       
-      if (savedGame) {
-        const shareUrl = `${window.location.origin}/game/${savedGame.id}`;
+      if (result && result.id) {
+        const shareUrl = `${window.location.origin}/game/${result.id}`;
         console.log("Đã tạo URL chia sẻ:", shareUrl);
+        
+        setShareUrl(shareUrl);
+        setShowShareDialog(true);
         
         if (onShare) {
           onShare();
         }
-
-        await navigator.clipboard.writeText(shareUrl);
         
         toast({
           title: "Game đã được chia sẻ",
-          description: "Đường dẫn đã được sao chép vào clipboard",
+          description: "Liên kết chia sẻ đã được tạo thành công",
         });
+      } else {
+        throw new Error("Không nhận được ID game sau khi lưu");
       }
     } catch (error) {
       console.error("Lỗi khi chia sẻ game:", error);
       toast({
         title: "Lỗi chia sẻ game",
-        description: "Không thể tạo liên kết chia sẻ",
+        description: "Không thể tạo liên kết chia sẻ. Vui lòng thử lại.",
         variant: "destructive"
       });
     } finally {
       setIsSharing(false);
     }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        
+        toast({
+          title: "Đã sao chép",
+          description: "Liên kết đã được sao chép vào clipboard",
+        });
+      })
+      .catch(err => {
+        console.error("Không thể sao chép liên kết:", err);
+        toast({
+          title: "Lỗi",
+          description: "Không thể sao chép liên kết",
+          variant: "destructive"
+        });
+      });
   };
 
   const refreshGame = () => {
@@ -198,6 +231,44 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           </div>
         )}
       </div>
+
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Chia sẻ game</DialogTitle>
+            <DialogDescription>
+              Chia sẻ game này với bạn bè để họ có thể tham gia chơi
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <div className="p-4 bg-white rounded-lg">
+              <QRCodeSVG value={shareUrl} size={200} />
+            </div>
+            
+            <div className="w-full space-y-2">
+              <Label htmlFor="share-link">Liên kết chia sẻ</Label>
+              <div className="flex">
+                <Input 
+                  id="share-link" 
+                  value={shareUrl} 
+                  readOnly 
+                  className="rounded-r-none"
+                />
+                <Button 
+                  variant="outline" 
+                  className="rounded-l-none"
+                  onClick={handleCopyLink}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowShareDialog(false)}>Đóng</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

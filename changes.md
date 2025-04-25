@@ -1,6 +1,13 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 25/04/2025 - Sửa lỗi chia sẻ game tùy chỉnh không lưu vào Supabase
+- Đã sửa lỗi trong EnhancedGameView.tsx khi chia sẻ game tùy chỉnh
+- Đã cải thiện xử lý lưu game vào Supabase và tạo link chia sẻ
+- Đã thêm cơ chế kiểm tra trạng thái lưu và hiển thị thông báo phù hợp
+- Đã sửa lại customGameAPI.ts để đảm bảo dữ liệu game được lưu chính xác
+- Đã cập nhật cách xử lý URL chia sẻ để tránh lỗi hết hạn
+
 ## 25/04/2025 - Sửa lỗi tự chuyển hướng vào /game-history khi không có game
 - Đã sửa lỗi trong GameController.tsx để không tự động chuyển hướng vào /game-history khi không có game
 - Đã thêm useEffect để tự động kiểm tra và tải game đã lưu từ localStorage khi trang được tải
