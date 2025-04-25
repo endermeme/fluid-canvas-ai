@@ -98,3 +98,35 @@
 3. Thêm các props mới: gameData và gameType
 4. Cập nhật giao diện và thêm thông báo toast
 5. Thêm chức năng sao chép link vào clipboard
+
+## 25/04/2024 - Cập nhật tích hợp Supabase với custom game
+
+### Tệp đã chỉnh sửa:
+1. `src/components/quiz/custom-games/utils/customGameAPI.ts`:
+   - Cải thiện định dạng và cấu trúc code
+   - Thêm kiểu dữ liệu và interface đầy đủ
+   - Cập nhật logic lưu trữ và chia sẻ game
+   - Thêm xử lý lỗi chi tiết
+
+2. `src/components/quiz/custom-games/EnhancedGameView.tsx`:
+   - Cập nhật logic chia sẻ game
+   - Cải thiện UX khi chia sẻ với toast notifications
+   - Thêm xử lý clipboard
+   - Tối ưu hóa hiệu suất iframe
+
+### Chi tiết thay đổi:
+1. Cải thiện cấu trúc dữ liệu:
+   - Tách biệt rõ ràng giữa dữ liệu game cơ bản và dữ liệu tùy chỉnh
+   - Thêm metadata và settings cho mỗi game
+   - Cải thiện định dạng dữ liệu JSON
+
+2. Nâng cao tính năng chia sẻ:
+   - Tự động tạo URL chia sẻ
+   - Copy vào clipboard
+   - Thông báo trạng thái rõ ràng
+   - Xử lý lỗi tốt hơn
+
+3. Tối ưu hóa hiệu suất:
+   - Cải thiện logic tải iframe
+   - Thêm loading states
+   - Xử lý lỗi chi tiết hơn

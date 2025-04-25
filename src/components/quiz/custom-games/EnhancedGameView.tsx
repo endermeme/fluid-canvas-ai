@@ -68,7 +68,11 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         title: miniGame.title || "Game tương tác",
         content: miniGame.content,
         gameType: 'custom',
-        description: "Game tùy chỉnh được tạo với AI"
+        description: "Game tương tác tùy chỉnh",
+        settings: {
+          allowSharing: true,
+          showTimer: true
+        }
       };
       
       toast({
@@ -79,18 +83,16 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       const savedGame = await saveCustomGame(gameData);
       
       if (savedGame) {
-        // Generate share URL using game ID
         const shareUrl = `${window.location.origin}/game/${savedGame.id}`;
         
         if (onShare) {
           onShare();
         }
 
-        // Copy to clipboard
         await navigator.clipboard.writeText(shareUrl);
         
         toast({
-          title: "Đã lưu game",
+          title: "Game đã được chia sẻ",
           description: "Đường dẫn đã được sao chép vào clipboard",
         });
       }
@@ -145,7 +147,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           onBack={onBack}
           onNewGame={onNewGame}
           onShare={handleShareGame}
-          onRefresh={refreshGame}
+          onRefresh={() => refreshGame()}
           onFullscreen={handleFullscreen}
           showShare={true}
           isGameCreated={isIframeLoaded}
@@ -159,7 +161,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
             <p className="text-destructive mb-4">{iframeError}</p>
             <button 
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-              onClick={refreshGame}
+              onClick={() => refreshGame()}
             >
               Tải lại
             </button>
@@ -178,7 +180,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
               ref={iframeRef}
               className="w-full h-full"
               sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
-              title={miniGame.title || "Minigame"}
+              title={miniGame.title || "Game tương tác"}
               style={{
                 border: 'none',
                 display: 'block',
