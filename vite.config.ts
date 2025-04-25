@@ -16,11 +16,15 @@ export default defineConfig(({ mode }) => ({
       // Tăng thời gian chờ để tránh khởi động lại quá nhanh
       timeout: 5000
     },
-    // Thêm cấu hình allowedHosts
+    // Cập nhật cấu hình allowedHosts
     allowedHosts: [
       'localhost', 
       '127.0.0.1', 
-      'e3cb-109-123-231-70.ngrok-free.app'
+      'aurabusiness.tech',
+      'aurabusiness.tech:8080',
+      'e3cb-109-123-231-70.ngrok-free.app',
+      '.ngrok-free.app', // Cho phép tất cả các domain ngrok-free.app
+      'all' // Cho phép tất cả các host (chỉ dùng khi cần thiết)
     ],
   },
   plugins: [
