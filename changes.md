@@ -1,3 +1,4 @@
+
 # Lịch sử thay đổi mã nguồn
 
 ## 25/04/2024 - Kiểm tra cấu trúc thư mục custom game
@@ -99,34 +100,20 @@
 4. Cập nhật giao diện và thêm thông báo toast
 5. Thêm chức năng sao chép link vào clipboard
 
-## 25/04/2024 - Cập nhật tích hợp Supabase với custom game
+## 25/04/2024 - Sửa lỗi chia sẻ game tùy chỉnh
 
 ### Tệp đã chỉnh sửa:
 1. `src/components/quiz/custom-games/utils/customGameAPI.ts`:
-   - Cải thiện định dạng và cấu trúc code
-   - Thêm kiểu dữ liệu và interface đầy đủ
-   - Cập nhật logic lưu trữ và chia sẻ game
-   - Thêm xử lý lỗi chi tiết
+   - Thêm log chi tiết để theo dõi quá trình lưu và truy xuất game
+   - Cải thiện xử lý lỗi và thông báo
+   - Đảm bảo dữ liệu được lưu đúng định dạng vào Supabase
 
 2. `src/components/quiz/custom-games/EnhancedGameView.tsx`:
-   - Cập nhật logic chia sẻ game
-   - Cải thiện UX khi chia sẻ với toast notifications
-   - Thêm xử lý clipboard
-   - Tối ưu hóa hiệu suất iframe
+   - Thêm trạng thái isSharing để kiểm soát nút chia sẻ
+   - Cải thiện quá trình tạo URL chia sẻ
+   - Thêm log chi tiết để debug quá trình chia sẻ
+   - Tự động sao chép URL vào clipboard
 
-### Chi tiết thay đổi:
-1. Cải thiện cấu trúc dữ liệu:
-   - Tách biệt rõ ràng giữa dữ liệu game cơ bản và dữ liệu tùy chỉnh
-   - Thêm metadata và settings cho mỗi game
-   - Cải thiện định dạng dữ liệu JSON
-
-2. Nâng cao tính năng chia sẻ:
-   - Tự động tạo URL chia sẻ
-   - Copy vào clipboard
-   - Thông báo trạng thái rõ ràng
-   - Xử lý lỗi tốt hơn
-
-3. Tối ưu hóa hiệu suất:
-   - Cải thiện logic tải iframe
-   - Thêm loading states
-   - Xử lý lỗi chi tiết hơn
+3. `src/components/quiz/custom-games/CustomGameHeader.tsx`:
+   - Thêm prop isSharing để hiển thị trạng thái đang xử lý
+   - Cập nhật giao diện nút chia sẻ khi đang trong quá trình xử lý

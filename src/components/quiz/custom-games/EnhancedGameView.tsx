@@ -33,6 +33,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const [iframeError, setIframeError] = useState<string | null>(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [isSharing, setIsSharing] = useState<boolean>(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -64,6 +65,13 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     }
     
     try {
+      setIsSharing(true);
+      
+      toast({
+        title: "Đang xử lý",
+        description: "Đang lưu và tạo liên kết chia sẻ...",
+      });
+      
       const gameData = {
         title: miniGame.title || "Game tương tác",
         content: miniGame.content,
@@ -75,15 +83,11 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         }
       };
       
-      toast({
-        title: "Đang xử lý",
-        description: "Đang lưu và tạo liên kết chia sẻ...",
-      });
-      
       const savedGame = await saveCustomGame(gameData);
       
       if (savedGame) {
         const shareUrl = `${window.location.origin}/game/${savedGame.id}`;
+        console.log("Đã tạo URL chia sẻ:", shareUrl);
         
         if (onShare) {
           onShare();
@@ -103,6 +107,8 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         description: "Không thể tạo liên kết chia sẻ",
         variant: "destructive"
       });
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -152,6 +158,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           showShare={true}
           isGameCreated={isIframeLoaded}
           showGameControls={true}
+          isSharing={isSharing}
         />
       )}
       

@@ -11,6 +11,8 @@ export interface CustomGameData {
 
 export const saveCustomGame = async (gameData: CustomGameData) => {
   try {
+    console.log("Đang lưu game tùy chỉnh:", gameData);
+    
     // Save to games table with proper HTML content and metadata
     const { data: gameEntry, error: gameError } = await supabase
       .from('games')
@@ -26,7 +28,12 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
       .select()
       .single();
 
-    if (gameError) throw gameError;
+    if (gameError) {
+      console.error("Lỗi khi lưu game vào bảng games:", gameError);
+      throw gameError;
+    }
+
+    console.log("Game đã được lưu vào games với ID:", gameEntry.id);
 
     // Save additional game data to custom_games table
     const { data: customGame, error: customError } = await supabase
@@ -48,8 +55,12 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
       .select()
       .single();
 
-    if (customError) throw customError;
+    if (customError) {
+      console.error("Lỗi khi lưu custom_games:", customError);
+      throw customError;
+    }
 
+    console.log("Dữ liệu game tùy chỉnh đã được lưu:", customGame);
     return { ...gameEntry, customData: customGame };
   } catch (error) {
     console.error('Error saving custom game:', error);
@@ -59,6 +70,8 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
 
 export const getCustomGame = async (gameId: string) => {
   try {
+    console.log("Đang lấy game theo ID:", gameId);
+    
     // Get complete game data from both tables
     const { data: game, error: gameError } = await supabase
       .from('games')
@@ -72,7 +85,12 @@ export const getCustomGame = async (gameId: string) => {
       .eq('id', gameId)
       .single();
 
-    if (gameError) throw gameError;
+    if (gameError) {
+      console.error("Không tìm thấy game với ID:", gameId, gameError);
+      throw gameError;
+    }
+    
+    console.log("Đã tìm thấy game:", game);
     return game;
   } catch (error) {
     console.error('Error fetching custom game:', error);
@@ -131,6 +149,8 @@ export const deleteCustomGame = async (gameId: string) => {
       .eq('id', gameId);
 
     if (error) throw error;
+    
+    console.log("Game đã được xóa:", gameId);
   } catch (error) {
     console.error('Error deleting custom game:', error);
     throw error;
@@ -152,10 +172,10 @@ export const listCustomGames = async () => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
+    console.log("Danh sách game tùy chỉnh:", data?.length || 0, "games");
     return data;
   } catch (error) {
     console.error('Error listing custom games:', error);
     throw error;
   }
 };
-
