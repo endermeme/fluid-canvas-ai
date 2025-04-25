@@ -117,3 +117,9 @@
 3. `src/components/quiz/custom-games/CustomGameHeader.tsx`:
    - Thêm prop isSharing để hiển thị trạng thái đang xử lý
    - Cập nhật giao diện nút chia sẻ khi đang trong quá trình xử lý
+
+## 25/04/2024 - Ghi chú về vấn đề Node.js phiên bản cũ
+- Dự án Vite yêu cầu Node.js v14.18+ hoặc 16+
+- Node.js v10.19.0 không hỗ trợ cú pháp import ES modules mà Vite sử dụng
+- Cần nâng cấp Node.js lên phiên bản mới hơn để chạy dự án
+- Có thể sử dụng NVM (Node Version Manager) để dễ dàng cài đặt và quản lý các phiên bản Node.js
