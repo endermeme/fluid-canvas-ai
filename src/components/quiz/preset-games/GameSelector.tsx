@@ -3,7 +3,11 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogTitle 
+} from '@/components/ui/dialog';
 import { 
   Brain, BookOpen, Puzzle, Dices, 
   Image, CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
