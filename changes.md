@@ -1,4 +1,22 @@
+
 # Lịch sử thay đổi mã nguồn
+
+## 25/04/2024 - Kiểm tra logic chia sẻ game tùy chỉnh
+- Đã phân tích quá trình lưu game vào Supabase
+- Xác định cơ chế chia sẻ game thông qua URL và QR code
+- Xác nhận rằng hệ thống lưu trữ và chia sẻ đã được triển khai nhưng cần một số cải tiến
+- Cải thiện trải nghiệm người dùng khi chia sẻ game với người chơi khác
+
+### Quy trình chia sẻ game hiện tại:
+1. Game được tạo và hiển thị trong iframe
+2. Khi người dùng nhấn nút chia sẻ, game được lưu vào bảng `games` trong Supabase
+3. Link chia sẻ được tạo dựa trên ID của game trong Supabase
+4. Người nhận link có thể mở và chơi game ngay lập tức
+
+### Các thành phần liên quan:
+- `EnhancedGameView.tsx`: Xử lý hiển thị game và chức năng chia sẻ
+- `customGameAPI.ts`: Quản lý việc lưu và truy xuất game từ Supabase
+- `QuizHeader.tsx`: Hiển thị nút chia sẻ và dialog QR code
 
 ## 25/04/2024 - Cập nhật cấu hình Vite để cho phép tất cả host
 - Đã thêm các tên miền vào `allowedHosts` trong `vite.config.ts`: aurabusiness.tech, aurabusiness.tech:8080
@@ -119,43 +137,38 @@
 2. Truyền đúng props `onShare` và `showShare` từ PresetGameManager sang PresetGameHeader
 3. Chỉ hiển thị nút chia sẻ khi có game content
 
-## 25/04/2024 - Cập nhật QuizHeader với chức năng chia sẻ game
-- Tích hợp chức năng chia sẻ game với QR code và link
-- Thêm props để hỗ trợ chia sẻ game tùy chỉnh
-- Tích hợp với Supabase để lưu và chia sẻ game
-- Thêm thông báo toast cho các tương tác
-- Thêm chức năng sao chép đường dẫn vào clipboard
-
+## 25/04/2024 - Chuẩn hóa QuizHeader và sửa chức năng chia sẻ
 ### Tệp đã chỉnh sửa:
-- `src/components/quiz/QuizHeader.tsx`: Cập nhật component với chức năng chia sẻ
+- `src/components/quiz/QuizHeader.tsx`: Cập nhật logic chia sẻ và giao diện header
 
 ### Chi tiết thay đổi:
-1. Thêm Dialog hiển thị QR code và link chia sẻ
-2. Tích hợp với saveGameForSharing từ utils/gameExport
-3. Thêm các props mới: gameData và gameType
-4. Cập nhật giao diện và thêm thông báo toast
-5. Thêm chức năng sao chép link vào clipboard
+1. Sửa lại cách xử lý chia sẻ game để phù hợp với cả custom game và preset game
+2. Cải thiện việc kiểm tra dữ liệu game trước khi chia sẻ
+3. Thêm thông báo lỗi khi không có dữ liệu game
+4. Cập nhật giao diện header để thống nhất giữa các loại game
+5. Tối ưu hóa UX với các thông báo toast
 
-## 25/04/2024 - Sửa lỗi chia sẻ game tùy chỉnh
+## 25/04/2024 - Sửa lỗi chia sẻ game không hoạt động
+- Cải thiện quá trình lưu trữ và tạo link chia sẻ cho custom game
 
 ### Tệp đã chỉnh sửa:
-1. `src/components/quiz/custom-games/utils/customGameAPI.ts`:
-   - Thêm log chi tiết để theo dõi quá trình lưu và truy xuất game
-   - Cải thiện xử lý lỗi và thông báo
-   - Đảm bảo dữ liệu được lưu đúng định dạng vào Supabase
+- `src/components/quiz/QuizHeader.tsx`: Sửa logic chia sẻ game
 
-2. `src/components/quiz/custom-games/EnhancedGameView.tsx`:
-   - Thêm trạng thái isSharing để kiểm soát nút chia sẻ
-   - Cải thiện quá trình tạo URL chia sẻ
-   - Thêm log chi tiết để debug quá trình chia sẻ
-   - Tự động sao chép URL vào clipboard
+### Chi tiết thay đổi:
+1. Thêm chỉ báo trạng thái đang chia sẻ (isSharing)
+2. Thêm thông báo toast khi bắt đầu quá trình chia sẻ
+3. Mã hóa dữ liệu game vào nội dung HTML để dễ dàng khôi phục
+4. Kiểm tra URL trả về trước khi hiển thị dialog chia sẻ
+5. Xử lý lỗi chi tiết hơn và hiển thị thông báo phù hợp
 
-3. `src/components/quiz/custom-games/CustomGameHeader.tsx`:
-   - Thêm prop isSharing để hiển thị trạng thái đang xử lý
-   - Cập nhật giao diện nút chia sẻ khi đang trong quá trình xử lý
+## 25/04/2024 - Tích hợp Supabase với custom games
+### Tệp đã chỉnh sửa:
+- `src/components/quiz/custom-games/utils/customGameAPI.ts`: Cập nhật để sử dụng bảng custom_games mới
+- `src/components/quiz/custom-games/EnhancedGameView.tsx`: Cập nhật logic chia sẻ game
 
-## 25/04/2024 - Ghi chú về vấn đề Node.js phiên bản cũ
-- Dự án Vite yêu cầu Node.js v14.18+ hoặc 16+
-- Node.js v10.19.0 không hỗ trợ cú pháp import ES modules mà Vite sử dụng
-- Cần nâng cấp Node.js lên phiên bản mới hơn để chạy dự án
-- Có thể sử dụng NVM (Node Version Manager) để dễ dàng cài đặt và quản lý các phiên bản Node.js
+### Chi tiết thay đổi:
+1. Thêm các hàm mới để tương tác với bảng custom_games
+2. Cập nhật logic lưu trữ để sử dụng cả bảng games và custom_games
+3. Thêm các trường dữ liệu mới cho custom games
+4. Cải thiện xử lý lỗi và thông báo
+5. Tối ưu hóa quá trình lưu trữ và chia sẻ game
