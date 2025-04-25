@@ -19,6 +19,17 @@
 4. **/src/components/quiz/utils/iframe-utils.ts** - Tiện ích xử lý nội dung iframe
 5. **/src/components/quiz/QuizHeader.tsx** - Header chung cho các trang quiz
 
+## 25/04/2024 - Sửa lỗi TypeScript trong các components
+
+### Tệp đã chỉnh sửa:
+- `src/components/quiz/components/GameContainer.tsx`: Sửa đường dẫn import cho `iframe-utils.ts`
+- `src/components/quiz/custom-games/CustomGameHeader.tsx`: Thêm prop `onBack` để hỗ trợ điều hướng
+
+### Chi tiết thay đổi:
+1. Sửa đường dẫn import trong GameContainer.tsx từ `../custom-games/utils/iframe-utils` thành `../utils/iframe-utils`
+2. Thêm prop `onBack` vào interface CustomGameHeaderProps và xử lý trong component
+3. Thêm logic mặc định khi không có hàm onBack được cung cấp (chuyển về trang chủ)
+
 ## 24/04/2024 - Chuẩn hóa giao diện và tổ chức lại mã nguồn cho custom game
 
 ### Tệp đã tạo mới:

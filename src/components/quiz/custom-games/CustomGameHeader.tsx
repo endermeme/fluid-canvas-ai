@@ -1,9 +1,11 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, History, Plus, Share2, RefreshCw, Maximize, PlusCircle } from "lucide-react";
 
 interface CustomGameHeaderProps {
+  onBack?: () => void;
   onShare?: () => void;
   onRefresh?: () => void;
   onFullscreen?: () => void;
@@ -14,6 +16,7 @@ interface CustomGameHeaderProps {
 }
 
 const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({ 
+  onBack,
   onShare, 
   onRefresh,
   onFullscreen,
@@ -24,13 +27,21 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate("/");
+    }
+  };
+
   return (
     <header className="flex justify-between items-center p-3 bg-background/80 backdrop-blur-md border-b sticky top-0 z-20">
       <Button
         variant="ghost"
         size="icon"
         className="hover:bg-primary/10"
-        onClick={() => navigate("/")}
+        onClick={handleBack}
       >
         <ArrowLeft className="h-5 w-5" />
       </Button>
