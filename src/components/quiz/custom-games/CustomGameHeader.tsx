@@ -13,7 +13,6 @@ interface CustomGameHeaderProps {
   isGameCreated?: boolean;
   showGameControls?: boolean;
   isSharing?: boolean;
-  gameTitle?: string; // Thêm prop gameTitle vào interface
 }
 
 const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
@@ -26,7 +25,6 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
   isGameCreated = false,
   showGameControls = false,
   isSharing = false,
-  gameTitle
 }) => {
   const handleBack = () => {
     if (onBack) {
@@ -45,12 +43,6 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        
-        {gameTitle && (
-          <span className="text-sm font-medium truncate max-w-[200px]">
-            {gameTitle}
-          </span>
-        )}
       </div>
 
       <div className="flex items-center gap-2">
