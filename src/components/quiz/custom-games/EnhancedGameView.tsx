@@ -13,6 +13,9 @@ interface EnhancedGameViewProps {
   className?: string;
   onBack?: () => void;
   hideHeader?: boolean;
+  onShare?: () => void;
+  onNewGame?: () => void;
+  extraButton?: React.ReactNode;
 }
 
 const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({ 
@@ -20,7 +23,10 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   onReload,
   className,
   onBack,
-  hideHeader = false
+  hideHeader = false,
+  onShare,
+  onNewGame,
+  extraButton
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeError, setIframeError] = useState<string | null>(null);
@@ -121,6 +127,12 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
                 height: '100%'
               }}
             />
+          </div>
+        )}
+        
+        {extraButton && (
+          <div className="absolute bottom-4 right-4">
+            {extraButton}
           </div>
         )}
       </div>

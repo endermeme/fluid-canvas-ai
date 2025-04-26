@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -159,31 +160,6 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
         });
       });
   };
-
-  const copyToClipboard = async (text: string) => {
-    // ... existing code ...
-  }
-
-  const handleCopy = async () => {
-    // ... existing code ...
-  }
-
-  const exportAndShare = async () => {
-    const shareUrl = await handleShare();
-    setShowShareDialog(true);
-    setShareUrl(shareUrl);
-  }
-
-  const handleHTMLExport = () => {
-    const exportedHTML = document.getElementById("root");
-    const clone = exportedHTML?.cloneNode(true) as HTMLElement;
-    const iframes = clone?.querySelectorAll("iframe");
-    for (let i = 0; i < iframes?.length; i++) {
-      iframes[i].remove();
-    }
-    const html = clone?.outerHTML ?? "";
-    return html;
-  }
 
   return (
     <div className={cn("relative h-full w-full flex flex-col bg-gradient-to-b from-background to-background/95 shadow-lg rounded-lg overflow-hidden", className)}>

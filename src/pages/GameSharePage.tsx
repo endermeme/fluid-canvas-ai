@@ -135,6 +135,18 @@ const GameSharePage: React.FC = () => {
   }
   
   const shareUrl = `${window.location.origin}/game/${gameId}`;
+
+  const joinGameButton = (
+    <Button 
+      size="sm" 
+      variant="outline" 
+      className="text-xs"
+      onClick={() => setShowNameDialog(true)}
+    >
+      <Users className="h-3.5 w-3.5 mr-1" />
+      Tham gia
+    </Button>
+  );
   
   return (
     <QuizContainer
@@ -165,17 +177,7 @@ const GameSharePage: React.FC = () => {
             }}
             onBack={handleBack}
             hideHeader={true}
-            extraButton={
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="text-xs"
-                onClick={() => setShowNameDialog(true)}
-              >
-                <Users className="h-3.5 w-3.5 mr-1" />
-                Tham gia
-              </Button>
-            }
+            extraButton={joinGameButton}
           />
         </TabsContent>
         

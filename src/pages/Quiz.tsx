@@ -338,7 +338,6 @@ const Quiz = () => {
         <EnhancedGameView 
           miniGame={miniGame}
           onBack={handleReset}
-          onShare={handleShare}
           hideHeader={true}
         />
       );

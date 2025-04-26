@@ -80,3 +80,64 @@ export const getRemainingTime = (expiresAt: Date | number): string => {
   
   return `${hours}h ${minutes}m`;
 };
+
+export const saveGameForSharing = async (
+  title: string,
+  gameType: string,
+  content: any,
+  htmlContent: string,
+  description?: string
+): Promise<string> => {
+  try {
+    // Tạo một ID mới cho game
+    const gameId = crypto.randomUUID();
+    
+    // Tính thời gian hết hạn (3 ngày từ hiện tại)
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 3);
+    
+    // Nhúng dữ liệu game vào HTML content
+    let processedHtmlContent = htmlContent;
+    
+    // Nếu content là object, encode nó và nhúng vào HTML
+    if (typeof content === 'object' && content !== null) {
+      const encodedContent = encodeURIComponent(JSON.stringify(content));
+      
+      // Thêm data attribute vào thẻ body
+      if (!processedHtmlContent.includes('data-game-content')) {
+        processedHtmlContent = processedHtmlContent.replace(
+          /<body([^>]*)>/i,
+          `<body$1 data-game-content="${encodedContent}">`
+        );
+      }
+    }
+    
+    // Lưu game vào database
+    const { data, error } = await supabase
+      .from('games')
+      .insert([
+        {
+          id: gameId,
+          title,
+          game_type: gameType,
+          description: description || `Shared game: ${title}`,
+          html_content: processedHtmlContent,
+          expires_at: expiresAt.toISOString(),
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error saving game:", error);
+      throw new Error("Không thể lưu game");
+    }
+
+    // Trả về URL cho game đã được chia sẻ
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/game/${gameId}`;
+  } catch (error) {
+    console.error("Error in saveGameForSharing:", error);
+    throw error;
+  }
+};

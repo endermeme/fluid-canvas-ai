@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
@@ -117,7 +118,6 @@ const GameController: React.FC<GameControllerProps> = ({
             }} 
             onBack={handleBack}
             onNewGame={handleNewGame}
-            onShare={handleShareGame}
             hideHeader={false}
           />
         </div>
