@@ -1,3 +1,4 @@
+
 # Lịch sử thay đổi mã nguồn
 
 ## 26/04/2024 - Thêm lại chức năng chia sẻ game
@@ -23,3 +24,9 @@
    - onShare: Xử lý chia sẻ game
    - onNewGame: Tạo game mới
    - extraButton: Thêm nút tùy chỉnh
+
+## 26/04/2024 - Sửa lỗi TypeScript trong CustomGameHeader
+- Cập nhật interface CustomGameHeaderProps để bổ sung các props còn thiếu
+- Thêm props onShare và onNewGame vào CustomGameHeader
+- Thêm các nút share và new game vào giao diện header
+- Sửa lỗi TypeScript trong EnhancedGameView.tsx
