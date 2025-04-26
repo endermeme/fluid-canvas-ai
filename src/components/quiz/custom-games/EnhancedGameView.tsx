@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { enhanceIframeContent } from '../utils/iframe-utils';
 import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
+import { saveGameForSharing } from '@/utils/gameExport';
 
 interface EnhancedGameViewProps {
   miniGame: {
@@ -13,7 +14,7 @@ interface EnhancedGameViewProps {
   className?: string;
   onBack?: () => void;
   hideHeader?: boolean;
-  onShare?: () => void;
+  onShare?: () => Promise<string>;
   onNewGame?: () => void;
   extraButton?: React.ReactNode;
 }
@@ -31,6 +32,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeError, setIframeError] = useState<string | null>(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState<boolean>(false);
+  const [isSharing, setIsSharing] = useState<boolean>(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -83,6 +85,39 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     }
   };
 
+  const handleShare = async (): Promise<string | void> => {
+    if (onShare) {
+      return await onShare();
+    }
+    
+    try {
+      setIsSharing(true);
+      toast({
+        title: "Đang xử lý",
+        description: "Đang tạo liên kết chia sẻ...",
+      });
+      
+      const url = await saveGameForSharing(
+        miniGame.title || 'Game tương tác',
+        'custom',
+        { content: miniGame.content },
+        miniGame.content,
+        'Shared custom game'
+      );
+      
+      setIsSharing(false);
+      return url;
+    } catch (error) {
+      console.error("Error sharing game:", error);
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
+        variant: "destructive"
+      });
+      setIsSharing(false);
+    }
+  };
+
   return (
     <div className={`w-full h-full flex flex-col ${className || ''}`}>
       {!hideHeader && (
@@ -90,9 +125,10 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           onBack={onBack}
           onRefresh={refreshGame}
           onFullscreen={handleFullscreen}
-          onShare={onShare}
+          onShare={handleShare}
           onNewGame={onNewGame}
           showGameControls={true}
+          isSharing={isSharing}
         />
       )}
       

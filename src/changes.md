@@ -1,37 +1,21 @@
+
 # Lịch sử thay đổi mã nguồn
 
-## 26/04/2024 - Thêm lại chức năng chia sẻ game
-- Tạo bảng shared_games và thiết lập RLS policies
-- Cập nhật gameExport.ts với các hàm xử lý chia sẻ game
-- Thêm props mới cho EnhancedGameView để hỗ trợ chia sẻ game
-- Ghi chú các thay đổi trong changes.md
-
-### Tệp đã chỉnh sửa:
-1. `src/utils/gameExport.ts`: Thêm lại các hàm chia sẻ game
-2. `src/components/quiz/custom-games/EnhancedGameView.tsx`: Cập nhật interface và thêm props mới
-3. `src/changes.md`: Ghi chú các thay đổi
-
-### Chi tiết thay đổi:
-1. Tạo bảng `shared_games` với các trường:
-   - id, game_id, created_at, expires_at, share_code, is_active
-   - Thêm các indexes và RLS policies
-2. Thêm lại các hàm trong gameExport.ts:
-   - saveGameForSharing: Lưu game và tạo link chia sẻ
-   - getSharedGame: Lấy thông tin game từ mã chia sẻ
-   - getRemainingTime: Tính thời gian còn lại
-3. Cập nhật EnhancedGameView với các props mới:
-   - onShare: Xử lý chia sẻ game
-   - onNewGame: Tạo game mới
-   - extraButton: Thêm nút tùy chỉnh
-
-## 26/04/2024 - Sửa lỗi TypeScript trong CustomGameHeader
-- Cập nhật interface CustomGameHeaderProps để bổ sung các props còn thiếu
-- Thêm props onShare và onNewGame vào CustomGameHeader
-- Thêm các nút share và new game vào giao diện header
-- Sửa lỗi TypeScript trong EnhancedGameView.tsx
-
 ## 26/04/2024 - Cập nhật chức năng chia sẻ game
-- Thêm Dialog hiển thị QR code và link chia sẻ trong CustomGameHeader
-- Sử dụng hook useToast để hiển thị thông báo
-- Thêm chức năng sao chép link vào clipboard
-- Tích hợp với saveGameForSharing từ utils/gameExport
+- Thêm nút chia sẻ vào CustomGameHeader
+- Tích hợp chức năng tạo QR code và link chia sẻ
+- Cải thiện UX/UI cho phần chia sẻ game
+- Thêm toast thông báo trạng thái
+
+## 26/04/2024 - Sửa lỗi TypeScript trong EnhancedGameView
+- Cập nhật interface CustomGameHeaderProps
+- Thêm props onShare và onNewGame
+- Thêm xử lý chia sẻ và tạo game mới
+
+## 25/04/2024 - Cập nhật chức năng chia sẻ game
+- Tích hợp chức năng chia sẻ game với QR code
+- Thêm tính năng sao chép link vào clipboard
+
+## 24/04/2024 - Chuẩn hóa giao diện game
+- Tạo CustomGameHeader component
+- Thêm các nút điều hướng và chức năng

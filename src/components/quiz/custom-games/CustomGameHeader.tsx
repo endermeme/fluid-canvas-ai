@@ -12,9 +12,10 @@ interface CustomGameHeaderProps {
   onBack?: () => void;
   onRefresh?: () => void;
   onFullscreen?: () => void;
-  onShare?: () => void;
+  onShare?: () => Promise<string | void>;
   onNewGame?: () => void;
   showGameControls?: boolean;
+  isSharing?: boolean;
 }
 
 const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
@@ -24,6 +25,7 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
   onShare,
   onNewGame,
   showGameControls = false,
+  isSharing = false,
 }) => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
@@ -37,20 +39,21 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
   };
 
   const handleShare = async () => {
-    if (onShare) {
-      try {
-        await onShare();
-        const currentUrl = window.location.href;
-        setShareUrl(currentUrl);
+    if (!onShare) return;
+    
+    try {
+      const url = await onShare();
+      if (url) {
+        setShareUrl(url.toString());
         setShowShareDialog(true);
-      } catch (error) {
-        console.error('Error sharing game:', error);
-        toast({
-          title: "Lỗi chia sẻ",
-          description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
-          variant: "destructive"
-        });
       }
+    } catch (error) {
+      console.error('Error sharing game:', error);
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -113,13 +116,15 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
               
               {onShare && (
                 <Button 
-                  variant="ghost" 
+                  variant="default" 
                   size="sm"
                   onClick={handleShare}
-                  className="h-8 w-8 p-0"
+                  disabled={isSharing}
+                  className="h-8 px-3 flex items-center gap-1"
                   title="Chia sẻ"
                 >
                   <Share2 className="h-4 w-4" />
+                  <span>Chia sẻ</span>
                 </Button>
               )}
               
