@@ -1,16 +1,17 @@
 
-import React, { useRef, useState } from 'react';
-import { enhanceIframeContent } from '../utils/iframe-utils';
-import CustomGameHeader from './CustomGameHeader';
+import React, { useRef, useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import GameIframeView from './GameIframeView';
 import ShareGameDialog from './ShareGameDialog';
+import CustomGameHeader from './CustomGameHeader';
+
+interface MiniGame {
+  title?: string;
+  content: string;
+}
 
 interface EnhancedGameViewProps {
-  miniGame: {
-    title?: string;
-    content: string;
-  };
+  miniGame: MiniGame;
   onReload?: () => void;
   className?: string;
   onBack?: () => void;
@@ -39,6 +40,18 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const [shareUrl, setShareUrl] = useState('');
   const { toast } = useToast();
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   const handleIframeLoad = () => {
     console.log("Iframe đã được tải xong");
     setIsIframeLoaded(true);
@@ -48,8 +61,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     if (iframeRef.current && miniGame?.content) {
       try {
         setIsIframeLoaded(false);
-        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
-        iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
         
         if (onReload) {
@@ -106,6 +117,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     }
   };
 
+  // Error component
   if (iframeError) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 bg-destructive/10">

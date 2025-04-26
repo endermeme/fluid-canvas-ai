@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { enhanceIframeContent } from '../utils/iframe-utils';
 
 interface GameIframeViewProps {
@@ -10,6 +10,17 @@ interface GameIframeViewProps {
 }
 
 const GameIframeView = ({ content, title, onLoad, iframeRef }: GameIframeViewProps) => {
+  useEffect(() => {
+    if (iframeRef.current && content) {
+      try {
+        const enhancedContent = enhanceIframeContent(content, title);
+        iframeRef.current.srcdoc = enhancedContent;
+      } catch (error) {
+        console.error("Error setting iframe content:", error);
+      }
+    }
+  }, [content, title, iframeRef]);
+
   return (
     <div className="relative w-full h-full">
       <iframe

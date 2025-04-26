@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
-import { AIGameGenerator } from '../generator/geminiGenerator';
 import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
@@ -162,7 +161,7 @@ const GameController: React.FC<GameControllerProps> = ({
       );
     }
     
-    // Thay đổi logic ở đây - không tự chuyển hướng
+    // Không có game hoặc form
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
         <div className="p-6 bg-background/90 rounded-xl shadow-lg border border-primary/10 max-w-md w-full">
