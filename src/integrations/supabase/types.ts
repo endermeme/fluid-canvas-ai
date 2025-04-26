@@ -121,6 +121,41 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_games: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          game_id: string | null
+          id: string
+          is_active: boolean | null
+          share_code: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          game_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          share_code?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          game_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          share_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_games_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       visitor_logs: {
         Row: {
           browser: string

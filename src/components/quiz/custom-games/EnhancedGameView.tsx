@@ -90,6 +90,8 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           onBack={onBack}
           onRefresh={refreshGame}
           onFullscreen={handleFullscreen}
+          onShare={onShare}
+          onNewGame={onNewGame}
           showGameControls={true}
         />
       )}
