@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
@@ -20,50 +21,98 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { QRCodeSVG } from 'qrcode.react';
+import { useToast } from '@/hooks/use-toast';
+
+// Định nghĩa schema validation cho form đăng ký
+const playerFormSchema = z.object({
+  playerName: z.string().min(2, {
+    message: "Tên phải có ít nhất 2 ký tự",
+  }),
+  playerAge: z.string().refine((val) => {
+    const age = parseInt(val, 10);
+    return !isNaN(age) && age >= 6 && age <= 100;
+  }, {
+    message: "Tuổi phải từ 6 đến 100",
+  })
+});
+
+type PlayerFormValues = z.infer<typeof playerFormSchema>;
 
 const GameSharePage: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const [game, setGame] = useState<StoredGame | null>(null);
-  const [playerName, setPlayerName] = useState('');
   const [showNameDialog, setShowNameDialog] = useState(false);
+  const [hasRegistered, setHasRegistered] = useState(false);
   const [participants, setParticipants] = useState<GameParticipant[]>([]);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState('game');
+  const [gameExpired, setGameExpired] = useState(false);
+  const { toast } = useToast();
+  
+  const form = useForm<PlayerFormValues>({
+    resolver: zodResolver(playerFormSchema),
+    defaultValues: {
+      playerName: "",
+      playerAge: ""
+    },
+  });
   
   useEffect(() => {
     const loadGame = async () => {
       if (gameId) {
-        const loadedGame = await getSharedGame(gameId);
-        if (loadedGame) {
-          const completeGame: StoredGame = {
-            ...loadedGame,
-            description: loadedGame.description || `Shared game: ${loadedGame.title}`
-          };
-          setGame(completeGame);
+        try {
+          const loadedGame = await getSharedGame(gameId);
           
-          const sessionsJson = localStorage.getItem('game_sessions');
-          if (sessionsJson) {
-            const sessions = JSON.parse(sessionsJson);
-            const session = sessions.find((s: any) => s.id === gameId);
-            if (session && session.participants) {
-              setParticipants(session.participants);
+          if (loadedGame) {
+            const completeGame: StoredGame = {
+              ...loadedGame,
+              description: loadedGame.description || `Shared game: ${loadedGame.title}`
+            };
+            setGame(completeGame);
+            
+            // Kiểm tra game có hết hạn chưa
+            if (loadedGame.expiresAt) {
+              const expiryTime = new Date(loadedGame.expiresAt).getTime();
+              if (expiryTime < Date.now()) {
+                setGameExpired(true);
+              }
             }
+            
+            const sessionsJson = localStorage.getItem('game_sessions');
+            if (sessionsJson) {
+              const sessions = JSON.parse(sessionsJson);
+              const session = sessions.find((s: any) => s.id === gameId);
+              if (session && session.participants) {
+                setParticipants(session.participants);
+              }
+            }
+            
+            // Kiểm tra xem người chơi đã đăng ký chưa
+            const registeredGamesStr = localStorage.getItem('registered_games');
+            if (registeredGamesStr) {
+              const registeredGames = JSON.parse(registeredGamesStr);
+              if (registeredGames.includes(gameId)) {
+                setHasRegistered(true);
+              } else {
+                // Hiển thị dialog đăng ký ngay
+                setShowNameDialog(true);
+              }
+            } else {
+              setShowNameDialog(true);
+            }
+          } else {
+            setGameExpired(true);
           }
+        } catch (error) {
+          console.error("Không thể tải game:", error);
+          setGameExpired(true);
         }
       }
     };
@@ -81,27 +130,69 @@ const GameSharePage: React.FC = () => {
       .then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+        toast({
+          title: "Đã sao chép",
+          description: "Đường dẫn đã được sao chép vào clipboard.",
+        });
       })
       .catch(err => {
         console.error('Không thể sao chép liên kết:', err);
+        toast({
+          title: "Lỗi sao chép", 
+          description: "Không thể sao chép liên kết.",
+          variant: "destructive"
+        });
       });
   };
   
-  const handleJoinGame = async () => {
-    if (!playerName.trim() || !gameId || !game) return;
+  const handleJoinGame = async (values: PlayerFormValues) => {
+    if (!gameId || !game) return;
     
-    const fakeIp = getFakeIpAddress();
-    
-    const result = await addParticipant(gameId, playerName, fakeIp);
-    
-    if (result.success) {
-      setParticipants(prev => result.participant ? [...prev, result.participant] : prev);
-      setShowNameDialog(false);
-    } else if (result.participant) {
-      setParticipants(prev => 
-        prev.map(p => p.id === result.participant?.id ? result.participant : p)
-      );
-      setShowNameDialog(false);
+    try {
+      const fakeIp = getFakeIpAddress();
+      
+      const result = await addParticipant(gameId, `${values.playerName} (${values.playerAge} tuổi)`, fakeIp);
+      
+      if (result.success) {
+        setParticipants(prev => result.participant ? [...prev, result.participant] : prev);
+        setShowNameDialog(false);
+        setHasRegistered(true);
+        
+        // Lưu game ID vào danh sách đã đăng ký
+        const registeredGamesStr = localStorage.getItem('registered_games');
+        let registeredGames = registeredGamesStr ? JSON.parse(registeredGamesStr) : [];
+        registeredGames.push(gameId);
+        localStorage.setItem('registered_games', JSON.stringify(registeredGames));
+        
+        toast({
+          title: "Tham gia thành công",
+          description: "Bạn đã tham gia vào game này!",
+        });
+      } else if (result.participant) {
+        setParticipants(prev => 
+          prev.map(p => p.id === result.participant?.id ? result.participant : p)
+        );
+        setShowNameDialog(false);
+        setHasRegistered(true);
+        
+        toast({
+          title: "Đã cập nhật thông tin",
+          description: "Thông tin tham gia của bạn đã được cập nhật.",
+        });
+      } else {
+        toast({
+          title: "Lỗi tham gia",
+          description: result.message || "Không thể tham gia game này.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Lỗi khi tham gia game:", error);
+      toast({
+        title: "Lỗi hệ thống",
+        description: "Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại.",
+        variant: "destructive"
+      });
     }
   };
   
@@ -116,17 +207,36 @@ const GameSharePage: React.FC = () => {
     });
   };
   
-  if (!game) {
+  if (!game && !gameExpired) {
     return (
       <QuizContainer
-        title="Game không tồn tại"
+        title="Đang tải game..."
+        showBackButton={true}
+        onBack={handleBack}
+        className="p-0 overflow-hidden"
+      >
+        <div className="flex items-center justify-center h-full">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+            <p className="text-primary font-medium">Đang tải thông tin game...</p>
+          </div>
+        </div>
+      </QuizContainer>
+    );
+  }
+  
+  if (gameExpired) {
+    return (
+      <QuizContainer
+        title="Game không khả dụng"
         showBackButton={true}
         onBack={handleBack}
         className="p-0 overflow-hidden"
       >
         <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
           <div className="p-8 bg-background/90 rounded-xl shadow-lg border border-primary/10 max-w-md w-full">
-            <p className="text-center mb-6 text-muted-foreground">Game đã hết hạn hoặc không tồn tại.</p>
+            <h2 className="text-xl font-bold text-center mb-4">Game đã hết hạn hoặc không tồn tại</h2>
+            <p className="text-center mb-6 text-muted-foreground">Game này đã hết thời hạn hoặc không còn khả dụng.</p>
             <Button onClick={handleBack} className="w-full">Quay lại</Button>
           </div>
         </div>
@@ -144,7 +254,7 @@ const GameSharePage: React.FC = () => {
       onClick={() => setShowNameDialog(true)}
     >
       <Users className="h-3.5 w-3.5 mr-1" />
-      Tham gia
+      {hasRegistered ? "Cập nhật thông tin" : "Tham gia"}
     </Button>
   );
   
@@ -160,7 +270,7 @@ const GameSharePage: React.FC = () => {
           <TabsList>
             <TabsTrigger value="game">Game</TabsTrigger>
             <TabsTrigger value="share">Chia sẻ</TabsTrigger>
-            <TabsTrigger value="participants">Người tham gia ({participants.length})</TabsTrigger>
+            <TabsTrigger value="participants">Người chơi ({participants.length})</TabsTrigger>
           </TabsList>
           
           <div className="flex items-center text-sm text-muted-foreground">
@@ -177,7 +287,8 @@ const GameSharePage: React.FC = () => {
             }}
             onBack={handleBack}
             hideHeader={true}
-            extraButton={joinGameButton}
+            extraButton={!hasRegistered ? joinGameButton : undefined}
+            gameExpired={gameExpired}
           />
         </TabsContent>
         
@@ -220,7 +331,7 @@ const GameSharePage: React.FC = () => {
                   onClick={() => setShowNameDialog(true)}
                 >
                   <Users className="h-4 w-4 mr-2" />
-                  Tham gia game
+                  {hasRegistered ? "Cập nhật thông tin" : "Tham gia game"}
                 </Button>
               </CardFooter>
             </Card>
@@ -255,7 +366,7 @@ const GameSharePage: React.FC = () => {
           <div className="max-w-md mx-auto space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Danh sách người tham gia</CardTitle>
+                <CardTitle>Danh sách người chơi</CardTitle>
                 <CardDescription>
                   {participants.length > 0 
                     ? `${participants.length} người đã tham gia game này` 
@@ -311,7 +422,7 @@ const GameSharePage: React.FC = () => {
                   onClick={() => setShowNameDialog(true)}
                 >
                   <Users className="h-4 w-4 mr-2" />
-                  Tham gia game
+                  {hasRegistered ? "Cập nhật thông tin" : "Tham gia game"}
                 </Button>
               </CardFooter>
             </Card>
@@ -324,27 +435,52 @@ const GameSharePage: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Tham gia game</DialogTitle>
             <DialogDescription>
-              Nhập tên của bạn để tham gia game "{game.title}"
+              Vui lòng nhập thông tin để tham gia game "{game.title}"
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <Label htmlFor="player-name">Tên của bạn</Label>
-            <Input 
-              id="player-name" 
-              value={playerName} 
-              onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="Nhập tên của bạn"
-              className="mt-2"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowNameDialog(false)}>
-              Hủy
-            </Button>
-            <Button onClick={handleJoinGame} disabled={!playerName.trim()}>
-              Tham gia
-            </Button>
-          </DialogFooter>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleJoinGame)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="playerName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tên của bạn</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Nhập tên của bạn" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="playerAge"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tuổi</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="number" min="6" max="100" placeholder="Nhập tuổi của bạn" />
+                    </FormControl>
+                    <FormDescription>
+                      Thông tin này chỉ dùng cho mục đích thống kê
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter className="mt-6">
+                <Button type="button" variant="outline" onClick={() => setShowNameDialog(false)}>
+                  Hủy
+                </Button>
+                <Button type="submit">
+                  {hasRegistered ? "Cập nhật" : "Tham gia"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </QuizContainer>

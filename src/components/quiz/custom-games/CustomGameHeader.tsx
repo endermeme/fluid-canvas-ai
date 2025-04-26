@@ -16,6 +16,7 @@ interface CustomGameHeaderProps {
   onNewGame?: () => void;
   showGameControls?: boolean;
   isSharing?: boolean;
+  isTeacher?: boolean;
 }
 
 const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
@@ -26,6 +27,7 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
   onNewGame,
   showGameControls = false,
   isSharing = false,
+  isTeacher = false,
 }) => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
@@ -128,7 +130,7 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
                 </Button>
               )}
               
-              {onNewGame && (
+              {onNewGame && isTeacher && (
                 <Button 
                   variant="ghost" 
                   size="sm"

@@ -17,6 +17,8 @@ interface EnhancedGameViewProps {
   onShare?: () => Promise<string>;
   onNewGame?: () => void;
   extraButton?: React.ReactNode;
+  isTeacher?: boolean;
+  gameExpired?: boolean;
 }
 
 const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({ 
@@ -27,12 +29,15 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   hideHeader = false,
   onShare,
   onNewGame,
-  extraButton
+  extraButton,
+  isTeacher = false,
+  gameExpired = false
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeError, setIframeError] = useState<string | null>(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState<boolean>(false);
   const [isSharing, setIsSharing] = useState<boolean>(false);
+  const [showJoinDialog, setShowJoinDialog] = useState<boolean>(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -52,6 +57,13 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       }
     }
   }, [miniGame]);
+
+  // Nếu game đã hết hạn, hiển thị thông báo
+  useEffect(() => {
+    if (gameExpired) {
+      setIframeError("Game này đã hết hạn hoặc không còn khả dụng.");
+    }
+  }, [gameExpired]);
 
   const refreshGame = () => {
     if (iframeRef.current && miniGame?.content) {
@@ -129,6 +141,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           onNewGame={onNewGame}
           showGameControls={true}
           isSharing={isSharing}
+          isTeacher={isTeacher}
         />
       )}
       

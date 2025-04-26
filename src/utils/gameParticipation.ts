@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { GameParticipant, GameSession } from "@/utils/types";
 
@@ -8,6 +7,46 @@ export const getFakeIpAddress = () => {
   return octets.join('.');
 };
 
+// Thêm hàm để kiểm tra anti-cheat
+export const verifyParticipant = async (gameId: string, ipAddress: string): Promise<boolean> => {
+  try {
+    // Kiểm tra số lần tham gia trong một khoảng thời gian ngắn
+    const { data: recentAttempts, error: checkError } = await supabase
+      .from('game_participants')
+      .select('timestamp')
+      .eq('game_id', gameId)
+      .eq('ip_address', ipAddress)
+      .order('timestamp', { ascending: false })
+      .limit(10);
+    
+    if (checkError) {
+      console.error("Error checking participant data:", checkError);
+      return true; // Cho phép tham gia trong trường hợp lỗi
+    }
+    
+    // Nếu có quá nhiều lần tham gia trong thời gian ngắn (1 phút)
+    if (recentAttempts && recentAttempts.length > 5) {
+      const now = Date.now();
+      const oneMinuteAgo = now - 60 * 1000;
+      
+      const recentCount = recentAttempts.filter(attempt => {
+        const timestamp = new Date(attempt.timestamp).getTime();
+        return timestamp > oneMinuteAgo;
+      }).length;
+      
+      if (recentCount > 5) {
+        console.warn(`Possible abuse detected: ${recentCount} attempts in the last minute from IP ${ipAddress}`);
+        return false;
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error in verifyParticipant:", error);
+    return true; // Cho phép tham gia trong trường hợp lỗi
+  }
+};
+
 // Add a participant to a game
 export const addParticipant = async (gameId: string, name: string, ipAddress: string): Promise<{ 
   success: boolean; 
@@ -15,6 +54,17 @@ export const addParticipant = async (gameId: string, name: string, ipAddress: st
   participant: GameParticipant | null;
 }> => {
   try {
+    // Kiểm tra anti-cheat
+    const isAllowed = await verifyParticipant(gameId, ipAddress);
+    
+    if (!isAllowed) {
+      return { 
+        success: false, 
+        message: "Quá nhiều yêu cầu trong thời gian ngắn. Vui lòng thử lại sau.", 
+        participant: null 
+      };
+    }
+    
     // Check if this IP has already participated recently
     const { data: existingParticipants, error: checkError } = await supabase
       .from('game_participants')
