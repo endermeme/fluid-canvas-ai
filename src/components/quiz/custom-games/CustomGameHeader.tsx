@@ -1,12 +1,12 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, RefreshCw, Fullscreen, Share2, PlusCircle, Copy, Check } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Maximize2, Share2, Copy, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { QRCodeSVG } from 'qrcode.react';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 interface CustomGameHeaderProps {
   onBack?: () => void;
@@ -17,6 +17,7 @@ interface CustomGameHeaderProps {
   showGameControls?: boolean;
   isSharing?: boolean;
   isTeacher?: boolean;
+  gameType?: string;
 }
 
 const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
@@ -28,6 +29,7 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
   showGameControls = false,
   isSharing = false,
   isTeacher = false,
+  gameType = "Trò chơi"
 }) => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
@@ -81,16 +83,23 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
 
   return (
     <>
-      <header className="bg-background/80 backdrop-blur-sm p-2 flex items-center justify-between border-b">
-        <div className="flex items-center gap-2">
+      <header className="bg-background/80 backdrop-blur-md border-b px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <div className="flex items-center gap-3">
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={handleBack}
-            className="h-8 w-8 p-0"
+            onClick={onBack}
+            className="hover:bg-primary/10"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
+          
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-medium">{gameType}</h1>
+            <Badge variant="secondary" className="font-normal">
+              Beta
+            </Badge>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -100,8 +109,8 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
                 variant="ghost" 
                 size="sm"
                 onClick={onRefresh}
-                className="h-8 w-8 p-0"
-                title="Tải lại"
+                className="hover:bg-primary/10"
+                title="Làm mới"
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
@@ -110,10 +119,10 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
                 variant="ghost" 
                 size="sm"
                 onClick={onFullscreen}
-                className="h-8 w-8 p-0"
+                className="hover:bg-primary/10"
                 title="Toàn màn hình"
               >
-                <Fullscreen className="h-4 w-4" />
+                <Maximize2 className="h-4 w-4" />
               </Button>
               
               {onShare && (
@@ -122,23 +131,10 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
                   size="sm"
                   onClick={handleShare}
                   disabled={isSharing}
-                  className="h-8 px-3 flex items-center gap-1"
-                  title="Chia sẻ"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
                 >
-                  <Share2 className="h-4 w-4" />
+                  <Share2 className="h-4 w-4 mr-2" />
                   <span>Chia sẻ</span>
-                </Button>
-              )}
-              
-              {onNewGame && isTeacher && (
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={onNewGame}
-                  className="h-8 w-8 p-0"
-                  title="Tạo game mới"
-                >
-                  <PlusCircle className="h-4 w-4" />
                 </Button>
               )}
             </>
@@ -155,7 +151,7 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center space-y-4 py-4">
-            <div className="p-4 bg-white rounded-lg">
+            <div className="p-4 bg-white rounded-lg shadow-inner">
               <QRCodeSVG value={shareUrl} size={200} />
             </div>
             

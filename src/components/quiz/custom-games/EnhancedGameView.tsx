@@ -4,6 +4,10 @@ import { enhanceIframeContent } from '../utils/iframe-utils';
 import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 interface EnhancedGameViewProps {
   miniGame: {
@@ -37,7 +41,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const [iframeError, setIframeError] = useState<string | null>(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState<boolean>(false);
   const [isSharing, setIsSharing] = useState<boolean>(false);
-  const [showJoinDialog, setShowJoinDialog] = useState<boolean>(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,9 +51,22 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
         
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 20;
+          if (progress > 90) {
+            clearInterval(interval);
+            progress = 90;
+          }
+          setLoadingProgress(progress);
+        }, 100);
+        
         iframeRef.current.onload = () => {
-          console.log("Iframe đã được tải xong");
-          setIsIframeLoaded(true);
+          clearInterval(interval);
+          setLoadingProgress(100);
+          setTimeout(() => {
+            setIsIframeLoaded(true);
+          }, 200);
         };
       } catch (error) {
         console.error("Error setting iframe content:", error);
@@ -58,7 +75,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     }
   }, [miniGame]);
 
-  // Nếu game đã hết hạn, hiển thị thông báo
   useEffect(() => {
     if (gameExpired) {
       setIframeError("Game này đã hết hạn hoặc không còn khả dụng.");
@@ -69,6 +85,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     if (iframeRef.current && miniGame?.content) {
       try {
         setIsIframeLoaded(false);
+        setLoadingProgress(0);
         const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
         iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
@@ -98,9 +115,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   };
 
   const handleShare = async (): Promise<string | void> => {
-    if (onShare) {
-      return await onShare();
-    }
+    if (!miniGame?.content) return;
     
     try {
       setIsSharing(true);
@@ -112,9 +127,8 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       const url = await saveGameForSharing(
         miniGame.title || 'Game tương tác',
         'custom',
-        { content: miniGame.content },
-        miniGame.content,
-        'Shared custom game'
+        miniGame,
+        miniGame.content
       );
       
       setIsSharing(false);
@@ -131,7 +145,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   };
 
   return (
-    <div className={`w-full h-full flex flex-col ${className || ''}`}>
+    <div className={`w-full h-full flex flex-col bg-gradient-to-b from-background to-background/95 ${className || ''}`}>
       {!hideHeader && (
         <CustomGameHeader
           onBack={onBack}
@@ -142,27 +156,28 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           showGameControls={true}
           isSharing={isSharing}
           isTeacher={isTeacher}
+          gameType={miniGame?.title}
         />
       )}
       
-      <div className="flex-1 relative overflow-hidden">
+      <div className="flex-1 relative overflow-hidden p-4">
         {iframeError ? (
-          <div className="flex flex-col items-center justify-center h-full p-6 bg-destructive/10">
-            <p className="text-destructive mb-4">{iframeError}</p>
-            <button 
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-              onClick={() => refreshGame()}
-            >
-              Tải lại
-            </button>
+          <div className="flex flex-col items-center justify-center h-full">
+            <Alert variant="destructive" className="max-w-md">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Lỗi tải game</AlertTitle>
+              <AlertDescription>{iframeError}</AlertDescription>
+            </Alert>
           </div>
         ) : (
-          <div className="relative w-full h-full">
+          <Card className="relative w-full h-full overflow-hidden shadow-lg border-primary/10">
             {!isIframeLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-10">
-                <div className="flex flex-col items-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
-                  <p className="text-primary font-medium">Đang tải game...</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md z-10 p-6">
+                <div className="w-full max-w-xs space-y-4">
+                  <Progress value={loadingProgress} className="w-full" />
+                  <p className="text-center text-sm text-muted-foreground">
+                    Đang tải game... {Math.round(loadingProgress)}%
+                  </p>
                 </div>
               </div>
             )}
@@ -178,11 +193,11 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
                 height: '100%'
               }}
             />
-          </div>
+          </Card>
         )}
         
         {extraButton && (
-          <div className="absolute bottom-4 right-4">
+          <div className="absolute bottom-4 right-4 z-10">
             {extraButton}
           </div>
         )}
