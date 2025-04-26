@@ -1,4 +1,3 @@
-
 # Lịch sử thay đổi mã nguồn
 
 ## 26/04/2024 - Thêm lại chức năng chia sẻ game
@@ -30,3 +29,9 @@
 - Thêm props onShare và onNewGame vào CustomGameHeader
 - Thêm các nút share và new game vào giao diện header
 - Sửa lỗi TypeScript trong EnhancedGameView.tsx
+
+## 26/04/2024 - Cập nhật chức năng chia sẻ game
+- Thêm Dialog hiển thị QR code và link chia sẻ trong CustomGameHeader
+- Sử dụng hook useToast để hiển thị thông báo
+- Thêm chức năng sao chép link vào clipboard
+- Tích hợp với saveGameForSharing từ utils/gameExport
