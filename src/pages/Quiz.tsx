@@ -19,7 +19,6 @@ const Quiz = () => {
   
   const handleGenerate = async (promptText: string, game?: any) => {
     if (game) {
-      // Nếu đã có game được tạo từ CustomGameForm
       setGameContent(game.content);
       setGameTitle(game.title || `Game: ${promptText.substring(0, 40)}...`);
       setMiniGame({
@@ -115,101 +114,46 @@ const Quiz = () => {
       <html lang="vi">
       <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>Game Demo: ${promptText}</title>
         <style>
           * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-          }
-          
-          body {
-            background-color: #f8f9fa;
-            color: #111827;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-          }
-          
-          .container {
-            background-color: white;
-            border-radius: 12px;
-            padding: 32px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-            width: 100%;
-            max-width: 800px;
-            text-align: center;
-          }
-          
-          h1 {
-            color: #4f46e5;
-            margin-bottom: 16px;
-            font-size: 24px;
-          }
-          
-          .game-content {
-            margin-top: 32px;
-            border: 1px solid #e5e7eb;
-            padding: 24px;
-            border-radius: 8px;
-            background-color: #f3f4f6;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
           }
           
           button {
-            background-color: #4f46e5;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
+            min-width: 44px;
+            min-height: 44px;
+            padding: 12px 24px;
+            margin: 8px;
             font-size: 16px;
-            margin: 10px 5px;
-            transition: all 0.2s;
-          }
-          
-          button:hover {
-            background-color: #4338ca;
-            transform: translateY(-2px);
-          }
-          
-          .score {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 20px 0;
-            color: #4f46e5;
           }
           
           .game-object {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             background-color: #4f46e5;
             border-radius: 50%;
             position: absolute;
             cursor: pointer;
             transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
           }
           
-          .game-object:hover {
-            transform: scale(1.1);
+          @media (hover: hover) and (pointer: fine) {
+            .game-object:hover {
+              transform: scale(1.1);
+            }
           }
           
-          .message {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 6px;
-            font-style: italic;
-            background-color: #e0f2fe;
-            color: #075985;
+          .game-object:active {
+            transform: scale(0.95);
+          }
+          
+          .no-select {
+            user-select: none;
+            -webkit-user-select: none;
           }
         </style>
       </head>
@@ -239,6 +183,21 @@ const Quiz = () => {
           let gameArea;
           let scoreElement;
           let gameTimer;
+          
+          function addGameObjectEvents(element) {
+            const isTouchDevice = 'ontouchstart' in window;
+            
+            if (isTouchDevice) {
+              element.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                increaseScore(element);
+              });
+            }
+            
+            element.addEventListener('click', function(e) {
+              increaseScore(element);
+            });
+          }
           
           document.addEventListener('DOMContentLoaded', function() {
             gameArea = document.getElementById('gameArea');
@@ -290,9 +249,7 @@ const Quiz = () => {
             element.style.top = y + 'px';
             element.style.backgroundColor = color;
             
-            element.addEventListener('click', function() {
-              increaseScore(element);
-            });
+            addGameObjectEvents(element);
             
             gameArea.appendChild(element);
             
