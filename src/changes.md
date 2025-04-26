@@ -1,5 +1,25 @@
 # Lịch sử thay đổi mã nguồn
 
+## 26/04/2024 - Xóa cơ chế chia sẻ game tùy chỉnh
+
+### Tệp đã xoá:
+1. `src/pages/SharedGame.tsx`: Xóa trang chia sẻ game
+2. `src/components/quiz/share/SharedGame.tsx`: Xóa component hiển thị game được chia sẻ
+3. `src/components/quiz/share/ShareGamePage.tsx`: Xóa component trang chia sẻ
+
+### Tệp đã chỉnh sửa:
+1. `src/components/quiz/custom-games/CustomGameHeader.tsx`:
+   - Xóa nút Share và các props liên quan
+   - Giữ lại các chức năng cơ bản như Back, Refresh, Fullscreen
+   - Loại bỏ logic xử lý chia sẻ
+
+2. `src/components/quiz/custom-games/EnhancedGameView.tsx`:
+   - Xóa logic chia sẻ game
+   - Giữ lại chức năng hiển thị và điều khiển game
+
+3. `src/utils/gameExport.ts`:
+   - Xóa các hàm liên quan đến chia sẻ game
+
 ## 25/04/2024 - Kiểm tra cấu trúc thư mục custom game
 
 ### Thư mục chính: `/src/components/quiz/custom-games/`
@@ -69,7 +89,7 @@
 1. Thêm interface `PresetGameHeaderProps` với các thuộc tính:
    - `onShare?`: Hàm callback khi nhấn nút chia sẻ
    - `showShare?`: Boolean để ẩn/hiện nút chia sẻ (mặc định là true)
-2. Thêm nút Share2 trong header để chia sẻ trò chơi
+2. Thêm nút Share2 trong header để chia sẻ trò ch��i
 3. Nút chia sẻ chỉ hiển thị khi cả `showShare` là true và `onShare` được cung cấp
 
 ## 24/04/2024 - Cập nhật PresetGameManager

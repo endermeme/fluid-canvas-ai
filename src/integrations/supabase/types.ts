@@ -46,7 +46,7 @@ export type Database = {
       }
       game_participants: {
         Row: {
-          game_id: string
+          game_id: string | null
           id: string
           ip_address: string | null
           name: string
@@ -54,7 +54,7 @@ export type Database = {
           timestamp: string
         }
         Insert: {
-          game_id: string
+          game_id?: string | null
           id?: string
           ip_address?: string | null
           name: string
@@ -62,7 +62,7 @@ export type Database = {
           timestamp?: string
         }
         Update: {
-          game_id?: string
+          game_id?: string | null
           id?: string
           ip_address?: string | null
           name?: string

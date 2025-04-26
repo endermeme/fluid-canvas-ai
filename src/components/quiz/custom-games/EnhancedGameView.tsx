@@ -1,7 +1,6 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { enhanceIframeContent } from '../utils/iframe-utils';
-import { saveCustomGame } from './utils/customGameAPI';
 import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,9 +12,6 @@ interface EnhancedGameViewProps {
   onReload?: () => void;
   className?: string;
   onBack?: () => void;
-  onNewGame?: () => void;
-  onShare?: () => void;
-  extraButton?: React.ReactNode;
   hideHeader?: boolean;
 }
 
@@ -24,16 +20,11 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   onReload,
   className,
   onBack,
-  onNewGame,
-  onShare,
-  extraButton,
   hideHeader = false
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeError, setIframeError] = useState<string | null>(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState<boolean>(false);
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [isSharing, setIsSharing] = useState<boolean>(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -53,64 +44,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       }
     }
   }, [miniGame]);
-
-  const handleShareGame = async () => {
-    if (!miniGame?.content || !isIframeLoaded) {
-      toast({
-        title: "Chưa thể chia sẻ",
-        description: "Game đang được tải, vui lòng đợi một chút",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    try {
-      setIsSharing(true);
-      
-      toast({
-        title: "Đang xử lý",
-        description: "Đang lưu và tạo liên kết chia sẻ...",
-      });
-      
-      const gameData = {
-        title: miniGame.title || "Game tương tác",
-        content: miniGame.content,
-        gameType: 'custom',
-        description: "Game tương tác tùy chỉnh",
-        settings: {
-          allowSharing: true,
-          showTimer: true
-        }
-      };
-      
-      const savedGame = await saveCustomGame(gameData);
-      
-      if (savedGame) {
-        const shareUrl = `${window.location.origin}/game/${savedGame.id}`;
-        console.log("Đã tạo URL chia sẻ:", shareUrl);
-        
-        if (onShare) {
-          onShare();
-        }
-
-        await navigator.clipboard.writeText(shareUrl);
-        
-        toast({
-          title: "Game đã được chia sẻ",
-          description: "Đường dẫn đã được sao chép vào clipboard",
-        });
-      }
-    } catch (error) {
-      console.error("Lỗi khi chia sẻ game:", error);
-      toast({
-        title: "Lỗi chia sẻ game",
-        description: "Không thể tạo liên kết chia sẻ",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSharing(false);
-    }
-  };
 
   const refreshGame = () => {
     if (iframeRef.current && miniGame?.content) {
@@ -139,10 +72,8 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       iframe.requestFullscreen().catch(err => {
         console.error("Không thể vào chế độ toàn màn hình:", err);
       });
-      setIsFullscreen(true);
     } else {
       document.exitFullscreen();
-      setIsFullscreen(false);
     }
   };
 
@@ -151,14 +82,9 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       {!hideHeader && (
         <CustomGameHeader
           onBack={onBack}
-          onNewGame={onNewGame}
-          onShare={handleShareGame}
-          onRefresh={() => refreshGame()}
+          onRefresh={refreshGame}
           onFullscreen={handleFullscreen}
-          showShare={true}
-          isGameCreated={isIframeLoaded}
           showGameControls={true}
-          isSharing={isSharing}
         />
       )}
       
