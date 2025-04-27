@@ -24,14 +24,26 @@ export const enhanceScript = (jsContent: string): string => {
       \`;
       document.head.appendChild(styleSheet);
     })();
+    
+    // Ensure console logs are visible in parent window
+    (function() {
+      const originalConsoleLog = console.log;
+      console.log = function() {
+        originalConsoleLog.apply(console, arguments);
+        try {
+          window.parent.postMessage({
+            type: 'console.log',
+            args: Array.from(arguments).map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg)
+          }, '*');
+        } catch(e) {
+          originalConsoleLog('Error sending log to parent:', e);
+        }
+      }
+    })();
   `;
   
-  // Ensure helpers are included but don't duplicate them
-  if (!jsContent.includes('window.wheelHelpers') && !jsContent.includes('window.gameHelpers')) {
-    return helpers + '\n\n' + jsContent;
-  }
-  
-  return jsContent;
+  // Always include helpers at the beginning of the script
+  return helpers + '\n\n' + jsContent;
 };
 
 /**

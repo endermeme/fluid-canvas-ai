@@ -23,18 +23,14 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       // Chèn CSS vào thẻ style
       htmlDoc = htmlDoc.replace('<style id="game-styles"></style>', `<style id="game-styles">${cssContent}</style>`);
       
-      // Chèn JavaScript vào thẻ script
-      htmlDoc = htmlDoc.replace('<script id="game-script"></script>', `<script id="game-script">${jsContent}</script>`);
-      
-      // Thêm IIFE để đảm bảo code chạy sau khi DOM đã tải
-      const wrappedScript = `<script>
-        document.addEventListener('DOMContentLoaded', function() {
+      // Chèn JavaScript vào thẻ script - không sử dụng DOMContentLoaded để tránh xung đột
+      htmlDoc = htmlDoc.replace('<script id="game-script"></script>', `<script id="game-script">
+        try {
           ${jsContent}
-        });
-      </script>`;
-      
-      // Chèn script vào cuối body
-      htmlDoc = htmlDoc.replace('</body>', `${wrappedScript}</body>`);
+        } catch(e) {
+          console.error("Game script initialization error:", e);
+        }
+      </script>`);
       
       return htmlDoc;
     }
@@ -91,6 +87,7 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       </head>
       <body>
         <div style="color: red;">Error loading game content</div>
+        <pre>${error.message || 'Unknown error'}</pre>
       </body>
       </html>
     `;
@@ -113,7 +110,13 @@ export const processGeminiResponse = (apiResponse: string): {
   // Tạo HTML đầy đủ
   let fullHtml = createHtmlStructure(html, "Custom Game");
   fullHtml = fullHtml.replace('<style id="game-styles"></style>', `<style id="game-styles">${optimizeStyles(css)}</style>`);
-  fullHtml = fullHtml.replace('<script id="game-script"></script>', `<script id="game-script">${enhanceScript(js)}</script>`);
+  fullHtml = fullHtml.replace('<script id="game-script"></script>', `<script id="game-script">
+    try {
+      ${enhanceScript(js)}
+    } catch(e) {
+      console.error("Game script error:", e);
+    }
+  </script>`);
   
   return {
     html,
@@ -138,22 +141,15 @@ export const createIframeContent = (
   // Chèn CSS vào thẻ style
   htmlDoc = htmlDoc.replace('<style id="game-styles"></style>', `<style id="game-styles">${optimizeStyles(css)}</style>`);
   
-  // Chèn JavaScript vào thẻ script
-  htmlDoc = htmlDoc.replace('<script id="game-script"></script>', `<script id="game-script">${enhanceScript(js)}</script>`);
-  
-  // Thêm IIFE để đảm bảo code chạy sau khi DOM đã tải
-  const wrappedScript = `<script>
-    document.addEventListener('DOMContentLoaded', function() {
-      try {
-        ${js}
-      } catch(e) {
-        console.error("Game script error:", e);
-      }
-    });
-  </script>`;
-  
-  // Chèn script vào cuối body
-  htmlDoc = htmlDoc.replace('</body>', `${wrappedScript}</body>`);
+  // Chèn JavaScript trực tiếp vào thẻ script (không sử dụng DOMContentLoaded)
+  const enhancedJs = enhanceScript(js);
+  htmlDoc = htmlDoc.replace('<script id="game-script"></script>', `<script id="game-script">
+    try {
+      ${enhancedJs}
+    } catch(e) {
+      console.error("Game script error:", e);
+    }
+  </script>`);
   
   return htmlDoc;
 };

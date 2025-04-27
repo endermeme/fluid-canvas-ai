@@ -54,3 +54,10 @@
   - Cập nhật `iframe-utils.ts` để đảm bảo script chạy sau khi DOM đã tải
   - Thêm xử lý lỗi cho script để tránh treo trò chơi
   - Đảm bảo các trình trợ giúp đúng cách
+
+## 2025-05-05
+- Sửa triệt để lỗi JavaScript không hoạt động trong iframe:
+  - Cập nhật `iframe-js.ts` để luôn bao gồm trình trợ giúp ở đầu script
+  - Cập nhật `iframe-utils.ts` để thực thi JavaScript trực tiếp không qua DOMContentLoaded
+  - Thêm xử lý lỗi chi tiết hơn để hiển thị lỗi game trong iframe
+  - Tích hợp thêm console.log trong iframe để dễ debug hơn
