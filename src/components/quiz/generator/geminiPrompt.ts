@@ -9,7 +9,7 @@ IMPORTANT FORMATTING RULES (FOLLOW THESE EXACTLY):
 3. Place ALL CSS in a SINGLE <style> tag in the head section.
 4. Use modern JavaScript (ES6+) with proper syntax and error handling.
 5. DO NOT use external dependencies or CDN links.
-6. DO NOT use markdown code blocks (\`\`\` or ~~~) in your response.
+6. DO NOT use markdown code blocks (``` or ~~~) in your response.
 7. Make the game FULLY INTERACTIVE and TOUCH-FRIENDLY for mobile devices.
 8. Include clear instructions for players directly in the game UI.
 9. Make the game centered and responsive for both desktop and mobile.
@@ -34,33 +34,6 @@ EXAMPLE CODE STRUCTURE:
   </script>
 </body>
 </html>
-`;
-
-export const GEMINI_IMAGES_INSTRUCTIONS = `
-WHEN USING IMAGES IN GAMES, FOLLOW THESE RULES:
-1. Always provide BOTH methods for images:
-   a) A placeholder Base64 image (small, valid, properly formatted)
-   b) A fallback URL to a placeholder image
-
-2. CORRECT Way to Use Base64 Images:
-   <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAS0lEQVR4AWP4//8/RRirICkYQQ6gaCA2YMkLzw6gGMurV68OoCjgdQCpGMUB5GIMAYocQAmGOwCbeICRiA2jQUgyHk1EIzmRkIwB+U5/FS9tKasAAAAASUVORK5CYII=" 
-        alt="Description"
-        onerror="this.onerror=null; this.src='https://placehold.co/100x100/orange/white?text=Fallback';" />
-
-3. Always include error handling for images that fail to load with the onerror attribute.
-
-4. For game data arrays with images, use this structure:
-   const gameData = [
-     {
-       imageSrc: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
-       fallbackSrc: "https://placehold.co/200x200/blue/white?text=Item1",
-       text: "Item 1"
-     },
-     // more items
-   ];
-
-5. When displaying images from game data:
-   <img src="\${item.imageSrc}" alt="\${item.text}" onerror="this.onerror=null; this.src='\${item.fallbackSrc}';" />
 `;
 
 export const GEMINI_CANVAS_INSTRUCTIONS = `
@@ -96,20 +69,18 @@ window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 `;
 
-export function createGameGenerationPrompt(options: {
+export const createGameGenerationPrompt = (options: {
   topic: string;
   useCanvas?: boolean;
   language?: string;
   difficulty?: string;
   category?: string;
-}): string {
+}): string => {
   const { topic, useCanvas = true, language = 'en', difficulty = 'medium', category = 'general' } = options;
   
   let prompt = `Create an interactive HTML5 mini-game about "${topic}" for educational purposes.
 
 ${GEMINI_HTML_FORMAT_INSTRUCTIONS}
-
-${GEMINI_IMAGES_INSTRUCTIONS}
 
 Game Requirements:
 - Difficulty level: ${difficulty}
@@ -121,13 +92,12 @@ Game Requirements:
 - Add scoring and progress tracking
 - Design the game to be visually appealing with good colors
 - Make it responsive for both desktop and mobile
-- All images should be base64 encoded with fallback URLs
 ${useCanvas ? GEMINI_CANVAS_INSTRUCTIONS : ''}
 
 IMPORTANT: Return ONLY the complete HTML document. Do not include any explanation, commentary, or markdown syntax around your code.
 `;
 
   return prompt;
-}
+};
 
 export default createGameGenerationPrompt; 

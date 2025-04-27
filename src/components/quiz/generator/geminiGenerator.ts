@@ -18,32 +18,6 @@ const SOURCE = "GEMINI";
 // Export the MiniGame type for use in other files
 export type { MiniGame } from './types';
 
-// Default fallback image placeholders
-const FALLBACK_IMAGE_PLACEHOLDERS = [
-  'https://placehold.co/200x200/orange/white?text=Fallback1',
-  'https://placehold.co/200x200/blue/white?text=Fallback2',
-  'https://placehold.co/200x200/green/white?text=Fallback3',
-  'https://placehold.co/200x200/red/white?text=Fallback4',
-  'https://placehold.co/200x200/purple/white?text=Fallback5'
-];
-
-// Minimal valid transparent 1x1 png base64
-const MINIMAL_VALID_BASE64_IMAGE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
-
-// Valid small colored 20x20 images for fallback
-const VALID_COLOR_BASE64_IMAGES = [
-  // Red
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC45bDN+TgAAAD1JREFUOhFjYBgFoyEwkCHw//9/ByD+D8XgMI0q0PDPP9gNBOFRF4LTIhpATEwMONwGTZgOBIPCI6oAAI/KEXhEr9TSAAAAAElFTkSuQmCC',
-  // Blue
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC45bDN+TgAAAD1JREFUOhFjYBgFoyEw+EPg////HID4PxSDwzSqQMM//2A3EIRHXYS+aYmJiQGH26AJ00FgUHhEWQAAj8oReK6e9hQAAAAASUVORK5CYII=',
-  // Green
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC45bDN+TgAAAD1JREFUOhFjYBgFoyEwdELg////HID4PxSDwzSqQMM//2A3EIRHXYT2aYmJiQGH26AJ00FgUHhE2QAAT8oReOArXHIAAAAASUVORK5CYII=',
-  // Yellow
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC45bDN+TgAAAD1JREFUOhFjYBgFoyEwdEPg////HID4PxSDwzSqQMM//2A3EIRHXYR+aYmJiQGH26AJ00FgUHhE2QYAT8oReBCQ5N4AAAAASUVORK5CYII=',
-  // Purple 
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC45bDN+TgAAAD1JREFUOhFjYBgFoyEw9EPg////HID4PxSDwzSqQMM//2A3EIRHXYR+aYmJiQGH26AJ00FgUHhEWQMAAMoReBYyLYUAAAAASUVORK5CYII='
-];
-
 // Tạo lớp AIGameGenerator để giữ tương thích với code cũ
 export class AIGameGenerator {
   private static instance: AIGameGenerator | null = null;
@@ -166,103 +140,6 @@ export const generateWithGemini = async (
 };
 
 /**
- * Kiểm tra xem một chuỗi base64 có hợp lệ hay không
- * @param base64String Chuỗi base64 cần kiểm tra
- * @returns true nếu hợp lệ, false nếu không hợp lệ
- */
-const isValidBase64 = (base64String: string): boolean => {
-  if (!base64String) return false;
-  
-  // Kiểm tra định dạng data URL
-  if (base64String.startsWith('data:image/')) {
-    // Tách phần base64 từ data URL
-    const base64Part = base64String.split(',')[1];
-    if (!base64Part) return false;
-    
-    // Kiểm tra định dạng base64 (chỉ chứa ký tự base64 hợp lệ)
-    const validBase64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
-    return validBase64Regex.test(base64Part);
-  }
-  
-  // Nếu không phải data URL, kiểm tra chuỗi base64 thuần túy
-  const validBase64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
-  return validBase64Regex.test(base64String);
-};
-
-/**
- * Sửa và thay thế chuỗi base64 không hợp lệ
- * @param content HTML content cần xử lý
- * @returns HTML content sau khi đã sửa các base64
- */
-const fixBase64Images = (content: string): string => {
-  let fixedContent = content;
-  
-  // Tìm tất cả data URL trong HTML
-  const dataUrlRegex = /("data:image\/[^"]+base64,[^"]+"|'data:image\/[^']+base64,[^']+')/g;
-  let match;
-  let index = 0;
-  
-  while ((match = dataUrlRegex.exec(content)) !== null) {
-    const dataUrl = match[0].slice(1, -1); // Loại bỏ dấu ngoặc kép hoặc đơn
-    
-    if (!isValidBase64(dataUrl)) {
-      // Thay thế bằng ảnh hợp lệ
-      const replacement = VALID_COLOR_BASE64_IMAGES[index % VALID_COLOR_BASE64_IMAGES.length];
-      fixedContent = fixedContent.replace(dataUrl, replacement);
-      index++;
-    }
-  }
-  
-  // Tìm tất cả mảng gameData hoặc mảng dữ liệu chứa base64
-  const fixGameDataArrays = (htmlContent: string): string => {
-    // Tìm các biến mảng như gameData, quizData, etc.
-    const arrayDefinitionRegex = /(const|let|var)\s+(\w+(?:Data|Items|Questions|Images))\s*=\s*\[([\s\S]*?)\];/g;
-    
-    return htmlContent.replace(arrayDefinitionRegex, (match, declarationType, arrayName, arrayContent) => {
-      // Xử lý từng mục trong mảng
-      const fixedArrayContent = arrayContent.replace(/({[\s\S]*?imageSrc\s*:\s*)(['"]data:image\/[^'"]+['"])/g, 
-        (itemMatch, prefix, base64) => {
-          const dataUrl = base64.slice(1, -1); // Bỏ dấu ngoặc
-          
-          if (!isValidBase64(dataUrl)) {
-            // Tạo fallback phù hợp
-            const replacementImg = VALID_COLOR_BASE64_IMAGES[Math.floor(Math.random() * VALID_COLOR_BASE64_IMAGES.length)];
-            return `${prefix}'${replacementImg}', fallbackSrc: '${FALLBACK_IMAGE_PLACEHOLDERS[Math.floor(Math.random() * FALLBACK_IMAGE_PLACEHOLDERS.length)]}'`;
-          }
-          
-          // Nếu base64 hợp lệ nhưng không có fallbackSrc
-          if (!itemMatch.includes('fallbackSrc')) {
-            return `${prefix}${base64}, fallbackSrc: '${FALLBACK_IMAGE_PLACEHOLDERS[Math.floor(Math.random() * FALLBACK_IMAGE_PLACEHOLDERS.length)]}'`;
-          }
-          
-          return itemMatch;
-        });
-      
-      return `${declarationType} ${arrayName} = [${fixedArrayContent}];`;
-    });
-  };
-  
-  // Thêm xử lý onerror cho tất cả thẻ img
-  const addErrorHandlingToImages = (htmlContent: string): string => {
-    return htmlContent.replace(/<img([^>]*)src=['"]([^'"]+)['"]([^>]*)>/gi, (match, before, src, after) => {
-      if (match.includes('onerror=')) {
-        return match; // Đã có onerror, giữ nguyên
-      }
-      
-      // Thêm thuộc tính onerror với fallback
-      const fallback = FALLBACK_IMAGE_PLACEHOLDERS[Math.floor(Math.random() * FALLBACK_IMAGE_PLACEHOLDERS.length)];
-      return `<img${before}src="${src}"${after} onerror="this.onerror=null; this.src='${fallback}';">`;
-    });
-  };
-  
-  // Áp dụng các sửa đổi
-  fixedContent = fixGameDataArrays(fixedContent);
-  fixedContent = addErrorHandlingToImages(fixedContent);
-  
-  return fixedContent;
-};
-
-/**
  * Xử lý mã code trả về từ Gemini để extract thông tin và làm sạch
  */
 const processGameCode = (text: string): { title: string, content: string } => {
@@ -346,7 +223,7 @@ const processGameCode = (text: string): { title: string, content: string } => {
       'resetGame': '',
     };
     
-    if (Object.prototype.hasOwnProperty.call(paramNames, funcName)) {
+    if (paramNames.hasOwnProperty(funcName)) {
       return `function ${funcName}(${paramNames[funcName]})`;
     }
     
@@ -389,10 +266,7 @@ const processGameCode = (text: string): { title: string, content: string } => {
     }
   }
   
-  // 7. Sửa và thay thế base64 không hợp lệ
-  sanitized = fixBase64Images(sanitized);
-  
-  // 8. Extract title
+  // 7. Extract title
   let title = '';
   const titleTag = sanitized.match(/<title>(.*?)<\/title>/is);
   if (titleTag && titleTag[1]) {
@@ -411,7 +285,7 @@ const processGameCode = (text: string): { title: string, content: string } => {
 };
 
 export const tryGeminiGeneration = async (
-  model: unknown,
+  model: any,
   topic: string, 
   settings?: GameSettingsData,
   retryCount = 0

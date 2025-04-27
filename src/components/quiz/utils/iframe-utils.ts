@@ -82,70 +82,8 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     </script>
   `;
 
-  // Script xử lý ảnh base64 không hợp lệ
-  const imageHandlingScript = `
-    <script>
-      // Xử lý ảnh base64 bị lỗi
-      window.addEventListener('DOMContentLoaded', function() {
-        // Fallback placeholders
-        const fallbacks = [
-          'https://placehold.co/200x200/orange/white?text=Fallback1',
-          'https://placehold.co/200x200/blue/white?text=Fallback2',
-          'https://placehold.co/200x200/green/white?text=Fallback3',
-          'https://placehold.co/200x200/red/white?text=Fallback4',
-          'https://placehold.co/200x200/purple/white?text=Fallback5'
-        ];
-        
-        // Tìm tất cả ảnh không có onerror
-        const images = document.querySelectorAll('img:not([onerror])');
-        images.forEach(img => {
-          // Thêm onerror handler với fallback
-          img.onerror = function() {
-            this.onerror = null;
-            this.src = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-          };
-          
-          // Kiểm tra nếu đã load xong nhưng vẫn lỗi
-          if (img.complete && img.naturalHeight === 0) {
-            img.src = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-          }
-        });
-        
-        // Kiểm tra các mảng dữ liệu game
-        const fixGameArrays = () => {
-          // Tìm các biến gameData, quizData, v.v.
-          const dataArrayVars = [
-            'gameData', 'quizData', 'questionData', 'imageData',
-            'items', 'questions', 'images', 'cards', 'options'
-          ];
-          
-          dataArrayVars.forEach(varName => {
-            if (window[varName] && Array.isArray(window[varName])) {
-              window[varName].forEach((item, index) => {
-                // Thêm fallback cho mọi mục có imageSrc
-                if (item.imageSrc && !item.fallbackSrc) {
-                  item.fallbackSrc = fallbacks[index % fallbacks.length];
-                }
-              });
-            }
-          });
-        };
-        
-        // Thực hiện ngay và sau khi window load
-        fixGameArrays();
-        window.addEventListener('load', fixGameArrays);
-      });
-    </script>
-  `;
-
   const touchStyles = `
     <style>
-      /* Animation keyframes */
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      
       /* Base styles */
       body {
         margin: 0;
@@ -159,19 +97,6 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       * {
         -webkit-tap-highlight-color: transparent;
         box-sizing: border-box;
-      }
-      
-      /* Cải thiện hiển thị ảnh */
-      img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-      }
-      
-      img[src^="data:image"] {
-        image-rendering: crisp-edges;  /* Cải thiện render ảnh nhỏ */
-        min-width: 30px; /* Đảm bảo ảnh không quá nhỏ */
-        min-height: 30px;
       }
       
       /* Better buttons for touch */
@@ -258,7 +183,7 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
 
   // Thêm các script và style vào head và body
   head = touchStyles + head;
-  body = loadingIndicator + body + errorHandlingScript + deviceDetectionScript + imageHandlingScript;
+  body = loadingIndicator + body + errorHandlingScript + deviceDetectionScript;
 
   // Tái tạo HTML đầy đủ
   const enhancedHTML = `<!DOCTYPE html>
