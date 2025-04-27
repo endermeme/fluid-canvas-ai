@@ -153,11 +153,10 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         
         clearTimers();
         
-        // Thêm timestamp để tránh cache
+        // Thêm timestamp để tránh cache - sửa lỗi ở đây, chỉ truyền 2 tham số thay vì 3
         const enhancedContent = enhanceIframeContent(
           miniGame.content, 
-          miniGame.title, 
-          { timestamp: Date.now() }
+          miniGame.title
         );
         iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
