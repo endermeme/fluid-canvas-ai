@@ -1,14 +1,67 @@
 export const enhanceIframeContent = (content: string, title?: string): string => {
-  // Add device detection script and touch handling
-  const deviceDetectionScript = `
+  // Tách phần head, body và style, script nếu có
+  let head = '';
+  let body = '';
+  let html = content;
+
+  // Kiểm tra và chuẩn hóa cấu trúc HTML
+  if (!html.includes('<!DOCTYPE') && !html.includes('<html')) {
+    html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>${title || 'Interactive Game'}</title>
+</head>
+<body>
+  ${html}
+</body>
+</html>`;
+  }
+
+  // Extract head và body
+  const headMatch = html.match(/<head>([\s\S]*?)<\/head>/i);
+  if (headMatch && headMatch[1]) {
+    head = headMatch[1];
+  }
+
+  const bodyMatch = html.match(/<body>([\s\S]*?)<\/body>/i);
+  if (bodyMatch && bodyMatch[1]) {
+    body = bodyMatch[1];
+  }
+
+  // Thêm các script và style thiết yếu
+  const errorHandlingScript = `
     <script>
-      // Device detection
-      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      document.documentElement.classList.add(isTouchDevice ? 'touch-device' : 'no-touch');
-      document.documentElement.classList.add(isMobile ? 'mobile' : 'desktop');
+      // Error handling
+      window.onerror = function(message, source, lineno, colno, error) {
+        console.error('Game error:', message, source, lineno, colno);
+        if (error && error.stack) console.error(error.stack);
+        
+        // Không hiển thị lỗi quá dài trong UI
+        const shortenedMessage = message.length > 100 ? message.substring(0, 100) + '...' : message;
+        
+        // Chỉ thêm UI error message nếu chưa có
+        if (!document.getElementById('game-error')) {
+          const errorDiv = document.createElement('div');
+          errorDiv.id = 'game-error';
+          errorDiv.style.cssText = 'position:fixed; bottom:0; left:0; right:0; background:rgba(220,50,50,0.9); color:white; padding:10px; font-family:sans-serif; font-size:14px; z-index:10000;';
+          errorDiv.innerHTML = '<b>Error:</b> ' + shortenedMessage + ' <small>Check console for details</small>';
+          document.body.appendChild(errorDiv);
+          
+          // Auto-hide sau 5 giây
+          setTimeout(() => {
+            if (errorDiv.parentNode) {
+              errorDiv.parentNode.removeChild(errorDiv);
+            }
+          }, 5000);
+        }
+        
+        return true; // Prevent default handling
+      };
       
-      // Prevent zoom on double tap
+      // Xử lý sự kiện touch tốt hơn
+      let lastTap = 0;
       document.addEventListener('touchend', (e) => {
         const now = Date.now();
         if (now - lastTap < 300) {
@@ -16,73 +69,208 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
         }
         lastTap = now;
       }, { passive: false });
-      
-      // Prevent unwanted scrolling/zooming
-      document.addEventListener('touchmove', (e) => {
-        if (e.scale !== 1) {
-          e.preventDefault();
-        }
-      }, { passive: false });
+    </script>
+  `;
+
+  const deviceDetectionScript = `
+    <script>
+      // Device detection
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      document.documentElement.classList.add(isTouchDevice ? 'touch-device' : 'no-touch');
+      document.documentElement.classList.add(isMobile ? 'mobile' : 'desktop');
+    </script>
+  `;
+
+  // Script xử lý ảnh base64 không hợp lệ
+  const imageHandlingScript = `
+    <script>
+      // Xử lý ảnh base64 bị lỗi
+      window.addEventListener('DOMContentLoaded', function() {
+        // Fallback placeholders
+        const fallbacks = [
+          'https://placehold.co/200x200/orange/white?text=Fallback1',
+          'https://placehold.co/200x200/blue/white?text=Fallback2',
+          'https://placehold.co/200x200/green/white?text=Fallback3',
+          'https://placehold.co/200x200/red/white?text=Fallback4',
+          'https://placehold.co/200x200/purple/white?text=Fallback5'
+        ];
+        
+        // Tìm tất cả ảnh không có onerror
+        const images = document.querySelectorAll('img:not([onerror])');
+        images.forEach(img => {
+          // Thêm onerror handler với fallback
+          img.onerror = function() {
+            this.onerror = null;
+            this.src = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+          };
+          
+          // Kiểm tra nếu đã load xong nhưng vẫn lỗi
+          if (img.complete && img.naturalHeight === 0) {
+            img.src = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+          }
+        });
+        
+        // Kiểm tra các mảng dữ liệu game
+        const fixGameArrays = () => {
+          // Tìm các biến gameData, quizData, v.v.
+          const dataArrayVars = [
+            'gameData', 'quizData', 'questionData', 'imageData',
+            'items', 'questions', 'images', 'cards', 'options'
+          ];
+          
+          dataArrayVars.forEach(varName => {
+            if (window[varName] && Array.isArray(window[varName])) {
+              window[varName].forEach((item, index) => {
+                // Thêm fallback cho mọi mục có imageSrc
+                if (item.imageSrc && !item.fallbackSrc) {
+                  item.fallbackSrc = fallbacks[index % fallbacks.length];
+                }
+              });
+            }
+          });
+        };
+        
+        // Thực hiện ngay và sau khi window load
+        fixGameArrays();
+        window.addEventListener('load', fixGameArrays);
+      });
     </script>
   `;
 
   const touchStyles = `
     <style>
-      /* Touch optimization */
-      * {
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
+      /* Animation keyframes */
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
       }
       
-      .touch-device [role="button"],
+      /* Base styles */
+      body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        touch-action: manipulation;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+      }
+      
+      /* Touch optimization */
+      * {
+        -webkit-tap-highlight-color: transparent;
+        box-sizing: border-box;
+      }
+      
+      /* Cải thiện hiển thị ảnh */
+      img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+      
+      img[src^="data:image"] {
+        image-rendering: crisp-edges;  /* Cải thiện render ảnh nhỏ */
+        min-width: 30px; /* Đảm bảo ảnh không quá nhỏ */
+        min-height: 30px;
+      }
+      
+      /* Better buttons for touch */
       .touch-device button,
+      .touch-device [role="button"],
       .touch-device input[type="button"],
+      .touch-device input[type="submit"],
       .touch-device .clickable {
         min-width: 44px;
         min-height: 44px;
-        padding: 12px;
+      }
+      
+      /* Better canvas scaling */
+      canvas {
+        touch-action: none;
+        max-width: 100%;
+        display: block;
+        margin: 0 auto;
+      }
+      
+      /* Loading indicator styles */
+      #loading-indicator {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255,255,255,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.3s;
+      }
+      #loading-indicator.hidden {
+        opacity: 0;
+        pointer-events: none;
       }
       
       @media (hover: hover) and (pointer: fine) {
         /* Mouse-specific styles */
-        .no-touch [role="button"]:hover,
-        .no-touch button:hover {
-          opacity: 0.8;
+        .no-touch button:hover,
+        .no-touch [role="button"]:hover {
+          cursor: pointer;
+          opacity: 0.9;
         }
-      }
-      
-      /* Prevent text selection during touch */
-      [role="button"],
-      button,
-      .no-select {
-        user-select: none;
-        -webkit-user-select: none;
       }
     </style>
   `;
 
-  // Insert viewport meta tag for proper mobile rendering
+  // Thêm loading indicator
+  const loadingIndicator = `
+    <div id="loading-indicator">
+      <div style="text-align:center">
+        <div style="width:40px;height:40px;border:3px solid #333;border-radius:50%;border-top-color:transparent;margin:0 auto;animation:spin 1s linear infinite"></div>
+        <p style="margin-top:10px">Loading game...</p>
+      </div>
+    </div>
+    <script>
+      window.addEventListener('load', function() {
+        const loadingEl = document.getElementById('loading-indicator');
+        if (loadingEl) {
+          loadingEl.classList.add('hidden');
+          setTimeout(() => {
+            if (loadingEl.parentNode) {
+              loadingEl.parentNode.removeChild(loadingEl);
+            }
+          }, 500);
+        }
+      });
+    </script>
+  `;
+
+  // Tạo viewport meta nếu chưa có
   const viewportMeta = '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
-
-  // Insert the enhancements into the content
-  let enhancedContent = content;
-  
-  if (!enhancedContent.includes('<head>')) {
-    enhancedContent = enhancedContent.replace(/<html[^>]*>/, '$&<head><meta charset="UTF-8"></head>');
-  }
-  
-  // Add viewport meta
-  if (!enhancedContent.includes('viewport')) {
-    enhancedContent = enhancedContent.replace('</head>', `${viewportMeta}</head>`);
-  }
-  
-  // Add device detection and touch handling
-  enhancedContent = enhancedContent.replace('</head>', `${touchStyles}${deviceDetectionScript}</head>`);
-
-  // Update title if provided
-  if (title && !enhancedContent.includes('<title>')) {
-    enhancedContent = enhancedContent.replace('</head>', `<title>${title}</title></head>`);
+  if (!head.includes('viewport')) {
+    head = viewportMeta + head;
   }
 
-  return enhancedContent;
+  // Thêm title nếu được cung cấp và chưa có
+  if (title && !head.includes('<title>')) {
+    head += `<title>${title}</title>`;
+  }
+
+  // Thêm các script và style vào head và body
+  head = touchStyles + head;
+  body = loadingIndicator + body + errorHandlingScript + deviceDetectionScript + imageHandlingScript;
+
+  // Tái tạo HTML đầy đủ
+  const enhancedHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  ${head}
+</head>
+<body>
+  ${body}
+</body>
+</html>`;
+
+  return enhancedHTML;
 };

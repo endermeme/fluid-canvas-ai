@@ -10,14 +10,39 @@ import {
   getApiEndpoint,
   DEFAULT_GENERATION_SETTINGS 
 } from '@/constants/api-constants';
-import { buildGeminiPrompt } from './promptBuilder';
-import { generateCustomGamePrompt } from './customGamePrompt';
+import { createGameGenerationPrompt } from './geminiPrompt';
 import type { MiniGame, GameApiResponse } from './types';
 
 const SOURCE = "GEMINI";
 
 // Export the MiniGame type for use in other files
 export type { MiniGame } from './types';
+
+// Default fallback image placeholders
+const FALLBACK_IMAGE_PLACEHOLDERS = [
+  'https://placehold.co/200x200/orange/white?text=Fallback1',
+  'https://placehold.co/200x200/blue/white?text=Fallback2',
+  'https://placehold.co/200x200/green/white?text=Fallback3',
+  'https://placehold.co/200x200/red/white?text=Fallback4',
+  'https://placehold.co/200x200/purple/white?text=Fallback5'
+];
+
+// Minimal valid transparent 1x1 png base64
+const MINIMAL_VALID_BASE64_IMAGE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+
+// Valid small colored 20x20 images for fallback
+const VALID_COLOR_BASE64_IMAGES = [
+  // Red
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC45bDN+TgAAAD1JREFUOhFjYBgFoyEwkCHw//9/ByD+D8XgMI0q0PDPP9gNBOFRF4LTIhpATEwMONwGTZgOBIPCI6oAAI/KEXhEr9TSAAAAAElFTkSuQmCC',
+  // Blue
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC45bDN+TgAAAD1JREFUOhFjYBgFoyEw+EPg////HID4PxSDwzSqQMM//2A3EIRHXYS+aYmJiQGH26AJ00FgUHhEWQAAj8oReK6e9hQAAAAASUVORK5CYII=',
+  // Green
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC45bDN+TgAAAD1JREFUOhFjYBgFoyEwdELg////HID4PxSDwzSqQMM//2A3EIRHXYT2aYmJiQGH26AJ00FgUHhE2QAAT8oReOArXHIAAAAASUVORK5CYII=',
+  // Yellow
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC45bDN+TgAAAD1JREFUOhFjYBgFoyEwdEPg////HID4PxSDwzSqQMM//2A3EIRHXYR+aYmJiQGH26AJ00FgUHhE2QYAT8oReBCQ5N4AAAAASUVORK5CYII=',
+  // Purple 
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC45bDN+TgAAAD1JREFUOhFjYBgFoyEw9EPg////HID4PxSDwzSqQMM//2A3EIRHXYR+aYmJiQGH26AJ00FgUHhEWQMAAMoReBYyLYUAAAAASUVORK5CYII='
+];
 
 // Tạo lớp AIGameGenerator để giữ tương thích với code cũ
 export class AIGameGenerator {
@@ -64,30 +89,14 @@ export const generateWithGemini = async (
     canvasMode: useCanvas ? "enabled" : "disabled"
   });
 
-  const promptOptions = {
+  // Tạo prompt với template cải tiến từ geminiPrompt.ts
+  const prompt = createGameGenerationPrompt({
     topic,
     useCanvas,
     language: settings?.language || 'en',
     difficulty: settings?.difficulty || 'medium',
     category: settings?.category || 'general'
-  };
-
-  // Add enhanced instructions for proper code formatting to the prompt
-  const formattingInstructions = `
-IMPORTANT CODE FORMATTING INSTRUCTIONS:
-1. Return a SINGLE, complete, self-contained HTML file with all CSS and JavaScript included
-2. Use proper HTML structure with DOCTYPE, html, head, and body tags
-3. Include all JavaScript inside a SINGLE script tag at the end of the body
-4. Format all CSS and JavaScript code with proper indentation
-5. Use template literals correctly with backticks (\`) not regular quotes for dynamic content
-6. Use clear parameter names in function declarations (NOT $2 or placeholder variables)
-7. Include proper error handling for canvas operations
-8. Make sure all HTML elements are properly closed
-9. DO NOT include markdown syntax (\`\`\`) in your response
-`;
-
-  // Generate prompt with formatting instructions
-  const prompt = generateCustomGamePrompt(promptOptions) + formattingInstructions;
+  });
 
   try {
     logInfo(SOURCE, `Sending request to Gemini API`);
@@ -130,37 +139,24 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
     const duration = measureExecutionTime(startTime);
     logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
     
-    console.log('%c Generated Game Code:', 'font-weight: bold; color: #6f42c1;');
-    console.log(text);
+    // Tạo phiên bản gỡ lỗi để xem code gốc
+    logInfo(SOURCE, `Generated Game Code (Original):`, text.substring(0, 500) + '...');
     
-    let title = topic;
-    const titleMatch = text.match(/<title>(.*?)<\/title>/i) || 
-                      text.match(/<h1[^>]*>(.*?)<\/h1>/i);
+    // Xử lý code để extract thông tin và clean
+    const { title, content } = processGameCode(text);
     
-    if (titleMatch && titleMatch[1]) {
-      title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
-    }
-    
-    let content = text;
-    
-    if (!content.trim().startsWith('<!DOCTYPE') && !content.trim().startsWith('<html')) {
-      const htmlMatch = text.match(/<!DOCTYPE[\s\S]*<\/html>/i) || 
-                        text.match(/<html[\s\S]*<\/html>/i);
-      
-      if (htmlMatch && htmlMatch[0]) {
-        content = htmlMatch[0];
-      }
-    }
-    
-    content = sanitizeGameCode(content);
-    
+    // Tạo đối tượng game
     const game: MiniGame = {
-      title: title,
+      title: title || topic,
       content: content,
       useCanvas: useCanvas
     };
     
-    logSuccess(SOURCE, "Game generated successfully");
+    logSuccess(SOURCE, "Game generated successfully", {
+      title: game.title,
+      contentLength: game.content.length,
+      hasDocType: game.content.includes('<!DOCTYPE')
+    });
     
     return game;
   } catch (error) {
@@ -169,29 +165,196 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
   }
 };
 
-const sanitizeGameCode = (content: string): string => {
-  let sanitized = content;
+/**
+ * Kiểm tra xem một chuỗi base64 có hợp lệ hay không
+ * @param base64String Chuỗi base64 cần kiểm tra
+ * @returns true nếu hợp lệ, false nếu không hợp lệ
+ */
+const isValidBase64 = (base64String: string): boolean => {
+  if (!base64String) return false;
   
-  // Remove markdown code block syntax if present
-  sanitized = sanitized.replace(/```html|```/g, '');
+  // Kiểm tra định dạng data URL
+  if (base64String.startsWith('data:image/')) {
+    // Tách phần base64 từ data URL
+    const base64Part = base64String.split(',')[1];
+    if (!base64Part) return false;
+    
+    // Kiểm tra định dạng base64 (chỉ chứa ký tự base64 hợp lệ)
+    const validBase64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+    return validBase64Regex.test(base64Part);
+  }
   
-  // Fix function parameters
-  sanitized = sanitized.replace(/function\s+(\w+)\s*\(\$2\)/g, (match, funcName) => {
-    if (funcName === 'drawSegment') return 'function drawSegment(index)';
-    if (funcName === 'getWinningSegment') return 'function getWinningSegment(finalAngle)';
-    if (funcName === 'spinWheel') return 'function spinWheel()';
-    if (funcName === 'drawWheel') return 'function drawWheel()';
-    return match;
+  // Nếu không phải data URL, kiểm tra chuỗi base64 thuần túy
+  const validBase64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+  return validBase64Regex.test(base64String);
+};
+
+/**
+ * Sửa và thay thế chuỗi base64 không hợp lệ
+ * @param content HTML content cần xử lý
+ * @returns HTML content sau khi đã sửa các base64
+ */
+const fixBase64Images = (content: string): string => {
+  let fixedContent = content;
+  
+  // Tìm tất cả data URL trong HTML
+  const dataUrlRegex = /("data:image\/[^"]+base64,[^"]+"|'data:image\/[^']+base64,[^']+')/g;
+  let match;
+  let index = 0;
+  
+  while ((match = dataUrlRegex.exec(content)) !== null) {
+    const dataUrl = match[0].slice(1, -1); // Loại bỏ dấu ngoặc kép hoặc đơn
+    
+    if (!isValidBase64(dataUrl)) {
+      // Thay thế bằng ảnh hợp lệ
+      const replacement = VALID_COLOR_BASE64_IMAGES[index % VALID_COLOR_BASE64_IMAGES.length];
+      fixedContent = fixedContent.replace(dataUrl, replacement);
+      index++;
+    }
+  }
+  
+  // Tìm tất cả mảng gameData hoặc mảng dữ liệu chứa base64
+  const fixGameDataArrays = (htmlContent: string): string => {
+    // Tìm các biến mảng như gameData, quizData, etc.
+    const arrayDefinitionRegex = /(const|let|var)\s+(\w+(?:Data|Items|Questions|Images))\s*=\s*\[([\s\S]*?)\];/g;
+    
+    return htmlContent.replace(arrayDefinitionRegex, (match, declarationType, arrayName, arrayContent) => {
+      // Xử lý từng mục trong mảng
+      const fixedArrayContent = arrayContent.replace(/({[\s\S]*?imageSrc\s*:\s*)(['"]data:image\/[^'"]+['"])/g, 
+        (itemMatch, prefix, base64) => {
+          const dataUrl = base64.slice(1, -1); // Bỏ dấu ngoặc
+          
+          if (!isValidBase64(dataUrl)) {
+            // Tạo fallback phù hợp
+            const replacementImg = VALID_COLOR_BASE64_IMAGES[Math.floor(Math.random() * VALID_COLOR_BASE64_IMAGES.length)];
+            return `${prefix}'${replacementImg}', fallbackSrc: '${FALLBACK_IMAGE_PLACEHOLDERS[Math.floor(Math.random() * FALLBACK_IMAGE_PLACEHOLDERS.length)]}'`;
+          }
+          
+          // Nếu base64 hợp lệ nhưng không có fallbackSrc
+          if (!itemMatch.includes('fallbackSrc')) {
+            return `${prefix}${base64}, fallbackSrc: '${FALLBACK_IMAGE_PLACEHOLDERS[Math.floor(Math.random() * FALLBACK_IMAGE_PLACEHOLDERS.length)]}'`;
+          }
+          
+          return itemMatch;
+        });
+      
+      return `${declarationType} ${arrayName} = [${fixedArrayContent}];`;
+    });
+  };
+  
+  // Thêm xử lý onerror cho tất cả thẻ img
+  const addErrorHandlingToImages = (htmlContent: string): string => {
+    return htmlContent.replace(/<img([^>]*)src=['"]([^'"]+)['"]([^>]*)>/gi, (match, before, src, after) => {
+      if (match.includes('onerror=')) {
+        return match; // Đã có onerror, giữ nguyên
+      }
+      
+      // Thêm thuộc tính onerror với fallback
+      const fallback = FALLBACK_IMAGE_PLACEHOLDERS[Math.floor(Math.random() * FALLBACK_IMAGE_PLACEHOLDERS.length)];
+      return `<img${before}src="${src}"${after} onerror="this.onerror=null; this.src='${fallback}';">`;
+    });
+  };
+  
+  // Áp dụng các sửa đổi
+  fixedContent = fixGameDataArrays(fixedContent);
+  fixedContent = addErrorHandlingToImages(fixedContent);
+  
+  return fixedContent;
+};
+
+/**
+ * Xử lý mã code trả về từ Gemini để extract thông tin và làm sạch
+ */
+const processGameCode = (text: string): { title: string, content: string } => {
+  // Loại bỏ hoàn toàn cú pháp markdown nếu có
+  let cleanedContent = text.trim();
+  
+  // 1. Loại bỏ markdown code block syntax
+  const codeBlockRegex = /^```(?:html|javascript)?\s*([\s\S]*?)```$/;
+  const codeBlockMatch = cleanedContent.match(codeBlockRegex);
+  
+  if (codeBlockMatch && codeBlockMatch[1]) {
+    cleanedContent = codeBlockMatch[1].trim();
+  } else {
+    // Nếu không tìm thấy, vẫn xóa các dấu hiệu markdown
+    cleanedContent = cleanedContent.replace(/```html|```javascript|```/g, '').trim();
+  }
+  
+  // 2. Đảm bảo code HTML đầy đủ và đúng cấu trúc
+  if (!cleanedContent.toLowerCase().includes('<!doctype html>') && 
+      !cleanedContent.toLowerCase().startsWith('<html') &&
+      !cleanedContent.toLowerCase().startsWith('<!--')) {
+    // Tìm HTML trong văn bản nếu không có doctype
+    const htmlPattern = /<html[\s\S]*?<\/html>/i;
+    const htmlMatch = cleanedContent.match(htmlPattern);
+    
+    if (htmlMatch && htmlMatch[0]) {
+      cleanedContent = `<!DOCTYPE html>\n${htmlMatch[0]}`;
+    } else {
+      // Nếu không có thẻ HTML đầy đủ, bọc nội dung lại
+      cleanedContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${cleanedContent.match(/<h1[^>]*>(.*?)<\/h1>/i)?.[1] || 'Interactive Game'}</title>
+  <style>
+    body { margin: 0; padding: 20px; font-family: sans-serif; }
+    .container { max-width: 800px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    ${cleanedContent}
+  </div>
+  <script>
+    // Console error catching
+    window.onerror = (msg, src, line, col, err) => {
+      console.error('Game error:', msg, 'at', line, ':', col);
+      return true;
+    }
+  </script>
+</body>
+</html>`;
+    }
+  }
+  
+  // 3. Sửa các lỗi cú pháp JavaScript phổ biến
+  let sanitized = cleanedContent;
+  
+  // Sửa các template literals bị lỗi - ghi đè bằng regexp phức tạp hơn
+  sanitized = sanitized.replace(/(\w+\.(?:style\.transform|innerHTML|textContent|innerText)\s*=\s*)(['"])?([^'"`;]*)\$\{([^}]+)\}([^'"`;]*)(['"])?;?/g, 
+    (match, prefix, openQuote, before, expr, after, closeQuote) => {
+      // Nếu đã có backticks thì giữ nguyên
+      if (!openQuote && !closeQuote) return match;
+      
+      // Thay thế quotes bằng backticks
+      return `${prefix}\`${before}\${${expr}}${after}\`;`;
+    });
+  
+  // Sửa các tham số hàm bị lỗi
+  sanitized = sanitized.replace(/function\s+(\w+)\s*\(\$(\d+)\)/g, (match, funcName, paramNum) => {
+    const paramNames = {
+      'drawSegment': 'index',
+      'getWinningSegment': 'finalAngle',
+      'spinWheel': '',
+      'drawWheel': '',
+      'updateScore': 'points',
+      'checkAnswer': 'selectedOption',
+      'startGame': '',
+      'endGame': '',
+      'resetGame': '',
+    };
+    
+    if (Object.prototype.hasOwnProperty.call(paramNames, funcName)) {
+      return `function ${funcName}(${paramNames[funcName]})`;
+    }
+    
+    // Nếu không có trong danh sách, thay thế bằng param + số
+    return `function ${funcName}(param${paramNum})`;
   });
   
-  // Fix template literals
-  sanitized = sanitized.replace(/(\w+\.style\.transform\s*=\s*)rotate\(\$\{([^}]+)\}([^)]*)\)/g, 
-    "$1`rotate(${$2}$3)`");
-  
-  sanitized = sanitized.replace(/(\w+\.textContent\s*=\s*)([^;"`']*)\$\{([^}]+)\}([^;"`']*);/g, 
-    "$1`$2${$3}$4`;");
-  
-  // Add error handling for canvas context
+  // 4. Đảm bảo xử lý lỗi cho canvas
   if (sanitized.includes('getContext') && !sanitized.includes('if (!ctx)')) {
     sanitized = sanitized.replace(
       /const\s+ctx\s*=\s*canvas\.getContext\(['"]2d['"]\);/g,
@@ -199,25 +362,56 @@ const sanitizeGameCode = (content: string): string => {
     );
   }
   
-  // Add error handling script
-  if (!sanitized.includes('window.onerror')) {
+  // 5. Đảm bảo tất cả CSS được đặt trong thẻ <style>
+  const cssBlockMatch = sanitized.match(/\/\*\s*CSS\s*\*\/([\s\S]*?)\/\*\s*End CSS\s*\*\//i);
+  if (cssBlockMatch && cssBlockMatch[1] && !cssBlockMatch[0].includes('<style>')) {
+    const cssContent = cssBlockMatch[1].trim();
     sanitized = sanitized.replace(
-      /<\/body>/,
-      `  <script>
+      cssBlockMatch[0],
+      `<style>\n${cssContent}\n</style>`
+    );
+  }
+  
+  // 6. Thêm xử lý lỗi window.onerror nếu chưa có
+  if (!sanitized.includes('window.onerror')) {
+    const errorHandlingScript = `
+  <script>
     window.onerror = (message, source, lineno, colno, error) => {
       console.error('Game error:', { message, source, lineno, colno, stack: error?.stack });
       return true;
     };
-  </script>
-</body>`
-    );
+  </script>`;
+    
+    if (sanitized.includes('</body>')) {
+      sanitized = sanitized.replace('</body>', `${errorHandlingScript}\n</body>`);
+    } else if (sanitized.includes('</html>')) {
+      sanitized = sanitized.replace('</html>', `${errorHandlingScript}\n</html>`);
+    }
   }
   
-  return sanitized;
+  // 7. Sửa và thay thế base64 không hợp lệ
+  sanitized = fixBase64Images(sanitized);
+  
+  // 8. Extract title
+  let title = '';
+  const titleTag = sanitized.match(/<title>(.*?)<\/title>/is);
+  if (titleTag && titleTag[1]) {
+    title = titleTag[1].trim();
+  } else {
+    const h1Tag = sanitized.match(/<h1[^>]*>(.*?)<\/h1>/is);
+    if (h1Tag && h1Tag[1]) {
+      title = h1Tag[1].replace(/<[^>]*>/g, '').trim();
+    }
+  }
+  
+  return {
+    title,
+    content: sanitized
+  };
 };
 
 export const tryGeminiGeneration = async (
-  model: any,
+  model: unknown,
   topic: string, 
   settings?: GameSettingsData,
   retryCount = 0
