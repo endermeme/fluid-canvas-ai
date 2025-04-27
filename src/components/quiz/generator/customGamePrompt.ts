@@ -21,10 +21,18 @@ Tạo một trò chơi HTML tương tác đơn giản theo chủ đề: "${topic
 
 **YÊU CẦU PHÂN CHIA MÃ NGUỒN:**
 - Tạo mã HTML, CSS và JavaScript HOÀN TOÀN TÁCH BIỆT (không nhúng lẫn nhau)
-- Sử dụng thẻ phân tách rõ ràng giữa ba phần: 
-  <HTML>...</HTML>
-  <CSS>...</CSS>
-  <JAVASCRIPT>...</JAVASCRIPT>
+- CODE MUST BE WRAPPED in these exact tags (DO NOT MODIFY THESE TAGS):
+  <HTML>
+  // Place HTML code here (no style or script tags)
+  </HTML>
+
+  <CSS>
+  // Place CSS code here
+  </CSS>
+
+  <JAVASCRIPT>
+  // Place JavaScript code here
+  </JAVASCRIPT>
 - KHÔNG mã hóa, KHÔNG minify - trả về mã nguồn dễ đọc
 - TỐI ƯU HÓA TỐC ĐỘ TẢI (QUAN TRỌNG NHẤT)
 
@@ -45,12 +53,12 @@ Tạo một trò chơi HTML tương tác đơn giản theo chủ đề: "${topic
 - Tránh tạo quá nhiều sự kiện hay listener
 
 **YÊU CẦU ĐẦU RA:**
-- Trả về ba phần riêng biệt: HTML, CSS và JavaScript
-- HTML KHÔNG được chứa thẻ <style> hoặc <script>
-- CSS và JavaScript PHẢI nằm trong thẻ phân tách riêng biệt
+- HTML: KHÔNG được chứa thẻ <style> hoặc <script>
+- CSS: Chỉ viết CSS thuần, không được nhúng vào HTML
+- JS: Chỉ viết JavaScript thuần, không được nhúng vào HTML
+- PHẢI sử dụng chính xác các thẻ <HTML>, <CSS>, và <JAVASCRIPT>
 - KHÔNG sử dụng thư viện hoặc tài nguyên bên ngoài
-- Đảm bảo mã HTML có meta viewport cho thiết bị di động
-- Tiêu đề phải phù hợp với chủ đề
+- Đảm bảo có viewport meta tag cho thiết bị di động trong HTML
 
 **CẤU TRÚC GAME:**
 - Tiêu đề rõ ràng và hướng dẫn ngắn gọn
@@ -60,7 +68,8 @@ Tạo một trò chơi HTML tương tác đơn giản theo chủ đề: "${topic
 - Ngôn ngữ: ${language === 'vi' ? 'Tiếng Việt' : 'Tiếng Anh'}
 - Độ khó: ${difficulty}
 
-TẬP TRUNG CHÍNH VÀO TỐC ĐỘ TẢI, ĐƠN GIẢN, VÀ TRẢI NGHIỆM NGƯỜI DÙNG MƯỢT MÀ!
+TẬP TRUNG VÀO TỐC ĐỘ TẢI, ĐƠN GIẢN, VÀ TRẢI NGHIỆM NGƯỜI DÙNG MƯỢT MÀ!
+TÔI SẼ CHỈ CHẤP NHẬN MÃ NGUỒN NẾU NÓ ĐƯỢC PHÂN CHIA ĐÚNG CÁCH THEO CÁC THẺ YÊU CẦU.
 `;
 
   return basePrompt;
