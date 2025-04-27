@@ -15,52 +15,50 @@ export const generateCustomGamePrompt = (options: GamePromptOptions): string => 
     category = 'general'
   } = options;
 
-  // Cải thiện prompt để yêu cầu tách biệt rõ ràng HTML, CSS và JavaScript
   const basePrompt = `
-Tạo một trò chơi HTML tương tác đơn giản theo chủ đề: "${topic}"
+Create a simple, ready-to-play HTML game about: "${topic}"
 
-**YÊU CẦU PHÂN CHIA MÃ NGUỒN:**
-- Tạo mã HTML, CSS và JavaScript HOÀN TOÀN TÁCH BIỆT (không nhúng lẫn nhau)
-- Sử dụng thẻ phân tách rõ ràng giữa ba phần: 
-  <HTML>...</HTML>
-  <CSS>...</CSS>
-  <JAVASCRIPT>...</JAVASCRIPT>
-- KHÔNG mã hóa, KHÔNG minify - trả về mã nguồn dễ đọc
-- TỐI ƯU HÓA TỐC ĐỘ TẢI (QUAN TRỌNG NHẤT)
+**IMPORTANT GAME REQUIREMENTS:**
+- Game must be playable immediately without complex setup
+- Support both touch screens and mouse interactions
+- Must work on both mobile and desktop devices
+- Keep the UI clean and intuitive
+- Focus on core gameplay mechanics only
+- Language: ${language === 'vi' ? 'Vietnamese' : 'English'}
+- Difficulty: ${difficulty}
+- Category: ${category}
 
-**THIẾT KẾ RESPONSIVE:**
-- Sử dụng đơn vị tương đối (%, vw, vh) cho kích thước
-- Hỗ trợ đầy đủ cho cả màn hình cảm ứng và điều khiển bằng chuột
-- Bố cục thích ứng với cả hướng dọc và ngang
+**DEVICE COMPATIBILITY:**
+1. Touch screen support:
+   - All interactions must work with touch events (touchstart, touchmove, touchend)
+   - Include proper touch event handling
+   - Support multi-touch where appropriate
+   - Use proper touch target sizes (min 44px)
+   - Add touch feedback (visual response to interactions)
 
-**TƯƠNG THÍCH ĐA NỀN TẢNG:**
-- Đảm bảo trải nghiệm nhất quán trên điện thoại, máy tính bảng và máy tính
-- Tất cả phần tử tương tác PHẢI đủ lớn cho cảm ứng (tối thiểu 44px)
-- Ngăn chặn zoom và cuộn không mong muốn trong khi chơi
-- Xử lý sự kiện touch và sự kiện chuột một cách nhất quán
+2. Mouse support:
+   - All interactions must also work with mouse events
+   - Support hover states where appropriate
+   - Maintain consistent behavior across devices
 
-**TỐI ƯU HÓA HIỆU SUẤT:**
-- Giảm thiểu số lượng DOM và hoạt ảnh phức tạp
-- Sử dụng requestAnimationFrame thay vì setInterval
-- Tránh tạo quá nhiều sự kiện hay listener
+**CODE REQUIREMENTS:**
+- Return complete HTML file with all CSS/JS included
+- NO EXTERNAL DEPENDENCIES or CDN links
+- Start with \`\`\`html
+- Format code properly with indentation
+- End with \`\`\`
+- NO COMMENTS in the code
 
-**YÊU CẦU ĐẦU RA:**
-- Trả về ba phần riêng biệt: HTML, CSS và JavaScript
-- HTML KHÔNG được chứa thẻ <style> hoặc <script>
-- CSS và JavaScript PHẢI nằm trong thẻ phân tách riêng biệt
-- KHÔNG sử dụng thư viện hoặc tài nguyên bên ngoài
-- Đảm bảo mã HTML có meta viewport cho thiết bị di động
-- Tiêu đề phải phù hợp với chủ đề
+**GAME STRUCTURE:**
+1. Clear game title and simple instructions
+2. Immediate start button (touch-friendly size)
+3. Core gameplay area with touch/mouse support
+4. Basic score/progress display
+5. Quick restart option
+6. Device-appropriate controls
+7. Responsive layout for all screen sizes
 
-**CẤU TRÚC GAME:**
-- Tiêu đề rõ ràng và hướng dẫn ngắn gọn
-- Vùng chơi game chính đáp ứng điều khiển cảm ứng/chuột
-- Hiển thị điểm số hoặc tiến trình trực quan
-- Khả năng bắt đầu lại nhanh chóng
-- Ngôn ngữ: ${language === 'vi' ? 'Tiếng Việt' : 'Tiếng Anh'}
-- Độ khó: ${difficulty}
-
-TẬP TRUNG CHÍNH VÀO TỐC ĐỘ TẢI, ĐƠN GIẢN, VÀ TRẢI NGHIỆM NGƯỜI DÙNG MƯỢT MÀ!
+Focus on making the game instantly playable and fun on any device!
 `;
 
   return basePrompt;

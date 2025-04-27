@@ -1,12 +1,10 @@
 
+import { GameSettingsData } from '../types';
+
 export interface MiniGame {
-  title: string;
-  content: string;
+  title?: string;
+  content?: string;
   useCanvas?: boolean;
-  html?: string; // HTML component
-  css?: string;  // CSS component
-  js?: string;   // JavaScript component
-  rawResponse?: string; // API raw response
 }
 
 export interface GameApiResponse {
@@ -21,4 +19,12 @@ export interface PromptOptions {
   language?: string;
   difficulty?: string;
   category?: string;
+}
+
+export interface GeneratorSettings {
+  temperature?: number;
+  topK?: number;
+  topP?: number;
+  candidateCount?: number;
+  maxOutputTokens?: number;
 }

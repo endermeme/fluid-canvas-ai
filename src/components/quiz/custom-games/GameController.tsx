@@ -2,52 +2,20 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
+import { AIGameGenerator } from '../generator/geminiGenerator';
 import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from "@/integrations/supabase/client";
+import { createGameSession } from '@/utils/gameParticipation';
 import QuizContainer from '../QuizContainer';
 
 interface GameControllerProps {
   initialTopic?: string;
   onGameGenerated?: (game: MiniGame) => void;
 }
-
-// Chuyển thẳng các hàm Supabase vào đây thay vì sử dụng file utils riêng
-const saveCustomGameToSupabase = async (title: string, content: string, gameType: string = 'custom') => {
-  try {
-    console.log("🔄 Đang lưu game:", { title, gameType });
-    
-    // Lưu trực tiếp vào bảng games
-    const { data: gameEntry, error: gameError } = await supabase
-      .from('games')
-      .insert([{
-        title: title,
-        html_content: content,
-        game_type: gameType,
-        description: 'Game tương tác tùy chỉnh',
-        is_preset: false,
-        content_type: 'html',
-        expires_at: new Date(Date.now() + (48 * 60 * 60 * 1000)).toISOString() // 48 giờ
-      }])
-      .select()
-      .single();
-
-    if (gameError) throw gameError;
-
-    // Tạo URL chia sẻ
-    const shareUrl = `${window.location.origin}/game/${gameEntry.id}`;
-    
-    console.log("✅ Game đã được lưu với ID:", gameEntry.id);
-    return { id: gameEntry.id, url: shareUrl };
-  } catch (error) {
-    console.error('❌ Lỗi khi lưu game:', error);
-    throw error;
-  }
-};
 
 const GameController: React.FC<GameControllerProps> = ({ 
   initialTopic = "", 
@@ -96,42 +64,32 @@ const GameController: React.FC<GameControllerProps> = ({
   };
   
   const handleShareGame = async () => {
-    if (!currentGame || isSharing) return "";
+    if (!currentGame || isSharing) return;
     
     try {
       setIsSharing(true);
-      toast({
-        title: "Đang xử lý",
-        description: "Đang tạo liên kết chia sẻ...",
-      });
       
-      // Sử dụng hàm đã di chuyển trực tiếp vào component
-      const result = await saveCustomGameToSupabase(
-        currentGame.title || "Minigame tương tác", 
+      // Tạo session game (sẽ được gọi sau khi game đã được lưu vào Supabase từ EnhancedGameView)
+      const gameSession = await createGameSession(
+        currentGame.title || "Minigame tương tác",
         currentGame.content
       );
       
-      // Sao chép URL vào clipboard
-      await navigator.clipboard.writeText(result.url);
-      
-      navigate(`/game/${result.id}`);
+      navigate(`/game/${gameSession.id}`);
       
       toast({
         title: "Game đã được chia sẻ",
-        description: "Đường dẫn đã được sao chép vào clipboard.",
+        description: "Bạn có thể gửi link cho người khác để họ tham gia.",
       });
-      
-      setIsSharing(false);
-      return result.url;
     } catch (error) {
-      console.error("Lỗi chia sẻ game:", error);
+      console.error("Error sharing game:", error);
       toast({
         title: "Lỗi chia sẻ",
         description: "Không thể tạo liên kết chia sẻ. Vui lòng thử lại.",
         variant: "destructive"
       });
+    } finally {
       setIsSharing(false);
-      return "";
     }
   };
 
@@ -156,15 +114,10 @@ const GameController: React.FC<GameControllerProps> = ({
           <EnhancedGameView 
             miniGame={{
               title: currentGame.title || "Minigame Tương Tác",
-              content: currentGame.content || "",
-              html: currentGame.html,
-              css: currentGame.css,
-              js: currentGame.js,
-              rawResponse: currentGame.rawResponse
+              content: currentGame.content || ""
             }} 
             onBack={handleBack}
             onNewGame={handleNewGame}
-            onShare={handleShareGame}
             hideHeader={false}
           />
         </div>

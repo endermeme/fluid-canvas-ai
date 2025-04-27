@@ -151,10 +151,6 @@ const GameSharePage: React.FC = () => {
     try {
       const fakeIp = getFakeIpAddress();
       
-      // Thêm log để debug
-      console.log('Submitting player data:', values);
-      console.log('Game ID:', gameId);
-      
       const result = await addParticipant(gameId, `${values.playerName} (${values.playerAge} tuổi)`, fakeIp);
       
       if (result.success) {
@@ -171,11 +167,7 @@ const GameSharePage: React.FC = () => {
         toast({
           title: "Tham gia thành công",
           description: "Bạn đã tham gia vào game này!",
-          duration: 3000,
         });
-        
-        // Chuyển tab về game để người chơi bắt đầu ngay
-        setActiveTab('game');
       } else if (result.participant) {
         setParticipants(prev => 
           prev.map(p => p.id === result.participant?.id ? result.participant : p)
@@ -186,14 +178,12 @@ const GameSharePage: React.FC = () => {
         toast({
           title: "Đã cập nhật thông tin",
           description: "Thông tin tham gia của bạn đã được cập nhật.",
-          duration: 3000,
         });
       } else {
         toast({
           title: "Lỗi tham gia",
           description: result.message || "Không thể tham gia game này.",
-          variant: "destructive",
-          duration: 5000,
+          variant: "destructive"
         });
       }
     } catch (error) {
@@ -201,8 +191,7 @@ const GameSharePage: React.FC = () => {
       toast({
         title: "Lỗi hệ thống",
         description: "Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại.",
-        variant: "destructive",
-        duration: 5000,
+        variant: "destructive"
       });
     }
   };
@@ -271,7 +260,7 @@ const GameSharePage: React.FC = () => {
   
   return (
     <QuizContainer
-      title={game?.title || "Game tương tác"}
+      title={game.title}
       showBackButton={true}
       onBack={handleBack}
       className="p-0 overflow-hidden"
@@ -293,8 +282,8 @@ const GameSharePage: React.FC = () => {
         <TabsContent value="game" className="h-[calc(100%-48px)] m-0">
           <EnhancedGameView 
             miniGame={{
-              title: game?.title || "",
-              content: game?.htmlContent || ""
+              title: game.title,
+              content: game.htmlContent
             }}
             onBack={handleBack}
             hideHeader={true}
@@ -442,11 +431,11 @@ const GameSharePage: React.FC = () => {
       </Tabs>
       
       <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Tham gia game</DialogTitle>
             <DialogDescription>
-              Vui lòng nhập thông tin để tham gia game "{game?.title || 'Game tương tác'}"
+              Vui lòng nhập thông tin để tham gia game "{game.title}"
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -458,7 +447,7 @@ const GameSharePage: React.FC = () => {
                   <FormItem>
                     <FormLabel>Tên của bạn</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Nhập tên của bạn" autoComplete="off" />
+                      <Input {...field} placeholder="Nhập tên của bạn" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -472,14 +461,7 @@ const GameSharePage: React.FC = () => {
                   <FormItem>
                     <FormLabel>Tuổi</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        type="number" 
-                        min="6" 
-                        max="100" 
-                        placeholder="Nhập tuổi của bạn" 
-                        autoComplete="off"
-                      />
+                      <Input {...field} type="number" min="6" max="100" placeholder="Nhập tuổi của bạn" />
                     </FormControl>
                     <FormDescription>
                       Thông tin này chỉ dùng cho mục đích thống kê
@@ -489,25 +471,12 @@ const GameSharePage: React.FC = () => {
                 )}
               />
               
-              <DialogFooter className="mt-6 space-x-2">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setShowNameDialog(false)}
-                >
+              <DialogFooter className="mt-6">
+                <Button type="button" variant="outline" onClick={() => setShowNameDialog(false)}>
                   Hủy
                 </Button>
-                <Button 
-                  type="submit"
-                  disabled={form.formState.isSubmitting}
-                  className="min-w-[100px]"
-                >
-                  {form.formState.isSubmitting ? (
-                    <span className="flex items-center">
-                      <span className="animate-spin h-4 w-4 mr-2 border-2 border-t-transparent border-white rounded-full"></span>
-                      Đang xử lý...
-                    </span>
-                  ) : hasRegistered ? "Cập nhật" : "Tham gia"}
+                <Button type="submit">
+                  {hasRegistered ? "Cập nhật" : "Tham gia"}
                 </Button>
               </DialogFooter>
             </form>
