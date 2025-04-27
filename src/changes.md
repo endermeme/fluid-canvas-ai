@@ -1,6 +1,12 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 27/04/2025 - Sửa lỗi gắn console trong iframe
+- Sửa lỗi TypeScript trong EnhancedGameView.tsx liên quan đến việc gắn console.log và console.error
+- Thay thế toán tử optional chaining `?.` bằng kiểm tra điều kiện trước khi gán
+- Loại bỏ window.console (không cần thiết) và chỉ sử dụng console trực tiếp
+- Thêm kiểm tra tính tồn tại của iframe.contentWindow trước khi gán
+
 ## 27/04/2025 - Cải thiện hiển thị debug cho game HTML/CSS/JS
 - Thêm chức năng hiển thị thông tin debug đầy đủ trong console
 - Hiển thị rõ ràng phản hồi API thô và các thành phần HTML/CSS/JS tách biệt

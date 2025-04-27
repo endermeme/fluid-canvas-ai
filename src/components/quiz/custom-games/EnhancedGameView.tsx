@@ -202,14 +202,21 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           
           // Gắn console.log từ iframe ra ngoài để debug
           try {
-            iframe.contentWindow?.console.log = function(...args: any[]) {
-              console.log("%c📱 IFRAME CONSOLE:", "background:#ff9800; color:white; padding:2px 5px; border-radius:3px;", ...args);
-              return window.console.log(...args);
-            };
-            iframe.contentWindow?.console.error = function(...args: any[]) {
-              console.error("%c📱 IFRAME ERROR:", "background:#f44336; color:white; padding:2px 5px; border-radius:3px;", ...args);
-              return window.console.error(...args);
-            };
+            if (iframe.contentWindow) {
+              const contentWindow = iframe.contentWindow;
+              
+              // Gán hàm console.log mới cho cửa sổ iframe
+              contentWindow.console.log = function(...args: any[]) {
+                console.log("%c📱 IFRAME CONSOLE:", "background:#ff9800; color:white; padding:2px 5px; border-radius:3px;", ...args);
+                return console.log(...args);
+              };
+              
+              // Gán hàm console.error mới cho cửa sổ iframe
+              contentWindow.console.error = function(...args: any[]) {
+                console.error("%c📱 IFRAME ERROR:", "background:#f44336; color:white; padding:2px 5px; border-radius:3px;", ...args);
+                return console.error(...args);
+              };
+            }
           } catch (e) {
             console.warn("Không thể gắn console từ iframe: ", e);
           }
