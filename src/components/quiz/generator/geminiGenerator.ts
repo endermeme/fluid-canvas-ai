@@ -1,3 +1,4 @@
+
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
@@ -72,22 +73,8 @@ export const generateWithGemini = async (
     category: settings?.category || 'general'
   };
 
-  // Add enhanced instructions for proper code formatting to the prompt
-  const formattingInstructions = `
-IMPORTANT CODE FORMATTING INSTRUCTIONS:
-1. Return a SINGLE, complete, self-contained HTML file with all CSS and JavaScript included
-2. Use proper HTML structure with DOCTYPE, html, head, and body tags
-3. Include all JavaScript inside a SINGLE script tag at the end of the body
-4. Format all CSS and JavaScript code with proper indentation
-5. Use template literals correctly with backticks (\`) not regular quotes for dynamic content
-6. Use clear parameter names in function declarations (NOT $2 or placeholder variables)
-7. Include proper error handling for canvas operations
-8. Make sure all HTML elements are properly closed
-9. DO NOT include markdown syntax (\`\`\`) in your response
-`;
-
-  // Generate prompt with formatting instructions
-  const prompt = generateCustomGamePrompt(promptOptions) + formattingInstructions;
+  // Tạo prompt cho mã game không cần chỉnh sửa quá nhiều
+  const prompt = generateCustomGamePrompt(promptOptions);
 
   try {
     logInfo(SOURCE, `Sending request to Gemini API`);
@@ -133,26 +120,9 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
     console.log('%c Generated Game Code:', 'font-weight: bold; color: #6f42c1;');
     console.log(text);
     
-    let title = topic;
-    const titleMatch = text.match(/<title>(.*?)<\/title>/i) || 
-                      text.match(/<h1[^>]*>(.*?)<\/h1>/i);
-    
-    if (titleMatch && titleMatch[1]) {
-      title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
-    }
-    
-    let content = text;
-    
-    if (!content.trim().startsWith('<!DOCTYPE') && !content.trim().startsWith('<html')) {
-      const htmlMatch = text.match(/<!DOCTYPE[\s\S]*<\/html>/i) || 
-                        text.match(/<html[\s\S]*<\/html>/i);
-      
-      if (htmlMatch && htmlMatch[0]) {
-        content = htmlMatch[0];
-      }
-    }
-    
-    content = sanitizeGameCode(content);
+    // Trích xuất thông tin game và content từ phản hồi
+    let content = extractGameCodeFromResponse(text);
+    let title = extractGameTitle(content, topic);
     
     const game: MiniGame = {
       title: title,
@@ -169,51 +139,38 @@ IMPORTANT CODE FORMATTING INSTRUCTIONS:
   }
 };
 
-const sanitizeGameCode = (content: string): string => {
-  let sanitized = content;
+// Hàm trích xuất mã HTML game từ phản hồi API
+const extractGameCodeFromResponse = (text: string): string => {
+  // Loại bỏ các dấu markdown nếu có
+  let content = text.replace(/```html|```/g, '').trim();
   
-  // Remove markdown code block syntax if present
-  sanitized = sanitized.replace(/```html|```/g, '');
-  
-  // Fix function parameters
-  sanitized = sanitized.replace(/function\s+(\w+)\s*\(\$2\)/g, (match, funcName) => {
-    if (funcName === 'drawSegment') return 'function drawSegment(index)';
-    if (funcName === 'getWinningSegment') return 'function getWinningSegment(finalAngle)';
-    if (funcName === 'spinWheel') return 'function spinWheel()';
-    if (funcName === 'drawWheel') return 'function drawWheel()';
-    return match;
-  });
-  
-  // Fix template literals
-  sanitized = sanitized.replace(/(\w+\.style\.transform\s*=\s*)rotate\(\$\{([^}]+)\}([^)]*)\)/g, 
-    "$1`rotate(${$2}$3)`");
-  
-  sanitized = sanitized.replace(/(\w+\.textContent\s*=\s*)([^;"`']*)\$\{([^}]+)\}([^;"`']*);/g, 
-    "$1`$2${$3}$4`;");
-  
-  // Add error handling for canvas context
-  if (sanitized.includes('getContext') && !sanitized.includes('if (!ctx)')) {
-    sanitized = sanitized.replace(
-      /const\s+ctx\s*=\s*canvas\.getContext\(['"]2d['"]\);/g,
-      "const ctx = canvas.getContext('2d');\n  if (!ctx) { console.error('Canvas context not available'); return; }"
-    );
+  // Xử lý trường hợp không có thẻ DOCTYPE hoặc <html> ở đầu
+  if (!content.trim().startsWith('<!DOCTYPE') && !content.trim().startsWith('<html')) {
+    // Tìm mã HTML trong phản hồi
+    const htmlMatch = text.match(/<!DOCTYPE[\s\S]*<\/html>/i) || 
+                      text.match(/<html[\s\S]*<\/html>/i);
+    
+    if (htmlMatch && htmlMatch[0]) {
+      content = htmlMatch[0];
+    }
   }
   
-  // Add error handling script
-  if (!sanitized.includes('window.onerror')) {
-    sanitized = sanitized.replace(
-      /<\/body>/,
-      `  <script>
-    window.onerror = (message, source, lineno, colno, error) => {
-      console.error('Game error:', { message, source, lineno, colno, stack: error?.stack });
-      return true;
-    };
-  </script>
-</body>`
-    );
+  return content;
+};
+
+// Trích xuất tiêu đề game từ nội dung HTML
+const extractGameTitle = (content: string, defaultTopic: string): string => {
+  let title = defaultTopic;
+  
+  // Tìm tiêu đề từ thẻ title hoặc h1
+  const titleMatch = content.match(/<title>(.*?)<\/title>/i) || 
+                    content.match(/<h1[^>]*>(.*?)<\/h1>/i);
+  
+  if (titleMatch && titleMatch[1]) {
+    title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
   }
   
-  return sanitized;
+  return title;
 };
 
 export const tryGeminiGeneration = async (

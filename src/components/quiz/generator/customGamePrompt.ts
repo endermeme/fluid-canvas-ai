@@ -31,7 +31,7 @@ Create a simple, ready-to-play HTML game about: "${topic}"
 **CROSS-DEVICE COMPATIBILITY:**
 1. Touch screen support (CRITICAL):
    - All interactive elements MUST work with touch events (touchstart, touchmove, touchend)
-   - Include proper touch event handling for all interactive elements
+   - Include proper touch event handlers for all interactive elements
    - Support multi-touch where appropriate for gameplay
    - Use proper touch target sizes (minimum 44px square)
    - Add visual touch feedback (clear visual response to interactions)
@@ -44,17 +44,22 @@ Create a simple, ready-to-play HTML game about: "${topic}"
 
 **RESPONSIVE DESIGN:**
 - Use viewport-relative units (vw, vh) for sizing
-- Implement fluid layouts that adapt to both portrait and mobile orientations
+- Implement fluid layouts that adapt to both portrait and landscape orientations
 - Auto-detect device capabilities and adjust UI accordingly
 - Test layouts for both small mobile screens and large desktop displays
 
-**CODE REQUIREMENTS:**
+**GAME CODE FORMAT:**
 - Return complete HTML file with all CSS/JS included
 - NO EXTERNAL DEPENDENCIES or CDN links
-- Start with \`\`\`html
-- Format code properly with indentation
-- End with \`\`\`
-- NO COMMENTS in the code
+- Return code exactly as it would run, with proper indentation and structure
+- DO NOT modify or sanitize the code - return it exactly as is
+- DO NOT include markdown code block syntax (\`\`\`) in your response
+- Include proper DOCTYPE and HTML structure
+
+**DEVICE ADAPTATION SCRIPT:**
+- Include a device detection script to automatically adjust UI for touch/mouse
+- Add touch-specific event handlers that correctly handle all interaction types
+- Create a responsive layout that works on all screen sizes without manual adjustment
 
 **GAME STRUCTURE:**
 1. Clear game title and simple instructions
