@@ -26,10 +26,12 @@ export const enhanceScript = (jsContent: string): string => {
     })();
   `;
   
-  // Combine helpers with original script
-  const enhancedScript = helpers + '\n\n' + jsContent;
+  // Ensure helpers are included but don't duplicate them
+  if (!jsContent.includes('window.wheelHelpers') && !jsContent.includes('window.gameHelpers')) {
+    return helpers + '\n\n' + jsContent;
+  }
   
-  return enhancedScript;
+  return jsContent;
 };
 
 /**

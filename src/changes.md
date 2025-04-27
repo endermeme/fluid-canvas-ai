@@ -1,3 +1,4 @@
+
 # Các thay đổi
 
 ## 2025-04-27
@@ -46,3 +47,10 @@
   - Updated `general-helpers.ts` to properly type check HTML elements
   - Updated `wheel-helpers.ts` to properly type check SVG elements
 - Simplified main `iframe-css.ts` to use modular style imports
+
+## 2025-05-04
+- Sửa lỗi JavaScript không hoạt động trong game:
+  - Cập nhật `iframe-js.ts` để cải thiện cách tích hợp mã JavaScript
+  - Cập nhật `iframe-utils.ts` để đảm bảo script chạy sau khi DOM đã tải
+  - Thêm xử lý lỗi cho script để tránh treo trò chơi
+  - Đảm bảo các trình trợ giúp đúng cách

@@ -26,6 +26,16 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       // Chèn JavaScript vào thẻ script
       htmlDoc = htmlDoc.replace('<script id="game-script"></script>', `<script id="game-script">${jsContent}</script>`);
       
+      // Thêm IIFE để đảm bảo code chạy sau khi DOM đã tải
+      const wrappedScript = `<script>
+        document.addEventListener('DOMContentLoaded', function() {
+          ${jsContent}
+        });
+      </script>`;
+      
+      // Chèn script vào cuối body
+      htmlDoc = htmlDoc.replace('</body>', `${wrappedScript}</body>`);
+      
       return htmlDoc;
     }
     
@@ -51,6 +61,21 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       </head>
       <body>
         ${content}
+        <script>
+          // Script to enable console.log access in iframe
+          (function() {
+            const originalConsoleLog = console.log;
+            console.log = function() {
+              originalConsoleLog.apply(console, arguments);
+              try {
+                window.parent.postMessage({
+                  type: 'console.log',
+                  args: Array.from(arguments).map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg)
+                }, '*');
+              } catch(e) {}
+            }
+          })();
+        </script>
       </body>
       </html>
     `;
@@ -115,6 +140,20 @@ export const createIframeContent = (
   
   // Chèn JavaScript vào thẻ script
   htmlDoc = htmlDoc.replace('<script id="game-script"></script>', `<script id="game-script">${enhanceScript(js)}</script>`);
+  
+  // Thêm IIFE để đảm bảo code chạy sau khi DOM đã tải
+  const wrappedScript = `<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
+        ${js}
+      } catch(e) {
+        console.error("Game script error:", e);
+      }
+    });
+  </script>`;
+  
+  // Chèn script vào cuối body
+  htmlDoc = htmlDoc.replace('</body>', `${wrappedScript}</body>`);
   
   return htmlDoc;
 };
