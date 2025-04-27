@@ -19,7 +19,7 @@ interface GameControllerProps {
 // Chuyển thẳng các hàm Supabase vào đây thay vì sử dụng file utils riêng
 const saveCustomGameToSupabase = async (title: string, content: string, gameType: string = 'custom') => {
   try {
-    console.log("Đang lưu game:", { title, gameType });
+    console.log("🔄 Đang lưu game:", { title, gameType });
     
     // Lưu trực tiếp vào bảng games
     const { data: gameEntry, error: gameError } = await supabase
@@ -41,10 +41,10 @@ const saveCustomGameToSupabase = async (title: string, content: string, gameType
     // Tạo URL chia sẻ
     const shareUrl = `${window.location.origin}/game/${gameEntry.id}`;
     
-    console.log("Game đã được lưu với ID:", gameEntry.id);
+    console.log("✅ Game đã được lưu với ID:", gameEntry.id);
     return { id: gameEntry.id, url: shareUrl };
   } catch (error) {
-    console.error('Lỗi khi lưu game:', error);
+    console.error('❌ Lỗi khi lưu game:', error);
     throw error;
   }
 };
@@ -156,7 +156,10 @@ const GameController: React.FC<GameControllerProps> = ({
           <EnhancedGameView 
             miniGame={{
               title: currentGame.title || "Minigame Tương Tác",
-              content: currentGame.content || ""
+              content: currentGame.content || "",
+              html: currentGame.html,
+              css: currentGame.css,
+              js: currentGame.js
             }} 
             onBack={handleBack}
             onNewGame={handleNewGame}

@@ -47,6 +47,37 @@ export class AIGameGenerator {
   }
 }
 
+// Hàm phân tích và tách mã HTML thành các thành phần riêng biệt
+const extractComponents = (htmlContent: string) => {
+  const htmlDoc = document.createElement('div');
+  htmlDoc.innerHTML = htmlContent;
+  
+  // Tách CSS
+  let cssContent = '';
+  const styleElements = htmlDoc.querySelectorAll('style');
+  styleElements.forEach(style => {
+    cssContent += style.innerHTML;
+    style.remove();
+  });
+  
+  // Tách JavaScript
+  let jsContent = '';
+  const scriptElements = htmlDoc.querySelectorAll('script');
+  scriptElements.forEach(script => {
+    jsContent += script.innerHTML;
+    script.remove();
+  });
+  
+  // Phần HTML còn lại
+  const htmlPart = htmlDoc.innerHTML;
+  
+  return {
+    html: htmlPart,
+    css: cssContent,
+    js: jsContent
+  };
+};
+
 // Đơn giản hóa hàm tạo game, tập trung vào việc lấy mã HTML nguyên bản từ API
 export const generateWithGemini = async (
   topic: string, 
@@ -55,27 +86,22 @@ export const generateWithGemini = async (
   const gameType = getGameTypeByTopic(topic);
   const useCanvas = settings?.useCanvas !== undefined ? settings.useCanvas : true;
   
-  logInfo(SOURCE, `Bắt đầu tạo game cho "${topic}"`, {
-    model: GEMINI_MODELS.CUSTOM_GAME,
-    apiVersion: API_VERSION,
-    type: gameType?.name || "Không xác định",
-    settings: settings || {},
-    canvasMode: useCanvas ? "bật" : "tắt"
-  });
+  console.log(`%c🎮 Bắt đầu tạo game: "${topic}" %c(${useCanvas ? 'sử dụng Canvas' : 'không sử dụng Canvas'})`,
+    'font-weight: bold; color: #4C75F2;', 'font-weight: normal; color: #718096;');
 
+  // Tạo prompt đơn giản hơn
   const promptOptions = {
     topic,
     useCanvas,
-    language: settings?.language || 'en',
+    language: settings?.language || 'vi',
     difficulty: settings?.difficulty || 'medium',
     category: settings?.category || 'general'
   };
 
-  // Tạo prompt đơn giản hơn
   const prompt = generateCustomGamePrompt(promptOptions);
 
   try {
-    logInfo(SOURCE, `Đang gửi yêu cầu đến API Gemini`);
+    console.log('🌐 Đang gọi API Gemini...');
     
     const startTime = Date.now();
     
@@ -113,32 +139,35 @@ export const generateWithGemini = async (
     }
     
     const duration = measureExecutionTime(startTime);
-    logSuccess(SOURCE, `Đã nhận phản hồi sau ${duration.seconds}s`);
+    console.log(`%c✅ Nhận phản hồi sau ${duration.seconds}s`, 'color: #10B981; font-weight: bold;');
     
-    console.log('%c Mã Game Đã Tạo:', 'font-weight: bold; color: #6f42c1;');
-    console.log(text);
-    
-    // Đơn giản hóa cách xử lý phản hồi từ API
-    let content = extractGameContentFromResponse(text);
+    // Lấy nội dung HTML từ phản hồi API
+    let content = extractHTMLFromResponse(text);
     let title = extractGameTitleFromContent(content, topic);
+    
+    // Tách các thành phần
+    const components = extractComponents(content);
     
     const game: MiniGame = {
       title: title,
       content: content,
+      html: components.html,
+      css: components.css,
+      js: components.js,
       useCanvas: useCanvas
     };
     
-    logSuccess(SOURCE, "Game đã được tạo thành công");
+    console.log('%c🎯 Game đã được tạo thành công', 'color: #10B981; font-weight: bold;');
     
     return game;
   } catch (error) {
-    logError(SOURCE, "Lỗi khi tạo game với Gemini", error);
+    console.error('🔴 Lỗi khi tạo game với Gemini:', error);
     throw error;
   }
 };
 
 // Hàm đơn giản để trích xuất mã HTML từ phản hồi API
-const extractGameContentFromResponse = (text: string): string => {
+const extractHTMLFromResponse = (text: string): string => {
   // Loại bỏ các dấu markdown nếu có
   let content = text.trim();
   
@@ -209,14 +238,14 @@ export const tryGeminiGeneration = async (
   const maxRetries = 2;  // Giảm số lần thử lại xuống 2 cho nhanh hơn
   
   if (retryCount >= maxRetries) {
-    logWarning(SOURCE, `Đã đạt đến số lần thử lại tối đa (${maxRetries})`);
+    console.warn(`⚠️ Đã đạt đến số lần thử lại tối đa (${maxRetries})`);
     return null;
   }
   
   try {
     return await generateWithGemini(topic, settings);
   } catch (error) {
-    logError(SOURCE, `Lần thử ${retryCount + 1} thất bại`, error);
+    console.error(`❌ Lần thử ${retryCount + 1} thất bại:`, error);
     
     // Tăng thời gian chờ giữa các lần thử lại
     const waitTime = (retryCount + 1) * 1500;

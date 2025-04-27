@@ -1,6 +1,5 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { enhanceIframeContent } from '../utils/iframe-utils';
 import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -14,6 +13,9 @@ interface EnhancedGameViewProps {
   miniGame: {
     title?: string;
     content: string;
+    html?: string;
+    css?: string;
+    js?: string;
   };
   onReload?: () => void;
   className?: string;
@@ -25,6 +27,65 @@ interface EnhancedGameViewProps {
   isTeacher?: boolean;
   gameExpired?: boolean;
 }
+
+// Hàm cải thiện nội dung HTML cho iframe
+const enhanceIframeContent = (content: string, title?: string) => {
+  // Kiểm tra xem nội dung đã có HTML đầy đủ chưa
+  if (!content.includes('<!DOCTYPE') && !content.includes('<html')) {
+    // Nếu có các thành phần HTML, CSS, JS riêng biệt
+    if (content.includes('<style>') || content.includes('<script>')) {
+      return content;
+    }
+    
+    // Bọc nội dung trong HTML đầy đủ
+    return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>${title || 'Game tương tác'}</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+        }
+        body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .game-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        ${content}
+    </div>
+    <script>
+        // Cải thiện hiệu suất touch trên thiết bị di động
+        document.addEventListener('touchstart', function() {}, {passive: true});
+    </script>
+</body>
+</html>`;
+  }
+  
+  return content;
+};
 
 // Hàm lưu game trực tiếp trong component thay vì sử dụng file utils riêng
 const saveGameForSharing = async (title: string, content: string) => {
@@ -92,8 +153,38 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     }
   };
 
+  // Tạo nội dung cho iframe từ các thành phần riêng biệt
+  const createIframeContent = () => {
+    if (miniGame.html && miniGame.css && miniGame.js) {
+      // Nếu có các thành phần riêng biệt
+      return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>${miniGame.title || 'Game tương tác'}</title>
+    <style>
+        ${miniGame.css}
+    </style>
+</head>
+<body>
+    ${miniGame.html}
+    <script>
+        // Cải thiện hiệu suất touch trên thiết bị di động
+        document.addEventListener('touchstart', function() {}, {passive: true});
+        
+        ${miniGame.js}
+    </script>
+</body>
+</html>`;
+    } 
+    
+    // Sử dụng nội dung gốc nếu không có các thành phần riêng biệt
+    return enhanceIframeContent(miniGame.content, miniGame.title);
+  };
+
   useEffect(() => {
-    if (iframeRef.current && miniGame?.content) {
+    if (iframeRef.current && miniGame) {
       try {
         // Reset trạng thái
         setIsIframeLoaded(false);
@@ -104,11 +195,8 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         
         clearTimers();
         
-        // Đảm bảo chỉ truyền 2 tham số đúng với định nghĩa hàm
-        const enhancedContent = enhanceIframeContent(
-          miniGame.content,
-          miniGame.title
-        );
+        // Chuẩn bị nội dung iframe
+        const enhancedContent = createIframeContent();
         
         iframeRef.current.srcdoc = enhancedContent;
         
@@ -187,11 +275,8 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         
         clearTimers();
         
-        // Đảm bảo chỉ truyền 2 tham số đúng với định nghĩa hàm
-        const enhancedContent = enhanceIframeContent(
-          miniGame.content,
-          miniGame.title
-        );
+        // Chuẩn bị lại nội dung iframe
+        const enhancedContent = createIframeContent();
         
         iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
@@ -232,7 +317,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   };
 
   const handleShare = async () => {
-    if (!miniGame?.content) return;
+    if (!miniGame?.content) return "";
     
     try {
       setIsSharing(true);
@@ -268,6 +353,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         variant: "destructive"
       });
       setIsSharing(false);
+      return "";
     }
   };
 
