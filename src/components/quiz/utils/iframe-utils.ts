@@ -1,10 +1,33 @@
+import { processImageSource } from '@/utils/media-utils';
 
+export const enhanceIframeContent = async (content: string, title?: string): Promise<string> => {
+  // Process all image sources in the content
+  let processedContent = content;
+  
+  // Find all img tags and process their sources
+  const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/g;
+  const imgMatches = content.matchAll(imgRegex);
+  
+  for (const match of imgMatches) {
+    const originalSrc = match[1];
+    const processedSrc = await processImageSource(originalSrc);
+    processedContent = processedContent.replace(originalSrc, processedSrc);
+  }
+  
+  // Find all CSS background-image urls and process them
+  const bgRegex = /background-image:\s*url\(['"]?([^'")\s]+)['"]?\)/g;
+  const bgMatches = content.matchAll(bgRegex);
+  
+  for (const match of bgMatches) {
+    const originalUrl = match[1];
+    const processedUrl = await processImageSource(originalUrl);
+    processedContent = processedContent.replace(originalUrl, processedUrl);
+  }
 
-export const enhanceIframeContent = (content: string, title?: string): string => {
   // Tách phần head, body và style, script nếu có
   let head = '';
   let body = '';
-  let html = content;
+  let html = processedContent;
 
   // Kiểm tra và chuẩn hóa cấu trúc HTML
   if (!html.includes('<!DOCTYPE') && !html.includes('<html')) {
@@ -400,4 +423,3 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
 
   return enhancedHTML;
 };
-
