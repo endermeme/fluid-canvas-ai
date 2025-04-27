@@ -49,11 +49,12 @@ const GameController: React.FC = () => {
     });
 
     console.log("Đang gửi yêu cầu tạo game...");
+    console.log("Prompt người dùng:", prompt);
 
     try {
       const gamePrompt = generateCustomGamePrompt(prompt);
       
-      console.log("Gửi prompt tới API:", gamePrompt.slice(0, 100) + "...");
+      console.log("Gửi prompt tới API:", gamePrompt);
       console.log("API endpoint:", getApiEndpoint(GEMINI_MODELS.CUSTOM_GAME));
       
       const response = await fetch(getApiEndpoint(GEMINI_MODELS.CUSTOM_GAME), {
@@ -90,26 +91,40 @@ const GameController: React.FC = () => {
         throw new Error('Không nhận được phản hồi từ AI');
       }
 
-      // Xử lý phản hồi từ AI để tách HTML, CSS và JavaScript
+      console.log("Nội dung game nhận được:", gameContent);
+
       const htmlMatch = gameContent.match(/<HTML>([\s\S]*?)<\/HTML>/i);
       const cssMatch = gameContent.match(/<CSS>([\s\S]*?)<\/CSS>/i);
       const jsMatch = gameContent.match(/<JAVASCRIPT>([\s\S]*?)<\/JAVASCRIPT>/i);
 
-      console.log("Đã trích xuất HTML, CSS, JS:", {
+      console.log("=== HTML CODE ===");
+      console.log(htmlMatch?.[1]?.trim() || 'Không có HTML');
+      
+      console.log("=== CSS CODE ===");
+      console.log(cssMatch?.[1]?.trim() || 'Không có CSS');
+      
+      console.log("=== JAVASCRIPT CODE ===");
+      console.log(jsMatch?.[1]?.trim() || 'Không có JavaScript');
+
+      console.log("Kết quả trích xuất:", {
         html: htmlMatch ? "Có" : "Không",
         css: cssMatch ? "Có" : "Không",
         js: jsMatch ? "Có" : "Không"
       });
 
+      const gameData = {
+        html: htmlMatch?.[1]?.trim() || '',
+        css: cssMatch?.[1]?.trim() || '',
+        javascript: jsMatch?.[1]?.trim() || '',
+        title: `Tùy chỉnh: ${prompt.slice(0, 30)}...`
+      };
+
+      console.log("Dữ liệu game cuối cùng:", gameData);
+
       setGameState({
         loading: false,
         error: null,
-        content: {
-          html: htmlMatch?.[1]?.trim() || '',
-          css: cssMatch?.[1]?.trim() || '',
-          javascript: jsMatch?.[1]?.trim() || '',
-          title: `Tùy chỉnh: ${prompt.slice(0, 30)}...`
-        }
+        content: gameData
       });
 
       toast({
