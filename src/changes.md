@@ -6,3 +6,4 @@
 - Ẩn nút giáo viên cho người chơi thường
 - Cập nhật hiển thị thông tin người chơi
 - Thêm cơ chế chống gian lận
+- Sửa lỗi cú pháp trong geminiPrompt.ts (escape backticks trong template string)

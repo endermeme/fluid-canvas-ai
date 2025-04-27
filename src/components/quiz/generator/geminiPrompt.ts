@@ -1,3 +1,4 @@
+
 /**
  * Prompt template để tạo game từ Gemini API
  */
@@ -9,7 +10,7 @@ IMPORTANT FORMATTING RULES (FOLLOW THESE EXACTLY):
 3. Place ALL CSS in a SINGLE <style> tag in the head section.
 4. Use modern JavaScript (ES6+) with proper syntax and error handling.
 5. DO NOT use external dependencies or CDN links.
-6. DO NOT use markdown code blocks (``` or ~~~) in your response.
+6. DO NOT use markdown code blocks (\`\`\` or ~~~) in your response.
 7. Make the game FULLY INTERACTIVE and TOUCH-FRIENDLY for mobile devices.
 8. Include clear instructions for players directly in the game UI.
 9. Make the game centered and responsive for both desktop and mobile.
@@ -100,4 +101,4 @@ IMPORTANT: Return ONLY the complete HTML document. Do not include any explanatio
   return prompt;
 };
 
-export default createGameGenerationPrompt; 
+export default createGameGenerationPrompt;
