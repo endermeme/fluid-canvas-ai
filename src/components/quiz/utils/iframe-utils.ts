@@ -1,3 +1,4 @@
+
 export const enhanceIframeContent = (content: string, title?: string): string => {
   // Tách phần head, body và style, script nếu có
   let head = '';
@@ -59,6 +60,19 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
         
         return true; // Prevent default handling
       };
+
+      // Thông báo cho parent frame khi game đã load xong
+      window.addEventListener('load', function() {
+        try {
+          console.log('Game loaded successfully');
+          // Thử gửi thông báo đến parent frame
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'GAME_LOADED', success: true }, '*');
+          }
+        } catch (err) {
+          console.error('Error notifying parent:', err);
+        }
+      });
       
       // Xử lý sự kiện touch tốt hơn
       let lastTap = 0;
@@ -79,6 +93,93 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       document.documentElement.classList.add(isTouchDevice ? 'touch-device' : 'no-touch');
       document.documentElement.classList.add(isMobile ? 'mobile' : 'desktop');
+    </script>
+  `;
+
+  const iframeHelperScript = `
+    <script>
+      // Đảm bảo tất cả scripts được executed sau khi DOM đã sẵn sàng
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM fully loaded');
+        
+        // Đảm bảo các phần tử canvas được khởi tạo đúng
+        const canvases = document.querySelectorAll('canvas');
+        if (canvases.length > 0) {
+          console.log('Found', canvases.length, 'canvas elements');
+          canvases.forEach((canvas, index) => {
+            if (!canvas.style.width) canvas.style.width = '100%';
+            if (!canvas.style.maxWidth) canvas.style.maxWidth = '800px';
+            if (!canvas.style.margin) canvas.style.margin = '0 auto';
+            console.log('Canvas', index, 'dimensions:', canvas.width, 'x', canvas.height);
+          });
+        }
+        
+        // Tự động thêm handlers cho các button
+        const buttons = document.querySelectorAll('button:not([data-handled])');
+        buttons.forEach(btn => {
+          btn.setAttribute('data-handled', 'true');
+          if (!btn.style.cursor) btn.style.cursor = 'pointer';
+          if (isTouchDevice && !btn.getAttribute('data-touch-optimized')) {
+            btn.setAttribute('data-touch-optimized', 'true');
+            if (parseInt(getComputedStyle(btn).minHeight || '0', 10) < 44) {
+              btn.style.minHeight = '44px';
+            }
+            if (parseInt(getComputedStyle(btn).minWidth || '0', 10) < 44) {
+              btn.style.minWidth = '44px';
+            }
+          }
+        });
+      });
+      
+      // Một số helper functions phổ biến cho game
+      function centerElement(element) {
+        if (!element) return;
+        element.style.position = element.style.position || 'absolute';
+        element.style.left = '50%';
+        element.style.top = '50%';
+        element.style.transform = 'translate(-50%, -50%)';
+      }
+      
+      function animateElement(element, keyframes, options) {
+        if (!element || !keyframes) return;
+        try {
+          if (typeof element.animate === 'function') {
+            return element.animate(keyframes, options);
+          }
+        } catch (err) {
+          console.error('Animation error:', err);
+        }
+      }
+      
+      function shake(element, intensity = 5, duration = 500) {
+        if (!element) return;
+        const originalTransform = element.style.transform || '';
+        
+        // Backup current position/transform
+        const backup = {
+          transform: originalTransform,
+          transition: element.style.transition
+        };
+        
+        // Create shake animation
+        let start = null;
+        const step = (timestamp) => {
+          if (!start) start = timestamp;
+          const progress = timestamp - start;
+          
+          if (progress < duration) {
+            const x = Math.sin(progress / 10) * intensity;
+            element.style.transform = originalTransform + ` translateX(${x}px)`;
+            requestAnimationFrame(step);
+          } else {
+            // Restore original styles
+            element.style.transform = backup.transform;
+            element.style.transition = backup.transition;
+          }
+        };
+        
+        requestAnimationFrame(step);
+      }
     </script>
   `;
 
@@ -144,6 +245,22 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
           opacity: 0.9;
         }
       }
+
+      /* Debugging styles */
+      .debug-info {
+        position: fixed;
+        top: 0;
+        right: 0;
+        background: rgba(0,0,0,0.7);
+        color: #fff;
+        font-size: 12px;
+        padding: 5px;
+        max-width: 300px;
+        max-height: 150px;
+        overflow: auto;
+        z-index: 9999;
+        font-family: monospace;
+      }
     </style>
   `;
 
@@ -167,6 +284,14 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
           }, 500);
         }
       });
+      
+      // Animation styles
+      if (!document.getElementById('animation-styles')) {
+        const styleTag = document.createElement('style');
+        styleTag.id = 'animation-styles';
+        styleTag.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+        document.head.appendChild(styleTag);
+      }
     </script>
   `;
 
@@ -181,9 +306,40 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
     head += `<title>${title}</title>`;
   }
 
+  // Thêm debug mode
+  const debugTools = `
+    <script>
+      // Debug tools - chỉ hiển thị khi có URL param debug=true
+      if (window.location.href.includes('debug=true')) {
+        const debugDiv = document.createElement('div');
+        debugDiv.className = 'debug-info';
+        document.body.appendChild(debugDiv);
+        
+        // Override console.log để hiển thị trong debug div
+        const originalConsoleLog = console.log;
+        console.log = function() {
+          originalConsoleLog.apply(console, arguments);
+          const args = Array.from(arguments);
+          const text = args.map(arg => {
+            if (typeof arg === 'object') return JSON.stringify(arg);
+            return arg;
+          }).join(' ');
+          
+          if (debugDiv.childNodes.length > 20) {
+            debugDiv.removeChild(debugDiv.firstChild);
+          }
+          
+          const logLine = document.createElement('div');
+          logLine.textContent = text;
+          debugDiv.appendChild(logLine);
+        }
+      }
+    </script>
+  `;
+
   // Thêm các script và style vào head và body
   head = touchStyles + head;
-  body = loadingIndicator + body + errorHandlingScript + deviceDetectionScript;
+  body = loadingIndicator + body + errorHandlingScript + deviceDetectionScript + iframeHelperScript + debugTools;
 
   // Tái tạo HTML đầy đủ
   const enhancedHTML = `<!DOCTYPE html>

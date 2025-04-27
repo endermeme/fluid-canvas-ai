@@ -60,13 +60,49 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           }
           setLoadingProgress(progress);
         }, 100);
+
+        // Thiết lập message listener để xử lý thông báo từ iframe
+        const messageHandler = (event: MessageEvent) => {
+          // Kiểm tra nếu tin nhắn từ iframe của chúng ta
+          if (event.data && event.data.type === 'GAME_LOADED') {
+            console.log('Game loaded message received from iframe');
+            clearInterval(interval);
+            setLoadingProgress(100);
+            setTimeout(() => {
+              setIsIframeLoaded(true);
+            }, 200);
+          }
+        };
+
+        window.addEventListener('message', messageHandler);
         
         iframeRef.current.onload = () => {
+          console.log('Iframe onload event triggered');
           clearInterval(interval);
           setLoadingProgress(100);
+          
+          // Đặt timeout để đảm bảo iframe có đủ thời gian để tải
           setTimeout(() => {
+            if (!isIframeLoaded) {
+              setIsIframeLoaded(true);
+            }
+          }, 1000);
+        };
+
+        // Backup timeout để đảm bảo trường hợp không nhận được message hoặc onload không trigger
+        const backupTimeout = setTimeout(() => {
+          if (!isIframeLoaded && loadingProgress < 100) {
+            console.log('Backup timeout triggered - forcing iframe to display');
+            clearInterval(interval);
+            setLoadingProgress(100);
             setIsIframeLoaded(true);
-          }, 200);
+          }
+        }, 5000);
+        
+        return () => {
+          window.removeEventListener('message', messageHandler);
+          clearTimeout(backupTimeout);
+          clearInterval(interval);
         };
       } catch (error) {
         console.error("Error setting iframe content:", error);

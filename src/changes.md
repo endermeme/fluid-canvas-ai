@@ -7,3 +7,5 @@
 - Cập nhật hiển thị thông tin người chơi
 - Thêm cơ chế chống gian lận
 - Sửa lỗi cú pháp trong geminiPrompt.ts (escape backticks trong template string)
+- Sửa lỗi iframe trắng bằng cách cải thiện trình xử lý nội dung và thêm phát hiện khi game đã tải xong
+
