@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
-import { enhanceIframeContent } from '../utils/iframe-utils';
+import { createIframeContent } from '../utils/iframe-utils';
+import { CustomGameResponse } from '../types/customGame';
 
 interface GameContainerProps {
   iframeRef: React.RefObject<HTMLIFrameElement>;
-  content: string;
+  content: CustomGameResponse | null;
   title?: string;
   error?: string | null;
   onReload: () => void;
@@ -28,7 +30,10 @@ const GameContainer: React.FC<GameContainerProps> = ({
     }
   }, [externalError]);
 
-  const formattedContent = content ? enhanceIframeContent(content, title) : '';
+  // Tạo nội dung iframe từ các phần HTML, CSS, JS riêng biệt
+  const formattedContent = content 
+    ? createIframeContent(content.html, content.css, content.javascript, content.title) 
+    : '';
   
   const handleReload = () => {
     setLoading(true);
