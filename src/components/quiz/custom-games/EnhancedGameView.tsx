@@ -3,12 +3,12 @@ import React, { useRef, useEffect, useState } from 'react';
 import { enhanceIframeContent } from '../utils/iframe-utils';
 import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
-import { saveGameForSharing } from '@/utils/gameExport';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, RefreshCw, RotateCcw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from '@/components/ui/button';
+import { supabase } from "@/integrations/supabase/client";
 
 interface EnhancedGameViewProps {
   miniGame: {
@@ -19,12 +19,43 @@ interface EnhancedGameViewProps {
   className?: string;
   onBack?: () => void;
   hideHeader?: boolean;
-  onShare?: () => Promise<string>;
+  onShare?: () => Promise<string> | void;
   onNewGame?: () => void;
   extraButton?: React.ReactNode;
   isTeacher?: boolean;
   gameExpired?: boolean;
 }
+
+// Hàm lưu game trực tiếp trong component thay vì sử dụng file utils riêng
+const saveGameForSharing = async (title: string, content: string) => {
+  try {
+    console.log("Đang lưu game để chia sẻ:", { title });
+    
+    // Lưu vào bảng games
+    const { data: gameEntry, error: gameError } = await supabase
+      .from('games')
+      .insert([{
+        title: title,
+        html_content: content,
+        game_type: 'custom',
+        description: 'Game tương tác tùy chỉnh',
+        is_preset: false,
+        content_type: 'html',
+        expires_at: new Date(Date.now() + (48 * 60 * 60 * 1000)).toISOString() // 48 giờ
+      }])
+      .select()
+      .single();
+
+    if (gameError) throw gameError;
+
+    // Tạo URL chia sẻ
+    const shareUrl = `${window.location.origin}/game/${gameEntry.id}`;
+    return shareUrl;
+  } catch (error) {
+    console.error('Lỗi khi lưu game:', error);
+    throw error;
+  }
+};
 
 const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({ 
   miniGame, 
@@ -49,7 +80,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const timerRef = useRef<number | null>(null);
   const loadingIntervalRef = useRef<number | null>(null);
   
-  // Функция для очистки таймеров
+  // Hàm để xóa các timers
   const clearTimers = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -64,7 +95,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   useEffect(() => {
     if (iframeRef.current && miniGame?.content) {
       try {
-        // Сбросить состояния при загрузке нового контента
+        // Reset trạng thái
         setIsIframeLoaded(false);
         setLoadingProgress(0);
         setLoadingFailed(false);
@@ -73,22 +104,26 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         
         clearTimers();
         
-        // Optimized content enhancement
-        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
+        // Đảm bảo chỉ truyền 2 tham số đúng với định nghĩa hàm
+        const enhancedContent = enhanceIframeContent(
+          miniGame.content,
+          miniGame.title
+        );
+        
         iframeRef.current.srcdoc = enhancedContent;
         
-        // Имитировать индикатор выполнения загрузки
+        // Giả lập hiển thị tiến trình tải
         let progress = 0;
         loadingIntervalRef.current = window.setInterval(() => {
-          progress += Math.random() * 10 + 5;  // Faster progression
+          progress += Math.random() * 10 + 5;  // Nhanh hơn
           if (progress > 90) {
             clearInterval(loadingIntervalRef.current!);
             progress = 90;
           }
           setLoadingProgress(progress);
-        }, 150); // Shorter interval for faster perception of loading
+        }, 150);
         
-        // Установить обработчики load и error для iframe
+        // Thiết lập các xử lý sự kiện cho iframe
         const iframe = iframeRef.current;
         
         iframe.onload = () => {
@@ -98,7 +133,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
             setIsIframeLoaded(true);
           }, 200);
           
-          // Clear the timeout since loading succeeded
           if (timerRef.current) {
             clearTimeout(timerRef.current);
             timerRef.current = null;
@@ -111,7 +145,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           setIframeError("Không thể tải game. Vui lòng thử lại sau.");
         };
         
-        // Set a timeout to detect loading failures - shorter timeout (10 seconds)
+        // Thiết lập thời gian chờ để phát hiện lỗi tải - ngắn hơn (10 giây)
         timerRef.current = window.setTimeout(() => {
           if (!isIframeLoaded && loadingProgress < 100) {
             setLoadingFailed(true);
@@ -125,7 +159,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           clearTimers();
         };
       } catch (error) {
-        console.error("Error setting iframe content:", error);
+        console.error("Lỗi khi thiết lập nội dung iframe:", error);
         setIframeError("Không thể tải nội dung game. Vui lòng thử lại.");
         setLoadingFailed(true);
       }
@@ -153,11 +187,12 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         
         clearTimers();
         
-        // Thêm timestamp để tránh cache - sửa lỗi ở đây, chỉ truyền 2 tham số thay vì 3
+        // Đảm bảo chỉ truyền 2 tham số đúng với định nghĩa hàm
         const enhancedContent = enhanceIframeContent(
-          miniGame.content, 
+          miniGame.content,
           miniGame.title
         );
+        
         iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
         
@@ -170,7 +205,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           onReload();
         }
       } catch (error) {
-        console.error("Error refreshing game:", error);
+        console.error("Lỗi khi làm mới game:", error);
         setIframeError("Không thể tải lại game. Vui lòng thử lại.");
         setLoadingFailed(true);
       }
@@ -196,7 +231,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     }
   };
 
-  const handleShare = async (): Promise<string | void> => {
+  const handleShare = async () => {
     if (!miniGame?.content) return;
     
     try {
@@ -206,17 +241,27 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         description: "Đang tạo liên kết chia sẻ...",
       });
       
-      const url = await saveGameForSharing(
-        miniGame.title || 'Game tương tác',
-        'custom',
-        miniGame,
-        miniGame.content
-      );
+      // Sử dụng hàm trực tiếp trong component thay vì từ file utils
+      const url = onShare ? 
+        await onShare() : 
+        await saveGameForSharing(
+          miniGame.title || 'Game tương tác',
+          miniGame.content
+        );
+      
+      // Sao chép URL vào clipboard
+      if (url) {
+        await navigator.clipboard.writeText(url);
+        toast({
+          title: "Liên kết đã sẵn sàng",
+          description: "Đã sao chép đường dẫn vào clipboard.",
+        });
+      }
       
       setIsSharing(false);
       return url;
     } catch (error) {
-      console.error("Error sharing game:", error);
+      console.error("Lỗi chia sẻ game:", error);
       toast({
         title: "Lỗi chia sẻ",
         description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",

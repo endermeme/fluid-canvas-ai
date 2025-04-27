@@ -183,3 +183,10 @@
 - Sửa lỗi TypeScript trong file EnhancedGameView.tsx
 - Cập nhật tham số của hàm enhanceIframeContent để phù hợp với định nghĩa
 - Điều chỉnh cách gọi hàm refreshGame để tránh lỗi khi tham số không phù hợp
+
+## 02/05/2025 - Tái cấu trúc thư mục custom game
+- Xóa thư mục utils riêng và tích hợp chức năng trực tiếp vào các component
+- Đơn giản hóa cách xử lý API và mã HTML trong geminiGenerator.ts
+- Cập nhật prompt để tạo game tối ưu hóa hơn và tải nhanh hơn
+- Sửa lỗi TypeScript trong EnhancedGameView.tsx
+- Đơn giản hóa cách lưu trữ và chia sẻ game

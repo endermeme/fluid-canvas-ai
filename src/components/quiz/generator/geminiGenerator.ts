@@ -17,10 +17,8 @@ import type { MiniGame, GameApiResponse } from './types';
 
 const SOURCE = "GEMINI";
 
-// Export the MiniGame type for use in other files
 export type { MiniGame } from './types';
 
-// Tạo lớp AIGameGenerator để giữ tương thích với code cũ
 export class AIGameGenerator {
   private static instance: AIGameGenerator | null = null;
   private canvasMode: boolean = true;
@@ -39,7 +37,6 @@ export class AIGameGenerator {
   }
 
   public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
-    // Sử dụng biến canvasMode từ instance
     const useCanvasMode = settings?.useCanvas !== undefined ? settings.useCanvas : this.canvasMode;
     const updatedSettings = {
       ...settings,
@@ -50,6 +47,7 @@ export class AIGameGenerator {
   }
 }
 
+// Đơn giản hóa hàm tạo game, tập trung vào việc lấy mã HTML nguyên bản từ API
 export const generateWithGemini = async (
   topic: string, 
   settings?: GameSettingsData
@@ -57,12 +55,12 @@ export const generateWithGemini = async (
   const gameType = getGameTypeByTopic(topic);
   const useCanvas = settings?.useCanvas !== undefined ? settings.useCanvas : true;
   
-  logInfo(SOURCE, `Starting game generation for "${topic}"`, {
+  logInfo(SOURCE, `Bắt đầu tạo game cho "${topic}"`, {
     model: GEMINI_MODELS.CUSTOM_GAME,
     apiVersion: API_VERSION,
-    type: gameType?.name || "Not specified",
+    type: gameType?.name || "Không xác định",
     settings: settings || {},
-    canvasMode: useCanvas ? "enabled" : "disabled"
+    canvasMode: useCanvas ? "bật" : "tắt"
   });
 
   const promptOptions = {
@@ -73,11 +71,11 @@ export const generateWithGemini = async (
     category: settings?.category || 'general'
   };
 
-  // Tạo prompt cho mã game không cần chỉnh sửa quá nhiều
+  // Tạo prompt đơn giản hơn
   const prompt = generateCustomGamePrompt(promptOptions);
 
   try {
-    logInfo(SOURCE, `Sending request to Gemini API`);
+    logInfo(SOURCE, `Đang gửi yêu cầu đến API Gemini`);
     
     const startTime = Date.now();
     
@@ -111,21 +109,18 @@ export const generateWithGemini = async (
     const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     
     if (!text) {
-      throw new Error('No content returned from API');
+      throw new Error('Không nhận được nội dung từ API');
     }
     
     const duration = measureExecutionTime(startTime);
-    logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
+    logSuccess(SOURCE, `Đã nhận phản hồi sau ${duration.seconds}s`);
     
-    console.log('%c Generated Game Code:', 'font-weight: bold; color: #6f42c1;');
+    console.log('%c Mã Game Đã Tạo:', 'font-weight: bold; color: #6f42c1;');
     console.log(text);
     
-    // Trích xuất thông tin game và content từ phản hồi
-    let content = extractGameCodeFromResponse(text);
-    let title = extractGameTitle(content, topic);
-    
-    // Kiểm tra xem mã game có hợp lệ không và tối ưu hóa
-    content = optimizeGameCode(content);
+    // Đơn giản hóa cách xử lý phản hồi từ API
+    let content = extractGameContentFromResponse(text);
+    let title = extractGameTitleFromContent(content, topic);
     
     const game: MiniGame = {
       title: title,
@@ -133,80 +128,67 @@ export const generateWithGemini = async (
       useCanvas: useCanvas
     };
     
-    logSuccess(SOURCE, "Game generated successfully");
+    logSuccess(SOURCE, "Game đã được tạo thành công");
     
     return game;
   } catch (error) {
-    logError(SOURCE, "Error generating with Gemini", error);
+    logError(SOURCE, "Lỗi khi tạo game với Gemini", error);
     throw error;
   }
 };
 
-// Hàm trích xuất mã HTML game từ phản hồi API
-const extractGameCodeFromResponse = (text: string): string => {
+// Hàm đơn giản để trích xuất mã HTML từ phản hồi API
+const extractGameContentFromResponse = (text: string): string => {
   // Loại bỏ các dấu markdown nếu có
-  let content = text;
+  let content = text.trim();
   
-  // Xóa backticks và text "html" nếu có
+  // Loại bỏ backticks và nhãn html nếu có
   content = content.replace(/```html|```/g, '').trim();
   
-  // Kiểm tra nếu nội dung không bắt đầu với <!DOCTYPE hoặc <html
-  if (!content.trim().startsWith('<!DOCTYPE') && !content.trim().startsWith('<html')) {
-    // Tìm mã HTML trong phản hồi
+  // Tìm mã HTML trong phản hồi nếu chưa đúng định dạng
+  if (!content.startsWith('<!DOCTYPE') && !content.startsWith('<html')) {
     const htmlMatch = text.match(/<!DOCTYPE[\s\S]*<\/html>/i) || 
-                      text.match(/<html[\s\S]*<\/html>/i);
+                     text.match(/<html[\s\S]*<\/html>/i);
     
     if (htmlMatch && htmlMatch[0]) {
       content = htmlMatch[0];
     } else {
-      // Nếu không tìm thấy mã HTML hoàn chỉnh, thử thêm thẻ DOCTYPE và HTML
+      // Bao bọc nội dung trong thẻ HTML nếu cần
       content = `<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>${text.substring(0, 30)}...</title>
+    <title>Game: ${text.substring(0, 30)}...</title>
+    <style>
+      * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+      body { font-family: system-ui, sans-serif; }
+    </style>
 </head>
 <body>
     ${content}
+    <script>
+      // Cải thiện hiệu suất touch trên thiết bị di động
+      document.addEventListener('touchstart', function() {}, {passive: true});
+    </script>
 </body>
 </html>`;
     }
   }
   
+  // Thêm meta viewport nếu chưa có
+  if (!content.includes('<meta name="viewport"')) {
+    content = content.replace('</head>', 
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">\n</head>');
+  }
+  
   return content;
 };
 
-// Hàm tối ưu hóa mã game để tải nhanh hơn
-const optimizeGameCode = (content: string): string => {
-  try {
-    // Thêm meta viewport nếu chưa có để đảm bảo responsive
-    if (!content.includes('<meta name="viewport"')) {
-      content = content.replace('</head>', 
-      '<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">\n</head>');
-    }
-    
-    // Thêm các thuộc tính touch-action để cải thiện trải nghiệm trên thiết bị cảm ứng
-    if (!content.includes('touch-action')) {
-      content = content.replace('<style>', '<style>\n* { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }\n');
-    }
-    
-    // Thêm code preload để đảm bảo game tải nhanh
-    content = content.replace('</head>', 
-    '<script>\nwindow.addEventListener("load", function() { document.body.classList.add("loaded"); });\n</script>\n</head>');
-    
-    return content;
-  } catch (error) {
-    console.error("Error optimizing game code:", error);
-    return content;  // Return original content if optimization fails
-  }
-};
-
-// Trích xuất tiêu đề game từ nội dung HTML
-const extractGameTitle = (content: string, defaultTopic: string): string => {
+// Hàm đơn giản để trích xuất tiêu đề từ nội dung HTML
+const extractGameTitleFromContent = (content: string, defaultTopic: string): string => {
   let title = defaultTopic;
   
-  // Tìm tiêu đề từ thẻ title hoặc h1
   const titleMatch = content.match(/<title>(.*?)<\/title>/i) || 
                     content.match(/<h1[^>]*>(.*?)<\/h1>/i);
   
@@ -217,26 +199,27 @@ const extractGameTitle = (content: string, defaultTopic: string): string => {
   return title;
 };
 
+// Hàm thử lại khi gặp lỗi
 export const tryGeminiGeneration = async (
   model: any,
   topic: string, 
   settings?: GameSettingsData,
   retryCount = 0
 ): Promise<MiniGame | null> => {
-  const maxRetries = 3;
+  const maxRetries = 2;  // Giảm số lần thử lại xuống 2 cho nhanh hơn
   
   if (retryCount >= maxRetries) {
-    logWarning(SOURCE, `Reached maximum retries (${maxRetries})`);
+    logWarning(SOURCE, `Đã đạt đến số lần thử lại tối đa (${maxRetries})`);
     return null;
   }
   
   try {
     return await generateWithGemini(topic, settings);
   } catch (error) {
-    logError(SOURCE, `Attempt ${retryCount + 1} failed`, error);
+    logError(SOURCE, `Lần thử ${retryCount + 1} thất bại`, error);
     
     // Tăng thời gian chờ giữa các lần thử lại
-    const waitTime = (retryCount + 1) * 2000;
+    const waitTime = (retryCount + 1) * 1500;
     await new Promise(resolve => setTimeout(resolve, waitTime));
     
     return tryGeminiGeneration(null, topic, settings, retryCount + 1);
