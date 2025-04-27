@@ -14,3 +14,5 @@
 - Thêm xử lý cho các định dạng ảnh từ API Gemini (base64 và URL)
 - Sửa lỗi TypeScript liên quan đến Promise trong xử lý nội dung iframe
 - Cải thiện chức năng chia sẻ game để giảm hiện tượng flash màn hình và sửa lỗi không tìm thấy game trong link chia sẻ
+- Thêm các chức năng thiếu trong gameParticipation.ts: getGameSession, exportParticipantsToCSV, maskIpAddress, getAllGameSessions
+- Thêm interface GameSession vào types.ts để hỗ trợ các chức năng quản lý phiên game và người chơi

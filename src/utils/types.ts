@@ -18,4 +18,17 @@ export interface GameParticipant {
   timestamp: number | string;
   gameId: string;
   retryCount: number;
+  score?: number;
+}
+
+export interface GameSession {
+  id: string;
+  title: string;
+  gameType?: string;
+  content?: any;
+  htmlContent?: string;
+  description?: string;
+  expiresAt?: Date | number;
+  createdAt: number;
+  participants: GameParticipant[];
 }
