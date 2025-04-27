@@ -1,71 +1,67 @@
 
-export const generateCustomGamePrompt = (userPrompt: string): string => {
-  return `
-Create an interactive HTML5 game based on this description: "${userPrompt}"
+export interface GamePromptOptions {
+  topic: string;
+  useCanvas?: boolean;
+  language?: string;
+  difficulty?: string;
+  category?: string;
+}
 
-REQUIREMENTS:
-1. Return code in THREE SEPARATE SECTIONS using these EXACT tags:
-<HTML>
-// Pure HTML only (no style/script tags)
-</HTML>
+export const generateCustomGamePrompt = (options: GamePromptOptions): string => {
+  const { 
+    topic, 
+    language = 'en',
+    difficulty = 'medium',
+    category = 'general'
+  } = options;
 
-<CSS>
-// All styles here
-</CSS>
+  // Cải thiện prompt để yêu cầu tách biệt rõ ràng HTML, CSS và JavaScript
+  const basePrompt = `
+Tạo một trò chơi HTML tương tác đơn giản theo chủ đề: "${topic}"
 
-<JAVASCRIPT>
-// All game logic here
-</JAVASCRIPT>
+**YÊU CẦU PHÂN CHIA MÃ NGUỒN:**
+- Tạo mã HTML, CSS và JavaScript HOÀN TOÀN TÁCH BIỆT (không nhúng lẫn nhau)
+- Sử dụng thẻ phân tách rõ ràng giữa ba phần: 
+  <HTML>...</HTML>
+  <CSS>...</CSS>
+  <JAVASCRIPT>...</JAVASCRIPT>
+- KHÔNG mã hóa, KHÔNG minify - trả về mã nguồn dễ đọc
+- TỐI ƯU HÓA TỐC ĐỘ TẢI (QUAN TRỌNG NHẤT)
 
-2. OPTIMIZATION RULES:
-- Use pure HTML5, CSS3, and vanilla JavaScript only
-- NO external libraries or frameworks
-- All code must be cross-browser compatible
-- Optimize for mobile devices (touch events)
-- Keep code simple and well-commented
-- Must work in an iframe sandbox
+**THIẾT KẾ RESPONSIVE:**
+- Sử dụng đơn vị tương đối (%, vw, vh) cho kích thước
+- Hỗ trợ đầy đủ cho cả màn hình cảm ứng và điều khiển bằng chuột
+- Bố cục thích ứng với cả hướng dọc và ngang
 
-3. TEXT RENDERING AND LAYOUT RULES:
-- All text elements must use standard CSS text alignment
-- For SVG or canvas text:
-  * Use text-anchor: middle for centered text
-  * Use dominant-baseline: middle for vertical alignment
-  * Set proper transform-origin for rotating elements
-- Ensure text is properly wrapped and responsive
-- Use flexbox or grid for layouts when possible
-- Maintain consistent spacing and alignment
+**TƯƠNG THÍCH ĐA NỀN TẢNG:**
+- Đảm bảo trải nghiệm nhất quán trên điện thoại, máy tính bảng và máy tính
+- Tất cả phần tử tương tác PHẢI đủ lớn cho cảm ứng (tối thiểu 44px)
+- Ngăn chặn zoom và cuộn không mong muốn trong khi chơi
+- Xử lý sự kiện touch và sự kiện chuột một cách nhất quán
 
-4. RESPONSIVE DESIGN:
-- Use responsive units (vh, vw, %, rem)
-- Support both portrait and landscape
-- Min touch target size: 44px
-- Prevent unwanted scrolling/zooming
-- Adapt text size for different screen sizes
+**TỐI ƯU HÓA HIỆU SUẤT:**
+- Giảm thiểu số lượng DOM và hoạt ảnh phức tạp
+- Sử dụng requestAnimationFrame thay vì setInterval
+- Tránh tạo quá nhiều sự kiện hay listener
 
-5. GAME MECHANICS:
-- Clear objectives and win conditions
-- Simple, intuitive controls
-- Visual feedback for actions
-- Score tracking if applicable
-- Restart functionality
+**YÊU CẦU ĐẦU RA:**
+- Trả về ba phần riêng biệt: HTML, CSS và JavaScript
+- HTML KHÔNG được chứa thẻ <style> hoặc <script>
+- CSS và JavaScript PHẢI nằm trong thẻ phân tách riêng biệt
+- KHÔNG sử dụng thư viện hoặc tài nguyên bên ngoài
+- Đảm bảo mã HTML có meta viewport cho thiết bị di động
+- Tiêu đề phải phù hợp với chủ đề
 
-6. PERFORMANCE:
-- Minimal DOM operations
-- Use requestAnimationFrame for animations
-- Optimize event listeners
-- Clean up resources properly
+**CẤU TRÚC GAME:**
+- Tiêu đề rõ ràng và hướng dẫn ngắn gọn
+- Vùng chơi game chính đáp ứng điều khiển cảm ứng/chuột
+- Hiển thị điểm số hoặc tiến trình trực quan
+- Khả năng bắt đầu lại nhanh chóng
+- Ngôn ngữ: ${language === 'vi' ? 'Tiếng Việt' : 'Tiếng Anh'}
+- Độ khó: ${difficulty}
 
-7. WHEEL GAMES SPECIAL RULES:
-- Use correct angles for wheel segments (divide 360 degrees by number of segments)
-- Add unique classes for wheel elements (use .wheel, .wheel-segment, .segment-text)
-- Create segments as SVG paths with text elements inside them
-- Position text in the middle of each segment and rotate properly to be readable
-- Store segment angles in data attributes for easier calculations
-- Add a pointer/indicator at a fixed position (e.g., top center)
-- Use proper rotation center with transform-origin: center
-- Determine winning segment based on final angle relative to pointer
-
-CODE MUST BE COMPLETE AND FUNCTIONAL WITH NO EXTERNAL DEPENDENCIES.
-RETURN ONLY THE CODE INSIDE THE SPECIFIED TAGS.
+TẬP TRUNG CHÍNH VÀO TỐC ĐỘ TẢI, ĐƠN GIẢN, VÀ TRẢI NGHIỆM NGƯỜI DÙNG MƯỢT MÀ!
 `;
+
+  return basePrompt;
 };

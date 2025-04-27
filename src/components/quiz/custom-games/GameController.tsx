@@ -1,204 +1,217 @@
 
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
+import { MiniGame } from '../generator/types';
+import EnhancedGameView from './EnhancedGameView';
+import CustomGameForm from './CustomGameForm';
+import GameLoading from '../GameLoading';
+import { useNavigate } from 'react-router-dom';
+import { PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Wand2 } from 'lucide-react';
-import { CustomGameState } from '../types/customGame';
-import GameContainer from '../components/GameContainer';
+import { supabase } from "@/integrations/supabase/client";
 import QuizContainer from '../QuizContainer';
-import { generateCustomGamePrompt } from '../generator/customGamePrompt';
-import { GEMINI_MODELS, getApiEndpoint } from '@/constants/api-constants';
 
-const GameController: React.FC = () => {
+interface GameControllerProps {
+  initialTopic?: string;
+  onGameGenerated?: (game: MiniGame) => void;
+}
+
+// Chuyển thẳng các hàm Supabase vào đây thay vì sử dụng file utils riêng
+const saveCustomGameToSupabase = async (title: string, content: string, gameType: string = 'custom') => {
+  try {
+    console.log("🔄 Đang lưu game:", { title, gameType });
+    
+    // Lưu trực tiếp vào bảng games
+    const { data: gameEntry, error: gameError } = await supabase
+      .from('games')
+      .insert([{
+        title: title,
+        html_content: content,
+        game_type: gameType,
+        description: 'Game tương tác tùy chỉnh',
+        is_preset: false,
+        content_type: 'html',
+        expires_at: new Date(Date.now() + (48 * 60 * 60 * 1000)).toISOString() // 48 giờ
+      }])
+      .select()
+      .single();
+
+    if (gameError) throw gameError;
+
+    // Tạo URL chia sẻ
+    const shareUrl = `${window.location.origin}/game/${gameEntry.id}`;
+    
+    console.log("✅ Game đã được lưu với ID:", gameEntry.id);
+    return { id: gameEntry.id, url: shareUrl };
+  } catch (error) {
+    console.error('❌ Lỗi khi lưu game:', error);
+    throw error;
+  }
+};
+
+const GameController: React.FC<GameControllerProps> = ({ 
+  initialTopic = "", 
+  onGameGenerated 
+}) => {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [currentGame, setCurrentGame] = useState<MiniGame | null>(null);
+  const [currentTopic, setCurrentTopic] = useState<string>(initialTopic);
+  const [showForm, setShowForm] = useState(!currentGame);
+  const [isSharing, setIsSharing] = useState(false);
   const navigate = useNavigate();
-  const [prompt, setPrompt] = useState('');
-  const [generating, setGenerating] = useState(false);
   const { toast } = useToast();
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   
-  const [gameState, setGameState] = useState<CustomGameState>({
-    loading: false,
-    error: null,
-    content: null
-  });
-
-  const handleBack = () => {
-    navigate('/preset-games');
+  const handleGameGeneration = (content: string, game?: MiniGame) => {
+    setCurrentTopic(content);
+    
+    if (game) {
+      setCurrentGame(game);
+      setShowForm(false);
+      
+      if (onGameGenerated) {
+        onGameGenerated(game);
+      }
+      
+      toast({
+        title: "Minigame Đã Sẵn Sàng",
+        description: `Minigame "${game.title || content}" đã được tạo thành công.`,
+      });
+    }
+    
+    setIsGenerating(false);
   };
 
-  const handleGenerateGame = async () => {
-    if (!prompt.trim()) {
-      toast({
-        title: "Thiếu thông tin",
-        description: "Vui lòng nhập mô tả chi tiết về game bạn muốn tạo",
-        variant: "destructive"
-      });
-      return;
+  const handleBack = () => {
+    if (currentGame) {
+      setCurrentGame(null);
+      setShowForm(true);
+    } else {
+      navigate('/');
     }
+  };
 
-    setGenerating(true);
-    setGameState({
-      loading: true,
-      error: null,
-      content: null
-    });
-
-    console.log("Đang gửi yêu cầu tạo game...");
-    console.log("Prompt người dùng:", prompt);
-
+  const handleNewGame = () => {
+    setCurrentGame(null);
+    setShowForm(true);
+  };
+  
+  const handleShareGame = async () => {
+    if (!currentGame || isSharing) return "";
+    
     try {
-      const gamePrompt = generateCustomGamePrompt(prompt);
-      
-      console.log("Gửi prompt tới API:", gamePrompt);
-      console.log("API endpoint:", getApiEndpoint(GEMINI_MODELS.CUSTOM_GAME));
-      
-      const response = await fetch(getApiEndpoint(GEMINI_MODELS.CUSTOM_GAME), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          contents: [{
-            role: "user",
-            parts: [{text: gamePrompt}]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 8192
-          }
-        })
-      });
-
-      if (!response.ok) {
-        console.error("Lỗi API:", response.status, response.statusText);
-        throw new Error('Lỗi khi tạo game');
-      }
-
-      const result = await response.json();
-      console.log("Nhận phản hồi từ API:", result);
-      
-      const gameContent = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!gameContent) {
-        console.error("Không nhận được phản hồi từ AI");
-        throw new Error('Không nhận được phản hồi từ AI');
-      }
-
-      console.log("Nội dung game nhận được:", gameContent);
-
-      const htmlMatch = gameContent.match(/<HTML>([\s\S]*?)<\/HTML>/i);
-      const cssMatch = gameContent.match(/<CSS>([\s\S]*?)<\/CSS>/i);
-      const jsMatch = gameContent.match(/<JAVASCRIPT>([\s\S]*?)<\/JAVASCRIPT>/i);
-
-      console.log("=== HTML CODE ===");
-      console.log(htmlMatch?.[1]?.trim() || 'Không có HTML');
-      
-      console.log("=== CSS CODE ===");
-      console.log(cssMatch?.[1]?.trim() || 'Không có CSS');
-      
-      console.log("=== JAVASCRIPT CODE ===");
-      console.log(jsMatch?.[1]?.trim() || 'Không có JavaScript');
-
-      console.log("Kết quả trích xuất:", {
-        html: htmlMatch ? "Có" : "Không",
-        css: cssMatch ? "Có" : "Không",
-        js: jsMatch ? "Có" : "Không"
-      });
-
-      const gameData = {
-        html: htmlMatch?.[1]?.trim() || '',
-        css: cssMatch?.[1]?.trim() || '',
-        javascript: jsMatch?.[1]?.trim() || '',
-        title: `Tùy chỉnh: ${prompt.slice(0, 30)}...`
-      };
-
-      console.log("Dữ liệu game cuối cùng:", gameData);
-
-      setGameState({
-        loading: false,
-        error: null,
-        content: gameData
-      });
-
+      setIsSharing(true);
       toast({
-        title: "Thành công!",
-        description: "Game của bạn đã được tạo",
+        title: "Đang xử lý",
+        description: "Đang tạo liên kết chia sẻ...",
       });
-
+      
+      // Sử dụng hàm đã di chuyển trực tiếp vào component
+      const result = await saveCustomGameToSupabase(
+        currentGame.title || "Minigame tương tác", 
+        currentGame.content
+      );
+      
+      // Sao chép URL vào clipboard
+      await navigator.clipboard.writeText(result.url);
+      
+      navigate(`/game/${result.id}`);
+      
+      toast({
+        title: "Game đã được chia sẻ",
+        description: "Đường dẫn đã được sao chép vào clipboard.",
+      });
+      
+      setIsSharing(false);
+      return result.url;
     } catch (error) {
-      console.error('Error generating game:', error);
-      setGameState({
-        loading: false,
-        error: error.message || "Không thể tạo game. Vui lòng thử lại.",
-        content: null
-      });
-      
+      console.error("Lỗi chia sẻ game:", error);
       toast({
-        title: "Lỗi",
-        description: "Không thể tạo game. Vui lòng thử lại.",
+        title: "Lỗi chia sẻ",
+        description: "Không thể tạo liên kết chia sẻ. Vui lòng thử lại.",
         variant: "destructive"
       });
-    } finally {
-      setGenerating(false);
+      setIsSharing(false);
+      return "";
     }
+  };
+
+  const getContainerTitle = () => {
+    if (isGenerating) {
+      return `Đang tạo game: ${currentTopic}`;
+    }
+    if (currentGame) {
+      return currentGame.title || "Minigame Tương Tác";
+    }
+    return "Tạo Game Tùy Chỉnh";
+  };
+
+  const renderContent = () => {
+    if (isGenerating) {
+      return <GameLoading topic={currentTopic} />;
+    } 
+    
+    if (currentGame) {
+      return (
+        <div className="w-full h-full">
+          <EnhancedGameView 
+            miniGame={{
+              title: currentGame.title || "Minigame Tương Tác",
+              content: currentGame.content || "",
+              html: currentGame.html,
+              css: currentGame.css,
+              js: currentGame.js,
+              rawResponse: currentGame.rawResponse
+            }} 
+            onBack={handleBack}
+            onNewGame={handleNewGame}
+            onShare={handleShareGame}
+            hideHeader={false}
+          />
+        </div>
+      );
+    } 
+    
+    if (showForm) {
+      return (
+        <CustomGameForm 
+          onGenerate={(content, game) => {
+            setIsGenerating(true);
+            setTimeout(() => handleGameGeneration(content, game), 500);
+          }}
+          onCancel={() => navigate('/')}
+        />
+      );
+    }
+    
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
+        <div className="p-6 bg-background/90 rounded-xl shadow-lg border border-primary/10 max-w-md w-full">
+          <p className="text-center mb-4">Không có nội dung trò chơi. Vui lòng tạo mới.</p>
+          <Button 
+            onClick={handleNewGame} 
+            className="w-full"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Tạo Game Mới
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <QuizContainer 
-      title="Tạo Game Tùy Chỉnh"
-      showBackButton 
+    <QuizContainer
+      title={getContainerTitle()}
+      showBackButton={false}
       onBack={handleBack}
+      showSettingsButton={false}
+      showCreateButton={false}
+      onCreate={handleNewGame}
+      className="p-0 overflow-hidden"
+      isCreatingGame={showForm}
     >
-      <div className="container mx-auto p-4 max-w-4xl">
-        <Card className="p-6 mb-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="prompt">Mô tả game của bạn</Label>
-              <Textarea
-                id="prompt"
-                placeholder="Mô tả chi tiết game bạn muốn tạo (ví dụ: một game ghép hình với chủ đề động vật...)"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="min-h-[100px]"
-              />
-            </div>
-            
-            <Button
-              onClick={handleGenerateGame}
-              disabled={generating}
-              className="w-full"
-            >
-              {generating ? (
-                <>
-                  <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                  Đang tạo game...
-                </>
-              ) : (
-                <>
-                  <Wand2 className="mr-2 h-4 w-4" />
-                  Tạo Game
-                </>
-              )}
-            </Button>
-          </div>
-        </Card>
-
-        {gameState.content && (
-          <GameContainer
-            iframeRef={iframeRef}
-            content={gameState.content}
-            error={gameState.error}
-            onReload={handleGenerateGame}
-            title={gameState.content.title}
-          />
-        )}
+      <div className="h-full w-full overflow-hidden">
+        {renderContent()}
       </div>
     </QuizContainer>
   );

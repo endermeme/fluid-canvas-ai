@@ -1,27 +1,35 @@
 
-# Các thay đổi
 
-## 2025-04-27
-- Tạo mới `src/components/quiz/utils/iframe-html.ts`: Xử lý phần HTML trong iframe
-- Tạo mới `src/components/quiz/utils/iframe-css.ts`: Xử lý phần CSS trong iframe 
-- Tạo mới `src/components/quiz/utils/iframe-js.ts`: Xử lý phần JavaScript trong iframe
-- Cập nhật `src/components/quiz/utils/iframe-utils.ts`: Tích hợp 3 phần HTML, CSS, JS
-- Cập nhật `src/components/quiz/generator/customGamePrompt.ts`: Cải thiện prompt cho định dạng 3 phần riêng biệt
-- Cập nhật `src/components/quiz/custom-games/GameController.tsx`: Mở lại tính năng tạo game tùy chỉnh
-- Tạo mới `src/components/quiz/types/customGame.ts`: Thêm kiểu dữ liệu cho game tùy chỉnh
-- Cập nhật `src/components/quiz/components/GameContainer.tsx`: Sửa lỗi kiểu dữ liệu CustomGameResponse
-- Cập nhật `src/components/quiz/custom-games/GameController.tsx`: Thêm logs cho debug và sửa lỗi gửi yêu cầu
+# Lịch sử thay đổi mã nguồn
 
-## 2025-04-28
-- Cập nhật `src/components/quiz/utils/iframe-css.ts`: Tối ưu hóa CSS cho hiển thị văn bản trong game
-- Cập nhật `src/components/quiz/generator/customGamePrompt.ts`: Cải thiện hướng dẫn tạo game hiển thị văn bản đúng
+## 27/04/2025 - Sửa lỗi TypeScript về đối tượng console trong iframe
+- Sửa lỗi TypeScript trong EnhancedGameView.tsx về việc truy cập thuộc tính console từ contentWindow
+- Đã thêm type assertion `as Window & { console: Console }` để định nghĩa rõ kiểu dữ liệu
+- Giải quyết lỗi TS2339: Property 'console' does not exist on type 'Window'
 
-## 2025-04-29
-- Cập nhật `src/components/quiz/utils/iframe-css.ts`: Sửa lỗi vị trí hiển thị văn bản trong các game vòng quay
-- Cập nhật `src/components/quiz/utils/iframe-js.ts`: Sửa lỗi logic xác định phần thưởng trong game vòng quay
-- Bổ sung hàm `determineWheelResult` để đảm bảo xác định chính xác phần thưởng trong vòng quay
+## 27/04/2025 - Sửa lỗi gắn console trong iframe
+- Sửa lỗi TypeScript trong EnhancedGameView.tsx liên quan đến việc gắn console.log và console.error
+- Thay thế toán tử optional chaining `?.` bằng kiểm tra điều kiện trước khi gán
+- Loại bỏ window.console (không cần thiết) và chỉ sử dụng console trực tiếp
+- Thêm kiểm tra tính tồn tại của iframe.contentWindow trước khi gán
 
-## 2025-04-30
-- Cập nhật `src/components/quiz/utils/iframe-css.ts`: Cải thiện CSS cho việc hiển thị văn bản trong các segment của vòng quay
-- Cập nhật `src/components/quiz/utils/iframe-js.ts`: Thêm hàm `positionWheelTexts` để định vị text trong các segment vòng quay
-- Cập nhật `src/components/quiz/generator/customGamePrompt.ts`: Bổ sung hướng dẫn chi tiết hơn cho việc tạo game vòng quay
+## 27/04/2025 - Cải thiện hiển thị debug cho game HTML/CSS/JS
+- Thêm chức năng hiển thị thông tin debug đầy đủ trong console
+- Hiển thị rõ ràng phản hồi API thô và các thành phần HTML/CSS/JS tách biệt
+- Tách biệt mã nguồn HTML, CSS và JS để dễ debug và hiển thị
+- Thêm nút Debug/Console để xem thông tin chi tiết
+
+## 27/04/2025 - Sửa lỗi TypeScript trong GameController
+- Đã sửa lỗi trong handleShareGame() để trả về Promise<string> thay vì Promise<void>
+- Sửa lỗi: error TS2322: Type '() => Promise<void>' không thể gán cho '() => void | Promise<string>'
+- Thêm giá trị trả về chuỗi rỗng để tương thích với kiểu trả về yêu cầu
+
+## 27/04/2024 - Cải thiện cách xử lý game HTML/CSS/JS và tích hợp Supabase
+- Thay đổi cách xử lý mã HTML/CSS/JS khi tải game trong iframe
+- Tách riêng xử lý HTML, CSS và JS thành các phần riêng biệt
+- Sửa đổi cơ chế lưu trữ Supabase để đơn giản hơn
+- Cải thiện các thông báo console.log để dễ theo dõi hơn
+
+## 25/04/2024 - Cập nhật cấu hình Vite để cho phép tất cả host
+- Đã thêm các tên miền vào `allowedHosts` trong `vite.config.ts`: aurabusiness.tech, aurabusiness.tech:8080
+

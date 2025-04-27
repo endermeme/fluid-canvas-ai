@@ -1,120 +1,177 @@
 
-import { createHtmlStructure, extractHtmlContent } from './iframe-html';
-import { optimizeStyles, extractCssContent } from './iframe-css';
-import { enhanceScript, extractJsContent } from './iframe-js';
-
-/**
- * Tăng cường nội dung iframe với HTML, CSS và JS
- */
 export const enhanceIframeContent = (content: string, title?: string): string => {
-  if (!content) return '';
+  // Define a variable for lastTap (needed for double tap prevention)
+  const lastTapVariable = 'let lastTap = 0;';
   
-  try {
-    // Kiểm tra xem content có phải là ba phần riêng biệt hay không
-    if (content.includes('<HTML>') || content.includes('<CSS>') || content.includes('<JAVASCRIPT>')) {
-      // Trích xuất từng phần
-      const htmlContent = extractHtmlContent(content);
-      const cssContent = optimizeStyles(extractCssContent(content));
-      const jsContent = enhanceScript(extractJsContent(content));
+  // Add device detection script and touch handling
+  const deviceDetectionScript = `
+    <script>
+      // Device detection
+      ${lastTapVariable}
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      document.documentElement.classList.add(isTouchDevice ? 'touch-device' : 'no-touch');
+      document.documentElement.classList.add(isMobile ? 'mobile' : 'desktop');
       
-      // Tạo HTML cơ bản
-      let htmlDoc = createHtmlStructure(htmlContent, title);
+      // Prevent zoom on double tap
+      document.addEventListener('touchend', (e) => {
+        const now = Date.now();
+        if (now - lastTap < 300) {
+          e.preventDefault();
+        }
+        lastTap = now;
+      }, { passive: false });
       
-      // Chèn CSS vào thẻ style
-      htmlDoc = htmlDoc.replace('<style id="game-styles"></style>', `<style id="game-styles">${cssContent}</style>`);
+      // Prevent unwanted scrolling/zooming
+      document.addEventListener('touchmove', (e) => {
+        if (e.scale !== 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
       
-      // Chèn JavaScript vào thẻ script
-      htmlDoc = htmlDoc.replace('<script id="game-script"></script>', `<script id="game-script">${jsContent}</script>`);
+      // Fix for iOS specific touch delay
+      document.addEventListener('touchstart', function() {}, {passive: true});
       
-      return htmlDoc;
-    }
-    
-    // Nếu content không có định dạng ba phần riêng biệt, xử lý theo cách thông thường
-    return `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${title || 'Game'}</title>
-        <style>
-          body { 
-            margin: 0; 
-            padding: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            font-family: Arial, sans-serif; 
-          }
-        </style>
-      </head>
-      <body>
-        ${content}
-      </body>
-      </html>
-    `;
-  } catch (error) {
-    console.error('Error enhancing iframe content:', error);
-    return `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Error</title>
-      </head>
-      <body>
-        <div style="color: red;">Error loading game content</div>
-      </body>
-      </html>
-    `;
+      // Announce device capabilities to console for debugging
+      console.log('Device capabilities:', {
+        isTouchDevice,
+        isMobile,
+        viewport: {
+          width: window.innerWidth,
+          height: window.innerHeight
+        }
+      });
+    </script>
+  `;
+
+  const touchStyles = `
+    <style>
+      /* Touch optimization */
+      * {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        box-sizing: border-box;
+      }
+      
+      html, body {
+        overscroll-behavior: none;
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .touch-device [role="button"],
+      .touch-device button,
+      .touch-device input[type="button"],
+      .touch-device .clickable,
+      .touch-device a {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 12px;
+        margin: 4px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: manipulation;
+      }
+      
+      @media (hover: hover) and (pointer: fine) {
+        /* Mouse-specific styles */
+        .no-touch [role="button"]:hover,
+        .no-touch button:hover,
+        .no-touch input[type="button"]:hover,
+        .no-touch .clickable:hover,
+        .no-touch a:hover {
+          opacity: 0.8;
+        }
+      }
+      
+      /* Prevent text selection during touch */
+      [role="button"],
+      button,
+      .no-select,
+      .clickable {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+      }
+      
+      /* Touch feedback */
+      .touch-device [role="button"]:active,
+      .touch-device button:active,
+      .touch-device input[type="button"]:active,
+      .touch-device .clickable:active {
+        transform: scale(0.97);
+        transition: transform 0.1s;
+      }
+      
+      /* Orientation-specific adjustments */
+      @media screen and (orientation: portrait) {
+        .landscape-only {
+          display: none !important;
+        }
+      }
+      
+      @media screen and (orientation: landscape) {
+        .portrait-only {
+          display: none !important;
+        }
+      }
+      
+      /* Responsive font sizes */
+      html {
+        font-size: calc(14px + 0.5vw);
+      }
+      
+      /* Responsive container sizing */
+      .game-container {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+  `;
+
+  // Insert viewport meta tag for proper mobile rendering
+  const viewportMeta = '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=cover">';
+
+  // Insert the enhancements into the content
+  let enhancedContent = content;
+  
+  if (!enhancedContent.includes('<head>')) {
+    enhancedContent = enhancedContent.replace(/<html[^>]*>/, '$&<head><meta charset="UTF-8"></head>');
   }
-};
+  
+  // Add viewport meta
+  if (!enhancedContent.includes('viewport')) {
+    enhancedContent = enhancedContent.replace('</head>', `${viewportMeta}</head>`);
+  }
+  
+  // Add device detection and touch handling
+  enhancedContent = enhancedContent.replace('</head>', `${touchStyles}${deviceDetectionScript}</head>`);
 
-/**
- * Xử lý phản hồi API từ Gemini và tách thành HTML, CSS, JS
- */
-export const processGeminiResponse = (apiResponse: string): { 
-  html: string; 
-  css: string; 
-  js: string;
-  fullHtml: string;
-} => {
-  const html = extractHtmlContent(apiResponse);
-  const css = extractCssContent(apiResponse);
-  const js = extractJsContent(apiResponse);
-  
-  // Tạo HTML đầy đủ
-  let fullHtml = createHtmlStructure(html, "Custom Game");
-  fullHtml = fullHtml.replace('<style id="game-styles"></style>', `<style id="game-styles">${optimizeStyles(css)}</style>`);
-  fullHtml = fullHtml.replace('<script id="game-script"></script>', `<script id="game-script">${enhanceScript(js)}</script>`);
-  
-  return {
-    html,
-    css,
-    js,
-    fullHtml
-  };
-};
+  // Update title if provided
+  if (title && !enhancedContent.includes('<title>')) {
+    enhancedContent = enhancedContent.replace('</head>', `<title>${title}</title></head>`);
+  } else if (!enhancedContent.includes('<title>')) {
+    enhancedContent = enhancedContent.replace('</head>', `<title>Interactive Game</title></head>`);
+  }
 
-/**
- * Tạo nội dung iframe từ các phần riêng biệt
- */
-export const createIframeContent = (
-  html: string, 
-  css: string, 
-  js: string, 
-  title: string = 'Game'
-): string => {
-  // Tạo HTML cơ bản
-  let htmlDoc = createHtmlStructure(html, title);
-  
-  // Chèn CSS vào thẻ style
-  htmlDoc = htmlDoc.replace('<style id="game-styles"></style>', `<style id="game-styles">${optimizeStyles(css)}</style>`);
-  
-  // Chèn JavaScript vào thẻ script
-  htmlDoc = htmlDoc.replace('<script id="game-script"></script>', `<script id="game-script">${enhanceScript(js)}</script>`);
-  
-  return htmlDoc;
+  // Add body class for enhancing touch handling if not already present
+  if (!enhancedContent.includes('class="game-container"')) {
+    enhancedContent = enhancedContent.replace('<body>', '<body class="game-container">');
+  }
+
+  return enhancedContent;
 };
