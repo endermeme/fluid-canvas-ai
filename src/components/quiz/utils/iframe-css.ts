@@ -1,3 +1,4 @@
+
 /**
  * Xử lý phần CSS của game trong iframe
  */
@@ -58,6 +59,16 @@ export const optimizeStyles = (cssContent: string): string => {
       text-anchor: middle;
       dominant-baseline: middle;
       alignment-baseline: middle;
+    }
+
+    /* Wheel game specific */
+    .wheel-segment text,
+    .wheel-text {
+      transform-origin: center !important;
+      text-anchor: middle !important;
+      dominant-baseline: central !important;
+      alignment-baseline: middle !important;
+      font-weight: bold;
     }
 
     /* Game elements common styles */

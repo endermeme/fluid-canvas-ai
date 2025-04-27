@@ -55,8 +55,14 @@ REQUIREMENTS:
 - Optimize event listeners
 - Clean up resources properly
 
+7. WHEEL GAMES SPECIAL RULES:
+- Use correct angles for wheel segments
+- Calculate correct segment positions
+- Add code for determining accurate results based on final angle
+- Use transform-origin: center for all rotating elements
+- Properly position result text relative to wheel  
+
 CODE MUST BE COMPLETE AND FUNCTIONAL WITH NO EXTERNAL DEPENDENCIES.
 RETURN ONLY THE CODE INSIDE THE SPECIFIED TAGS.
 `;
 };
-
