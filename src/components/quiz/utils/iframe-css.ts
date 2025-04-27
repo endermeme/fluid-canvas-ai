@@ -9,6 +9,8 @@ export const optimizeStyles = (cssContent: string): string => {
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
+      margin: 0;
+      padding: 0;
     }
     
     body {
@@ -22,6 +24,7 @@ export const optimizeStyles = (cssContent: string): string => {
       display: flex;
       justify-content: center;
       align-items: center;
+      background-color: #f8f9fa;
     }
     
     #game-container {
@@ -36,10 +39,18 @@ export const optimizeStyles = (cssContent: string): string => {
       justify-content: center;
     }
 
-    /* Cải thiện hiển thị văn bản cho tất cả các game */
+    /* Game elements common styles */
+    .game-element {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    /* Common text styles */
     .game-text,
     .text-element,
-    text,
     .question-text,
     .answer-text,
     .card-text,
@@ -51,19 +62,16 @@ export const optimizeStyles = (cssContent: string): string => {
       padding: 0;
     }
 
-    /* SVG text alignment - cho tất cả các text trong SVG */
-    svg text {
-      text-anchor: middle;
-      dominant-baseline: central;
-      alignment-baseline: middle;
-    }
-
-    /* Wheel game specific styles - được tối ưu hóa đặc biệt */
+    /* Wheel game styles - completely revised */
     .wheel-container {
       position: relative;
-      width: 100%;
+      width: 90%;
       max-width: 500px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     
     .wheel {
@@ -71,44 +79,51 @@ export const optimizeStyles = (cssContent: string): string => {
       transition: transform 3s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
     
-    .wheel-segment text {
+    /* Wheel segments and text */
+    .wheel-segment {
+      fill-opacity: 0.8;
+      transition: fill-opacity 0.3s;
+    }
+    
+    .wheel-segment:hover {
+      fill-opacity: 1;
+    }
+    
+    .segment-text {
       font-weight: bold;
+      font-size: 14px;
+      fill: #fff;
       pointer-events: none;
+      text-anchor: middle;
+      dominant-baseline: central;
+      filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.5));
     }
     
-    /* Đảm bảo text trong wheel đúng vị trí và hướng */
-    .wheel-segment text,
-    .wheel-text {
-      text-anchor: middle !important;
-      dominant-baseline: central !important;
-      alignment-baseline: middle !important;
+    /* Wheel pointer styles */
+    .wheel-pointer {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 30px;
+      z-index: 10;
     }
     
-    /* Đảm bảo kết quả hiển thị đúng */
+    /* Result display */
     .result-display {
-      text-align: center;
       margin-top: 20px;
+      padding: 10px 20px;
       font-size: 1.5rem;
       font-weight: bold;
-      min-height: 2rem;
-    }
-    
-    /* Sửa lỗi hiển thị text trong các segment */
-    .segment-text {
-      transform-box: fill-box;
-      transform-origin: center;
+      text-align: center;
+      min-height: 60px;
+      background-color: rgba(255,255,255,0.8);
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
-    /* Game elements common styles */
-    .game-element {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      user-select: none;
-    }
-
-    /* Interactive elements */
+    /* Buttons */
     button, 
     [role="button"],
     .clickable {
@@ -124,6 +139,44 @@ export const optimizeStyles = (cssContent: string): string => {
       transition: all 0.2s ease;
       user-select: none;
       -webkit-user-select: none;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    button:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* SVG text alignment */
+    svg text {
+      text-anchor: middle;
+      dominant-baseline: central;
+      alignment-baseline: middle;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .wheel-container {
+        width: 90%;
+      }
+      
+      .segment-text {
+        font-size: 12px;
+      }
+      
+      .result-display {
+        font-size: 1.2rem;
+        padding: 8px 16px;
+      }
     }
 
     /* Game cards common styles */
@@ -147,39 +200,11 @@ export const optimizeStyles = (cssContent: string): string => {
       text-align: center;
     }
 
-    /* Responsive grid layouts */
-    .game-grid {
-      display: grid;
-      gap: 1rem;
-      width: 100%;
-      max-width: 100%;
-      margin: 0 auto;
-      padding: 1rem;
-    }
-
-    /* Ensure proper text wrapping */
+    /* Word wrap */
     .word-wrap {
       word-wrap: break-word;
       overflow-wrap: break-word;
       hyphens: auto;
-    }
-
-    /* Animations */
-    .animated {
-      animation-duration: 0.3s;
-      animation-fill-mode: both;
-    }
-
-    @media (max-width: 768px) {
-      .game-text,
-      .text-element {
-        font-size: 0.9em;
-      }
-      
-      .game-grid {
-        gap: 0.5rem;
-        padding: 0.5rem;
-      }
     }
   `;
   
