@@ -11,4 +11,5 @@
 - Cập nhật `src/components/quiz/custom-games/GameController.tsx`: Mở lại tính năng tạo game tùy chỉnh
 - Tạo mới `src/components/quiz/types/customGame.ts`: Thêm kiểu dữ liệu cho game tùy chỉnh
 - Cập nhật `src/components/quiz/components/GameContainer.tsx`: Sửa lỗi kiểu dữ liệu CustomGameResponse
+- Cập nhật `src/components/quiz/custom-games/GameController.tsx`: Thêm logs cho debug và sửa lỗi gửi yêu cầu
 

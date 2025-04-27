@@ -48,8 +48,13 @@ const GameController: React.FC = () => {
       content: null
     });
 
+    console.log("Đang gửi yêu cầu tạo game...");
+
     try {
       const gamePrompt = generateCustomGamePrompt(prompt);
+      
+      console.log("Gửi prompt tới API:", gamePrompt.slice(0, 100) + "...");
+      console.log("API endpoint:", getApiEndpoint(GEMINI_MODELS.CUSTOM_GAME));
       
       const response = await fetch(getApiEndpoint(GEMINI_MODELS.CUSTOM_GAME), {
         method: 'POST',
@@ -71,13 +76,17 @@ const GameController: React.FC = () => {
       });
 
       if (!response.ok) {
+        console.error("Lỗi API:", response.status, response.statusText);
         throw new Error('Lỗi khi tạo game');
       }
 
       const result = await response.json();
+      console.log("Nhận phản hồi từ API:", result);
+      
       const gameContent = result?.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!gameContent) {
+        console.error("Không nhận được phản hồi từ AI");
         throw new Error('Không nhận được phản hồi từ AI');
       }
 
@@ -86,6 +95,12 @@ const GameController: React.FC = () => {
       const cssMatch = gameContent.match(/<CSS>([\s\S]*?)<\/CSS>/i);
       const jsMatch = gameContent.match(/<JAVASCRIPT>([\s\S]*?)<\/JAVASCRIPT>/i);
 
+      console.log("Đã trích xuất HTML, CSS, JS:", {
+        html: htmlMatch ? "Có" : "Không",
+        css: cssMatch ? "Có" : "Không",
+        js: jsMatch ? "Có" : "Không"
+      });
+
       setGameState({
         loading: false,
         error: null,
@@ -93,7 +108,7 @@ const GameController: React.FC = () => {
           html: htmlMatch?.[1]?.trim() || '',
           css: cssMatch?.[1]?.trim() || '',
           javascript: jsMatch?.[1]?.trim() || '',
-          title: `Custom Game: ${prompt.slice(0, 30)}...`
+          title: `Tùy chỉnh: ${prompt.slice(0, 30)}...`
         }
       });
 
@@ -106,7 +121,7 @@ const GameController: React.FC = () => {
       console.error('Error generating game:', error);
       setGameState({
         loading: false,
-        error: error.message,
+        error: error.message || "Không thể tạo game. Vui lòng thử lại.",
         content: null
       });
       
