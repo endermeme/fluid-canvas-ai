@@ -1,30 +1,21 @@
 
-// Game storage types
+// Định nghĩa các kiểu dữ liệu chung cho toàn bộ ứng dụng
 export interface StoredGame {
   id: string;
   title: string;
-  description?: string; // Changed from required to optional
-  gameType?: string;
+  gameType: string;
   content?: any;
   htmlContent: string;
-  createdAt: number | Date;
-  expiresAt: number | Date;
+  description?: string;
+  expiresAt: Date | number;
+  createdAt: Date | number;
 }
 
-// Game participation types
 export interface GameParticipant {
   id: string;
-  game_id: string;
   name: string;
-  timestamp: string | number;
   ipAddress?: string;
+  timestamp: number | string;
+  gameId: string;
   retryCount: number;
-}
-
-export interface GameSession {
-  id: string;
-  title: string;
-  htmlContent?: string;
-  participants: GameParticipant[];
-  createdAt: number;
 }

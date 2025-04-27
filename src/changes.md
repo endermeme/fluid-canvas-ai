@@ -13,3 +13,4 @@
 - Thêm xử lý thời gian chờ và cơ chế kiểm tra nội dung iframe để giải quyết vấn đề màn hình trắng
 - Thêm xử lý cho các định dạng ảnh từ API Gemini (base64 và URL)
 - Sửa lỗi TypeScript liên quan đến Promise trong xử lý nội dung iframe
+- Cải thiện chức năng chia sẻ game để giảm hiện tượng flash màn hình và sửa lỗi không tìm thấy game trong link chia sẻ

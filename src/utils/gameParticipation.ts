@@ -1,307 +1,302 @@
-import { supabase } from "@/integrations/supabase/client";
-import { GameParticipant, GameSession } from "@/utils/types";
 
-// Generate a fake IP for development/demo purposes
-export const getFakeIpAddress = () => {
-  const octets = Array.from({ length: 4 }, () => Math.floor(Math.random() * 256));
-  return octets.join('.');
-};
+// Tệp mới để quản lý người tham gia game
+import { supabase } from '@/integrations/supabase/client';
 
-// Thêm hàm để kiểm tra anti-cheat
-export const verifyParticipant = async (gameId: string, ipAddress: string): Promise<boolean> => {
-  try {
-    // Kiểm tra số lần tham gia trong một khoảng thời gian ngắn
-    const { data: recentAttempts, error: checkError } = await supabase
-      .from('game_participants')
-      .select('timestamp')
-      .eq('game_id', gameId)
-      .eq('ip_address', ipAddress)
-      .order('timestamp', { ascending: false })
-      .limit(10);
-    
-    if (checkError) {
-      console.error("Error checking participant data:", checkError);
-      return true; // Cho phép tham gia trong trường hợp lỗi
-    }
-    
-    // Nếu có quá nhiều lần tham gia trong thời gian ngắn (1 phút)
-    if (recentAttempts && recentAttempts.length > 5) {
-      const now = Date.now();
-      const oneMinuteAgo = now - 60 * 1000;
-      
-      const recentCount = recentAttempts.filter(attempt => {
-        const timestamp = new Date(attempt.timestamp).getTime();
-        return timestamp > oneMinuteAgo;
-      }).length;
-      
-      if (recentCount > 5) {
-        console.warn(`Possible abuse detected: ${recentCount} attempts in the last minute from IP ${ipAddress}`);
-        return false;
-      }
-    }
-    
-    return true;
-  } catch (error) {
-    console.error("Error in verifyParticipant:", error);
-    return true; // Cho phép tham gia trong trường hợp lỗi
+export interface GameParticipant {
+  id: string;
+  name: string;
+  ipAddress?: string;
+  timestamp: number | string;
+  gameId: string;
+  retryCount: number;
+}
+
+export interface ParticipantResponse {
+  success: boolean;
+  message?: string;
+  participant?: GameParticipant;
+}
+
+export const getFakeIpAddress = (): string => {
+  // Tạo "fake IP" cho mục đích demo
+  const segments = [];
+  for (let i = 0; i < 4; i++) {
+    segments.push(Math.floor(Math.random() * 256));
   }
+  return segments.join('.');
 };
 
-// Add a participant to a game
-export const addParticipant = async (gameId: string, name: string, ipAddress: string): Promise<{ 
-  success: boolean; 
-  message: string; 
-  participant: GameParticipant | null;
-}> => {
+// Thêm người tham gia mới vào game
+export const addParticipant = async (
+  gameId: string,
+  name: string,
+  ipAddress: string
+): Promise<ParticipantResponse> => {
+  if (!gameId || !name) {
+    return {
+      success: false,
+      message: "Thiếu thông tin game hoặc người tham gia"
+    };
+  }
+
   try {
-    // Kiểm tra anti-cheat
-    const isAllowed = await verifyParticipant(gameId, ipAddress);
-    
-    if (!isAllowed) {
-      return { 
-        success: false, 
-        message: "Quá nhiều yêu cầu trong thời gian ngắn. Vui lòng thử lại sau.", 
-        participant: null 
-      };
-    }
-    
-    // Check if this IP has already participated recently
+    // Kiểm tra xem IP này đã tham gia game này chưa
     const { data: existingParticipants, error: checkError } = await supabase
       .from('game_participants')
-      .select('retry_count')
+      .select('*')
       .eq('game_id', gameId)
-      .eq('ip_address', ipAddress)
-      .order('timestamp', { ascending: false })
-      .limit(1);
+      .eq('ip_address', ipAddress);
 
-    const retryCount = existingParticipants?.[0]?.retry_count || 0;
+    if (checkError) {
+      console.error("Error checking existing participants:", checkError);
+      return {
+        success: false,
+        message: "Không thể kiểm tra thông tin tham gia trước đó"
+      };
+    }
 
-    const { data: participant, error } = await supabase
+    if (existingParticipants && existingParticipants.length > 0) {
+      // IP đã tham gia, cập nhật thông tin
+      const participant = existingParticipants[0];
+      const retryCount = (participant.retry_count || 0) + 1;
+      
+      const { data: updatedParticipant, error: updateError } = await supabase
+        .from('game_participants')
+        .update({
+          name,
+          retry_count: retryCount,
+          timestamp: new Date().toISOString()
+        })
+        .eq('id', participant.id)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error("Error updating participant:", updateError);
+        return {
+          success: false,
+          message: "Không thể cập nhật thông tin tham gia"
+        };
+      }
+
+      return {
+        success: true,
+        participant: {
+          id: updatedParticipant.id,
+          name: updatedParticipant.name,
+          ipAddress: updatedParticipant.ip_address,
+          timestamp: updatedParticipant.timestamp,
+          gameId: updatedParticipant.game_id,
+          retryCount: updatedParticipant.retry_count
+        }
+      };
+    }
+
+    // Thêm người tham gia mới
+    const { data: newParticipant, error: insertError } = await supabase
       .from('game_participants')
-      .insert({
-        game_id: gameId,
-        name,
-        ip_address: ipAddress,
-        retry_count: retryCount + 1
-      })
+      .insert([
+        {
+          game_id: gameId,
+          name,
+          ip_address: ipAddress,
+          retry_count: 0
+        }
+      ])
       .select()
       .single();
 
-    if (error) {
-      console.error("Error adding participant:", error);
-      return { 
-        success: false, 
-        message: "Không thể tham gia game lúc này",
-        participant: null
+    if (insertError) {
+      console.error("Error adding new participant:", insertError);
+      return {
+        success: false,
+        message: "Không thể thêm người tham gia mới"
       };
     }
 
-    // Convert database fields to our interface format
-    const formattedParticipant: GameParticipant = {
-      id: participant.id,
-      game_id: participant.game_id,
-      name: participant.name,
-      timestamp: participant.timestamp,
-      ipAddress: participant.ip_address,
-      retryCount: participant.retry_count
-    };
+    // Lưu vào localStorage để theo dõi các phiên tham gia
+    try {
+      const sessionsJson = localStorage.getItem('game_sessions');
+      const sessions = sessionsJson ? JSON.parse(sessionsJson) : [];
+      
+      let sessionIndex = sessions.findIndex((s: any) => s.id === gameId);
+      if (sessionIndex >= 0) {
+        // Game đã tồn tại, thêm người tham gia mới vào
+        if (!sessions[sessionIndex].participants) {
+          sessions[sessionIndex].participants = [];
+        }
+        
+        sessions[sessionIndex].participants.push({
+          id: newParticipant.id,
+          name: newParticipant.name,
+          ipAddress: newParticipant.ip_address,
+          timestamp: newParticipant.timestamp,
+          gameId: newParticipant.game_id,
+          retryCount: newParticipant.retry_count
+        });
+      } else {
+        // Game chưa có trong sessions, thêm mới
+        sessions.push({
+          id: gameId,
+          participants: [
+            {
+              id: newParticipant.id,
+              name: newParticipant.name,
+              ipAddress: newParticipant.ip_address,
+              timestamp: newParticipant.timestamp,
+              gameId: newParticipant.game_id,
+              retryCount: newParticipant.retry_count
+            }
+          ]
+        });
+      }
+      
+      localStorage.setItem('game_sessions', JSON.stringify(sessions));
+    } catch (localStorageError) {
+      console.error("Error updating localStorage:", localStorageError);
+      // Tiếp tục xử lý dù có lỗi localStorage
+    }
 
-    return { 
-      success: true, 
-      message: "Tham gia thành công", 
-      participant: formattedParticipant
+    return {
+      success: true,
+      participant: {
+        id: newParticipant.id,
+        name: newParticipant.name,
+        ipAddress: newParticipant.ip_address,
+        timestamp: newParticipant.timestamp,
+        gameId: newParticipant.game_id,
+        retryCount: newParticipant.retry_count
+      }
     };
   } catch (error) {
-    console.error("Error in addParticipant:", error);
-    return { 
-      success: false, 
-      message: "Đã xảy ra lỗi khi tham gia game", 
-      participant: null 
+    console.error("Unhandled error in addParticipant:", error);
+    return {
+      success: false,
+      message: "Đã xảy ra lỗi khi xử lý yêu cầu tham gia"
     };
   }
 };
 
-// Get a game session by ID
-export const getGameSession = async (gameId: string): Promise<GameSession | null> => {
+// Tạo một phiên game mới
+export const createGameSession = async (
+  title: string,
+  content: string
+): Promise<{ id: string }> => {
+  // Tạo một ID mới cho game
+  const gameId = crypto.randomUUID();
+  
   try {
-    const { data: game, error: gameError } = await supabase
-      .from('games')
-      .select('*')
-      .eq('id', gameId)
-      .single();
+    // Lưu session vào localStorage
+    const sessionsJson = localStorage.getItem('game_sessions');
+    const sessions = sessionsJson ? JSON.parse(sessionsJson) : [];
+    
+    sessions.push({
+      id: gameId,
+      title,
+      content,
+      createdAt: new Date().toISOString(),
+      participants: []
+    });
+    
+    localStorage.setItem('game_sessions', JSON.stringify(sessions));
+    
+    return { id: gameId };
+  } catch (error) {
+    console.error("Error creating game session:", error);
+    throw new Error("Không thể tạo phiên game mới");
+  }
+};
 
-    if (gameError || !game) {
-      console.error("Error getting game:", gameError);
-      return null;
-    }
-
-    const { data: participants, error: participantsError } = await supabase
+// Lấy danh sách người tham gia game
+export const getGameParticipants = async (
+  gameId: string
+): Promise<GameParticipant[]> => {
+  if (!gameId) return [];
+  
+  try {
+    const { data, error } = await supabase
       .from('game_participants')
       .select('*')
       .eq('game_id', gameId)
       .order('timestamp', { ascending: false });
-
-    if (participantsError) {
-      console.error("Error getting participants:", participantsError);
-      return null;
-    }
-
-    // Format participants to match our interface
-    const formattedParticipants: GameParticipant[] = (participants || []).map(p => ({
-      id: p.id,
-      game_id: p.game_id,
-      name: p.name,
-      timestamp: p.timestamp,
-      ipAddress: p.ip_address,
-      retryCount: p.retry_count
-    }));
-
-    return {
-      id: game.id,
-      title: game.title,
-      htmlContent: game.html_content,
-      participants: formattedParticipants,
-      createdAt: new Date(game.created_at).getTime()
-    };
-  } catch (error) {
-    console.error("Error in getGameSession:", error);
-    return null;
-  }
-};
-
-// Get all game sessions
-export const getAllGameSessions = async (): Promise<GameSession[]> => {
-  try {
-    const { data: games, error: gamesError } = await supabase
-      .from('games')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (gamesError || !games) {
-      console.error("Error getting games:", gamesError);
+    
+    if (error) {
+      console.error("Error fetching participants:", error);
       return [];
     }
-
-    const sessions: GameSession[] = await Promise.all(
-      games.map(async (game) => {
-        const { data: participants } = await supabase
-          .from('game_participants')
-          .select('*')
-          .eq('game_id', game.id)
-          .order('timestamp', { ascending: false });
-
-        // Format participants to match our interface
-        const formattedParticipants: GameParticipant[] = (participants || []).map(p => ({
-          id: p.id,
-          game_id: p.game_id,
-          name: p.name,
-          timestamp: p.timestamp,
-          ipAddress: p.ip_address,
-          retryCount: p.retry_count
-        }));
-
-        return {
-          id: game.id,
-          title: game.title,
-          htmlContent: game.html_content,
-          participants: formattedParticipants,
-          createdAt: new Date(game.created_at).getTime()
-        };
-      })
-    );
-
-    return sessions;
+    
+    return data.map(p => ({
+      id: p.id,
+      name: p.name,
+      ipAddress: p.ip_address,
+      timestamp: p.timestamp,
+      gameId: p.game_id,
+      retryCount: p.retry_count || 0
+    }));
   } catch (error) {
-    console.error("Error in getAllGameSessions:", error);
+    console.error("Error in getGameParticipants:", error);
     return [];
   }
 };
 
-// Create a new game session
-export const createGameSession = async (title: string, htmlContent: string): Promise<GameSession> => {
+// Lấy một game từ localStorage (fallback khi không có kết nối đến Supabase)
+export const getLocalGame = (gameId: string): any => {
   try {
-    const { data, error } = await supabase
+    const sessionsJson = localStorage.getItem('game_sessions');
+    if (!sessionsJson) return null;
+    
+    const sessions = JSON.parse(sessionsJson);
+    return sessions.find((s: any) => s.id === gameId) || null;
+  } catch (error) {
+    console.error("Error retrieving local game:", error);
+    return null;
+  }
+};
+
+// Kiểm tra xem game có tồn tại không và chưa hết hạn
+export const isGameValid = async (gameId: string): Promise<boolean> => {
+  try {
+    const { data } = await supabase
       .from('games')
-      .insert({
-        title: title || "Minigame Tương tác",
-        html_content: htmlContent,
-        game_type: 'shared'
-      })
-      .select()
+      .select('expires_at')
+      .eq('id', gameId)
       .single();
-      
-    if (error) {
-      console.error("Error creating game session:", error);
-      // Return a temporary session object for fallback
-      return {
-        id: Math.random().toString(36).substring(2, 9),
-        title: title,
-        htmlContent: htmlContent,
-        participants: [],
-        createdAt: Date.now()
-      };
-    }
     
-    return {
-      id: data.id,
-      title: data.title,
-      htmlContent: data.html_content,
-      participants: [],
-      createdAt: new Date(data.created_at).getTime()
-    };
+    if (!data) return false;
+    
+    const expiryDate = new Date(data.expires_at);
+    const now = new Date();
+    
+    return expiryDate > now;
   } catch (error) {
-    console.error("Error in createGameSession:", error);
-    return {
-      id: Math.random().toString(36).substring(2, 9),
-      title: title,
-      htmlContent: htmlContent,
-      participants: [],
-      createdAt: Date.now()
-    };
+    console.error("Error checking game validity:", error);
+    
+    // Fallback kiểm tra trong localStorage
+    const localGame = getLocalGame(gameId);
+    return !!localGame;
   }
 };
 
-// Export participants to CSV
-export const exportParticipantsToCSV = async (gameId: string): Promise<string> => {
+export interface GameWithParticipants {
+  game: any;
+  participants: GameParticipant[];
+}
+
+// Lấy thông tin game và người tham gia
+export const getGameWithParticipants = async (
+  gameId: string
+): Promise<GameWithParticipants | null> => {
   try {
-    // Get participants for the game
-    const { data: participants, error } = await supabase
-      .from('game_participants')
-      .select('*')
-      .eq('game_id', gameId)
-      .order('timestamp', { ascending: false });
-      
-    if (error || !participants || participants.length === 0) {
-      return "Name,IP Address,Timestamp,Retry Count\n";
-    }
+    // Lấy thông tin game
+    const game = await getSharedGame(gameId);
+    if (!game) return null;
     
-    // Create CSV header
-    let csv = "Name,IP Address,Timestamp,Retry Count\n";
+    // Lấy danh sách người tham gia
+    const participants = await getGameParticipants(gameId);
     
-    // Add data rows
-    participants.forEach(p => {
-      const row = [
-        `"${p.name.replace(/"/g, '""')}"`,
-        `"${p.ip_address || ''}"`,
-        `"${new Date(p.timestamp).toLocaleString()}"`,
-        p.retry_count || 0
-      ];
-      csv += row.join(',') + '\n';
-    });
-    
-    return csv;
+    return { game, participants };
   } catch (error) {
-    console.error("Error exporting participants to CSV:", error);
-    return "Error generating CSV data";
+    console.error("Error in getGameWithParticipants:", error);
+    return null;
   }
-};
-
-// Mask IP address for privacy
-export const maskIpAddress = (ip?: string): string => {
-  if (!ip) return "N/A";
-  
-  const parts = ip.split('.');
-  if (parts.length !== 4) return ip;
-  
-  return `${parts[0]}.${parts[1]}.*.*`;
 };

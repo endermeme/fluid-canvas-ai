@@ -58,11 +58,14 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
         description: "Đang lưu game và tạo liên kết chia sẻ...",
       });
 
+      // Đảm bảo content là chuỗi
+      let gameContent = gameData.content || '';
+      
       const url = await saveGameForSharing(
         gameData.title || 'Game tương tác',
         gameType,
         gameData,
-        gameData.content || ''
+        gameContent
       );
       
       if (url) {
