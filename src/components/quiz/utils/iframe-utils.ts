@@ -23,14 +23,8 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       // Chèn CSS vào thẻ style
       htmlDoc = htmlDoc.replace('<style id="game-styles"></style>', `<style id="game-styles">${cssContent}</style>`);
       
-      // Chèn JavaScript vào thẻ script - không sử dụng DOMContentLoaded để tránh xung đột
-      htmlDoc = htmlDoc.replace('<script id="game-script"></script>', `<script id="game-script">
-        try {
-          ${jsContent}
-        } catch(e) {
-          console.error("Game script initialization error:", e);
-        }
-      </script>`);
+      // Chèn JavaScript vào thẻ script
+      htmlDoc = htmlDoc.replace('<script id="game-script"></script>', `<script id="game-script">${jsContent}</script>`);
       
       return htmlDoc;
     }
@@ -57,21 +51,6 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       </head>
       <body>
         ${content}
-        <script>
-          // Script to enable console.log access in iframe
-          (function() {
-            const originalConsoleLog = console.log;
-            console.log = function() {
-              originalConsoleLog.apply(console, arguments);
-              try {
-                window.parent.postMessage({
-                  type: 'console.log',
-                  args: Array.from(arguments).map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg)
-                }, '*');
-              } catch(e) {}
-            }
-          })();
-        </script>
       </body>
       </html>
     `;
@@ -87,7 +66,6 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
       </head>
       <body>
         <div style="color: red;">Error loading game content</div>
-        <pre>${error.message || 'Unknown error'}</pre>
       </body>
       </html>
     `;
@@ -110,13 +88,7 @@ export const processGeminiResponse = (apiResponse: string): {
   // Tạo HTML đầy đủ
   let fullHtml = createHtmlStructure(html, "Custom Game");
   fullHtml = fullHtml.replace('<style id="game-styles"></style>', `<style id="game-styles">${optimizeStyles(css)}</style>`);
-  fullHtml = fullHtml.replace('<script id="game-script"></script>', `<script id="game-script">
-    try {
-      ${enhanceScript(js)}
-    } catch(e) {
-      console.error("Game script error:", e);
-    }
-  </script>`);
+  fullHtml = fullHtml.replace('<script id="game-script"></script>', `<script id="game-script">${enhanceScript(js)}</script>`);
   
   return {
     html,
@@ -141,15 +113,8 @@ export const createIframeContent = (
   // Chèn CSS vào thẻ style
   htmlDoc = htmlDoc.replace('<style id="game-styles"></style>', `<style id="game-styles">${optimizeStyles(css)}</style>`);
   
-  // Chèn JavaScript trực tiếp vào thẻ script (không sử dụng DOMContentLoaded)
-  const enhancedJs = enhanceScript(js);
-  htmlDoc = htmlDoc.replace('<script id="game-script"></script>', `<script id="game-script">
-    try {
-      ${enhancedJs}
-    } catch(e) {
-      console.error("Game script error:", e);
-    }
-  </script>`);
+  // Chèn JavaScript vào thẻ script
+  htmlDoc = htmlDoc.replace('<script id="game-script"></script>', `<script id="game-script">${enhanceScript(js)}</script>`);
   
   return htmlDoc;
 };

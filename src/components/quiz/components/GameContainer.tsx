@@ -24,18 +24,6 @@ const GameContainer: React.FC<GameContainerProps> = ({
   const [localError, setLocalError] = useState<string | null>(null);
   const [showFullscreen, setShowFullscreen] = useState(false);
 
-  // Lắng nghe console.log từ iframe
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'console.log') {
-        console.log('Game iframe log:', ...event.data.args);
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
-
   useEffect(() => {
     if (externalError) {
       setLocalError(externalError);
@@ -57,48 +45,23 @@ const GameContainer: React.FC<GameContainerProps> = ({
   const toggleFullscreen = () => {
     setShowFullscreen(prev => !prev);
   };
-
-  // Lấy kích thước iframe phù hợp
-  const getIframeHeight = () => {
-    if (showFullscreen) return '100vh';
-    
-    // Lấy chiều cao của cửa sổ trình duyệt
-    const windowHeight = window.innerHeight;
-    const minHeight = 650;
-    const maxHeight = 1200;
-    
-    // Tính chiều cao phù hợp: 92% chiều cao cửa sổ hoặc tối thiểu 650px, tối đa 1200px
-    const calculatedHeight = Math.min(Math.max(windowHeight * 0.92, minHeight), maxHeight);
-    
-    return `${calculatedHeight}px`;
-  };
   
   return (
     <div 
       className={`relative rounded-xl overflow-hidden bg-gradient-to-b from-blue-50 to-white shadow-xl border border-gray-200 w-full mx-auto transition-all duration-300 ${showFullscreen ? 'fixed inset-0 z-50 rounded-none m-0 max-w-none' : ''}`}
       style={{ 
-        height: getIframeHeight(),
+        height: showFullscreen ? '100vh' : '92vh',
         minHeight: '650px',
         maxHeight: showFullscreen ? '100vh' : '1200px',
         maxWidth: showFullscreen ? '100vw' : '1800px'
       }}
     >
-      <div className="absolute top-2 right-2 z-30 flex space-x-2">
-        <button 
-          className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm font-medium flex items-center gap-1.5"
-          onClick={handleReload}
-        >
-          <RefreshCw size={16} />
-          Tải lại
-        </button>
-        
-        <button 
-          className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm font-medium flex items-center gap-1.5"
-          onClick={toggleFullscreen}
-        >
-          {showFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}
-        </button>
-      </div>
+      <button 
+        className="absolute top-2 right-2 z-30 px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm font-medium flex items-center gap-1.5"
+        onClick={toggleFullscreen}
+      >
+        {showFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}
+      </button>
       
       {!!localError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-white p-8 z-20">
@@ -137,12 +100,8 @@ const GameContainer: React.FC<GameContainerProps> = ({
         srcDoc={formattedContent}
         className="w-full h-full border-0 rounded-xl shadow-inner"
         sandbox="allow-scripts"
-        onLoad={() => {
-          console.log('Game iframe loaded');
-          setLoading(false);
-        }}
-        onError={(e) => {
-          console.error('Game iframe error:', e);
+        onLoad={() => setLoading(false)}
+        onError={() => {
           setLocalError("Không thể tải nội dung game. Vui lòng thử lại sau.");
           setLoading(false);
         }}
