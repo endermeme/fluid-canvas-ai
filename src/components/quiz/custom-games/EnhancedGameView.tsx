@@ -48,13 +48,15 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   // Theo dõi số lần thử tải lại iframe
   const maxRetryAttempts = 3;
 
-  const loadIframeContent = () => {
+  const loadIframeContent = async () => {
     if (!iframeRef.current || !miniGame?.content) return;
 
     try {
       console.log("Đang cố gắng tải nội dung game...");
-      const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
-      iframeRef.current.srcdoc = enhancedContent;
+      const enhancedContent = await enhanceIframeContent(miniGame.content, miniGame.title);
+      if (iframeRef.current) {
+        iframeRef.current.srcdoc = enhancedContent;
+      }
       setIframeError(null);
       
       let progress = 0;
@@ -288,4 +290,3 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
 };
 
 export default EnhancedGameView;
-

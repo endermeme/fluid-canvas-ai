@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 import { enhanceIframeContent } from '../utils/iframe-utils';
@@ -21,6 +22,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
   const [key, setKey] = useState(0);
   const [localError, setLocalError] = useState<string | null>(null);
   const [showFullscreen, setShowFullscreen] = useState(false);
+  const [processedContent, setProcessedContent] = useState<string>('');
 
   useEffect(() => {
     if (externalError) {
@@ -28,7 +30,35 @@ const GameContainer: React.FC<GameContainerProps> = ({
     }
   }, [externalError]);
 
-  const formattedContent = content ? enhanceIframeContent(content, title) : '';
+  // Process the content when it changes
+  useEffect(() => {
+    let isMounted = true;
+    
+    const processContent = async () => {
+      try {
+        if (content) {
+          const enhanced = await enhanceIframeContent(content, title);
+          if (isMounted) {
+            setProcessedContent(enhanced);
+          }
+        } else {
+          setProcessedContent('');
+        }
+      } catch (error) {
+        console.error("Error processing iframe content:", error);
+        if (isMounted) {
+          setLocalError("Không thể xử lý nội dung game. Vui lòng thử lại.");
+          setProcessedContent('');
+        }
+      }
+    };
+
+    processContent();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [content, title]);
   
   const handleReload = () => {
     setLoading(true);
@@ -92,7 +122,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
         ref={iframeRef}
         key={key}
         title={title || "Game"}
-        srcDoc={formattedContent}
+        srcDoc={processedContent}
         className="w-full h-full border-0 rounded-xl shadow-inner"
         sandbox="allow-scripts"
         onLoad={() => setLoading(false)}
