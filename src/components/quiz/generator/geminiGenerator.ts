@@ -1,4 +1,3 @@
-
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
@@ -149,7 +148,6 @@ ${js}
 </html>`;
 };
 
-// Hàm tạo game với Gemini, đã được cải tiến để tách biệt rõ ràng HTML/CSS/JS
 export const generateWithGemini = async (
   topic: string, 
   settings?: GameSettingsData
@@ -243,7 +241,6 @@ export const generateWithGemini = async (
   }
 };
 
-// Hàm thử lại khi gặp lỗi
 export const tryGeminiGeneration = async (
   model: any,
   topic: string, 
