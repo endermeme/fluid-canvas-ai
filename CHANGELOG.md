@@ -2,6 +2,11 @@
 # Changelog
 
 ## [2025-04-27]
-- Tạo lại các file thiếu: Quiz.tsx, GameController.tsx, GameLoading.tsx, QuizContainer.tsx, EnhancedGameView.tsx
-- Khắc phục lỗi build
+- Xóa các file xử lý API game và markdown:
+  - promptBuilder.ts
+  - iframe-utils.ts
+  - PROJECT_UPDATE.md
+  - changes.md
+  - unused-files.md
+  - project-documentation.md
 
