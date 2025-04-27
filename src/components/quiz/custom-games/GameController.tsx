@@ -96,7 +96,7 @@ const GameController: React.FC<GameControllerProps> = ({
   };
   
   const handleShareGame = async () => {
-    if (!currentGame || isSharing) return;
+    if (!currentGame || isSharing) return "";
     
     try {
       setIsSharing(true);
@@ -120,6 +120,9 @@ const GameController: React.FC<GameControllerProps> = ({
         title: "Game đã được chia sẻ",
         description: "Đường dẫn đã được sao chép vào clipboard.",
       });
+      
+      setIsSharing(false);
+      return result.url;
     } catch (error) {
       console.error("Lỗi chia sẻ game:", error);
       toast({
@@ -127,8 +130,8 @@ const GameController: React.FC<GameControllerProps> = ({
         description: "Không thể tạo liên kết chia sẻ. Vui lòng thử lại.",
         variant: "destructive"
       });
-    } finally {
       setIsSharing(false);
+      return "";
     }
   };
 
