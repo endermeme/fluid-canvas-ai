@@ -1,27 +1,176 @@
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { ArrowLeft, Wand2 } from 'lucide-react';
+import { CustomGameState } from '../types/customGame';
+import GameContainer from '../components/GameContainer';
+import QuizContainer from '../QuizContainer';
+import { generateCustomGamePrompt } from '../generator/customGamePrompt';
+import { GEMINI_MODELS, getApiEndpoint } from '@/constants/api-constants';
 
 const GameController: React.FC = () => {
   const navigate = useNavigate();
+  const [prompt, setPrompt] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const { toast } = useToast();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  
+  const [gameState, setGameState] = useState<CustomGameState>({
+    loading: false,
+    error: null,
+    content: null
+  });
 
   const handleBack = () => {
     navigate('/preset-games');
   };
 
+  const handleGenerateGame = async () => {
+    if (!prompt.trim()) {
+      toast({
+        title: "Thiếu thông tin",
+        description: "Vui lòng nhập mô tả chi tiết về game bạn muốn tạo",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setGenerating(true);
+    setGameState({
+      loading: true,
+      error: null,
+      content: null
+    });
+
+    try {
+      const gamePrompt = generateCustomGamePrompt(prompt);
+      
+      const response = await fetch(getApiEndpoint(GEMINI_MODELS.CUSTOM_GAME), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [{
+            role: "user",
+            parts: [{text: gamePrompt}]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 8192
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Lỗi khi tạo game');
+      }
+
+      const result = await response.json();
+      const gameContent = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!gameContent) {
+        throw new Error('Không nhận được phản hồi từ AI');
+      }
+
+      // Xử lý phản hồi từ AI để tách HTML, CSS và JavaScript
+      const htmlMatch = gameContent.match(/<HTML>([\s\S]*?)<\/HTML>/i);
+      const cssMatch = gameContent.match(/<CSS>([\s\S]*?)<\/CSS>/i);
+      const jsMatch = gameContent.match(/<JAVASCRIPT>([\s\S]*?)<\/JAVASCRIPT>/i);
+
+      setGameState({
+        loading: false,
+        error: null,
+        content: {
+          html: htmlMatch?.[1]?.trim() || '',
+          css: cssMatch?.[1]?.trim() || '',
+          javascript: jsMatch?.[1]?.trim() || '',
+          title: `Custom Game: ${prompt.slice(0, 30)}...`
+        }
+      });
+
+      toast({
+        title: "Thành công!",
+        description: "Game của bạn đã được tạo",
+      });
+
+    } catch (error) {
+      console.error('Error generating game:', error);
+      setGameState({
+        loading: false,
+        error: error.message,
+        content: null
+      });
+      
+      toast({
+        title: "Lỗi",
+        description: "Không thể tạo game. Vui lòng thử lại.",
+        variant: "destructive"
+      });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background p-6 flex flex-col items-center justify-center">
-      <div className="max-w-md w-full space-y-6">
-        <h1 className="text-2xl font-bold text-center">Game tùy chỉnh</h1>
-        <p className="text-center text-muted-foreground">
-          Tính năng tạo game tùy chỉnh đang được xây dựng lại. Vui lòng quay lại sau.
-        </p>
-        <Button onClick={handleBack} className="w-full">
-          Quay lại danh sách game
-        </Button>
+    <QuizContainer 
+      title="Tạo Game Tùy Chỉnh"
+      showBackButton 
+      onBack={handleBack}
+    >
+      <div className="container mx-auto p-4 max-w-4xl">
+        <Card className="p-6 mb-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="prompt">Mô tả game của bạn</Label>
+              <Textarea
+                id="prompt"
+                placeholder="Mô tả chi tiết game bạn muốn tạo (ví dụ: một game ghép hình với chủ đề động vật...)"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                className="min-h-[100px]"
+              />
+            </div>
+            
+            <Button
+              onClick={handleGenerateGame}
+              disabled={generating}
+              className="w-full"
+            >
+              {generating ? (
+                <>
+                  <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                  Đang tạo game...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="mr-2 h-4 w-4" />
+                  Tạo Game
+                </>
+              )}
+            </Button>
+          </div>
+        </Card>
+
+        {gameState.content && (
+          <GameContainer
+            iframeRef={iframeRef}
+            content={gameState.content}
+            error={gameState.error}
+            onReload={handleGenerateGame}
+            title={gameState.content.title}
+          />
+        )}
       </div>
-    </div>
+    </QuizContainer>
   );
 };
 
