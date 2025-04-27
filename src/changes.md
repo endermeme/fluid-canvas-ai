@@ -25,8 +25,3 @@
 - Cập nhật `src/components/quiz/utils/iframe-css.ts`: Cải thiện CSS cho việc hiển thị văn bản trong các segment của vòng quay
 - Cập nhật `src/components/quiz/utils/iframe-js.ts`: Thêm hàm `positionWheelTexts` để định vị text trong các segment vòng quay
 - Cập nhật `src/components/quiz/generator/customGamePrompt.ts`: Bổ sung hướng dẫn chi tiết hơn cho việc tạo game vòng quay
-
-## 2025-05-01
-- Cập nhật `src/components/quiz/generator/customGamePrompt.ts`: Viết hướng dẫn chi tiết hơn cho việc tạo game vòng quay
-- Cập nhật `src/components/quiz/utils/iframe-css.ts`: Viết lại hoàn toàn CSS cho game vòng quay
-- Cập nhật `src/components/quiz/utils/iframe-js.ts`: Thêm các hàm hỗ trợ mới cho game vòng quay với logic cải tiến

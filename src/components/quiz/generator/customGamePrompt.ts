@@ -56,29 +56,14 @@ REQUIREMENTS:
 - Clean up resources properly
 
 7. WHEEL GAMES SPECIAL RULES:
-- Use SVG for the wheel (not Canvas) for better text handling
-- Create wheel as a group/wrapper element with ID "wheel" or class "wheel"
-- Create wheel segments as separate SVG path elements with unique IDs or classes
-- Position segment text in center of each segment using a consistent pattern:
-  * Each segment text MUST BE a separate SVG text element
-  * Add class "segment-text" to ALL text elements
-  * Set text-anchor="middle" and dominant-baseline="central" attributes
-  * Properly rotate text to be readable (perpendicular to the radius)
-  * Set font-size proportional to wheel size (e.g., radius/10)
-- Add a fixed pointer/indicator element outside the wheel
-- Implement smooth rotation with CSS transitions or JS animations
-- Make a GLOBAL variable called segments that stores all segment values
-- When displaying results, use clear text notifications
-- Store final rotation angle in a variable for accurate result determination
-- Include a function determineResult() that calculates which segment is at the pointer
-- Add a clear visual indicator when a segment is selected
-
-8. COMMON ISSUES TO AVOID:
-- Text displaying incorrectly or unreadable in wheel segments
-- Incorrect calculation of winning segment
-- Wheel pointer misalignment
-- Text not being centered in segments
-- Results showing wrong values
+- Use correct angles for wheel segments (divide 360 degrees by number of segments)
+- Add unique classes for wheel elements (use .wheel, .wheel-segment, .segment-text)
+- Create segments as SVG paths with text elements inside them
+- Position text in the middle of each segment and rotate properly to be readable
+- Store segment angles in data attributes for easier calculations
+- Add a pointer/indicator at a fixed position (e.g., top center)
+- Use proper rotation center with transform-origin: center
+- Determine winning segment based on final angle relative to pointer
 
 CODE MUST BE COMPLETE AND FUNCTIONAL WITH NO EXTERNAL DEPENDENCIES.
 RETURN ONLY THE CODE INSIDE THE SPECIFIED TAGS.
