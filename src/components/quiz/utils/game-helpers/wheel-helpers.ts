@@ -29,6 +29,8 @@ export const wheelHelpers = {
       
       // Update each text position
       segmentTexts.forEach((text, index) => {
+        if (!(text instanceof SVGTextElement)) return;
+        
         const midAngle = index * anglePerSegment + (anglePerSegment / 2);
         
         const x = centerX + Math.cos(midAngle) * (radius * 0.7);

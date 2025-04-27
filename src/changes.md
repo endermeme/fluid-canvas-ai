@@ -35,3 +35,14 @@
 - Tạo mới `src/components/quiz/utils/game-helpers/wheel-helpers.ts`: Chứa các hàm hỗ trợ cho game vòng quay
 - Tạo mới `src/components/quiz/utils/game-helpers/general-helpers.ts`: Chứa các hàm hỗ trợ chung cho tất cả các game
 - Sửa lỗi tính toán kết quả trong game vòng quay và cải thiện hiển thị văn bản
+
+## 2025-05-03
+- Refactored CSS into separate modules for better organization:
+  - Created `src/components/quiz/utils/styles/base-styles.ts`: Base styles for all games
+  - Created `src/components/quiz/utils/styles/wheel-styles.ts`: Wheel game specific styles
+  - Created `src/components/quiz/utils/styles/text-styles.ts`: Common text styles
+  - Created `src/components/quiz/utils/styles/card-styles.ts`: Card game specific styles
+- Fixed TypeScript errors in helpers:
+  - Updated `general-helpers.ts` to properly type check HTML elements
+  - Updated `wheel-helpers.ts` to properly type check SVG elements
+- Simplified main `iframe-css.ts` to use modular style imports

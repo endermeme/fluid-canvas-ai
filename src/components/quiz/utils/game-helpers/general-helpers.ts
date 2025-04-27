@@ -15,7 +15,7 @@ export const gameHelpers = {
                            document.querySelector('#result') ||
                            document.querySelector('[data-result]');
       
-      if (resultDisplay) {
+      if (resultDisplay instanceof HTMLElement) {
         resultDisplay.textContent = resultText;
         resultDisplay.style.animation = 'none';
         setTimeout(() => {
