@@ -56,11 +56,14 @@ REQUIREMENTS:
 - Clean up resources properly
 
 7. WHEEL GAMES SPECIAL RULES:
-- Use correct angles for wheel segments
-- Calculate correct segment positions
-- Add code for determining accurate results based on final angle
-- Use transform-origin: center for all rotating elements
-- Properly position result text relative to wheel  
+- Use correct angles for wheel segments (divide 360 degrees by number of segments)
+- Add unique classes for wheel elements (use .wheel, .wheel-segment, .segment-text)
+- Create segments as SVG paths with text elements inside them
+- Position text in the middle of each segment and rotate properly to be readable
+- Store segment angles in data attributes for easier calculations
+- Add a pointer/indicator at a fixed position (e.g., top center)
+- Use proper rotation center with transform-origin: center
+- Determine winning segment based on final angle relative to pointer
 
 CODE MUST BE COMPLETE AND FUNCTIONAL WITH NO EXTERNAL DEPENDENCIES.
 RETURN ONLY THE CODE INSIDE THE SPECIFIED TAGS.

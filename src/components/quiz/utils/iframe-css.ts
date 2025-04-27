@@ -9,7 +9,6 @@ export const optimizeStyles = (cssContent: string): string => {
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
-      position: relative;
     }
     
     body {
@@ -47,28 +46,57 @@ export const optimizeStyles = (cssContent: string): string => {
     .instruction-text {
       text-align: center;
       font-family: Arial, sans-serif;
-      transform-origin: center;
       line-height: 1.4;
       margin: 0;
       padding: 0;
     }
 
-    /* SVG text alignment */
-    svg text,
-    .svg-text {
+    /* SVG text alignment - cho tất cả các text trong SVG */
+    svg text {
       text-anchor: middle;
-      dominant-baseline: middle;
+      dominant-baseline: central;
       alignment-baseline: middle;
     }
 
-    /* Wheel game specific */
+    /* Wheel game specific styles - được tối ưu hóa đặc biệt */
+    .wheel-container {
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .wheel {
+      transform-origin: center;
+      transition: transform 3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    
+    .wheel-segment text {
+      font-weight: bold;
+      pointer-events: none;
+    }
+    
+    /* Đảm bảo text trong wheel đúng vị trí và hướng */
     .wheel-segment text,
     .wheel-text {
-      transform-origin: center !important;
       text-anchor: middle !important;
       dominant-baseline: central !important;
       alignment-baseline: middle !important;
+    }
+    
+    /* Đảm bảo kết quả hiển thị đúng */
+    .result-display {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 1.5rem;
       font-weight: bold;
+      min-height: 2rem;
+    }
+    
+    /* Sửa lỗi hiển thị text trong các segment */
+    .segment-text {
+      transform-box: fill-box;
+      transform-origin: center;
     }
 
     /* Game elements common styles */

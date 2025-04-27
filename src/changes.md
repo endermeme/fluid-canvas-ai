@@ -20,3 +20,8 @@
 - Cập nhật `src/components/quiz/utils/iframe-css.ts`: Sửa lỗi vị trí hiển thị văn bản trong các game vòng quay
 - Cập nhật `src/components/quiz/utils/iframe-js.ts`: Sửa lỗi logic xác định phần thưởng trong game vòng quay
 - Bổ sung hàm `determineWheelResult` để đảm bảo xác định chính xác phần thưởng trong vòng quay
+
+## 2025-04-30
+- Cập nhật `src/components/quiz/utils/iframe-css.ts`: Cải thiện CSS cho việc hiển thị văn bản trong các segment của vòng quay
+- Cập nhật `src/components/quiz/utils/iframe-js.ts`: Thêm hàm `positionWheelTexts` để định vị text trong các segment vòng quay
+- Cập nhật `src/components/quiz/generator/customGamePrompt.ts`: Bổ sung hướng dẫn chi tiết hơn cho việc tạo game vòng quay
