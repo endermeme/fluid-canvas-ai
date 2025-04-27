@@ -6,6 +6,7 @@ export interface MiniGame {
   html?: string; // HTML component
   css?: string;  // CSS component
   js?: string;   // JavaScript component
+  rawResponse?: string; // API raw response
 }
 
 export interface GameApiResponse {

@@ -15,12 +15,16 @@ export const generateCustomGamePrompt = (options: GamePromptOptions): string => 
     category = 'general'
   } = options;
 
-  // Cải thiện prompt để trả về HTML, CSS và JS rõ ràng hơn
+  // Cải thiện prompt để yêu cầu tách biệt rõ ràng HTML, CSS và JavaScript
   const basePrompt = `
 Tạo một trò chơi HTML tương tác đơn giản theo chủ đề: "${topic}"
 
 **YÊU CẦU PHÂN CHIA MÃ NGUỒN:**
-- Tạo mã HTML cơ bản, CSS riêng biệt và JavaScript riêng biệt
+- Tạo mã HTML, CSS và JavaScript HOÀN TOÀN TÁCH BIỆT (không nhúng lẫn nhau)
+- Sử dụng thẻ phân tách rõ ràng giữa ba phần: 
+  <HTML>...</HTML>
+  <CSS>...</CSS>
+  <JAVASCRIPT>...</JAVASCRIPT>
 - KHÔNG mã hóa, KHÔNG minify - trả về mã nguồn dễ đọc
 - TỐI ƯU HÓA TỐC ĐỘ TẢI (QUAN TRỌNG NHẤT)
 
@@ -41,11 +45,12 @@ Tạo một trò chơi HTML tương tác đơn giản theo chủ đề: "${topic
 - Tránh tạo quá nhiều sự kiện hay listener
 
 **YÊU CẦU ĐẦU RA:**
-- Tạo file HTML hoàn chỉnh với CSS trong thẻ <style> và JS trong thẻ <script>
-- BẮT BUỘC trả về định dạng đầy đủ: <!DOCTYPE html><html>...</html>
+- Trả về ba phần riêng biệt: HTML, CSS và JavaScript
+- HTML KHÔNG được chứa thẻ <style> hoặc <script>
+- CSS và JavaScript PHẢI nằm trong thẻ phân tách riêng biệt
 - KHÔNG sử dụng thư viện hoặc tài nguyên bên ngoài
-- Luôn thêm meta viewport cho thiết bị di động
-- Tiêu đề <title> và <h1> phù hợp với chủ đề
+- Đảm bảo mã HTML có meta viewport cho thiết bị di động
+- Tiêu đề phải phù hợp với chủ đề
 
 **CẤU TRÚC GAME:**
 - Tiêu đề rõ ràng và hướng dẫn ngắn gọn

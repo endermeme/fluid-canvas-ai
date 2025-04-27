@@ -47,38 +47,109 @@ export class AIGameGenerator {
   }
 }
 
-// Hàm phân tích và tách mã HTML thành các thành phần riêng biệt
-const extractComponents = (htmlContent: string) => {
-  const htmlDoc = document.createElement('div');
-  htmlDoc.innerHTML = htmlContent;
+// Hàm phân tích và tách mã nguồn từ phản hồi API
+const extractComponentsFromResponse = (text: string): { html: string; css: string; js: string; rawResponse: string } => {
+  console.log("%c🌐 API RAW RESPONSE:", "background: #222; color: #bada55; padding: 5px; border-radius: 3px;");
+  console.log(text);
   
-  // Tách CSS
-  let cssContent = '';
-  const styleElements = htmlDoc.querySelectorAll('style');
-  styleElements.forEach(style => {
-    cssContent += style.innerHTML;
-    style.remove();
-  });
+  // Lưu response thô
+  const rawResponse = text;
   
-  // Tách JavaScript
-  let jsContent = '';
-  const scriptElements = htmlDoc.querySelectorAll('script');
-  scriptElements.forEach(script => {
-    jsContent += script.innerHTML;
-    script.remove();
-  });
+  // Tìm các thẻ phân tách đặc biệt trong phản hồi
+  let html = '', css = '', js = '';
   
-  // Phần HTML còn lại
-  const htmlPart = htmlDoc.innerHTML;
+  // Tìm HTML
+  const htmlMatch = text.match(/<HTML>([\s\S]*?)<\/HTML>/i);
+  if (htmlMatch && htmlMatch[1]) {
+    html = htmlMatch[1].trim();
+  } else {
+    // Thử tìm mã HTML trong phản hồi markdown
+    const docTypeMatch = text.match(/<!DOCTYPE[\s\S]*?<\/html>/i);
+    if (docTypeMatch) {
+      // Nếu có DOCTYPE, lấy toàn bộ HTML
+      html = docTypeMatch[0];
+      
+      // Trích xuất CSS và JS từ mã HTML
+      const styleMatch = html.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+      if (styleMatch) {
+        css = styleMatch[1].trim();
+        html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/i, '');
+      }
+      
+      const scriptMatch = html.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+      if (scriptMatch) {
+        js = scriptMatch[1].trim();
+        html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/i, '');
+      }
+    } else {
+      // Nếu không có thẻ, lấy toàn bộ text làm HTML
+      html = text;
+    }
+  }
   
-  return {
-    html: htmlPart,
-    css: cssContent,
-    js: jsContent
-  };
+  // Tìm CSS
+  const cssMatch = text.match(/<CSS>([\s\S]*?)<\/CSS>/i);
+  if (cssMatch && cssMatch[1]) {
+    css = cssMatch[1].trim();
+  } else if (!css) {
+    // Nếu chưa tìm được CSS từ tách HTML
+    const styleMatch = text.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+    if (styleMatch) {
+      css = styleMatch[1].trim();
+    }
+  }
+  
+  // Tìm JavaScript
+  const jsMatch = text.match(/<JAVASCRIPT>([\s\S]*?)<\/JAVASCRIPT>/i);
+  if (jsMatch && jsMatch[1]) {
+    js = jsMatch[1].trim();
+  } else if (!js) {
+    // Nếu chưa tìm được JS từ tách HTML
+    const scriptMatch = text.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+    if (scriptMatch) {
+      js = scriptMatch[1].trim();
+    }
+  }
+  
+  // In ra console để kiểm tra
+  console.log("%c🧩 SEPARATED COMPONENTS:", "background: #222; color: #bada55; padding: 5px; border-radius: 3px;");
+  console.log("%c📄 HTML:", "color: #e44d26; font-weight: bold;");
+  console.log(html);
+  console.log("%c🎨 CSS:", "color: #264de4; font-weight: bold;");
+  console.log(css);
+  console.log("%c⚙️ JavaScript:", "color: #f0db4f; font-weight: bold;");
+  console.log(js);
+  
+  return { html, css, js, rawResponse };
 };
 
-// Đơn giản hóa hàm tạo game, tập trung vào việc lấy mã HTML nguyên bản từ API
+// Tạo HTML đầy đủ từ các thành phần
+const createFullHtml = (html: string, css: string, js: string, title: string = 'Interactive Game'): string => {
+  // Loại bỏ DOCTYPE và thẻ html nếu có
+  let htmlContent = html.replace(/<!DOCTYPE[^>]*>|<html[^>]*>|<\/html>/gi, '');
+  htmlContent = htmlContent.replace(/<head>[\s\S]*?<\/head>/i, '');
+  htmlContent = htmlContent.replace(/<body[^>]*>|<\/body>/gi, '');
+  
+  return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>${title}</title>
+    <style>
+${css}
+    </style>
+</head>
+<body>
+${htmlContent}
+    <script>
+${js}
+    </script>
+</body>
+</html>`;
+};
+
+// Hàm tạo game với Gemini, đã được cải tiến để tách biệt rõ ràng HTML/CSS/JS
 export const generateWithGemini = async (
   topic: string, 
   settings?: GameSettingsData
@@ -89,7 +160,7 @@ export const generateWithGemini = async (
   console.log(`%c🎮 Bắt đầu tạo game: "${topic}" %c(${useCanvas ? 'sử dụng Canvas' : 'không sử dụng Canvas'})`,
     'font-weight: bold; color: #4C75F2;', 'font-weight: normal; color: #718096;');
 
-  // Tạo prompt đơn giản hơn
+  // Tạo prompt cải tiến
   const promptOptions = {
     topic,
     useCanvas,
@@ -141,20 +212,26 @@ export const generateWithGemini = async (
     const duration = measureExecutionTime(startTime);
     console.log(`%c✅ Nhận phản hồi sau ${duration.seconds}s`, 'color: #10B981; font-weight: bold;');
     
-    // Lấy nội dung HTML từ phản hồi API
-    let content = extractHTMLFromResponse(text);
-    let title = extractGameTitleFromContent(content, topic);
+    // Tách các thành phần HTML, CSS, JS
+    const { html, css, js, rawResponse } = extractComponentsFromResponse(text);
     
-    // Tách các thành phần
-    const components = extractComponents(content);
+    // Lấy tiêu đề từ nội dung HTML
+    const titleMatch = html.match(/<title>(.*?)<\/title>/i) || 
+                      html.match(/<h1[^>]*>(.*?)<\/h1>/i);
+    const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : topic;
     
+    // Tạo nội dung HTML đầy đủ
+    const fullContent = createFullHtml(html, css, js, title);
+    
+    // Tạo đối tượng game
     const game: MiniGame = {
       title: title,
-      content: content,
-      html: components.html,
-      css: components.css,
-      js: components.js,
-      useCanvas: useCanvas
+      content: fullContent,
+      html: html,
+      css: css,
+      js: js,
+      useCanvas: useCanvas,
+      rawResponse: rawResponse
     };
     
     console.log('%c🎯 Game đã được tạo thành công', 'color: #10B981; font-weight: bold;');
@@ -164,68 +241,6 @@ export const generateWithGemini = async (
     console.error('🔴 Lỗi khi tạo game với Gemini:', error);
     throw error;
   }
-};
-
-// Hàm đơn giản để trích xuất mã HTML từ phản hồi API
-const extractHTMLFromResponse = (text: string): string => {
-  // Loại bỏ các dấu markdown nếu có
-  let content = text.trim();
-  
-  // Loại bỏ backticks và nhãn html nếu có
-  content = content.replace(/```html|```/g, '').trim();
-  
-  // Tìm mã HTML trong phản hồi nếu chưa đúng định dạng
-  if (!content.startsWith('<!DOCTYPE') && !content.startsWith('<html')) {
-    const htmlMatch = text.match(/<!DOCTYPE[\s\S]*<\/html>/i) || 
-                     text.match(/<html[\s\S]*<\/html>/i);
-    
-    if (htmlMatch && htmlMatch[0]) {
-      content = htmlMatch[0];
-    } else {
-      // Bao bọc nội dung trong thẻ HTML nếu cần
-      content = `<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Game: ${text.substring(0, 30)}...</title>
-    <style>
-      * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-      body { font-family: system-ui, sans-serif; }
-    </style>
-</head>
-<body>
-    ${content}
-    <script>
-      // Cải thiện hiệu suất touch trên thiết bị di động
-      document.addEventListener('touchstart', function() {}, {passive: true});
-    </script>
-</body>
-</html>`;
-    }
-  }
-  
-  // Thêm meta viewport nếu chưa có
-  if (!content.includes('<meta name="viewport"')) {
-    content = content.replace('</head>', 
-    '<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">\n</head>');
-  }
-  
-  return content;
-};
-
-// Hàm đơn giản để trích xuất tiêu đề từ nội dung HTML
-const extractGameTitleFromContent = (content: string, defaultTopic: string): string => {
-  let title = defaultTopic;
-  
-  const titleMatch = content.match(/<title>(.*?)<\/title>/i) || 
-                    content.match(/<h1[^>]*>(.*?)<\/h1>/i);
-  
-  if (titleMatch && titleMatch[1]) {
-    title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
-  }
-  
-  return title;
 };
 
 // Hàm thử lại khi gặp lỗi

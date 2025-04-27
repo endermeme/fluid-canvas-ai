@@ -159,7 +159,8 @@ const GameController: React.FC<GameControllerProps> = ({
               content: currentGame.content || "",
               html: currentGame.html,
               css: currentGame.css,
-              js: currentGame.js
+              js: currentGame.js,
+              rawResponse: currentGame.rawResponse
             }} 
             onBack={handleBack}
             onNewGame={handleNewGame}
