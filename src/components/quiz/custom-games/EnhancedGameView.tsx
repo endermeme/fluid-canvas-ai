@@ -203,7 +203,10 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           // Gắn console.log từ iframe ra ngoài để debug
           try {
             if (iframe.contentWindow) {
-              const contentWindow = iframe.contentWindow;
+              // Sử dụng type assertion để TypeScript biết window có console
+              const contentWindow = iframe.contentWindow as Window & {
+                console: Console;
+              };
               
               // Gán hàm console.log mới cho cửa sổ iframe
               contentWindow.console.log = function(...args: any[]) {

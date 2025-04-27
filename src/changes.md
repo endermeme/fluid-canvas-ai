@@ -1,6 +1,11 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 27/04/2025 - Sửa lỗi TypeScript về đối tượng console trong iframe
+- Sửa lỗi TypeScript trong EnhancedGameView.tsx về việc truy cập thuộc tính console từ contentWindow
+- Đã thêm type assertion `as Window & { console: Console }` để định nghĩa rõ kiểu dữ liệu
+- Giải quyết lỗi TS2339: Property 'console' does not exist on type 'Window'
+
 ## 27/04/2025 - Sửa lỗi gắn console trong iframe
 - Sửa lỗi TypeScript trong EnhancedGameView.tsx liên quan đến việc gắn console.log và console.error
 - Thay thế toán tử optional chaining `?.` bằng kiểm tra điều kiện trước khi gán
