@@ -10,10 +10,12 @@ export const getFakeIpAddress = () => {
 // Thêm hàm để kiểm tra anti-cheat
 export const verifyParticipant = async (gameId: string, ipAddress: string): Promise<boolean> => {
   try {
+    console.log(`Verifying participant for game ${gameId}, IP: ${maskIpAddress(ipAddress)}`);
+    
     // Kiểm tra số lần tham gia trong một khoảng thời gian ngắn
     const { data: recentAttempts, error: checkError } = await supabase
       .from('game_participants')
-      .select('timestamp')
+      .select('timestamp, retry_count')
       .eq('game_id', gameId)
       .eq('ip_address', ipAddress)
       .order('timestamp', { ascending: false })
@@ -25,17 +27,36 @@ export const verifyParticipant = async (gameId: string, ipAddress: string): Prom
     }
     
     // Nếu có quá nhiều lần tham gia trong thời gian ngắn (1 phút)
-    if (recentAttempts && recentAttempts.length > 5) {
+    if (recentAttempts && recentAttempts.length > 3) {
       const now = Date.now();
       const oneMinuteAgo = now - 60 * 1000;
+      const fiveMinutesAgo = now - 5 * 60 * 1000;
       
-      const recentCount = recentAttempts.filter(attempt => {
+      const recentMinuteCount = recentAttempts.filter(attempt => {
         const timestamp = new Date(attempt.timestamp).getTime();
         return timestamp > oneMinuteAgo;
       }).length;
       
-      if (recentCount > 5) {
-        console.warn(`Possible abuse detected: ${recentCount} attempts in the last minute from IP ${ipAddress}`);
+      const recentFiveMinutesCount = recentAttempts.filter(attempt => {
+        const timestamp = new Date(attempt.timestamp).getTime();
+        return timestamp > fiveMinutesAgo;
+      }).length;
+      
+      // Kiểm tra các mức độ lạm dụng khác nhau
+      if (recentMinuteCount > 5) {
+        console.warn(`Possible abuse detected: ${recentMinuteCount} attempts in the last minute from IP ${maskIpAddress(ipAddress)}`);
+        return false;
+      }
+      
+      if (recentFiveMinutesCount > 15) {
+        console.warn(`Possible abuse detected: ${recentFiveMinutesCount} attempts in the last 5 minutes from IP ${maskIpAddress(ipAddress)}`);
+        return false;
+      }
+      
+      // Kiểm tra nếu retry_count cao bất thường
+      const highRetryCount = recentAttempts.some(attempt => attempt.retry_count > 20);
+      if (highRetryCount) {
+        console.warn(`Suspicious activity: very high retry count from IP ${maskIpAddress(ipAddress)}`);
         return false;
       }
     }
@@ -54,13 +75,16 @@ export const addParticipant = async (gameId: string, name: string, ipAddress: st
   participant: GameParticipant | null;
 }> => {
   try {
+    console.log(`Adding participant ${name} to game ${gameId}`);
+    
     // Kiểm tra anti-cheat
     const isAllowed = await verifyParticipant(gameId, ipAddress);
     
     if (!isAllowed) {
+      console.warn(`Request blocked by anti-cheat for IP: ${maskIpAddress(ipAddress)}`);
       return { 
         success: false, 
-        message: "Quá nhiều yêu cầu trong thời gian ngắn. Vui lòng thử lại sau.", 
+        message: "Quá nhiều yêu cầu trong thời gian ngắn. Vui lòng thử lại sau một lúc.", 
         participant: null 
       };
     }
@@ -68,21 +92,65 @@ export const addParticipant = async (gameId: string, name: string, ipAddress: st
     // Check if this IP has already participated recently
     const { data: existingParticipants, error: checkError } = await supabase
       .from('game_participants')
-      .select('retry_count')
+      .select('id, retry_count, name')
       .eq('game_id', gameId)
       .eq('ip_address', ipAddress)
       .order('timestamp', { ascending: false })
       .limit(1);
+    
+    console.log("Existing participants check:", existingParticipants);
 
-    const retryCount = existingParticipants?.[0]?.retry_count || 0;
+    // Nếu người chơi đã tồn tại, cập nhật thông tin thay vì tạo mới
+    if (existingParticipants && existingParticipants.length > 0) {
+      const existingParticipant = existingParticipants[0];
+      const retryCount = existingParticipant?.retry_count || 0;
+      
+      // Cập nhật dữ liệu
+      const { data: updatedParticipant, error: updateError } = await supabase
+        .from('game_participants')
+        .update({
+          name: name, // Cập nhật tên
+          retry_count: retryCount + 1, // Tăng retry_count
+          timestamp: new Date().toISOString() // Cập nhật timestamp
+        })
+        .eq('id', existingParticipant.id)
+        .select()
+        .single();
 
+      if (updateError) {
+        console.error("Error updating participant:", updateError);
+        return { 
+          success: false, 
+          message: "Không thể cập nhật thông tin người tham gia",
+          participant: null
+        };
+      }
+
+      // Format data
+      const formattedParticipant: GameParticipant = {
+        id: updatedParticipant.id,
+        game_id: updatedParticipant.game_id,
+        name: updatedParticipant.name,
+        timestamp: updatedParticipant.timestamp,
+        ipAddress: updatedParticipant.ip_address,
+        retryCount: updatedParticipant.retry_count
+      };
+
+      return { 
+        success: true, 
+        message: "Thông tin đã được cập nhật", 
+        participant: formattedParticipant
+      };
+    }
+    
+    // Tạo người tham gia mới nếu chưa tồn tại
     const { data: participant, error } = await supabase
       .from('game_participants')
       .insert({
         game_id: gameId,
         name,
         ip_address: ipAddress,
-        retry_count: retryCount + 1
+        retry_count: 0 // Bắt đầu với 0 vì là lần đầu tham gia
       })
       .select()
       .single();

@@ -5,9 +5,10 @@ import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Button } from '@/components/ui/button';
 
 interface EnhancedGameViewProps {
   miniGame: {
@@ -42,15 +43,22 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const [isIframeLoaded, setIsIframeLoaded] = useState<boolean>(false);
   const [isSharing, setIsSharing] = useState<boolean>(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingFailed, setLoadingFailed] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (iframeRef.current && miniGame?.content) {
       try {
+        // Reset states when loading new content
+        setIsIframeLoaded(false);
+        setLoadingProgress(0);
+        setLoadingFailed(false);
+        
         const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
         iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
         
+        // Simulate loading progress
         let progress = 0;
         const interval = setInterval(() => {
           progress += Math.random() * 20;
@@ -61,16 +69,40 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           setLoadingProgress(progress);
         }, 100);
         
-        iframeRef.current.onload = () => {
+        // Set up load and error handlers for iframe
+        const iframe = iframeRef.current;
+        
+        iframe.onload = () => {
           clearInterval(interval);
           setLoadingProgress(100);
           setTimeout(() => {
             setIsIframeLoaded(true);
           }, 200);
         };
+        
+        iframe.onerror = () => {
+          clearInterval(interval);
+          setLoadingFailed(true);
+          setIframeError("Không thể tải game. Vui lòng thử lại sau.");
+        };
+        
+        // Set a timeout to detect loading failures
+        const timeout = setTimeout(() => {
+          if (!isIframeLoaded && loadingProgress < 100) {
+            setLoadingFailed(true);
+            setIframeError("Game không thể tải trong thời gian cho phép. Hãy thử làm mới lại.");
+            clearInterval(interval);
+          }
+        }, 15000); // 15 seconds timeout
+        
+        return () => {
+          clearInterval(interval);
+          clearTimeout(timeout);
+        };
       } catch (error) {
         console.error("Error setting iframe content:", error);
         setIframeError("Không thể tải nội dung game. Vui lòng thử lại.");
+        setLoadingFailed(true);
       }
     }
   }, [miniGame]);
@@ -78,6 +110,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   useEffect(() => {
     if (gameExpired) {
       setIframeError("Game này đã hết hạn hoặc không còn khả dụng.");
+      setLoadingFailed(true);
     }
   }, [gameExpired]);
 
@@ -86,9 +119,16 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       try {
         setIsIframeLoaded(false);
         setLoadingProgress(0);
+        setLoadingFailed(false);
+        
         const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
         iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
+        
+        toast({
+          title: "Đang làm mới game",
+          description: "Game đang được tải lại...",
+        });
         
         if (onReload) {
           onReload();
@@ -96,6 +136,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       } catch (error) {
         console.error("Error refreshing game:", error);
         setIframeError("Không thể tải lại game. Vui lòng thử lại.");
+        setLoadingFailed(true);
       }
     }
   };
@@ -108,6 +149,11 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     if (!document.fullscreenElement) {
       iframe.requestFullscreen().catch(err => {
         console.error("Không thể vào chế độ toàn màn hình:", err);
+        toast({
+          title: "Lỗi hiển thị",
+          description: "Không thể vào chế độ toàn màn hình. Thiết bị của bạn có thể không hỗ trợ tính năng này.",
+          variant: "destructive"
+        });
       });
     } else {
       document.exitFullscreen();
@@ -166,7 +212,15 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
             <Alert variant="destructive" className="max-w-md">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Lỗi tải game</AlertTitle>
-              <AlertDescription>{iframeError}</AlertDescription>
+              <AlertDescription className="mb-4">{iframeError}</AlertDescription>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2" 
+                onClick={refreshGame}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" /> Thử lại
+              </Button>
             </Alert>
           </div>
         ) : (
@@ -176,8 +230,24 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
                 <div className="w-full max-w-xs space-y-4">
                   <Progress value={loadingProgress} className="w-full" />
                   <p className="text-center text-sm text-muted-foreground">
-                    Đang tải game... {Math.round(loadingProgress)}%
+                    {loadingFailed ? (
+                      <span className="text-destructive">Đã xảy ra lỗi khi tải game</span>
+                    ) : (
+                      <>Đang tải game... {Math.round(loadingProgress)}%</>
+                    )}
                   </p>
+                  
+                  {loadingFailed && (
+                    <div className="flex justify-center">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={refreshGame}
+                      >
+                        <RefreshCw className="h-4 w-4 mr-2" /> Thử lại
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
