@@ -1,4 +1,5 @@
 
+
 # Lịch sử thay đổi
 
 - Thêm form nhập tên và tuổi trước khi tham gia game
@@ -10,3 +11,5 @@
 - Sửa lỗi iframe trắng bằng cách cải thiện trình xử lý nội dung và thêm phát hiện khi game đã tải xong
 - Sửa lỗi cú pháp trong iframe-utils.ts (các lỗi dấu phẩy và cú pháp)
 - Cải thiện hàm shake() trong iframe-utils.ts thông qua việc thay thế template string bằng chuỗi thông thường
+- Thêm xử lý thời gian chờ và cơ chế kiểm tra nội dung iframe để giải quyết vấn đề màn hình trắng
+

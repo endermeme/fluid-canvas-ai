@@ -1,4 +1,5 @@
 
+
 export const enhanceIframeContent = (content: string, title?: string): string => {
   // Tách phần head, body và style, script nếu có
   let head = '';
@@ -69,9 +70,29 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
           if (window.parent && window.parent !== window) {
             window.parent.postMessage({ type: 'GAME_LOADED', success: true }, '*');
           }
+          
+          // Thông báo thêm một lần nữa sau một khoảng thời gian (phòng trường hợp lần đầu bị lỡ)
+          setTimeout(function() {
+            if (window.parent && window.parent !== window) {
+              window.parent.postMessage({ type: 'GAME_LOADED', success: true }, '*');
+            }
+          }, 500);
         } catch (err) {
           console.error('Error notifying parent:', err);
         }
+      });
+
+      // Backup notification khi DOM loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          if (window.parent && window.parent !== window) {
+            try {
+              window.parent.postMessage({ type: 'GAME_LOADED', success: true, source: 'DOMContentLoaded' }, '*');
+            } catch (err) {
+              console.error('Error sending DOMContentLoaded message:', err);
+            }
+          }
+        }, 200);
       });
       
       // Xử lý sự kiện touch tốt hơn
@@ -261,6 +282,15 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
         z-index: 9999;
         font-family: monospace;
       }
+
+      /* Ensure all the content is rendered properly */
+      html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff;
+      }
     </style>
   `;
 
@@ -292,6 +322,21 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
         styleTag.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
         document.head.appendChild(styleTag);
       }
+
+      // Thêm một class vào body để ghi nhận rằng game đang hoạt động
+      document.body.classList.add('game-loaded');
+
+      // Thêm một lớp bảo vệ để đảm bảo script thực sự chạy và nội dung được hiển thị
+      setTimeout(function() {
+        try {
+          if (document.body.innerText === '' || document.body.childElementCount <= 1) {
+            // Có thể nội dung không load được
+            document.body.innerHTML = '<div style="text-align:center;padding:20px;"><h3>Không thể tải nội dung game</h3><p>Vui lòng thử làm mới trang</p><button onclick="window.location.reload()" style="padding:10px 20px;background:#4a90e2;color:white;border:none;border-radius:4px;cursor:pointer;">Tải lại</button></div>';
+          }
+        } catch(e) {
+          console.error('Error checking content:', e);
+        }
+      }, 2000);
     </script>
   `;
 
@@ -355,3 +400,4 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
 
   return enhancedHTML;
 };
+
