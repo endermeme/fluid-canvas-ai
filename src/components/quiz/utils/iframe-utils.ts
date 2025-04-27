@@ -169,7 +169,7 @@ export const enhanceIframeContent = (content: string, title?: string): string =>
           
           if (progress < duration) {
             const x = Math.sin(progress / 10) * intensity;
-            element.style.transform = originalTransform + ` translateX(${x}px)`;
+            element.style.transform = originalTransform + ' translateX(' + x + 'px)';
             requestAnimationFrame(step);
           } else {
             // Restore original styles
