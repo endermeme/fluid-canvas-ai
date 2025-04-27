@@ -1,4 +1,3 @@
-
 /**
  * Xử lý phần CSS của game trong iframe
  */
@@ -31,35 +30,117 @@ export const optimizeStyles = (cssContent: string): string => {
       max-width: 800px;
       position: relative;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
-    button, [role="button"] {
+    /* Cải thiện hiển thị văn bản cho tất cả các game */
+    .game-text,
+    .text-element,
+    text,
+    .question-text,
+    .answer-text,
+    .card-text,
+    .instruction-text {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      transform-origin: center;
+      line-height: 1.4;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* SVG text alignment */
+    svg text,
+    .svg-text {
+      text-anchor: middle;
+      dominant-baseline: middle;
+      alignment-baseline: middle;
+    }
+
+    /* Game elements common styles */
+    .game-element {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    /* Interactive elements */
+    button, 
+    [role="button"],
+    .clickable {
       min-width: 44px;
       min-height: 44px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      user-select: none;
+      -webkit-user-select: none;
     }
-    
-    /* Cải thiện hiển thị văn bản trong các phần tử quay */
-    text, .text-element {
-      text-anchor: middle;
-      dominant-baseline: middle;
-      font-family: Arial, sans-serif;
-      font-weight: bold;
-      transform-origin: center;
-      transform-box: fill-box;
+
+    /* Game cards common styles */
+    .card {
+      perspective: 1000px;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
     }
-    
-    /* Đảm bảo văn bản không bị lệch trong SVG */
-    svg text {
-      alignment-baseline: middle;
-      text-anchor: middle;
+
+    .card-front,
+    .card-back {
+      backface-visibility: hidden;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
     }
-    
-    /* Điều chỉnh vị trí văn bản trong các phần tử quay */
-    .wheel-text, .segment-text {
-      transform-origin: center;
-      alignment-baseline: middle;
-      text-anchor: middle;
+
+    /* Responsive grid layouts */
+    .game-grid {
+      display: grid;
+      gap: 1rem;
+      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* Ensure proper text wrapping */
+    .word-wrap {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+    }
+
+    /* Animations */
+    .animated {
+      animation-duration: 0.3s;
+      animation-fill-mode: both;
+    }
+
+    @media (max-width: 768px) {
+      .game-text,
+      .text-element {
+        font-size: 0.9em;
+      }
+      
+      .game-grid {
+        gap: 0.5rem;
+        padding: 0.5rem;
+      }
     }
   `;
   

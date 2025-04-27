@@ -25,18 +25,22 @@ REQUIREMENTS:
 - Keep code simple and well-commented
 - Must work in an iframe sandbox
 
-3. TEXT RENDERING RULES:
-- When displaying text in SVG elements, use proper text anchoring:
-  * Always set text-anchor: middle for centered text
-  * Always use dominant-baseline: middle or alignment-baseline: middle
-  * Position text elements correctly using x,y coordinates  
-- For circular/wheel games with text, use proper transform-origin: center
+3. TEXT RENDERING AND LAYOUT RULES:
+- All text elements must use standard CSS text alignment
+- For SVG or canvas text:
+  * Use text-anchor: middle for centered text
+  * Use dominant-baseline: middle for vertical alignment
+  * Set proper transform-origin for rotating elements
+- Ensure text is properly wrapped and responsive
+- Use flexbox or grid for layouts when possible
+- Maintain consistent spacing and alignment
 
 4. RESPONSIVE DESIGN:
 - Use responsive units (vh, vw, %, rem)
 - Support both portrait and landscape
 - Min touch target size: 44px
 - Prevent unwanted scrolling/zooming
+- Adapt text size for different screen sizes
 
 5. GAME MECHANICS:
 - Clear objectives and win conditions
@@ -55,3 +59,4 @@ CODE MUST BE COMPLETE AND FUNCTIONAL WITH NO EXTERNAL DEPENDENCIES.
 RETURN ONLY THE CODE INSIDE THE SPECIFIED TAGS.
 `;
 };
+
