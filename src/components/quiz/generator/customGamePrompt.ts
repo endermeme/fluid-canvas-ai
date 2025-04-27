@@ -24,6 +24,8 @@ Create a simple, ready-to-play HTML game about: "${topic}"
 - Must work flawlessly on both mobile and desktop devices (cross-device compatibility)
 - Keep the UI clean, intuitive and visually appealing
 - Focus on core gameplay mechanics only
+- OPTIMIZE FOR FAST LOADING (critical)
+- Keep code size minimal and efficient
 - Language: ${language === 'vi' ? 'Vietnamese' : 'English'}
 - Difficulty: ${difficulty}
 - Category: ${category}
@@ -47,6 +49,13 @@ Create a simple, ready-to-play HTML game about: "${topic}"
 - Implement fluid layouts that adapt to both portrait and landscape orientations
 - Auto-detect device capabilities and adjust UI accordingly
 - Test layouts for both small mobile screens and large desktop displays
+
+**PERFORMANCE OPTIMIZATION:**
+- Minimize DOM elements and optimize rendering
+- Use requestAnimationFrame for animations instead of setInterval
+- Reduce complexity of game logic where possible
+- Keep asset sizes minimal (small images, no large resources)
+- Avoid memory leaks and cleanup resources properly
 
 **GAME CODE FORMAT:**
 - Return complete HTML file with all CSS/JS included

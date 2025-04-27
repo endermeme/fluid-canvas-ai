@@ -5,7 +5,7 @@ import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, RotateCcw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from '@/components/ui/button';
@@ -44,60 +44,85 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const [isSharing, setIsSharing] = useState<boolean>(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingFailed, setLoadingFailed] = useState(false);
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
   const { toast } = useToast();
+  const timerRef = useRef<number | null>(null);
+  const loadingIntervalRef = useRef<number | null>(null);
+  
+  // Функция для очистки таймеров
+  const clearTimers = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (loadingIntervalRef.current) {
+      clearInterval(loadingIntervalRef.current);
+      loadingIntervalRef.current = null;
+    }
+  };
 
   useEffect(() => {
     if (iframeRef.current && miniGame?.content) {
       try {
-        // Reset states when loading new content
+        // Сбросить состояния при загрузке нового контента
         setIsIframeLoaded(false);
         setLoadingProgress(0);
         setLoadingFailed(false);
-        
-        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
-        iframeRef.current.srcdoc = enhancedContent;
+        setLoadingTimedOut(false);
         setIframeError(null);
         
-        // Simulate loading progress
+        clearTimers();
+        
+        // Optimized content enhancement
+        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
+        iframeRef.current.srcdoc = enhancedContent;
+        
+        // Имитировать индикатор выполнения загрузки
         let progress = 0;
-        const interval = setInterval(() => {
-          progress += Math.random() * 20;
+        loadingIntervalRef.current = window.setInterval(() => {
+          progress += Math.random() * 10 + 5;  // Faster progression
           if (progress > 90) {
-            clearInterval(interval);
+            clearInterval(loadingIntervalRef.current!);
             progress = 90;
           }
           setLoadingProgress(progress);
-        }, 100);
+        }, 150); // Shorter interval for faster perception of loading
         
-        // Set up load and error handlers for iframe
+        // Установить обработчики load и error для iframe
         const iframe = iframeRef.current;
         
         iframe.onload = () => {
-          clearInterval(interval);
+          clearInterval(loadingIntervalRef.current!);
           setLoadingProgress(100);
           setTimeout(() => {
             setIsIframeLoaded(true);
           }, 200);
+          
+          // Clear the timeout since loading succeeded
+          if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
+          }
         };
         
         iframe.onerror = () => {
-          clearInterval(interval);
+          clearInterval(loadingIntervalRef.current!);
           setLoadingFailed(true);
           setIframeError("Không thể tải game. Vui lòng thử lại sau.");
         };
         
-        // Set a timeout to detect loading failures
-        const timeout = setTimeout(() => {
+        // Set a timeout to detect loading failures - shorter timeout (10 seconds)
+        timerRef.current = window.setTimeout(() => {
           if (!isIframeLoaded && loadingProgress < 100) {
             setLoadingFailed(true);
+            setLoadingTimedOut(true);
             setIframeError("Game không thể tải trong thời gian cho phép. Hãy thử làm mới lại.");
-            clearInterval(interval);
+            clearInterval(loadingIntervalRef.current!);
           }
-        }, 15000); // 15 seconds timeout
+        }, 10000);
         
         return () => {
-          clearInterval(interval);
-          clearTimeout(timeout);
+          clearTimers();
         };
       } catch (error) {
         console.error("Error setting iframe content:", error);
@@ -112,6 +137,10 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       setIframeError("Game này đã hết hạn hoặc không còn khả dụng.");
       setLoadingFailed(true);
     }
+    
+    return () => {
+      clearTimers();
+    };
   }, [gameExpired]);
 
   const refreshGame = () => {
@@ -120,8 +149,16 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         setIsIframeLoaded(false);
         setLoadingProgress(0);
         setLoadingFailed(false);
+        setLoadingTimedOut(false);
         
-        const enhancedContent = enhanceIframeContent(miniGame.content, miniGame.title);
+        clearTimers();
+        
+        // Thêm timestamp để tránh cache
+        const enhancedContent = enhanceIframeContent(
+          miniGame.content, 
+          miniGame.title, 
+          { timestamp: Date.now() }
+        );
         iframeRef.current.srcdoc = enhancedContent;
         setIframeError(null);
         
@@ -212,15 +249,37 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
             <Alert variant="destructive" className="max-w-md">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Lỗi tải game</AlertTitle>
-              <AlertDescription className="mb-4">{iframeError}</AlertDescription>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-2" 
-                onClick={refreshGame}
-              >
-                <RefreshCw className="h-4 w-4 mr-2" /> Thử lại
-              </Button>
+              <AlertDescription className="mb-4">
+                {iframeError}
+                {loadingTimedOut && (
+                  <div className="mt-2 text-sm">
+                    <p>Nguyên nhân có thể do:</p>
+                    <ul className="list-disc pl-5 mt-1 space-y-1">
+                      <li>Game quá phức tạp không thể tải kịp thời gian</li>
+                      <li>Kết nối mạng không ổn định</li>
+                      <li>Thiết bị của bạn không đủ mạnh</li>
+                    </ul>
+                  </div>
+                )}
+              </AlertDescription>
+              <div className="flex gap-2 mt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={refreshGame}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" /> Thử lại
+                </Button>
+                {loadingTimedOut && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onNewGame}
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" /> Tạo game mới
+                  </Button>
+                )}
+              </div>
             </Alert>
           </div>
         ) : (

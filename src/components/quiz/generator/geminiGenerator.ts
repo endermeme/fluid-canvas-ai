@@ -124,6 +124,9 @@ export const generateWithGemini = async (
     let content = extractGameCodeFromResponse(text);
     let title = extractGameTitle(content, topic);
     
+    // Kiểm tra xem mã game có hợp lệ không và tối ưu hóa
+    content = optimizeGameCode(content);
+    
     const game: MiniGame = {
       title: title,
       content: content,
@@ -142,9 +145,12 @@ export const generateWithGemini = async (
 // Hàm trích xuất mã HTML game từ phản hồi API
 const extractGameCodeFromResponse = (text: string): string => {
   // Loại bỏ các dấu markdown nếu có
-  let content = text.replace(/```html|```/g, '').trim();
+  let content = text;
   
-  // Xử lý trường hợp không có thẻ DOCTYPE hoặc <html> ở đầu
+  // Xóa backticks và text "html" nếu có
+  content = content.replace(/```html|```/g, '').trim();
+  
+  // Kiểm tra nếu nội dung không bắt đầu với <!DOCTYPE hoặc <html
   if (!content.trim().startsWith('<!DOCTYPE') && !content.trim().startsWith('<html')) {
     // Tìm mã HTML trong phản hồi
     const htmlMatch = text.match(/<!DOCTYPE[\s\S]*<\/html>/i) || 
@@ -152,10 +158,48 @@ const extractGameCodeFromResponse = (text: string): string => {
     
     if (htmlMatch && htmlMatch[0]) {
       content = htmlMatch[0];
+    } else {
+      // Nếu không tìm thấy mã HTML hoàn chỉnh, thử thêm thẻ DOCTYPE và HTML
+      content = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>${text.substring(0, 30)}...</title>
+</head>
+<body>
+    ${content}
+</body>
+</html>`;
     }
   }
   
   return content;
+};
+
+// Hàm tối ưu hóa mã game để tải nhanh hơn
+const optimizeGameCode = (content: string): string => {
+  try {
+    // Thêm meta viewport nếu chưa có để đảm bảo responsive
+    if (!content.includes('<meta name="viewport"')) {
+      content = content.replace('</head>', 
+      '<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">\n</head>');
+    }
+    
+    // Thêm các thuộc tính touch-action để cải thiện trải nghiệm trên thiết bị cảm ứng
+    if (!content.includes('touch-action')) {
+      content = content.replace('<style>', '<style>\n* { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }\n');
+    }
+    
+    // Thêm code preload để đảm bảo game tải nhanh
+    content = content.replace('</head>', 
+    '<script>\nwindow.addEventListener("load", function() { document.body.classList.add("loaded"); });\n</script>\n</head>');
+    
+    return content;
+  } catch (error) {
+    console.error("Error optimizing game code:", error);
+    return content;  // Return original content if optimization fails
+  }
 };
 
 // Trích xuất tiêu đề game từ nội dung HTML
@@ -191,7 +235,8 @@ export const tryGeminiGeneration = async (
   } catch (error) {
     logError(SOURCE, `Attempt ${retryCount + 1} failed`, error);
     
-    const waitTime = (retryCount + 1) * 1500;
+    // Tăng thời gian chờ giữa các lần thử lại
+    const waitTime = (retryCount + 1) * 2000;
     await new Promise(resolve => setTimeout(resolve, waitTime));
     
     return tryGeminiGeneration(null, topic, settings, retryCount + 1);
