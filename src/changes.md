@@ -1,4 +1,5 @@
 
+
 # Lịch sử thay đổi mã nguồn
 
 ## 27/04/2025 - Sửa lỗi TypeScript về đối tượng console trong iframe
@@ -31,3 +32,4 @@
 
 ## 25/04/2024 - Cập nhật cấu hình Vite để cho phép tất cả host
 - Đã thêm các tên miền vào `allowedHosts` trong `vite.config.ts`: aurabusiness.tech, aurabusiness.tech:8080
+
