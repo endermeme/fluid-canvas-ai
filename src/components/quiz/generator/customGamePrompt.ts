@@ -25,20 +25,27 @@ REQUIREMENTS:
 - Keep code simple and well-commented
 - Must work in an iframe sandbox
 
-3. RESPONSIVE DESIGN:
+3. TEXT RENDERING RULES:
+- When displaying text in SVG elements, use proper text anchoring:
+  * Always set text-anchor: middle for centered text
+  * Always use dominant-baseline: middle or alignment-baseline: middle
+  * Position text elements correctly using x,y coordinates  
+- For circular/wheel games with text, use proper transform-origin: center
+
+4. RESPONSIVE DESIGN:
 - Use responsive units (vh, vw, %, rem)
 - Support both portrait and landscape
 - Min touch target size: 44px
 - Prevent unwanted scrolling/zooming
 
-4. GAME MECHANICS:
+5. GAME MECHANICS:
 - Clear objectives and win conditions
 - Simple, intuitive controls
 - Visual feedback for actions
 - Score tracking if applicable
 - Restart functionality
 
-5. PERFORMANCE:
+6. PERFORMANCE:
 - Minimal DOM operations
 - Use requestAnimationFrame for animations
 - Optimize event listeners

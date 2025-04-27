@@ -1,5 +1,4 @@
 
-
 # Các thay đổi
 
 ## 2025-04-27
@@ -13,3 +12,6 @@
 - Cập nhật `src/components/quiz/components/GameContainer.tsx`: Sửa lỗi kiểu dữ liệu CustomGameResponse
 - Cập nhật `src/components/quiz/custom-games/GameController.tsx`: Thêm logs cho debug và sửa lỗi gửi yêu cầu
 
+## 2025-04-28
+- Cập nhật `src/components/quiz/utils/iframe-css.ts`: Tối ưu hóa CSS cho hiển thị văn bản trong game
+- Cập nhật `src/components/quiz/generator/customGamePrompt.ts`: Cải thiện hướng dẫn tạo game hiển thị văn bản đúng

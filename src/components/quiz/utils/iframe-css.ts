@@ -9,6 +9,7 @@ export const optimizeStyles = (cssContent: string): string => {
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
+      position: relative;
     }
     
     body {
@@ -36,6 +37,29 @@ export const optimizeStyles = (cssContent: string): string => {
       min-width: 44px;
       min-height: 44px;
       cursor: pointer;
+    }
+    
+    /* Cải thiện hiển thị văn bản trong các phần tử quay */
+    text, .text-element {
+      text-anchor: middle;
+      dominant-baseline: middle;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+    
+    /* Đảm bảo văn bản không bị lệch trong SVG */
+    svg text {
+      alignment-baseline: middle;
+      text-anchor: middle;
+    }
+    
+    /* Điều chỉnh vị trí văn bản trong các phần tử quay */
+    .wheel-text, .segment-text {
+      transform-origin: center;
+      alignment-baseline: middle;
+      text-anchor: middle;
     }
   `;
   
