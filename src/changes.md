@@ -1,4 +1,3 @@
-
 # Các thay đổi
 
 ## 2025-04-27
@@ -30,3 +29,9 @@
 - Cập nhật `src/components/quiz/generator/customGamePrompt.ts`: Viết hướng dẫn chi tiết hơn cho việc tạo game vòng quay
 - Cập nhật `src/components/quiz/utils/iframe-css.ts`: Viết lại hoàn toàn CSS cho game vòng quay
 - Cập nhật `src/components/quiz/utils/iframe-js.ts`: Thêm các hàm hỗ trợ mới cho game vòng quay với logic cải tiến
+
+## 2025-05-02
+- Tái cấu trúc `src/components/quiz/utils/iframe-js.ts`: Tách thành các file nhỏ hơn để dễ quản lý
+- Tạo mới `src/components/quiz/utils/game-helpers/wheel-helpers.ts`: Chứa các hàm hỗ trợ cho game vòng quay
+- Tạo mới `src/components/quiz/utils/game-helpers/general-helpers.ts`: Chứa các hàm hỗ trợ chung cho tất cả các game
+- Sửa lỗi tính toán kết quả trong game vòng quay và cải thiện hiển thị văn bản
