@@ -136,12 +136,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
           backgroundColor: 'white',
           display: loading ? 'none' : 'block',
           opacity: loading ? 0 : 1,
-          transition: 'opacity 0.3s ease-in-out',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0
+          transition: 'opacity 0.3s ease-in-out'
         }}
       />
     </div>
