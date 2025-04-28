@@ -1,5 +1,6 @@
 
 
+
 # Lịch sử thay đổi
 
 - Thêm form nhập tên và tuổi trước khi tham gia game
@@ -18,4 +19,5 @@
 - Thêm các chức năng thiếu trong gameParticipation.ts: getGameSession, exportParticipantsToCSV, maskIpAddress, getAllGameSessions
 - Thêm interface GameSession vào types.ts để hỗ trợ các chức năng quản lý phiên game và người chơi
 - Sửa lỗi TypeScript trong gameParticipation.ts: xoá định nghĩa trùng lặp GameParticipant và thêm thuộc tính score
+- Sửa lỗi TypeScript trong gameParticipation.ts: thêm kiểm tra thuộc tính score trong dữ liệu từ Supabase
 

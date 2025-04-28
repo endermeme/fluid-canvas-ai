@@ -1,7 +1,6 @@
-
 // Tệp mới để quản lý người tham gia game
 import { supabase } from '@/integrations/supabase/client';
-import { GameParticipant, GameSession, StoredGame } from './types';
+import { GameParticipant, GameSession, StoredGame, SupabaseGameParticipant } from './types';
 import { getSharedGame as getGameFromExport } from './gameExport';
 
 // Ẩn địa chỉ IP (chỉ hiện 2 octet đầu tiên)
@@ -19,6 +18,19 @@ export const getFakeIpAddress = (): string => {
     segments.push(Math.floor(Math.random() * 256));
   }
   return segments.join('.');
+};
+
+// Chuyển đối tượng từ Supabase sang định dạng GameParticipant
+const mapSupabaseParticipant = (participant: SupabaseGameParticipant): GameParticipant => {
+  return {
+    id: participant.id,
+    name: participant.name,
+    ipAddress: participant.ip_address,
+    timestamp: participant.timestamp,
+    gameId: participant.game_id,
+    retryCount: participant.retry_count || 0,
+    score: participant.score || 0
+  };
 };
 
 // Thêm người tham gia mới vào game
@@ -76,15 +88,7 @@ export const addParticipant = async (
 
       return {
         success: true,
-        participant: {
-          id: updatedParticipant.id,
-          name: updatedParticipant.name,
-          ipAddress: updatedParticipant.ip_address,
-          timestamp: updatedParticipant.timestamp,
-          gameId: updatedParticipant.game_id,
-          retryCount: updatedParticipant.retry_count,
-          score: updatedParticipant.score || 0
-        }
+        participant: mapSupabaseParticipant(updatedParticipant as SupabaseGameParticipant)
       };
     }
 
@@ -122,29 +126,15 @@ export const addParticipant = async (
           sessions[sessionIndex].participants = [];
         }
         
-        sessions[sessionIndex].participants.push({
-          id: newParticipant.id,
-          name: newParticipant.name,
-          ipAddress: newParticipant.ip_address,
-          timestamp: newParticipant.timestamp,
-          gameId: newParticipant.game_id,
-          retryCount: newParticipant.retry_count,
-          score: newParticipant.score || 0
-        });
+        sessions[sessionIndex].participants.push(
+          mapSupabaseParticipant(newParticipant as SupabaseGameParticipant)
+        );
       } else {
         // Game chưa có trong sessions, thêm mới
         sessions.push({
           id: gameId,
           participants: [
-            {
-              id: newParticipant.id,
-              name: newParticipant.name,
-              ipAddress: newParticipant.ip_address,
-              timestamp: newParticipant.timestamp,
-              gameId: newParticipant.game_id,
-              retryCount: newParticipant.retry_count,
-              score: newParticipant.score || 0
-            }
+            mapSupabaseParticipant(newParticipant as SupabaseGameParticipant)
           ]
         });
       }
@@ -157,15 +147,7 @@ export const addParticipant = async (
 
     return {
       success: true,
-      participant: {
-        id: newParticipant.id,
-        name: newParticipant.name,
-        ipAddress: newParticipant.ip_address,
-        timestamp: newParticipant.timestamp,
-        gameId: newParticipant.game_id,
-        retryCount: newParticipant.retry_count,
-        score: newParticipant.score || 0
-      }
+      participant: mapSupabaseParticipant(newParticipant as SupabaseGameParticipant)
     };
   } catch (error) {
     console.error("Unhandled error in addParticipant:", error);
@@ -224,15 +206,7 @@ export const getGameParticipants = async (
       return [];
     }
     
-    return data.map(p => ({
-      id: p.id,
-      name: p.name,
-      ipAddress: p.ip_address,
-      timestamp: p.timestamp,
-      gameId: p.game_id,
-      retryCount: p.retry_count || 0,
-      score: p.score || 0
-    }));
+    return data.map(p => mapSupabaseParticipant(p as SupabaseGameParticipant));
   } catch (error) {
     console.error("Error in getGameParticipants:", error);
     return [];
