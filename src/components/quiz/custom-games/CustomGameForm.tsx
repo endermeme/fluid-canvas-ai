@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -90,59 +91,65 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
   }
 
   return (
-    <div className="p-4 max-w-4xl mx-auto w-full">
-      <Card className="bg-background/70 backdrop-blur-sm border-primary/20 shadow-lg p-6">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold flex items-center gap-2 text-primary">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Code className="h-6 w-6 text-primary" />
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 bg-gradient-to-b from-background to-background/80">
+      <Card className="max-w-4xl w-full bg-background/80 backdrop-blur-xl border-primary/20 shadow-2xl rounded-2xl overflow-hidden">
+        <div className="p-8">
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 rounded-xl bg-primary/10 backdrop-blur-sm">
+                <Code className="h-7 w-7 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  Tạo trò chơi tùy chỉnh với AI
+                </h2>
+                <p className="text-muted-foreground mt-1">
+                  Mô tả chi tiết game bạn muốn tạo và AI sẽ xây dựng nó cho bạn
+                </p>
+              </div>
             </div>
-            Tạo trò chơi tùy chỉnh với AI
-          </h2>
-          <p className="text-muted-foreground">Mô tả chi tiết game bạn muốn tạo và AI sẽ xây dựng nó cho bạn</p>
-        </div>
-        
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="content" className="flex items-center gap-2 text-base">
-              <SparklesIcon className="h-4 w-4 text-primary" /> 
-              Mô tả game của bạn
-            </Label>
-            <Textarea
-              id="content"
-              placeholder={getPlaceholderText()}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={6}
-              className="mt-2 font-mono text-sm border-primary/20 focus-visible:ring-primary/30 w-full"
-            />
           </div>
           
-          <div className="flex flex-col gap-4 mt-2">
-            <div className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg">
-              <Info className="w-4 h-4 text-primary mt-1" />
+          <div className="space-y-6">
+            <div>
+              <Label htmlFor="content" className="flex items-center gap-2 text-lg font-medium mb-3">
+                <SparklesIcon className="h-5 w-5 text-primary" /> 
+                Mô tả game của bạn
+              </Label>
+              <Textarea
+                id="content"
+                placeholder={getPlaceholderText()}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={8}
+                className="font-mono text-sm border-2 border-primary/20 bg-white/30 backdrop-blur-sm focus-visible:ring-primary/30 focus-visible:border-primary/40 rounded-xl transition-all duration-200 resize-none shadow-inner"
+              />
+            </div>
+            
+            <div className="flex items-start gap-3 p-4 bg-primary/5 rounded-xl border border-primary/10">
+              <Info className="w-5 h-5 text-primary mt-0.5" />
               <p className="text-sm text-muted-foreground">
                 AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Game sẽ sử dụng HTML5 Canvas cho hiệu ứng đồ họa tốt hơn.
               </p>
             </div>
-          </div>
-          
-          <div className="flex justify-between pt-4">
-            <Button 
-              variant="outline" 
-              onClick={handleCancel}
-              className="border-primary/20 hover:border-primary/30 hover:bg-primary/5"
-            >
-              Hủy
-            </Button>
-            <Button 
-              onClick={handleSubmit}
-              disabled={isGenerating || !content.trim()}
-              className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90"
-            >
-              <SparklesIcon className="h-4 w-4 mr-2" />
-              Tạo với AI
-            </Button>
+            
+            <div className="flex justify-between gap-4 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={handleCancel}
+                className="min-w-[120px] border-2 border-primary/20 hover:border-primary/30 hover:bg-primary/5 rounded-xl transition-all duration-200"
+              >
+                Hủy
+              </Button>
+              <Button 
+                onClick={handleSubmit}
+                disabled={isGenerating || !content.trim()}
+                className="min-w-[200px] bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 rounded-xl shadow-lg shadow-primary/20 transition-all duration-200"
+              >
+                <SparklesIcon className="h-5 w-5 mr-2" />
+                Tạo với AI
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
