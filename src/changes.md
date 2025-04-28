@@ -1,8 +1,6 @@
-
-
-
 # Lịch sử thay đổi
 
+- Ẩn tiêu đề game trên header
 - Thêm form nhập tên và tuổi trước khi tham gia game
 - Cải thiện thông báo khi game hết hạn
 - Ẩn nút giáo viên cho người chơi thường
@@ -20,4 +18,3 @@
 - Thêm interface GameSession vào types.ts để hỗ trợ các chức năng quản lý phiên game và người chơi
 - Sửa lỗi TypeScript trong gameParticipation.ts: xoá định nghĩa trùng lặp GameParticipant và thêm thuộc tính score
 - Sửa lỗi TypeScript trong gameParticipation.ts: thêm kiểm tra thuộc tính score trong dữ liệu từ Supabase
-

@@ -37,7 +37,7 @@ interface QuizContainerProps {
 
 const QuizContainer: React.FC<QuizContainerProps> = ({
   children,
-  title = "Minigame Tương Tác",
+  title = "", // Changed default title to empty string
   showBackButton = true,
   showHomeButton = false,
   showRefreshButton = false,
