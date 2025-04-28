@@ -54,7 +54,6 @@ const GameSettings = ({
   }, [initialSettings]);
 
   useEffect(() => {
-    // Update prompt in settings when topic changes
     if (topic && topic !== settings.prompt) {
       setSettings(prev => ({ ...prev, prompt: topic }));
     }
@@ -162,9 +161,9 @@ const GameSettings = ({
   return (
     <div 
       ref={containerRef} 
-      className={`${inDrawer || inModal ? '' : 'h-full w-full'} flex flex-col items-center justify-center py-4 ${inModal ? 'px-1' : 'px-4'}`}
+      className={`${inDrawer || inModal ? '' : 'min-h-[calc(100vh-4rem)]'} flex flex-col items-center justify-center py-4 ${inModal ? 'px-1' : 'px-4'}`}
     >
-      <Card className="w-full max-w-md bg-background/60 backdrop-blur-sm border-primary/20 p-6 shadow-lg">
+      <Card className="w-full max-w-md bg-background/60 backdrop-blur-sm border-primary/20 p-6 shadow-lg mx-auto">
         <div className="flex flex-col items-center mb-6 relative">
           <div className="absolute inset-0 blur-2xl bg-primary/10 rounded-full opacity-70"></div>
           <div className="z-10 flex flex-col items-center">
@@ -178,7 +177,6 @@ const GameSettings = ({
         </div>
 
         <div className="space-y-6">
-          {/* Prompt Input - Replace Category */}
           <div className="space-y-3">
             <Label htmlFor="prompt" className="flex items-center gap-2 text-base font-medium">
               <Type className="h-4 w-4 text-primary" /> Nội dung trò chơi
