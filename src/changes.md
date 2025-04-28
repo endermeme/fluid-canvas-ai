@@ -1,5 +1,7 @@
+
 # Lịch sử thay đổi
 
+- Ẩn tiêu đề game trên header và xoá phản hồi tại header game tùy chỉnh
 - Ẩn tiêu đề game trên header
 - Thêm form nhập tên và tuổi trước khi tham gia game
 - Cải thiện thông báo khi game hết hạn

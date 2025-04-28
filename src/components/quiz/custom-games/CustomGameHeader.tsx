@@ -29,7 +29,6 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
   showGameControls = false,
   isSharing = false,
   isTeacher = false,
-  gameType = "Trò chơi"
 }) => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
@@ -93,13 +92,6 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-medium">{gameType}</h1>
-            <Badge variant="secondary" className="font-normal">
-              Beta
-            </Badge>
-          </div>
         </div>
 
         <div className="flex items-center gap-2">
