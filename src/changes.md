@@ -1,4 +1,5 @@
 
+
 # Lịch sử thay đổi
 
 - Thêm form nhập tên và tuổi trước khi tham gia game
@@ -16,3 +17,5 @@
 - Cải thiện chức năng chia sẻ game để giảm hiện tượng flash màn hình và sửa lỗi không tìm thấy game trong link chia sẻ
 - Thêm các chức năng thiếu trong gameParticipation.ts: getGameSession, exportParticipantsToCSV, maskIpAddress, getAllGameSessions
 - Thêm interface GameSession vào types.ts để hỗ trợ các chức năng quản lý phiên game và người chơi
+- Sửa lỗi TypeScript trong gameParticipation.ts: xoá định nghĩa trùng lặp GameParticipant và thêm thuộc tính score
+

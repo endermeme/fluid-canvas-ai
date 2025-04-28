@@ -4,21 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { GameParticipant, GameSession, StoredGame } from './types';
 import { getSharedGame as getGameFromExport } from './gameExport';
 
-export interface GameParticipant {
-  id: string;
-  name: string;
-  ipAddress?: string;
-  timestamp: number | string;
-  gameId: string;
-  retryCount: number;
-}
-
-export interface ParticipantResponse {
-  success: boolean;
-  message?: string;
-  participant?: GameParticipant;
-}
-
 // Ẩn địa chỉ IP (chỉ hiện 2 octet đầu tiên)
 export const maskIpAddress = (ip?: string): string => {
   if (!ip) return 'Không có';
@@ -41,7 +26,7 @@ export const addParticipant = async (
   gameId: string,
   name: string,
   ipAddress: string
-): Promise<ParticipantResponse> => {
+): Promise<{ success: boolean; message?: string; participant?: GameParticipant }> => {
   if (!gameId || !name) {
     return {
       success: false,
@@ -98,7 +83,7 @@ export const addParticipant = async (
           timestamp: updatedParticipant.timestamp,
           gameId: updatedParticipant.game_id,
           retryCount: updatedParticipant.retry_count,
-          score: updatedParticipant.score
+          score: updatedParticipant.score || 0
         }
       };
     }
@@ -143,7 +128,8 @@ export const addParticipant = async (
           ipAddress: newParticipant.ip_address,
           timestamp: newParticipant.timestamp,
           gameId: newParticipant.game_id,
-          retryCount: newParticipant.retry_count
+          retryCount: newParticipant.retry_count,
+          score: newParticipant.score || 0
         });
       } else {
         // Game chưa có trong sessions, thêm mới
@@ -156,7 +142,8 @@ export const addParticipant = async (
               ipAddress: newParticipant.ip_address,
               timestamp: newParticipant.timestamp,
               gameId: newParticipant.game_id,
-              retryCount: newParticipant.retry_count
+              retryCount: newParticipant.retry_count,
+              score: newParticipant.score || 0
             }
           ]
         });
@@ -176,7 +163,8 @@ export const addParticipant = async (
         ipAddress: newParticipant.ip_address,
         timestamp: newParticipant.timestamp,
         gameId: newParticipant.game_id,
-        retryCount: newParticipant.retry_count
+        retryCount: newParticipant.retry_count,
+        score: newParticipant.score || 0
       }
     };
   } catch (error) {
