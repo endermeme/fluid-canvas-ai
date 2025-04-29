@@ -26,3 +26,4 @@
 - Thêm CSS animation helpers để đảm bảo animation hoạt động trên tất cả các trình duyệt
 - Sửa lỗi TypeScript trong EnhancedGameView.tsx: thêm import useEffect và cập nhật cách sử dụng ref trong GameIframe
 - Sửa lỗi TypeScript trong GameIframe.tsx: thêm import useRef
+- Nâng cấp GameIframe.tsx để cải thiện cách tải nội dung game: thêm xử lý lỗi tốt hơn, tăng thời gian timeout, xử lý tình huống iframe không tải được nội dung

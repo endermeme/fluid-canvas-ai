@@ -1,4 +1,5 @@
-import React, { useEffect, useState, forwardRef, useRef } from 'react';
+
+import React, { useEffect, useState, useRef } from 'react';
 import { Card } from "@/components/ui/card";
 import { enhanceIframeContent } from '../../utils/iframe-utils';
 
@@ -22,6 +23,8 @@ const GameIframe: React.FC<GameIframeProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const loadAttemptsRef = useRef(0);
   const maxRetryAttempts = 3;
+  const timeoutRef = useRef<number | null>(null);
+  const messageListenerRef = useRef<(event: MessageEvent) => void | null>(null);
 
   const loadIframeContent = async () => {
     if (!iframeRef.current || !content) return;
@@ -34,15 +37,27 @@ const GameIframe: React.FC<GameIframeProps> = ({
         iframeRef.current.srcdoc = enhancedContent;
       }
 
+      // Xóa các event listener cũ nếu có
+      if (messageListenerRef.current) {
+        window.removeEventListener('message', messageListenerRef.current);
+      }
+
       // Thiết lập message listener để xử lý thông báo từ iframe
       const messageHandler = (event: MessageEvent) => {
         if (event.data && event.data.type === 'GAME_LOADED') {
           console.log('GameIframe: Nhận được thông báo game đã tải xong');
           setIsLoading(false);
           if (onLoad) onLoad();
+          
+          // Xóa timeout nếu đã nhận được thông báo thành công
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+          }
         }
       };
 
+      messageListenerRef.current = messageHandler;
       window.addEventListener('message', messageHandler);
       
       // Sự kiện onload của iframe
@@ -62,26 +77,52 @@ const GameIframe: React.FC<GameIframeProps> = ({
               if (loadAttemptsRef.current < maxRetryAttempts) {
                 loadAttemptsRef.current += 1;
                 console.log(`GameIframe: Thử tải lại lần ${loadAttemptsRef.current}/${maxRetryAttempts}`);
-                setTimeout(loadIframeContent, 500);
+                setTimeout(loadIframeContent, 800);
                 return;
               } else if (onError) {
                 onError("Không thể tải nội dung game sau nhiều lần thử");
+              }
+            } else {
+              // Kiểm tra nếu body chỉ chứa thông báo lỗi
+              const bodyText = iframeDoc.body.textContent || '';
+              if (bodyText.includes('Error:') || bodyText.includes('Lỗi:')) {
+                console.error('GameIframe: Phát hiện thông báo lỗi trong iframe:', bodyText);
+                if (onError) {
+                  onError("Phát hiện lỗi trong nội dung game");
+                }
+                return;
+              }
+              
+              // Thử thêm một script vào iframe để thông báo đã load
+              try {
+                const script = iframeDoc.createElement('script');
+                script.textContent = `
+                  try {
+                    if (window.parent && window.parent !== window) {
+                      window.parent.postMessage({ type: 'GAME_LOADED', success: true, source: 'injected' }, '*');
+                    }
+                  } catch(e) { console.error('Error sending message:', e); }
+                `;
+                iframeDoc.body.appendChild(script);
+              } catch (scriptError) {
+                console.warn('GameIframe: Không thể inject script:', scriptError);
               }
             }
           } catch (e) {
             console.error("GameIframe: Lỗi khi kiểm tra nội dung iframe:", e);
           }
           
-          // Nếu sau 800ms vẫn không nhận được thông báo GAME_LOADED, cũng coi như đã tải xong
-          setTimeout(() => {
+          // Nếu sau 1000ms vẫn không nhận được thông báo GAME_LOADED, cũng coi như đã tải xong
+          timeoutRef.current = window.setTimeout(() => {
             setIsLoading(false);
             if (onLoad) onLoad();
-          }, 800);
+            timeoutRef.current = null;
+          }, 1000) as unknown as number;
         };
       }
 
       // Backup timeout để đảm bảo trạng thái luôn được cập nhật
-      const backupTimeout = setTimeout(() => {
+      timeoutRef.current = window.setTimeout(() => {
         if (isLoading) {
           console.log('GameIframe: Timeout - Đánh dấu game đã tải xong');
           setIsLoading(false);
@@ -99,7 +140,7 @@ const GameIframe: React.FC<GameIframeProps> = ({
               if (loadAttemptsRef.current < maxRetryAttempts) {
                 loadAttemptsRef.current += 1;
                 console.log(`GameIframe: Thử tải lại sau timeout lần ${loadAttemptsRef.current}/${maxRetryAttempts}`);
-                setTimeout(loadIframeContent, 500);
+                setTimeout(loadIframeContent, 800);
               } else if (onError) {
                 onError("Không thể tải nội dung game sau nhiều lần thử");
               }
@@ -108,12 +149,8 @@ const GameIframe: React.FC<GameIframeProps> = ({
             console.error("GameIframe: Lỗi khi kiểm tra nội dung iframe sau timeout:", e);
           }
         }
-      }, 3000);
-      
-      return () => {
-        window.removeEventListener('message', messageHandler);
-        clearTimeout(backupTimeout);
-      };
+        timeoutRef.current = null;
+      }, 4000) as unknown as number;
     } catch (error) {
       console.error("GameIframe: Lỗi khi thiết lập nội dung iframe:", error);
       if (onError) {
@@ -126,6 +163,16 @@ const GameIframe: React.FC<GameIframeProps> = ({
     loadAttemptsRef.current = 0;
     setIsLoading(true);
     loadIframeContent();
+    
+    // Cleanup function
+    return () => {
+      if (messageListenerRef.current) {
+        window.removeEventListener('message', messageListenerRef.current);
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, [content, title]);
 
   return (
