@@ -1,6 +1,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { enhanceIframeContent } from '../utils/iframe-utils';
+import { enhanceAnimations } from '../utils/enhanceAnimation';
 import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
@@ -13,6 +14,7 @@ interface EnhancedGameViewProps {
   miniGame: {
     title?: string;
     content: string;
+    animation?: boolean;
   };
   onReload?: () => void;
   className?: string;
@@ -53,8 +55,15 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
 
     try {
       console.log("Đang cố gắng tải nội dung game...");
-      const enhancedContent = await enhanceIframeContent(miniGame.content, miniGame.title);
+      let enhancedContent = await enhanceIframeContent(miniGame.content, miniGame.title);
+      
+      // Thêm hỗ trợ animation nếu cần
+      if (miniGame.animation !== false) {
+        enhancedContent = enhanceAnimations(enhancedContent);
+      }
+
       if (iframeRef.current) {
+        // Sử dụng srcdoc để hỗ trợ tốt hơn cho các animations
         iframeRef.current.srcdoc = enhancedContent;
       }
       setIframeError(null);
@@ -266,7 +275,8 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
             <iframe
               ref={iframeRef}
               className="w-full h-full"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-presentation"
+              allowFullScreen
               title={miniGame.title || "Game tương tác"}
               style={{
                 border: 'none',

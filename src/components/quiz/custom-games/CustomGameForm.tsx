@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -43,12 +44,13 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     setIsGenerating(true);
     
     try {
-      // Luôn sử dụng canvas mode
+      // Luôn sử dụng canvas mode và đặt animation flag
       gameGenerator.setCanvasMode(true);
       
-      // Minimal settings
+      // Minimal settings với animation=true
       const settings: GameSettingsData = {
-        category: 'custom'
+        category: 'custom',
+        animation: true // Đảm bảo animation được bật
       };
       
       const game = await gameGenerator.generateMiniGame(content, settings);
@@ -58,6 +60,11 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
           title: "Đã tạo trò chơi",
           description: `Trò chơi đã được tạo thành công.`,
         });
+        
+        // Gắn cờ animation vào dữ liệu game nếu chưa có
+        if (typeof game.animation === 'undefined') {
+          game.animation = true;
+        }
         
         onGenerate(content, game);
       } else {
@@ -96,7 +103,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
           <div className="mb-8 text-center">
             <div className="flex flex-col items-center gap-4 mb-6">
               <div className="p-3.5 rounded-2xl bg-primary/10 backdrop-blur-sm border border-primary/10 shadow-sm">
-                <Code className="h-8 w-8 text-primary" />
+                <Code className="h-8 w-8 text-primary animate-float" />
               </div>
               <div>
                 <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent">
@@ -112,7 +119,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
           <div className="space-y-8">
             <div className="relative">
               <Label htmlFor="content" className="flex items-center justify-center gap-2.5 text-lg font-medium mb-4">
-                <SparklesIcon className="h-5 w-5 text-primary" /> 
+                <SparklesIcon className="h-5 w-5 text-primary animate-pulse-soft" /> 
                 Mô tả game của bạn
               </Label>
               <Textarea
@@ -127,9 +134,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
             </div>
             
             <div className="flex items-start gap-3.5 p-5 bg-primary/5 rounded-2xl border border-primary/15 backdrop-blur-sm">
-              <Info className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <Info className="w-5 h-5 text-primary mt-0.5 flex-shrink-0 animate-bounce-subtle" />
               <p className="text-sm text-muted-foreground">
-                AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Game sẽ sử dụng HTML5 Canvas cho hiệu ứng đồ họa tốt hơn.
+                AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Game sẽ sử dụng HTML5 Canvas cho hiệu ứng đồ họa tốt hơn và hỗ trợ đầy đủ animation.
               </p>
             </div>
             
@@ -144,9 +151,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
               <Button 
                 onClick={handleSubmit}
                 disabled={isGenerating || !content.trim()}
-                className="min-w-[220px] bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 rounded-xl shadow-lg shadow-primary/20 transition-all duration-300 font-medium"
+                className="min-w-[220px] bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 rounded-xl shadow-lg shadow-primary/20 transition-all duration-300 font-medium animate-breathe"
               >
-                <SparklesIcon className="h-5 w-5 mr-2.5" />
+                <SparklesIcon className="h-5 w-5 mr-2.5 animate-pulse-soft" />
                 Tạo với AI
               </Button>
             </div>
