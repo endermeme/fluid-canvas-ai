@@ -1,4 +1,3 @@
-
 import { processImageSource } from '@/utils/media-utils';
 
 export const enhanceIframeContent = async (content: string, title?: string): Promise<string> => {
@@ -228,108 +227,6 @@ export const enhanceIframeContent = async (content: string, title?: string): Pro
     </script>
   `;
 
-  // Thêm CSS Animation Helper
-  const animationHelpers = `
-    <style id="animation-helpers">
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-      
-      @keyframes fadeOut {
-        from { opacity: 1; }
-        to { opacity: 0; }
-      }
-      
-      @keyframes slideInUp {
-        from {
-          transform: translate3d(0, 100%, 0);
-          visibility: visible;
-        }
-        to {
-          transform: translate3d(0, 0, 0);
-        }
-      }
-      
-      @keyframes slideInDown {
-        from {
-          transform: translate3d(0, -100%, 0);
-          visibility: visible;
-        }
-        to {
-          transform: translate3d(0, 0, 0);
-        }
-      }
-      
-      @keyframes pulse {
-        from {
-          transform: scale3d(1, 1, 1);
-        }
-        50% {
-          transform: scale3d(1.05, 1.05, 1.05);
-        }
-        to {
-          transform: scale3d(1, 1, 1);
-        }
-      }
-      
-      @keyframes bounce {
-        from, 20%, 53%, 80%, to {
-          animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
-          transform: translate3d(0, 0, 0);
-        }
-        40%, 43% {
-          animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
-          transform: translate3d(0, -30px, 0);
-        }
-        70% {
-          animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
-          transform: translate3d(0, -15px, 0);
-        }
-        90% {
-          transform: translate3d(0, -4px, 0);
-        }
-      }
-      
-      @keyframes spin {
-        from {
-          transform: rotate(0deg);
-        }
-        to {
-          transform: rotate(360deg);
-        }
-      }
-      
-      .animate-fade-in {
-        animation: fadeIn 0.5s ease-in forwards;
-      }
-      
-      .animate-fade-out {
-        animation: fadeOut 0.5s ease-out forwards;
-      }
-      
-      .animate-slide-up {
-        animation: slideInUp 0.5s ease-out forwards;
-      }
-      
-      .animate-slide-down {
-        animation: slideInDown 0.5s ease-out forwards;
-      }
-      
-      .animate-pulse {
-        animation: pulse 1s infinite;
-      }
-      
-      .animate-bounce {
-        animation: bounce 1s infinite;
-      }
-      
-      .animate-spin {
-        animation: spin 1s linear infinite;
-      }
-    </style>
-  `;
-
   const touchStyles = `
     <style>
       /* Base styles */
@@ -466,70 +363,6 @@ export const enhanceIframeContent = async (content: string, title?: string): Pro
     </script>
   `;
 
-  // Script khôi phục animation nếu WebAnimations API không khả dụng
-  const animationPolyfillScript = `
-    <script>
-      // Polyfill cho Web Animations API trên trình duyệt cũ
-      if (!Element.prototype.animate) {
-        console.warn('Web Animations API không khả dụng, sử dụng polyfill đơn giản');
-        Element.prototype.animate = function(keyframes, options) {
-          const element = this;
-          const duration = options.duration || 1000;
-          
-          // Tạo animation sử dụng CSS transitions
-          const start = performance.now();
-          const applyKeyframe = (keyframeIndex) => {
-            const keyframe = keyframes[keyframeIndex];
-            for (const prop in keyframe) {
-              if (prop !== 'offset') {
-                element.style[prop] = keyframe[prop];
-              }
-            }
-          };
-          
-          // Bắt đầu với keyframe đầu tiên
-          applyKeyframe(0);
-          
-          // Kết thúc với keyframe cuối cùng sau thời gian duration
-          setTimeout(() => {
-            applyKeyframe(keyframes.length - 1);
-            
-            // Gọi onfinish nếu được cung cấp
-            if (options.onfinish) {
-              options.onfinish();
-            }
-          }, duration);
-          
-          // Trả về một đối tượng animation giả
-          return {
-            cancel: function() {
-              // Không làm gì, chỉ để tương thích API
-            },
-            finished: new Promise((resolve) => {
-              setTimeout(resolve, duration);
-            })
-          };
-        };
-      }
-
-      // Thêm hỗ trợ CSS animation cho các phần tử cụ thể
-      function applyAnimationToElements() {
-        // Animate các phần tử có data-animation attribute
-        document.querySelectorAll('[data-animation]').forEach(element => {
-          const animationType = element.getAttribute('data-animation');
-          const animationDelay = element.getAttribute('data-animation-delay') || '0';
-          const animationDuration = element.getAttribute('data-animation-duration') || '0.5s';
-          
-          element.style.animation = \`\${animationType} \${animationDuration} both\`;
-          element.style.animationDelay = animationDelay;
-        });
-      }
-      
-      // Chạy sau khi DOM đã load
-      document.addEventListener('DOMContentLoaded', applyAnimationToElements);
-    </script>
-  `;
-
   // Tạo viewport meta nếu chưa có
   const viewportMeta = '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
   if (!head.includes('viewport')) {
@@ -573,8 +406,8 @@ export const enhanceIframeContent = async (content: string, title?: string): Pro
   `;
 
   // Thêm các script và style vào head và body
-  head = touchStyles + animationHelpers + head;
-  body = loadingIndicator + body + errorHandlingScript + deviceDetectionScript + iframeHelperScript + animationPolyfillScript + debugTools;
+  head = touchStyles + head;
+  body = loadingIndicator + body + errorHandlingScript + deviceDetectionScript + iframeHelperScript + debugTools;
 
   // Tái tạo HTML đầy đủ
   const enhancedHTML = `<!DOCTYPE html>

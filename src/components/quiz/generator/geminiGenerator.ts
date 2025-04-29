@@ -1,4 +1,3 @@
-
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
@@ -68,7 +67,7 @@ export const generateWithGemini = async (
   const prompt = createGameGenerationPrompt({
     topic,
     useCanvas,
-    language: settings?.language || 'vi', // Thay đổi mặc định sang tiếng Việt
+    language: settings?.language || 'en',
     difficulty: settings?.difficulty || 'medium',
     category: settings?.category || 'general'
   });
@@ -118,21 +117,19 @@ export const generateWithGemini = async (
     logInfo(SOURCE, `Generated Game Code (Original):`, text.substring(0, 500) + '...');
     
     // Xử lý code để extract thông tin và clean
-    const { title, content, animations } = processGameCode(text);
+    const { title, content } = processGameCode(text);
     
     // Tạo đối tượng game
     const game: MiniGame = {
       title: title || topic,
       content: content,
-      useCanvas: useCanvas,
-      animation: animations // Thêm phần animations vào đối tượng MiniGame
+      useCanvas: useCanvas
     };
     
     logSuccess(SOURCE, "Game generated successfully", {
       title: game.title,
       contentLength: game.content.length,
-      hasDocType: game.content.includes('<!DOCTYPE'),
-      hasAnimations: !!animations
+      hasDocType: game.content.includes('<!DOCTYPE')
     });
     
     return game;
@@ -145,7 +142,7 @@ export const generateWithGemini = async (
 /**
  * Xử lý mã code trả về từ Gemini để extract thông tin và làm sạch
  */
-const processGameCode = (text: string): { title: string, content: string, animations?: string[] } => {
+const processGameCode = (text: string): { title: string, content: string } => {
   // Loại bỏ hoàn toàn cú pháp markdown nếu có
   let cleanedContent = text.trim();
   
@@ -160,24 +157,7 @@ const processGameCode = (text: string): { title: string, content: string, animat
     cleanedContent = cleanedContent.replace(/```html|```javascript|```/g, '').trim();
   }
   
-  // 2. Tìm và trích xuất các animations
-  const animations: string[] = [];
-  
-  // 2.1 Tìm tất cả chuỗi @keyframes
-  const keyframesRegex = /@keyframes\s+([^{]+)\s*{([^}]*)}/g;
-  let keyframesMatch;
-  while ((keyframesMatch = keyframesRegex.exec(cleanedContent)) !== null) {
-    animations.push(`@keyframes ${keyframesMatch[1]} {${keyframesMatch[2]}}`);
-  }
-  
-  // 2.2 Tìm tất cả định nghĩa animations trong CSS
-  const animationDefRegex = /\.([^{]+)\s*{[^}]*animation\s*:[^;}]+;[^}]*}/g;
-  let animationDefMatch;
-  while ((animationDefMatch = animationDefRegex.exec(cleanedContent)) !== null) {
-    animations.push(animationDefMatch[0]);
-  }
-  
-  // 3. Đảm bảo code HTML đầy đủ và đúng cấu trúc
+  // 2. Đảm bảo code HTML đầy đủ và đúng cấu trúc
   if (!cleanedContent.toLowerCase().includes('<!doctype html>') && 
       !cleanedContent.toLowerCase().startsWith('<html') &&
       !cleanedContent.toLowerCase().startsWith('<!--')) {
@@ -198,7 +178,6 @@ const processGameCode = (text: string): { title: string, content: string, animat
   <style>
     body { margin: 0; padding: 20px; font-family: sans-serif; }
     .container { max-width: 800px; margin: 0 auto; }
-    ${animations.join('\n')} /* Thêm các animation đã phát hiện vào phần <style> */
   </style>
 </head>
 <body>
@@ -217,7 +196,7 @@ const processGameCode = (text: string): { title: string, content: string, animat
     }
   }
   
-  // 4. Sửa các lỗi cú pháp JavaScript phổ biến
+  // 3. Sửa các lỗi cú pháp JavaScript phổ biến
   let sanitized = cleanedContent;
   
   // Sửa các template literals bị lỗi - ghi đè bằng regexp phức tạp hơn
@@ -252,7 +231,7 @@ const processGameCode = (text: string): { title: string, content: string, animat
     return `function ${funcName}(param${paramNum})`;
   });
   
-  // 5. Đảm bảo xử lý lỗi cho canvas
+  // 4. Đảm bảo xử lý lỗi cho canvas
   if (sanitized.includes('getContext') && !sanitized.includes('if (!ctx)')) {
     sanitized = sanitized.replace(
       /const\s+ctx\s*=\s*canvas\.getContext\(['"]2d['"]\);/g,
@@ -260,12 +239,31 @@ const processGameCode = (text: string): { title: string, content: string, animat
     );
   }
   
-  // 6. Đảm bảo khai báo đúng hàm requestAnimationFrame nếu có
-  if (sanitized.includes('requestAnimationFrame') && !sanitized.includes('window.requestAnimationFrame')) {
+  // 5. Đảm bảo tất cả CSS được đặt trong thẻ <style>
+  const cssBlockMatch = sanitized.match(/\/\*\s*CSS\s*\*\/([\s\S]*?)\/\*\s*End CSS\s*\*\//i);
+  if (cssBlockMatch && cssBlockMatch[1] && !cssBlockMatch[0].includes('<style>')) {
+    const cssContent = cssBlockMatch[1].trim();
     sanitized = sanitized.replace(
-      /let\s+requestAnimationFrame\s*=\s*window\.requestAnimationFrame/g,
-      "// Sử dụng API có sẵn của trình duyệt\n  const requestAnimFrame = window.requestAnimationFrame"
+      cssBlockMatch[0],
+      `<style>\n${cssContent}\n</style>`
     );
+  }
+  
+  // 6. Thêm xử lý lỗi window.onerror nếu chưa có
+  if (!sanitized.includes('window.onerror')) {
+    const errorHandlingScript = `
+  <script>
+    window.onerror = (message, source, lineno, colno, error) => {
+      console.error('Game error:', { message, source, lineno, colno, stack: error?.stack });
+      return true;
+    };
+  </script>`;
+    
+    if (sanitized.includes('</body>')) {
+      sanitized = sanitized.replace('</body>', `${errorHandlingScript}\n</body>`);
+    } else if (sanitized.includes('</html>')) {
+      sanitized = sanitized.replace('</html>', `${errorHandlingScript}\n</html>`);
+    }
   }
   
   // 7. Extract title
@@ -280,13 +278,9 @@ const processGameCode = (text: string): { title: string, content: string, animat
     }
   }
   
-  // 8. Đảm bảo không có các nguồn dữ liệu external
-  sanitized = sanitized.replace(/<script[^>]+src=["'][^"']*["'][^>]*><\/script>/g, '<!-- External script removed -->');
-  
   return {
     title,
-    content: sanitized,
-    animations: animations.length > 0 ? animations : undefined
+    content: sanitized
   };
 };
 
