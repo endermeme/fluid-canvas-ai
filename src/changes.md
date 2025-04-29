@@ -1,4 +1,5 @@
 
+
 # Lịch sử thay đổi mã nguồn
 
 ## 25/04/2024 - Cập nhật cấu hình Vite để cho phép tất cả host
@@ -48,3 +49,13 @@
    - Thêm allowfullscreen và loading="eager" cho iframe để tăng hiệu suất
    - Thay đổi cách xử lý kết xuất iframe để đảm bảo các animation CSS hoạt động
    - Thêm các tối ưu cho CSS animation trên các thiết bị di động
+
+## 29/04/2025 - Thêm thuộc tính animation vào định nghĩa kiểu dữ liệu
+1. `src/components/quiz/types.ts`:
+   - Thêm thuộc tính `animation` vào interface GameSettingsData
+   - Đảm bảo kiểu dữ liệu được định nghĩa đúng
+
+2. `src/components/quiz/generator/types.ts`:
+   - Thêm thuộc tính `animation` vào interface MiniGame
+   - Hỗ trợ tốt hơn cho các game có animation phong phú
+

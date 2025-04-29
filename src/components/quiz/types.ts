@@ -1,3 +1,4 @@
+
 // Các loại game và cài đặt
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
@@ -46,6 +47,7 @@ export interface GameSettingsData {
   allowMultipleCategories?: boolean;
   showCategoryHints?: boolean;
   useCanvas?: boolean;
+  animation?: boolean; // Thêm thuộc tính animation để cho phép bật/tắt animation
 }
 
 export interface GameType {
