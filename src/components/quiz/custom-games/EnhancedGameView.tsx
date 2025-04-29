@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
@@ -149,7 +149,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         ) : (
           <div className="relative w-full h-full">
             <GameIframe
-              ref={iframeRef}
+              iframeRef={iframeRef}
               content={miniGame.content}
               title={miniGame.title}
               onLoad={handleIframeLoad}

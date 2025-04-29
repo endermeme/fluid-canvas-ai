@@ -1,6 +1,4 @@
 
-
-
 # Lịch sử thay đổi
 
 - Cập nhật giao diện CustomGameForm: căn giữa màn hình, thêm hiệu ứng gradient và backdrop-blur, nâng cấp thiết kế Card
@@ -26,4 +24,4 @@
 - Thêm tính năng animation và trích xuất animation từ API Gemini: Sửa lỗi mất animation trong game
 - Cải thiện việc xử lý và hiển thị animation trong iframe với polyfill cho Web Animation API
 - Thêm CSS animation helpers để đảm bảo animation hoạt động trên tất cả các trình duyệt
-
+- Sửa lỗi TypeScript trong EnhancedGameView.tsx: thêm import useEffect và cập nhật cách sử dụng ref trong GameIframe

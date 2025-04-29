@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useEffect, useState, forwardRef } from 'react';
 import { Card } from "@/components/ui/card";
 import { enhanceIframeContent } from '../../utils/iframe-utils';
 
@@ -9,6 +9,7 @@ interface GameIframeProps {
   onLoad?: () => void;
   onError?: (error: string) => void;
   className?: string;
+  iframeRef: React.RefObject<HTMLIFrameElement>;
 }
 
 const GameIframe: React.FC<GameIframeProps> = ({
@@ -16,9 +17,9 @@ const GameIframe: React.FC<GameIframeProps> = ({
   title,
   onLoad,
   onError,
-  className = ''
+  className = '',
+  iframeRef
 }) => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const loadAttemptsRef = useRef(0);
   const maxRetryAttempts = 3;
