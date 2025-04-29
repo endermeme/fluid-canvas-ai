@@ -5,7 +5,6 @@ export interface MiniGame {
   title?: string;
   content?: string;
   useCanvas?: boolean;
-  animation?: boolean; // Thêm thuộc tính animation cho phép xác định game có animation hay không
 }
 
 export interface GameApiResponse {
