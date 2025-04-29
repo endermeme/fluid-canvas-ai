@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState, forwardRef } from 'react';
+import React, { useEffect, useState, forwardRef, useRef } from 'react';
 import { Card } from "@/components/ui/card";
 import { enhanceIframeContent } from '../../utils/iframe-utils';
 
