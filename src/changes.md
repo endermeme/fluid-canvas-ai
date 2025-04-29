@@ -1,5 +1,6 @@
 
 
+
 # Lịch sử thay đổi mã nguồn
 
 ## 25/04/2024 - Cập nhật cấu hình Vite để cho phép tất cả host
@@ -58,4 +59,17 @@
 2. `src/components/quiz/generator/types.ts`:
    - Thêm thuộc tính `animation` vào interface MiniGame
    - Hỗ trợ tốt hơn cho các game có animation phong phú
+
+## 29/04/2025 - Refactor EnhancedGameView thành các component nhỏ hơn 
+1. Tạo các component con riêng biệt:
+   - `GameLoadingState.tsx`: Hiển thị trạng thái đang tải game
+   - `GameErrorState.tsx`: Hiển thị thông báo lỗi và nút tải lại
+   - `GameIframe.tsx`: Xử lý logic render iframe và các tương tác với iframe
+
+2. Cập nhật EnhancedGameView.tsx:
+   - Giảm độ phức tạp của component chính
+   - Cải thiện khả năng tái sử dụng code
+   - Dễ dàng bảo trì và mở rộng chức năng
+   - Giảm số lượng mã trong một file
+
 
