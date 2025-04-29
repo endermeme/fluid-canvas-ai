@@ -5,6 +5,7 @@ export interface MiniGame {
   title?: string;
   content?: string;
   useCanvas?: boolean;
+  animation?: string | string[]; // Thêm trường animation để lưu trữ mã animation
 }
 
 export interface GameApiResponse {

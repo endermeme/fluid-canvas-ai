@@ -1,5 +1,6 @@
 
 
+
 # Lịch sử thay đổi
 
 - Cập nhật giao diện CustomGameForm: căn giữa màn hình, thêm hiệu ứng gradient và backdrop-blur, nâng cấp thiết kế Card
@@ -22,4 +23,7 @@
 - Thêm interface GameSession vào types.ts để hỗ trợ các chức năng quản lý phiên game và người chơi
 - Sửa lỗi TypeScript trong gameParticipation.ts: xoá định nghĩa trùng lặp GameParticipant và thêm thuộc tính score
 - Sửa lỗi TypeScript trong gameParticipation.ts: thêm kiểm tra thuộc tính score trong dữ liệu từ Supabase
+- Thêm tính năng animation và trích xuất animation từ API Gemini: Sửa lỗi mất animation trong game
+- Cải thiện việc xử lý và hiển thị animation trong iframe với polyfill cho Web Animation API
+- Thêm CSS animation helpers để đảm bảo animation hoạt động trên tất cả các trình duyệt
 

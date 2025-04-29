@@ -1,18 +1,17 @@
 
-import React, { useRef, useEffect, useState } from 'react';
-import { enhanceIframeContent } from '../utils/iframe-utils';
+import React, { useState, useRef } from 'react';
 import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import GameIframe from './components/GameIframe';
+import GameLoadingState from './components/GameLoadingState';
+import GameErrorState from './components/GameErrorState';
 
 interface EnhancedGameViewProps {
   miniGame: {
     title?: string;
     content: string;
+    animation?: string | string[];
   };
   onReload?: () => void;
   className?: string;
@@ -41,107 +40,11 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   const [iframeError, setIframeError] = useState<string | null>(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState<boolean>(false);
   const [isSharing, setIsSharing] = useState<boolean>(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadAttempts, setLoadAttempts] = useState(0);
   const { toast } = useToast();
 
   // Theo dõi số lần thử tải lại iframe
   const maxRetryAttempts = 3;
-
-  const loadIframeContent = async () => {
-    if (!iframeRef.current || !miniGame?.content) return;
-
-    try {
-      console.log("Đang cố gắng tải nội dung game...");
-      const enhancedContent = await enhanceIframeContent(miniGame.content, miniGame.title);
-      if (iframeRef.current) {
-        iframeRef.current.srcdoc = enhancedContent;
-      }
-      setIframeError(null);
-      
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 20;
-        if (progress > 90) {
-          clearInterval(interval);
-          progress = 90;
-        }
-        setLoadingProgress(progress);
-      }, 100);
-
-      // Thiết lập message listener để xử lý thông báo từ iframe
-      const messageHandler = (event: MessageEvent) => {
-        // Kiểm tra nếu tin nhắn từ iframe của chúng ta
-        if (event.data && event.data.type === 'GAME_LOADED') {
-          console.log('Game loaded message received from iframe');
-          clearInterval(interval);
-          setLoadingProgress(100);
-          setTimeout(() => {
-            setIsIframeLoaded(true);
-          }, 200);
-        }
-      };
-
-      window.addEventListener('message', messageHandler);
-      
-      iframeRef.current.onload = () => {
-        console.log('Iframe onload event triggered');
-        clearInterval(interval);
-        setLoadingProgress(100);
-        
-        // Đặt timeout để đảm bảo iframe có đủ thời gian để tải
-        setTimeout(() => {
-          if (!isIframeLoaded) {
-            setIsIframeLoaded(true);
-          }
-        }, 800); // Tăng thời gian chờ
-      };
-
-      // Backup timeout để đảm bảo trường hợp không nhận được message hoặc onload không trigger
-      const backupTimeout = setTimeout(() => {
-        if (!isIframeLoaded) {
-          console.log('Backup timeout triggered - forcing iframe to display');
-          clearInterval(interval);
-          setLoadingProgress(100);
-          setIsIframeLoaded(true);
-          
-          // Kiểm tra xem iframe có nội dung không
-          try {
-            if (iframeRef.current) {
-              const iframeDoc = iframeRef.current.contentDocument || 
-                (iframeRef.current.contentWindow && iframeRef.current.contentWindow.document);
-                
-              if (!iframeDoc || !iframeDoc.body || !iframeDoc.body.innerHTML || 
-                  iframeDoc.body.innerHTML.trim() === '') {
-                console.log('Iframe content appears empty, attempting retry');
-                if (loadAttempts < maxRetryAttempts) {
-                  setLoadAttempts(prev => prev + 1);
-                  setTimeout(() => loadIframeContent(), 1000); // Thử lại sau 1 giây
-                } else {
-                  setIframeError("Game không thể tải được. Vui lòng thử làm mới.");
-                }
-              }
-            }
-          } catch (e) {
-            console.error("Lỗi khi kiểm tra nội dung iframe:", e);
-          }
-        }
-      }, 3000); // Giảm thời gian timeout để phát hiện sớm hơn
-      
-      return () => {
-        window.removeEventListener('message', messageHandler);
-        clearTimeout(backupTimeout);
-        clearInterval(interval);
-      };
-    } catch (error) {
-      console.error("Error setting iframe content:", error);
-      setIframeError("Không thể tải nội dung game. Vui lòng thử lại.");
-    }
-  };
-
-  useEffect(() => {
-    loadIframeContent();
-  }, [miniGame, loadAttempts]);
 
   useEffect(() => {
     if (gameExpired) {
@@ -150,34 +53,27 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   }, [gameExpired]);
 
   const refreshGame = () => {
-    if (iframeRef.current && miniGame?.content) {
-      try {
-        setIsIframeLoaded(false);
-        setLoadingProgress(0);
-        setLoadAttempts(0); // Reset số lần thử tải lại
-        loadIframeContent();
-        
-        if (onReload) {
-          onReload();
-        }
-      } catch (error) {
-        console.error("Error refreshing game:", error);
-        setIframeError("Không thể tải lại game. Vui lòng thử lại.");
-      }
+    if (onReload) {
+      onReload();
     }
+    setIsIframeLoaded(false);
+    setIframeError(null);
+    setLoadAttempts(0);
   };
 
   const handleFullscreen = () => {
     if (!iframeRef.current) return;
     
-    const iframe = iframeRef.current;
-    
-    if (!document.fullscreenElement) {
-      iframe.requestFullscreen().catch(err => {
-        console.error("Không thể vào chế độ toàn màn hình:", err);
-      });
-    } else {
-      document.exitFullscreen();
+    try {
+      if (!document.fullscreenElement) {
+        iframeRef.current.requestFullscreen().catch(err => {
+          console.error("Không thể vào chế độ toàn màn hình:", err);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    } catch (error) {
+      console.error("Lỗi khi chuyển chế độ toàn màn hình:", error);
     }
   };
 
@@ -191,12 +87,18 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         description: "Đang tạo liên kết chia sẻ...",
       });
       
-      const url = await saveGameForSharing(
-        miniGame.title || 'Game tương tác',
-        'custom',
-        miniGame,
-        miniGame.content
-      );
+      // Sử dụng onShare từ props nếu có, nếu không dùng hàm mặc định
+      let url;
+      if (onShare) {
+        url = await onShare();
+      } else {
+        url = await saveGameForSharing(
+          miniGame.title || 'Game tương tác',
+          'custom',
+          miniGame,
+          miniGame.content
+        );
+      }
       
       setIsSharing(false);
       return url;
@@ -208,6 +110,17 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         variant: "destructive"
       });
       setIsSharing(false);
+    }
+  };
+
+  const handleIframeLoad = () => {
+    setIsIframeLoaded(true);
+  };
+
+  const handleIframeError = (error: string) => {
+    setIframeError(error);
+    if (loadAttempts < maxRetryAttempts) {
+      setLoadAttempts(prev => prev + 1);
     }
   };
 
@@ -229,54 +142,27 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       
       <div className="flex-1 relative overflow-hidden p-4">
         {iframeError ? (
-          <div className="flex flex-col items-center justify-center h-full">
-            <Alert variant="destructive" className="max-w-md">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Lỗi tải game</AlertTitle>
-              <AlertDescription>
-                {iframeError}
-                <div className="mt-2">
-                  <button 
-                    onClick={refreshGame}
-                    className="text-sm font-medium underline cursor-pointer hover:text-primary"
-                  >
-                    Thử tải lại
-                  </button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          </div>
+          <GameErrorState 
+            errorMessage={iframeError}
+            onRetry={refreshGame}
+          />
         ) : (
-          <Card className="relative w-full h-full overflow-hidden shadow-lg border-primary/10">
-            {!isIframeLoaded && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md z-10 p-6">
-                <div className="w-full max-w-xs space-y-4">
-                  <Progress value={loadingProgress} className="w-full" />
-                  <p className="text-center text-sm text-muted-foreground">
-                    Đang tải game... {Math.round(loadingProgress)}%
-                  </p>
-                  {loadAttempts > 0 && (
-                    <p className="text-center text-xs text-amber-500">
-                      Đang thử lại lần {loadAttempts}/{maxRetryAttempts}...
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-            <iframe
+          <div className="relative w-full h-full">
+            <GameIframe
               ref={iframeRef}
-              className="w-full h-full"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
-              title={miniGame.title || "Game tương tác"}
-              style={{
-                border: 'none',
-                display: 'block',
-                width: '100%',
-                height: '100%',
-                backgroundColor: '#ffffff' // Thêm màu nền
-              }}
+              content={miniGame.content}
+              title={miniGame.title}
+              onLoad={handleIframeLoad}
+              onError={handleIframeError}
             />
-          </Card>
+            
+            {!isIframeLoaded && (
+              <GameLoadingState 
+                loadAttempts={loadAttempts}
+                maxAttempts={maxRetryAttempts}
+              />
+            )}
+          </div>
         )}
         
         {extraButton && (

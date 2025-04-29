@@ -15,6 +15,7 @@ IMPORTANT FORMATTING RULES (FOLLOW THESE EXACTLY):
 8. Include clear instructions for players directly in the game UI.
 9. Make the game centered and responsive for both desktop and mobile.
 10. Include a title and game description in the HTML.
+11. ALWAYS USE ANIMATIONS to make the game more engaging and interactive.
 
 EXAMPLE CODE STRUCTURE:
 <!DOCTYPE html>
@@ -25,13 +26,38 @@ EXAMPLE CODE STRUCTURE:
   <title>Your Game Title</title>
   <style>
     /* ALL CSS HERE */
+    
+    /* Always include animations like this: */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .animate-fade {
+      animation: fadeIn 0.5s ease-in forwards;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    .animate-bounce {
+      animation: bounce 1s infinite;
+    }
   </style>
 </head>
 <body>
   <!-- Game HTML here -->
   
   <script>
-    // ALL JavaScript code here
+    // ALL JavaScript code here with proper animation handlers
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize animations and game elements
+      document.querySelectorAll('.animate-on-load').forEach(el => {
+        el.classList.add('animate-fade');
+      });
+    });
   </script>
 </body>
 </html>
@@ -46,8 +72,9 @@ CANVAS IMPLEMENTATION RULES:
 3. Use requestAnimationFrame for animations
 4. Include touch events for mobile compatibility
 5. Use proper scaling for high-DPI screens
+6. ALWAYS ADD ANIMATIONS to canvas games using keyframes and animations
 
-EXAMPLE CANVAS INITIALIZATION:
+EXAMPLE CANVAS INITIALIZATION WITH ANIMATION:
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 if (!ctx) {
@@ -66,6 +93,27 @@ function resizeCanvas() {
   drawGame();
 }
 
+// Animation variables
+let animationId;
+const animationElements = [];
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Update and draw all animation elements
+  animationElements.forEach(element => {
+    element.update();
+    element.draw();
+  });
+  
+  // Request next animation frame
+  animationId = requestAnimationFrame(animate);
+}
+
+// Start animation
+animate();
+
+// Handle animations on resize
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 `;
@@ -93,6 +141,8 @@ Game Requirements:
 - Add scoring and progress tracking
 - Design the game to be visually appealing with good colors
 - Make it responsive for both desktop and mobile
+- IMPORTANT: ADD ANIMATIONS to make the game engaging and interactive. Use CSS animations, keyframes, and transitions for elements
+- Ensure all animations work properly on both desktop and mobile devices
 ${useCanvas ? GEMINI_CANVAS_INSTRUCTIONS : ''}
 
 IMPORTANT: Return ONLY the complete HTML document. Do not include any explanation, commentary, or markdown syntax around your code.
