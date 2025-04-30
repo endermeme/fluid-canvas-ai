@@ -1,14 +1,14 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, RefreshCw, Maximize2, Share2, Copy, Check, PlusCircle } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Maximize2, Share2, Copy, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { QRCodeSVG } from 'qrcode.react';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
-interface GameHeaderProps {
+interface CustomGameHeaderProps {
   onBack?: () => void;
   onRefresh?: () => void;
   onFullscreen?: () => void;
@@ -17,11 +17,10 @@ interface GameHeaderProps {
   showGameControls?: boolean;
   isSharing?: boolean;
   isTeacher?: boolean;
-  title?: string;
-  hideTitle?: boolean;
+  gameType?: string;
 }
 
-const GameHeader: React.FC<GameHeaderProps> = ({
+const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
   onBack,
   onRefresh,
   onFullscreen,
@@ -30,13 +29,17 @@ const GameHeader: React.FC<GameHeaderProps> = ({
   showGameControls = false,
   isSharing = false,
   isTeacher = false,
-  title = "Trò chơi tương tác",
-  hideTitle = true,
 }) => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    }
+  };
 
   const handleShare = async () => {
     if (!onShare) return;
@@ -89,10 +92,6 @@ const GameHeader: React.FC<GameHeaderProps> = ({
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          
-          {!hideTitle && (
-            <h2 className="text-lg font-medium truncate">{title}</h2>
-          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -118,18 +117,6 @@ const GameHeader: React.FC<GameHeaderProps> = ({
                 <Maximize2 className="h-4 w-4" />
               </Button>
               
-              {onNewGame && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onNewGame}
-                  className="hover:bg-primary/10"
-                  title="Tạo trò chơi mới"
-                >
-                  <PlusCircle className="h-4 w-4" />
-                </Button>
-              )}
-              
               {onShare && (
                 <Button 
                   variant="default" 
@@ -140,16 +127,6 @@ const GameHeader: React.FC<GameHeaderProps> = ({
                 >
                   <Share2 className="h-4 w-4 mr-2" />
                   <span>Chia sẻ</span>
-                </Button>
-              )}
-              
-              {isTeacher && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-amber-500 text-amber-600 hover:bg-amber-50"
-                >
-                  Chế độ giáo viên
                 </Button>
               )}
             </>
@@ -198,4 +175,4 @@ const GameHeader: React.FC<GameHeaderProps> = ({
   );
 };
 
-export default GameHeader;
+export default CustomGameHeader;
