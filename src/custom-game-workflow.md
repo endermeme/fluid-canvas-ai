@@ -3,175 +3,97 @@
 
 ## Tổng quan
 
-Custom Game là tính năng cho phép người dùng tạo các trò chơi tương tác bằng cách sử dụng AI để tạo ra code HTML, CSS và JavaScript dựa trên mô tả của người dùng. Dưới đây là quy trình tổng thể và các file tham gia:
+Custom Game là tính năng cho phép người dùng tạo các trò chơi tương tác bằng cách sử dụng AI để tạo ra code HTML, CSS và JavaScript dựa trên mô tả của người dùng. Dưới đây là quy trình tổng thể và các file liên quan.
 
-## Quy trình hoạt động
+## Quy trình hoạt động chi tiết
 
-1. **Người dùng nhập mô tả game** → CustomGameForm.tsx
-2. **Gửi yêu cầu tới AI (Gemini)** → geminiGenerator.ts
-3. **Xử lý phản hồi từ AI** → geminiGenerator.ts → processGameCode()
-4. **Hiển thị game trong iframe** → iframe-utils.ts → enhanceIframeContent()
-5. **Hiển thị giao diện game** → EnhancedGameView.tsx
-6. **Quản lý trạng thái game** → GameController.tsx
-7. **Chia sẻ game** → gameExport.ts → saveGameForSharing()
+### 1. Người dùng nhập mô tả game
+- Người dùng truy cập vào trang tạo game tùy chỉnh
+- Điền vào form mô tả chi tiết về game muốn tạo
+- Form được xử lý bởi CustomGameForm.tsx
 
-## Các file tham gia và vai trò
+### 2. Gửi yêu cầu tới AI (Gemini)
+- CustomGameForm gọi đến AIGameGenerator
+- AIGameGenerator tạo prompt dựa trên mô tả người dùng
+- Prompt được gửi tới Gemini API thông qua geminiGenerator.ts
+- Quá trình này có cơ chế retry nếu gặp lỗi
 
-### File gốc (Entry point)
-- `src/App.tsx` - Định nghĩa routes của ứng dụng, trong đó có route `/custom-game` dẫn đến tính năng tạo game tùy chỉnh
+### 3. Xử lý phản hồi từ AI
+- Phản hồi từ AI được nhận và xử lý bởi processGameCode()
+- Mã HTML được làm sạch và chuẩn hóa
+- Tiêu đề game được trích xuất từ nội dung
+- Tạo đối tượng MiniGame chứa thông tin game
 
-### Components cho Custom Game
+### 4. Nâng cao nội dung iframe
+- MiniGame được gửi tới EnhancedGameView
+- Nội dung HTML được cải thiện bởi enhanceIframeContent() trong iframe-utils.ts
+- Thêm xử lý lỗi và theo dõi trạng thái loading
+- Thêm CSS và script hỗ trợ cho game
 
-1. **GameController.tsx**
-   - Vai trò: Điều khiển luồng làm việc tổng thể của custom game
-   - Chức năng:
-     - Quản lý trạng thái của game (đang tạo, đã tạo, đang hiển thị form)
-     - Điều hướng giữa form tạo game và hiển thị game
-     - Xử lý các tác vụ chia sẻ game
-     - Điều phối giữa CustomGameForm và EnhancedGameView
+### 5. Hiển thị game cho người dùng
+- Game được hiển thị trong iframe bởi GameIframeRenderer
+- Hiển thị loading indicator trong khi game đang tải
+- Xử lý các lỗi nếu có
+- Hiển thị các điều khiển qua CustomGameHeader
 
-2. **CustomGameForm.tsx**
-   - Vai trò: Giao diện để người dùng nhập mô tả game muốn tạo
-   - Chức năng:
-     - Thu thập đầu vào từ người dùng (mô tả game)
-     - Gọi AIGameGenerator để tạo game
-     - Hiển thị trạng thái loading trong quá trình tạo game
-     - Chuyển kết quả tạo game về GameController
+### 6. Quản lý trạng thái game
+- GameController.tsx quản lý toàn bộ trạng thái
+- Chuyển đổi giữa form và hiển thị game
+- Xử lý các tương tác từ người dùng
+- Quản lý việc tạo game mới
 
-3. **EnhancedGameView.tsx**
-   - Vai trò: Hiển thị game đã tạo trong iframe
-   - Chức năng:
-     - Nhúng nội dung HTML game vào iframe
-     - Xử lý các tương tác với game (refresh, fullscreen)
-     - Hiển thị thông báo lỗi nếu game không thể tải
-     - Quản lý trạng thái loading của iframe
+### 7. Chia sẻ game (tùy chọn)
+- Người dùng có thể chọn chia sẻ game
+- Game được lưu vào cơ sở dữ liệu thông qua customGameAPI.ts
+- Tạo URL chia sẻ độc đáo
+- Người dùng có thể sao chép hoặc xem mã QR
 
-4. **CustomGameHeader.tsx**
-   - Vai trò: Hiển thị thanh điều hướng cho game tùy chỉnh
-   - Chức năng:
-     - Cung cấp các nút điều khiển (quay lại, làm mới, toàn màn hình)
-     - Hiển thị tiêu đề game
-     - Cung cấp nút chia sẻ game
+## Các file chính và vai trò
 
-### API và Xử lý dữ liệu
+### Components UI
+1. **GameController.tsx**: Điều khiển luồng làm việc tổng thể
+2. **CustomGameForm.tsx**: Giao diện nhập mô tả game
+3. **EnhancedGameView.tsx**: Hiển thị game trong iframe
+4. **CustomGameHeader.tsx**: Thanh điều hướng và điều khiển
+5. **GameIframeRenderer.tsx**: Component iframe đặc biệt
+6. **GameErrorDisplay.tsx**: Hiển thị lỗi nếu có
+7. **GameLoadingIndicator.tsx**: Hiển thị trạng thái loading
 
-1. **geminiGenerator.ts**
-   - Vai trò: Kết nối với Google Gemini API để tạo game
-   - Chức năng:
-     - Tạo prompt cho Gemini API
-     - Gửi yêu cầu tới API
-     - Xử lý phản hồi từ API
-     - Làm sạch và định dạng mã code nhận được
-     - Trích xuất tiêu đề và nội dung game
+### API và xử lý dữ liệu
+1. **customGameAPI.ts**: Tương tác với Supabase
+2. **geminiGenerator.ts**: Giao tiếp với AI Gemini
+3. **geminiPrompt.ts**: Template cho prompt AI
+4. **iframe-utils.ts**: Utilities xử lý nội dung iframe
 
-2. **geminiPrompt.ts**
-   - Vai trò: Định nghĩa prompt templates cho Gemini API
-   - Chức năng:
-     - Cung cấp cấu trúc prompt cho việc tạo game
-     - Định nghĩa các instructions về format HTML, canvas, và tính năng game
+### Hooks và tiện ích
+1. **useIframeManager.tsx**: Hook quản lý iframe
+2. **useGameShareManager.tsx**: Hook quản lý chia sẻ game
 
-3. **customGamePrompt.ts**
-   - Vai trò: Định nghĩa prompt templates thay thế cho tạo game đơn giản hơn
-   - Chức năng:
-     - Cung cấp template prompt đơn giản hơn
-     - Tập trung vào yêu cầu cụ thể cho mobile và desktop
+## Xử lý lỗi và các trường hợp đặc biệt
 
-### Utilities và Helpers
+### 1. Xử lý lỗi khi gọi AI
+- Cơ chế retry tự động khi gọi API thất bại
+- Hiển thị thông báo lỗi thân thiện cho người dùng
+- Log chi tiết để giúp gỡ lỗi
 
-1. **iframe-utils.ts**
-   - Vai trò: Xử lý và nâng cao nội dung HTML để hiển thị trong iframe
-   - Chức năng:
-     - Xử lý hình ảnh trong nội dung HTML
-     - Thêm các script hỗ trợ vào HTML (xử lý lỗi, theo dõi loading)
-     - Thêm CSS tối ưu hóa cho touch devices
-     - Đảm bảo cấu trúc HTML đúng và đầy đủ
+### 2. Xử lý iframe trống hoặc lỗi
+- Timeout khi iframe không tải đúng
+- Theo dõi và thông báo lỗi JavaScript trong iframe
+- Hiển thị giao diện lỗi thân thiện
 
-2. **gameExport.ts**
-   - Vai trò: Lưu trữ và chia sẻ game
-   - Chức năng:
-     - Lưu game vào cơ sở dữ liệu
-     - Tạo URL chia sẻ
-     - Xử lý các tác vụ liên quan đến export game
+### 3. Tối ưu cho thiết bị di động
+- Thêm CSS đặc biệt cho touch devices
+- Xử lý sự kiện touch
+- Responsive design cho mọi kích thước màn hình
 
-3. **apiUtils.ts**
-   - Vai trò: Cung cấp tiện ích cho việc gọi API
-   - Chức năng:
-     - Log các thông tin API
-     - Đo thời gian thực thi API
-     - Xử lý lỗi API
+### 4. Bảo mật
+- Sandbox cho iframe để ngăn chặn mã độc
+- Xử lý an toàn nội dung từ AI
+- Kiểm tra và làm sạch mã HTML trước khi hiển thị
 
-### Types và Interfaces
-
-1. **types.ts**
-   - Định nghĩa các types cho game settings
-   - Định nghĩa cấu trúc dữ liệu cho game
-
-2. **generator/types.ts**
-   - Định nghĩa các types cho API response
-   - Định nghĩa cấu trúc MiniGame
-
-## Luồng dữ liệu chi tiết
-
-### 1. Khi người dùng tạo game mới:
-
-```
-Người dùng nhập mô tả → CustomGameForm.tsx 
-→ AIGameGenerator.getInstance().generateMiniGame() 
-→ tryGeminiGeneration() trong geminiGenerator.ts
-→ generateWithGemini() trong geminiGenerator.ts
-→ Gọi Gemini API với prompt từ geminiPrompt.ts
-→ Xử lý kết quả với processGameCode()
-→ Trả về đối tượng MiniGame cho CustomGameForm.tsx
-→ CustomGameForm.tsx gọi onGenerate() để trả kết quả về GameController.tsx
-→ GameController.tsx cập nhật state và hiển thị EnhancedGameView.tsx
-→ EnhancedGameView.tsx gọi enhanceIframeContent() từ iframe-utils.ts
-→ Game được hiển thị trong iframe
-```
-
-### 2. Khi người dùng chia sẻ game:
-
-```
-Người dùng nhấn nút chia sẻ → CustomGameHeader.tsx
-→ EnhancedGameView.tsx gọi handleShare()
-→ saveGameForSharing() trong gameExport.ts
-→ Lưu game vào cơ sở dữ liệu
-→ Tạo URL chia sẻ
-→ Trả về URL cho EnhancedGameView.tsx
-→ Hiển thị thông báo thành công
-```
-
-### 3. Xử lý nội dung HTML:
-
-```
-HTML từ AI → enhanceIframeContent() trong iframe-utils.ts
-→ Xử lý hình ảnh với processImageSource()
-→ Phân tích và chuẩn hóa cấu trúc HTML
-→ Thêm các script hỗ trợ (error handling, loading notification)
-→ Thêm CSS tối ưu hóa cho touch devices
-→ Thêm loading indicator
-→ Trả về HTML đã được nâng cao
-```
-
-## Tối ưu hóa và Xử lý lỗi
-
-1. **Retry Mechanism**
-   - tryGeminiGeneration() có cơ chế retry khi gọi API thất bại
-
-2. **Error Handling trong iframe**
-   - Thêm window.onerror để bắt và hiển thị lỗi trong game
-   - Hiển thị UI thân thiện cho các lỗi
-
-3. **Loading States**
-   - Hiển thị progress bar khi loading game
-   - Theo dõi trạng thái loading của iframe
-
-4. **Responsive Design**
-   - Thêm CSS tối ưu cho cả desktop và touch devices
-   - Xử lý sự kiện touch đặc biệt cho mobile
-
-## Lưu ý quan trọng
-
-1. Các game được tạo chỉ tồn tại trong session hiện tại trừ khi được chia sẻ
-2. Gemini API yêu cầu kết nối internet để hoạt động
-3. Iframe có các giới hạn bảo mật (sandbox) để đảm bảo an toàn
-4. Custom game sử dụng HTML Canvas khi có thể để tạo trải nghiệm game tốt hơn
+## Các cải tiến trong tương lai
+- Cho phép người dùng chỉnh sửa mã HTML trực tiếp
+- Thêm templates game để người dùng chọn
+- Cải thiện hiệu suất AI với cache
+- Thêm tùy chọn tùy chỉnh giao diện game
+- Tích hợp với các hệ thống đánh giá và phân tích

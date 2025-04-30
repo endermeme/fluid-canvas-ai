@@ -25,7 +25,13 @@
 - Sửa lỗi TypeScript: "React refers to a UMD global, but the current file is a module"
 - Đảm bảo sử dụng React.useState và React.useEffect đúng cách
 
-# Lịch sử thay đổi
+## 30/04/2025 - Chuyển đổi tài liệu từ sơ đồ sang văn bản
+- Cập nhật `src/custom-game-architecture.md` để hiển thị kiến trúc dưới dạng văn bản thay vì sơ đồ
+- Cập nhật `src/custom-game-workflow.md` để mô tả quy trình dưới dạng văn bản chi tiết
+- Cải thiện cấu trúc và định dạng để dễ đọc hơn
+- Bổ sung thêm chi tiết về các thành phần và quy trình
+
+## Các thay đổi trước đó
 
 - Refactor iframe-utils.ts thành các modules nhỏ hơn: iframe-enhancer.ts, iframe-scripts.ts, iframe-styles.ts và iframe-utils.ts mới nhỏ gọn hơn
 - Refactor EnhancedGameView.tsx thành các components nhỏ hơn: GameErrorDisplay, GameLoadingIndicator, GameIframeRenderer và các hooks useIframeManager, useGameShareManager
