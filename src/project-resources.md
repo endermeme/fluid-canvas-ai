@@ -15,6 +15,10 @@
 
 ### Utils
 - `src/utils`: Các utility functions dùng chung cho toàn bộ ứng dụng
+  - `customGameAPI.ts`: API cho game tùy chỉnh (di chuyển từ components)
+  - `gameExport.ts`: Chức năng xuất game
+  - `gameParticipation.ts`: Quản lý người tham gia game
+  - `media-utils.ts`: Xử lý hình ảnh và media
 - `src/hooks`: Các custom hooks
 - `src/integrations`: Các tích hợp với dịch vụ bên ngoài (Supabase)
 
@@ -40,6 +44,11 @@
    - `iframe-scripts.ts`: Scripts cho iframe
    - `iframe-styles.ts`: Styles cho iframe
 
+## Các file đã được di chuyển/đổi tên
+
+1. **Utils Files**
+   - `src/components/quiz/custom-games/utils/customGameAPI.ts` -> `src/utils/customGameAPI.ts`
+
 ## Các file không cần thiết đã được xóa
 
 1. **Generator Files**
@@ -50,5 +59,5 @@
    - `index.tsx`: Trùng lặp với QuickGameSelector.tsx
    - `CustomGameDialog.tsx`: Chức năng đã được thay thế bởi CustomGameForm.tsx
 
-3. **Các file tài liệu không cần thiết**
-   - `unused-files.md`: Đã được tích hợp vào changes.md
+3. **Thư mục không cần thiết**
+   - `src/components/quiz/custom-games/utils`: Di chuyển nội dung vào `src/utils`

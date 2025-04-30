@@ -1,6 +1,11 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 30/04/2025 - Dọn dẹp thư mục src/components
+- Tái cấu trúc các thư mục trong `src/components/quiz/utils`
+- Di chuyển và hợp nhất các file từ `src/components/quiz/custom-games/utils` vào `src/utils`
+- Xóa thư mục `src/components/quiz/custom-games/utils` không cần thiết
+
 ## 30/04/2025 - Dọn dẹp project và xóa file không cần thiết
 - Xóa `src/unused-files.md` (chuyển thành `src/changes.md`)
 - Xóa các file không được sử dụng trong thư mục `src/components/quiz/generator`:
