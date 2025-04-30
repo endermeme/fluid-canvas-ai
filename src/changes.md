@@ -1,7 +1,7 @@
 
-
 # Lịch sử thay đổi
 
+- Tái cấu trúc thư mục cho custom game: di chuyển các file liên quan vào thư mục cấu trúc hợp lý hơn
 - Cập nhật giao diện CustomGameForm: căn giữa màn hình, thêm hiệu ứng gradient và backdrop-blur, nâng cấp thiết kế Card
 - Ẩn tiêu đề game trên header và xoá phản hồi tại header game tùy chỉnh
 - Ẩn tiêu đề game trên header
@@ -22,4 +22,3 @@
 - Thêm interface GameSession vào types.ts để hỗ trợ các chức năng quản lý phiên game và người chơi
 - Sửa lỗi TypeScript trong gameParticipation.ts: xoá định nghĩa trùng lặp GameParticipant và thêm thuộc tính score
 - Sửa lỗi TypeScript trong gameParticipation.ts: thêm kiểm tra thuộc tính score trong dữ liệu từ Supabase
-
