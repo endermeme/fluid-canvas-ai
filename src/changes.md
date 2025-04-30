@@ -2,6 +2,7 @@
 # Lịch sử thay đổi
 
 - Refactor iframe-utils.ts thành các modules nhỏ hơn: iframe-enhancer.ts, iframe-scripts.ts, iframe-styles.ts và iframe-utils.ts mới nhỏ gọn hơn
+- Refactor EnhancedGameView.tsx thành các components nhỏ hơn: GameErrorDisplay, GameLoadingIndicator, GameIframeRenderer và các hooks useIframeManager, useGameShareManager
 - Cập nhật giao diện CustomGameForm: căn giữa màn hình, thêm hiệu ứng gradient và backdrop-blur, nâng cấp thiết kế Card
 - Ẩn tiêu đề game trên header và xoá phản hồi tại header game tùy chỉnh
 - Ẩn tiêu đề game trên header
