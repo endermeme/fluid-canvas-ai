@@ -13,7 +13,7 @@
 - Sửa lỗi cú pháp trong geminiPrompt.ts (escape backticks trong template string)
 - Sửa lỗi iframe trắng bằng cách cải thiện trình xử lý nội dung và thêm phát hiện khi game đã tải xong
 - Sửa lỗi cú pháp trong iframe-utils.ts (các lỗi dấu phẩy và cú pháp)
-- Cải thiện hàm shake() trong iframe-utils.ts thông qua việc thay thế template string bằng chuỗi thông thường
+- Cải thiện hàm shake() trong iframe-utils.ts thông qua việc thay thế template string bằng chuỗi thường
 - Thêm xử lý thời gian chờ và cơ chế kiểm tra nội dung iframe để giải quyết vấn đề màn hình trắng
 - Thêm xử lý cho các định dạng ảnh từ API Gemini (base64 và URL)
 - Sửa lỗi TypeScript liên quan đến Promise trong xử lý nội dung iframe
@@ -24,3 +24,4 @@
 - Sửa lỗi TypeScript trong gameParticipation.ts: thêm kiểm tra thuộc tính score trong dữ liệu từ Supabase
 - Cải thiện iframe-helper.ts: thêm nhiều cơ chế thông báo game đã tải xong, xử lý lỗi tốt hơn, theo dõi trạng thái game, hỗ trợ chế độ offline, và tối ưu quá trình tải
 - Cập nhật HomePage: thêm tag BETA cho phần tạo game HTML và đánh dấu trò chơi có sẵn là trò chơi chính
+- Nâng cấp các cơ chế tải game: thêm kiểm tra tính toàn vẹn nội dung, cơ chế tải lại tự động và cải thiện giao diện lỗi
