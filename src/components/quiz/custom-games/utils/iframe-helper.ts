@@ -79,8 +79,19 @@ export const addMobileOptimization = (content: string): string => {
         width: 100%;
         height: 100%;
         overflow: hidden;
+        direction: ltr;
+        text-align: initial;
       }
       * { touch-action: manipulation; }
+
+      /* Sửa vấn đề RTL text và hướng văn bản */
+      [dir="rtl"] { direction: rtl; }
+      [lang="ar"], [lang="he"], [lang="fa"] { direction: rtl; }
+      
+      /* Đảm bảo font-size tối thiểu cho các đoạn văn bản */
+      p, div, span, button, a { 
+        font-size: min(max(12px, 1em), 16px); 
+      }
       
       /* Thêm style để khắc phục vấn đề trống trắng */
       body:empty::before {
@@ -96,6 +107,28 @@ export const addMobileOptimization = (content: string): string => {
         display: block;
         margin: 0 auto;
         max-width: 100%;
+        height: auto;
+      }
+
+      /* Đảm bảo các buttons đủ lớn cho mobile */
+      button, 
+      .button, 
+      [role="button"], 
+      input[type="button"], 
+      input[type="submit"], 
+      input[type="reset"] {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 8px 16px;
+      }
+
+      /* Sửa lỗi overflow gây mất nội dung */
+      div.container, 
+      div.game-container,
+      div#game-container,
+      div#gameContainer {
+        overflow: auto !important;
+        max-width: 100% !important;
       }
     </style>
   `;
@@ -404,6 +437,82 @@ export const optimizeGameLoading = (content: string): string => {
 };
 
 /**
+ * Sửa lỗi chữ bị lật ngược và các vấn đề CSS khác
+ */
+export const fixTextAndCSSIssues = (content: string): string => {
+  // Thêm CSS để sửa vấn đề văn bản và layout
+  const fixingCssScript = `
+    <style>
+      /* Sửa vấn đề với direction và text alignment */
+      * {
+        direction: ltr;
+        text-align: initial;
+      }
+      [dir="rtl"] {
+        direction: rtl;
+      }
+      
+      /* Sửa lỗi font-size quá nhỏ */
+      * {
+        font-size: min(max(12px, 1em), 18px);
+      }
+      
+      /* Sửa lỗi overflow và z-index */
+      .container, .game-container, #game, #gameContainer {
+        overflow: auto !important;
+        max-width: 100% !important;
+      }
+      
+      /* Sửa lỗi với position absolute không có z-index */
+      [style*="position: absolute"] {
+        z-index: 1;
+      }
+      
+      /* Đảm bảo mã văn bản được hiển thị chính xác */
+      pre, code {
+        unicode-bidi: isolate;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      
+      /* Sửa lỗi các button quá nhỏ */
+      button, .button, [role="button"] {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 8px 12px;
+      }
+      
+      /* Sửa lỗi transform scale gây đảo chữ */
+      [style*="transform: scaleX(-1)"] {
+        transform: scaleX(1) !important;
+      }
+    </style>
+  `;
+  
+  // Chèn CSS vào head
+  if (content.includes('</head>')) {
+    content = content.replace('</head>', `${fixingCssScript}</head>`);
+  } else if (content.includes('<body')) {
+    const bodyPos = content.indexOf('<body');
+    content = content.substring(0, bodyPos) + `<head>${fixingCssScript}</head>` + content.substring(bodyPos);
+  }
+  
+  // Sửa các lỗi transform trong inline style
+  content = content.replace(/style="([^"]*)transform\s*:\s*scaleX\(-1\)([^"]*)"/g, 'style="$1transform: scaleX(1)$2"');
+  
+  // Sửa font-size quá nhỏ trong inline style
+  content = content.replace(/style="([^"]*)font-size\s*:\s*([0-9]+)px([^"]*)"/g, (match, before, size, after) => {
+    const fontSize = parseInt(size, 10);
+    if (fontSize < 12) {
+      return `style="${before}font-size: ${Math.max(12, fontSize)}px${after}"`;
+    }
+    return match;
+  });
+  
+  return content;
+};
+
+/**
  * Xử lý và tối ưu nội dung HTML cho iframe
  * Hàm chính để xử lý toàn bộ nội dung trước khi đưa vào iframe
  */
@@ -439,6 +548,9 @@ export const processIframeContent = (content: string, title?: string): string =>
 </html>`;
   }
   
+  // Sửa lỗi chữ bị lật ngược và CSS
+  processedContent = fixTextAndCSSIssues(processedContent);
+  
   // Áp dụng các cải tiến
   processedContent = injectLoadingCompleteScript(processedContent);
   processedContent = addMobileOptimization(processedContent);
@@ -449,3 +561,4 @@ export const processIframeContent = (content: string, title?: string): string =>
   
   return processedContent;
 };
+

@@ -392,10 +392,84 @@ ${bodyMatch[0]}
     sanitized += '\n</html>';
   }
   
+  // 12. Sửa lỗi chữ bị lật ngược và CSS không đúng
+  sanitized = fixTextDirectionAndCSS(sanitized);
+  
   return {
     title,
     content: sanitized
   };
+};
+
+/**
+ * Sửa lỗi chữ bị lật ngược và CSS không đúng
+ */
+const fixTextDirectionAndCSS = (content: string): string => {
+  let fixedContent = content;
+  
+  // 1. Thêm direction và rtl CSS để đảm bảo văn bản hiển thị đúng
+  if (!content.includes('direction:') && !content.includes('direction=')) {
+    // Thêm CSS để đảm bảo chữ không bị lật ngược
+    const directionCSS = `
+    * {
+      direction: ltr;
+      text-align: initial;
+    }
+    [dir="rtl"] {
+      direction: rtl;
+    }
+    `;
+    
+    // Chèn CSS vào thẻ style nếu có
+    if (content.includes('</style>')) {
+      fixedContent = fixedContent.replace('</style>', `${directionCSS}\n</style>`);
+    } else if (content.includes('</head>')) {
+      fixedContent = fixedContent.replace('</head>', `<style>${directionCSS}</style>\n</head>`);
+    }
+  }
+  
+  // 2. Sửa các thuộc tính transform có thể gây lật ngược
+  fixedContent = fixedContent.replace(/transform\s*:\s*scaleX\(-1\)/g, 'transform: scaleX(1)');
+  
+  // 3. Sửa lỗi thanh CSS với overflow gây lỗi layout
+  fixedContent = fixedContent.replace(/overflow\s*:\s*hidden;/g, 'overflow: auto;');
+  
+  // 4. Sửa lỗi font-size quá nhỏ
+  fixedContent = fixedContent.replace(/font-size\s*:\s*([0-9.]+)px/g, (match, size) => {
+    const fontSize = parseFloat(size);
+    if (fontSize < 12) {
+      return `font-size: ${Math.max(12, fontSize)}px`;
+    }
+    return match;
+  });
+  
+  // 5. Đảm bảo các phần tử control đủ lớn cho mobile
+  fixedContent = fixedContent.replace(/(\.|#)([a-zA-Z0-9_-]+)(\s*\{[^}]*?)(width\s*:\s*)([0-9.]+)(px)([^}]*?\})/g, 
+    (match, prefix, className, beforeWidth, widthDecl, widthVal, unit, afterWidth) => {
+      if (className.includes('button') || className.includes('btn') || className.includes('control')) {
+        const width = parseFloat(widthVal);
+        if (width < 44) {
+          return `${prefix}${className}${beforeWidth}${widthDecl}${Math.max(44, width)}${unit}${afterWidth}`;
+        }
+      }
+      return match;
+    });
+  
+  // 6. Thêm meta viewport nếu chưa có
+  if (!fixedContent.includes('viewport')) {
+    const metaViewport = '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
+    
+    if (fixedContent.includes('</head>')) {
+      fixedContent = fixedContent.replace('</head>', `${metaViewport}\n</head>`);
+    } else if (fixedContent.includes('<head>')) {
+      fixedContent = fixedContent.replace('<head>', `<head>\n${metaViewport}`);
+    }
+  }
+  
+  // 7. Sửa các thuộc tính position có thể gây lỗi hiển thị
+  fixedContent = fixedContent.replace(/position\s*:\s*absolute\s*;/g, 'position: absolute; z-index: 1;');
+  
+  return fixedContent;
 };
 
 export const tryGeminiGeneration = async (
@@ -422,3 +496,4 @@ export const tryGeminiGeneration = async (
     return tryGeminiGeneration(null, topic, settings, retryCount + 1);
   }
 };
+

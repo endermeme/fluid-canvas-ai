@@ -1,6 +1,17 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 30/04/2025 - Sửa lỗi chữ bị lật ngược và giao diện HTML trong game
+- Thêm hàm fixTextDirectionAndCSS trong geminiGenerator.ts để sửa CSS và direction
+- Cập nhật iframe-helper.ts với hàm mới fixTextAndCSSIssues
+- Thêm CSS để sửa lỗi chữ bị lật ngược, font-size quá nhỏ và các vấn đề giao diện
+- Tăng cường xử lý các thẻ có thuộc tính transform: scaleX(-1) để ngăn lật ngược chữ
+- Đảm bảo buttons đủ lớn để dùng trên thiết bị di động (tối thiểu 44px)
+
+## 30/04/2025 - Sửa lỗi import trong HomePage.tsx
+- Sửa import từ `useMobile` thành `useIsMobile` trong file HomePage.tsx
+- Lỗi phát sinh do import không đúng tên export từ hook use-mobile.tsx
+
 ## 30/04/2025 - Cải thiện việc parse và xử lý nội dung game
 - Cập nhật processGameCode trong geminiGenerator.ts để xử lý tốt hơn các dạng nội dung khác nhau
 - Cải thiện cách phát hiện và xử lý HTML không hợp lệ hoặc không đầy đủ
