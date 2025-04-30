@@ -1,6 +1,12 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 30/04/2025 - Đơn giản hóa iframe-helper.ts
+- Loại bỏ tất cả các hàm sửa lỗi và các hàm thay đổi HTML
+- Giữ lại chỉ một hàm `processIframeContent` đơn giản để xử lý markdown thành HTML chuẩn
+- Loại bỏ các hàm: fixTextDirectionAndCSS, fixTextAndCSSIssues, addMobileOptimization, addErrorHandling, addGameMonitoring, addOfflineFallback, optimizeGameLoading
+- Chỉ giữ lại phần cơ bản nhất để hiển thị nội dung trong iframe
+
 ## 30/04/2025 - Sửa lỗi chữ bị lật ngược và giao diện HTML trong game
 - Thêm hàm fixTextDirectionAndCSS trong geminiGenerator.ts để sửa CSS và direction
 - Cập nhật iframe-helper.ts với hàm mới fixTextAndCSSIssues
