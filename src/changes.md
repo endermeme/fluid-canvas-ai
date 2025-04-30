@@ -1,6 +1,13 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 30/04/2025 - Tái cấu trúc thư mục CustomGame
+- Tạo hai thư mục chính: `src/components/quiz/custom-games/api` và `src/components/quiz/custom-games/ui`
+- Di chuyển `src/utils/customGameAPI.ts` vào `src/components/quiz/custom-games/api/customGameAPI.ts`
+- Di chuyển các component UI vào thư mục `src/components/quiz/custom-games/ui`
+- Cập nhật các import path trong các file liên quan
+- Cập nhật tài liệu để phản ánh cấu trúc mới
+
 ## 30/04/2025 - Dọn dẹp thư mục src/components
 - Tái cấu trúc các thư mục trong `src/components/quiz/utils`
 - Di chuyển và hợp nhất các file từ `src/components/quiz/custom-games/utils` vào `src/utils`

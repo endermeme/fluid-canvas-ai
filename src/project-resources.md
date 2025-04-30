@@ -6,6 +6,9 @@
 ### Core components
 - `src/components/quiz`: Chứa các components chính của ứng dụng game
   - `custom-games`: Components cho chức năng game tùy chỉnh
+    - `api`: API và tương tác với Supabase
+    - `ui`: Components giao diện người dùng
+    - `game-components`: Components hỗ trợ hiển thị game
   - `preset-games`: Components cho các game có sẵn
   - `share`: Components liên quan đến chia sẻ game
   - `utils`: Các utility functions cho game
@@ -15,7 +18,6 @@
 
 ### Utils
 - `src/utils`: Các utility functions dùng chung cho toàn bộ ứng dụng
-  - `customGameAPI.ts`: API cho game tùy chỉnh (di chuyển từ components)
   - `gameExport.ts`: Chức năng xuất game
   - `gameParticipation.ts`: Quản lý người tham gia game
   - `media-utils.ts`: Xử lý hình ảnh và media
@@ -26,8 +28,9 @@
 
 1. **Custom Games**: Tạo và quản lý game tùy chỉnh
    - `GameController.tsx`: Điều khiển luồng tạo game
-   - `CustomGameForm.tsx`: Form nhập liệu để tạo game
-   - `EnhancedGameView.tsx`: Hiển thị game trong iframe
+   - `ui/CustomGameForm.tsx`: Form nhập liệu để tạo game
+   - `ui/EnhancedGameView.tsx`: Hiển thị game trong iframe
+   - `api/customGameAPI.ts`: API tương tác với Supabase
 
 2. **Preset Games**: Các game có sẵn với template
    - `PresetGameManager.tsx`: Quản lý các game có sẵn
@@ -46,8 +49,9 @@
 
 ## Các file đã được di chuyển/đổi tên
 
-1. **Utils Files**
-   - `src/components/quiz/custom-games/utils/customGameAPI.ts` -> `src/utils/customGameAPI.ts`
+1. **Custom Game Files**
+   - `src/utils/customGameAPI.ts` -> `src/components/quiz/custom-games/api/customGameAPI.ts`
+   - `src/components/quiz/custom-games/game-components/*` -> `src/components/quiz/custom-games/ui/*`
 
 ## Các file không cần thiết đã được xóa
 
@@ -60,4 +64,4 @@
    - `CustomGameDialog.tsx`: Chức năng đã được thay thế bởi CustomGameForm.tsx
 
 3. **Thư mục không cần thiết**
-   - `src/components/quiz/custom-games/utils`: Di chuyển nội dung vào `src/utils`
+   - `src/components/quiz/custom-games/utils`: Di chuyển nội dung vào API directory
