@@ -1,4 +1,11 @@
 
+# Lịch sử thay đổi mã nguồn
+
+## 30/04/2025 - Sửa lỗi React trong use-toast.ts
+- Đã thêm import React trong file `src/hooks/use-toast.ts`
+- Sửa lỗi TypeScript: "React refers to a UMD global, but the current file is a module"
+- Đảm bảo sử dụng React.useState và React.useEffect đúng cách
+
 # Lịch sử thay đổi
 
 - Refactor iframe-utils.ts thành các modules nhỏ hơn: iframe-enhancer.ts, iframe-scripts.ts, iframe-styles.ts và iframe-utils.ts mới nhỏ gọn hơn
