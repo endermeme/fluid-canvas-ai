@@ -1,3 +1,4 @@
+
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
@@ -146,21 +147,58 @@ const processGameCode = (text: string): { title: string, content: string } => {
   // Loại bỏ hoàn toàn cú pháp markdown nếu có
   let cleanedContent = text.trim();
   
-  // 1. Loại bỏ markdown code block syntax
-  const codeBlockRegex = /^```(?:html|javascript)?\s*([\s\S]*?)```$/;
-  const codeBlockMatch = cleanedContent.match(codeBlockRegex);
+  // 1. Phát hiện và xử lý nhiều định dạng khác nhau từ API
   
-  if (codeBlockMatch && codeBlockMatch[1]) {
-    cleanedContent = codeBlockMatch[1].trim();
-  } else {
-    // Nếu không tìm thấy, vẫn xóa các dấu hiệu markdown
-    cleanedContent = cleanedContent.replace(/```html|```javascript|```/g, '').trim();
+  // Xử lý mã trong khối markdown
+  const codeBlockRegexes = [
+    /^```(?:html|javascript|js|typescript|ts)?\s*([\s\S]*?)```$/m, // Khối code chuẩn
+    /(<html[\s\S]*<\/html>)/i, // HTML đầy đủ
+    /<!DOCTYPE\s+html[\s\S]*?>/i // Bắt đầu với DOCTYPE
+  ];
+  
+  let extracted = false;
+  
+  for (const regex of codeBlockRegexes) {
+    const match = cleanedContent.match(regex);
+    if (match && match[1]) {
+      cleanedContent = match[1].trim();
+      extracted = true;
+      break;
+    }
   }
   
+  // Nếu vẫn không tìm thấy khối code, thử tìm HTML inline
+  if (!extracted) {
+    // Xóa các dòng không liên quan đến mã HTML (như hướng dẫn, giải thích)
+    const lines = cleanedContent.split('\n');
+    const htmlLines = lines.filter(line => {
+      const trimmed = line.trim();
+      return trimmed.startsWith('<') || trimmed.includes('</') || 
+             trimmed.includes('function') || trimmed.includes('const ') || 
+             trimmed.includes('let ') || trimmed.includes('var ') ||
+             trimmed.includes('style') || trimmed.includes('script');
+    });
+    
+    if (htmlLines.length > 0) {
+      cleanedContent = htmlLines.join('\n');
+    }
+  }
+  
+  // Loại bỏ các chú thích markdown và text không liên quan
+  cleanedContent = cleanedContent
+    .replace(/^(Here's|This is) (a|the) (complete|HTML|interactive) (code|game|implementation).*$/gim, '')
+    .replace(/^I've created an interactive game.*$/gim, '')
+    .replace(/^The game works as follows.*$/gim, '')
+    .replace(/^Let me explain.*$/gim, '')
+    .replace(/^```html|```javascript|```typescript|```$/gim, '')
+    .trim();
+  
   // 2. Đảm bảo code HTML đầy đủ và đúng cấu trúc
-  if (!cleanedContent.toLowerCase().includes('<!doctype html>') && 
-      !cleanedContent.toLowerCase().startsWith('<html') &&
-      !cleanedContent.toLowerCase().startsWith('<!--')) {
+  const hasDoctype = cleanedContent.toLowerCase().includes('<!doctype html>') ||
+                     cleanedContent.toLowerCase().includes('<!doctype');
+  const hasHtmlTag = cleanedContent.toLowerCase().includes('<html');
+
+  if (!hasDoctype && !hasHtmlTag) {
     // Tìm HTML trong văn bản nếu không có doctype
     const htmlPattern = /<html[\s\S]*?<\/html>/i;
     const htmlMatch = cleanedContent.match(htmlPattern);
@@ -168,8 +206,23 @@ const processGameCode = (text: string): { title: string, content: string } => {
     if (htmlMatch && htmlMatch[0]) {
       cleanedContent = `<!DOCTYPE html>\n${htmlMatch[0]}`;
     } else {
-      // Nếu không có thẻ HTML đầy đủ, bọc nội dung lại
-      cleanedContent = `<!DOCTYPE html>
+      // Nếu không có thẻ HTML đầy đủ, tìm body
+      const bodyPattern = /<body[\s\S]*?<\/body>/i;
+      const bodyMatch = cleanedContent.match(bodyPattern);
+      
+      if (bodyMatch && bodyMatch[0]) {
+        cleanedContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${cleanedContent.match(/<title>(.*?)<\/title>/i)?.[1] || 'Interactive Game'}</title>
+</head>
+${bodyMatch[0]}
+</html>`;
+      } else {
+        // Nếu không có body, bọc toàn bộ nội dung
+        cleanedContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -184,22 +237,48 @@ const processGameCode = (text: string): { title: string, content: string } => {
   <div class="container">
     ${cleanedContent}
   </div>
-  <script>
-    // Console error catching
-    window.onerror = (msg, src, line, col, err) => {
-      console.error('Game error:', msg, 'at', line, ':', col);
-      return true;
-    }
-  </script>
 </body>
 </html>`;
+      }
     }
   }
   
-  // 3. Sửa các lỗi cú pháp JavaScript phổ biến
+  // 3. Kiểm tra và sửa lỗi nếu không có thẻ head hoặc body
+  if (!cleanedContent.toLowerCase().includes('<head>')) {
+    const htmlOpenPos = cleanedContent.toLowerCase().indexOf('<html');
+    if (htmlOpenPos !== -1) {
+      const afterHtmlTagPos = cleanedContent.indexOf('>', htmlOpenPos) + 1;
+      cleanedContent = cleanedContent.substring(0, afterHtmlTagPos) + 
+        '\n<head><meta charset="UTF-8"><title>Interactive Game</title></head>\n' +
+        cleanedContent.substring(afterHtmlTagPos);
+    }
+  }
+  
+  if (!cleanedContent.toLowerCase().includes('<body>')) {
+    const headClosePos = cleanedContent.toLowerCase().indexOf('</head>');
+    if (headClosePos !== -1) {
+      const afterHeadPos = headClosePos + 7;
+      cleanedContent = cleanedContent.substring(0, afterHeadPos) + 
+        '\n<body>\n<div class="container">' +
+        cleanedContent.substring(afterHeadPos);
+      
+      // Thêm đóng thẻ body nếu cần
+      if (!cleanedContent.toLowerCase().includes('</body>')) {
+        const htmlClosePos = cleanedContent.toLowerCase().indexOf('</html>');
+        if (htmlClosePos !== -1) {
+          cleanedContent = cleanedContent.substring(0, htmlClosePos) + 
+            '\n</div>\n</body>\n' + cleanedContent.substring(htmlClosePos);
+        } else {
+          cleanedContent += '\n</div>\n</body>\n</html>';
+        }
+      }
+    }
+  }
+  
+  // 4. Sửa các lỗi cú pháp JavaScript phổ biến
   let sanitized = cleanedContent;
   
-  // Sửa các template literals bị lỗi - ghi đè bằng regexp phức tạp hơn
+  // Sửa các template literals bị lỗi
   sanitized = sanitized.replace(/(\w+\.(?:style\.transform|innerHTML|textContent|innerText)\s*=\s*)(['"])?([^'"`;]*)\$\{([^}]+)\}([^'"`;]*)(['"])?;?/g, 
     (match, prefix, openQuote, before, expr, after, closeQuote) => {
       // Nếu đã có backticks thì giữ nguyên
@@ -209,7 +288,13 @@ const processGameCode = (text: string): { title: string, content: string } => {
       return `${prefix}\`${before}\${${expr}}${after}\`;`;
     });
   
-  // Sửa các tham số hàm bị lỗi
+  // Sửa các template literals không đúng
+  sanitized = sanitized.replace(/(\w+\.(?:style\.transform|innerHTML|textContent|innerText)\s*=\s*)(['"])([^'"]*)\${([^}]+)}([^'"]*)(['"])/g,
+    (match, prefix, openQuote, before, expr, after, closeQuote) => {
+      return `${prefix}\`${before}\${${expr}}${after}\``;
+    });
+  
+  // Sửa các function declarations bị lỗi tham số
   sanitized = sanitized.replace(/function\s+(\w+)\s*\(\$(\d+)\)/g, (match, funcName, paramNum) => {
     const paramNames = {
       'drawSegment': 'index',
@@ -231,7 +316,7 @@ const processGameCode = (text: string): { title: string, content: string } => {
     return `function ${funcName}(param${paramNum})`;
   });
   
-  // 4. Đảm bảo xử lý lỗi cho canvas
+  // 5. Đảm bảo xử lý lỗi cho canvas
   if (sanitized.includes('getContext') && !sanitized.includes('if (!ctx)')) {
     sanitized = sanitized.replace(
       /const\s+ctx\s*=\s*canvas\.getContext\(['"]2d['"]\);/g,
@@ -239,7 +324,24 @@ const processGameCode = (text: string): { title: string, content: string } => {
     );
   }
   
-  // 5. Đảm bảo tất cả CSS được đặt trong thẻ <style>
+  // 6. Đảm bảo có thẻ đóng script nếu có mở
+  const scriptOpenTags = (sanitized.match(/<script/g) || []).length;
+  const scriptCloseTags = (sanitized.match(/<\/script>/g) || []).length;
+  
+  if (scriptOpenTags > scriptCloseTags) {
+    // Thêm thẻ đóng script nếu thiếu
+    for (let i = 0; i < scriptOpenTags - scriptCloseTags; i++) {
+      if (sanitized.toLowerCase().includes('</body>')) {
+        sanitized = sanitized.replace('</body>', '</script>\n</body>');
+      } else if (sanitized.toLowerCase().includes('</html>')) {
+        sanitized = sanitized.replace('</html>', '</script>\n</html>');
+      } else {
+        sanitized += '\n</script>';
+      }
+    }
+  }
+  
+  // 7. Đảm bảo tất cả CSS được đặt trong thẻ <style>
   const cssBlockMatch = sanitized.match(/\/\*\s*CSS\s*\*\/([\s\S]*?)\/\*\s*End CSS\s*\*\//i);
   if (cssBlockMatch && cssBlockMatch[1] && !cssBlockMatch[0].includes('<style>')) {
     const cssContent = cssBlockMatch[1].trim();
@@ -249,7 +351,7 @@ const processGameCode = (text: string): { title: string, content: string } => {
     );
   }
   
-  // 6. Thêm xử lý lỗi window.onerror nếu chưa có
+  // 8. Thêm xử lý lỗi window.onerror nếu chưa có
   if (!sanitized.includes('window.onerror')) {
     const errorHandlingScript = `
   <script>
@@ -266,7 +368,7 @@ const processGameCode = (text: string): { title: string, content: string } => {
     }
   }
   
-  // 7. Extract title
+  // 9. Extract title
   let title = '';
   const titleTag = sanitized.match(/<title>(.*?)<\/title>/is);
   if (titleTag && titleTag[1]) {
@@ -278,10 +380,96 @@ const processGameCode = (text: string): { title: string, content: string } => {
     }
   }
   
+  // 10. Kiểm tra và sửa lỗi DOCTYPE không đúng
+  if (!sanitized.toLowerCase().includes('<!doctype html>') && 
+      !sanitized.toLowerCase().includes('<!doctype')) {
+    sanitized = `<!DOCTYPE html>\n${sanitized}`;
+  }
+
+  // 11. Đảm bảo có thẻ html, head và body nếu chưa có
+  if (!sanitized.toLowerCase().includes('<html')) {
+    sanitized = sanitized.replace('<!DOCTYPE html>', '<!DOCTYPE html>\n<html lang="en">');
+    sanitized += '\n</html>';
+  }
+  
+  // 12. Sửa lỗi chữ bị lật ngược và CSS không đúng
+  sanitized = fixTextDirectionAndCSS(sanitized);
+  
   return {
     title,
     content: sanitized
   };
+};
+
+/**
+ * Sửa lỗi chữ bị lật ngược và CSS không đúng
+ */
+const fixTextDirectionAndCSS = (content: string): string => {
+  let fixedContent = content;
+  
+  // 1. Thêm direction và rtl CSS để đảm bảo văn bản hiển thị đúng
+  if (!content.includes('direction:') && !content.includes('direction=')) {
+    // Thêm CSS để đảm bảo chữ không bị lật ngược
+    const directionCSS = `
+    * {
+      direction: ltr;
+      text-align: initial;
+    }
+    [dir="rtl"] {
+      direction: rtl;
+    }
+    `;
+    
+    // Chèn CSS vào thẻ style nếu có
+    if (content.includes('</style>')) {
+      fixedContent = fixedContent.replace('</style>', `${directionCSS}\n</style>`);
+    } else if (content.includes('</head>')) {
+      fixedContent = fixedContent.replace('</head>', `<style>${directionCSS}</style>\n</head>`);
+    }
+  }
+  
+  // 2. Sửa các thuộc tính transform có thể gây lật ngược
+  fixedContent = fixedContent.replace(/transform\s*:\s*scaleX\(-1\)/g, 'transform: scaleX(1)');
+  
+  // 3. Sửa lỗi thanh CSS với overflow gây lỗi layout
+  fixedContent = fixedContent.replace(/overflow\s*:\s*hidden;/g, 'overflow: auto;');
+  
+  // 4. Sửa lỗi font-size quá nhỏ
+  fixedContent = fixedContent.replace(/font-size\s*:\s*([0-9.]+)px/g, (match, size) => {
+    const fontSize = parseFloat(size);
+    if (fontSize < 12) {
+      return `font-size: ${Math.max(12, fontSize)}px`;
+    }
+    return match;
+  });
+  
+  // 5. Đảm bảo các phần tử control đủ lớn cho mobile
+  fixedContent = fixedContent.replace(/(\.|#)([a-zA-Z0-9_-]+)(\s*\{[^}]*?)(width\s*:\s*)([0-9.]+)(px)([^}]*?\})/g, 
+    (match, prefix, className, beforeWidth, widthDecl, widthVal, unit, afterWidth) => {
+      if (className.includes('button') || className.includes('btn') || className.includes('control')) {
+        const width = parseFloat(widthVal);
+        if (width < 44) {
+          return `${prefix}${className}${beforeWidth}${widthDecl}${Math.max(44, width)}${unit}${afterWidth}`;
+        }
+      }
+      return match;
+    });
+  
+  // 6. Thêm meta viewport nếu chưa có
+  if (!fixedContent.includes('viewport')) {
+    const metaViewport = '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
+    
+    if (fixedContent.includes('</head>')) {
+      fixedContent = fixedContent.replace('</head>', `${metaViewport}\n</head>`);
+    } else if (fixedContent.includes('<head>')) {
+      fixedContent = fixedContent.replace('<head>', `<head>\n${metaViewport}`);
+    }
+  }
+  
+  // 7. Sửa các thuộc tính position có thể gây lỗi hiển thị
+  fixedContent = fixedContent.replace(/position\s*:\s*absolute\s*;/g, 'position: absolute; z-index: 1;');
+  
+  return fixedContent;
 };
 
 export const tryGeminiGeneration = async (
@@ -308,3 +496,4 @@ export const tryGeminiGeneration = async (
     return tryGeminiGeneration(null, topic, settings, retryCount + 1);
   }
 };
+
