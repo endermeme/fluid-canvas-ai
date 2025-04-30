@@ -22,11 +22,11 @@ import {
   Layout,
   Edit3
 } from 'lucide-react';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   
   const handleNavigate = (path: string) => {
     navigate(path);
