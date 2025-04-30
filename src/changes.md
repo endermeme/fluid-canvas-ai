@@ -23,3 +23,4 @@
 - Sửa lỗi TypeScript trong gameParticipation.ts: xoá định nghĩa trùng lặp GameParticipant và thêm thuộc tính score
 - Sửa lỗi TypeScript trong gameParticipation.ts: thêm kiểm tra thuộc tính score trong dữ liệu từ Supabase
 - Cải thiện iframe-helper.ts: thêm nhiều cơ chế thông báo game đã tải xong, xử lý lỗi tốt hơn, theo dõi trạng thái game, hỗ trợ chế độ offline, và tối ưu quá trình tải
+- Cập nhật HomePage: thêm tag BETA cho phần tạo game HTML và đánh dấu trò chơi có sẵn là trò chơi chính

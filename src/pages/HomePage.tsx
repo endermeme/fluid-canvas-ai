@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Gamepad, SparklesIcon, History, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Badge } from '@/components/ui/badge';
 
 const HomePage: React.FC = () => {
   const containerVariants = {
@@ -130,13 +131,21 @@ const HomePage: React.FC = () => {
                 <Card className="p-8 h-full bg-gradient-to-br from-background to-primary/5 border-2 border-primary/20 overflow-hidden group relative">
                   <div className="absolute -right-16 -top-16 w-32 h-32 bg-primary/10 rounded-full transform group-hover:scale-150 transition-transform duration-500"></div>
                   <div className="relative z-10 flex flex-col items-center text-center gap-6">
-                    <motion.div 
-                      className="p-4 bg-primary/10 rounded-full"
-                      variants={iconVariants}
-                      whileHover="hover"
-                    >
-                      <SparklesIcon className="h-12 w-12 text-primary" />
-                    </motion.div>
+                    <div className="relative">
+                      <motion.div 
+                        className="p-4 bg-primary/10 rounded-full"
+                        variants={iconVariants}
+                        whileHover="hover"
+                      >
+                        <SparklesIcon className="h-12 w-12 text-primary" />
+                      </motion.div>
+                      <Badge 
+                        variant="default"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white font-bold"
+                      >
+                        BETA
+                      </Badge>
+                    </div>
                     <div>
                       <h3 className="text-2xl font-bold mb-2">Tạo Game HTML</h3>
                       <p className="text-muted-foreground">
@@ -162,13 +171,21 @@ const HomePage: React.FC = () => {
                 <Card className="p-8 h-full bg-gradient-to-br from-background to-primary/5 border-2 border-primary/20 overflow-hidden group relative">
                   <div className="absolute -right-16 -top-16 w-32 h-32 bg-primary/10 rounded-full transform group-hover:scale-150 transition-transform duration-500"></div>
                   <div className="relative z-10 flex flex-col items-center text-center gap-6">
-                    <motion.div 
-                      className="p-4 bg-primary/10 rounded-full"
-                      variants={iconVariants}
-                      whileHover="hover"
-                    >
-                      <Gamepad className="h-12 w-12 text-primary" />
-                    </motion.div>
+                    <div className="relative">
+                      <motion.div 
+                        className="p-4 bg-primary/10 rounded-full"
+                        variants={iconVariants}
+                        whileHover="hover"
+                      >
+                        <Gamepad className="h-12 w-12 text-primary" />
+                      </motion.div>
+                      <Badge 
+                        variant="secondary"
+                        className="absolute -top-2 -right-2 bg-primary text-white font-bold"
+                      >
+                        Chính thức
+                      </Badge>
+                    </div>
                     <div>
                       <h3 className="text-2xl font-bold mb-2">Trò Chơi Có Sẵn</h3>
                       <p className="text-muted-foreground">
