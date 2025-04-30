@@ -1,6 +1,13 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 30/04/2025 - Dọn dẹp project và xóa file không cần thiết
+- Xóa `src/unused-files.md` (chuyển thành `src/changes.md`)
+- Xóa các file không được sử dụng trong thư mục `src/components/quiz/generator`:
+  - `fallbackGenerator.ts` 
+  - `responseParser.ts`
+- Hợp nhất các file trong thư mục `src/components/quiz/quick-game-selector`
+
 ## 30/04/2025 - Sửa lỗi React trong use-toast.ts
 - Đã thêm import React trong file `src/hooks/use-toast.ts`
 - Sửa lỗi TypeScript: "React refers to a UMD global, but the current file is a module"
