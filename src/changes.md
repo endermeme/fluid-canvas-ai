@@ -1,5 +1,4 @@
 
-
 # Lịch sử thay đổi
 
 - Cập nhật giao diện CustomGameForm: căn giữa màn hình, thêm hiệu ứng gradient và backdrop-blur, nâng cấp thiết kế Card
@@ -22,4 +21,4 @@
 - Thêm interface GameSession vào types.ts để hỗ trợ các chức năng quản lý phiên game và người chơi
 - Sửa lỗi TypeScript trong gameParticipation.ts: xoá định nghĩa trùng lặp GameParticipant và thêm thuộc tính score
 - Sửa lỗi TypeScript trong gameParticipation.ts: thêm kiểm tra thuộc tính score trong dữ liệu từ Supabase
-
+- Thêm tài liệu về quy trình hoạt động của custom game và kiến trúc hệ thống
