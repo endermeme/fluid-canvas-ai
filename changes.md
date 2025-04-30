@@ -1,15 +1,4 @@
-
 # Lịch sử thay đổi mã nguồn
-
-## 30/04/2025 - Sửa lỗi import trong HomePage.tsx
-- Sửa import từ `useMobile` thành `useIsMobile` trong file HomePage.tsx
-- Lỗi phát sinh do import không đúng tên export từ hook use-mobile.tsx
-
-## 30/04/2025 - Cải thiện việc parse và xử lý nội dung game
-- Cập nhật processGameCode trong geminiGenerator.ts để xử lý tốt hơn các dạng nội dung khác nhau
-- Cải thiện cách phát hiện và xử lý HTML không hợp lệ hoặc không đầy đủ
-- Thêm xử lý đặc biệt cho các dạng nội dung khác nhau từ API Gemini
-- Tăng cường khả năng tự sửa chữa mã HTML không hợp lệ
 
 ## 25/04/2024 - Cập nhật cấu hình Vite để cho phép tất cả host
 - Đã thêm các tên miền vào `allowedHosts` trong `vite.config.ts`: aurabusiness.tech, aurabusiness.tech:8080
