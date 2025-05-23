@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import QuizContainer from '@/components/quiz/QuizContainer';
-import GameLoading from '@/components/quiz/GameLoading';
-import CustomGameForm from '@/components/quiz/custom-games/CustomGameForm';
-import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
-import { tryGeminiGeneration } from '@/components/quiz/generator/geminiGenerator';
+import QuizContainer from '@/components/games/shared/QuizContainer';
+import GameLoading from '@/components/games/shared/GameLoading';
+import CustomGameForm from '@/components/games/custom/CustomGameForm';
+import EnhancedGameView from '@/components/games/custom/EnhancedGameView';
+import { tryGeminiGeneration } from '@/components/games/generator/geminiGenerator';
 
 const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
