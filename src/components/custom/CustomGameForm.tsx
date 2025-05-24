@@ -6,10 +6,10 @@ import { Label } from '@/components/ui/label';
 import { SparklesIcon, Info, Code } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { AIGameGenerator } from '../../generator';
-import { MiniGame } from '../../generator/types';
-import { GameSettingsData } from '../../shared/types';
-import GameLoading from '../../shared/GameLoading';
+import { AIGameGenerator } from '../ai';
+import { MiniGame } from '../ai/types';
+import { GameSettingsData } from '../shared/types';
+import GameLoading from '../shared/GameLoading';
 import { GEMINI_MODELS } from '@/constants/api-constants';
 
 interface CustomGameFormProps {
@@ -23,7 +23,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Use the singleton pattern
   const gameGenerator = AIGameGenerator.getInstance();
 
   const getPlaceholderText = () => {
@@ -43,10 +42,8 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     setIsGenerating(true);
     
     try {
-      // Luôn sử dụng canvas mode
       gameGenerator.setCanvasMode(true);
       
-      // Minimal settings
       const settings: GameSettingsData = {
         category: 'custom'
       };

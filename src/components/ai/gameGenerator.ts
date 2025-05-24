@@ -14,12 +14,8 @@ import { callGeminiAPI } from './geminiClient';
 import { processGameCode, createFallbackGameHtml } from './gameProcessor';
 import type { MiniGame, GameApiResponse } from './types';
 
-// Constants
 const SOURCE = "GAME_GENERATOR";
 
-/**
- * Interface chính cho việc tạo game
- */
 export class GameGenerator {
   private static instance: GameGenerator | null = null;
   private useCanvasMode: boolean = true;
@@ -27,9 +23,6 @@ export class GameGenerator {
   
   private constructor() {}
   
-  /**
-   * Singleton pattern
-   */
   public static getInstance(): GameGenerator {
     if (!GameGenerator.instance) {
       GameGenerator.instance = new GameGenerator();
@@ -37,23 +30,14 @@ export class GameGenerator {
     return GameGenerator.instance;
   }
   
-  /**
-   * Thiết lập chế độ canvas
-   */
   public setCanvasMode(useCanvas: boolean): void {
     this.useCanvasMode = useCanvas;
   }
   
-  /**
-   * Lấy game được tạo gần nhất
-   */
   public getLastGeneratedGame(): MiniGame | null {
     return this.lastGeneratedGame;
   }
   
-  /**
-   * Tạo game theo chủ đề
-   */
   public async generateGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
       logInfo(SOURCE, `Starting game generation for topic: "${topic}"`, {
@@ -61,17 +45,14 @@ export class GameGenerator {
         canvasMode: this.useCanvasMode ? "enabled" : "disabled"
       });
       
-      // Xác định cài đặt
       const useCanvas = settings?.useCanvas !== undefined ? settings.useCanvas : this.useCanvasMode;
       const gameType = getGameTypeByTopic(topic);
       
-      // Ghi log thông tin
       logInfo(SOURCE, `Generating ${useCanvas ? 'Canvas' : 'DOM'} game`, {
         topic,
         gameType: gameType?.name || "unknown"
       });
       
-      // Tạo prompt từ template
       const prompt = createGamePrompt({
         topic,
         useCanvas,
@@ -80,10 +61,8 @@ export class GameGenerator {
         category: settings?.category || 'general'
       });
       
-      // Gọi Gemini API với timeout
       logInfo(SOURCE, "Calling Gemini API");
       
-      // Thiết lập thời gian chờ dài hơn cho game generation
       const response = await callGeminiAPI({
         prompt,
         model: GEMINI_MODELS.CUSTOM_GAME,
@@ -94,23 +73,19 @@ export class GameGenerator {
         throw new Error(response.error || "Empty response from API");
       }
       
-      // Thống kê kết quả
       logSuccess(SOURCE, "API call completed successfully", {
         contentLength: response.content.length,
         metrics: response.metrics
       });
       
-      // Xử lý code game
       const { title, content } = processGameCode(response.content);
       
-      // Tạo đối tượng game
       const game: MiniGame = {
         title: title || topic,
         content,
         useCanvas
       };
       
-      // Lưu lại game gần nhất
       this.lastGeneratedGame = game;
       
       logSuccess(SOURCE, "Game generated successfully", {
@@ -120,18 +95,13 @@ export class GameGenerator {
       
       return game;
     } catch (error) {
-      // Xử lý lỗi
       const errorMessage = error instanceof Error ? error.message : String(error);
       logError(SOURCE, `Game generation failed: ${errorMessage}`, error);
       
-      // Tạo fallback game
       return this.createFallbackGame(topic, settings);
     }
   }
   
-  /**
-   * Tạo game dự phòng khi API lỗi
-   */
   private createFallbackGame(topic: string, settings?: GameSettingsData): MiniGame {
     const useCanvas = settings?.useCanvas !== undefined ? settings.useCanvas : this.useCanvasMode;
     
@@ -145,7 +115,6 @@ export class GameGenerator {
       useCanvas
     };
     
-    // Lưu lại game gần nhất
     this.lastGeneratedGame = fallbackGame;
     
     logSuccess(SOURCE, "Created fallback game", {
@@ -158,7 +127,6 @@ export class GameGenerator {
   }
 }
 
-// Legacy compatibility class
 export class AIGameGenerator {
   private static instance: AIGameGenerator | null = null;
   private gameGenerator: GameGenerator;
@@ -183,9 +151,6 @@ export class AIGameGenerator {
   }
 }
 
-/**
- * Hàm tiện ích để tạo game từ chủ đề
- */
 export async function generateGameFromTopic(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
   return GameGenerator.getInstance().generateGame(topic, settings);
 }
@@ -194,4 +159,4 @@ export default {
   GameGenerator,
   AIGameGenerator,
   generateGameFromTopic
-}; 
+};

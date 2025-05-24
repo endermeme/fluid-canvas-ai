@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { MiniGame } from '../generator/types';
-import { AIGameGenerator } from '../generator';
+import { MiniGame } from '../ai/types';
+import { AIGameGenerator } from '../ai';
 import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../shared/GameLoading';
@@ -68,7 +68,6 @@ const GameController: React.FC<GameControllerProps> = ({
     try {
       setIsSharing(true);
       
-      // Tạo session game (sẽ được gọi sau khi game đã được lưu vào Supabase từ EnhancedGameView)
       const gameSession = await createGameSession(
         currentGame.title || "Minigame tương tác",
         currentGame.content

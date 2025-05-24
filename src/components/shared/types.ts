@@ -1,5 +1,3 @@
-// Các loại game và cài đặt
-
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type Category = 'general' | 'history' | 'science' | 'math' | 'geography' | 'arts' | 'custom';
 export type Language = 'en' | 'vi';
@@ -56,7 +54,6 @@ export interface GameType {
   defaultSettings: GameSettingsData;
 }
 
-// Cấu trúc game và câu hỏi
 export interface GameQuestion {
   question: string;
   options?: string[];
