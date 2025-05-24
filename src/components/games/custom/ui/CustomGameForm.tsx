@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { SparklesIcon, Info, Code } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { AIGameGenerator } from '../../generator/geminiGenerator';
+import { AIGameGenerator } from '../../generator';
 import { MiniGame } from '../../generator/types';
 import { GameSettingsData } from '../../shared/types';
 import GameLoading from '../../shared/GameLoading';

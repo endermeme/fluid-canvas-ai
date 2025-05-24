@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
-import { AIGameGenerator } from '../generator/geminiGenerator';
+import { AIGameGenerator } from '../generator';
 import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../shared/GameLoading';

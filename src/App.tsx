@@ -6,6 +6,7 @@ import GameSharePage from './pages/GameSharePage';
 import GameHistoryPage from './pages/GameHistoryPage';
 import GameController from './components/games/custom/GameController';
 import TeacherDashboard from './components/games/shared/TeacherDashboard';
+import IframeTest from './pages/iframe-test';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
       <Route path="/custom-game" element={<GameController />} />
       <Route path="/game/:gameId/dashboard" element={<TeacherDashboard />} />
       <Route path="/play/:gameType/:slug/:gameId/dashboard" element={<TeacherDashboard />} />
+      <Route path="/iframe-test" element={<IframeTest />} />
     </Routes>
   );
 }

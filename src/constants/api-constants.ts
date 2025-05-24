@@ -1,4 +1,3 @@
-
 /**
  * API Constants for the application
  * Centralized location for all API keys and model configurations
@@ -32,7 +31,7 @@ export const DEFAULT_GENERATION_SETTINGS = {
 };
 
 // Request timeout in milliseconds
-export const REQUEST_TIMEOUT = 60000; // 60 seconds
+export const REQUEST_TIMEOUT = 180000; // 3 phút (180 giây)
 
 // Maximum retry attempts for API calls
-export const MAX_RETRY_ATTEMPTS = 3;
+export const MAX_RETRY_ATTEMPTS = 2;

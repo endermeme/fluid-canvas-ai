@@ -6,7 +6,8 @@ import QuizContainer from '@/components/games/shared/QuizContainer';
 import GameLoading from '@/components/games/shared/GameLoading';
 import CustomGameForm from '@/components/games/custom/CustomGameForm';
 import EnhancedGameView from '@/components/games/custom/EnhancedGameView';
-import { tryGeminiGeneration } from '@/components/games/generator/geminiGenerator';
+import { tryGeminiGeneration } from '@/components/games/generator';
+import { MiniGame } from '@/components/games/generator/types';
 
 const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -17,7 +18,7 @@ const Quiz = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const handleGenerate = async (promptText: string, game?: any) => {
+  const handleGenerate = async (promptText: string, game?: MiniGame) => {
     if (game) {
       setGameContent(game.content);
       setGameTitle(game.title || `Game: ${promptText.substring(0, 40)}...`);
@@ -44,6 +45,11 @@ const Quiz = () => {
     setMiniGame(null);
     
     try {
+      toast({
+        title: "Đang tạo trò chơi",
+        description: "Quá trình có thể mất 2-3 phút, vui lòng đợi...",
+      });
+      
       const game = await tryGeminiGeneration(null, promptText, { 
         useCanvas: true, 
         category: 'general' 

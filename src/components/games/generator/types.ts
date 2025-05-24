@@ -1,22 +1,31 @@
 import { GameSettingsData } from '../shared/types';
 
-export interface MiniGame {
-  title?: string;
-  content?: string;
-  useCanvas?: boolean;
-}
-
+/**
+ * Interface cho response từ API game
+ */
 export interface GameApiResponse {
   success: boolean;
-  game?: MiniGame;
+  content?: string;
   error?: string;
 }
 
+/**
+ * Interface cho mini game
+ */
+export interface MiniGame {
+  title: string;
+  content: string;
+  useCanvas?: boolean;
+}
+
+/**
+ * Options cho việc tạo prompt
+ */
 export interface PromptOptions {
   topic: string;
   useCanvas?: boolean;
   language?: string;
-  difficulty?: string;
+  difficulty?: 'easy' | 'medium' | 'hard';
   category?: string;
 }
 
