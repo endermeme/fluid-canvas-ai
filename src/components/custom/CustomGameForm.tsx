@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -51,7 +52,13 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
         useCanvas: true
       };
       
-      const game = await gameGenerator.generateMiniGame(content, settings);
+      // Convert GameSettingsData to compatible format for generateMiniGame
+      const gameOptions = {
+        useCanvas: settings.useCanvas,
+        category: settings.category
+      };
+      
+      const game = await gameGenerator.generateMiniGame(content, gameOptions);
       
       if (game) {
         toast({

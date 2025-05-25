@@ -1,6 +1,16 @@
 
 # Quyết định và Thay đổi dự án
 
+## Ngày 25/05/2025 - Sửa lỗi import package và type compatibility
+
+### Thay đổi:
+- **dependencies**: Cài đặt @google/generative-ai package thay vì @google-ai/generative-ai
+- **geminiClient.ts**: Cập nhật import đúng package name
+- **CustomGameForm.tsx**: Sửa type compatibility giữa GameSettingsData và GeneratorSettings
+- **AI integration**: Đảm bảo tương thích types giữa các components
+
+### Loại thay đổi: Sửa lỗi import và type compatibility
+
 ## Ngày 25/05/2025 - Sửa lỗi build dependencies và interface conflicts
 
 ### Thay đổi:

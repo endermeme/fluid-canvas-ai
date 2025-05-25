@@ -1,4 +1,5 @@
-import { GoogleGenerativeAI } from '@google-ai/generative-ai';
+
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GameApiResponse, GeneratorSettings } from './types';
 
 const MODEL_NAME = 'gemini-1.5-pro-001';
@@ -47,7 +48,7 @@ export const generateWithGemini = async (
       success: true,
       content,
       metrics: {
-        tokensUsed: 0, // Note: Usage metadata không khả dụng trong phiên bản hiện tại
+        tokensUsed: 0,
         responseTime
       }
     };
