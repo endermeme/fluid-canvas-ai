@@ -1,9 +1,12 @@
 
 export interface GameSettingsData {
   difficulty: 'easy' | 'medium' | 'hard';
-  language?: 'vi' | 'en';
+  language: 'vi' | 'en';
   useCanvas?: boolean;
   category?: string;
+  questionCount?: number;
+  timePerQuestion?: number;
+  useTimer?: boolean;
 }
 
 export interface MiniGameData {

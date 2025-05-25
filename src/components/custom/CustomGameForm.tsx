@@ -45,7 +45,10 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       gameGenerator.setCanvasMode(true);
       
       const settings: GameSettingsData = {
-        category: 'custom'
+        difficulty: 'medium',
+        language: 'vi',
+        category: 'custom',
+        useCanvas: true
       };
       
       const game = await gameGenerator.generateMiniGame(content, settings);

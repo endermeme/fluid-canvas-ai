@@ -23,10 +23,9 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
   
   const defaultSettings: GameSettingsData = {
     difficulty: 'medium',
-    questionCount: 10,
-    timePerQuestion: 30,
+    language: 'vi',
     category: 'general',
-    useTimer: true
+    useCanvas: true
   };
   
   const handleQuickStart = () => {
@@ -162,7 +161,6 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
         <DialogContent className="sm:max-w-md">
           <DialogTitle>Cài đặt cho {gameTypes.find(g => g.id === selectedGameType)?.name || "trò chơi"}</DialogTitle>
           <GameSettings 
-            topic={quickPrompt}
             onStart={(settings) => {
               if (onQuickStart && selectedGameType) {
                 onQuickStart(selectedGameType, quickPrompt, settings);

@@ -4,18 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-
-export interface GameSettingsData {
-  difficulty: 'easy' | 'medium' | 'hard';
-  language: 'vi' | 'en';
-  useCanvas: boolean;
-}
+import { GameSettingsData } from './types';
 
 interface GameSettingsProps {
   onStart: (settings: GameSettingsData) => void;
   initialSettings: GameSettingsData;
   onCancel: () => void;
   inModal?: boolean;
+  topic?: string;
 }
 
 const GameSettings: React.FC<GameSettingsProps> = ({
@@ -32,10 +28,6 @@ const GameSettings: React.FC<GameSettingsProps> = ({
 
   const handleLanguageChange = (value: 'vi' | 'en') => {
     setSettings({ ...settings, language: value });
-  };
-
-  const handleUseCanvasChange = (value: boolean) => {
-    setSettings({ ...settings, useCanvas: value });
   };
 
   const handleSubmit = () => {
@@ -84,18 +76,6 @@ const GameSettings: React.FC<GameSettingsProps> = ({
             </SelectContent>
           </Select>
         </div>
-        
-        {/* <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="useCanvas" className="text-right">
-            Sử dụng Canvas
-          </Label>
-          <Switch
-            id="useCanvas"
-            checked={settings.useCanvas}
-            onCheckedChange={handleUseCanvasChange}
-            className="col-span-3"
-          />
-        </div> */}
       </CardContent>
       <div className="flex justify-end space-x-2 p-4">
         <Button variant="ghost" onClick={onCancel}>

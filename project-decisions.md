@@ -1,6 +1,18 @@
 
 # Quyết định và Thay đổi dự án
 
+## Ngày 25/05/2025 - Sửa lỗi build dependencies và interface conflicts
+
+### Thay đổi:
+- **dependencies**: Thêm @google/generative-ai package
+- **shared/types.ts**: Thống nhất GameSettingsData interface với các properties đầy đủ
+- **GameSettings.tsx**: Cập nhật để sử dụng interface chung từ shared/types
+- **CustomGameForm.tsx**: Sửa settings object để có đầy đủ required properties
+- **GameSelector.tsx**: Loại bỏ questionCount không hợp lệ, sử dụng interface đúng
+- **PresetGameManager.tsx**: Cập nhật interface compatibility
+
+### Loại thay đổi: Sửa lỗi build và type conflicts
+
 ## Ngày 25/05/2025 - Sửa lỗi export và type conflicts
 
 ### Thay đổi:
