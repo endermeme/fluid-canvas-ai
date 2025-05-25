@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import GameSettings, { GameSettingsData } from '@/components/shared/GameSettings';
+import GameSettings from '@/components/shared/GameSettings';
+import { GameSettingsData } from '@/components/shared/types';
 
 export interface PresetGameManagerProps {
   onBack: () => void;

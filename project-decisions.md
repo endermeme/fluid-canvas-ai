@@ -1,6 +1,18 @@
 
 # Quyết định và Thay đổi dự án
 
+## Ngày 25/05/2025 - Sửa lỗi export và type conflicts
+
+### Thay đổi:
+- **gameGenerator.ts**: Sửa exports thiếu (GameGenerator, AIGameGenerator, generateGameFromTopic)
+- **AI index.ts**: Cập nhật imports phù hợp với exports thực tế
+- **GameSettings.tsx**: Loại bỏ id props không hợp lệ từ Select components
+- **PresetGamesPage.tsx**: Sửa props interface cho PresetGameManager
+- **GameHistoryPage.tsx**: Thêm type definition cho StoredGame
+- **shared/types.ts**: Thống nhất GameSettingsData interface
+
+### Loại thay đổi: Sửa lỗi exports và type definitions
+
 ## Ngày 25/05/2025 - Sửa lỗi build và import
 
 ### Thay đổi:

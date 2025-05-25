@@ -3,7 +3,9 @@
 export { 
   GameGenerator, 
   AIGameGenerator,
-  generateGameFromTopic 
+  generateGameFromTopic,
+  generateGame,
+  generateAlternativeGame
 } from './gameGenerator';
 
 export type { MiniGame, GameApiResponse, PromptOptions } from './types';

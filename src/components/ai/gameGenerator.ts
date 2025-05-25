@@ -1,3 +1,4 @@
+
 import { MiniGame, PromptOptions, GeneratorSettings } from './types';
 
 const cleanUpCode = (code: string): string => {
@@ -227,3 +228,36 @@ export const generateAlternativeGame = async (
     difficulty: options.difficulty
   };
 };
+
+// Class-based API for compatibility
+export class GameGenerator {
+  static async generate(prompt: string, options?: PromptOptions): Promise<MiniGame> {
+    return generateGame(prompt, options);
+  }
+}
+
+export class AIGameGenerator {
+  private static instance: AIGameGenerator;
+  private canvasMode: boolean = false;
+
+  static getInstance(): AIGameGenerator {
+    if (!AIGameGenerator.instance) {
+      AIGameGenerator.instance = new AIGameGenerator();
+    }
+    return AIGameGenerator.instance;
+  }
+
+  setCanvasMode(enabled: boolean): void {
+    this.canvasMode = enabled;
+  }
+
+  async generateMiniGame(prompt: string, settings?: GeneratorSettings): Promise<MiniGame> {
+    return generateGame(prompt, { topic: prompt }, settings);
+  }
+}
+
+export const generateGameFromTopic = async (topic: string, settings?: GeneratorSettings): Promise<MiniGame> => {
+  return generateGame(topic, { topic }, settings);
+};
+
+export default { generateGame, generateAlternativeGame, GameGenerator, AIGameGenerator, generateGameFromTopic };

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,7 +53,6 @@ const GameSettings: React.FC<GameSettingsProps> = ({
             Độ khó
           </Label>
           <Select
-            id="difficulty"
             value={settings.difficulty}
             onValueChange={handleDifficultyChange}
           >
@@ -72,7 +72,6 @@ const GameSettings: React.FC<GameSettingsProps> = ({
             Ngôn ngữ
           </Label>
           <Select
-            id="language"
             value={settings.language}
             onValueChange={handleLanguageChange}
           >
