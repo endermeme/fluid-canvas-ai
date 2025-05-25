@@ -1,120 +1,110 @@
-
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+
+export interface GameSettingsData {
+  difficulty: 'easy' | 'medium' | 'hard';
+  language: 'vi' | 'en';
+  useCanvas: boolean;
+}
 
 interface GameSettingsProps {
-  settings: {
-    difficulty: string;
-    soundEnabled: boolean;
-    autoSave: boolean;
-    theme: string;
-    gameSpeed: number;
-  };
-  onSettingsChange: (settings: any) => void;
+  onStart: (settings: GameSettingsData) => void;
+  initialSettings: GameSettingsData;
+  onCancel: () => void;
+  inModal?: boolean;
 }
 
 const GameSettings: React.FC<GameSettingsProps> = ({
-  settings,
-  onSettingsChange
+  onStart,
+  initialSettings,
+  onCancel,
+  inModal = false
 }) => {
-  const updateSetting = (key: string, value: any) => {
-    onSettingsChange({
-      ...settings,
-      [key]: value
-    });
+  const [settings, setSettings] = React.useState<GameSettingsData>(initialSettings);
+
+  const handleDifficultyChange = (value: 'easy' | 'medium' | 'hard') => {
+    setSettings({ ...settings, difficulty: value });
+  };
+
+  const handleLanguageChange = (value: 'vi' | 'en') => {
+    setSettings({ ...settings, language: value });
+  };
+
+  const handleUseCanvasChange = (value: boolean) => {
+    setSettings({ ...settings, useCanvas: value });
+  };
+
+  const handleSubmit = () => {
+    onStart(settings);
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Cài đặt game</CardTitle>
-          <CardDescription>
-            Tùy chỉnh các thiết lập cho trò chơi
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="difficulty">Độ khó</Label>
-            <Select
-              value={settings.difficulty}
-              onValueChange={(value) => updateSetting('difficulty', value)}
-            >
-              <SelectTrigger id="difficulty">
-                <SelectValue placeholder="Chọn độ khó" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="easy">Dễ</SelectItem>
-                <SelectItem value="medium">Trung bình</SelectItem>
-                <SelectItem value="hard">Khó</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="theme">Giao diện</Label>
-            <Select
-              value={settings.theme}
-              onValueChange={(value) => updateSetting('theme', value)}
-            >
-              <SelectTrigger id="theme">
-                <SelectValue placeholder="Chọn giao diện" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="light">Sáng</SelectItem>
-                <SelectItem value="dark">Tối</SelectItem>
-                <SelectItem value="auto">Tự động</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-3">
-            <Label htmlFor="speed">Tốc độ game: {settings.gameSpeed}x</Label>
-            <Slider
-              id="speed"
-              min={0.5}
-              max={2}
-              step={0.1}
-              value={[settings.gameSpeed]}
-              onValueChange={(value) => updateSetting('gameSpeed', value[0])}
-              className="w-full"
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="sound" className="flex flex-col space-y-1">
-              <span>Âm thanh</span>
-              <span className="text-sm text-muted-foreground">
-                Bật/tắt hiệu ứng âm thanh
-              </span>
-            </Label>
-            <Switch
-              id="sound"
-              checked={settings.soundEnabled}
-              onCheckedChange={(checked) => updateSetting('soundEnabled', checked)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="autosave" className="flex flex-col space-y-1">
-              <span>Tự động lưu</span>
-              <span className="text-sm text-muted-foreground">
-                Tự động lưu tiến độ game
-              </span>
-            </Label>
-            <Switch
-              id="autosave"
-              checked={settings.autoSave}
-              onCheckedChange={(checked) => updateSetting('autoSave', checked)}
-            />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <Card className={inModal ? "w-full" : "w-[500px]"}>
+      <CardHeader>
+        <CardTitle>Cài đặt trò chơi</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="difficulty" className="text-right">
+            Độ khó
+          </Label>
+          <Select
+            id="difficulty"
+            value={settings.difficulty}
+            onValueChange={handleDifficultyChange}
+          >
+            <SelectTrigger className="col-span-3">
+              <SelectValue placeholder="Chọn độ khó" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="easy">Dễ</SelectItem>
+              <SelectItem value="medium">Trung bình</SelectItem>
+              <SelectItem value="hard">Khó</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="language" className="text-right">
+            Ngôn ngữ
+          </Label>
+          <Select
+            id="language"
+            value={settings.language}
+            onValueChange={handleLanguageChange}
+          >
+            <SelectTrigger className="col-span-3">
+              <SelectValue placeholder="Chọn ngôn ngữ" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="vi">Tiếng Việt</SelectItem>
+              <SelectItem value="en">English</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {/* <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="useCanvas" className="text-right">
+            Sử dụng Canvas
+          </Label>
+          <Switch
+            id="useCanvas"
+            checked={settings.useCanvas}
+            onCheckedChange={handleUseCanvasChange}
+            className="col-span-3"
+          />
+        </div> */}
+      </CardContent>
+      <div className="flex justify-end space-x-2 p-4">
+        <Button variant="ghost" onClick={onCancel}>
+          Hủy bỏ
+        </Button>
+        <Button onClick={handleSubmit}>Bắt đầu</Button>
+      </div>
+    </Card>
   );
 };
 

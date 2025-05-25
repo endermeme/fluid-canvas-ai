@@ -1,6 +1,18 @@
 
 # Quyết định và Thay đổi dự án
 
+## Ngày 25/05/2025 - Sửa lỗi build và import
+
+### Thay đổi:
+- **GameHistoryPage.tsx**: Thêm import cho UI components
+- **GameController.tsx**: Sửa import từ `saveSharedGame` thành `saveGameForSharing`
+- **AI types**: Xóa property `useCanvas` không hợp lệ từ MiniGame interface
+- **GameSettings**: Cập nhật props interface
+- **PresetGameManager**: Cập nhật props interface
+- **GeminiClient**: Sửa lỗi usageMetadata
+
+### Loại thay đổi: Sửa lỗi build và type definitions
+
 ## Ngày 25/05/2025 - Tái tổ chức cấu trúc thư mục
 
 ### Thay đổi:

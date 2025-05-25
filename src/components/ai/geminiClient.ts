@@ -1,66 +1,78 @@
+import { GoogleGenerativeAI } from '@google-ai/generative-ai';
+import { GameApiResponse, GeneratorSettings } from './types';
 
-/**
- * Gemini Client - Handles communication with Google's Gemini API
- */
+const MODEL_NAME = 'gemini-1.5-pro-001';
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { GEMINI_MODELS } from '@/constants/api-constants';
-import type { GameApiResponse, GeneratorSettings } from './types';
+const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
 
-interface GeminiCallOptions {
-  prompt: string;
-  model?: string;
-  temperature?: number;
-  settings?: GeneratorSettings;
-}
+const model = genAI.getModel({
+  model: MODEL_NAME,
+  generationConfig: {
+    temperature: 0.6,
+    topK: 20,
+    topP: 0.95,
+    maxOutputTokens: 4096,
+  },
+});
 
-export const callGeminiAPI = async (options: GeminiCallOptions): Promise<GameApiResponse> => {
-  const { prompt, model = GEMINI_MODELS.CUSTOM_GAME, temperature = 0.7, settings } = options;
-
+export const generateWithGemini = async (
+  prompt: string,
+  settings: GeneratorSettings = {}
+): Promise<GameApiResponse> => {
+  const startTime = Date.now();
+  
   try {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    
-    if (!apiKey) {
-      throw new Error('Gemini API key not found');
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const geminiModel = genAI.getGenerativeModel({ model });
-
     const generationConfig = {
-      temperature: settings?.temperature || temperature,
-      topK: settings?.topK || 40,
-      topP: settings?.topP || 0.95,
-      maxOutputTokens: settings?.maxOutputTokens || 8192,
+      temperature: settings.temperature || 0.6,
+      topK: settings.topK || 20,
+      topP: settings.topP || 0.95,
+      maxOutputTokens: settings.maxOutputTokens || 4096,
     };
 
-    const result = await geminiModel.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    const model = genAI.getModel({
+      model: MODEL_NAME,
       generationConfig,
     });
-
-    const response = await result.response;
-    const content = response.text();
-
-    if (!content) {
-      throw new Error('Empty response from Gemini API');
+    
+    const response = await model.generateContent(prompt);
+    const responseTime = Date.now() - startTime;
+    
+    if (!response.response) {
+      throw new Error('No response received from Gemini');
     }
 
+    const content = response.response.text();
+    
     return {
       success: true,
       content,
       metrics: {
-        tokensUsed: response.usageMetadata?.totalTokenCount || 0,
-        responseTime: Date.now()
+        tokensUsed: 0, // Note: Usage metadata không khả dụng trong phiên bản hiện tại
+        responseTime
       }
     };
-
   } catch (error) {
-    console.error('Gemini API Error:', error);
+    console.error('Gemini generation error:', error);
+    const responseTime = Date.now() - startTime;
     
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      metrics: {
+        tokensUsed: 0,
+        responseTime
+      }
     };
+  }
+};
+
+export const countTokens = async (text: string): Promise<number> => {
+  try {
+    const model = genAI.getModel({ model: MODEL_NAME });
+    const { totalTokens } = await model.countTokens(text);
+    return totalTokens;
+  } catch (error) {
+    console.error("Error counting tokens:", error);
+    return 0;
   }
 };

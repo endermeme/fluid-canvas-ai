@@ -8,7 +8,7 @@ import GameLoading from '@/components/shared/GameLoading';
 import EnhancedGameView from './EnhancedGameView';
 import { tryGeminiGeneration } from '@/components/ai';
 import { MiniGame } from '@/components/ai/types';
-import { saveSharedGame } from '@/lib/gameExport';
+import { saveGameForSharing } from '@/lib/gameExport';
 import QuizContainer from '@/components/shared/QuizContainer';
 
 const GameController = () => {
@@ -90,29 +90,32 @@ const GameController = () => {
     setMiniGame(null);
   };
 
-  const handleShare = async () => {
+  const handleShare = async (): Promise<string> => {
     if (!miniGame) {
       toast({
         title: "Lỗi",
         description: "Không có game để chia sẻ",
         variant: "destructive"
       });
-      return;
+      throw new Error("No game to share");
     }
 
     try {
-      const gameId = await saveSharedGame({
-        title: miniGame.title,
-        description: prompt,
-        htmlContent: miniGame.content,
-      });
+      const shareUrl = await saveGameForSharing(
+        miniGame.title,
+        'custom',
+        miniGame,
+        miniGame.content,
+        prompt
+      );
 
-      if (gameId) {
-        navigate(`/game/${gameId}`);
+      if (shareUrl) {
+        navigate(`/game/${shareUrl.split('/').pop()}`);
         toast({
           title: "Game đã được chia sẻ",
           description: "Bạn có thể chia sẻ game này với bạn bè",
         });
+        return shareUrl;
       } else {
         throw new Error("Không thể chia sẻ game");
       }
@@ -123,6 +126,7 @@ const GameController = () => {
         description: "Có lỗi xảy ra khi chia sẻ game. Vui lòng thử lại.",
         variant: "destructive"
       });
+      throw error;
     }
   };
 
