@@ -52,13 +52,8 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
         useCanvas: true
       };
       
-      // Convert GameSettingsData to compatible format for generateMiniGame
-      const gameOptions = {
-        useCanvas: settings.useCanvas,
-        category: settings.category
-      };
-      
-      const game = await gameGenerator.generateMiniGame(content, gameOptions);
+      // Pass content directly to generateMiniGame without gameOptions
+      const game = await gameGenerator.generateMiniGame(content);
       
       if (game) {
         toast({

@@ -1,6 +1,15 @@
 
 # Quyết định và Thay đổi dự án
 
+## Ngày 25/05/2025 - Sửa lỗi Gemini API method và type compatibility
+
+### Thay đổi:
+- **geminiClient.ts**: Sửa từ `getModel()` thành `getGenerativeModel()` theo Gemini API đúng
+- **CustomGameForm.tsx**: Loại bỏ gameOptions type mismatch, gọi generateMiniGame trực tiếp với content
+- **API integration**: Đảm bảo tương thích với @google/generative-ai package
+
+### Loại thay đổi: Sửa lỗi API method và type compatibility
+
 ## Ngày 25/05/2025 - Sửa lỗi import package và type compatibility
 
 ### Thay đổi:

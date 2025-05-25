@@ -6,7 +6,7 @@ const MODEL_NAME = 'gemini-1.5-pro-001';
 
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
 
-const model = genAI.getModel({
+const model = genAI.getGenerativeModel({
   model: MODEL_NAME,
   generationConfig: {
     temperature: 0.6,
@@ -30,7 +30,7 @@ export const generateWithGemini = async (
       maxOutputTokens: settings.maxOutputTokens || 4096,
     };
 
-    const model = genAI.getModel({
+    const model = genAI.getGenerativeModel({
       model: MODEL_NAME,
       generationConfig,
     });
@@ -69,7 +69,7 @@ export const generateWithGemini = async (
 
 export const countTokens = async (text: string): Promise<number> => {
   try {
-    const model = genAI.getModel({ model: MODEL_NAME });
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     const { totalTokens } = await model.countTokens(text);
     return totalTokens;
   } catch (error) {
