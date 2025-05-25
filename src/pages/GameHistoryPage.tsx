@@ -3,36 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { getRemainingTime } from '@/lib/gameExport';
 import { StoredGame } from '@/types/types';
 import QuizContainer from '@/components/shared/QuizContainer';
-import { Button } from '@/components/ui/button';
-import { Plus, Clock, ExternalLink, Search, Trash2, Share2, Filter } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 
 const GameHistoryPage: React.FC = () => {
   const [games, setGames] = useState<StoredGame[]>([]);

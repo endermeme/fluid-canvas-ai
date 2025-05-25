@@ -1,98 +1,134 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Play } from 'lucide-react';
-import GameSettings from '../shared/GameSettings';
-import { GameSettingsData } from '../shared/types';
+import { Button } from '@/components/ui/button';
+import { Play, Settings, Share2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+
+interface PresetGame {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  estimatedTime: number;
+  htmlContent: string;
+}
 
 interface PresetGameManagerProps {
-  gameType: string;
-  onBack: () => void;
-  initialTopic?: string;
+  games: PresetGame[];
+  onGameSelect: (game: PresetGame) => void;
+  onGameCustomize?: (game: PresetGame) => void;
+  onGameShare?: (game: PresetGame) => void;
 }
 
 const PresetGameManager: React.FC<PresetGameManagerProps> = ({
-  gameType,
-  onBack,
-  initialTopic = ""
+  games,
+  onGameSelect,
+  onGameCustomize,
+  onGameShare
 }) => {
-  const [topic, setTopic] = useState(initialTopic);
-  const [showSettings, setShowSettings] = useState(!initialTopic);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const gameTypeNames: Record<string, string> = {
-    quiz: 'Trắc Nghiệm',
-    flashcards: 'Thẻ Ghi Nhớ',
-    matching: 'Nối Từ',
-    memory: 'Trò Chơi Ghi Nhớ',
-    ordering: 'Sắp Xếp Câu',
-    wordsearch: 'Tìm Từ Ẩn',
-    pictionary: 'Đoán Hình',
-    truefalse: 'Đúng hay Sai'
+  const categories = ['all', ...Array.from(new Set(games.map(game => game.category)))];
+  
+  const filteredGames = selectedCategory === 'all' 
+    ? games 
+    : games.filter(game => game.category === selectedCategory);
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'easy': return 'bg-green-100 text-green-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'hard': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  const handleStartGame = (settings: GameSettingsData) => {
-    console.log('Starting game:', gameType, 'with settings:', settings);
-    // TODO: Implement game generation logic
+  const getDifficultyText = (difficulty: string) => {
+    switch (difficulty) {
+      case 'easy': return 'Dễ';
+      case 'medium': return 'TB';
+      case 'hard': return 'Khó';
+      default: return 'N/A';
+    }
   };
-
-  if (showSettings) {
-    return (
-      <div className="p-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" onClick={onBack}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Quay lại
-          </Button>
-          <h2 className="text-2xl font-bold">
-            Cài đặt {gameTypeNames[gameType] || gameType}
-          </h2>
-        </div>
-
-        <div className="max-w-2xl mx-auto">
-          <GameSettings
-            topic={topic || `game ${gameType}`}
-            onStart={handleStartGame}
-            onCancel={onBack}
-          />
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="outline" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Quay lại
-        </Button>
-        <h2 className="text-2xl font-bold">
-          {gameTypeNames[gameType] || gameType}
-        </h2>
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {categories.map(category => (
+          <Button
+            key={category}
+            variant={selectedCategory === category ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedCategory(category)}
+          >
+            {category === 'all' ? 'Tất cả' : category}
+          </Button>
+        ))}
       </div>
 
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Play className="h-5 w-5" />
-            Sẵn sàng chơi {gameTypeNames[gameType]}
-          </CardTitle>
-          <CardDescription>
-            Game đã được tạo và sẵn sàng để chơi
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <p className="text-lg mb-4">
-              Game {gameTypeNames[gameType]} về "{topic}" đã sẵn sàng!
-            </p>
-            <Button onClick={() => setShowSettings(true)}>
-              Chơi ngay
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {filteredGames.map(game => (
+          <Card key={game.id} className="hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-lg line-clamp-1">{game.title}</CardTitle>
+                <Badge className={getDifficultyColor(game.difficulty)}>
+                  {getDifficultyText(game.difficulty)}
+                </Badge>
+              </div>
+              <CardDescription className="line-clamp-2">
+                {game.description}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-2">
+              <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
+                <span>⏱️ {game.estimatedTime} phút</span>
+                <span>📂 {game.category}</span>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => onGameSelect(game)}
+                  className="flex-1"
+                  size="sm"
+                >
+                  <Play className="h-4 w-4 mr-1" />
+                  Chơi
+                </Button>
+                
+                {onGameCustomize && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => onGameCustomize(game)}
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                )}
+                
+                {onGameShare && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => onGameShare(game)}
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {filteredGames.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          <p>Không tìm thấy game nào trong danh mục này</p>
+        </div>
+      )}
     </div>
   );
 };

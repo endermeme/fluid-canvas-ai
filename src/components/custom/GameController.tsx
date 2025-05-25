@@ -1,169 +1,342 @@
-import React, { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { MiniGame } from '../ai/types';
-import { AIGameGenerator } from '../ai';
-import EnhancedGameView from './EnhancedGameView';
-import CustomGameForm from './CustomGameForm';
-import GameLoading from '../shared/GameLoading';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { createGameSession } from '@/lib/gameParticipation';
-import QuizContainer from '../shared/QuizContainer';
+import { Trash2 } from 'lucide-react';
+import CustomGameForm from './CustomGameForm';
+import GameLoading from '@/components/shared/GameLoading';
+import EnhancedGameView from './EnhancedGameView';
+import { tryGeminiGeneration } from '@/components/ai';
+import { MiniGame } from '@/components/ai/types';
+import { saveSharedGame } from '@/lib/gameExport';
+import QuizContainer from '@/components/shared/QuizContainer';
 
-interface GameControllerProps {
-  initialTopic?: string;
-  onGameGenerated?: (game: MiniGame) => void;
-}
-
-const GameController: React.FC<GameControllerProps> = ({ 
-  initialTopic = "", 
-  onGameGenerated 
-}) => {
+const GameController = () => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [currentGame, setCurrentGame] = useState<MiniGame | null>(null);
-  const [currentTopic, setCurrentTopic] = useState<string>(initialTopic);
-  const [showForm, setShowForm] = useState(!currentGame);
-  const [isSharing, setIsSharing] = useState(false);
-  const navigate = useNavigate();
+  const [gameContent, setGameContent] = useState<string | null>(null);
+  const [gameTitle, setGameTitle] = useState('Custom Game');
+  const [prompt, setPrompt] = useState('');
+  const [miniGame, setMiniGame] = useState<{ title: string, content: string } | null>(null);
   const { toast } = useToast();
-  
-  const handleGameGeneration = (content: string, game?: MiniGame) => {
-    setCurrentTopic(content);
-    
-    if (game) {
-      setCurrentGame(game);
-      setShowForm(false);
-      
-      if (onGameGenerated) {
-        onGameGenerated(game);
-      }
-      
+  const navigate = useNavigate();
+
+  const handleGenerate = async (promptText: string) => {
+    if (!promptText.trim()) {
       toast({
-        title: "Minigame Đã Sẵn Sàng",
-        description: `Minigame "${game.title || content}" đã được tạo thành công.`,
+        title: "Lỗi",
+        description: "Vui lòng nhập yêu cầu cho trò chơi",
+        variant: "destructive"
       });
+      return;
     }
-    
-    setIsGenerating(false);
-  };
 
-  const handleBack = () => {
-    if (currentGame) {
-      setCurrentGame(null);
-      setShowForm(true);
-    } else {
-      navigate('/');
-    }
-  };
+    setPrompt(promptText);
+    setGameTitle(`Game: ${promptText.substring(0, 40)}${promptText.length > 40 ? '...' : ''}`);
+    setIsGenerating(true);
+    setGameContent(null);
+    setMiniGame(null);
 
-  const handleNewGame = () => {
-    setCurrentGame(null);
-    setShowForm(true);
-  };
-  
-  const handleShareGame = async () => {
-    if (!currentGame || isSharing) return;
-    
     try {
-      setIsSharing(true);
-      
-      const gameSession = await createGameSession(
-        currentGame.title || "Minigame tương tác",
-        currentGame.content
-      );
-      
-      navigate(`/game/${gameSession.id}`);
-      
       toast({
-        title: "Game đã được chia sẻ",
-        description: "Bạn có thể gửi link cho người khác để họ tham gia.",
+        title: "Đang tạo trò chơi",
+        description: "Quá trình có thể mất 2-3 phút, vui lòng đợi...",
       });
+
+      const game = await tryGeminiGeneration(null, promptText, {
+        useCanvas: true,
+        category: 'general'
+      });
+
+      if (game) {
+        setGameContent(game.content);
+        setGameTitle(game.title || `Game: ${promptText.substring(0, 40)}...`);
+        setMiniGame({
+          title: game.title || `Game: ${promptText.substring(0, 40)}...`,
+          content: game.content
+        });
+
+        toast({
+          title: "Trò chơi đã được tạo",
+          description: "Trò chơi đã được tạo thành công với HTML, CSS và JavaScript",
+        });
+      } else {
+        throw new Error("Không thể tạo game");
+      }
+    } catch (error) {
+      console.error("Error generating game:", error);
+
+      toast({
+        title: "Lỗi tạo game",
+        description: "Có lỗi xảy ra khi tạo game. Vui lòng thử lại.",
+        variant: "destructive"
+      });
+
+      const fallbackHTML = generateFallbackGame(promptText);
+      setGameContent(fallbackHTML);
+      setGameTitle(`Game: ${promptText.substring(0, 40)}...`);
+      setMiniGame({
+        title: `Game: ${promptText.substring(0, 40)}...`,
+        content: fallbackHTML
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleReset = () => {
+    setGameContent(null);
+    setGameTitle('Custom Game');
+    setPrompt('');
+    setMiniGame(null);
+  };
+
+  const handleShare = async () => {
+    if (!miniGame) {
+      toast({
+        title: "Lỗi",
+        description: "Không có game để chia sẻ",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const gameId = await saveSharedGame({
+        title: miniGame.title,
+        description: prompt,
+        htmlContent: miniGame.content,
+      });
+
+      if (gameId) {
+        navigate(`/game/${gameId}`);
+        toast({
+          title: "Game đã được chia sẻ",
+          description: "Bạn có thể chia sẻ game này với bạn bè",
+        });
+      } else {
+        throw new Error("Không thể chia sẻ game");
+      }
     } catch (error) {
       console.error("Error sharing game:", error);
       toast({
-        title: "Lỗi chia sẻ",
-        description: "Không thể tạo liên kết chia sẻ. Vui lòng thử lại.",
+        title: "Lỗi chia sẻ game",
+        description: "Có lỗi xảy ra khi chia sẻ game. Vui lòng thử lại.",
         variant: "destructive"
       });
-    } finally {
-      setIsSharing(false);
     }
   };
 
-  const getContainerTitle = () => {
-    if (isGenerating) {
-      return `Đang tạo game: ${currentTopic}`;
-    }
-    if (currentGame) {
-      return currentGame.title || "Minigame Tương Tác";
-    }
-    return "Tạo Game Tùy Chỉnh";
+  const generateFallbackGame = (promptText: string): string => {
+    return `
+      <!DOCTYPE html>
+      <html lang="vi">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>Game Demo: ${promptText}</title>
+        <style>
+          * {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+          }
+          
+          button {
+            min-width: 44px;
+            min-height: 44px;
+            padding: 12px 24px;
+            margin: 8px;
+            font-size: 16px;
+          }
+          
+          .game-object {
+            width: 60px;
+            height: 60px;
+            background-color: #4f46e5;
+            border-radius: 50%;
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+          }
+          
+          @media (hover: hover) and (pointer: fine) {
+            .game-object:hover {
+              transform: scale(1.1);
+            }
+          }
+          
+          .game-object:active {
+            transform: scale(0.95);
+          }
+          
+          .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Game Demo: ${promptText}</h1>
+          
+          <p>Đây là phiên bản demo của trò chơi dựa trên yêu cầu của bạn:</p>
+          <p><em>"${promptText}"</em></p>
+          
+          <div class="score">Điểm: <span id="score">0</span></div>
+          
+          <div class="game-content" id="gameArea">
+            <div class="message">Nhấp vào các đối tượng để tăng điểm</div>
+          </div>
+          
+          <div style="margin-top: 24px">
+            <button id="playButton">Bắt đầu chơi</button>
+            <button id="resetButton">Đặt lại</button>
+          </div>
+        </div>
+        
+        <script>
+          let score = 0;
+          let gameRunning = false;
+          let gameObjects = [];
+          let gameArea;
+          let scoreElement;
+          let gameTimer;
+          
+          function addGameObjectEvents(element) {
+            const isTouchDevice = 'ontouchstart' in window;
+            
+            if (isTouchDevice) {
+              element.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                increaseScore(element);
+              });
+            }
+            
+            element.addEventListener('click', function(e) {
+              increaseScore(element);
+            });
+          }
+          
+          document.addEventListener('DOMContentLoaded', function() {
+            gameArea = document.getElementById('gameArea');
+            scoreElement = document.getElementById('score');
+            
+            document.getElementById('playButton').addEventListener('click', startGame);
+            document.getElementById('resetButton').addEventListener('click', resetGame);
+          });
+          
+          function startGame() {
+            if (gameRunning) return;
+            
+            resetGame();
+            gameRunning = true;
+            document.getElementById('playButton').textContent = 'Đang chơi...';
+            
+            gameTimer = setInterval(createGameObject, 1500);
+            createGameObject();
+          }
+          
+          function resetGame() {
+            gameRunning = false;
+            score = 0;
+            scoreElement.textContent = score;
+            document.getElementById('playButton').textContent = 'Bắt đầu chơi';
+            
+            clearInterval(gameTimer);
+            gameObjects.forEach(obj => obj.element.remove());
+            gameObjects = [];
+          }
+          
+          function createGameObject() {
+            if (!gameRunning) return;
+            
+            const areaRect = gameArea.getBoundingClientRect();
+            const maxX = areaRect.width - 50;
+            const maxY = areaRect.height - 50;
+            
+            const element = document.createElement('div');
+            element.classList.add('game-object');
+            
+            const x = Math.floor(Math.random() * maxX);
+            const y = Math.floor(Math.random() * maxY);
+            
+            const colors = ['#4f46e5', '#06b6d4', '#ec4899', '#f97316', '#84cc16'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            element.style.left = x + 'px';
+            element.style.top = y + 'px';
+            element.style.backgroundColor = color;
+            
+            addGameObjectEvents(element);
+            
+            gameArea.appendChild(element);
+            
+            const gameObject = {
+              element: element,
+              createdAt: Date.now()
+            };
+            gameObjects.push(gameObject);
+            
+            setTimeout(() => {
+              if (gameObjects.includes(gameObject)) {
+                element.remove();
+                gameObjects = gameObjects.filter(obj => obj !== gameObject);
+              }
+            }, 3000);
+          }
+          
+          function increaseScore(element) {
+            score += 10;
+            scoreElement.textContent = score;
+            
+            element.style.transform = 'scale(1.5)';
+            element.style.opacity = '0';
+            
+            setTimeout(() => {
+              element.remove();
+              gameObjects = gameObjects.filter(obj => obj.element !== element);
+            }, 300);
+          }
+        </script>
+      </body>
+      </html>
+    `;
   };
 
   const renderContent = () => {
     if (isGenerating) {
-      return <GameLoading topic={currentTopic} />;
-    } 
-    
-    if (currentGame) {
+      return <GameLoading topic={prompt} />;
+    }
+
+    if (miniGame) {
       return (
-        <div className="w-full h-full">
-          <EnhancedGameView 
-            miniGame={{
-              title: currentGame.title || "Minigame Tương Tác",
-              content: currentGame.content || ""
-            }} 
-            onBack={handleBack}
-            onNewGame={handleNewGame}
-            hideHeader={false}
-          />
-        </div>
-      );
-    } 
-    
-    if (showForm) {
-      return (
-        <CustomGameForm 
-          onGenerate={(content, game) => {
-            setIsGenerating(true);
-            setTimeout(() => handleGameGeneration(content, game), 500);
-          }}
-          onCancel={() => navigate('/')}
+        <EnhancedGameView
+          miniGame={miniGame}
+          onBack={handleReset}
+          onShare={handleShare}
         />
       );
     }
-    
+
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
-        <div className="p-6 bg-background/90 rounded-xl shadow-lg border border-primary/10 max-w-md w-full">
-          <p className="text-center mb-4">Không có nội dung trò chơi. Vui lòng tạo mới.</p>
-          <Button 
-            onClick={handleNewGame} 
-            className="w-full"
-          >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Tạo Game Mới
-          </Button>
-        </div>
-      </div>
+      <CustomGameForm
+        onGenerate={handleGenerate}
+        onCancel={() => navigate('/')}
+      />
     );
   };
 
   return (
     <QuizContainer
-      title={getContainerTitle()}
-      showBackButton={false}
-      onBack={handleBack}
+      title={gameTitle}
+      showBackButton={true}
+      onBack={() => navigate('/')}
       showSettingsButton={false}
-      showCreateButton={false}
-      onCreate={handleNewGame}
-      className="p-0 overflow-hidden"
-      isCreatingGame={showForm}
+      showCreateButton={!!miniGame}
+      onCreate={handleReset}
+      isCreatingGame={!miniGame && !isGenerating}
     >
-      <div className="h-full w-full overflow-hidden">
-        {renderContent()}
-      </div>
+      {renderContent()}
     </QuizContainer>
   );
 };

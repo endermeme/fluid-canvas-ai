@@ -1,67 +1,51 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { GameSettingsData } from './types';
+import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface GameSettingsProps {
-  topic: string;
-  onStart: (settings: GameSettingsData) => void;
-  initialSettings?: GameSettingsData;
-  onCancel?: () => void;
-  inModal?: boolean;
+  settings: {
+    difficulty: string;
+    soundEnabled: boolean;
+    autoSave: boolean;
+    theme: string;
+    gameSpeed: number;
+  };
+  onSettingsChange: (settings: any) => void;
 }
 
 const GameSettings: React.FC<GameSettingsProps> = ({
-  topic,
-  onStart,
-  initialSettings,
-  onCancel,
-  inModal = false
+  settings,
+  onSettingsChange
 }) => {
-  const [settings, setSettings] = React.useState<GameSettingsData>({
-    difficulty: 'medium',
-    questionCount: 10,
-    timePerQuestion: 30,
-    useTimer: true,
-    category: 'general',
-    language: 'vi',
-    ...initialSettings
-  });
-
-  const handleSubmit = () => {
-    onStart(settings);
-  };
-
-  const updateSetting = <K extends keyof GameSettingsData>(
-    key: K,
-    value: GameSettingsData[K]
-  ) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+  const updateSetting = (key: string, value: any) => {
+    onSettingsChange({
+      ...settings,
+      [key]: value
+    });
   };
 
   return (
-    <Card className={inModal ? "border-0 shadow-none" : ""}>
-      <CardHeader>
-        <CardTitle>Cài đặt game</CardTitle>
-        <CardDescription>
-          Tùy chỉnh cài đặt cho game về "{topic}"
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Cài đặt game</CardTitle>
+          <CardDescription>
+            Tùy chỉnh các thiết lập cho trò chơi
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="difficulty">Độ khó</Label>
-            <Select 
-              value={settings.difficulty} 
-              onValueChange={(value: 'easy' | 'medium' | 'hard') => updateSetting('difficulty', value)}
+            <Select
+              value={settings.difficulty}
+              onValueChange={(value) => updateSetting('difficulty', value)}
             >
-              <SelectTrigger>
-                <SelectValue />
+              <SelectTrigger id="difficulty">
+                <SelectValue placeholder="Chọn độ khó" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="easy">Dễ</SelectItem>
@@ -72,55 +56,65 @@ const GameSettings: React.FC<GameSettingsProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="questionCount">Số câu hỏi</Label>
-            <Input
-              id="questionCount"
-              type="number"
-              min="5"
-              max="50"
-              value={settings.questionCount}
-              onChange={(e) => updateSetting('questionCount', parseInt(e.target.value))}
+            <Label htmlFor="theme">Giao diện</Label>
+            <Select
+              value={settings.theme}
+              onValueChange={(value) => updateSetting('theme', value)}
+            >
+              <SelectTrigger id="theme">
+                <SelectValue placeholder="Chọn giao diện" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">Sáng</SelectItem>
+                <SelectItem value="dark">Tối</SelectItem>
+                <SelectItem value="auto">Tự động</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-3">
+            <Label htmlFor="speed">Tốc độ game: {settings.gameSpeed}x</Label>
+            <Slider
+              id="speed"
+              min={0.5}
+              max={2}
+              step={0.1}
+              value={[settings.gameSpeed]}
+              onValueChange={(value) => updateSetting('gameSpeed', value[0])}
+              className="w-full"
             />
           </div>
-        </div>
 
-        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label htmlFor="useTimer">Sử dụng thời gian</Label>
+            <Label htmlFor="sound" className="flex flex-col space-y-1">
+              <span>Âm thanh</span>
+              <span className="text-sm text-muted-foreground">
+                Bật/tắt hiệu ứng âm thanh
+              </span>
+            </Label>
             <Switch
-              id="useTimer"
-              checked={settings.useTimer}
-              onCheckedChange={(checked) => updateSetting('useTimer', checked)}
+              id="sound"
+              checked={settings.soundEnabled}
+              onCheckedChange={(checked) => updateSetting('soundEnabled', checked)}
             />
           </div>
 
-          {settings.useTimer && (
-            <div className="space-y-2">
-              <Label htmlFor="timePerQuestion">Thời gian mỗi câu (giây)</Label>
-              <Input
-                id="timePerQuestion"
-                type="number"
-                min="10"
-                max="300"
-                value={settings.timePerQuestion}
-                onChange={(e) => updateSetting('timePerQuestion', parseInt(e.target.value))}
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="flex justify-end gap-3 pt-4">
-          {onCancel && (
-            <Button variant="outline" onClick={onCancel}>
-              Hủy
-            </Button>
-          )}
-          <Button onClick={handleSubmit}>
-            Bắt đầu game
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="autosave" className="flex flex-col space-y-1">
+              <span>Tự động lưu</span>
+              <span className="text-sm text-muted-foreground">
+                Tự động lưu tiến độ game
+              </span>
+            </Label>
+            <Switch
+              id="autosave"
+              checked={settings.autoSave}
+              onCheckedChange={(checked) => updateSetting('autoSave', checked)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
