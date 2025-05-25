@@ -6,7 +6,7 @@ import PresetGamesPage from './components/preset/PresetGamesPage';
 import GameSharePage from './pages/GameSharePage';
 import GameHistoryPage from './pages/GameHistoryPage';
 import GameController from './components/custom/GameController';
-import TeacherDashboard from './components/games/shared/TeacherDashboard';
+import TeacherDashboard from './components/shared/TeacherDashboard';
 import IframeTest from './pages/iframe-test';
 
 function App() {
