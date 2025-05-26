@@ -1,6 +1,5 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { GEMINI_MODELS } from '@/constants/api-constants';
 
 interface GameGenerationSettings {
   category: string;
@@ -86,7 +85,7 @@ Danh mục: ${settings.category}
       console.log('Đang tạo game với AI:', { topic, settings });
       
       const model = this.genAI.getGenerativeModel({ 
-        model: GEMINI_MODELS.GEMINI_PRO 
+        model: 'gemini-pro'
       });
       
       const prompt = this.buildGamePrompt(topic, settings);

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -6,11 +7,9 @@ import { Label } from '@/components/ui/label';
 import { SparklesIcon, Info, Code } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { AIGameGenerator } from '../ai/game-generator';
+import { AIGameGenerator, GameGenerationSettings } from '../ai/game-generator';
 import { MiniGame } from '../quiz/generator/types';
-import { GameSettingsData } from '../quiz/types';
 import GameLoading from '../quiz/GameLoading';
-import { GEMINI_MODELS } from '@/constants/api-constants';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
@@ -46,9 +45,10 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       // Luôn sử dụng canvas mode
       gameGenerator.setCanvasMode(true);
       
-      // Minimal settings
-      const settings: GameSettingsData = {
-        category: 'custom'
+      // Settings with required category
+      const settings: GameGenerationSettings = {
+        category: 'custom',
+        useCanvas: true
       };
       
       const game = await gameGenerator.generateMiniGame(content, settings);

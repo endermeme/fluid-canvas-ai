@@ -30,6 +30,21 @@
 - **Thư mục di chuyển**: `game-components/`, `ui/`, `api/`
 - **Tạo mới**: `src/components/custom/index.ts`
 
+## 2025-01-26 - Build Fix: Missing Components và Template Placeholders
+
+### Sửa lỗi AI Game Generator
+- **File sửa**: `src/components/ai/game-generator.ts` - Thay GEMINI_PRO bằng 'gemini-pro'
+- **Type fix**: GameGenerationSettings interface cần category required
+
+### Tạo missing components cho custom
+- **File tạo**: `src/components/custom/GameIframeRenderer.tsx`
+- **File tạo**: `src/components/custom/game-components/GameErrorDisplay.tsx`
+- **File tạo**: `src/components/custom/game-components/GameLoadingIndicator.tsx`
+
+### Tạo template placeholders cho preset
+- **File tạo**: Tất cả template files (QuizTemplate, FlashcardsTemplate, etc.)
+- **Lý do**: Tránh lỗi import trong templates/index.ts
+
 ### Kế hoạch refactor tiếp theo
 - Bước 3: Tạo thư mục `ui` cho shared UI components
 - Bước 4: Xóa thư mục `quiz` cũ và cập nhật imports
