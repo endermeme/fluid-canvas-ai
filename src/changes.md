@@ -1,6 +1,11 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 26/05/2025 - Sửa lỗi import trong index.ts
+- Sửa lỗi TypeScript trong `src/components/quiz/custom-games/ui/index.ts`
+- Cập nhật đường dẫn import để trỏ đến đúng vị trí các component trong thư mục `src/components/custom/`
+- Loại bỏ: CustomGameForm, CustomGameHeader, EnhancedGameView, GameIframeRenderer đã được chuyển từ quiz/custom-games sang custom/
+
 ## 30/04/2025 - Tái cấu trúc thư mục CustomGame
 - Tạo hai thư mục chính: `src/components/quiz/custom-games/api` và `src/components/quiz/custom-games/ui`
 - Di chuyển `src/utils/customGameAPI.ts` vào `src/components/quiz/custom-games/api/customGameAPI.ts`

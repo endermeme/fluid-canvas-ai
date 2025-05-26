@@ -1,5 +1,5 @@
 
-export { default as CustomGameForm } from './CustomGameForm';
-export { default as CustomGameHeader } from './CustomGameHeader';
-export { default as EnhancedGameView } from './EnhancedGameView';
-export { default as GameIframeRenderer } from './GameIframeRenderer';
+export { default as CustomGameForm } from '../../../custom/CustomGameForm';
+export { default as CustomGameHeader } from '../../../custom/CustomGameHeader';
+export { default as EnhancedGameView } from '../../../custom/EnhancedGameView';
+export { default as GameIframeRenderer } from '../../../custom/GameIframeRenderer';
