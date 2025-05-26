@@ -67,7 +67,7 @@ export const generateWithGemini = async (
   const prompt = createGameGenerationPrompt({
     topic,
     useCanvas,
-    language: settings?.language || 'en',
+    language: settings?.language || 'vi',
     difficulty: settings?.difficulty || 'medium',
     category: settings?.category || 'general'
   });
@@ -83,7 +83,7 @@ export const generateWithGemini = async (
       }],
       generationConfig: {
         ...DEFAULT_GENERATION_SETTINGS,
-        temperature: 0.7,
+        temperature: 0.8,
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 8192
@@ -104,17 +104,48 @@ export const generateWithGemini = async (
     }
     
     const result = await response.json();
-    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     
-    if (!text) {
-      throw new Error('No content returned from API');
+    // Debug log để xem response structure
+    logInfo(SOURCE, "API Response structure:", {
+      hasCandidates: !!result?.candidates,
+      candidatesLength: result?.candidates?.length || 0,
+      firstCandidate: result?.candidates?.[0] ? Object.keys(result.candidates[0]) : [],
+      finishReason: result?.candidates?.[0]?.finishReason,
+      hasContent: !!result?.candidates?.[0]?.content,
+      contentKeys: result?.candidates?.[0]?.content ? Object.keys(result.candidates[0].content) : []
+    });
+    
+    // Improved content extraction logic
+    let text = '';
+    
+    if (result?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      text = result.candidates[0].content.parts[0].text;
+    } else if (result?.candidates?.[0]?.content?.text) {
+      text = result.candidates[0].content.text;
+    } else if (result?.candidates?.[0]?.text) {
+      text = result.candidates[0].text;
+    } else if (result?.text) {
+      text = result.text;
+    }
+    
+    // Log giá trị text được extract
+    logInfo(SOURCE, `Extracted text length: ${text.length}`);
+    
+    if (!text || text.length < 100) {
+      // Log toàn bộ response để debug
+      logError(SOURCE, "No valid content in response", {
+        fullResponse: result,
+        extractedText: text,
+        textLength: text.length
+      });
+      throw new Error(`No content returned from API. Response: ${JSON.stringify(result)}`);
     }
     
     const duration = measureExecutionTime(startTime);
     logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
     
     // Tạo phiên bản gỡ lỗi để xem code gốc
-    logInfo(SOURCE, `Generated Game Code (Original):`, text.substring(0, 500) + '...');
+    logInfo(SOURCE, `Generated Game Code (first 500 chars):`, text.substring(0, 500));
     
     // Xử lý code để extract thông tin và clean
     const { title, content } = processGameCode(text);
@@ -170,18 +201,20 @@ const processGameCode = (text: string): { title: string, content: string } => {
     } else {
       // Nếu không có thẻ HTML đầy đủ, bọc nội dung lại
       cleanedContent = `<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${cleanedContent.match(/<h1[^>]*>(.*?)<\/h1>/i)?.[1] || 'Interactive Game'}</title>
+  <title>${cleanedContent.match(/<h1[^>]*>(.*?)<\/h1>/i)?.[1] || 'Game Xếp Hình'}</title>
   <style>
-    body { margin: 0; padding: 20px; font-family: sans-serif; }
-    .container { max-width: 800px; margin: 0 auto; }
+    body { margin: 0; padding: 20px; font-family: 'Segoe UI', sans-serif; background: #f0f2f5; }
+    .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
   <div class="container">
+    <h1>Game Xếp Hình</h1>
+    <p>Game đang được tạo...</p>
     ${cleanedContent}
   </div>
   <script>
@@ -279,7 +312,7 @@ const processGameCode = (text: string): { title: string, content: string } => {
   }
   
   return {
-    title,
+    title: title || 'Game Xếp Hình',
     content: sanitized
   };
 };
@@ -302,7 +335,7 @@ export const tryGeminiGeneration = async (
   } catch (error) {
     logError(SOURCE, `Attempt ${retryCount + 1} failed`, error);
     
-    const waitTime = (retryCount + 1) * 1500;
+    const waitTime = (retryCount + 1) * 2000; // Tăng thời gian chờ
     await new Promise(resolve => setTimeout(resolve, waitTime));
     
     return tryGeminiGeneration(null, topic, settings, retryCount + 1);

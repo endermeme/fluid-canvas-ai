@@ -87,3 +87,20 @@
 - Tất cả tính năng hoạt động như cũ
 - Performance không bị ảnh hưởng
 - UI/UX giữ nguyên hoàn toàn
+
+## 2025-01-26 - Sửa lỗi Gemini API Response
+
+### Vấn đề
+- **Lỗi**: "No content returned from API" từ Gemini API
+- **Nguyên nhân**: API response format có thể đã thay đổi, content không được extract đúng cách
+- **Triệu chứng**: API trả về 200 nhưng candidates[0].content.parts[0].text undefined
+
+### Giải pháp
+- **Cải tiến logic extract content**: Thêm nhiều fallback paths để lấy text từ response
+- **Debug logging**: Log chi tiết response structure để troubleshoot
+- **Error handling**: Bắt lỗi chi tiết hơn với full response context
+- **Language update**: Chuyển default language sang 'vi' cho phù hợp
+- **Retry logic**: Tăng thời gian chờ retry từ 1.5s lên 2s
+
+### File cập nhật
+- **File sửa**: `src/components/quiz/generator/geminiGenerator.ts` - Improved response parsing và error handling
