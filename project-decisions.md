@@ -60,6 +60,13 @@
 - **File cập nhật**: `src/components/custom/GameController.tsx` - Sử dụng GameContainer mới
 - **File cập nhật**: `src/App.tsx` - Import đúng components
 
+## 2025-01-26 - Build Fix: Import Updates
+
+### Sửa lỗi imports cho GameContainer
+- **File cập nhật**: `src/components/quiz/custom-games/GameController.tsx` - Import GameContainer từ ui/game
+- **File cập nhật**: `src/pages/Quiz.tsx` - Import GameContainer từ ui/game  
+- **File cập nhật**: `src/pages/GameHistoryPage.tsx` - Import GameContainer từ ui/game
+
 ### Kế hoạch refactor tiếp theo
 - Bước 5: Xóa hoàn toàn thư mục `quiz` và cập nhật tất cả imports còn lại
 - Bước 6: Tối ưu hóa structure cuối cùng và kiểm tra toàn bộ hệ thống
@@ -68,3 +75,4 @@
 - Giữ nguyên functionality, chỉ tái cấu trúc
 - Tất cả imports đã được cập nhật cho UI components mới
 - Structure hiện tại đã rõ ràng hơn với AI, preset, custom và ui riêng biệt
+- Build errors đã được sửa, sẵn sàng cho bước 5

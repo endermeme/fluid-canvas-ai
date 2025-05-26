@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
@@ -10,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createGameSession } from '@/utils/gameParticipation';
-import QuizContainer from '../QuizContainer';
+import { GameContainer } from '@/components/ui/game';
 
 interface GameControllerProps {
   initialTopic?: string;
@@ -153,7 +152,7 @@ const GameController: React.FC<GameControllerProps> = ({
   };
 
   return (
-    <QuizContainer
+    <GameContainer
       title={getContainerTitle()}
       showBackButton={false}
       onBack={handleBack}
@@ -166,7 +165,7 @@ const GameController: React.FC<GameControllerProps> = ({
       <div className="h-full w-full overflow-hidden">
         {renderContent()}
       </div>
-    </QuizContainer>
+    </GameContainer>
   );
 };
 
