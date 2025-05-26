@@ -10,9 +10,9 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
-import QuizHeader from './QuizHeader';
+import GameHeader from './GameHeader';
 
-interface QuizContainerProps {
+interface GameContainerProps {
   children: React.ReactNode;
   title?: string;
   showBackButton?: boolean;
@@ -35,9 +35,9 @@ interface QuizContainerProps {
   onHandleShare?: () => Promise<string>;
 }
 
-const QuizContainer: React.FC<QuizContainerProps> = ({
+const GameContainer: React.FC<GameContainerProps> = ({
   children,
-  title = "", // Changed default title to empty string
+  title = "",
   showBackButton = true,
   showHomeButton = false,
   showRefreshButton = false,
@@ -163,9 +163,8 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
 
   return (
     <div className={cn("relative h-full w-full flex flex-col bg-gradient-to-b from-background to-background/95 shadow-lg rounded-lg overflow-hidden", className)}>
-      {/* Sử dụng component QuizHeader mới */}
       {!isCreatingGame && (
-        <QuizHeader 
+        <GameHeader 
           showBackButton={showBackButton}
           showCreateButton={showCreateButton}
           showShareButton={showShareButton}
@@ -177,19 +176,16 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
         />
       )}
       
-      {/* Main content */}
       <div className="flex-1 overflow-hidden p-0 relative">
         {children}
       </div>
       
-      {/* Footer (optional) */}
       {footerContent && (
         <div className="bg-background/90 backdrop-blur-md p-2 border-t border-primary/10">
           {footerContent}
         </div>
       )}
 
-      {/* Share Dialog */}
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -231,4 +227,4 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
   );
 };
 
-export default QuizContainer;
+export default GameContainer;

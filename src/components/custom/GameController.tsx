@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../quiz/generator/types';
@@ -9,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createGameSession } from '@/utils/gameParticipation';
-import QuizContainer from '../quiz/QuizContainer';
+import { GameContainer } from '@/components/ui/game';
 
 interface GameControllerProps {
   initialTopic?: string;
@@ -68,7 +69,6 @@ const GameController: React.FC<GameControllerProps> = ({
     try {
       setIsSharing(true);
       
-      // Tạo session game (sẽ được gọi sau khi game đã được lưu vào Supabase từ EnhancedGameView)
       const gameSession = await createGameSession(
         currentGame.title || "Minigame tương tác",
         currentGame.content
@@ -152,7 +152,7 @@ const GameController: React.FC<GameControllerProps> = ({
   };
 
   return (
-    <QuizContainer
+    <GameContainer
       title={getContainerTitle()}
       showBackButton={false}
       onBack={handleBack}
@@ -165,7 +165,7 @@ const GameController: React.FC<GameControllerProps> = ({
       <div className="h-full w-full overflow-hidden">
         {renderContent()}
       </div>
-    </QuizContainer>
+    </GameContainer>
   );
 };
 

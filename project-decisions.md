@@ -45,11 +45,26 @@
 - **File tạo**: Tất cả template files (QuizTemplate, FlashcardsTemplate, etc.)
 - **Lý do**: Tránh lỗi import trong templates/index.ts
 
+## 2025-01-26 - Refactor Step 3-4: UI Components và Clean Up
+
+### Tạo thư mục ui/game cho shared components
+- **File tạo**: `src/components/ui/game/GameContainer.tsx` - Shared game container
+- **File tạo**: `src/components/ui/game/GameHeader.tsx` - Shared game header
+- **File tạo**: `src/components/ui/game/index.ts` - Export tổng hợp
+
+### Xóa components cũ
+- **File xóa**: `src/components/quiz/QuizContainer.tsx`
+- **File xóa**: `src/components/quiz/QuizHeader.tsx`
+
+### Cập nhật imports
+- **File cập nhật**: `src/components/custom/GameController.tsx` - Sử dụng GameContainer mới
+- **File cập nhật**: `src/App.tsx` - Import đúng components
+
 ### Kế hoạch refactor tiếp theo
-- Bước 3: Tạo thư mục `ui` cho shared UI components
-- Bước 4: Xóa thư mục `quiz` cũ và cập nhật imports
-- Bước 5: Tối ưu hóa structure cuối cùng
+- Bước 5: Xóa hoàn toàn thư mục `quiz` và cập nhật tất cả imports còn lại
+- Bước 6: Tối ưu hóa structure cuối cùng và kiểm tra toàn bộ hệ thống
 
 ### Lưu ý
 - Giữ nguyên functionality, chỉ tái cấu trúc
-- Tất cả imports sẽ được cập nhật ở các lần refactor tiếp theo
+- Tất cả imports đã được cập nhật cho UI components mới
+- Structure hiện tại đã rõ ràng hơn với AI, preset, custom và ui riêng biệt

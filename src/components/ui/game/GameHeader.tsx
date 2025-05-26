@@ -10,7 +10,7 @@ import { Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
 
-interface QuizHeaderProps {
+interface GameHeaderProps {
   showBackButton?: boolean;
   showCreateButton?: boolean;
   showShareButton?: boolean;
@@ -23,7 +23,7 @@ interface QuizHeaderProps {
   gameType?: string;
 }
 
-const QuizHeader: React.FC<QuizHeaderProps> = ({
+const GameHeader: React.FC<GameHeaderProps> = ({
   showBackButton = true,
   showCreateButton = false,
   showShareButton = false,
@@ -58,7 +58,6 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
         description: "Đang lưu game và tạo liên kết chia sẻ...",
       });
 
-      // Đảm bảo content là chuỗi
       let gameContent = gameData.content || '';
       
       const url = await saveGameForSharing(
@@ -192,4 +191,4 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
   );
 };
 
-export default QuizHeader;
+export default GameHeader;
