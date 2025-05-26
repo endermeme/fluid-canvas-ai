@@ -16,10 +16,24 @@
 - Hỗ trợ mobile optimization tự động
 - Error handling tốt hơn
 
+## 2025-01-26 - Refactor Step 2: Preset và Custom Game Structure
+
+### Tạo thư mục preset games
+- **Di chuyển**: `src/components/quiz/preset-games/` → `src/components/preset/`
+- **File di chuyển**: `PresetGamesPage.tsx`, `GameSelector.tsx`, `PresetGameManager.tsx`
+- **Thư mục di chuyển**: `templates/`, `data/`
+- **Tạo mới**: `src/components/preset/index.ts`
+
+### Tạo thư mục custom games  
+- **Di chuyển**: `src/components/quiz/custom-games/` → `src/components/custom/`
+- **File di chuyển**: `GameController.tsx`, `CustomGameForm.tsx`, `CustomGameHeader.tsx`, `EnhancedGameView.tsx`
+- **Thư mục di chuyển**: `game-components/`, `ui/`, `api/`
+- **Tạo mới**: `src/components/custom/index.ts`
+
 ### Kế hoạch refactor tiếp theo
-- Sẽ tạo thư mục `preset` và `custom` cho game components
-- Tạo thư mục `ui` cho shared UI components
-- Xóa các thư mục không cần thiết
+- Bước 3: Tạo thư mục `ui` cho shared UI components
+- Bước 4: Xóa thư mục `quiz` cũ và cập nhật imports
+- Bước 5: Tối ưu hóa structure cuối cùng
 
 ### Lưu ý
 - Giữ nguyên functionality, chỉ tái cấu trúc
