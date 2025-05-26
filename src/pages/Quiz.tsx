@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import QuizContainer from '@/components/shared/QuizContainer';
-import GameLoading from '@/components/shared/GameLoading';
-import CustomGameForm from '@/components/custom/CustomGameForm';
-import EnhancedGameView from '@/components/custom/EnhancedGameView';
-import { tryGeminiGeneration } from '@/components/ai';
-import { MiniGame } from '@/components/ai/types';
+import QuizContainer from '@/components/games/shared/QuizContainer';
+import GameLoading from '@/components/games/shared/GameLoading';
+import CustomGameForm from '@/components/games/custom/CustomGameForm';
+import EnhancedGameView from '@/components/games/custom/EnhancedGameView';
+import { tryGeminiGeneration } from '@/components/games/generator/geminiGenerator';
 
 const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -18,7 +17,7 @@ const Quiz = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const handleGenerate = async (promptText: string, game?: MiniGame) => {
+  const handleGenerate = async (promptText: string, game?: any) => {
     if (game) {
       setGameContent(game.content);
       setGameTitle(game.title || `Game: ${promptText.substring(0, 40)}...`);
@@ -45,11 +44,6 @@ const Quiz = () => {
     setMiniGame(null);
     
     try {
-      toast({
-        title: "Đang tạo trò chơi",
-        description: "Quá trình có thể mất 2-3 phút, vui lòng đợi...",
-      });
-      
       const game = await tryGeminiGeneration(null, promptText, { 
         useCanvas: true, 
         category: 'general' 

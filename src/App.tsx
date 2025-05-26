@@ -1,13 +1,11 @@
-
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import Quiz from './pages/Quiz';
-import PresetGamesPage from './components/preset/PresetGamesPage';
+import PresetGamesPage from './components/games/preset/PresetGamesPage';
 import GameSharePage from './pages/GameSharePage';
 import GameHistoryPage from './pages/GameHistoryPage';
-import GameController from './components/custom/GameController';
-import TeacherDashboard from './components/shared/TeacherDashboard';
-import IframeTest from './pages/iframe-test';
+import GameController from './components/games/custom/GameController';
+import TeacherDashboard from './components/games/shared/TeacherDashboard';
 
 function App() {
   return (
@@ -21,7 +19,6 @@ function App() {
       <Route path="/custom-game" element={<GameController />} />
       <Route path="/game/:gameId/dashboard" element={<TeacherDashboard />} />
       <Route path="/play/:gameType/:slug/:gameId/dashboard" element={<TeacherDashboard />} />
-      <Route path="/iframe-test" element={<IframeTest />} />
     </Routes>
   );
 }
