@@ -1,158 +1,177 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { SparklesIcon, Info, Code } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { AIGameGenerator, GameGenerationSettings } from '../ai/game-generator';
-import { MiniGame } from '../quiz/generator/types';
-import GameLoading from '../quiz/GameLoading';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Sparkles, Gamepad2, ArrowLeft } from 'lucide-react';
 
 interface CustomGameFormProps {
-  onGenerate: (content: string, game?: MiniGame) => void;
+  onGenerate: (prompt: string, game?: any) => void;
   onCancel: () => void;
 }
 
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel }) => {
-  const [content, setContent] = useState('');
+  const [prompt, setPrompt] = useState('');
+  const [difficulty, setDifficulty] = useState('medium');
+  const [category, setCategory] = useState('general');
+  const [useCanvas, setUseCanvas] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  
-  // Use the singleton pattern
-  const gameGenerator = AIGameGenerator.getInstance();
 
-  const getPlaceholderText = () => {
-    return 'Mô tả chi tiết game bạn muốn tạo. Hãy bao gồm thể loại game, giao diện, cách chơi và bất kỳ yêu cầu đặc biệt nào.\n\nVí dụ: "Tạo một trò chơi xếp hình với 9 mảnh ghép hình ảnh về vũ trụ, có âm thanh khi hoàn thành và hiệu ứng ngôi sao khi người chơi thắng."';
-  };
-
-  const handleSubmit = async () => {
-    if (!content.trim()) {
-      toast({
-        title: "Lỗi",
-        description: "Vui lòng mô tả game bạn muốn tạo",
-        variant: "destructive"
-      });
-      return;
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!prompt.trim()) return;
 
     setIsGenerating(true);
-    
     try {
-      // Luôn sử dụng canvas mode
-      gameGenerator.setCanvasMode(true);
-      
-      // Settings with required category
-      const settings: GameGenerationSettings = {
-        category: 'custom',
-        useCanvas: true
-      };
-      
-      const game = await gameGenerator.generateMiniGame(content, settings);
-      
-      if (game) {
-        toast({
-          title: "Đã tạo trò chơi",
-          description: `Trò chơi đã được tạo thành công.`,
-        });
-        
-        onGenerate(content, game);
-      } else {
-        throw new Error("Không thể tạo game");
-      }
-    } catch (error) {
-      console.error("Lỗi khi tạo game:", error);
-      
-      toast({
-        title: "Lỗi tạo game",
-        description: "Có lỗi xảy ra khi tạo game. Vui lòng thử lại.",
-        variant: "destructive"
+      await onGenerate(prompt, {
+        difficulty,
+        category,
+        useCanvas,
+        prompt
       });
-      onGenerate(content);
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const handleCancel = () => {
-    if (window.location.pathname === '/quiz' && !window.location.search) {
-      navigate('/');
-    } else {
-      onCancel();
-    }
-  };
-
-  if (isGenerating) {
-    return <GameLoading topic={content} />;
-  }
+  const presetPrompts = [
+    "Tạo game đua xe đơn giản với điều khiển bằng phím mũi tên",
+    "Game xếp hình Tetris cơ bản với các khối rơi",
+    "Trò chơi bắn súng không gian với phi thuyền",
+    "Game nhảy platform với nhân vật thu thập coin",
+    "Trò chơi câu đố ghép hình đơn giản"
+  ];
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <Card className="max-w-3xl w-full mx-auto bg-background/70 backdrop-blur-xl border border-primary/20 shadow-[0_0_50px_rgba(0,0,0,0.1)] rounded-3xl overflow-hidden">
-        <div className="p-8 sm:p-10">
-          <div className="mb-8 text-center">
-            <div className="flex flex-col items-center gap-4 mb-6">
-              <div className="p-3.5 rounded-2xl bg-primary/10 backdrop-blur-sm border border-primary/10 shadow-sm">
-                <Code className="h-8 w-8 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent">
-                  Tạo trò chơi tùy chỉnh với AI
-                </h2>
-                <p className="text-muted-foreground mt-2.5 max-w-xl mx-auto">
-                  Mô tả chi tiết game bạn muốn tạo và AI sẽ xây dựng nó cho bạn
-                </p>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className="w-full max-w-2xl">
+        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+          <CardHeader className="text-center pb-6">
+            <div className="flex items-center justify-center mb-4">
+              <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full">
+                <Sparkles className="h-8 w-8 text-white" />
               </div>
             </div>
-          </div>
-          
-          <div className="space-y-8">
-            <div className="relative">
-              <Label htmlFor="content" className="flex items-center justify-center gap-2.5 text-lg font-medium mb-4">
-                <SparklesIcon className="h-5 w-5 text-primary" /> 
-                Mô tả game của bạn
-              </Label>
-              <Textarea
-                id="content"
-                placeholder={getPlaceholderText()}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                rows={7}
-                className="font-mono text-sm border-2 border-primary/20 bg-white/20 backdrop-blur-md focus-visible:ring-primary/30 focus-visible:border-primary/40 rounded-2xl transition-all duration-300 resize-none shadow-inner"
-              />
-              <div className="absolute -z-10 w-full h-full max-w-md blur-3xl bg-primary/5 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-50"></div>
-            </div>
-            
-            <div className="flex items-start gap-3.5 p-5 bg-primary/5 rounded-2xl border border-primary/15 backdrop-blur-sm">
-              <Info className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-muted-foreground">
-                AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Game sẽ sử dụng HTML5 Canvas cho hiệu ứng đồ họa tốt hơn.
-              </p>
-            </div>
-            
-            <div className="flex justify-center gap-5 pt-4">
-              <Button 
-                variant="outline" 
-                onClick={handleCancel}
-                className="min-w-[130px] border-2 border-primary/20 hover:border-primary/30 hover:bg-primary/5 rounded-xl transition-all duration-300"
-              >
-                Hủy
-              </Button>
-              <Button 
-                onClick={handleSubmit}
-                disabled={isGenerating || !content.trim()}
-                className="min-w-[220px] bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 rounded-xl shadow-lg shadow-primary/20 transition-all duration-300 font-medium"
-              >
-                <SparklesIcon className="h-5 w-5 mr-2.5" />
-                Tạo với AI
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Card>
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Tạo Game Tùy Chỉnh
+            </CardTitle>
+            <CardDescription className="text-lg text-gray-600">
+              Mô tả ý tưởng game của bạn và AI sẽ tạo ra trò chơi hoàn chỉnh
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="prompt" className="text-base font-medium">
+                  Mô tả trò chơi của bạn
+                </Label>
+                <Textarea
+                  id="prompt"
+                  placeholder="Ví dụ: Tạo game đua xe đơn giản với điều khiển bằng phím mũi tên..."
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="min-h-[120px] resize-none"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="difficulty">Độ khó</Label>
+                  <Select value={difficulty} onValueChange={setDifficulty}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="easy">Dễ</SelectItem>
+                      <SelectItem value="medium">Trung bình</SelectItem>
+                      <SelectItem value="hard">Khó</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="category">Thể loại</Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">Tổng quát</SelectItem>
+                      <SelectItem value="action">Hành động</SelectItem>
+                      <SelectItem value="puzzle">Câu đố</SelectItem>
+                      <SelectItem value="arcade">Arcade</SelectItem>
+                      <SelectItem value="strategy">Chiến thuật</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="useCanvas"
+                  checked={useCanvas}
+                  onCheckedChange={setUseCanvas}
+                />
+                <Label htmlFor="useCanvas">Sử dụng Canvas (Đồ họa nâng cao)</Label>
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-700">
+                  Gợi ý nhanh:
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {presetPrompts.map((preset, index) => (
+                    <Button
+                      key={index}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPrompt(preset)}
+                      className="text-xs"
+                    >
+                      {preset.substring(0, 30)}...
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onCancel}
+                  className="flex-1"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Quay lại
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!prompt.trim() || isGenerating}
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                >
+                  {isGenerating ? (
+                    <div className="flex items-center">
+                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      Đang tạo...
+                    </div>
+                  ) : (
+                    <>
+                      <Gamepad2 className="h-4 w-4 mr-2" />
+                      Tạo Game
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

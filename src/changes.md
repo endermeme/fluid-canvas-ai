@@ -1,6 +1,14 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 26/05/2025 - Khôi phục tính năng Custom Game và Gemini
+- Tạo lại `src/components/custom/CustomGameForm.tsx` với giao diện đầy đủ
+- Tạo lại `src/components/custom/CustomGameHeader.tsx` với các controls cần thiết
+- Tạo hooks `src/components/quiz/hooks/useIframeManager.ts` để quản lý iframe
+- Tạo hooks `src/components/quiz/hooks/useGameShareManager.ts` để quản lý chia sẻ game
+- Khôi phục đầy đủ tính năng tạo custom game với Gemini AI
+- Khôi phục tính năng chia sẻ game và điều khiển game
+
 ## 26/05/2025 - Sửa lỗi import trong index.ts
 - Sửa lỗi TypeScript trong `src/components/quiz/custom-games/ui/index.ts`
 - Cập nhật đường dẫn import để trỏ đến đúng vị trí các component trong thư mục `src/components/custom/`
