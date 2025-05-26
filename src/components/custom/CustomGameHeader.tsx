@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw, Maximize2, Share2, Copy, Check } from 'lucide-react';
@@ -6,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { QRCodeSVG } from 'qrcode.react';
 import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/ui/badge';
 
 interface CustomGameHeaderProps {
   onBack?: () => void;
@@ -34,12 +34,6 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
   const [shareUrl, setShareUrl] = useState('');
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
-
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    }
-  };
 
   const handleShare = async () => {
     if (!onShare) return;

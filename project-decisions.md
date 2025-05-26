@@ -130,3 +130,31 @@
 
 ### File cập nhật
 - **File sửa**: `src/components/quiz/generator/geminiGenerator.ts` - Massive debug logging improvement
+
+## 2025-01-26 - Fix Duplicate Files và Broken Functionality
+
+### Vấn đề phát hiện
+- **Duplicate files**: Có nhiều file trùng lặp sau refactor
+- **Import paths sai**: Components import từ đường dẫn không tồn tại
+- **Broken functionality**: Preset và Custom games không hoạt động
+- **Missing components**: Thiếu GameIframeRenderer và các component khác
+
+### Giải pháp
+- **Xóa duplicate files**: Xóa files cũ trong quiz/preset-games và quiz/custom-games
+- **Tạo missing components**: GameIframeRenderer cho custom games
+- **Sửa import paths**: Cập nhật tất cả imports để trỏ đúng đường dẫn
+- **Khôi phục functionality**: Đảm bảo tất cả tính năng hoạt động như trước
+
+### Files xử lý
+- **Xóa**: `src/components/quiz/preset-games/PresetGamesPage.tsx`
+- **Xóa**: `src/components/quiz/custom-games/EnhancedGameView.tsx`
+- **Xóa**: `src/components/quiz/custom-games/GameController.tsx`
+- **Xóa**: `src/components/quiz/custom-games/CustomGameForm.tsx`
+- **Tạo**: `src/components/custom/GameIframeRenderer.tsx`
+- **Sửa**: Tất cả components trong preset và custom để import đúng
+
+### Kết quả
+- **Hoàn thành**: Loại bỏ tất cả duplicate files
+- **Hoàn thành**: Khôi phục 100% functionality cho preset và custom games
+- **Hoàn thành**: Sửa tất cả import errors
+- **Sẵn sàng**: Preset và Custom games hoạt động bình thường
