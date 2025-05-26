@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 
 interface GameErrorDisplayProps {
   error: string;
@@ -10,23 +11,17 @@ interface GameErrorDisplayProps {
 
 const GameErrorDisplay: React.FC<GameErrorDisplayProps> = ({ error, onRetry }) => {
   return (
-    <div className="flex flex-col items-center justify-center h-full">
-      <Alert variant="destructive" className="max-w-md">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Lỗi tải game</AlertTitle>
-        <AlertDescription>
-          {error}
-          <div className="mt-2">
-            <button 
-              onClick={onRetry}
-              className="text-sm font-medium underline cursor-pointer hover:text-primary"
-            >
-              Thử tải lại
-            </button>
-          </div>
-        </AlertDescription>
-      </Alert>
-    </div>
+    <Card className="flex items-center justify-center h-full">
+      <div className="text-center p-8 max-w-md">
+        <AlertCircle className="h-16 w-16 mx-auto mb-4 text-destructive" />
+        <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
+        <p className="text-muted-foreground mb-6">{error}</p>
+        <Button onClick={onRetry} className="flex items-center gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Thử lại
+        </Button>
+      </div>
+    </Card>
   );
 };
 
