@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRemainingTime } from '@/utils/gameExport';
 import { StoredGame } from '@/utils/types';
-import QuizContainer from '@/components/quiz/QuizContainer';
+import { GameContainer } from '@/components/ui/game';
 import { Button } from '@/components/ui/button';
 import { Plus, Clock, ExternalLink, Search, Trash2, Share2, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -150,7 +149,7 @@ const GameHistoryPage: React.FC = () => {
   };
   
   return (
-    <QuizContainer
+    <GameContainer
       title="Lịch Sử Game"
       showBackButton={true}
       onBack={() => navigate('/')}
@@ -291,7 +290,7 @@ const GameHistoryPage: React.FC = () => {
           </div>
         )}
       </div>
-    </QuizContainer>
+    </GameContainer>
   );
 };
 

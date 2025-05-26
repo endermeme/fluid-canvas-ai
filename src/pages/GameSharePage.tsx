@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
 import { addParticipant, getFakeIpAddress } from '@/utils/gameParticipation';
 import { StoredGame, GameParticipant } from '@/utils/types';
-import QuizContainer from '@/components/quiz/QuizContainer';
+import { GameContainer } from '@/components/ui/game';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Share2, Users, Clock, Copy, Check } from 'lucide-react';
@@ -209,7 +208,7 @@ const GameSharePage: React.FC = () => {
   
   if (!game && !gameExpired) {
     return (
-      <QuizContainer
+      <GameContainer
         title="Đang tải game..."
         showBackButton={true}
         onBack={handleBack}
@@ -221,13 +220,13 @@ const GameSharePage: React.FC = () => {
             <p className="text-primary font-medium">Đang tải thông tin game...</p>
           </div>
         </div>
-      </QuizContainer>
+      </GameContainer>
     );
   }
   
   if (gameExpired) {
     return (
-      <QuizContainer
+      <GameContainer
         title="Game không khả dụng"
         showBackButton={true}
         onBack={handleBack}
@@ -240,7 +239,7 @@ const GameSharePage: React.FC = () => {
             <Button onClick={handleBack} className="w-full">Quay lại</Button>
           </div>
         </div>
-      </QuizContainer>
+      </GameContainer>
     );
   }
   
@@ -259,7 +258,7 @@ const GameSharePage: React.FC = () => {
   );
   
   return (
-    <QuizContainer
+    <GameContainer
       title={game.title}
       showBackButton={true}
       onBack={handleBack}
@@ -483,7 +482,7 @@ const GameSharePage: React.FC = () => {
           </Form>
         </DialogContent>
       </Dialog>
-    </QuizContainer>
+    </GameContainer>
   );
 };
 

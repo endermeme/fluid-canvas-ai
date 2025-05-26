@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { MiniGame } from '../generator/types';
-import { AIGameGenerator } from '../generator/geminiGenerator';
-import EnhancedGameView from './ui/EnhancedGameView';
-import CustomGameForm from './ui/CustomGameForm';
-import GameLoading from '../GameLoading';
+import { MiniGame } from '../quiz/generator/types';
+import { AIGameGenerator } from '../ai/game-generator';
+import EnhancedGameView from './EnhancedGameView';
+import CustomGameForm from './CustomGameForm';
+import GameLoading from '../quiz/GameLoading';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -68,7 +69,6 @@ const GameController: React.FC<GameControllerProps> = ({
     try {
       setIsSharing(true);
       
-      // Tạo session game (sẽ được gọi sau khi game đã được lưu vào Supabase từ EnhancedGameView)
       const gameSession = await createGameSession(
         currentGame.title || "Minigame tương tác",
         currentGame.content

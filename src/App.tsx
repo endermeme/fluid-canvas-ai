@@ -2,10 +2,10 @@
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import Quiz from './pages/Quiz';
-import PresetGamesPage from './components/quiz/preset-games/PresetGamesPage';
+import PresetGamesPage from './components/preset/PresetGamesPage';
 import GameSharePage from './pages/GameSharePage';
 import GameHistoryPage from './pages/GameHistoryPage';
-import GameController from './components/quiz/custom-games/GameController';
+import GameController from './components/custom/GameController';
 import TeacherDashboard from './components/quiz/share/TeacherDashboard';
 
 function App() {
