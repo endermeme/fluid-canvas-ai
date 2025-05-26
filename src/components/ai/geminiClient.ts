@@ -9,10 +9,10 @@ const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "
 const model = genAI.getGenerativeModel({
   model: MODEL_NAME,
   generationConfig: {
-    temperature: 0.6,
-    topK: 20,
-    topP: 0.95,
-    maxOutputTokens: 4096,
+    temperature: 0.7,
+    topK: 30,
+    topP: 0.9,
+    maxOutputTokens: 8192,
   },
 });
 
@@ -24,10 +24,10 @@ export const generateWithGemini = async (
   
   try {
     const generationConfig = {
-      temperature: settings.temperature || 0.6,
-      topK: settings.topK || 20,
-      topP: settings.topP || 0.95,
-      maxOutputTokens: settings.maxOutputTokens || 4096,
+      temperature: settings.temperature || 0.7,
+      topK: settings.topK || 30,
+      topP: settings.topP || 0.9,
+      maxOutputTokens: settings.maxOutputTokens || 8192,
     };
 
     const model = genAI.getGenerativeModel({
@@ -44,11 +44,14 @@ export const generateWithGemini = async (
 
     const content = response.response.text();
     
+    // Xử lý và làm sạch content từ Gemini
+    const processedContent = cleanGeminiResponse(content);
+    
     return {
       success: true,
-      content,
+      content: processedContent,
       metrics: {
-        tokensUsed: 0,
+        tokensUsed: estimateTokens(content),
         responseTime
       }
     };
@@ -67,6 +70,35 @@ export const generateWithGemini = async (
   }
 };
 
+// Làm sạch và xử lý response từ Gemini
+const cleanGeminiResponse = (content: string): string => {
+  // Loại bỏ markdown code blocks
+  let cleaned = content.replace(/```html\s*/g, '').replace(/```\s*/g, '');
+  
+  // Loại bỏ các ký tự không mong muốn
+  cleaned = cleaned.trim();
+  
+  // Đảm bảo có DOCTYPE nếu chưa có
+  if (!cleaned.includes('<!DOCTYPE')) {
+    cleaned = `<!DOCTYPE html>\n${cleaned}`;
+  }
+  
+  // Đảm bảo có meta viewport cho responsive
+  if (!cleaned.includes('viewport')) {
+    cleaned = cleaned.replace(
+      '<head>',
+      '<head>\n    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">'
+    );
+  }
+  
+  return cleaned;
+};
+
+// Ước tính số tokens
+const estimateTokens = (text: string): number => {
+  return Math.ceil(text.length / 4);
+};
+
 export const countTokens = async (text: string): Promise<number> => {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
@@ -74,6 +106,6 @@ export const countTokens = async (text: string): Promise<number> => {
     return totalTokens;
   } catch (error) {
     console.error("Error counting tokens:", error);
-    return 0;
+    return estimateTokens(text);
   }
 };
