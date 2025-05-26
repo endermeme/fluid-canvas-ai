@@ -88,7 +88,7 @@
 - Performance không bị ảnh hưởng
 - UI/UX giữ nguyên hoàn toàn
 
-## 2025-01-26 - Sửa lỗi Gemini API Response
+## 2025-01-26 - Sửa lỗi Gemini API Response v1
 
 ### Vấn đề
 - **Lỗi**: "No content returned from API" từ Gemini API
@@ -104,3 +104,29 @@
 
 ### File cập nhật
 - **File sửa**: `src/components/quiz/generator/geminiGenerator.ts` - Improved response parsing và error handling
+
+## 2025-01-26 - Enhanced Debug Logging for Gemini API
+
+### Vấn đề tiếp tục
+- **Lỗi**: Vẫn còn "No content returned from API" sau fix đầu tiên
+- **Cần**: Logging chi tiết hơn để debug sâu vào API response structure
+
+### Cải tiến Debug Logging
+- **Console logging**: Thêm `🔍 GEMINI DEBUG` prefix cho tất cả debug logs
+- **Request logging**: Log full payload structure, endpoint, prompt preview
+- **Response logging**: Log chi tiết response status, headers, full response object
+- **Content extraction**: Log từng method extraction với detailed analysis
+- **Recursive search**: Thêm deep search trong response object structure
+- **Error analysis**: Log detailed error context và stack trace
+- **Retry tracking**: Log chi tiết từng retry attempt
+
+### Logging Categories
+- **Request phase**: Payload structure, endpoint, headers
+- **Response phase**: Status, response keys, candidates analysis
+- **Content extraction**: Multiple fallback methods với detailed tracking
+- **Processing phase**: Code analysis, validation, final result
+- **Error handling**: Full error context với stack trace
+- **Retry mechanism**: Attempt tracking và wait time logging
+
+### File cập nhật
+- **File sửa**: `src/components/quiz/generator/geminiGenerator.ts` - Massive debug logging improvement

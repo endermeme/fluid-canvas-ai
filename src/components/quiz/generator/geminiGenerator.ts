@@ -1,3 +1,4 @@
+
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
@@ -74,6 +75,7 @@ export const generateWithGemini = async (
 
   try {
     logInfo(SOURCE, `Sending request to Gemini API`);
+    console.log('🔍 GEMINI DEBUG - Full prompt being sent:', prompt.substring(0, 500) + '...');
     
     const startTime = Date.now();
     
@@ -90,6 +92,15 @@ export const generateWithGemini = async (
       }
     };
     
+    console.log('🔍 GEMINI DEBUG - Request payload:', {
+      endpoint: getApiEndpoint(),
+      payloadStructure: {
+        contents: payload.contents.length,
+        generationConfig: Object.keys(payload.generationConfig),
+        promptLength: prompt.length
+      }
+    });
+    
     const response = await fetch(getApiEndpoint(), {
       method: 'POST',
       headers: {
@@ -98,57 +109,157 @@ export const generateWithGemini = async (
       body: JSON.stringify(payload)
     });
     
+    console.log('🔍 GEMINI DEBUG - Response status:', {
+      status: response.status,
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers.entries()),
+      ok: response.ok
+    });
+    
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('🔍 GEMINI DEBUG - Error response text:', errorText);
       throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
     }
     
     const result = await response.json();
     
-    // Debug log để xem response structure
-    logInfo(SOURCE, "API Response structure:", {
-      hasCandidates: !!result?.candidates,
-      candidatesLength: result?.candidates?.length || 0,
-      firstCandidate: result?.candidates?.[0] ? Object.keys(result.candidates[0]) : [],
-      finishReason: result?.candidates?.[0]?.finishReason,
-      hasContent: !!result?.candidates?.[0]?.content,
-      contentKeys: result?.candidates?.[0]?.content ? Object.keys(result.candidates[0].content) : []
+    // Chi tiết logging của response structure
+    console.log('🔍 GEMINI DEBUG - Full API Response:', {
+      fullResponse: result,
+      responseKeys: Object.keys(result || {}),
+      responseType: typeof result
     });
     
-    // Improved content extraction logic
-    let text = '';
+    // Debug log để xem response structure chi tiết
+    logInfo(SOURCE, "Detailed API Response analysis:", {
+      hasResult: !!result,
+      resultKeys: result ? Object.keys(result) : [],
+      hasCandidates: !!result?.candidates,
+      candidatesType: typeof result?.candidates,
+      candidatesLength: Array.isArray(result?.candidates) ? result.candidates.length : 'not array',
+      candidatesContent: result?.candidates ? result.candidates.map((c: any, i: number) => ({
+        index: i,
+        keys: Object.keys(c || {}),
+        hasContent: !!c?.content,
+        contentKeys: c?.content ? Object.keys(c.content) : [],
+        hasParts: !!c?.content?.parts,
+        partsLength: Array.isArray(c?.content?.parts) ? c.content.parts.length : 'not array',
+        partsContent: c?.content?.parts ? c.content.parts.map((p: any, pi: number) => ({
+          partIndex: pi,
+          partKeys: Object.keys(p || {}),
+          hasText: !!p?.text,
+          textLength: p?.text ? p.text.length : 0,
+          textPreview: p?.text ? p.text.substring(0, 100) : 'no text'
+        })) : 'no parts',
+        finishReason: c?.finishReason
+      })) : 'no candidates'
+    });
     
+    // Improved content extraction logic với nhiều fallback paths
+    let text = '';
+    let extractionMethod = '';
+    
+    // Method 1: Standard path
     if (result?.candidates?.[0]?.content?.parts?.[0]?.text) {
       text = result.candidates[0].content.parts[0].text;
-    } else if (result?.candidates?.[0]?.content?.text) {
+      extractionMethod = 'standard_path';
+    }
+    // Method 2: Direct content text
+    else if (result?.candidates?.[0]?.content?.text) {
       text = result.candidates[0].content.text;
-    } else if (result?.candidates?.[0]?.text) {
+      extractionMethod = 'content_text';
+    }
+    // Method 3: Direct candidate text
+    else if (result?.candidates?.[0]?.text) {
       text = result.candidates[0].text;
-    } else if (result?.text) {
+      extractionMethod = 'candidate_text';
+    }
+    // Method 4: Root text
+    else if (result?.text) {
       text = result.text;
+      extractionMethod = 'root_text';
+    }
+    // Method 5: Try to find text in nested structure
+    else if (result?.candidates?.[0]) {
+      const candidate = result.candidates[0];
+      console.log('🔍 GEMINI DEBUG - Searching in candidate structure:', candidate);
+      
+      // Deep search in candidate object
+      function findTextRecursively(obj: any, path: string = ''): string {
+        if (typeof obj === 'string' && obj.length > 100) {
+          console.log(`🔍 GEMINI DEBUG - Found text at path: ${path}`, obj.substring(0, 100));
+          return obj;
+        }
+        if (typeof obj === 'object' && obj !== null) {
+          for (const [key, value] of Object.entries(obj)) {
+            const result = findTextRecursively(value, `${path}.${key}`);
+            if (result) return result;
+          }
+        }
+        return '';
+      }
+      
+      text = findTextRecursively(candidate, 'candidate');
+      if (text) extractionMethod = 'recursive_search';
     }
     
-    // Log giá trị text được extract
-    logInfo(SOURCE, `Extracted text length: ${text.length}`);
+    console.log('🔍 GEMINI DEBUG - Text extraction result:', {
+      extractionMethod,
+      textFound: !!text,
+      textLength: text.length,
+      textPreview: text.substring(0, 200),
+      isValidHTML: text.includes('<!DOCTYPE') || text.includes('<html'),
+      hasGameContent: text.toLowerCase().includes('game') || text.toLowerCase().includes('canvas')
+    });
     
-    if (!text || text.length < 100) {
-      // Log toàn bộ response để debug
-      logError(SOURCE, "No valid content in response", {
+    if (!text || text.length < 50) {
+      // Final attempt: Log full response for manual inspection
+      console.error('🔍 GEMINI DEBUG - NO CONTENT FOUND - Full response for manual inspection:', {
+        fullResponseString: JSON.stringify(result, null, 2),
+        allPossibleTextFields: {
+          'result.text': result?.text,
+          'result.content': result?.content,
+          'result.message': result?.message,
+          'result.data': result?.data,
+          'result.response': result?.response
+        }
+      });
+      
+      logError(SOURCE, "No valid content in response after all extraction attempts", {
         fullResponse: result,
         extractedText: text,
-        textLength: text.length
+        textLength: text.length,
+        extractionMethod: extractionMethod || 'none'
       });
-      throw new Error(`No content returned from API. Response: ${JSON.stringify(result)}`);
+      throw new Error(`No content returned from API. Extraction method: ${extractionMethod}. Response keys: ${Object.keys(result || {}).join(', ')}`);
     }
     
     const duration = measureExecutionTime(startTime);
-    logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
+    logSuccess(SOURCE, `Response received in ${duration.seconds}s using method: ${extractionMethod}`);
     
-    // Tạo phiên bản gỡ lỗi để xem code gốc
-    logInfo(SOURCE, `Generated Game Code (first 500 chars):`, text.substring(0, 500));
+    // Log generated code preview
+    console.log('🔍 GEMINI DEBUG - Generated code analysis:', {
+      codeLength: text.length,
+      hasDoctype: text.includes('<!DOCTYPE'),
+      hasHTML: text.includes('<html'),
+      hasHead: text.includes('<head'),
+      hasBody: text.includes('<body'),
+      hasScript: text.includes('<script'),
+      hasStyle: text.includes('<style'),
+      hasCanvas: text.includes('canvas'),
+      codePreview: text.substring(0, 500)
+    });
     
     // Xử lý code để extract thông tin và clean
     const { title, content } = processGameCode(text);
+    
+    console.log('🔍 GEMINI DEBUG - Processed game result:', {
+      originalLength: text.length,
+      processedLength: content.length,
+      title,
+      hasValidStructure: content.includes('<!DOCTYPE') && content.includes('</html>')
+    });
     
     // Tạo đối tượng game
     const game: MiniGame = {
@@ -165,6 +276,12 @@ export const generateWithGemini = async (
     
     return game;
   } catch (error) {
+    console.error('🔍 GEMINI DEBUG - Full error details:', {
+      error,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorStack: error instanceof Error ? error.stack : 'No stack',
+      errorType: typeof error
+    });
     logError(SOURCE, "Error generating with Gemini", error);
     throw error;
   }
@@ -325,6 +442,12 @@ export const tryGeminiGeneration = async (
 ): Promise<MiniGame | null> => {
   const maxRetries = 3;
   
+  console.log(`🔍 GEMINI DEBUG - Retry attempt ${retryCount + 1}/${maxRetries}`, {
+    topic,
+    settings,
+    retryCount
+  });
+  
   if (retryCount >= maxRetries) {
     logWarning(SOURCE, `Reached maximum retries (${maxRetries})`);
     return null;
@@ -333,9 +456,16 @@ export const tryGeminiGeneration = async (
   try {
     return await generateWithGemini(topic, settings);
   } catch (error) {
+    console.error(`🔍 GEMINI DEBUG - Retry ${retryCount + 1} failed:`, {
+      error,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      willRetry: retryCount < maxRetries - 1
+    });
+    
     logError(SOURCE, `Attempt ${retryCount + 1} failed`, error);
     
     const waitTime = (retryCount + 1) * 2000; // Tăng thời gian chờ
+    console.log(`🔍 GEMINI DEBUG - Waiting ${waitTime}ms before retry...`);
     await new Promise(resolve => setTimeout(resolve, waitTime));
     
     return tryGeminiGeneration(null, topic, settings, retryCount + 1);
