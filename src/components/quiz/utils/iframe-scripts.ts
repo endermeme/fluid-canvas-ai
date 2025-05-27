@@ -39,10 +39,12 @@ export const errorHandlingScript = `
   window.addEventListener('load', function() {
     try {
       console.log('Game loaded successfully');
+      // Thử gửi thông báo đến parent frame
       if (window.parent && window.parent !== window) {
         window.parent.postMessage({ type: 'GAME_LOADED', success: true }, '*');
       }
       
+      // Thông báo thêm một lần nữa sau một khoảng thời gian (phòng trường hợp lần đầu bị lỡ)
       setTimeout(function() {
         if (window.parent && window.parent !== window) {
           window.parent.postMessage({ type: 'GAME_LOADED', success: true }, '*');
@@ -53,6 +55,7 @@ export const errorHandlingScript = `
     }
   });
 
+  // Backup notification khi DOM loaded
   document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
       if (window.parent && window.parent !== window) {
@@ -72,27 +75,21 @@ export const errorHandlingScript = `
  */
 export const deviceDetectionScript = `
 <script>
-  (function() {
-    // Device detection
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    document.documentElement.classList.add(isTouchDevice ? 'touch-device' : 'no-touch');
-    document.documentElement.classList.add(isMobile ? 'mobile' : 'desktop');
-    
-    // Xử lý sự kiện touch để tránh double tap zoom
-    if (isTouchDevice && !window.touchHandlerInitialized) {
-      window.touchHandlerInitialized = true;
-      let touchLastTap = 0;
-      
-      document.addEventListener('touchend', (e) => {
-        const now = Date.now();
-        if (now - touchLastTap < 300) {
-          e.preventDefault();
-        }
-        touchLastTap = now;
-      }, { passive: false });
+  // Device detection
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  document.documentElement.classList.add(isTouchDevice ? 'touch-device' : 'no-touch');
+  document.documentElement.classList.add(isMobile ? 'mobile' : 'desktop');
+  
+  // Xử lý sự kiện touch tốt hơn
+  let lastTap = 0;
+  document.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      e.preventDefault();
     }
-  })();
+    lastTap = now;
+  }, { passive: false });
 </script>
 `;
 
@@ -101,87 +98,121 @@ export const deviceDetectionScript = `
  */
 export const iframeHelperScript = `
 <script>
-  (function() {
-    // Đảm bảo tất cả scripts được executed sau khi DOM đã sẵn sàng
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM fully loaded');
-      
-      // Đảm bảo các phần tử canvas được khởi tạo đúng
-      const canvases = document.querySelectorAll('canvas');
-      if (canvases.length > 0) {
-        console.log('Found', canvases.length, 'canvas elements');
-        canvases.forEach((canvas, index) => {
-          if (!canvas.style.width) canvas.style.width = '100%';
-          if (!canvas.style.maxWidth) canvas.style.maxWidth = '800px';
-          if (!canvas.style.margin) canvas.style.margin = '0 auto';
-          console.log('Canvas', index, 'dimensions:', canvas.width, 'x', canvas.height);
-        });
-      }
-      
-      // Tự động thêm handlers cho các button
-      const buttons = document.querySelectorAll('button:not([data-handled])');
-      buttons.forEach(btn => {
-        btn.setAttribute('data-handled', 'true');
-        if (!btn.style.cursor) btn.style.cursor = 'pointer';
-        if (window.isTouchDevice && !btn.getAttribute('data-touch-optimized')) {
-          btn.setAttribute('data-touch-optimized', 'true');
-          if (parseInt(getComputedStyle(btn).minHeight || '0', 10) < 44) {
-            btn.style.minHeight = '44px';
-          }
-          if (parseInt(getComputedStyle(btn).minWidth || '0', 10) < 44) {
-            btn.style.minWidth = '44px';
-          }
-        }
+  // Đảm bảo tất cả scripts được executed sau khi DOM đã sẵn sàng
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded');
+    
+    // Đảm bảo các phần tử canvas được khởi tạo đúng
+    const canvases = document.querySelectorAll('canvas');
+    if (canvases.length > 0) {
+      console.log('Found', canvases.length, 'canvas elements');
+      canvases.forEach((canvas, index) => {
+        if (!canvas.style.width) canvas.style.width = '100%';
+        if (!canvas.style.maxWidth) canvas.style.maxWidth = '800px';
+        if (!canvas.style.margin) canvas.style.margin = '0 auto';
+        console.log('Canvas', index, 'dimensions:', canvas.width, 'x', canvas.height);
       });
-    });
+    }
     
-    // Một số helper functions phổ biến cho game
-    window.centerElement = function(element) {
-      if (!element) return;
-      element.style.position = element.style.position || 'absolute';
-      element.style.left = '50%';
-      element.style.top = '50%';
-      element.style.transform = 'translate(-50%, -50%)';
+    // Tự động thêm handlers cho các button
+    const buttons = document.querySelectorAll('button:not([data-handled])');
+    buttons.forEach(btn => {
+      btn.setAttribute('data-handled', 'true');
+      if (!btn.style.cursor) btn.style.cursor = 'pointer';
+      if (isTouchDevice && !btn.getAttribute('data-touch-optimized')) {
+        btn.setAttribute('data-touch-optimized', 'true');
+        if (parseInt(getComputedStyle(btn).minHeight || '0', 10) < 44) {
+          btn.style.minHeight = '44px';
+        }
+        if (parseInt(getComputedStyle(btn).minWidth || '0', 10) < 44) {
+          btn.style.minWidth = '44px';
+        }
+      }
+    });
+  });
+  
+  // Một số helper functions phổ biến cho game
+  function centerElement(element) {
+    if (!element) return;
+    element.style.position = element.style.position || 'absolute';
+    element.style.left = '50%';
+    element.style.top = '50%';
+    element.style.transform = 'translate(-50%, -50%)';
+  }
+  
+  function animateElement(element, keyframes, options) {
+    if (!element || !keyframes) return;
+    try {
+      if (typeof element.animate === 'function') {
+        return element.animate(keyframes, options);
+      }
+    } catch (err) {
+      console.error('Animation error:', err);
+    }
+  }
+  
+  function shake(element, intensity = 5, duration = 500) {
+    if (!element) return;
+    const originalTransform = element.style.transform || '';
+    
+    // Backup current position/transform
+    const backup = {
+      transform: originalTransform,
+      transition: element.style.transition
     };
     
-    window.animateElement = function(element, keyframes, options) {
-      if (!element || !keyframes) return;
-      try {
-        if (typeof element.animate === 'function') {
-          return element.animate(keyframes, options);
-        }
-      } catch (err) {
-        console.error('Animation error:', err);
+    // Create shake animation
+    let start = null;
+    const step = (timestamp) => {
+      if (!start) start = timestamp;
+      const progress = timestamp - start;
+      
+      if (progress < duration) {
+        const x = Math.sin(progress / 10) * intensity;
+        element.style.transform = originalTransform + ' translateX(' + x + 'px)';
+        requestAnimationFrame(step);
+      } else {
+        // Restore original styles
+        element.style.transform = backup.transform;
+        element.style.transition = backup.transition;
       }
     };
     
-    window.shake = function(element, intensity = 5, duration = 500) {
-      if (!element) return;
-      const originalTransform = element.style.transform || '';
+    requestAnimationFrame(step);
+  }
+</script>
+`;
+
+/**
+ * Script tools để debug khi cần
+ */
+export const debugToolsScript = `
+<script>
+  // Debug tools - chỉ hiển thị khi có URL param debug=true
+  if (window.location.href.includes('debug=true')) {
+    const debugDiv = document.createElement('div');
+    debugDiv.className = 'debug-info';
+    document.body.appendChild(debugDiv);
+    
+    // Override console.log để hiển thị trong debug div
+    const originalConsoleLog = console.log;
+    console.log = function() {
+      originalConsoleLog.apply(console, arguments);
+      const args = Array.from(arguments);
+      const text = args.map(arg => {
+        if (typeof arg === 'object') return JSON.stringify(arg);
+        return arg;
+      }).join(' ');
       
-      const backup = {
-        transform: originalTransform,
-        transition: element.style.transition
-      };
+      if (debugDiv.childNodes.length > 20) {
+        debugDiv.removeChild(debugDiv.firstChild);
+      }
       
-      let start = null;
-      const step = (timestamp) => {
-        if (!start) start = timestamp;
-        const progress = timestamp - start;
-        
-        if (progress < duration) {
-          const x = Math.sin(progress / 10) * intensity;
-          element.style.transform = originalTransform + ' translateX(' + x + 'px)';
-          requestAnimationFrame(step);
-        } else {
-          element.style.transform = backup.transform;
-          element.style.transition = backup.transition;
-        }
-      };
-      
-      requestAnimationFrame(step);
-    };
-  })();
+      const logLine = document.createElement('div');
+      logLine.textContent = text;
+      debugDiv.appendChild(logLine);
+    }
+  }
 </script>
 `;
 
@@ -189,49 +220,46 @@ export const iframeHelperScript = `
  * Script cho loading indicator
  */
 export const loadingScript = `
-<div id="loading-indicator" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;z-index:9999;">
+<div id="loading-indicator">
   <div style="text-align:center">
     <div style="width:40px;height:40px;border:3px solid #333;border-radius:50%;border-top-color:transparent;margin:0 auto;animation:spin 1s linear infinite"></div>
-    <p style="margin-top:10px;font-family:sans-serif;">Loading game...</p>
+    <p style="margin-top:10px">Loading game...</p>
   </div>
 </div>
-<style>
-  @keyframes spin { 
-    0% { transform: rotate(0deg); } 
-    100% { transform: rotate(360deg); } 
-  }
-  .hidden { 
-    opacity: 0; 
-    pointer-events: none; 
-    transition: opacity 0.5s ease; 
-  }
-</style>
 <script>
-  (function() {
-    window.addEventListener('load', function() {
-      const loadingEl = document.getElementById('loading-indicator');
-      if (loadingEl) {
-        loadingEl.classList.add('hidden');
-        setTimeout(() => {
-          if (loadingEl.parentNode) {
-            loadingEl.parentNode.removeChild(loadingEl);
-          }
-        }, 500);
-      }
-    });
-    
-    document.body.classList.add('game-loaded');
-
-    // Bảo vệ để đảm bảo nội dung được hiển thị
-    setTimeout(function() {
-      try {
-        if (document.body.innerText.trim() === '' || document.body.childElementCount <= 1) {
-          document.body.innerHTML = '<div style="text-align:center;padding:20px;font-family:sans-serif;"><h3>Không thể tải nội dung game</h3><p>Vui lòng thử làm mới trang</p><button onclick="window.location.reload()" style="padding:10px 20px;background:#4a90e2;color:white;border:none;border-radius:4px;cursor:pointer;">Tải lại</button></div>';
+  window.addEventListener('load', function() {
+    const loadingEl = document.getElementById('loading-indicator');
+    if (loadingEl) {
+      loadingEl.classList.add('hidden');
+      setTimeout(() => {
+        if (loadingEl.parentNode) {
+          loadingEl.parentNode.removeChild(loadingEl);
         }
-      } catch(e) {
-        console.error('Error checking content:', e);
+      }, 500);
+    }
+  });
+  
+  // Animation styles
+  if (!document.getElementById('animation-styles')) {
+    const styleTag = document.createElement('style');
+    styleTag.id = 'animation-styles';
+    styleTag.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+    document.head.appendChild(styleTag);
+  }
+
+  // Thêm một class vào body để ghi nhận rằng game đang hoạt động
+  document.body.classList.add('game-loaded');
+
+  // Thêm một lớp bảo vệ để đảm bảo script thực sự chạy và nội dung được hiển thị
+  setTimeout(function() {
+    try {
+      if (document.body.innerText === '' || document.body.childElementCount <= 1) {
+        // Có thể nội dung không load được
+        document.body.innerHTML = '<div style="text-align:center;padding:20px;"><h3>Không thể tải nội dung game</h3><p>Vui lòng thử làm mới trang</p><button onclick="window.location.reload()" style="padding:10px 20px;background:#4a90e2;color:white;border:none;border-radius:4px;cursor:pointer;">Tải lại</button></div>';
       }
-    }, 3000);
-  })();
+    } catch(e) {
+      console.error('Error checking content:', e);
+    }
+  }, 2000);
 </script>
 `;

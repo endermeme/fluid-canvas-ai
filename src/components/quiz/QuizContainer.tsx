@@ -10,9 +10,9 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
-import GameHeader from './GameHeader';
+import QuizHeader from './QuizHeader';
 
-interface GameContainerProps {
+interface QuizContainerProps {
   children: React.ReactNode;
   title?: string;
   showBackButton?: boolean;
@@ -35,9 +35,9 @@ interface GameContainerProps {
   onHandleShare?: () => Promise<string>;
 }
 
-const GameContainer: React.FC<GameContainerProps> = ({
+const QuizContainer: React.FC<QuizContainerProps> = ({
   children,
-  title = "",
+  title = "", // Changed default title to empty string
   showBackButton = true,
   showHomeButton = false,
   showRefreshButton = false,
@@ -163,8 +163,9 @@ const GameContainer: React.FC<GameContainerProps> = ({
 
   return (
     <div className={cn("relative h-full w-full flex flex-col bg-gradient-to-b from-background to-background/95 shadow-lg rounded-lg overflow-hidden", className)}>
+      {/* Sử dụng component QuizHeader mới */}
       {!isCreatingGame && (
-        <GameHeader 
+        <QuizHeader 
           showBackButton={showBackButton}
           showCreateButton={showCreateButton}
           showShareButton={showShareButton}
@@ -176,16 +177,19 @@ const GameContainer: React.FC<GameContainerProps> = ({
         />
       )}
       
+      {/* Main content */}
       <div className="flex-1 overflow-hidden p-0 relative">
         {children}
       </div>
       
+      {/* Footer (optional) */}
       {footerContent && (
         <div className="bg-background/90 backdrop-blur-md p-2 border-t border-primary/10">
           {footerContent}
         </div>
       )}
 
+      {/* Share Dialog */}
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -227,4 +231,4 @@ const GameContainer: React.FC<GameContainerProps> = ({
   );
 };
 
-export default GameContainer;
+export default QuizContainer;

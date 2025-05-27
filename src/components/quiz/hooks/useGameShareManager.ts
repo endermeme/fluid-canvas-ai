@@ -1,118 +1,54 @@
 
-import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState } from 'react';
+import { saveGameForSharing } from '@/utils/gameExport';
+import { ToastType } from '@/hooks/use-toast';
 
 interface MiniGame {
   title?: string;
   content: string;
 }
 
-interface ToastFunction {
-  (options: {
-    title: string;
-    description: string;
-    variant?: 'default' | 'destructive';
-  }): void;
-}
-
 export const useGameShareManager = (
-  miniGame: MiniGame | null,
-  toast: ToastFunction,
+  miniGame: MiniGame, 
+  toast: ToastType,
   onShare?: () => Promise<string>
 ) => {
-  const [isSharing, setIsSharing] = useState(false);
+  const [isSharing, setIsSharing] = useState<boolean>(false);
 
-  const handleShare = useCallback(async () => {
-    if (!miniGame?.content) {
-      toast({
-        title: "Lỗi",
-        description: "Không có game để chia sẻ",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // If custom onShare is provided, use it
-    if (onShare) {
-      try {
-        setIsSharing(true);
-        const shareUrl = await onShare();
-        
-        // Copy to clipboard
-        await navigator.clipboard.writeText(shareUrl);
-        
-        toast({
-          title: "Đã sao chép",
-          description: "Link chia sẻ đã được sao chép vào clipboard",
-        });
-      } catch (error) {
-        console.error('Error sharing game:', error);
-        toast({
-          title: "Lỗi chia sẻ",
-          description: "Không thể chia sẻ game. Vui lòng thử lại.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsSharing(false);
-      }
-      return;
-    }
-
-    // Default sharing logic
+  const handleShare = async (): Promise<string | void> => {
+    if (!miniGame?.content) return;
+    
     try {
       setIsSharing(true);
-
-      console.log('🎮 Sharing game:', {
-        title: miniGame.title,
-        contentLength: miniGame.content.length
-      });
-
-      const { data, error } = await supabase
-        .from('games')
-        .insert({
-          title: miniGame.title || 'Game Tùy Chỉnh',
-          game_type: 'custom',
-          html_content: miniGame.content,
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('🎮 Error saving game:', error);
-        throw error;
-      }
-
-      if (!data?.id) {
-        throw new Error('Không nhận được ID game');
-      }
-
-      const shareUrl = `${window.location.origin}/game/${data.id}`;
-      
-      console.log('🎮 Game saved successfully:', {
-        gameId: data.id,
-        shareUrl
-      });
-
-      // Copy to clipboard
-      await navigator.clipboard.writeText(shareUrl);
-
       toast({
-        title: "Đã lưu và sao chép",
-        description: "Link chia sẻ đã được sao chép vào clipboard",
+        title: "Đang xử lý",
+        description: "Đang tạo liên kết chia sẻ...",
       });
-
+      
+      if (onShare) {
+        return await onShare();
+      } else {
+        const url = await saveGameForSharing(
+          miniGame.title || 'Game tương tác',
+          'custom',
+          miniGame,
+          miniGame.content
+        );
+        
+        setIsSharing(false);
+        return url;
+      }
     } catch (error) {
-      console.error('🎮 Error sharing game:', error);
+      console.error("Error sharing game:", error);
       toast({
         title: "Lỗi chia sẻ",
-        description: "Không thể chia sẻ game. Vui lòng thử lại.",
+        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
         variant: "destructive"
       });
-    } finally {
       setIsSharing(false);
+      return undefined;
     }
-  }, [miniGame, toast, onShare]);
+  };
 
   return {
     isSharing,

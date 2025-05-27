@@ -1,19 +1,38 @@
 
-// API Constants for Gemini AI
-export const GEMINI_API_KEY = 'AIzaSyA7wP0XfY-JJBhZJMy2Kt1z9IQ6b3vEo5c';
+/**
+ * API Constants for the application
+ * Centralized location for all API keys and model configurations
+ */
 
+// Google Gemini API Key (public API key)
+export const GEMINI_API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
+
+// Gemini Model configurations
 export const GEMINI_MODELS = {
-  PRESET_GAME: 'gemini-2.0-flash',
-  CUSTOM_GAME: 'gemini-2.0-flash'
+  CUSTOM_GAME: "gemini-2.5-pro-preview-03-25",
+  PRESET_GAME: "gemini-2.5-pro-preview-03-25"
 };
 
-export const getApiEndpoint = (model: string) => {
-  return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
-};
+// API Version
+export const API_VERSION = "v1beta";
 
+// API Base URL
+export const API_BASE_URL = "https://generativelanguage.googleapis.com";
+
+// Full API Endpoint
+export const getApiEndpoint = (model = GEMINI_MODELS.CUSTOM_GAME) => 
+  `${API_BASE_URL}/${API_VERSION}/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+
+// AI Generation Settings
 export const DEFAULT_GENERATION_SETTINGS = {
-  temperature: 0.7,
+  temperature: 0.8,
   topK: 40,
   topP: 0.95,
-  maxOutputTokens: 8192
+  maxOutputTokens: 8192,
 };
+
+// Request timeout in milliseconds
+export const REQUEST_TIMEOUT = 60000; // 60 seconds
+
+// Maximum retry attempts for API calls
+export const MAX_RETRY_ATTEMPTS = 3;

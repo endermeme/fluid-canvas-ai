@@ -1,91 +1,58 @@
 
-# Lịch sử thay đổi dự án
+# Lịch sử thay đổi mã nguồn
 
-## 2025-05-27
+## 30/04/2025 - Tái cấu trúc thư mục CustomGame
+- Tạo hai thư mục chính: `src/components/quiz/custom-games/api` và `src/components/quiz/custom-games/ui`
+- Di chuyển `src/utils/customGameAPI.ts` vào `src/components/quiz/custom-games/api/customGameAPI.ts`
+- Di chuyển các component UI vào thư mục `src/components/quiz/custom-games/ui`
+- Cập nhật các import path trong các file liên quan
+- Cập nhật tài liệu để phản ánh cấu trúc mới
 
-### Tạo lại hệ thống Custom Game với Gemini API
-- **File mới**: src/services/geminiService.ts
-- **File đã cập nhật**: src/components/custom/CustomGameForm.tsx, src/components/custom/GameController.tsx, src/pages/Quiz.tsx
-- **Package mới**: @google/genai@latest
-- **Loại thay đổi**: Tạo mới chức năng hoàn chỉnh
-- **Mô tả**: Tạo lại hệ thống custom game từ đầu với:
-  - Giao diện form đơn giản chỉ có 1 ô nhập yêu cầu
-  - 6 gợi ý game phổ biến
-  - Tích hợp Gemini API 2.0-flash với API key riêng
-  - Xử lý markdown thành HTML hoàn chỉnh
-  - Hiển thị game HTML Canvas trên iframe
-  - Logging chi tiết cho debug
-  - Error handling đầy đủ
+## 30/04/2025 - Dọn dẹp thư mục src/components
+- Tái cấu trúc các thư mục trong `src/components/quiz/utils`
+- Di chuyển và hợp nhất các file từ `src/components/quiz/custom-games/utils` vào `src/utils`
+- Xóa thư mục `src/components/quiz/custom-games/utils` không cần thiết
 
-### Xóa toàn bộ chức năng tạo game bằng Gemini API
-- **File đã xóa**: 
-  - src/components/ai/enhanced-game-generator.ts
-  - src/components/ai/game-generator.ts
-  - src/components/ai/prompt-manager.ts
-  - src/components/ai/response-processor.ts
-  - src/components/ai/index.ts
-  - src/components/quiz/generator/geminiGenerator.ts
-  - src/components/quiz/generator/geminiPrompt.ts
-  - src/components/quiz/generator/customGamePrompt.ts
-  - src/components/quiz/generator/promptBuilder.ts
-  - src/components/quiz/generator/apiUtils.ts
-  - src/constants/api-constants.ts
-- **File đã cập nhật**: src/components/custom/CustomGameForm.tsx, src/pages/Quiz.tsx, src/components/custom/GameController.tsx
-- **Loại thay đổi**: Loại bỏ tính năng hoàn toàn
-- **Mô tả**: Xóa toàn bộ logic tạo game bằng AI, chỉ giữ lại giao diện form để người dùng nhập thông tin. Form hiện tại chỉ hiển thị và log thông tin khi submit, không tạo game thực tế.
+## 30/04/2025 - Dọn dẹp project và xóa file không cần thiết
+- Xóa `src/unused-files.md` (chuyển thành `src/changes.md`)
+- Xóa các file không được sử dụng trong thư mục `src/components/quiz/generator`:
+  - `fallbackGenerator.ts` 
+  - `responseParser.ts`
+- Hợp nhất các file trong thư mục `src/components/quiz/quick-game-selector`
 
-### Cải thiện hệ thống tạo Custom Game chi tiết
-- **File đã thay đổi**: src/components/custom/CustomGameForm.tsx, src/components/ai/enhanced-game-generator.ts
-- **Loại thay đổi**: Cải tiến tính năng toàn diện
-- **Mô tả**: Nâng cấp hoàn toàn hệ thống tạo game custom:
-  - Thêm form chi tiết với tabs (Cơ bản, Nâng cao, Kỹ thuật)
-  - Các tùy chọn: độ khó, thể loại, kiểu chơi, thời gian, độ phức tạp
-  - Cải thiện Gemini API với logging chi tiết từng bước
-  - Cơ chế retry mạnh mẽ với 5 lần thử
-  - Template code Canvas và DOM riêng biệt
-  - Error handling và validation đầy đủ
-  - Responsive design cho mobile
+## 30/04/2025 - Sửa lỗi React trong use-toast.ts
+- Đã thêm import React trong file `src/hooks/use-toast.ts`
+- Sửa lỗi TypeScript: "React refers to a UMD global, but the current file is a module"
+- Đảm bảo sử dụng React.useState và React.useEffect đúng cách
 
-### Sửa lỗi "Iframe element not ready" trong GameIframeRenderer
-- **File đã thay đổi**: src/components/custom/GameIframeRenderer.tsx
-- **Loại thay đổi**: Sửa lỗi runtime
-- **Mô tả**: Sửa lỗi "Iframe element not ready" bằng cách:
-  - Thêm null checking trong useImperativeHandle
-  - Tạo temporary ref khi iframe chưa sẵn sàng
-  - Queue các operations cho đến khi iframe đã mount
-  - Thêm console logs để debug
+## 30/04/2025 - Chuyển đổi tài liệu từ sơ đồ sang văn bản
+- Cập nhật `src/custom-game-architecture.md` để hiển thị kiến trúc dưới dạng văn bản thay vì sơ đồ
+- Cập nhật `src/custom-game-workflow.md` để mô tả quy trình dưới dạng văn bản chi tiết
+- Cải thiện cấu trúc và định dạng để dễ đọc hơn
+- Bổ sung thêm chi tiết về các thành phần và quy trình
 
-### Sửa lỗi đường dẫn import trong useIframeManager
-- **File đã thay đổi**: src/components/quiz/hooks/useIframeManager.ts
-- **Loại thay đổi**: Sửa lỗi import
-- **Mô tả**: Sửa đường dẫn import từ '../../../custom/GameIframeRenderer' thành '../../custom/GameIframeRenderer' để đúng với cấu trúc thư mục
+## Các thay đổi trước đó
 
-### Sửa lỗi TypeScript trong Custom Game
-- **File đã thay đổi**: src/components/custom/GameIframeRenderer.tsx, src/components/quiz/hooks/useGameShareManager.ts, src/components/quiz/hooks/useIframeManager.ts, src/pages/Quiz.tsx
-- **Loại thay đổi**: Sửa lỗi TypeScript
-- **Mô tả**: Sửa các lỗi:
-  - GameIframeRenderer: Sửa useImperativeHandle để trả về đúng type HTMLIFrameElement với custom methods
-  - useGameShareManager: Loại bỏ trường 'content' không tồn tại trong database, chỉ sử dụng html_content
-  - useIframeManager: Cập nhật type reference cho GameIframeRef
-  - Quiz.tsx: Đảm bảo miniGame.content luôn tồn tại trước khi truyền vào EnhancedGameView
-
-### Khôi phục toàn bộ hệ thống Custom Game
-- **File đã thay đổi**: src/pages/Quiz.tsx, src/components/custom/GameIframeRenderer.tsx
-- **File mới**: src/components/quiz/hooks/useIframeManager.ts, src/components/quiz/hooks/useGameShareManager.ts
-- **Loại thay đổi**: Khôi phục đầy đủ tính năng
-- **Mô tả**: Khôi phục lại toàn bộ hệ thống tạo custom game với Gemini AI, bao gồm:
-  - Cơ chế prompt và phản hồi HTML đúng cách
-  - Xử lý iframe và hiển thị game
-  - Quản lý loading states và error handling
-  - Tính năng chia sẻ game
-  - Fallback game khi có lỗi
-
-### Khôi phục chức năng Header
-- **File đã thay đổi**: src/components/preset/PresetGameHeader.tsx
-- **Loại thay đổi**: Khôi phục chức năng
-- **Mô tả**: Khôi phục lại các chức năng điều hướng và hiển thị header như ban đầu
-
-### Sửa toàn bộ hệ thống Template
-- **File đã thay đổi**: Tất cả template trong src/components/preset/templates/
-- **Loại thay đổi**: Sửa lỗi hiển thị toàn diện
-- **Mô tả**: Thay thế tất cả placeholder template bằng component thực tế từ quiz/preset-games/templates để đảm bảo API response được hiển thị đúng
+- Refactor iframe-utils.ts thành các modules nhỏ hơn: iframe-enhancer.ts, iframe-scripts.ts, iframe-styles.ts và iframe-utils.ts mới nhỏ gọn hơn
+- Refactor EnhancedGameView.tsx thành các components nhỏ hơn: GameErrorDisplay, GameLoadingIndicator, GameIframeRenderer và các hooks useIframeManager, useGameShareManager
+- Cập nhật giao diện CustomGameForm: căn giữa màn hình, thêm hiệu ứng gradient và backdrop-blur, nâng cấp thiết kế Card
+- Ẩn tiêu đề game trên header và xoá phản hồi tại header game tùy chỉnh
+- Ẩn tiêu đề game trên header
+- Thêm form nhập tên và tuổi trước khi tham gia game
+- Cải thiện thông báo khi game hết hạn
+- Ẩn nút giáo viên cho người chơi thường
+- Cập nhật hiển thị thông tin người chơi
+- Thêm cơ chế chống gian lận
+- Sửa lỗi cú pháp trong geminiPrompt.ts (escape backticks trong template string)
+- Sửa lỗi iframe trắng bằng cách cải thiện trình xử lý nội dung và thêm phát hiện khi game đã tải xong
+- Sửa lỗi cú pháp trong iframe-utils.ts (các lỗi dấu phẩy và cú pháp)
+- Cải thiện hàm shake() trong iframe-utils.ts thông qua việc thay thế template string bằng chuỗi thông thường
+- Thêm xử lý thời gian chờ và cơ chế kiểm tra nội dung iframe để giải quyết vấn đề màn hình trắng
+- Thêm xử lý cho các định dạng ảnh từ API Gemini (base64 và URL)
+- Sửa lỗi TypeScript liên quan đến Promise trong xử lý nội dung iframe
+- Cải thiện chức năng chia sẻ game để giảm hiện tượng flash màn hình và sửa lỗi không tìm thấy game trong link chia sẻ
+- Thêm các chức năng thiếu trong gameParticipation.ts: getGameSession, exportParticipantsToCSV, maskIpAddress, getAllGameSessions
+- Thêm interface GameSession vào types.ts để hỗ trợ các chức năng quản lý phiên game và người chơi
+- Sửa lỗi TypeScript trong gameParticipation.ts: xoá định nghĩa trùng lặp GameParticipant và thêm thuộc tính score
+- Sửa lỗi TypeScript trong gameParticipation.ts: thêm kiểm tra thuộc tính score trong dữ liệu từ Supabase
+- Thêm tài liệu về quy trình hoạt động của custom game và kiến trúc hệ thống

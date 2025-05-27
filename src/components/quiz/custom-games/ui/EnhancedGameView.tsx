@@ -1,12 +1,12 @@
 
 import React from 'react';
-import GameErrorDisplay from './game-components/GameErrorDisplay';
-import GameLoadingIndicator from './game-components/GameLoadingIndicator';
+import GameErrorDisplay from '../game-components/GameErrorDisplay';
+import GameLoadingIndicator from '../game-components/GameLoadingIndicator';
 import GameIframeRenderer from './GameIframeRenderer';
 import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
-import { useGameShareManager } from '../quiz/hooks/useGameShareManager';
-import { useIframeManager } from '../quiz/hooks/useIframeManager';
+import { useGameShareManager } from '../../hooks/useGameShareManager';
+import { useIframeManager } from '../../hooks/useIframeManager';
 import { Card } from "@/components/ui/card";
 
 interface EnhancedGameViewProps {

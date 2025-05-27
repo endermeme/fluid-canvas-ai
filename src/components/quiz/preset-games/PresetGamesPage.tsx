@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import GameSelector from './GameSelector';
 import PresetGameManager from './PresetGameManager';
-import { GameSettingsData } from '../quiz/types';
+import { GameSettingsData } from '../types';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { History } from 'lucide-react';
+import { BarChart3, History } from 'lucide-react';
 
 const PresetGamesPage: React.FC = () => {
   const [selectedGameType, setSelectedGameType] = useState<string | null>(null);
@@ -37,6 +37,7 @@ const PresetGamesPage: React.FC = () => {
   };
   
   const handleQuickStart = (gameType: string, prompt: string, settings: GameSettingsData) => {
+    // Update settings to include the prompt
     const updatedSettings = {
       ...settings,
       prompt: prompt
