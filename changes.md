@@ -3,6 +3,11 @@
 
 ## 2025-05-27
 
+### Sửa lỗi import debugToolsScript trong iframe-enhancer
+- **File đã sửa**: `src/components/quiz/utils/iframe-enhancer.ts`
+- **Loại thay đổi**: Sửa lỗi TypeScript
+- **Mô tả**: Loại bỏ import `debugToolsScript` không tồn tại và cập nhật hàm `enhanceBody` để chỉ sử dụng các scripts đã có sẵn
+
 ### Sửa lỗi "redeclaration of let lastTap" trong iframe scripts
 - **File đã sửa**: `src/components/quiz/utils/iframe-scripts.ts`
 - **Loại thay đổi**: Sửa lỗi JavaScript runtime
@@ -61,3 +66,4 @@
 - Error handling và loading states cải thiện
 - Detailed console logging
 - Khắc phục lỗi JavaScript runtime trong iframe
+- Khắc phục lỗi TypeScript import

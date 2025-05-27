@@ -1,11 +1,9 @@
-
 import { processImageSource } from '@/utils/media-utils';
 import { touchStyles } from './iframe-styles';
 import { 
   errorHandlingScript, 
   deviceDetectionScript, 
   iframeHelperScript,
-  debugToolsScript,
   loadingScript 
 } from './iframe-scripts';
 
@@ -118,6 +116,6 @@ export const enhanceBody = (body: string): string => {
   // Thêm loading indicator vào đầu body
   const enhancedBody = loadingScript + body;
   
-  // Thêm các scripts vào cuối body
-  return enhancedBody + errorHandlingScript + deviceDetectionScript + iframeHelperScript + debugToolsScript;
+  // Thêm các scripts vào cuối body (loại bỏ debugToolsScript không tồn tại)
+  return enhancedBody + errorHandlingScript + deviceDetectionScript + iframeHelperScript;
 };
