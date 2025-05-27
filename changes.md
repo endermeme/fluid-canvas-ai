@@ -1,6 +1,17 @@
+
 # Quyết định và Thay đổi Custom Game
 
 ## 2025-05-27
+
+### Cập nhật API Key và chuyển sang Edge Function
+- **Tạo mới**: `supabase/functions/generate-custom-game/index.ts`
+  - Edge function bảo mật cho custom game
+  - Sử dụng API key mới: AIzaSyAcCyfdmqeT9DNJZ4Qh-iNgw9hqXE5Epqw
+  - Model: gemini-2.0-flash-exp
+- **Sửa đổi**: `src/services/geminiService.ts`
+  - Chuyển từ direct API call sang edge function
+  - Bảo mật API key
+  - Chỉ áp dụng cho custom game
 
 ### Tạo API Constants (Khắc phục lỗi build)
 - **Tạo mới**: `src/constants/api-constants.ts`
@@ -34,7 +45,8 @@
 ### Tính năng hiện tại
 - Form nhập yêu cầu đơn giản
 - 6 preset prompts cho game phổ biến
-- API Gemini tạo HTML game hoàn chỉnh
+- Edge function bảo mật với API key mới
+- API Gemini 2.0-flash-exp tạo HTML game hoàn chỉnh
 - Hiển thị game trong iframe
 - Error handling và loading states
 - Detailed console logging

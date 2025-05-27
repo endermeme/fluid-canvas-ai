@@ -1,9 +1,5 @@
 
-import { GoogleGenAI } from '@google/genai';
-
-const GEMINI_API_KEY = 'AIzaSyA7wP0XfY-JJBhZJMy2Kt1z9IQ6b3vEo5c';
-
-const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+import { supabase } from '@/integrations/supabase/client';
 
 const GAME_SYSTEM_PROMPT = `You are a game developer that creates HTML Canvas games. 
 Return ONLY complete HTML code with embedded CSS and JavaScript.
@@ -15,42 +11,32 @@ Make it responsive and mobile-friendly.`;
 
 export async function generateGame(userPrompt: string): Promise<string> {
   try {
-    console.log('🎮 Sending request to Gemini:', { userPrompt });
+    console.log('🎮 Sending request to edge function:', { userPrompt });
     
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: `${GAME_SYSTEM_PROMPT}\n\nUser request: ${userPrompt}` }]
-        }
-      ],
+    const { data, error } = await supabase.functions.invoke('generate-custom-game', {
+      body: { prompt: userPrompt }
     });
 
-    console.log('🎮 Gemini response received:', {
-      responseLength: response.text?.length || 0,
-      hasHTML: response.text?.includes('<html') || false
-    });
-
-    let gameHTML = response.text || '';
-    
-    // Xử lý markdown thành HTML nếu cần
-    gameHTML = processMarkdownToHTML(gameHTML);
-    
-    // Validate HTML
-    if (!gameHTML.includes('<canvas') && !gameHTML.includes('<html')) {
-      throw new Error('Response không chứa HTML game hợp lệ');
+    if (error) {
+      console.error('🎮 Edge function error:', error);
+      throw new Error(`Edge function error: ${error.message}`);
     }
 
-    console.log('🎮 Game HTML processed:', {
-      finalLength: gameHTML.length,
-      hasCanvas: gameHTML.includes('<canvas'),
-      hasHTML: gameHTML.includes('<html')
+    if (!data.success) {
+      console.error('🎮 Game generation failed:', data.error);
+      throw new Error(data.error || 'Unknown error');
+    }
+
+    console.log('🎮 Game generated successfully:', {
+      htmlLength: data.gameHTML?.length || 0,
+      hasCanvas: data.gameHTML?.includes('<canvas') || false,
+      hasHTML: data.gameHTML?.includes('<html') || false
     });
 
-    return gameHTML;
+    return data.gameHTML;
+
   } catch (error) {
-    console.error('🎮 Gemini API Error:', error);
+    console.error('🎮 Gemini Service Error:', error);
     throw new Error(`Lỗi tạo game: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
