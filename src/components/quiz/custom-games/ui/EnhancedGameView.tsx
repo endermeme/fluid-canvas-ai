@@ -7,7 +7,6 @@ import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { useGameShareManager } from '../../hooks/useGameShareManager';
 import { useIframeManager } from '../../hooks/useIframeManager';
-import { Card } from "@/components/ui/card";
 
 interface EnhancedGameViewProps {
   miniGame: {
@@ -51,7 +50,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   } = useIframeManager(miniGame, onReload, gameExpired);
 
   return (
-    <div className={`w-full h-full flex flex-col bg-gradient-to-b from-background to-background/95 ${className || ''}`}>
+    <div className={`w-full h-full flex flex-col ${className || ''}`}>
       {!hideHeader && (
         <CustomGameHeader
           onBack={onBack}
@@ -66,27 +65,31 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         />
       )}
       
-      <div className="flex-1 relative overflow-hidden p-4">
+      <div className="flex-1 relative overflow-hidden">
         {iframeError ? (
-          <GameErrorDisplay 
-            error={iframeError} 
-            onRetry={refreshGame} 
-          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black">
+            <GameErrorDisplay 
+              error={iframeError} 
+              onRetry={refreshGame} 
+            />
+          </div>
         ) : (
-          <Card className="relative w-full h-full overflow-hidden shadow-lg border-primary/10">
+          <div className="relative w-full h-full overflow-hidden">
             {!isIframeLoaded && (
-              <GameLoadingIndicator 
-                progress={loadingProgress} 
-                loadAttempts={loadAttempts} 
-                maxAttempts={maxRetryAttempts} 
-              />
+              <div className="absolute inset-0 z-20 bg-black flex items-center justify-center">
+                <GameLoadingIndicator 
+                  progress={loadingProgress} 
+                  loadAttempts={loadAttempts} 
+                  maxAttempts={maxRetryAttempts} 
+                />
+              </div>
             )}
             <GameIframeRenderer 
               ref={iframeRef} 
               title={miniGame.title || "Game tương tác"} 
               isLoaded={isIframeLoaded}
             />
-          </Card>
+          </div>
         )}
         
         {extraButton && (

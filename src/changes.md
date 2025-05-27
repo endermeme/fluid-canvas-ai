@@ -1,6 +1,12 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 27/05/2025 - Cải thiện prompt và hiển thị iframe cho custom game
+- Cập nhật `customGamePrompt.ts`: tạo prompt tập trung vào full-screen gameplay, loại bỏ text thừa
+- Cập nhật `iframe-styles.ts`: thêm styles full-screen (100vw x 100vh), loại bỏ margin/padding
+- Cập nhật `GameIframeRenderer.tsx`: iframe absolute positioning để khớp viền màn hình
+- Cập nhật `EnhancedGameView.tsx`: loại bỏ Card wrapper, sử dụng layout full-screen
+
 ## 30/04/2025 - Tái cấu trúc thư mục CustomGame
 - Tạo hai thư mục chính: `src/components/quiz/custom-games/api` và `src/components/quiz/custom-games/ui`
 - Di chuyển `src/utils/customGameAPI.ts` vào `src/components/quiz/custom-games/api/customGameAPI.ts`

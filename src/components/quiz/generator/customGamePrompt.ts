@@ -16,49 +16,44 @@ export const generateCustomGamePrompt = (options: GamePromptOptions): string => 
   } = options;
 
   const basePrompt = `
-Create a simple, ready-to-play HTML game about: "${topic}"
+Create a minimalist, full-screen HTML5 game about: "${topic}"
 
-**IMPORTANT GAME REQUIREMENTS:**
-- Game must be playable immediately without complex setup
-- Support both touch screens and mouse interactions
-- Must work on both mobile and desktop devices
-- Keep the UI clean and intuitive
-- Focus on core gameplay mechanics only
+**CRITICAL REQUIREMENTS:**
+- FULL SCREEN GAME - NO wasted space, NO excessive text or instructions
+- Game area must fill 100% of viewport (100vw x 100vh)
+- Minimal UI - only essential elements (score, simple controls)
+- NO lengthy instructions or descriptions in the game
+- Immediate gameplay - game starts right away
 - Language: ${language === 'vi' ? 'Vietnamese' : 'English'}
 - Difficulty: ${difficulty}
-- Category: ${category}
 
-**DEVICE COMPATIBILITY:**
-1. Touch screen support:
-   - All interactions must work with touch events (touchstart, touchmove, touchend)
-   - Include proper touch event handling
-   - Support multi-touch where appropriate
-   - Use proper touch target sizes (min 44px)
-   - Add touch feedback (visual response to interactions)
-
-2. Mouse support:
-   - All interactions must also work with mouse events
-   - Support hover states where appropriate
-   - Maintain consistent behavior across devices
-
-**CODE REQUIREMENTS:**
-- Return complete HTML file with all CSS/JS included
-- NO EXTERNAL DEPENDENCIES or CDN links
-- Start with \`\`\`html
-- Format code properly with indentation
-- End with \`\`\`
-- NO COMMENTS in the code
+**RESPONSIVE DESIGN:**
+- Use viewport units (100vw, 100vh) for full screen
+- Game canvas/area: width: 100vw, height: 100vh
+- Remove all margins, padding from body and html
+- Position UI elements as overlays, not separate sections
 
 **GAME STRUCTURE:**
-1. Clear game title and simple instructions
-2. Immediate start button (touch-friendly size)
-3. Core gameplay area with touch/mouse support
-4. Basic score/progress display
-5. Quick restart option
-6. Device-appropriate controls
-7. Responsive layout for all screen sizes
+1. Full-screen game area (canvas or div)
+2. Minimal overlay UI (score in corner)
+3. Touch/mouse controls
+4. NO instruction screens - controls should be intuitive
+5. NO excessive text or descriptions
 
-Focus on making the game instantly playable and fun on any device!
+**CODE FORMAT:**
+- Complete HTML with DOCTYPE
+- CSS: body { margin: 0; padding: 0; overflow: hidden; width: 100vw; height: 100vh; }
+- Game area: { width: 100vw; height: 100vh; position: relative; }
+- All JavaScript in single script tag
+- NO external dependencies
+- Start with \`\`\`html and end with \`\`\`
+
+**TOUCH/MOUSE SUPPORT:**
+- Support both touch events and mouse events
+- Touch targets minimum 44px
+- Responsive controls for all devices
+
+Focus on creating an engaging, full-screen gaming experience with minimal UI clutter!
 `;
 
   return basePrompt;

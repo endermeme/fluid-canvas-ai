@@ -4,26 +4,55 @@
  */
 
 /**
- * Style cơ bản và tối ưu cho touch
+ * Style cơ bản và tối ưu cho touch - tập trung vào full screen
  */
 export const touchStyles = `
 <style>
-  /* Base styles */
-  body {
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
+  /* Full screen base styles */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
     touch-action: manipulation;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000;
   }
   
-  /* Touch optimization */
+  /* Remove any default spacing */
   * {
     -webkit-tap-highlight-color: transparent;
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
   }
   
-  /* Better buttons for touch */
+  /* Game container full screen */
+  #gameContainer, .game-container, .game-area {
+    width: 100vw !important;
+    height: 100vh !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Canvas full screen */
+  canvas {
+    width: 100vw !important;
+    height: 100vh !important;
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    touch-action: none;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Touch optimization */
   .touch-device button,
   .touch-device [role="button"],
   .touch-device input[type="button"],
@@ -31,24 +60,30 @@ export const touchStyles = `
   .touch-device .clickable {
     min-width: 44px;
     min-height: 44px;
+    position: relative;
+    z-index: 100;
   }
   
-  /* Better canvas scaling */
-  canvas {
-    touch-action: none;
-    max-width: 100%;
-    display: block;
-    margin: 0 auto;
+  /* UI overlays */
+  .ui-overlay, .score, .controls {
+    position: fixed !important;
+    z-index: 1000 !important;
+    pointer-events: auto;
   }
   
-  /* Loading indicator styles */
+  /* Hide scrollbars */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Loading indicator */
   #loading-indicator {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255,255,255,0.8);
+    background: rgba(0,0,0,0.8);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -60,38 +95,21 @@ export const touchStyles = `
     pointer-events: none;
   }
   
+  /* Mobile specific */
+  @media (max-width: 768px) {
+    body {
+      -webkit-overflow-scrolling: touch;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  }
+
   @media (hover: hover) and (pointer: fine) {
-    /* Mouse-specific styles */
     .no-touch button:hover,
     .no-touch [role="button"]:hover {
       cursor: pointer;
       opacity: 0.9;
     }
-  }
-
-  /* Debugging styles */
-  .debug-info {
-    position: fixed;
-    top: 0;
-    right: 0;
-    background: rgba(0,0,0,0.7);
-    color: #fff;
-    font-size: 12px;
-    padding: 5px;
-    max-width: 300px;
-    max-height: 150px;
-    overflow: auto;
-    z-index: 9999;
-    font-family: monospace;
-  }
-
-  /* Ensure all the content is rendered properly */
-  html, body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: #ffffff;
   }
 </style>
 `;
