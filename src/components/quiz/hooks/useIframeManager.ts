@@ -1,5 +1,6 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react';
+import { enhanceIframeContent } from '@/components/quiz/utils/iframe-utils';
 
 interface MiniGame {
   title?: string;
@@ -7,118 +8,130 @@ interface MiniGame {
 }
 
 export const useIframeManager = (
-  miniGame: MiniGame,
+  miniGame: MiniGame | null,
   onReload?: () => void,
   gameExpired?: boolean
 ) => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement & { updateContent?: (content: string) => Promise<void> }>(null);
   const [iframeError, setIframeError] = useState<string | null>(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadAttempts, setLoadAttempts] = useState(0);
   const maxRetryAttempts = 3;
 
-  const refreshGame = useCallback(() => {
-    if (onReload) {
-      onReload();
-    } else {
+  const loadGameContent = useCallback(async () => {
+    if (!miniGame?.content || !iframeRef.current) {
+      console.log('🎮 No content or iframe ref available');
+      return;
+    }
+
+    try {
+      console.log('🎮 Loading game content:', {
+        contentLength: miniGame.content.length,
+        title: miniGame.title,
+        attempt: loadAttempts + 1
+      });
+
       setIframeError(null);
       setIsIframeLoaded(false);
-      setLoadingProgress(0);
-      setLoadAttempts(prev => prev + 1);
-      
-      if (iframeRef.current) {
-        const iframe = iframeRef.current;
-        iframe.src = 'about:blank';
-        
-        setTimeout(() => {
-          try {
-            const blob = new Blob([miniGame.content], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            iframe.src = url;
-          } catch (error) {
-            console.error('Error refreshing game:', error);
-            setIframeError('Không thể tải lại game. Vui lòng thử lại.');
-          }
-        }, 100);
+      setLoadingProgress(20);
+
+      // Enhance content
+      const enhancedContent = await enhanceIframeContent(miniGame.content, miniGame.title);
+      setLoadingProgress(60);
+
+      console.log('🎮 Content enhanced:', {
+        originalLength: miniGame.content.length,
+        enhancedLength: enhancedContent.length,
+        hasDoctype: enhancedContent.includes('<!DOCTYPE')
+      });
+
+      // Update iframe
+      if (iframeRef.current.updateContent) {
+        await iframeRef.current.updateContent(enhancedContent);
+      } else {
+        iframeRef.current.srcdoc = enhancedContent;
       }
+
+      setLoadingProgress(80);
+
+      // Set up load detection
+      const iframe = iframeRef.current;
+      
+      const handleLoad = () => {
+        console.log('🎮 Iframe load event fired');
+        setLoadingProgress(100);
+        setIsIframeLoaded(true);
+        setIframeError(null);
+      };
+
+      const handleError = (error: any) => {
+        console.error('🎮 Iframe error:', error);
+        setIframeError('Lỗi tải game. Vui lòng thử lại.');
+        setIsIframeLoaded(false);
+      };
+
+      iframe.onload = handleLoad;
+      iframe.onerror = handleError;
+
+      // Timeout fallback
+      setTimeout(() => {
+        if (!isIframeLoaded) {
+          console.log('🎮 Iframe load timeout, assuming loaded');
+          setIsIframeLoaded(true);
+          setLoadingProgress(100);
+        }
+      }, 5000);
+
+    } catch (error) {
+      console.error('🎮 Error loading game content:', error);
+      setIframeError(`Lỗi tải game: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setIsIframeLoaded(false);
     }
-  }, [onReload, miniGame.content]);
+  }, [miniGame, loadAttempts, isIframeLoaded]);
+
+  const refreshGame = useCallback(async () => {
+    console.log('🎮 Refreshing game...');
+    
+    if (loadAttempts < maxRetryAttempts) {
+      setLoadAttempts(prev => prev + 1);
+      setLoadingProgress(0);
+      await loadGameContent();
+    } else if (onReload) {
+      console.log('🎮 Max attempts reached, calling onReload');
+      onReload();
+    } else {
+      setIframeError('Không thể tải game sau nhiều lần thử. Vui lòng tạo game mới.');
+    }
+  }, [loadAttempts, maxRetryAttempts, loadGameContent, onReload]);
 
   const handleFullscreen = useCallback(() => {
     if (iframeRef.current) {
-      if (iframeRef.current.requestFullscreen) {
-        iframeRef.current.requestFullscreen();
+      try {
+        if (iframeRef.current.requestFullscreen) {
+          iframeRef.current.requestFullscreen();
+        }
+      } catch (error) {
+        console.warn('🎮 Fullscreen not supported:', error);
       }
     }
   }, []);
 
+  // Load content when miniGame changes
   useEffect(() => {
-    if (!miniGame.content || gameExpired) return;
-
-    const iframe = iframeRef.current;
-    if (!iframe) return;
-
-    setIframeError(null);
-    setIsIframeLoaded(false);
-    setLoadingProgress(10);
-
-    const progressInterval = setInterval(() => {
-      setLoadingProgress(prev => {
-        if (prev >= 90) {
-          clearInterval(progressInterval);
-          return prev;
-        }
-        return prev + Math.random() * 10;
-      });
-    }, 200);
-
-    const loadTimeout = setTimeout(() => {
-      if (!isIframeLoaded) {
-        clearInterval(progressInterval);
-        setIframeError('Game tải quá lâu. Vui lòng thử lại.');
-        setLoadingProgress(0);
-      }
-    }, 15000);
-
-    const handleIframeLoad = () => {
-      clearInterval(progressInterval);
-      clearTimeout(loadTimeout);
-      setLoadingProgress(100);
-      setTimeout(() => {
-        setIsIframeLoaded(true);
-      }, 500);
-    };
-
-    const handleIframeError = () => {
-      clearInterval(progressInterval);
-      clearTimeout(loadTimeout);
-      setIframeError('Không thể tải game. Vui lòng thử lại.');
-      setLoadingProgress(0);
-    };
-
-    iframe.addEventListener('load', handleIframeLoad);
-    iframe.addEventListener('error', handleIframeError);
-
-    try {
-      const blob = new Blob([miniGame.content], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      iframe.src = url;
-
-      return () => {
-        iframe.removeEventListener('load', handleIframeLoad);
-        iframe.removeEventListener('error', handleIframeError);
-        clearInterval(progressInterval);
-        clearTimeout(loadTimeout);
-        URL.revokeObjectURL(url);
-      };
-    } catch (error) {
-      console.error('Error loading game content:', error);
-      setIframeError('Lỗi khi tải nội dung game.');
-      clearInterval(progressInterval);
-      clearTimeout(loadTimeout);
+    if (miniGame?.content) {
+      setLoadAttempts(0);
+      loadGameContent();
     }
-  }, [miniGame.content, gameExpired, isIframeLoaded]);
+  }, [miniGame?.content, miniGame?.title]);
+
+  // Handle game expiration
+  useEffect(() => {
+    if (gameExpired) {
+      setIframeError('Game đã hết hạn. Vui lòng tạo game mới.');
+      setIsIframeLoaded(false);
+    }
+  }, [gameExpired]);
 
   return {
     iframeRef,

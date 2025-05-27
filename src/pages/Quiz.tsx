@@ -7,28 +7,19 @@ import { GameContainer } from '@/components/ui/game';
 import GameLoading from '@/components/quiz/GameLoading';
 import CustomGameForm from '@/components/custom/CustomGameForm';
 import EnhancedGameView from '@/components/custom/EnhancedGameView';
-import { tryGeminiGeneration } from '@/components/quiz/generator/geminiGenerator';
+import { AIGameGenerator } from '@/components/ai/game-generator';
+import type { MiniGame } from '@/components/quiz/generator/types';
 
 const Quiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [gameContent, setGameContent] = useState<string | null>(null);
   const [gameTitle, setGameTitle] = useState('Game Tương Tác');
   const [prompt, setPrompt] = useState('');
-  const [miniGame, setMiniGame] = useState<{ title: string, content: string } | null>(null);
+  const [miniGame, setMiniGame] = useState<MiniGame | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const handleGenerate = async (promptText: string, game?: any) => {
-    if (game) {
-      setGameContent(game.content);
-      setGameTitle(game.title || `Game: ${promptText.substring(0, 40)}...`);
-      setMiniGame({
-        title: game.title || `Game: ${promptText.substring(0, 40)}...`,
-        content: game.content
-      });
-      return;
-    }
-    
+  const handleGenerate = async (promptText: string, settings?: any) => {
     if (!promptText.trim()) {
       toast({
         title: "Lỗi",
@@ -45,12 +36,27 @@ const Quiz = () => {
     setMiniGame(null);
     
     try {
-      const game = await tryGeminiGeneration(null, promptText, { 
-        useCanvas: true, 
-        category: 'general' 
+      console.log('🎮 Bắt đầu tạo game với prompt:', promptText);
+      console.log('🎮 Settings:', settings);
+      
+      const generator = AIGameGenerator.getInstance();
+      if (settings?.useCanvas !== undefined) {
+        generator.setCanvasMode(settings.useCanvas);
+      }
+      
+      const game = await generator.generateMiniGame(promptText, {
+        difficulty: settings?.difficulty || 'medium',
+        category: settings?.category || 'general',
+        useCanvas: settings?.useCanvas !== undefined ? settings.useCanvas : true
       });
       
-      if (game) {
+      if (game && game.content) {
+        console.log('🎮 Game được tạo thành công:', {
+          title: game.title,
+          contentLength: game.content.length,
+          hasHTML: game.content.includes('<html')
+        });
+        
         setGameContent(game.content);
         setGameTitle(game.title || `Game: ${promptText.substring(0, 40)}...`);
         setMiniGame({
@@ -63,10 +69,10 @@ const Quiz = () => {
           description: "Trò chơi đã được tạo thành công với HTML, CSS và JavaScript",
         });
       } else {
-        throw new Error("Không thể tạo game");
+        throw new Error("Không thể tạo game - response không hợp lệ");
       }
     } catch (error) {
-      console.error("Error generating game:", error);
+      console.error("🎮 Lỗi tạo game:", error);
       
       toast({
         title: "Lỗi tạo game",
@@ -74,6 +80,7 @@ const Quiz = () => {
         variant: "destructive"
       });
       
+      // Tạo fallback game đơn giản
       const fallbackHTML = generateFallbackGame(promptText);
       setGameContent(fallbackHTML);
       setGameTitle(`Game: ${promptText.substring(0, 40)}...`);
@@ -107,12 +114,44 @@ const Quiz = () => {
             -webkit-tap-highlight-color: transparent;
           }
           
+          body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          
+          .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+          }
+          
           button {
             min-width: 44px;
             min-height: 44px;
             padding: 12px 24px;
             margin: 8px;
             font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #4f46e5;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+          
+          button:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
           }
           
           .game-object {
@@ -126,36 +165,42 @@ const Quiz = () => {
             -webkit-tap-highlight-color: transparent;
           }
           
-          @media (hover: hover) and (pointer: fine) {
-            .game-object:hover {
-              transform: scale(1.1);
-            }
-          }
-          
           .game-object:active {
             transform: scale(0.95);
           }
           
-          .no-select {
-            user-select: none;
-            -webkit-user-select: none;
+          .score {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #4f46e5;
+          }
+          
+          #gameArea {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            border: 2px dashed #e5e7eb;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: hidden;
           }
         </style>
       </head>
       <body>
         <div class="container">
-          <h1>Game Demo: ${promptText}</h1>
-          
-          <p>Đây là phiên bản demo của trò chơi dựa trên yêu cầu của bạn:</p>
-          <p><em>"${promptText}"</em></p>
+          <h1>🎮 Game Demo</h1>
+          <p><strong>Chủ đề:</strong> ${promptText}</p>
           
           <div class="score">Điểm: <span id="score">0</span></div>
           
-          <div class="game-content" id="gameArea">
-            <div class="message">Nhấp vào các đối tượng để tăng điểm</div>
+          <div id="gameArea">
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #9ca3af;">
+              Nhấn "Bắt đầu chơi" để bắt đầu!
+            </div>
           </div>
           
-          <div style="margin-top: 24px">
+          <div>
             <button id="playButton">Bắt đầu chơi</button>
             <button id="resetButton">Đặt lại</button>
           </div>
@@ -212,20 +257,26 @@ const Quiz = () => {
             clearInterval(gameTimer);
             gameObjects.forEach(obj => obj.element.remove());
             gameObjects = [];
+            
+            gameArea.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #9ca3af;">Nhấn "Bắt đầu chơi" để bắt đầu!</div>';
           }
           
           function createGameObject() {
             if (!gameRunning) return;
             
+            if (gameObjects.length === 0) {
+              gameArea.innerHTML = '';
+            }
+            
             const areaRect = gameArea.getBoundingClientRect();
-            const maxX = areaRect.width - 50;
-            const maxY = areaRect.height - 50;
+            const maxX = gameArea.clientWidth - 60;
+            const maxY = gameArea.clientHeight - 60;
             
             const element = document.createElement('div');
             element.classList.add('game-object');
             
-            const x = Math.floor(Math.random() * maxX);
-            const y = Math.floor(Math.random() * maxY);
+            const x = Math.floor(Math.random() * Math.max(0, maxX));
+            const y = Math.floor(Math.random() * Math.max(0, maxY));
             
             const colors = ['#4f46e5', '#06b6d4', '#ec4899', '#f97316', '#84cc16'];
             const color = colors[Math.floor(Math.random() * colors.length)];
