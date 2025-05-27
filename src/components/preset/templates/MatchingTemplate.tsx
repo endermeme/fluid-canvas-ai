@@ -1,8 +1,14 @@
 
 import React from 'react';
+import ActualMatchingTemplate from '../../quiz/preset-games/templates/MatchingTemplate';
 
-const MatchingTemplate = () => {
-  return <div>Matching Template Placeholder</div>;
+interface MatchingTemplateProps {
+  content: any;
+  topic: string;
+}
+
+const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) => {
+  return <ActualMatchingTemplate content={content} topic={topic} />;
 };
 
 export default MatchingTemplate;

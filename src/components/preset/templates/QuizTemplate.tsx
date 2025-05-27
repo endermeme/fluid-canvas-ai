@@ -1,8 +1,14 @@
 
 import React from 'react';
+import ActualQuizTemplate from '../../quiz/preset-games/templates/QuizTemplate';
 
-const QuizTemplate = () => {
-  return <div>Quiz Template Placeholder</div>;
+interface QuizTemplateProps {
+  content: any;
+  topic: string;
+}
+
+const QuizTemplate: React.FC<QuizTemplateProps> = ({ content, topic }) => {
+  return <ActualQuizTemplate content={content} topic={topic} />;
 };
 
 export default QuizTemplate;

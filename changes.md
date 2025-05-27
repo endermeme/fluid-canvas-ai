@@ -3,6 +3,11 @@
 
 ## 2025-05-27
 
+### Sửa toàn bộ hệ thống Template
+- **File đã thay đổi**: Tất cả template trong src/components/preset/templates/
+- **Loại thay đổi**: Sửa lỗi hiển thị toàn diện
+- **Mô tả**: Thay thế tất cả placeholder template bằng component thực tế từ quiz/preset-games/templates để đảm bảo API response được hiển thị đúng
+
 ### Sửa lỗi Flashcards Template
 - **File đã thay đổi**: src/components/preset/templates/FlashcardsTemplate.tsx
 - **Loại thay đổi**: Sửa lỗi hiển thị

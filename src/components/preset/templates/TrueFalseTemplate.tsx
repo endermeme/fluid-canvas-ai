@@ -1,8 +1,14 @@
 
 import React from 'react';
+import ActualTrueFalseTemplate from '../../quiz/preset-games/templates/TrueFalseTemplate';
 
-const TrueFalseTemplate = () => {
-  return <div>TrueFalse Template Placeholder</div>;
+interface TrueFalseTemplateProps {
+  content: any;
+  topic: string;
+}
+
+const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ content, topic }) => {
+  return <ActualTrueFalseTemplate content={content} topic={topic} />;
 };
 
 export default TrueFalseTemplate;
