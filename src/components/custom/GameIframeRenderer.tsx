@@ -111,18 +111,44 @@ const GameIframeRenderer = forwardRef<GameIframeRef, GameIframeRendererProps>(
       }
     };
 
-    // Expose methods to parent
+    // Expose methods to parent with proper null checking
     useImperativeHandle(ref, () => {
+      // Tạo một object tạm thời để return khi iframe chưa sẵn sàng
+      const createTempRef = (): GameIframeRef => {
+        const tempDiv = document.createElement('iframe') as HTMLIFrameElement;
+        
+        return Object.assign(tempDiv, {
+          updateContent: async (content: string) => {
+            console.log('🎮 updateContent called but iframe not ready, queuing...');
+            // Đợi iframe sẵn sàng
+            const checkIframe = () => {
+              if (iframeElement) {
+                updateIframeContent(content);
+              } else {
+                setTimeout(checkIframe, 100);
+              }
+            };
+            checkIframe();
+          },
+          getCurrentContent: () => {
+            console.log('🎮 getCurrentContent called but iframe not ready');
+            return iframeContent;
+          }
+        }) as GameIframeRef;
+      };
+
+      // Nếu iframe element chưa sẵn sàng, trả về temp ref
       if (!iframeElement) {
-        throw new Error('Iframe element not ready');
+        console.log('🎮 Iframe element not ready, returning temp ref');
+        return createTempRef();
       }
       
-      // Create a new object that extends the iframe element with our custom methods
+      // Nếu iframe element đã sẵn sàng, trả về ref thực
       return Object.assign(iframeElement, {
         updateContent: updateIframeContent,
         getCurrentContent: () => iframeContent
       }) as GameIframeRef;
-    }, [iframeElement, iframeContent]);
+    }, [iframeElement, iframeContent, updateIframeContent]);
 
     return (
       <iframe

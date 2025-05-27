@@ -3,6 +3,15 @@
 
 ## 2025-05-27
 
+### Sửa lỗi "Iframe element not ready" trong GameIframeRenderer
+- **File đã thay đổi**: src/components/custom/GameIframeRenderer.tsx
+- **Loại thay đổi**: Sửa lỗi runtime
+- **Mô tả**: Sửa lỗi "Iframe element not ready" bằng cách:
+  - Thêm null checking trong useImperativeHandle
+  - Tạo temporary ref khi iframe chưa sẵn sàng
+  - Queue các operations cho đến khi iframe đã mount
+  - Thêm console logs để debug
+
 ### Sửa lỗi đường dẫn import trong useIframeManager
 - **File đã thay đổi**: src/components/quiz/hooks/useIframeManager.ts
 - **Loại thay đổi**: Sửa lỗi import
