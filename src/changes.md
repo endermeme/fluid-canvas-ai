@@ -1,7 +1,18 @@
-
 # Lịch sử thay đổi dự án
 
 ## 2025-05-27
+
+### Cải thiện hệ thống tạo Custom Game chi tiết
+- **File đã thay đổi**: src/components/custom/CustomGameForm.tsx, src/components/ai/enhanced-game-generator.ts
+- **Loại thay đổi**: Cải tiến tính năng toàn diện
+- **Mô tả**: Nâng cấp hoàn toàn hệ thống tạo game custom:
+  - Thêm form chi tiết với tabs (Cơ bản, Nâng cao, Kỹ thuật)
+  - Các tùy chọn: độ khó, thể loại, kiểu chơi, thời gian, độ phức tạp
+  - Cải thiện Gemini API với logging chi tiết từng bước
+  - Cơ chế retry mạnh mẽ với 5 lần thử
+  - Template code Canvas và DOM riêng biệt
+  - Error handling và validation đầy đủ
+  - Responsive design cho mobile
 
 ### Sửa lỗi "Iframe element not ready" trong GameIframeRenderer
 - **File đã thay đổi**: src/components/custom/GameIframeRenderer.tsx
