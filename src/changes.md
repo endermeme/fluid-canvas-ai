@@ -1,5 +1,16 @@
+# Lịch sử thay đổi dự án
 
-# Lịch sử thay đổi mã nguồn
+## 2025-05-27
+
+### Khôi phục chức năng Header
+- **File đã thay đổi**: src/components/preset/PresetGameHeader.tsx
+- **Loại thay đổi**: Khôi phục chức năng
+- **Mô tả**: Khôi phục lại các chức năng điều hướng và hiển thị header như ban đầu
+
+### Sửa toàn bộ hệ thống Template
+- **File đã thay đổi**: Tất cả template trong src/components/preset/templates/
+- **Loại thay đổi**: Sửa lỗi hiển thị toàn diện
+- **Mô tả**: Thay thế tất cả placeholder template bằng component thực tế từ quiz/preset-games/templates để đảm bảo API response được hiển thị đúng
 
 ## 26/05/2025 - Khôi phục tính năng Custom Game và Gemini
 - Tạo lại `src/components/custom/CustomGameForm.tsx` với giao diện đầy đủ
