@@ -3,6 +3,11 @@
 
 ## 2025-05-27
 
+### Sửa lỗi đường dẫn import trong useIframeManager
+- **File đã thay đổi**: src/components/quiz/hooks/useIframeManager.ts
+- **Loại thay đổi**: Sửa lỗi import
+- **Mô tả**: Sửa đường dẫn import từ '../../../custom/GameIframeRenderer' thành '../../custom/GameIframeRenderer' để đúng với cấu trúc thư mục
+
 ### Sửa lỗi TypeScript trong Custom Game
 - **File đã thay đổi**: src/components/custom/GameIframeRenderer.tsx, src/components/quiz/hooks/useGameShareManager.ts, src/components/quiz/hooks/useIframeManager.ts, src/pages/Quiz.tsx
 - **Loại thay đổi**: Sửa lỗi TypeScript

@@ -1,7 +1,6 @@
-
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { enhanceIframeContent } from '@/components/quiz/utils/iframe-utils';
-import type { GameIframeRef } from '../../../custom/GameIframeRenderer';
+import type { GameIframeRef } from '../../custom/GameIframeRenderer';
 
 interface MiniGame {
   title?: string;
