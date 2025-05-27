@@ -3,6 +3,16 @@
 
 ## 2025-05-27
 
+### Sửa lỗi "redeclaration of let lastTap" trong iframe scripts
+- **File đã sửa**: `src/components/quiz/utils/iframe-scripts.ts`
+- **Loại thay đổi**: Sửa lỗi JavaScript runtime
+- **Mô tả**: Khắc phục lỗi khai báo trùng lặp biến lastTap bằng cách:
+  - Đặt biến lastTap trong scope cục bộ với tên `touchLastTap`
+  - Sử dụng IIFE (Immediately Invoked Function Expression) để tránh xung đột global scope
+  - Thêm check `window.touchHandlerInitialized` để tránh khởi tạo multiple lần
+  - Cải thiện code structure và error handling
+  - Tối ưu hóa loading indicator và animation styles
+
 ### Cập nhật API Key và chuyển sang Edge Function
 - **Tạo mới**: `supabase/functions/generate-custom-game/index.ts`
   - Edge function bảo mật cho custom game
@@ -47,6 +57,7 @@
 - 6 preset prompts cho game phổ biến
 - Edge function bảo mật với API key mới
 - API Gemini 2.0-flash-exp tạo HTML game hoàn chỉnh
-- Hiển thị game trong iframe
-- Error handling và loading states
+- Hiển thị game trong iframe an toàn
+- Error handling và loading states cải thiện
 - Detailed console logging
+- Khắc phục lỗi JavaScript runtime trong iframe
