@@ -1,6 +1,24 @@
+
 # Lịch sử thay đổi dự án
 
 ## 2025-05-27
+
+### Xóa toàn bộ chức năng tạo game bằng Gemini API
+- **File đã xóa**: 
+  - src/components/ai/enhanced-game-generator.ts
+  - src/components/ai/game-generator.ts
+  - src/components/ai/prompt-manager.ts
+  - src/components/ai/response-processor.ts
+  - src/components/ai/index.ts
+  - src/components/quiz/generator/geminiGenerator.ts
+  - src/components/quiz/generator/geminiPrompt.ts
+  - src/components/quiz/generator/customGamePrompt.ts
+  - src/components/quiz/generator/promptBuilder.ts
+  - src/components/quiz/generator/apiUtils.ts
+  - src/constants/api-constants.ts
+- **File đã cập nhật**: src/components/custom/CustomGameForm.tsx, src/pages/Quiz.tsx, src/components/custom/GameController.tsx
+- **Loại thay đổi**: Loại bỏ tính năng hoàn toàn
+- **Mô tả**: Xóa toàn bộ logic tạo game bằng AI, chỉ giữ lại giao diện form để người dùng nhập thông tin. Form hiện tại chỉ hiển thị và log thông tin khi submit, không tạo game thực tế.
 
 ### Cải thiện hệ thống tạo Custom Game chi tiết
 - **File đã thay đổi**: src/components/custom/CustomGameForm.tsx, src/components/ai/enhanced-game-generator.ts

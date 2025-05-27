@@ -7,9 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Input } from '@/components/ui/input';
-import { Sparkles, Gamepad2, ArrowLeft, Settings, Lightbulb } from 'lucide-react';
+import { ArrowLeft, Settings, Lightbulb, Info } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface CustomGameFormProps {
   onGenerate: (prompt: string, game?: any) => void;
@@ -29,34 +29,13 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
   const [mobileOptimized, setMobileOptimized] = useState(true);
   const [language, setLanguage] = useState('vi');
   const [customSettings, setCustomSettings] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt.trim()) return;
 
-    setIsGenerating(true);
-    try {
-      const gameSettings = {
-        difficulty,
-        category,
-        gameType,
-        playerCount,
-        timeLimit: timeLimit[0],
-        complexity: complexity[0],
-        useCanvas,
-        includeSound,
-        mobileOptimized,
-        language,
-        customSettings,
-        prompt
-      };
-
-      console.log('🎮 [FORM] Submitting game creation with settings:', gameSettings);
-      await onGenerate(prompt, gameSettings);
-    } finally {
-      setIsGenerating(false);
-    }
+    // Chỉ hiển thị thông báo, không tạo game thực tế
+    alert('Chức năng tạo game đang được phát triển. Hiện tại chỉ hiển thị giao diện.');
   };
 
   const presetPrompts = [
@@ -95,18 +74,25 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
           <CardHeader className="text-center pb-6">
             <div className="flex items-center justify-center mb-4">
               <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full">
-                <Sparkles className="h-8 w-8 text-white" />
+                <Settings className="h-8 w-8 text-white" />
               </div>
             </div>
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Tạo Game Tùy Chỉnh Chi Tiết
+              Tạo Game Tùy Chỉnh
             </CardTitle>
             <CardDescription className="text-lg text-gray-600">
-              Mô tả chi tiết game của bạn với đầy đủ tùy chọn nâng cao
+              Thiết kế game của bạn với đầy đủ tùy chọn nâng cao
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Giao diện đã sẵn sàng. Chức năng tạo game đang được phát triển.
+              </AlertDescription>
+            </Alert>
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <Tabs defaultValue="basic" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
@@ -295,20 +281,11 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
                 </Button>
                 <Button
                   type="submit"
-                  disabled={!prompt.trim() || isGenerating}
+                  disabled={!prompt.trim()}
                   className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
                 >
-                  {isGenerating ? (
-                    <div className="flex items-center">
-                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                      Đang tạo...
-                    </div>
-                  ) : (
-                    <>
-                      <Gamepad2 className="h-4 w-4 mr-2" />
-                      Tạo Game Chi Tiết
-                    </>
-                  )}
+                  <Settings className="h-4 w-4 mr-2" />
+                  Xem Thiết Kế Game
                 </Button>
               </div>
             </form>
