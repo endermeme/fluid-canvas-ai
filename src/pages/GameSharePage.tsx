@@ -1,147 +1,95 @@
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { GameContainer } from '@/components/ui/game';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import EnhancedGameView from '@/components/custom/EnhancedGameView';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-interface SharedGameData {
-  id: string;
-  title: string;
-  type: string;
-  content: any;
-  html: string;
-  createdAt: string;
-}
+import { Card } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
 
 const GameSharePage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  const [gameData, setGameData] = useState<SharedGameData | null>(null);
+  const { gameId } = useParams<{ gameId: string }>();
+  const [gameData, setGameData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const loadGameData = async () => {
-      if (!id) {
+    const fetchGame = async () => {
+      if (!gameId) {
         setError('ID game không hợp lệ');
         setLoading(false);
         return;
       }
 
       try {
-        const storedGames = localStorage.getItem('sharedGames');
-        if (!storedGames) {
-          setError('Không tìm thấy game được chia sẻ');
-          setLoading(false);
+        const { data, error } = await supabase
+          .from('games')
+          .select('*')
+          .eq('id', gameId)
+          .single();
+
+        if (error) {
+          throw error;
+        }
+
+        if (!data) {
+          setError('Không tìm thấy game');
           return;
         }
 
-        const games = JSON.parse(storedGames);
-        const game = games.find((g: SharedGameData) => g.id === id);
-        
-        if (!game) {
-          setError('Game không tồn tại hoặc đã bị xóa');
-          setLoading(false);
-          return;
-        }
-
-        setGameData(game);
-      } catch (error) {
-        console.error('Error loading shared game:', error);
-        setError('Lỗi khi tải game');
+        setGameData(data);
+      } catch (err) {
+        console.error('Error fetching game:', err);
+        setError('Không thể tải game. Vui lòng thử lại.');
+        toast({
+          title: "Lỗi",
+          description: "Không thể tải game. Vui lòng thử lại.",
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }
     };
 
-    loadGameData();
-  }, [id]);
-
-  const handleBack = () => {
-    navigate('/');
-  };
-
-  const handleShare = async (): Promise<string> => {
-    if (!gameData) return '';
-    
-    const shareUrl = `${window.location.origin}/share/${gameData.id}`;
-    
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      toast({
-        title: "Đã sao chép liên kết",
-        description: "Liên kết đã được sao chép vào clipboard.",
-      });
-    } catch (error) {
-      console.error('Error copying to clipboard:', error);
-    }
-    
-    return shareUrl;
-  };
+    fetchGame();
+  }, [gameId, toast]);
 
   if (loading) {
     return (
-      <GameContainer 
-        title="Đang tải game..."
-        showBackButton={true}
-        onBack={handleBack}
-      >
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-lg font-medium">Đang tải game được chia sẻ...</p>
-          </div>
-        </div>
-      </GameContainer>
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-8 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Đang tải game...</p>
+        </Card>
+      </div>
     );
   }
 
   if (error || !gameData) {
     return (
-      <GameContainer 
-        title="Lỗi"
-        showBackButton={true}
-        onBack={handleBack}
-      >
-        <div className="flex items-center justify-center h-full">
-          <Card className="p-6 max-w-md">
-            <div className="text-center">
-              <AlertCircle className="h-12 w-12 mx-auto mb-4 text-destructive" />
-              <h3 className="text-xl font-bold mb-2">Không thể tải game</h3>
-              <p className="text-gray-500 mb-4">{error}</p>
-              <Button onClick={handleBack}>Quay lại trang chủ</Button>
-            </div>
-          </Card>
-        </div>
-      </GameContainer>
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-8 text-center max-w-md">
+          <h2 className="text-xl font-bold mb-4">Lỗi tải game</h2>
+          <p className="text-muted-foreground">{error || 'Game không tồn tại'}</p>
+        </Card>
+      </div>
     );
   }
 
   const miniGame = {
-    title: gameData.title,
-    content: gameData.html || JSON.stringify(gameData.content)
+    title: gameData.title || 'Game Chia Sẻ',
+    content: gameData.html_content || gameData.content || ''
   };
 
   return (
-    <GameContainer 
-      title={gameData.title}
-      showBackButton={true}
-      onBack={handleBack}
-    >
+    <div className="min-h-screen">
       <EnhancedGameView 
         miniGame={miniGame}
-        onBack={handleBack}
-        onShare={handleShare}
         hideHeader={false}
+        isTeacher={false}
       />
-    </GameContainer>
+    </div>
   );
 };
 

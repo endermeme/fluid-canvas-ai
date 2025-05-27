@@ -93,22 +93,6 @@ const Quiz = () => {
     setMiniGame(null);
   };
 
-  const handleShare = () => {
-    try {
-      if (gameContent) {
-        const shareUrl = window.location.origin + '/quiz?shared=true';
-        navigator.clipboard.writeText(shareUrl);
-        
-        toast({
-          title: "Đã sao chép liên kết",
-          description: "Liên kết đã được sao chép vào clipboard.",
-        });
-      }
-    } catch (error) {
-      console.error("Lỗi khi chia sẻ:", error);
-    }
-  };
-
   const generateFallbackGame = (promptText: string): string => {
     return `
       <!DOCTYPE html>
