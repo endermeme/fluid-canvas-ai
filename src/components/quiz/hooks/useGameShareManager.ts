@@ -71,8 +71,8 @@ export const useGameShareManager = (
         .from('games')
         .insert({
           title: miniGame.title || 'Game Tùy Chỉnh',
+          game_type: 'custom',
           html_content: miniGame.content,
-          content: miniGame.content,
           created_at: new Date().toISOString()
         })
         .select()
@@ -87,7 +87,7 @@ export const useGameShareManager = (
         throw new Error('Không nhận được ID game');
       }
 
-      const shareUrl = `${window.location.origin}/shared-game/${data.id}`;
+      const shareUrl = `${window.location.origin}/game/${data.id}`;
       
       console.log('🎮 Game saved successfully:', {
         gameId: data.id,

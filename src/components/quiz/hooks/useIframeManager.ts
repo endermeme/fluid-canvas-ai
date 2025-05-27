@@ -1,6 +1,7 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { enhanceIframeContent } from '@/components/quiz/utils/iframe-utils';
+import type { GameIframeRef } from '../../../custom/GameIframeRenderer';
 
 interface MiniGame {
   title?: string;
@@ -12,7 +13,7 @@ export const useIframeManager = (
   onReload?: () => void,
   gameExpired?: boolean
 ) => {
-  const iframeRef = useRef<HTMLIFrameElement & { updateContent?: (content: string) => Promise<void> }>(null);
+  const iframeRef = useRef<GameIframeRef>(null);
   const [iframeError, setIframeError] = useState<string | null>(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);

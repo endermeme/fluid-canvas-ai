@@ -61,7 +61,7 @@ const Quiz = () => {
         setGameTitle(game.title || `Game: ${promptText.substring(0, 40)}...`);
         setMiniGame({
           title: game.title || `Game: ${promptText.substring(0, 40)}...`,
-          content: game.content
+          content: game.content || ''
         });
         
         toast({
@@ -326,10 +326,13 @@ const Quiz = () => {
       return <GameLoading topic={prompt} />;
     }
     
-    if (miniGame) {
+    if (miniGame && miniGame.content) {
       return (
         <EnhancedGameView 
-          miniGame={miniGame}
+          miniGame={{
+            title: miniGame.title,
+            content: miniGame.content
+          }}
           onBack={handleReset}
           hideHeader={true}
         />

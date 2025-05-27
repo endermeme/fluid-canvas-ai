@@ -1,5 +1,5 @@
 
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useState, useImperativeHandle } from 'react';
 import { enhanceIframeContent } from '@/components/quiz/utils/iframe-utils';
 
 interface GameIframeRendererProps {
@@ -7,15 +7,19 @@ interface GameIframeRendererProps {
   isLoaded?: boolean;
 }
 
-const GameIframeRenderer = forwardRef<HTMLIFrameElement, GameIframeRendererProps>(
+export interface GameIframeRef extends HTMLIFrameElement {
+  updateContent: (content: string) => Promise<void>;
+  getCurrentContent: () => string;
+}
+
+const GameIframeRenderer = forwardRef<GameIframeRef, GameIframeRendererProps>(
   ({ title, isLoaded = false }, ref) => {
     const [iframeContent, setIframeContent] = useState<string>('');
+    const [iframeElement, setIframeElement] = useState<HTMLIFrameElement | null>(null);
 
     useEffect(() => {
       const initializeIframe = async () => {
-        if (ref && typeof ref === 'object' && ref.current) {
-          const iframe = ref.current;
-          
+        if (iframeElement) {
           // Tạo loading content
           const loadingHtml = `
             <!DOCTYPE html>
@@ -55,13 +59,13 @@ const GameIframeRenderer = forwardRef<HTMLIFrameElement, GameIframeRendererProps
             </html>
           `;
           
-          iframe.srcdoc = loadingHtml;
+          iframeElement.srcdoc = loadingHtml;
           setIframeContent(loadingHtml);
         }
       };
 
       initializeIframe();
-    }, [ref, title]);
+    }, [iframeElement, title]);
 
     const updateIframeContent = async (content: string) => {
       try {
@@ -71,9 +75,7 @@ const GameIframeRenderer = forwardRef<HTMLIFrameElement, GameIframeRendererProps
           title
         });
 
-        if (ref && typeof ref === 'object' && ref.current) {
-          const iframe = ref.current;
-          
+        if (iframeElement) {
           // Enhance content trước khi set
           const enhancedContent = await enhanceIframeContent(content, title);
           
@@ -83,16 +85,16 @@ const GameIframeRenderer = forwardRef<HTMLIFrameElement, GameIframeRendererProps
             hasDoctype: enhancedContent.includes('<!DOCTYPE')
           });
 
-          iframe.srcdoc = enhancedContent;
+          iframeElement.srcdoc = enhancedContent;
           setIframeContent(enhancedContent);
           
           // Thêm event listener để detect khi iframe load xong
-          iframe.onload = () => {
+          iframeElement.onload = () => {
             console.log('🎮 Iframe loaded successfully');
             
             try {
               // Thử truy cập iframe content để check
-              const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+              const iframeDoc = iframeElement.contentDocument || iframeElement.contentWindow?.document;
               if (iframeDoc) {
                 console.log('🎮 Iframe document accessible:', {
                   title: iframeDoc.title,
@@ -109,15 +111,22 @@ const GameIframeRenderer = forwardRef<HTMLIFrameElement, GameIframeRendererProps
       }
     };
 
-    // Expose method to parent
-    React.useImperativeHandle(ref, () => ({
-      updateContent: updateIframeContent,
-      getCurrentContent: () => iframeContent
-    }));
+    // Expose methods to parent
+    useImperativeHandle(ref, () => {
+      if (!iframeElement) {
+        throw new Error('Iframe element not ready');
+      }
+      
+      // Create a new object that extends the iframe element with our custom methods
+      return Object.assign(iframeElement, {
+        updateContent: updateIframeContent,
+        getCurrentContent: () => iframeContent
+      }) as GameIframeRef;
+    }, [iframeElement, iframeContent]);
 
     return (
       <iframe
-        ref={ref}
+        ref={setIframeElement}
         title={title}
         className={`w-full h-full border-0 bg-white transition-opacity duration-300 ${
           isLoaded ? 'opacity-100' : 'opacity-90'
