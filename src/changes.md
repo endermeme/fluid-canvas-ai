@@ -3,6 +3,20 @@
 
 ## 2025-05-27
 
+### Tạo lại hệ thống Custom Game với Gemini API
+- **File mới**: src/services/geminiService.ts
+- **File đã cập nhật**: src/components/custom/CustomGameForm.tsx, src/components/custom/GameController.tsx, src/pages/Quiz.tsx
+- **Package mới**: @google/genai@latest
+- **Loại thay đổi**: Tạo mới chức năng hoàn chỉnh
+- **Mô tả**: Tạo lại hệ thống custom game từ đầu với:
+  - Giao diện form đơn giản chỉ có 1 ô nhập yêu cầu
+  - 6 gợi ý game phổ biến
+  - Tích hợp Gemini API 2.0-flash với API key riêng
+  - Xử lý markdown thành HTML hoàn chỉnh
+  - Hiển thị game HTML Canvas trên iframe
+  - Logging chi tiết cho debug
+  - Error handling đầy đủ
+
 ### Xóa toàn bộ chức năng tạo game bằng Gemini API
 - **File đã xóa**: 
   - src/components/ai/enhanced-game-generator.ts
