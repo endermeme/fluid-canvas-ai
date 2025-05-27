@@ -1,39 +1,40 @@
-
-# Lịch sử thay đổi dự án
+# Quyết định và Thay đổi Custom Game
 
 ## 2025-05-27
 
-### Sửa toàn bộ hệ thống Template
-- **File đã thay đổi**: Tất cả template trong src/components/preset/templates/
-- **Loại thay đổi**: Sửa lỗi hiển thị toàn diện
-- **Mô tả**: Thay thế tất cả placeholder template bằng component thực tế từ quiz/preset-games/templates để đảm bảo API response được hiển thị đúng
+### Tạo API Constants (Khắc phục lỗi build)
+- **Tạo mới**: `src/constants/api-constants.ts`
+  - Chứa GEMINI_API_KEY và cấu hình API
+  - Khắc phục lỗi import trong PresetGameManager files
 
-### Sửa lỗi Flashcards Template
-- **File đã thay đổi**: src/components/preset/templates/FlashcardsTemplate.tsx
-- **Loại thay đổi**: Sửa lỗi hiển thị
-- **Mô tả**: Thay thế placeholder bằng component FlashcardsTemplate thực tế từ quiz/preset-games/templates
+### Xóa hoàn toàn hệ thống tạo game Gemini cũ
+- **Xóa**: `src/services/geminiService.ts` (loại bỏ logic Gemini cũ)
+- **Sửa đổi**: `src/components/custom/GameController.tsx` (chỉ giữ giao diện)
+- **Sửa đổi**: `src/components/custom/CustomGameForm.tsx` (chỉ giữ form)
+- **Sửa đổi**: `src/pages/Quiz.tsx` (đơn giản hóa)
 
-### Khôi phục tính năng Custom Game và Gemini
-- **File đã tạo**: src/components/custom/CustomGameForm.tsx
-- **File đã tạo**: src/components/custom/CustomGameHeader.tsx  
-- **File đã tạo**: src/components/quiz/hooks/useIframeManager.ts
-- **File đã tạo**: src/components/quiz/hooks/useGameShareManager.ts
-- **Loại thay đổi**: Khôi phục chức năng
-- **Mô tả**: Tái tạo các component và hook cần thiết cho Custom Game
+### Tái tạo hệ thống Custom Game với Gemini API mới
+- **Tạo mới**: `src/services/geminiService.ts` 
+  - Tích hợp @google/genai SDK
+  - Xử lý markdown thành HTML
+  - Validate HTML output
+  - Detailed logging
+- **Sửa đổi**: `src/components/custom/CustomGameForm.tsx`
+  - Form đơn giản với 1 ô nhập
+  - Preset prompts gợi ý
+  - Mobile-friendly design
+- **Sửa đổi**: `src/components/custom/GameController.tsx`
+  - Tích hợp Gemini service
+  - Error handling và loading states
+  - Enhanced game view với iframe
 
-### Sửa lỗi import paths
-- **File đã sửa**: src/components/quiz/custom-games/ui/index.ts
-- **Loại thay đổi**: Sửa lỗi import
-- **Mô tả**: Cập nhật đường dẫn import đúng vị trí component
+### Dependencies đã thêm
+- **@google/genai**: SDK chính thức cho Gemini AI
 
-### Tạo component game cơ bản
-- **File đã tạo**: src/components/custom/game-components/GameErrorDisplay.tsx
-- **File đã tạo**: src/components/custom/game-components/GameLoadingIndicator.tsx
-- **Loại thay đổi**: Tạo mới component
-- **Mô tả**: Tạo component hiển thị lỗi và loading cho game
-
-### Sửa lỗi import và cấu trúc
-- **File đã sửa**: src/pages/Quiz.tsx  
-- **File đã sửa**: src/pages/GameSharePage.tsx
-- **Loại thay đổi**: Sửa lỗi import
-- **Mô tả**: Cập nhật import paths và loại bỏ duplicate files
+### Tính năng hiện tại
+- Form nhập yêu cầu đơn giản
+- 6 preset prompts cho game phổ biến
+- API Gemini tạo HTML game hoàn chỉnh
+- Hiển thị game trong iframe
+- Error handling và loading states
+- Detailed console logging
