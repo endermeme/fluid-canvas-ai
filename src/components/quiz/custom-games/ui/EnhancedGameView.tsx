@@ -65,7 +65,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         />
       )}
       
-      <div className="flex-1 relative overflow-hidden">
+      <div className="flex-1 relative w-full h-full overflow-hidden" style={{ minHeight: 0 }}>
         {iframeError ? (
           <div className="absolute inset-0 flex items-center justify-center bg-black">
             <GameErrorDisplay 
@@ -74,7 +74,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
             />
           </div>
         ) : (
-          <div className="relative w-full h-full overflow-hidden">
+          <div className="relative w-full h-full">
             {!isIframeLoaded && (
               <div className="absolute inset-0 z-20 bg-black flex items-center justify-center">
                 <GameLoadingIndicator 
@@ -84,11 +84,13 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
                 />
               </div>
             )}
-            <GameIframeRenderer 
-              ref={iframeRef} 
-              title={miniGame.title || "Game tương tác"} 
-              isLoaded={isIframeLoaded}
-            />
+            <div className="w-full h-full">
+              <GameIframeRenderer 
+                ref={iframeRef} 
+                title={miniGame.title || "Game tương tác"} 
+                isLoaded={isIframeLoaded}
+              />
+            </div>
           </div>
         )}
         

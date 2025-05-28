@@ -4,52 +4,37 @@
  */
 
 /**
- * Style cơ bản và tối ưu cho touch - tập trung vào full screen
+ * Style cơ bản và tối ưu cho game - tập trung vào full screen
  */
 export const touchStyles = `
 <style>
-  /* Full screen base styles */
-  html, body {
+  /* Reset và full screen cơ bản */
+  *, *::before, *::after {
     margin: 0 !important;
     padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  html, body {
     width: 100vw !important;
     height: 100vh !important;
     overflow: hidden !important;
-    touch-action: manipulation;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #000;
-  }
-  
-  /* Remove any default spacing */
-  * {
-    -webkit-tap-highlight-color: transparent;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+    touch-action: manipulation !important;
+    font-family: Arial, sans-serif !important;
+    background: #000 !important;
+    position: relative !important;
   }
   
   /* Game container full screen */
-  #gameContainer, .game-container, .game-area {
+  #gameArea, .game-area, .game-container {
     width: 100vw !important;
     height: 100vh !important;
-    position: absolute !important;
+    position: relative !important;
     top: 0 !important;
     left: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
-  }
-  
-  /* Canvas full screen */
-  canvas {
-    width: 100vw !important;
-    height: 100vh !important;
-    display: block !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    touch-action: none;
-    margin: 0 !important;
-    padding: 0 !important;
+    overflow: hidden !important;
   }
   
   /* Touch optimization */
@@ -58,58 +43,53 @@ export const touchStyles = `
   .touch-device input[type="button"],
   .touch-device input[type="submit"],
   .touch-device .clickable {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 44px !important;
+    min-height: 44px !important;
     position: relative;
     z-index: 100;
+    cursor: pointer;
   }
   
   /* UI overlays */
   .ui-overlay, .score, .controls {
     position: fixed !important;
     z-index: 1000 !important;
-    pointer-events: auto;
+    pointer-events: auto !important;
   }
   
   /* Hide scrollbars */
   ::-webkit-scrollbar {
-    display: none;
-  }
-  
-  /* Loading indicator */
-  #loading-indicator {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    transition: opacity 0.3s;
-  }
-  #loading-indicator.hidden {
-    opacity: 0;
-    pointer-events: none;
+    display: none !important;
   }
   
   /* Mobile specific */
   @media (max-width: 768px) {
     body {
-      -webkit-overflow-scrolling: touch;
-      -webkit-user-select: none;
-      user-select: none;
+      -webkit-overflow-scrolling: touch !important;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+    }
+    
+    .touch-device {
+      -webkit-tap-highlight-color: transparent !important;
     }
   }
 
+  /* Desktop hover effects */
   @media (hover: hover) and (pointer: fine) {
     .no-touch button:hover,
     .no-touch [role="button"]:hover {
-      cursor: pointer;
-      opacity: 0.9;
+      cursor: pointer !important;
+      opacity: 0.9 !important;
     }
+  }
+  
+  /* Prevent text selection during game */
+  * {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
   }
 </style>
 `;
