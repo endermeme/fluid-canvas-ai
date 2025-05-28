@@ -1,6 +1,12 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 28/05/2025 - Cập nhật API model và cải thiện prompt cho custom game
+- Cập nhật `api-constants.ts`: chuyển sang model gemini-2.5-flash-preview-05-20
+- Cập nhật `customGamePrompt.ts`: viết lại prompt tập trung vào game đơn giản, ít lỗi
+- Thêm hướng dẫn JavaScript an toàn, tránh template literals phức tạp
+- Cải thiện cấu trúc HTML với ví dụ cụ thể
+
 ## 27/05/2025 - Cải thiện prompt và hiển thị iframe cho custom game
 - Cập nhật `customGamePrompt.ts`: tạo prompt tập trung vào full-screen gameplay, loại bỏ text thừa
 - Cập nhật `iframe-styles.ts`: thêm styles full-screen (100vw x 100vh), loại bỏ margin/padding

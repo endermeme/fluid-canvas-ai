@@ -10,50 +10,86 @@ export interface GamePromptOptions {
 export const generateCustomGamePrompt = (options: GamePromptOptions): string => {
   const { 
     topic, 
-    language = 'en',
+    language = 'vi',
     difficulty = 'medium',
     category = 'general'
   } = options;
 
   const basePrompt = `
-Create a minimalist, full-screen HTML5 game about: "${topic}"
+Tạo một trò chơi HTML5 đơn giản về chủ đề: "${topic}"
 
-**CRITICAL REQUIREMENTS:**
-- FULL SCREEN GAME - NO wasted space, NO excessive text or instructions
-- Game area must fill 100% of viewport (100vw x 100vh)
-- Minimal UI - only essential elements (score, simple controls)
-- NO lengthy instructions or descriptions in the game
-- Immediate gameplay - game starts right away
-- Language: ${language === 'vi' ? 'Vietnamese' : 'English'}
-- Difficulty: ${difficulty}
+**YÊU CẦU QUAN TRỌNG:**
+- Trò chơi TOÀN MÀN HÌNH - không có text thừa, hướng dẫn dài dòng
+- Khu vực game chiếm 100% viewport (100vw x 100vh)
+- UI tối thiểu - chỉ có điểm số và controls cần thiết
+- KHÔNG có hướng dẫn dài hoặc mô tả trong game
+- Game bắt đầu ngay lập tức
+- Ngôn ngữ: ${language === 'vi' ? 'Tiếng Việt' : 'English'}
+- Độ khó: ${difficulty}
 
-**RESPONSIVE DESIGN:**
-- Use viewport units (100vw, 100vh) for full screen
-- Game canvas/area: width: 100vw, height: 100vh
-- Remove all margins, padding from body and html
-- Position UI elements as overlays, not separate sections
+**THIẾT KẾ RESPONSIVE:**
+- Sử dụng viewport units (100vw, 100vh) cho toàn màn hình
+- Game area: width: 100vw, height: 100vh
+- Loại bỏ tất cả margin, padding từ body và html
+- UI elements như overlay, không phải section riêng
 
-**GAME STRUCTURE:**
-1. Full-screen game area (canvas or div)
-2. Minimal overlay UI (score in corner)
-3. Touch/mouse controls
-4. NO instruction screens - controls should be intuitive
-5. NO excessive text or descriptions
+**CẤU TRÚC GAME:**
+1. Khu vực game toàn màn hình (canvas hoặc div)
+2. UI overlay tối thiểu (điểm số ở góc)
+3. Controls touch/mouse
+4. KHÔNG có màn hình hướng dẫn - controls phải trực quan
+5. KHÔNG có text hoặc mô tả thừa
 
-**CODE FORMAT:**
-- Complete HTML with DOCTYPE
+**ĐỊNH DẠNG CODE:**
+- HTML hoàn chỉnh với DOCTYPE
 - CSS: body { margin: 0; padding: 0; overflow: hidden; width: 100vw; height: 100vh; }
 - Game area: { width: 100vw; height: 100vh; position: relative; }
-- All JavaScript in single script tag
-- NO external dependencies
-- Start with \`\`\`html and end with \`\`\`
+- Tất cả JavaScript trong một thẻ script
+- KHÔNG dependencies bên ngoài
+- Bắt đầu bằng \`\`\`html và kết thúc bằng \`\`\`
 
-**TOUCH/MOUSE SUPPORT:**
-- Support both touch events and mouse events
-- Touch targets minimum 44px
-- Responsive controls for all devices
+**HỖ TRỢ TOUCH/MOUSE:**
+- Hỗ trợ cả touch events và mouse events
+- Touch targets tối thiểu 44px
+- Controls responsive cho tất cả thiết bị
 
-Focus on creating an engaging, full-screen gaming experience with minimal UI clutter!
+**MÃ JAVASCRIPT AN TOÀN:**
+- Sử dụng let/const thay vì var
+- Kiểm tra null/undefined trước khi sử dụng
+- Wrap code trong DOMContentLoaded
+- Xử lý lỗi cơ bản với try/catch
+- KHÔNG sử dụng template literals phức tạp
+
+**VÍ DỤ CẤU TRÚC:**
+\`\`\`html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Title</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 100vw; height: 100vh; overflow: hidden; }
+    #gameArea { width: 100vw; height: 100vh; position: relative; }
+    .score { position: fixed; top: 20px; left: 20px; z-index: 100; }
+  </style>
+</head>
+<body>
+  <div id="gameArea">
+    <div class="score">Score: <span id="scoreValue">0</span></div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Game logic here
+    });
+  </script>
+</body>
+</html>
+\`\`\`
+
+Tập trung tạo trải nghiệm game toàn màn hình hấp dẫn với UI tối thiểu!
 `;
 
   return basePrompt;
