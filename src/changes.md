@@ -1,6 +1,13 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 01/06/2025 - Loại bỏ retry logic và tăng timeout lên 3 phút
+- Cập nhật `geminiGenerator.ts`: loại bỏ cơ chế retry nhiều lần
+- Tăng timeout từ 60 giây lên 180 giây (3 phút)
+- Chỉ thực hiện 1 request duy nhất và chờ kết quả
+- Thêm AbortController để handle timeout properly
+- Cải thiện logging để hiển thị rõ là single attempt
+
 ## 01/06/2025 - Cập nhật model Gemini sang gemini-2.5-pro-preview-05-06
 - Cập nhật `api-constants.ts`: chuyển tất cả model sang gemini-2.5-pro-preview-05-06
 - Áp dụng cho cả CUSTOM_GAME và PRESET_GAME

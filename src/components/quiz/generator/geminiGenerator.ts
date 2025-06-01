@@ -15,6 +15,9 @@ import type { MiniGame, GameApiResponse } from './types';
 
 const SOURCE = "GEMINI";
 
+// Request timeout: 3 phút (180 giây)
+const REQUEST_TIMEOUT = 180000;
+
 // Export the MiniGame type for use in other files
 export type { MiniGame } from './types';
 
@@ -44,7 +47,7 @@ export class AIGameGenerator {
       useCanvas: useCanvasMode
     };
     
-    return tryGeminiGeneration(null, topic, updatedSettings);
+    return generateWithGemini(topic, updatedSettings);
   }
 }
 
@@ -55,12 +58,13 @@ export const generateWithGemini = async (
   const gameType = getGameTypeByTopic(topic);
   const useCanvas = settings?.useCanvas !== undefined ? settings.useCanvas : true;
   
-  logInfo(SOURCE, `Starting game generation for "${topic}"`, {
+  logInfo(SOURCE, `Starting single game generation for "${topic}" (no retries, 3min timeout)`, {
     model: GEMINI_MODELS.CUSTOM_GAME,
     apiVersion: API_VERSION,
     type: gameType?.name || "Not specified",
     settings: settings || {},
-    canvasMode: useCanvas ? "enabled" : "disabled"
+    canvasMode: useCanvas ? "enabled" : "disabled",
+    timeout: `${REQUEST_TIMEOUT / 1000} seconds`
   });
 
   // Tạo prompt với template cải tiến từ geminiPrompt.ts
@@ -73,7 +77,7 @@ export const generateWithGemini = async (
   });
 
   try {
-    logInfo(SOURCE, `Sending request to Gemini API`);
+    logInfo(SOURCE, `Sending single request to Gemini API (waiting up to 3 minutes)`);
     
     const startTime = Date.now();
     
@@ -90,13 +94,23 @@ export const generateWithGemini = async (
       }
     };
     
+    // Tạo AbortController để handle timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, REQUEST_TIMEOUT);
+    
     const response = await fetch(getApiEndpoint(), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: controller.signal
     });
+    
+    // Clear timeout nếu request thành công
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -111,7 +125,7 @@ export const generateWithGemini = async (
     }
     
     const duration = measureExecutionTime(startTime);
-    logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
+    logSuccess(SOURCE, `Response received in ${duration.seconds}s (single attempt)`);
     
     // Tạo phiên bản gỡ lỗi để xem code gốc
     logInfo(SOURCE, `Generated Game Code (Original):`, text.substring(0, 500) + '...');
@@ -134,7 +148,12 @@ export const generateWithGemini = async (
     
     return game;
   } catch (error) {
-    logError(SOURCE, "Error generating with Gemini", error);
+    if (error.name === 'AbortError') {
+      logError(SOURCE, "Request timeout after 3 minutes", error);
+      throw new Error("Request timeout - please try a simpler game prompt");
+    }
+    
+    logError(SOURCE, "Error generating with Gemini (single attempt)", error);
     throw error;
   }
 };
@@ -284,27 +303,14 @@ const processGameCode = (text: string): { title: string, content: string } => {
   };
 };
 
+// Loại bỏ hoàn toàn function tryGeminiGeneration với retry logic
 export const tryGeminiGeneration = async (
   model: any,
   topic: string, 
   settings?: GameSettingsData,
   retryCount = 0
 ): Promise<MiniGame | null> => {
-  const maxRetries = 3;
-  
-  if (retryCount >= maxRetries) {
-    logWarning(SOURCE, `Reached maximum retries (${maxRetries})`);
-    return null;
-  }
-  
-  try {
-    return await generateWithGemini(topic, settings);
-  } catch (error) {
-    logError(SOURCE, `Attempt ${retryCount + 1} failed`, error);
-    
-    const waitTime = (retryCount + 1) * 1500;
-    await new Promise(resolve => setTimeout(resolve, waitTime));
-    
-    return tryGeminiGeneration(null, topic, settings, retryCount + 1);
-  }
+  // Chỉ gọi generateWithGemini một lần duy nhất, không retry
+  logInfo(SOURCE, `Single attempt generation (no retries)`);
+  return await generateWithGemini(topic, settings);
 };
