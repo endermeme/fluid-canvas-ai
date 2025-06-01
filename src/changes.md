@@ -1,4 +1,11 @@
+
 # Lịch sử thay đổi mã nguồn
+
+## 01/06/2025 - Refactor geminiGenerator.ts thành các file nhỏ hơn
+- Tạo `responseParser.ts`: tách logic xử lý phản hồi API từ Gemini
+- Tạo `gameCodeProcessor.ts`: tách logic xử lý và làm sạch code game HTML/JS
+- Cập nhật `geminiGenerator.ts`: giữ lại logic chính nhưng gọn gàng hơn, import từ các module mới
+- Cải thiện tổ chức code và khả năng bảo trì mà không thay đổi chức năng
 
 ## 01/06/2025 - Cải thiện hệ thống logging và error handling
 - Cập nhật `apiUtils.ts`: thêm structured error handling với error codes và recovery suggestions
