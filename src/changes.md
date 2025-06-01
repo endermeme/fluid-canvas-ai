@@ -1,6 +1,18 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 30/04/2025 - Tái cấu trúc thư mục CustomGame
+- Tạo hai thư mục chính: `src/components/quiz/custom-games/api` và `src/components/quiz/custom-games/ui`
+- Di chuyển `src/utils/customGameAPI.ts` vào `src/components/quiz/custom-games/api/customGameAPI.ts`
+- Di chuyển các component UI vào thư mục `src/components/quiz/custom-games/ui`
+- Cập nhật các import path trong các file liên quan
+- Cập nhật tài liệu để phản ánh cấu trúc mới
+
+## 30/04/2025 - Dọn dẹp thư mục src/components
+- Tái cấu trúc các thư mục trong `src/components/quiz/utils`
+- Di chuyển và hợp nhất các file từ `src/components/quiz/custom-games/utils` vào `src/utils`
+- Xóa thư mục `src/components/quiz/custom-games/utils` không cần thiết
+
 ## 30/04/2025 - Dọn dẹp project và xóa file không cần thiết
 - Xóa `src/unused-files.md` (chuyển thành `src/changes.md`)
 - Xóa các file không được sử dụng trong thư mục `src/components/quiz/generator`:
@@ -13,7 +25,13 @@
 - Sửa lỗi TypeScript: "React refers to a UMD global, but the current file is a module"
 - Đảm bảo sử dụng React.useState và React.useEffect đúng cách
 
-# Lịch sử thay đổi
+## 30/04/2025 - Chuyển đổi tài liệu từ sơ đồ sang văn bản
+- Cập nhật `src/custom-game-architecture.md` để hiển thị kiến trúc dưới dạng văn bản thay vì sơ đồ
+- Cập nhật `src/custom-game-workflow.md` để mô tả quy trình dưới dạng văn bản chi tiết
+- Cải thiện cấu trúc và định dạng để dễ đọc hơn
+- Bổ sung thêm chi tiết về các thành phần và quy trình
+
+## Các thay đổi trước đó
 
 - Refactor iframe-utils.ts thành các modules nhỏ hơn: iframe-enhancer.ts, iframe-scripts.ts, iframe-styles.ts và iframe-utils.ts mới nhỏ gọn hơn
 - Refactor EnhancedGameView.tsx thành các components nhỏ hơn: GameErrorDisplay, GameLoadingIndicator, GameIframeRenderer và các hooks useIframeManager, useGameShareManager

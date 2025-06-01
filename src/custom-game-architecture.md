@@ -1,108 +1,78 @@
 
-# Sơ đồ kiến trúc của Custom Game
+# Kiến trúc của Custom Game
 
-## Kiến trúc tổng quan
+## Tổng quan kiến trúc
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│                 │     │                 │     │                 │
-│  App.tsx        │────▶│ GameController  │────▶│ CustomGameForm  │
-│  (Routes)       │     │ (State Manager) │     │ (User Input)    │
-│                 │     │                 │     │                 │
-└─────────────────┘     └────────┬────────┘     └────────┬────────┘
-                                 │                       │
-                                 │                       │
-                                 │                       ▼
-┌─────────────────┐     ┌────────▼────────┐     ┌─────────────────┐
-│                 │     │                 │     │                 │
-│ gameExport.ts   │◀───▶│ EnhancedGameView│◀────│ geminiGenerator │
-│ (Share/Export)  │     │ (Game Display)  │     │ (AI Generation) │
-│                 │     │                 │     │                 │
-└─────────────────┘     └────────┬────────┘     └────────┬────────┘
-                                 │                       │
-                                 │                       │
-                                 ▼                       ▼
-                        ┌─────────────────┐     ┌─────────────────┐
-                        │                 │     │                 │
-                        │  iframe-utils   │     │ geminiPrompt.ts │
-                        │  (HTML Enhance) │     │ (AI Templates)  │
-                        │                 │     │                 │
-                        └─────────────────┘     └─────────────────┘
-```
+Custom Game được tổ chức thành hai thư mục chính: API và UI. Thư mục API chứa các tương tác với backend và cơ sở dữ liệu, trong khi thư mục UI chứa các component giao diện người dùng. Kiến trúc này giúp tách biệt rõ ràng giữa logic nghiệp vụ và giao diện.
 
-## Luồng dữ liệu
+GameController đóng vai trò trung tâm, điều phối giữa UI và API, quản lý trạng thái của ứng dụng và điều hướng. Thông qua GameController, người dùng có thể tạo và tương tác với các game tùy chỉnh.
 
-```
-┌─────────┐      ┌────────────┐      ┌─────────┐      ┌──────────┐
-│         │      │            │      │         │      │          │
-│ Mô tả   │─────▶│ CustomForm │─────▶│ Gemini  │─────▶│ HTML/CSS │
-│ Game    │      │            │      │ API     │      │ JS Code  │
-│         │      │            │      │         │      │          │
-└─────────┘      └────────────┘      └─────────┘      └────┬─────┘
-                                                           │
-                                                           ▼
-┌─────────┐      ┌────────────┐      ┌─────────┐      ┌──────────┐
-│         │      │            │      │         │      │          │
-│ Người   │◀─────│ Iframe     │◀─────│ Enhanced│◀─────│ Enhanced │
-│ dùng    │      │ Game       │      │ View    │      │ HTML     │
-│         │      │            │      │         │      │          │
-└─────────┘      └────────────┘      └─────────┘      └──────────┘
-```
+## Các thành phần chính
 
-## Quy trình xử lý HTML/CSS/JS Code
+### 1. Thành phần UI (src/components/quiz/custom-games/ui)
 
-```
-┌───────────────┐
-│ Raw HTML from │
-│ Gemini API    │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐    ┌───────────────┐
-│ processGameCode│───▶│ Extract title │
-│ (cleansing)    │    │ and content   │
-└───────┬───────┘    └───────────────┘
-        │
-        ▼
-┌───────────────┐    ┌───────────────┐    ┌───────────────┐
-│ enhanceIframe │───▶│ Process images│───▶│ Add error     │
-│ Content       │    │ in content    │    │ handling      │
-└───────┬───────┘    └───────────────┘    └───────────────┘
-        │
-        ▼
-┌───────────────┐    ┌───────────────┐    ┌───────────────┐
-│ Add responsive│───▶│ Add loading   │───▶│ Return final  │
-│ styles        │    │ indicator     │    │ HTML document │
-└───────────────┘    └───────────────┘    └───────────────┘
-```
+**CustomGameForm**
+- Thu thập đầu vào từ người dùng thông qua form
+- Cung cấp giao diện để nhập mô tả game
+- Xử lý việc gửi yêu cầu tạo game
+- Hiển thị thông báo khi game đang được tạo
 
-## Đặc điểm của mỗi component
+**EnhancedGameView**
+- Hiển thị game đã tạo trong iframe
+- Quản lý trạng thái của game (loading, error)
+- Cung cấp các tính năng như làm mới, toàn màn hình
+- Xử lý các sự kiện từ iframe
 
-### GameController (Quản lý trạng thái)
-- Quản lý toàn bộ trạng thái của game tùy chỉnh
-- Điều phối các components khác
-- Xử lý điều hướng và tương tác người dùng
+**CustomGameHeader**
+- Hiển thị thanh điều hướng phía trên game
+- Cung cấp các nút điều khiển (quay lại, chia sẻ, làm mới)
+- Quản lý các tương tác với game
 
-### CustomGameForm (Thu thập đầu vào)
-- Giao diện người dùng cho việc nhập mô tả game
-- Xử lý việc gọi AIGameGenerator
-- Hiển thị trạng thái loading
+**GameIframeRenderer**
+- Component đặc biệt để hiển thị iframe
+- Cấu hình sandbox và các thuộc tính bảo mật
+- Quản lý hiển thị và animation của iframe
 
-### EnhancedGameView (Hiển thị game)
-- Hiển thị game trong iframe
-- Quản lý tương tác với game (refresh, fullscreen)
-- Xử lý lỗi khi hiển thị game
+### 2. Thành phần API (src/components/quiz/custom-games/api)
 
-### geminiGenerator (Tạo nội dung game)
-- Kết nối với Gemini API
-- Xử lý và làm sạch mã HTML từ API
-- Trích xuất thông tin game
+**customGameAPI**
+- Quản lý tương tác với cơ sở dữ liệu Supabase
+- Cung cấp các hàm CRUD (Create, Read, Update, Delete)
+- Xử lý lưu trữ và truy xuất thông tin game
+- Quản lý việc chia sẻ game
 
-### iframe-utils (Xử lý nội dung HTML)
-- Tối ưu hóa HTML cho iframe
-- Thêm các script hỗ trợ
-- Xử lý các tài nguyên trong HTML
+### 3. Thành phần Controller
 
-### gameExport (Chia sẻ game)
-- Lưu game vào cơ sở dữ liệu
-- Tạo và quản lý URL chia sẻ
+**GameController**
+- Điều phối luồng làm việc của game
+- Quản lý trạng thái ứng dụng
+- Xử lý việc chuyển đổi giữa các màn hình
+- Kết nối UI với API
+
+## Quy trình xử lý dữ liệu
+
+1. **Tạo game mới**:
+   - Người dùng nhập mô tả game qua CustomGameForm
+   - GameController gọi geminiGenerator để tạo nội dung game
+   - EnhancedGameView hiển thị game trong iframe
+   - Nếu cần, game được lưu trữ qua customGameAPI
+
+2. **Chia sẻ game**:
+   - Người dùng nhấn nút chia sẻ trong CustomGameHeader
+   - customGameAPI lưu game vào cơ sở dữ liệu
+   - Tạo URL chia sẻ và thông báo cho người dùng
+   - Người dùng có thể sao chép URL hoặc xem mã QR
+
+3. **Xem game đã chia sẻ**:
+   - Người dùng truy cập URL game
+   - GameController lấy thông tin game từ customGameAPI
+   - EnhancedGameView hiển thị game trong iframe
+
+## Cải tiến và tối ưu hóa
+
+Kiến trúc hiện tại được tối ưu hóa để:
+- Tách biệt rõ ràng giữa UI và API
+- Dễ dàng mở rộng và thêm tính năng mới
+- Quản lý trạng thái một cách hiệu quả
+- Tái sử dụng component giữa các phần của ứng dụng
+- Xử lý lỗi và trạng thái loading một cách nhất quán
