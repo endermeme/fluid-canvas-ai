@@ -1,6 +1,13 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 01/06/2025 - Sửa lỗi "No content returned from API" và giảm maxOutputTokens
+- Cập nhật `geminiGenerator.ts`: sửa lỗi xử lý response từ Gemini API
+- Giảm maxOutputTokens từ 8192 xuống 4096 để tránh bị MAX_TOKENS limit
+- Cải thiện logging để debug response structure
+- Thêm xử lý cho trường hợp finishReason là MAX_TOKENS
+- Thêm fallback để tìm text content trong các cấu trúc response khác nhau
+
 ## 01/06/2025 - Loại bỏ retry logic và tăng timeout lên 3 phút
 - Cập nhật `geminiGenerator.ts`: loại bỏ cơ chế retry nhiều lần
 - Tăng timeout từ 60 giây lên 180 giây (3 phút)

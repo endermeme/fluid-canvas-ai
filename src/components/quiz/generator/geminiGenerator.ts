@@ -1,3 +1,4 @@
+
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
@@ -90,7 +91,7 @@ export const generateWithGemini = async (
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 8192
+        maxOutputTokens: 4096  // Giảm xuống để tránh bị MAX_TOKENS
       }
     };
     
@@ -118,10 +119,45 @@ export const generateWithGemini = async (
     }
     
     const result = await response.json();
-    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     
-    if (!text) {
-      throw new Error('No content returned from API');
+    // Debug log toàn bộ response để kiểm tra
+    logInfo(SOURCE, `Full API Response:`, {
+      candidates: result?.candidates?.length || 0,
+      hasContent: !!result?.candidates?.[0]?.content,
+      finishReason: result?.candidates?.[0]?.finishReason,
+      usageMetadata: result?.usageMetadata
+    });
+    
+    // Kiểm tra các trường hợp response không hợp lệ
+    if (!result?.candidates || result.candidates.length === 0) {
+      throw new Error('No candidates returned from API');
+    }
+    
+    const candidate = result.candidates[0];
+    if (candidate.finishReason === 'MAX_TOKENS') {
+      logWarning(SOURCE, 'Response was truncated due to MAX_TOKENS limit');
+    }
+    
+    // Thử các cách khác nhau để lấy text content
+    let text = '';
+    if (candidate.content?.parts?.[0]?.text) {
+      text = candidate.content.parts[0].text;
+    } else if (candidate.content?.role === 'model' && result.candidates[0].content) {
+      // Thử tìm text trong cấu trúc khác
+      const parts = candidate.content.parts || [];
+      for (const part of parts) {
+        if (part.text) {
+          text += part.text;
+        }
+      }
+    }
+    
+    if (!text || text.trim().length === 0) {
+      logError(SOURCE, 'Empty content from API', {
+        candidate: candidate,
+        finishReason: candidate.finishReason
+      });
+      throw new Error(`No content returned from API. Finish reason: ${candidate.finishReason || 'unknown'}`);
     }
     
     const duration = measureExecutionTime(startTime);
