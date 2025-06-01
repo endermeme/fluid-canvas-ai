@@ -9,8 +9,8 @@ export const GEMINI_API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 // Gemini Model configurations
 export const GEMINI_MODELS = {
-  CUSTOM_GAME: "gemini-2.5-pro-preview-05-06",
-  PRESET_GAME: "gemini-2.5-pro-preview-05-06"
+  CUSTOM_GAME: "gemini-2.5-pro-preview-03-25",
+  PRESET_GAME: "gemini-2.5-pro-preview-03-25"
 };
 
 // API Version
@@ -25,9 +25,9 @@ export const getApiEndpoint = (model = GEMINI_MODELS.CUSTOM_GAME) =>
 
 // AI Generation Settings
 export const DEFAULT_GENERATION_SETTINGS = {
-  temperature: 0.7,
-  topK: 30,
-  topP: 0.8,
+  temperature: 0.8,
+  topK: 40,
+  topP: 0.95,
   maxOutputTokens: 8192,
 };
 

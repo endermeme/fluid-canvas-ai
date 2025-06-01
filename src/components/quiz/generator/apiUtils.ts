@@ -3,99 +3,102 @@
  * Utility functions for API communication and logging
  */
 
-export const SOURCE = "GEMINI";
-
-// Error codes for better categorization
-export const ERROR_CODES = {
-  API_QUOTA_EXCEEDED: 'API_QUOTA_EXCEEDED',
-  API_REQUEST_FAILED: 'API_REQUEST_FAILED', 
-  API_TIMEOUT: 'API_TIMEOUT',
-  API_NO_CONTENT: 'API_NO_CONTENT',
-  NETWORK_ERROR: 'NETWORK_ERROR',
-  PARSING_ERROR: 'PARSING_ERROR'
-} as const;
-
-export type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES];
+export const SOURCE = "CUSTOM_GAME_GENERATOR";
 
 /**
- * Enhanced error with context and recovery suggestions
+ * Log information to the console with proper formatting
+ * @param context The logging context/source
+ * @param message The message to log
+ * @param data Optional data to log
  */
-export class APIError extends Error {
-  constructor(
-    public code: ErrorCode,
-    public userMessage: string,
-    public technicalDetails: string,
-    public recoverySuggestions: string[] = [],
-    public context?: any
-  ) {
-    super(technicalDetails);
-    this.name = 'APIError';
+export function logInfo(context: string, message: string, data?: any) {
+  console.log(
+    `%c ${context} INFO %c ${message}`,
+    'background: #0366d6; color: white; padding: 2px 6px; border-radius: 4px;',
+    'color: #0366d6; font-weight: bold;'
+  );
+  
+  if (data) {
+    console.log('%c 📊 Data:', 'color: #0366d6;', data);
   }
 }
 
 /**
- * Simple success logging
+ * Log success to the console with proper formatting
+ * @param context The logging context/source
+ * @param message The message to log
+ * @param data Optional data to log
  */
 export function logSuccess(context: string, message: string, data?: any) {
-  console.log(`✅ ${context}: ${message}${data?.seconds ? ` (${data.seconds}s)` : ''}`);
+  console.log(
+    `%c ${context} SUCCESS %c ${message}`,
+    'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px;',
+    'color: #2ea44f; font-weight: bold;'
+  );
+  
+  if (data) {
+    console.log('%c 📊 Data:', 'color: #2ea44f;', data);
+  }
 }
 
 /**
- * Simple error logging
+ * Log warning to the console with proper formatting
+ * @param context The logging context/source
+ * @param message The message to log
+ * @param data Optional data to log
+ */
+export function logWarning(context: string, message: string, data?: any) {
+  console.log(
+    `%c ${context} WARNING %c ${message}`,
+    'background: #f9a825; color: black; padding: 2px 6px; border-radius: 4px;',
+    'color: #f9a825; font-weight: bold;'
+  );
+  
+  if (data) {
+    console.log('%c 📊 Data:', 'color: #f9a825;', data);
+  }
+}
+
+/**
+ * Log error to the console with proper formatting
+ * @param context The logging context/source
+ * @param message The message to log
+ * @param error Optional error object
  */
 export function logError(context: string, message: string, error?: any) {
-  console.error(`❌ ${context}: ${message}`);
+  console.error(
+    `%c ${context} ERROR %c ${message}`,
+    'background: #d73a49; color: white; padding: 2px 6px; border-radius: 4px;',
+    'color: #d73a49; font-weight: bold;'
+  );
+  
   if (error) {
     console.error(error);
   }
 }
 
 /**
- * Create basic API error
+ * Format an object for logging
+ * @param obj Object to format
+ * @returns Formatted object for logging
  */
-export function createAPIError(
-  code: ErrorCode, 
-  technicalDetails: string,
-  context?: any
-): APIError {
-  return new APIError(
-    code,
-    "API Error occurred",
-    technicalDetails,
-    [],
-    context
-  );
+export function formatLogObject(obj: any): string {
+  try {
+    if (typeof obj === 'string') return obj;
+    return JSON.stringify(obj, null, 2);
+  } catch (error) {
+    return 'Unable to stringify object for logging';
+  }
 }
 
 /**
  * Measure execution time
+ * @param startTime Start time in milliseconds
+ * @returns Object with execution time in milliseconds and seconds
  */
 export function measureExecutionTime(startTime: number) {
   const endTime = Date.now();
   const ms = endTime - startTime;
   const seconds = (ms / 1000).toFixed(2);
   return { ms, seconds };
-}
-
-/**
- * Detect network vs API errors
- */
-export function categorizeError(error: any): ErrorCode {
-  if (error.name === 'AbortError' || error.message?.includes('timeout')) {
-    return ERROR_CODES.API_TIMEOUT;
-  }
-  
-  if (error.message?.includes('fetch') || error.message?.includes('network')) {
-    return ERROR_CODES.NETWORK_ERROR;
-  }
-  
-  if (error.message?.includes('quota') || error.message?.includes('limit')) {
-    return ERROR_CODES.API_QUOTA_EXCEEDED;
-  }
-  
-  if (error.message?.includes('No content') || error.message?.includes('Empty content')) {
-    return ERROR_CODES.API_NO_CONTENT;
-  }
-  
-  return ERROR_CODES.API_REQUEST_FAILED;
 }
