@@ -1,6 +1,11 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 01/06/2025 - Cập nhật model Gemini sang gemini-2.5-pro-preview-05-06
+- Cập nhật `api-constants.ts`: chuyển tất cả model sang gemini-2.5-pro-preview-05-06
+- Áp dụng cho cả CUSTOM_GAME và PRESET_GAME
+- Model pro có hiệu suất tốt hơn và ít lỗi hơn khi tạo game
+
 ## 28/05/2025 - Cải thiện prompt và sửa lỗi iframe cho custom game
 - Cập nhật `customGamePrompt.ts`: viết lại prompt tập trung vào game đơn giản với giả lập Canvas
 - Thêm hướng dẫn tạo game bằng div elements thay vì canvas thực
