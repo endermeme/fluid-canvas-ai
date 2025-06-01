@@ -1,5 +1,13 @@
-
 # Lịch sử thay đổi mã nguồn
+
+## 01/06/2025 - Cải thiện hệ thống logging và error handling
+- Cập nhật `apiUtils.ts`: thêm structured error handling với error codes và recovery suggestions
+- Tạo APIError class với user-friendly messages và technical details riêng biệt
+- Thêm error categorization để phân loại các loại lỗi khác nhau
+- Cải thiện logging để chỉ hiển thị thông tin cần thiết, giảm noise
+- Cập nhật `geminiGenerator.ts`: sử dụng enhanced error handling và simplified logging
+- Thêm parsing logic tối ưu cho API response
+- Cải thiện user experience với error messages rõ ràng và hướng dẫn khắc phục
 
 ## 01/06/2025 - Sửa lỗi "No content returned from API" và giảm maxOutputTokens
 - Cập nhật `geminiGenerator.ts`: sửa lỗi xử lý response từ Gemini API

@@ -1,9 +1,9 @@
-
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
   logInfo, logError, logWarning, logSuccess, 
-  measureExecutionTime
+  measureExecutionTime, createAPIError, categorizeError,
+  ERROR_CODES, APIError
 } from './apiUtils';
 import { 
   GEMINI_MODELS, 
@@ -59,11 +59,9 @@ export const generateWithGemini = async (
   const gameType = getGameTypeByTopic(topic);
   const useCanvas = settings?.useCanvas !== undefined ? settings.useCanvas : true;
   
-  logInfo(SOURCE, `Starting single game generation for "${topic}" (no retries, 3min timeout)`, {
+  logInfo(SOURCE, `Starting game generation for "${topic}"`, {
     model: GEMINI_MODELS.CUSTOM_GAME,
-    apiVersion: API_VERSION,
-    type: gameType?.name || "Not specified",
-    settings: settings || {},
+    type: gameType?.name || "general",
     canvasMode: useCanvas ? "enabled" : "disabled",
     timeout: `${REQUEST_TIMEOUT / 1000} seconds`
   });
@@ -78,8 +76,6 @@ export const generateWithGemini = async (
   });
 
   try {
-    logInfo(SOURCE, `Sending single request to Gemini API (waiting up to 3 minutes)`);
-    
     const startTime = Date.now();
     
     const payload = {
@@ -91,7 +87,7 @@ export const generateWithGemini = async (
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 4096  // Giảm xuống để tránh bị MAX_TOKENS
+        maxOutputTokens: 4096
       }
     };
     
@@ -115,56 +111,34 @@ export const generateWithGemini = async (
     
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+      const errorCode = response.status === 429 ? ERROR_CODES.API_QUOTA_EXCEEDED : ERROR_CODES.API_REQUEST_FAILED;
+      throw createAPIError(
+        errorCode,
+        `API request failed: ${response.status} ${response.statusText} - ${errorText}`,
+        { status: response.status, topic, model: GEMINI_MODELS.CUSTOM_GAME }
+      );
     }
     
     const result = await response.json();
     
-    // Debug log toàn bộ response để kiểm tra
-    logInfo(SOURCE, `Full API Response:`, {
-      candidates: result?.candidates?.length || 0,
-      hasContent: !!result?.candidates?.[0]?.content,
-      finishReason: result?.candidates?.[0]?.finishReason,
-      usageMetadata: result?.usageMetadata
-    });
-    
-    // Kiểm tra các trường hợp response không hợp lệ
-    if (!result?.candidates || result.candidates.length === 0) {
-      throw new Error('No candidates returned from API');
-    }
-    
-    const candidate = result.candidates[0];
-    if (candidate.finishReason === 'MAX_TOKENS') {
-      logWarning(SOURCE, 'Response was truncated due to MAX_TOKENS limit');
-    }
-    
-    // Thử các cách khác nhau để lấy text content
-    let text = '';
-    if (candidate.content?.parts?.[0]?.text) {
-      text = candidate.content.parts[0].text;
-    } else if (candidate.content?.role === 'model' && result.candidates[0].content) {
-      // Thử tìm text trong cấu trúc khác
-      const parts = candidate.content.parts || [];
-      for (const part of parts) {
-        if (part.text) {
-          text += part.text;
-        }
-      }
-    }
+    // Simplified response validation and parsing
+    const { text, hasWarning, warningMessage } = parseAPIResponse(result);
     
     if (!text || text.trim().length === 0) {
-      logError(SOURCE, 'Empty content from API', {
-        candidate: candidate,
-        finishReason: candidate.finishReason
-      });
-      throw new Error(`No content returned from API. Finish reason: ${candidate.finishReason || 'unknown'}`);
+      throw createAPIError(
+        ERROR_CODES.API_NO_CONTENT,
+        `No content returned from API. Finish reason: ${result?.candidates?.[0]?.finishReason || 'unknown'}`,
+        { topic, finishReason: result?.candidates?.[0]?.finishReason }
+      );
     }
     
     const duration = measureExecutionTime(startTime);
-    logSuccess(SOURCE, `Response received in ${duration.seconds}s (single attempt)`);
     
-    // Tạo phiên bản gỡ lỗi để xem code gốc
-    logInfo(SOURCE, `Generated Game Code (Original):`, text.substring(0, 500) + '...');
+    if (hasWarning && warningMessage) {
+      logWarning(SOURCE, warningMessage, { duration: duration.seconds });
+    } else {
+      logSuccess(SOURCE, `Game generated successfully`, { duration: duration.seconds });
+    }
     
     // Xử lý code để extract thông tin và clean
     const { title, content } = processGameCode(text);
@@ -176,7 +150,8 @@ export const generateWithGemini = async (
       useCanvas: useCanvas
     };
     
-    logSuccess(SOURCE, "Game generated successfully", {
+    // Final validation log
+    logInfo(SOURCE, "Game validation completed", {
       title: game.title,
       contentLength: game.content.length,
       hasDocType: game.content.includes('<!DOCTYPE')
@@ -184,15 +159,63 @@ export const generateWithGemini = async (
     
     return game;
   } catch (error) {
-    if (error.name === 'AbortError') {
-      logError(SOURCE, "Request timeout after 3 minutes", error);
-      throw new Error("Request timeout - please try a simpler game prompt");
-    }
+    // Enhanced error handling with categorization
+    const errorCode = categorizeError(error);
     
-    logError(SOURCE, "Error generating with Gemini (single attempt)", error);
-    throw error;
+    if (error instanceof APIError) {
+      logError(SOURCE, "API Error occurred", error);
+      throw error;
+    } else {
+      const structuredError = createAPIError(
+        errorCode,
+        error.message || "Unknown error occurred",
+        { topic, useCanvas, originalError: error.name }
+      );
+      logError(SOURCE, "Error generating with Gemini", structuredError);
+      throw structuredError;
+    }
   }
 };
+
+/**
+ * Parse API response and extract essential information
+ */
+function parseAPIResponse(result: any): { text: string, hasWarning: boolean, warningMessage?: string } {
+  // Essential validation only
+  if (!result?.candidates || result.candidates.length === 0) {
+    throw createAPIError(
+      ERROR_CODES.API_NO_CONTENT,
+      'No candidates returned from API',
+      { candidatesCount: 0 }
+    );
+  }
+  
+  const candidate = result.candidates[0];
+  let hasWarning = false;
+  let warningMessage = '';
+  
+  // Check for truncation warning
+  if (candidate.finishReason === 'MAX_TOKENS') {
+    hasWarning = true;
+    warningMessage = 'Response truncated due to length limit, but game should still work';
+  }
+  
+  // Extract text content efficiently
+  let text = '';
+  if (candidate.content?.parts?.[0]?.text) {
+    text = candidate.content.parts[0].text;
+  } else if (candidate.content?.parts) {
+    // Fallback: concatenate all text parts
+    const parts = candidate.content.parts || [];
+    for (const part of parts) {
+      if (part.text) {
+        text += part.text;
+      }
+    }
+  }
+  
+  return { text, hasWarning, warningMessage };
+}
 
 /**
  * Xử lý mã code trả về từ Gemini để extract thông tin và làm sạch
