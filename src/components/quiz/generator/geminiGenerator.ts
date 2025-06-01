@@ -2,9 +2,9 @@
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
-  logInfo, logError, logWarning, logSuccess, 
+  logError, logWarning, logSuccess, 
   measureExecutionTime, createAPIError, categorizeError,
-  ERROR_CODES, APIError
+  ERROR_CODES, APIError, SOURCE
 } from './apiUtils';
 import { 
   GEMINI_MODELS, 
@@ -15,8 +15,6 @@ import { createGameGenerationPrompt } from './geminiPrompt';
 import { parseAPIResponse } from './responseParser';
 import { processGameCode } from './gameCodeProcessor';
 import type { MiniGame } from './types';
-
-const SOURCE = "GEMINI";
 
 // Request timeout: 3 phút (180 giây)
 const REQUEST_TIMEOUT = 180000;
@@ -43,7 +41,6 @@ export class AIGameGenerator {
   }
 
   public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
-    // Sử dụng biến canvasMode từ instance
     const useCanvasMode = settings?.useCanvas !== undefined ? settings.useCanvas : this.canvasMode;
     const updatedSettings = {
       ...settings,
@@ -61,14 +58,8 @@ export const generateWithGemini = async (
   const gameType = getGameTypeByTopic(topic);
   const useCanvas = settings?.useCanvas !== undefined ? settings.useCanvas : true;
   
-  logInfo(SOURCE, `Starting game generation for "${topic}"`, {
-    model: GEMINI_MODELS.CUSTOM_GAME,
-    type: gameType?.name || "general",
-    canvasMode: useCanvas ? "enabled" : "disabled",
-    timeout: `${REQUEST_TIMEOUT / 1000} seconds`
-  });
+  console.log(`🎮 Generating game: "${topic}" (Canvas: ${useCanvas ? 'Yes' : 'No'})`);
 
-  // Tạo prompt với template cải tiến từ geminiPrompt.ts
   const prompt = createGameGenerationPrompt({
     topic,
     useCanvas,
@@ -93,11 +84,8 @@ export const generateWithGemini = async (
       }
     };
     
-    // Tạo AbortController để handle timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-    }, REQUEST_TIMEOUT);
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
     
     const response = await fetch(getApiEndpoint(), {
       method: 'POST',
@@ -108,7 +96,6 @@ export const generateWithGemini = async (
       signal: controller.signal
     });
     
-    // Clear timeout nếu request thành công
     clearTimeout(timeoutId);
     
     if (!response.ok) {
@@ -123,45 +110,31 @@ export const generateWithGemini = async (
     
     const result = await response.json();
     
-    // Sử dụng parseAPIResponse từ file riêng
+    // Parse response và handle cả truncated content
     const { text, hasWarning, warningMessage } = parseAPIResponse(result);
-    
-    if (!text || text.trim().length === 0) {
-      throw createAPIError(
-        ERROR_CODES.API_NO_CONTENT,
-        `No content returned from API. Finish reason: ${result?.candidates?.[0]?.finishReason || 'unknown'}`,
-        { topic, finishReason: result?.candidates?.[0]?.finishReason }
-      );
-    }
     
     const duration = measureExecutionTime(startTime);
     
     if (hasWarning && warningMessage) {
       logWarning(SOURCE, warningMessage, { duration: duration.seconds });
     } else {
-      logSuccess(SOURCE, `Game generated successfully`, { duration: duration.seconds });
+      logSuccess(SOURCE, `Game generated`, { duration: duration.seconds });
     }
     
-    // Sử dụng processGameCode từ file riêng
+    // Process game code
     const { title, content } = processGameCode(text);
     
-    // Tạo đối tượng game
+    // Create game object
     const game: MiniGame = {
       title: title || topic,
       content: content,
       useCanvas: useCanvas
     };
     
-    // Final validation log
-    logInfo(SOURCE, "Game validation completed", {
-      title: game.title,
-      contentLength: game.content.length,
-      hasDocType: game.content.includes('<!DOCTYPE')
-    });
+    console.log(`✅ Game ready: "${game.title}" (${game.content.length} chars)`);
     
     return game;
   } catch (error) {
-    // Enhanced error handling with categorization
     const errorCode = categorizeError(error);
     
     if (error instanceof APIError) {
@@ -173,20 +146,17 @@ export const generateWithGemini = async (
         error.message || "Unknown error occurred",
         { topic, useCanvas, originalError: error.name }
       );
-      logError(SOURCE, "Error generating with Gemini", structuredError);
+      logError(SOURCE, "Error generating game", structuredError);
       throw structuredError;
     }
   }
 };
 
-// Loại bỏ hoàn toàn function tryGeminiGeneration với retry logic
 export const tryGeminiGeneration = async (
   model: any,
   topic: string, 
   settings?: GameSettingsData,
   retryCount = 0
 ): Promise<MiniGame | null> => {
-  // Chỉ gọi generateWithGemini một lần duy nhất, không retry
-  logInfo(SOURCE, `Single attempt generation (no retries)`);
   return await generateWithGemini(topic, settings);
 };

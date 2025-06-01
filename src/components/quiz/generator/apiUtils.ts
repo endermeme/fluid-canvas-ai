@@ -3,7 +3,7 @@
  * Utility functions for API communication and logging
  */
 
-export const SOURCE = "CUSTOM_GAME_GENERATOR";
+export const SOURCE = "GEMINI";
 
 // Error codes for better categorization
 export const ERROR_CODES = {
@@ -11,24 +11,11 @@ export const ERROR_CODES = {
   API_REQUEST_FAILED: 'API_REQUEST_FAILED', 
   API_TIMEOUT: 'API_TIMEOUT',
   API_NO_CONTENT: 'API_NO_CONTENT',
-  API_CONTENT_TRUNCATED: 'API_CONTENT_TRUNCATED',
   NETWORK_ERROR: 'NETWORK_ERROR',
   PARSING_ERROR: 'PARSING_ERROR'
 } as const;
 
 export type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES];
-
-// Logging levels
-export const LOG_LEVELS = {
-  CRITICAL: 0,
-  ERROR: 1, 
-  WARNING: 2,
-  INFO: 3,
-  DEBUG: 4
-} as const;
-
-// Current log level (can be adjusted based on environment)
-const CURRENT_LOG_LEVEL = LOG_LEVELS.INFO;
 
 /**
  * Enhanced error with context and recovery suggestions
@@ -47,130 +34,36 @@ export class APIError extends Error {
 }
 
 /**
- * Log information with level checking
- */
-export function logInfo(context: string, message: string, data?: any) {
-  if (CURRENT_LOG_LEVEL < LOG_LEVELS.INFO) return;
-  
-  console.log(
-    `%c ${context} INFO %c ${message}`,
-    'background: #0366d6; color: white; padding: 2px 6px; border-radius: 4px;',
-    'color: #0366d6; font-weight: bold;'
-  );
-  
-  if (data) {
-    // Only log essential data, not full objects
-    const essentialData = extractEssentialData(data);
-    if (Object.keys(essentialData).length > 0) {
-      console.log('%c 📊 Data:', 'color: #0366d6;', essentialData);
-    }
-  }
-}
-
-/**
- * Log success with minimal noise
+ * Minimal success logging
  */
 export function logSuccess(context: string, message: string, data?: any) {
-  if (CURRENT_LOG_LEVEL < LOG_LEVELS.INFO) return;
-  
-  console.log(
-    `%c ${context} SUCCESS %c ${message}`,
-    'background: #2ea44f; color: white; padding: 2px 6px; border-radius: 4px;',
-    'color: #2ea44f; font-weight: bold;'
-  );
-  
-  // Only log timing and essential metrics for success
-  if (data?.seconds) {
-    console.log(`%c ⏱️ Duration: ${data.seconds}s`, 'color: #2ea44f;');
-  }
+  console.log(`✅ ${context}: ${message}${data?.seconds ? ` (${data.seconds}s)` : ''}`);
 }
 
 /**
- * Log warning with context
+ * Essential warning logging
  */
 export function logWarning(context: string, message: string, data?: any) {
-  if (CURRENT_LOG_LEVEL < LOG_LEVELS.WARNING) return;
-  
-  console.log(
-    `%c ${context} WARNING %c ${message}`,
-    'background: #f9a825; color: black; padding: 2px 6px; border-radius: 4px;',
-    'color: #f9a825; font-weight: bold;'
-  );
-  
-  if (data) {
-    const essentialData = extractEssentialData(data);
-    if (Object.keys(essentialData).length > 0) {
-      console.log('%c ⚠️ Context:', 'color: #f9a825;', essentialData);
-    }
-  }
+  console.warn(`⚠️ ${context}: ${message}`);
+  if (data?.duration) console.warn(`Duration: ${data.duration}`);
 }
 
 /**
- * Enhanced error logging with structured information
+ * Essential error logging
  */
 export function logError(context: string, message: string, error?: any) {
-  if (CURRENT_LOG_LEVEL < LOG_LEVELS.ERROR) return;
+  console.error(`❌ ${context}: ${message}`);
   
-  console.error(
-    `%c ${context} ERROR %c ${message}`,
-    'background: #d73a49; color: white; padding: 2px 6px; border-radius: 4px;',
-    'color: #d73a49; font-weight: bold;'
-  );
-  
-  if (error) {
-    if (error instanceof APIError) {
-      console.error(`%c 🚨 Code: ${error.code}`, 'color: #d73a49; font-weight: bold;');
-      console.error(`%c 👤 User Message: ${error.userMessage}`, 'color: #d73a49;');
-      console.error(`%c 🔧 Technical: ${error.technicalDetails}`, 'color: #d73a49;');
-      if (error.recoverySuggestions.length > 0) {
-        console.error(`%c 💡 Suggestions:`, 'color: #d73a49; font-weight: bold;');
-        error.recoverySuggestions.forEach((suggestion, index) => {
-          console.error(`%c   ${index + 1}. ${suggestion}`, 'color: #d73a49;');
-        });
-      }
-      if (error.context) {
-        console.error(`%c 📋 Context:`, 'color: #d73a49;', extractEssentialData(error.context));
-      }
-    } else {
-      console.error(error);
+  if (error instanceof APIError) {
+    console.error(`Code: ${error.code}`);
+    console.error(`User: ${error.userMessage}`);
+    console.error(`Tech: ${error.technicalDetails}`);
+    if (error.context) {
+      console.error('Context:', error.context);
     }
+  } else if (error) {
+    console.error(error);
   }
-}
-
-/**
- * Extract only essential data for logging to reduce noise
- */
-function extractEssentialData(data: any): any {
-  if (!data || typeof data !== 'object') return data;
-  
-  const essential: any = {};
-  
-  // Only include essential fields
-  const essentialFields = [
-    'topic', 'model', 'timeout', 'status', 'finishReason', 
-    'candidatesCount', 'hasContent', 'contentLength', 'duration',
-    'attempts', 'maxAttempts', 'errorCode', 'userMessage'
-  ];
-  
-  essentialFields.forEach(field => {
-    if (data[field] !== undefined) {
-      essential[field] = data[field];
-    }
-  });
-  
-  // Handle nested objects
-  if (data.candidates && Array.isArray(data.candidates)) {
-    essential.candidatesCount = data.candidates.length;
-  }
-  
-  if (data.usageMetadata) {
-    essential.usage = {
-      promptTokens: data.usageMetadata.promptTokenCount,
-      responseTokens: data.usageMetadata.candidatesTokenCount
-    };
-  }
-  
-  return essential;
 }
 
 /**
@@ -183,66 +76,34 @@ export function createAPIError(
 ): APIError {
   const errorMap = {
     [ERROR_CODES.API_QUOTA_EXCEEDED]: {
-      userMessage: "API đã đạt giới hạn. Vui lòng thử lại sau ít phút.",
-      suggestions: [
-        "Chờ 1-2 phút rồi thử lại",
-        "Thử tạo game đơn giản hơn",
-        "Kiểm tra quota API key"
-      ]
+      userMessage: "API limit reached. Please try again in a few minutes.",
+      suggestions: ["Wait 1-2 minutes", "Try simpler game", "Check API quota"]
     },
     [ERROR_CODES.API_REQUEST_FAILED]: {
-      userMessage: "Không thể kết nối đến dịch vụ AI. Vui lòng thử lại.",
-      suggestions: [
-        "Kiểm tra kết nối internet",
-        "Thử lại sau vài giây",
-        "Liên hệ hỗ trợ nếu lỗi tiếp tục"
-      ]
+      userMessage: "Cannot connect to AI service. Please try again.",
+      suggestions: ["Check internet", "Retry in few seconds", "Contact support"]
     },
     [ERROR_CODES.API_TIMEOUT]: {
-      userMessage: "Yêu cầu quá lâu (hơn 3 phút). Thử tạo game đơn giản hơn.",
-      suggestions: [
-        "Rút ngắn mô tả game",
-        "Chọn chủ đề đơn giản hơn",
-        "Thử lại với prompt ngắn gọn hơn"
-      ]
+      userMessage: "Request took too long (over 3 minutes). Try simpler game.",
+      suggestions: ["Shorter description", "Simpler topic", "Retry with concise prompt"]
     },
     [ERROR_CODES.API_NO_CONTENT]: {
-      userMessage: "AI không tạo được nội dung game. Vui lòng thử chủ đề khác.",
-      suggestions: [
-        "Thay đổi chủ đề game",
-        "Mô tả rõ ràng hơn về game muốn tạo",
-        "Thử với cài đặt khác"
-      ]
-    },
-    [ERROR_CODES.API_CONTENT_TRUNCATED]: {
-      userMessage: "Nội dung game bị cắt ngắn. Game vẫn có thể hoạt động.",
-      suggestions: [
-        "Kiểm tra game có hoạt động không",
-        "Thử tạo lại nếu game lỗi",
-        "Chọn game đơn giản hơn"
-      ]
+      userMessage: "AI couldn't generate game content. Try different topic.",
+      suggestions: ["Change game topic", "More detailed description", "Try different settings"]
     },
     [ERROR_CODES.NETWORK_ERROR]: {
-      userMessage: "Lỗi kết nối mạng. Vui lòng kiểm tra internet.",
-      suggestions: [
-        "Kiểm tra kết nối internet",
-        "Thử lại sau vài giây",
-        "Tải lại trang nếu cần"
-      ]
+      userMessage: "Network error. Please check your internet connection.",
+      suggestions: ["Check internet", "Retry in few seconds", "Reload page"]
     },
     [ERROR_CODES.PARSING_ERROR]: {
-      userMessage: "Lỗi xử lý dữ liệu từ AI. Vui lòng thử lại.",
-      suggestions: [
-        "Thử lại ngay lập tức",
-        "Thay đổi mô tả game",
-        "Liên hệ hỗ trợ nếu lỗi tiếp tục"
-      ]
+      userMessage: "Error processing AI response. Please try again.",
+      suggestions: ["Retry immediately", "Change description", "Contact support"]
     }
   };
   
   const errorInfo = errorMap[code] || {
-    userMessage: "Có lỗi xảy ra. Vui lòng thử lại.",
-    suggestions: ["Thử lại", "Liên hệ hỗ trợ"]
+    userMessage: "An error occurred. Please try again.",
+    suggestions: ["Retry", "Contact support"]
   };
   
   return new APIError(
