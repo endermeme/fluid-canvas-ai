@@ -1,6 +1,24 @@
 
 # Lịch sử thay đổi dự án
 
+## 2025-06-01 - Loại bỏ cơ chế MAX_TOKENS thừa thãi và đơn giản hóa logging
+
+### Sửa đổi:
+- **geminiGenerator.ts**: Loại bỏ override maxOutputTokens: 4096, sử dụng DEFAULT_GENERATION_SETTINGS (8192)
+- **responseParser.ts**: Xóa toàn bộ logic check MAX_TOKENS, chỉ kiểm tra có content hay không
+- **apiUtils.ts**: Đơn giản hóa error handling, xóa structured error phức tạp
+
+### Thay đổi quan trọng:
+- Sử dụng đúng giới hạn 8k tokens của Gemini thay vì 4k
+- Xóa bỏ logic warning/hasWarning không cần thiết
+- Logging trực tiếp lỗi từ API thay vì tạo message phức tạp
+- Code đơn giản và dễ hiểu hơn
+
+### Files đã sửa:
+- src/components/quiz/generator/geminiGenerator.ts
+- src/components/quiz/generator/responseParser.ts
+- src/components/quiz/generator/apiUtils.ts
+
 ## 2025-06-01 - Sửa lỗi MAX_TOKENS và tối ưu logging
 
 ### Sửa đổi:

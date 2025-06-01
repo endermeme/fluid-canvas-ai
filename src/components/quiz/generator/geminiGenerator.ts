@@ -2,7 +2,7 @@
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
-  logError, logWarning, logSuccess, 
+  logError, logSuccess, 
   measureExecutionTime, createAPIError, categorizeError,
   ERROR_CODES, APIError, SOURCE
 } from './apiUtils';
@@ -79,8 +79,7 @@ export const generateWithGemini = async (
         ...DEFAULT_GENERATION_SETTINGS,
         temperature: 0.7,
         topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 4096
+        topP: 0.95
       }
     };
     
@@ -100,26 +99,18 @@ export const generateWithGemini = async (
     
     if (!response.ok) {
       const errorText = await response.text();
-      const errorCode = response.status === 429 ? ERROR_CODES.API_QUOTA_EXCEEDED : ERROR_CODES.API_REQUEST_FAILED;
-      throw createAPIError(
-        errorCode,
-        `API request failed: ${response.status} ${response.statusText} - ${errorText}`,
-        { status: response.status, topic, model: GEMINI_MODELS.CUSTOM_GAME }
-      );
+      console.error(`❌ API Error: ${response.status} ${response.statusText} - ${errorText}`);
+      throw new Error(`API request failed: ${response.status} - ${errorText}`);
     }
     
     const result = await response.json();
+    console.log('✅ API Response received');
     
-    // Parse response và handle cả truncated content
-    const { text, hasWarning, warningMessage } = parseAPIResponse(result);
+    // Parse response đơn giản
+    const text = parseAPIResponse(result);
     
     const duration = measureExecutionTime(startTime);
-    
-    if (hasWarning && warningMessage) {
-      logWarning(SOURCE, warningMessage, { duration: duration.seconds });
-    } else {
-      logSuccess(SOURCE, `Game generated`, { duration: duration.seconds });
-    }
+    logSuccess(SOURCE, `Game generated`, { duration: duration.seconds });
     
     // Process game code
     const { title, content } = processGameCode(text);
@@ -135,20 +126,8 @@ export const generateWithGemini = async (
     
     return game;
   } catch (error) {
-    const errorCode = categorizeError(error);
-    
-    if (error instanceof APIError) {
-      logError(SOURCE, "API Error occurred", error);
-      throw error;
-    } else {
-      const structuredError = createAPIError(
-        errorCode,
-        error.message || "Unknown error occurred",
-        { topic, useCanvas, originalError: error.name }
-      );
-      logError(SOURCE, "Error generating game", structuredError);
-      throw structuredError;
-    }
+    console.error('❌ Error generating game:', error);
+    throw error;
   }
 };
 

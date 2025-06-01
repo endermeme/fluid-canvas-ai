@@ -1,24 +1,16 @@
 
-import { createAPIError, ERROR_CODES } from './apiUtils';
-
 /**
- * Parse API response and extract essential information
+ * Parse API response and extract text content
  */
-export function parseAPIResponse(result: any): { text: string, hasWarning: boolean, warningMessage?: string } {
-  // Essential validation only
+export function parseAPIResponse(result: any): string {
+  // Check for candidates
   if (!result?.candidates || result.candidates.length === 0) {
-    throw createAPIError(
-      ERROR_CODES.API_NO_CONTENT,
-      'No candidates returned from API',
-      { candidatesCount: 0 }
-    );
+    throw new Error('No candidates returned from API');
   }
   
   const candidate = result.candidates[0];
-  let hasWarning = false;
-  let warningMessage = '';
   
-  // Extract text content efficiently
+  // Extract text content
   let text = '';
   if (candidate.content?.parts?.[0]?.text) {
     text = candidate.content.parts[0].text;
@@ -32,19 +24,12 @@ export function parseAPIResponse(result: any): { text: string, hasWarning: boole
     }
   }
   
-  // Check for truncation AFTER getting text - important change!
-  if (candidate.finishReason === 'MAX_TOKENS' && text.trim()) {
-    hasWarning = true;
-    warningMessage = 'Content truncated but usable';
-    // Don't treat this as an error if we have content
-  } else if (!text || text.trim().length === 0) {
-    // Only throw error if truly no content
-    throw createAPIError(
-      ERROR_CODES.API_NO_CONTENT,
-      `No content returned. Finish reason: ${candidate.finishReason || 'unknown'}`,
-      { finishReason: candidate.finishReason }
-    );
+  // Check if we have content
+  if (!text || text.trim().length === 0) {
+    const finishReason = candidate.finishReason || 'unknown';
+    console.error(`❌ No content returned. Finish reason: ${finishReason}`);
+    throw new Error(`No content returned from API. Finish reason: ${finishReason}`);
   }
   
-  return { text, hasWarning, warningMessage };
+  return text;
 }

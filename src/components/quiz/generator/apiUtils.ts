@@ -34,83 +34,35 @@ export class APIError extends Error {
 }
 
 /**
- * Minimal success logging
+ * Simple success logging
  */
 export function logSuccess(context: string, message: string, data?: any) {
   console.log(`✅ ${context}: ${message}${data?.seconds ? ` (${data.seconds}s)` : ''}`);
 }
 
 /**
- * Essential warning logging
- */
-export function logWarning(context: string, message: string, data?: any) {
-  console.warn(`⚠️ ${context}: ${message}`);
-  if (data?.duration) console.warn(`Duration: ${data.duration}`);
-}
-
-/**
- * Essential error logging
+ * Simple error logging
  */
 export function logError(context: string, message: string, error?: any) {
   console.error(`❌ ${context}: ${message}`);
-  
-  if (error instanceof APIError) {
-    console.error(`Code: ${error.code}`);
-    console.error(`User: ${error.userMessage}`);
-    console.error(`Tech: ${error.technicalDetails}`);
-    if (error.context) {
-      console.error('Context:', error.context);
-    }
-  } else if (error) {
+  if (error) {
     console.error(error);
   }
 }
 
 /**
- * Create structured API error with recovery suggestions
+ * Create basic API error
  */
 export function createAPIError(
   code: ErrorCode, 
   technicalDetails: string,
   context?: any
 ): APIError {
-  const errorMap = {
-    [ERROR_CODES.API_QUOTA_EXCEEDED]: {
-      userMessage: "API limit reached. Please try again in a few minutes.",
-      suggestions: ["Wait 1-2 minutes", "Try simpler game", "Check API quota"]
-    },
-    [ERROR_CODES.API_REQUEST_FAILED]: {
-      userMessage: "Cannot connect to AI service. Please try again.",
-      suggestions: ["Check internet", "Retry in few seconds", "Contact support"]
-    },
-    [ERROR_CODES.API_TIMEOUT]: {
-      userMessage: "Request took too long (over 3 minutes). Try simpler game.",
-      suggestions: ["Shorter description", "Simpler topic", "Retry with concise prompt"]
-    },
-    [ERROR_CODES.API_NO_CONTENT]: {
-      userMessage: "AI couldn't generate game content. Try different topic.",
-      suggestions: ["Change game topic", "More detailed description", "Try different settings"]
-    },
-    [ERROR_CODES.NETWORK_ERROR]: {
-      userMessage: "Network error. Please check your internet connection.",
-      suggestions: ["Check internet", "Retry in few seconds", "Reload page"]
-    },
-    [ERROR_CODES.PARSING_ERROR]: {
-      userMessage: "Error processing AI response. Please try again.",
-      suggestions: ["Retry immediately", "Change description", "Contact support"]
-    }
-  };
-  
-  const errorInfo = errorMap[code] || {
-    userMessage: "An error occurred. Please try again.",
-    suggestions: ["Retry", "Contact support"]
-  };
-  
   return new APIError(
     code,
-    errorInfo.userMessage,
+    "API Error occurred",
     technicalDetails,
-    errorInfo.suggestions,
+    [],
     context
   );
 }
