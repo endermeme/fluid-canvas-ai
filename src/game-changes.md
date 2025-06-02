@@ -12,10 +12,14 @@
 6. **AdminDashboard.tsx** - Tạo trang admin mới
 7. **App.tsx** - Thêm route /admin
 8. **gameParticipation.ts** - Sửa lỗi lưu người chơi
+9. **types.ts** - Thêm maxParticipants, adminPassword vào StoredGame
+10. **GameLoadingIndicator.tsx** - Thêm hỗ trợ loadAttempts
+11. **EnhancedGameView.tsx** - Sửa lỗi TypeScript
+12. **generator/types.ts** - Thêm useCanvas vào PromptOptions
 
 ### Loại thay đổi:
 - **Thêm mới**: Admin dashboard, password protection
-- **Sửa lỗi**: Lưu người tham gia game
+- **Sửa lỗi**: Lưu người tham gia game, TypeScript errors
 - **Cải thiện**: UI/UX cho quản lý game
 - **Xóa**: Các hàm không sử dụng
 
@@ -25,3 +29,9 @@
 - Chỉnh sửa số người tối đa
 - Xem bảng điểm chi tiết
 - Quản lý thời gian hết hạn
+
+### Sửa lỗi TypeScript:
+- Thêm maxParticipants vào StoredGame interface
+- Loại bỏ loadAttempts/maxRetryAttempts từ useIframeManager
+- Cập nhật GameLoadingIndicatorProps
+- Thêm useCanvas vào PromptOptions

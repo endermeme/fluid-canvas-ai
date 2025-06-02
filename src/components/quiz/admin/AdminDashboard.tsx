@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -46,7 +45,7 @@ const AdminDashboard: React.FC = () => {
       const participantsData = await getGameParticipants(gameId);
       setParticipants(participantsData);
       
-      // Giả định maxParticipants từ game settings
+      // Sử dụng maxParticipants từ game hoặc default 50
       setMaxParticipants(gameData?.maxParticipants || 50);
     } catch (error) {
       console.error('Error loading game data:', error);
