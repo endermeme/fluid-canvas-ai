@@ -11,12 +11,7 @@ import {
   getApiEndpoint,
   DEFAULT_GENERATION_SETTINGS 
 } from '@/constants/api-constants';
-import { 
-  createGameGenerationPrompt, 
-  createFlashGamePrompt, 
-  createSuperThinkingAnalysisPrompt 
-} from './geminiPrompt';
-import { validateGameQuality, generateQualityReport } from './gameQualityValidator';
+import { createGameGenerationPrompt } from './geminiPrompt';
 import type { MiniGame, GameApiResponse } from './types';
 
 const SOURCE = "GEMINI";
@@ -27,7 +22,7 @@ export type { MiniGame } from './types';
 // Tạo lớp AIGameGenerator để giữ tương thích với code cũ
 export class AIGameGenerator {
   private static instance: AIGameGenerator | null = null;
-  private modelType: string = GEMINI_MODELS.CUSTOM_GAME;
+  private modelType: string = GEMINI_MODELS.CUSTOM_GAME; // Mặc định là model hiện tại
 
   private constructor() {}
 
@@ -38,7 +33,12 @@ export class AIGameGenerator {
     return AIGameGenerator.instance;
   }
   
+  /**
+   * Cài đặt loại mô hình AI sử dụng
+   * @param modelType Loại mô hình AI sử dụng (flash, pro, super-thinking)
+   */
   public setModelType(modelType: string): void {
+    // Ánh xạ từ AIModelType sang model thực tế
     switch(modelType) {
       case 'flash':
         this.modelType = GEMINI_MODELS.FLASH;
@@ -54,151 +54,101 @@ export class AIGameGenerator {
   }
 
   public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
+    // Nếu là chế độ Super Thinking, sử dụng flow đặc biệt
     if (this.modelType === GEMINI_MODELS.SUPER_THINKING) {
       return this.generateWithSuperThinking(topic, settings);
     }
     
+    // Nếu không, sử dụng flow bình thường với mô hình được chọn
     return tryGeminiGeneration(this.modelType, topic, settings);
   }
   
+  // Phương thức xử lý chế độ Super Thinking - sửa lỗi timeout và xử lý kết quả
   private async generateWithSuperThinking(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
-      logInfo(SOURCE, "🧠 Super Thinking Mode - Bước 1: Phân tích game design");
+      logInfo(SOURCE, "Starting Super Thinking mode - Step 1: Analysis");
       
-      // Bước 1: Phân tích chi tiết với Flash model
-      const analysisPrompt = createSuperThinkingAnalysisPrompt(topic);
+      // Bước 1: Sử dụng Flash model để phân tích logic game (timeout 45s)
+      const thinkingPrompt = `
+# Yêu cầu Game
+${topic}
+
+# Nhiệm vụ của bạn
+Hãy phân tích chi tiết game cần tạo dựa trên yêu cầu trên. Hãy mô tả rõ các phần sau:
+
+1. Thể loại game và cơ chế chính
+2. Các thành phần chính cần có
+3. Luồng chơi (gameplay flow)
+4. Logic xử lý game chính
+5. Điều kiện thắng/thua
+6. Giao diện người dùng và trải nghiệm
+7. Tương tác/animation quan trọng (cho cả mobile và PC)
+
+Lưu ý: không viết code, chỉ mô tả chi tiết logic và cơ chế trong 200 từ.`;
       
+      // Gọi Flash model để phân tích với timeout dài hơn
       const analysisStartTime = Date.now();
-      const analysisResponse = await Promise.race([
-        callGeminiApi(GEMINI_MODELS.FLASH, analysisPrompt),
+      const thinkingResponse = await Promise.race([
+        callGeminiApi(GEMINI_MODELS.FLASH, thinkingPrompt),
         new Promise<null>((_, reject) => 
-          setTimeout(() => reject(new Error("Analysis timeout")), 60000)
+          setTimeout(() => reject(new Error("Analysis timeout")), 45000)
         )
       ]);
       
       const analysisDuration = measureExecutionTime(analysisStartTime);
-      logInfo(SOURCE, `✅ Phân tích hoàn thành trong ${analysisDuration.seconds}s`);
+      logInfo(SOURCE, `Analysis completed in ${analysisDuration.seconds}s`);
       
-      if (!analysisResponse) {
-        logWarning(SOURCE, "⚠️ Phân tích thất bại, chuyển sang Pro model");
-        return this.generateWithEnhancedPrompt(GEMINI_MODELS.PRO, topic, settings);
+      if (!thinkingResponse) {
+        logWarning(SOURCE, "Flash analysis failed, falling back to PRO model");
+        return tryGeminiGeneration(GEMINI_MODELS.PRO, topic, settings);
       }
       
-      logInfo(SOURCE, "🎯 Super Thinking Mode - Bước 2: Tạo game với insights");
+      logInfo(SOURCE, "Starting Super Thinking mode - Step 2: Enhanced Generation");
       
-      // Bước 2: Tạo game với insights từ phân tích
-      const enhancedPrompt = this.createEnhancedPrompt(topic, analysisResponse);
+      // Bước 2: Kết hợp phân tích với yêu cầu ban đầu để tạo prompt nâng cao
+      const enhancedPrompt = `
+# Yêu cầu Game Gốc
+${topic}
+
+# Phân tích Chi tiết
+${thinkingResponse.substring(0, 1000)} // Giới hạn độ dài để tránh prompt quá lớn
+
+# Tạo Game HTML5 
+Dựa trên phân tích trên, hãy tạo một game HTML5 hoàn chỉnh với:
+- HTML, CSS, JavaScript embed trong một file duy nhất
+- Tối ưu cho cả desktop và mobile
+- UI đẹp và dễ sử dụng
+- Logic game rõ ràng dựa trên phân tích
+
+Trả về file HTML hoàn chỉnh có thể chạy trực tiếp.`;
       
+      // Gọi Pro model với prompt nâng cao và timeout dài hơn
       const generationStartTime = Date.now();
       const finalGame = await Promise.race([
-        this.generateGameWithPrompt(GEMINI_MODELS.PRO, enhancedPrompt, topic, settings),
+        generateWithCustomPrompt(GEMINI_MODELS.PRO, topic, enhancedPrompt, settings),
         new Promise<MiniGame | null>((_, reject) => 
-          setTimeout(() => reject(new Error("Generation timeout")), 90000)
+          setTimeout(() => reject(new Error("Generation timeout")), 60000)
         )
       ]);
       
       const generationDuration = measureExecutionTime(generationStartTime);
       
-      if (finalGame && finalGame.content && finalGame.content.length > 500) {
-        logSuccess(SOURCE, `🚀 Super Thinking hoàn thành trong ${generationDuration.seconds}s`);
-        
-        // Validate quality
-        const qualityResult = validateGameQuality(finalGame.content);
-        logInfo(SOURCE, `📊 Quality Score: ${qualityResult.metrics.overall.toFixed(1)}/100`);
-        
-        if (qualityResult.metrics.overall < 60) {
-          logWarning(SOURCE, "⚠️ Chất lượng thấp, thử lại với Pro model");
-          return this.generateWithEnhancedPrompt(GEMINI_MODELS.PRO, topic, settings);
-        }
-        
+      // Kiểm tra kết quả và xử lý đúng cách
+      if (finalGame && finalGame.content) {
+        logSuccess(SOURCE, `Super Thinking completed in ${generationDuration.seconds}s`);
         return finalGame;
       } else {
-        logWarning(SOURCE, "⚠️ Kết quả không hợp lệ, fallback to Pro");
-        return this.generateWithEnhancedPrompt(GEMINI_MODELS.PRO, topic, settings);
+        logWarning(SOURCE, "Super Thinking generated empty result, falling back to PRO model");
+        return tryGeminiGeneration(GEMINI_MODELS.PRO, topic, settings);
       }
       
     } catch (error) {
-      logError(SOURCE, "❌ Super Thinking thất bại", error);
-      return this.generateWithEnhancedPrompt(GEMINI_MODELS.PRO, topic, settings);
-    }
-  }
-  
-  private createEnhancedPrompt(topic: string, analysis: string): string {
-    return `# ENHANCED GAME CREATION với ANALYSIS INSIGHTS
-
-## TOPIC: ${topic}
-
-## DESIGN ANALYSIS:
-${analysis.substring(0, 1200)}
-
-## IMPLEMENTATION REQUIREMENTS:
-Dựa trên analysis trên, tạo game HTML5 với:
-
-### 🎯 CORE IMPLEMENTATION:
-- Apply tất cả insights từ analysis
-- Professional code architecture
-- Advanced game mechanics như đã phân tích
-- Anti-cheat measures được recommend
-- Performance optimizations được đề xuất
-
-### 🎨 VISUAL EXCELLENCE:
-- Modern UI design với CSS3
-- Smooth animations 60fps
-- Beautiful color schemes
-- Professional typography
-- Responsive cho mọi device
-
-### 🔧 TECHNICAL EXCELLENCE:
-- Clean, maintainable code
-- Proper error handling
-- Memory management
-- Performance monitoring
-- Cross-browser compatibility
-
-Trả về HTML hoàn chỉnh ready-to-play, implement tất cả insights từ analysis!`;
-  }
-  
-  private async generateWithEnhancedPrompt(model: string, topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
-    const prompt = model === GEMINI_MODELS.FLASH 
-      ? createFlashGamePrompt({ topic, language: settings?.language || 'vi' })
-      : createGameGenerationPrompt({ topic, language: settings?.language || 'vi' });
+      logError(SOURCE, "Super Thinking mode failed", error);
+      logWarning(SOURCE, "Falling back to PRO model");
       
-    return this.generateGameWithPrompt(model, prompt, topic, settings);
-  }
-  
-  private async generateGameWithPrompt(model: string, prompt: string, topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
-    const textResponse = await callGeminiApi(model, prompt);
-    
-    if (!textResponse) {
-      throw new Error('Failed to get response from API');
+      // Fallback to regular PRO model if Super Thinking fails
+      return tryGeminiGeneration(GEMINI_MODELS.PRO, topic, settings);
     }
-    
-    const { title, content } = processGameCode(textResponse);
-    
-    if (!content || content.length < 500) {
-      throw new Error('Generated content is insufficient');
-    }
-    
-    // Quality validation
-    const qualityResult = validateGameQuality(content);
-    if (qualityResult.metrics.overall < 50) {
-      logWarning(SOURCE, `⚠️ Low quality game: ${qualityResult.metrics.overall.toFixed(1)}/100`);
-      logInfo(SOURCE, generateQualityReport(qualityResult));
-    } else {
-      logSuccess(SOURCE, `✅ High quality game: ${qualityResult.metrics.overall.toFixed(1)}/100`);
-    }
-    
-    return {
-      id: `game-${Date.now()}`,
-      title: title || `Game: ${topic}`,
-      description: `Professional game: ${topic}`,
-      topic,
-      code: content,
-      settings: settings || {},
-      createdAt: new Date().toISOString(),
-      type: 'custom',
-      content: content
-    };
   }
 }
 
@@ -291,52 +241,47 @@ export const generateWithGemini = async (
 };
 
 /**
- * Xử lý mã code trả về từ Gemini - cải thiện để extract chất lượng cao
+ * Xử lý mã code trả về từ Gemini - đơn giản hóa tối đa
  */
 const processGameCode = (text: string): { title: string, content: string } => {
+  // Loại bỏ cú pháp markdown đơn giản
   let cleanedContent = text.trim();
-  let title = 'Professional Game';
+  let title = 'Interactive Game';
   
-  // 1. Extract HTML từ markdown với priority cho HTML5 compliant
-  const codeBlockRegex = /```(?:html|javascript|css)?\s*([\s\S]*?)```/g;
+  // 1. Xử lý markdown code blocks - chỉ lấy nội dung HTML trong block
+  const codeBlockRegex = /```(?:html|javascript)?\s*([\s\S]*?)```/g;
   const allMatches = [...cleanedContent.matchAll(codeBlockRegex)];
   
   if (allMatches.length > 0) {
-    // Tìm block HTML5 hoàn chỉnh
+    // Tìm block chứa HTML đầy đủ (ưu tiên có DOCTYPE hoặc thẻ html)
     const htmlBlockMatch = allMatches.find(match => 
       match[1] && (
         match[1].includes('<!DOCTYPE html>') || 
-        (match[1].includes('<html') && match[1].includes('<head') && match[1].includes('<body'))
+        match[1].includes('<html')
       )
     );
     
     if (htmlBlockMatch && htmlBlockMatch[1]) {
       cleanedContent = htmlBlockMatch[1].trim();
-    } else if (allMatches.length > 0) {
-      // Fallback to largest block
-      const largestBlock = allMatches.reduce((prev, current) => 
-        (current[1]?.length || 0) > (prev[1]?.length || 0) ? current : prev
-      );
-      cleanedContent = largestBlock[1]?.trim() || cleanedContent;
+    } else {
+      // Nếu không tìm thấy block HTML hoàn chỉnh, dùng block đầu tiên
+      cleanedContent = allMatches[0][1].trim();
     }
   } else {
-    // Clean markdown artifacts
-    cleanedContent = cleanedContent
-      .replace(/```html|```javascript|```css|```/g, '')
-      .trim();
+    // Không tìm thấy code block, giữ nguyên nội dung nhưng xóa các dấu markdown
+    cleanedContent = cleanedContent.replace(/```html|```javascript|```/g, '').trim();
   }
 
-  // 2. Extract title với multiple fallbacks
-  const titleSources = [
-    cleanedContent.match(/<title[^>]*>(.*?)<\/title>/i)?.[1],
-    cleanedContent.match(/<h1[^>]*>(.*?)<\/h1>/i)?.[1]?.replace(/<[^>]+>/g, ''),
-    cleanedContent.match(/\/\*\s*Game:\s*(.*?)\s*\*\//i)?.[1],
-    cleanedContent.match(/\/\/\s*Game:\s*(.*?)$/im)?.[1]
-  ];
-  
-  const extractedTitle = titleSources.find(t => t && t.trim().length > 0);
-  if (extractedTitle) {
-    title = extractedTitle.trim();
+  // 2. Trích xuất tiêu đề từ HTML nếu có
+  const titleMatch = cleanedContent.match(/<title[^>]*>(.*?)<\/title>/i);
+  if (titleMatch && titleMatch[1]) {
+    title = titleMatch[1].trim();
+  } else {
+    // Thử tìm trong H1
+    const h1Match = cleanedContent.match(/<h1[^>]*>(.*?)<\/h1>/i);
+    if (h1Match && h1Match[1]) {
+      title = h1Match[1].trim().replace(/<[^>]+>/g, ''); // Loại bỏ các thẻ HTML trong tiêu đề
+    }
   }
   
   return { 
