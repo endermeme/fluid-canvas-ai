@@ -1,204 +1,86 @@
 
-import * as React from "react"
-import { type ToastActionElement, ToastProps } from "@/components/ui/toast"
+import * as React from 'react';
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+// Định nghĩa loại toast
+type ToastVariant = 'default' | 'destructive';
 
-type ToasterToast = ToastProps & {
-  id: string
-  title?: React.ReactNode
-  description?: React.ReactNode
-  action?: ToastActionElement
-}
-
-const actionTypes = {
-  ADD_TOAST: "ADD_TOAST",
-  UPDATE_TOAST: "UPDATE_TOAST",
-  DISMISS_TOAST: "DISMISS_TOAST",
-  REMOVE_TOAST: "REMOVE_TOAST",
-} as const
-
-let count = 0
-
-function genId() {
-  count = (count + 1) % Number.MAX_VALUE
-  return count.toString()
-}
-
-type ActionType = typeof actionTypes
-
-type Action =
-  | {
-      type: ActionType["ADD_TOAST"]
-      toast: ToasterToast
-    }
-  | {
-      type: ActionType["UPDATE_TOAST"]
-      toast: Partial<ToasterToast>
-    }
-  | {
-      type: ActionType["DISMISS_TOAST"]
-      toastId?: string
-    }
-  | {
-      type: ActionType["REMOVE_TOAST"]
-      toastId?: string
-    }
-
-interface State {
-  toasts: ToasterToast[]
-}
-
-const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
-
-const addToRemoveQueue = (toastId: string) => {
-  if (toastTimeouts.has(toastId)) {
-    return
-  }
-
-  const timeout = setTimeout(() => {
-    toastTimeouts.delete(toastId)
-    dispatch({
-      type: "REMOVE_TOAST",
-      toastId: toastId,
-    })
-  }, TOAST_REMOVE_DELAY)
-
-  toastTimeouts.set(toastId, timeout)
-}
-
-export const reducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case "ADD_TOAST":
-      return {
-        ...state,
-        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
-      }
-
-    case "UPDATE_TOAST":
-      return {
-        ...state,
-        toasts: state.toasts.map((t) =>
-          t.id === action.toast.id ? { ...t, ...action.toast } : t
-        ),
-      }
-
-    case "DISMISS_TOAST": {
-      const { toastId } = action
-
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
-      if (toastId) {
-        addToRemoveQueue(toastId)
-      } else {
-        state.toasts.forEach((toast) => {
-          addToRemoveQueue(toast.id)
-        })
-      }
-
-      return {
-        ...state,
-        toasts: state.toasts.map((t) =>
-          t.id === toastId || toastId === undefined
-            ? {
-                ...t,
-                open: false,
-              }
-            : t
-        ),
-      }
-    }
-    case "REMOVE_TOAST":
-      if (action.toastId === undefined) {
-        return {
-          ...state,
-          toasts: [],
-        }
-      }
-      return {
-        ...state,
-        toasts: state.toasts.filter((t) => t.id !== action.toastId),
-      }
-  }
-}
-
-const listeners: Array<(state: State) => void> = []
-
-let memoryState: State = { toasts: [] }
-
-function dispatch(action: Action) {
-  memoryState = reducer(memoryState, action)
-  listeners.forEach((listener) => {
-    listener(memoryState)
-  })
-}
-
-type Toast = Omit<ToasterToast, "id">
-
-export type ToastType = {
-  (props: Toast): string
-  dismiss: (toastId?: string) => void
-  error: (props: Toast) => string
-  success: (props: Toast) => string
+// Cấu trúc của một toast
+type Toast = {
+  id: string;
+  title?: string;
+  description?: string;
+  variant?: ToastVariant;
+  open: boolean;
 };
 
-function toast(props: Toast) {
-  const id = genId()
+// Options khi tạo toast (không cần id và open vì được quản lý nội bộ)
+type ToastOptions = Omit<Toast, 'id' | 'open'>;
 
-  const update = (props: ToasterToast) =>
-    dispatch({
-      type: "UPDATE_TOAST",
-      toast: { ...props, id },
-    })
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
-
-  dispatch({
-    type: "ADD_TOAST",
-    toast: {
-      ...props,
-      id,
-      open: true,
-      onOpenChange: (open) => {
-        if (!open) dismiss()
-      },
-    },
-  })
-
-  return id
-}
-
-toast.dismiss = (toastId?: string) => {
-  dispatch({ type: "DISMISS_TOAST", toastId })
-}
-
-toast.success = (props: Toast) => {
-  return toast({ ...props, variant: "default" })
+// Context API cho toast
+type ToastContextType = {
+  toasts: Toast[];
+  toast: (options: ToastOptions) => void;
+  dismiss: (id?: string) => void;
+  success: (options: Omit<ToastOptions, 'variant'>) => void;
+  error: (options: Omit<ToastOptions, 'variant'>) => void;
 };
 
-toast.error = (props: Toast) => {
-  return toast({ ...props, variant: "destructive" })
-};
+// Tạo Context với giá trị mặc định là undefined
+const ToastContext = React.createContext<ToastContextType | undefined>(undefined);
 
-export function useToast() {
-  const [state, setState] = React.useState<State>(memoryState)
-
-  React.useEffect(() => {
-    listeners.push(setState)
-    return () => {
-      const index = listeners.indexOf(setState)
-      if (index > -1) {
-        listeners.splice(index, 1)
-      }
+// Tạo Provider để bọc ứng dụng
+export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // State lưu trữ danh sách toast
+  const [toasts, setToasts] = React.useState<Toast[]>([]);
+  
+  // Hàm thêm toast mới
+  const addToast = React.useCallback((options: ToastOptions) => {
+    const id = Math.random().toString(36).slice(2, 9);
+    setToasts((prev) => [...prev, { ...options, id, open: true }]);
+  }, []);
+  
+  // Hàm đóng toast theo id hoặc đóng tất cả nếu không cung cấp id
+  const dismiss = React.useCallback((id?: string) => {
+    if (id) {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    } else {
+      setToasts([]);
     }
-  }, [state])
+  }, []);
+  
+  // Hàm tiện ích tạo toast thành công
+  const success = React.useCallback((options: Omit<ToastOptions, 'variant'>) => {
+    addToast({ ...options, variant: 'default' });
+  }, [addToast]);
+  
+  // Hàm tiện ích tạo toast lỗi
+  const error = React.useCallback((options: Omit<ToastOptions, 'variant'>) => {
+    addToast({ ...options, variant: 'destructive' });
+  }, [addToast]);
+  
+  // Tạo giá trị context với memo
+  const contextValue = React.useMemo(() => ({
+    toasts,
+    toast: addToast,
+    dismiss,
+    success,
+    error
+  }), [toasts, addToast, dismiss, success, error]);
+  
+  return React.createElement(
+    ToastContext.Provider, 
+    { value: contextValue },
+    children
+  );
+};
 
-  return {
-    ...state,
-    toast,
-    dismiss: toast.dismiss,
+// Hook sử dụng toast context
+export function useToast(): ToastContextType {
+  const context = React.useContext(ToastContext);
+  
+  if (!context) {
+    throw new Error('useToast must be used within a ToastProvider');
   }
+  
+  return context;
 }
-
-// Cập nhật lại exports để sử dụng trong components
-export { toast }
