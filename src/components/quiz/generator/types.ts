@@ -1,9 +1,12 @@
+
 import { GameSettingsData } from '../types';
 
 export interface MiniGame {
   title?: string;
   content?: string;
   useCanvas?: boolean;
+  adminPassword?: string;
+  maxParticipants?: number;
 }
 
 export interface GameApiResponse {
@@ -18,6 +21,8 @@ export interface PromptOptions {
   language?: string;
   difficulty?: string;
   category?: string;
+  adminPassword?: string;
+  maxParticipants?: number;
 }
 
 export interface GeneratorSettings {
