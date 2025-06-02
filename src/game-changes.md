@@ -32,9 +32,9 @@
 - Xem bảng điểm chi tiết
 - Quản lý thời gian hết hạn
 
-### Sửa lỗi TypeScript (Lần 2):
+### Sửa lỗi TypeScript (Lần 3):
 - Đảm bảo StoredGame interface có maxParticipants và adminPassword
-- Loại bỏ hoàn toàn loadAttempts và maxRetryAttempts từ useIframeManager
-- Cập nhật EnhancedGameView để không destructure properties không tồn tại
-- Đơn giản hóa GameLoadingIndicator chỉ nhận progress
-- Sửa geminiPrompt.ts sử dụng đúng PromptOptions interface
+- Loại bỏ hoàn toàn loadAttempts và maxRetryAttempts từ EnhancedGameView
+- Cập nhật GameLoadingIndicator chỉ nhận progress
+- Đơn giản hóa codebase và đảm bảo tính nhất quán giữa các files
+- Sửa destructuring trong EnhancedGameView để chỉ lấy properties tồn tại
