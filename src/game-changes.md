@@ -1,6 +1,25 @@
 
 # Game Changes Log
 
+## [2025-06-02] Cập nhật thời gian tải game thành 10 phút
+
+### Thay đổi:
+- **useIframeManager.ts**: Điều chỉnh logic tải game từ vài giây thành 10 phút
+  - Thay đổi totalDuration từ tải nhanh thành 600,000ms (10 phút)
+  - Cập nhật mỗi giây với increment ~0.167%
+  - Giữ nguyên chức năng onload để kết thúc sớm nếu tải xong
+
+- **GameLoading.tsx**: Thêm hiển thị thời gian còn lại và trạng thái chi tiết
+  - Hiển thị countdown thời gian còn lại theo định dạng mm:ss
+  - Thêm 7 giai đoạn trạng thái chi tiết cho 10 phút
+  - Thêm thông báo về thời gian tạo game và khả năng rời trang
+  - Cải thiện progress bar với height lớn hơn
+
+### Lý do:
+- Đáp ứng yêu cầu người dùng muốn hiển thị tiến trình tải trong 10 phút
+- Cung cấp thông tin rõ ràng về thời gian còn lại
+- Tăng tính minh bạch trong quá trình tạo game
+
 ## [2025-06-02] Sửa lỗi Super Thinking bị kẹt ở "Đang tải game... 0%"
 
 ### Thay đổi:

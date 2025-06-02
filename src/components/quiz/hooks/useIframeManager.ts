@@ -1,3 +1,4 @@
+
 import { useRef, useState, useEffect } from 'react';
 import { enhanceIframeContent } from '../utils/iframe-utils';
 
@@ -26,23 +27,26 @@ export const useIframeManager = (
     try {
       console.log("Đang tải nội dung game...");
       
-      // Thêm thông báo load hoàn thành đơn giản nếu cần
       const content = await enhanceIframeContent(miniGame.content, miniGame.title);
       if (iframeRef.current) {
         iframeRef.current.srcdoc = content;
       }
       
-      // Mô phỏng tiến trình tải đơn giản
+      // Mô phỏng tiến trình tải trong 10 phút (600 giây)
       let progress = 0;
+      const totalDuration = 600000; // 10 phút = 600,000ms
+      const updateInterval = 1000; // Cập nhật mỗi giây
+      const incrementPerSecond = 100 / (totalDuration / updateInterval); // ~0.167% mỗi giây
+      
       const interval = setInterval(() => {
-        progress += 20;
+        progress += incrementPerSecond;
         if (progress >= 100) {
           clearInterval(interval);
           progress = 100;
           setIsIframeLoaded(true);
         }
-        setLoadingProgress(progress);
-      }, 100);
+        setLoadingProgress(Math.min(progress, 100));
+      }, updateInterval);
 
       // Sự kiện khi iframe tải xong
       iframeRef.current.onload = () => {
