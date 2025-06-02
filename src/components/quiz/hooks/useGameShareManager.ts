@@ -6,19 +6,19 @@ interface MiniGame {
   content: string;
 }
 
-interface Toast {
+interface ToastOptions {
   title: string;
   description: string;
   variant?: 'default' | 'destructive';
 }
 
 interface ToastHook {
-  toast: (toast: Toast) => void;
+  toast: (options: ToastOptions) => void;
 }
 
 export const useGameShareManager = (
   miniGame: MiniGame, 
-  toast: ToastHook, 
+  toastHook: ToastHook, 
   onShare?: () => Promise<string>
 ) => {
   const [isSharing, setIsSharing] = useState(false);
@@ -32,7 +32,7 @@ export const useGameShareManager = (
       if (onShare) {
         const shareUrl = await onShare();
         if (shareUrl) {
-          toast.toast({
+          toastHook.toast({
             title: "Game đã được chia sẻ",
             description: "Liên kết đã được tạo thành công.",
           });
@@ -49,7 +49,7 @@ export const useGameShareManager = (
           await navigator.share(shareData);
         } else {
           await navigator.clipboard.writeText(window.location.href);
-          toast.toast({
+          toastHook.toast({
             title: "Đã sao chép liên kết",
             description: "Liên kết đã được sao chép vào clipboard.",
           });
@@ -57,7 +57,7 @@ export const useGameShareManager = (
       }
     } catch (error) {
       console.error('Error sharing game:', error);
-      toast.toast({
+      toastHook.toast({
         title: "Lỗi chia sẻ",
         description: "Không thể chia sẻ game. Vui lòng thử lại.",
         variant: "destructive"

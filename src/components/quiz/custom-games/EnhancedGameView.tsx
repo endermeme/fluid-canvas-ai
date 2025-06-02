@@ -37,7 +37,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   isTeacher = false,
   gameExpired = false
 }) => {
-  const { toast } = useToast();
+  const toast = useToast();
   const { isSharing, handleShare } = useGameShareManager(miniGame, toast, onShare);
   const { 
     iframeRef,

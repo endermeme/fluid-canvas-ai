@@ -42,7 +42,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   gameExpired = false,
   gameId
 }) => {
-  const { toast } = useToast();
+  const toast = useToast();
   const navigate = useNavigate();
   const [showAdminButton, setShowAdminButton] = useState(false);
   
