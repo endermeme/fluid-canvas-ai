@@ -1,6 +1,17 @@
 
 # Game Changes Log
 
+## [2025-06-02] Sửa lỗi TypeScript trong GameSelector
+
+### Thay đổi:
+- **GameSelector.tsx**: Xóa prop `inModal` không tồn tại trong GameSettingsProps
+  - Sửa lỗi TypeScript khi truyền prop không được định nghĩa
+  - GameSettings component không hỗ trợ prop inModal
+
+### Lý do:
+- Khắc phục lỗi build TypeScript
+- Đảm bảo tương thích với interface GameSettingsProps
+
 ## [2025-06-02] Thêm cài đặt admin và chế độ AI cho cả Custom và Preset games
 
 ### Thay đổi:
