@@ -1,3 +1,4 @@
+
 import { GameSettingsData } from '../types';
 
 export interface MiniGame {
@@ -10,7 +11,6 @@ export interface MiniGame {
   settings?: any;       // Cài đặt game
   createdAt?: string;   // Thời gian tạo
   type?: string;        // Loại game
-  useCanvas?: boolean;  // Có sử dụng canvas mode hay không
 }
 
 export interface GameApiResponse {
@@ -21,10 +21,7 @@ export interface GameApiResponse {
 
 export interface PromptOptions {
   topic: string;
-  useCanvas?: boolean;
   language?: string;
-  difficulty?: string;
-  category?: string;
   enhancedPrompt?: string;  // Thêm trường này để hỗ trợ Super Thinking
   aiModelType?: string;     // Loại mô hình AI
 }

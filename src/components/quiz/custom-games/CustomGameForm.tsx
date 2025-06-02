@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -10,7 +11,6 @@ import { AIGameGenerator } from '../generator/geminiGenerator';
 import { MiniGame } from '../generator/types';
 import { AIModelType, GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
-import { GEMINI_MODELS } from '@/constants/api-constants';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -46,9 +46,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     setIsGenerating(true);
     
     try {
-      // Luôn sử dụng canvas mode
-      gameGenerator.setCanvasMode(true);
-      
       // Set model type based on user selection
       gameGenerator.setModelType(aiModelType);
       
@@ -218,7 +215,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
             <div className="flex items-start gap-3.5 p-5 bg-primary/5 rounded-2xl border border-primary/15 backdrop-blur-sm">
               <Info className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
               <div className="text-sm text-muted-foreground">
-                <p className="mb-2">AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Game sẽ sử dụng HTML5 Canvas cho hiệu ứng đồ họa tốt hơn.</p>
+                <p className="mb-2">AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn.</p>
                 <ul className="list-disc list-inside space-y-1 pl-2">
                   <li><span className="text-orange-500 font-medium">Chế độ nhanh:</span> Tạo game nhanh hơn, phù hợp với yêu cầu đơn giản</li>
                   <li><span className="text-primary font-medium">Bình thường:</span> Cân bằng giữa tốc độ và chất lượng code</li>

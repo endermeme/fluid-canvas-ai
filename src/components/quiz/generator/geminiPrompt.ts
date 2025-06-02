@@ -1,3 +1,4 @@
+
 /**
  * Prompt template siêu đơn giản cho game full màn hình
  */
@@ -5,7 +6,7 @@
 import { PromptOptions } from './types';
 
 export const createGameGenerationPrompt = (options: PromptOptions): string => {
-  const { topic, useCanvas = true, language = 'vi', difficulty = 'medium', category = 'custom' } = options;
+  const { topic, language = 'vi' } = options;
   
   // Siêu đơn giản, tập trung vào trải nghiệm đẹp và tràn màn hình
   const prompt = `Tạo một game HTML5 tràn màn hình về chủ đề "${topic}".

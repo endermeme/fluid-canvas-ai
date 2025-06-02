@@ -1,3 +1,4 @@
+
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
@@ -21,7 +22,6 @@ export type { MiniGame } from './types';
 // Tạo lớp AIGameGenerator để giữ tương thích với code cũ
 export class AIGameGenerator {
   private static instance: AIGameGenerator | null = null;
-  private canvasMode: boolean = true;
   private modelType: string = GEMINI_MODELS.CUSTOM_GAME; // Mặc định là model hiện tại
 
   private constructor() {}
@@ -31,10 +31,6 @@ export class AIGameGenerator {
       AIGameGenerator.instance = new AIGameGenerator();
     }
     return AIGameGenerator.instance;
-  }
-
-  public setCanvasMode(mode: boolean): void {
-    this.canvasMode = mode;
   }
   
   /**
@@ -58,20 +54,13 @@ export class AIGameGenerator {
   }
 
   public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
-    // Sử dụng biến canvasMode từ instance
-    const useCanvasMode = settings?.useCanvas !== undefined ? settings.useCanvas : this.canvasMode;
-    const updatedSettings = {
-      ...settings,
-      useCanvas: useCanvasMode
-    };
-    
     // Nếu là chế độ Super Thinking, sử dụng flow đặc biệt
     if (this.modelType === GEMINI_MODELS.SUPER_THINKING) {
-      return this.generateWithSuperThinking(topic, updatedSettings);
+      return this.generateWithSuperThinking(topic, settings);
     }
     
     // Nếu không, sử dụng flow bình thường với mô hình được chọn
-    return tryGeminiGeneration(this.modelType, topic, updatedSettings);
+    return tryGeminiGeneration(this.modelType, topic, settings);
   }
   
   // Phương thức xử lý chế độ Super Thinking
@@ -92,8 +81,8 @@ Hãy phân tích chi tiết game cần tạo dựa trên yêu cầu trên. Hãy 
 5. Điều kiện thắng/thua
 6. Các tính năng nâng cao (nếu có)
 7. Giao diện người dùng và trải nghiệm
-8. Tương tác/animation quan trọng
-9. Vấn đề tiềm ẩn và cách xử lý
+8. Tương tác/animation quan trọng (cho cả mobile và PC)
+9. Vấn đề tiềm ẩn và cách xử lý (hiển thị, điều khiển, tốc độ)
 
 Lưu ý: không viết code, chỉ mô tả chi tiết logic và cơ chế.`;
       
@@ -109,16 +98,16 @@ Lưu ý: không viết code, chỉ mô tả chi tiết logic và cơ chế.`;
 # Yêu cầu Game
 ${topic}
 
-# Phân tích chi tiết
+# Phân tích chi tiết từ AI Flash
 ${thinkingResponse}
 
 # Nhiệm vụ của bạn
-Hãy tạo một game HTML5 theo phân tích trên. Game phải::
+Hãy tạo một game HTML5 theo phân tích trên. Game phải:
 1. Chạy trên trình duyệt web mà không cần thư viện phức tạp
-2. Sử dụng HTML5 Canvas nếu cần hiệu ứng đồ họa
-3. Vẫn hỗ trợ các thiết bị di động
-4. Tạo trải nghiệm người dùng đẹp và dễ sử dụng
-5. Tích hợp các logic game đã phân tích ở trên
+2. Tối ưu cho cả desktop và mobile
+3. Tạo trải nghiệm người dùng đẹp và dễ sử dụng
+4. Tích hợp các logic game đã phân tích ở trên
+5. Tránh các lỗi về hiển thị, điều khiển và tốc độ
 
 Trả về một tệp HTML duy nhất với Javascript/CSS embed để dễ chạy.`;
       
@@ -146,7 +135,6 @@ export const generateWithGemini = async (
   settings?: GameSettingsData
 ): Promise<MiniGame | null> => {
   const gameType = getGameTypeByTopic(topic);
-  const useCanvas = settings?.useCanvas !== undefined ? settings.useCanvas : true;
   
   // Sử dụng mô hình được truyền vào hoặc mặc định
   const selectedModel = modelId || GEMINI_MODELS.CUSTOM_GAME;
@@ -155,17 +143,13 @@ export const generateWithGemini = async (
     model: selectedModel,
     apiVersion: API_VERSION,
     type: gameType?.name || "Not specified",
-    settings: settings || {},
-    canvasMode: useCanvas ? "enabled" : "disabled"
+    settings: settings || {}
   });
 
   // Tạo prompt với template cải tiến từ geminiPrompt.ts
   const prompt = createGameGenerationPrompt({
     topic,
-    useCanvas,
-    language: settings?.language || 'en',
-    difficulty: settings?.difficulty || 'medium',
-    category: settings?.category || 'general'
+    language: settings?.language || 'vi'
   });
 
   try {
@@ -217,8 +201,7 @@ export const generateWithGemini = async (
     // Tạo đối tượng game
     const game: MiniGame = {
       title: title || topic,
-      content: content,
-      useCanvas: useCanvas
+      content: content
     };
     
     logSuccess(SOURCE, "Game generated successfully", {
