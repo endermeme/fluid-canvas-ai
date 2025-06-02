@@ -1,6 +1,11 @@
 
 # Game Changes Log
 
+## 2025-06-02 - Xóa file use-toast-new.ts có lỗi cú pháp
+- Xóa file use-toast-new.ts vì có nhiều lỗi TypeScript không sửa được
+- Sử dụng file use-toast.ts đã hoạt động ổn định
+- System sẽ dùng toast hook từ file use-toast.ts
+
 ## 2025-06-02 - Sửa lỗi TypeScript trong use-toast-new.ts (lần 2)
 - Viết lại hoàn toàn file use-toast-new.ts với cú pháp TypeScript đúng
 - Khắc phục tất cả lỗi TS1005, TS1136, TS1109, TS1161, TS1128
