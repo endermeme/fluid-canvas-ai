@@ -1,31 +1,34 @@
-/**
- * Prompt template siêu đơn giản cho game full màn hình
- */
+import { PromptOptions } from './types';
 
-export const createGameGenerationPrompt = (options: {
-  topic: string;
-}): string => {
-  const { topic } = options;
+export const createGameGenerationPrompt = (options: PromptOptions): string => {
+  const { topic, useCanvas = true, language = 'en', difficulty = 'medium', category = 'general' } = options;
   
-  // Siêu đơn giản, tập trung vào trải nghiệm đẹp và tràn màn hình
-  const prompt = `Tạo một game HTML5 tràn màn hình về chủ đề "${topic}".
+  const gamePrompt = `Create an interactive ${topic} game with the following specifications:
 
-NGUYÊN TẮC THIẾT KẾ:
-- Tạo HTML5 hoàn chỉnh với game PHẢI tràn TOÀN BỘ màn hình
-- Thêm reset CSS đầy đủ: margin/padding 0, box-sizing: border-box
-- Cài đặt body/html với width/height 100%, overflow hidden
-- Game PHẢI đẹp với UI hiện đại, màu sắc tương phản rõ ràng
-- Toàn bộ text trong game bằng tiếng Việt
-- PHẢI có nút "BẮT ĐẦU" cỡ lớn (>50px) và hướng dẫn ngắn gọn
-- Tối thiểu hóa chữ, dùng hình ảnh và biểu tượng trực quan
-- Tất cả UI phần tử ít nhất 44px, font chữ lớn (>18px)
-- Game phải responsive và đẹp ở mọi kích thước màn hình
-- KHÔNG PHÂN CHIA màn hình thành các phần nhỏ, chiếm toàn bộ không gian
+**Game Requirements:**
+- Topic: ${topic}
+- Difficulty: ${difficulty}
+- Language: ${language}
+- Category: ${category}
+- Canvas Mode: ${useCanvas ? 'Enabled' : 'Disabled'}
 
-QUAN TRỌNG: Trả về HTML đầy đủ, không giải thích, không markdown. Game PHẢI tràn đầy màn hình trên mọi thiết bị.
-`;
+**Technical Requirements:**
+- Create a complete HTML page with embedded CSS and JavaScript
+- Use modern web technologies (HTML5, CSS3, ES6+)
+- Responsive design that works on both desktop and mobile
+- Interactive elements and engaging gameplay
+- Clear instructions and feedback for users
+- Score tracking and game completion detection
 
-  return prompt;
+**Output Format:**
+Please provide a complete, standalone HTML file that includes:
+1. DOCTYPE declaration
+2. Proper HTML structure
+3. Embedded CSS styles
+4. JavaScript functionality
+5. Game logic and interactivity
+
+The game should be immediately playable when loaded in a browser.`;
+
+  return gamePrompt;
 };
-
-export default createGameGenerationPrompt;

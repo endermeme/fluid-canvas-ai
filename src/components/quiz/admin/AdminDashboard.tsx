@@ -10,6 +10,7 @@ import { ArrowLeft, Settings, Users, Clock, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSharedGame } from '@/utils/gameExport';
 import { getGameSession, getGameParticipants } from '@/utils/gameParticipation';
+import { StoredGame, GameParticipant } from '@/utils/types';
 
 const AdminDashboard: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -19,8 +20,8 @@ const AdminDashboard: React.FC = () => {
   const [showPasswordDialog, setShowPasswordDialog] = useState(true);
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [game, setGame] = useState<any>(null);
-  const [participants, setParticipants] = useState<any[]>([]);
+  const [game, setGame] = useState<StoredGame | null>(null);
+  const [participants, setParticipants] = useState<GameParticipant[]>([]);
   const [maxParticipants, setMaxParticipants] = useState<number>(50);
   const [gameExpiry, setGameExpiry] = useState<string>('');
 
