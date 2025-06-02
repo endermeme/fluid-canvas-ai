@@ -118,4 +118,42 @@ export const checkPlayerInfoRequired = async (
     console.error("Error checking player info requirement:", error);
     return true;
   }
-}; 
+};
+
+/**
+ * Tạo cài đặt admin mặc định cho game mới
+ */
+export const createDefaultAdminSettings = async (
+  gameId: string,
+  customSettings?: Partial<GameAdminSettings>
+): Promise<GameAdminSettings> => {
+  const defaultSettings: GameAdminSettings = {
+    gameId,
+    adminPassword: customSettings?.adminPassword || '1234',
+    maxParticipants: customSettings?.maxParticipants || 50,
+    requestPlayerInfo: customSettings?.requestPlayerInfo !== false,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  
+  await updateGameAdminSettings(defaultSettings);
+  return defaultSettings;
+};
+
+/**
+ * Kiểm tra và tạo cài đặt admin nếu chưa có
+ */
+export const ensureAdminSettings = async (
+  gameId: string,
+  defaultPassword?: string
+): Promise<GameAdminSettings> => {
+  let settings = await getGameAdminSettings(gameId);
+  
+  if (!settings) {
+    settings = await createDefaultAdminSettings(gameId, {
+      adminPassword: defaultPassword || '1234'
+    });
+  }
+  
+  return settings;
+};

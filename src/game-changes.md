@@ -1,35 +1,44 @@
 
 # Game Changes Log
 
-## 2025-06-02 - Sửa lỗi TypeScript và cấu trúc file
-- Sửa lỗi EnhancedGameView: loại bỏ thuộc tính loadAttempts và maxRetryAttempts không tồn tại
-- Sửa lỗi import CustomGameForm trong GameController và ui/index.ts
-- Sửa lỗi toast export trong useGameShareManager và use-toast.ts
-- Viết lại gameAdmin.ts và gameCreator.ts để không dùng bảng game_admin_settings không tồn tại
-- Sử dụng localStorage làm phương án thay thế cho lưu trữ cài đặt admin
+## [2025-06-02] Khôi phục cơ chế mật khẩu admin đầy đủ
 
-## 2025-06-02 - Xóa file use-toast-new.ts có lỗi cú pháp
-- Xóa file use-toast-new.ts vì có nhiều lỗi TypeScript không sửa được
+### Thay đổi:
+- **utils/gameAdmin.ts**: Khôi phục đầy đủ các chức năng admin
+  - Thêm `createDefaultAdminSettings()` để tạo cài đặt admin mặc định
+  - Thêm `ensureAdminSettings()` để đảm bảo game có cài đặt admin
+  - Giữ nguyên tất cả các hàm xác thực và kiểm tra
+
+- **utils/gameCreator.ts**: Tích hợp lại cơ chế admin
+  - Tự động tạo cài đặt admin khi tạo game mới
+  - Hỗ trợ các tùy chọn admin từ GameCreationOptions
+
+- **ui/EnhancedGameView.tsx**: Khôi phục xử lý admin hoàn chỉnh
+  - Giữ nguyên customShareHandler với cài đặt admin đầy đủ
+  - Hiển thị nút quản trị khi có cài đặt admin
+  - Hỗ trợ requestPlayerInfo trong cài đặt admin
+
+### Lý do:
+- Khôi phục lại cơ chế mật khẩu admin vốn có mà không làm mất chức năng chế độ AI
+- Đảm bảo cả hai chế độ game đều có đầy đủ tính năng admin
+- Tự động tạo cài đặt admin cho mọi game mới được tạo
+
+## [2025-06-02] Sửa lỗi TypeScript với ToastHook
+
+### Thay đổi:
+- **hooks/useGameShareManager.ts**: Sửa interface ToastHook
+- **EnhancedGameView.tsx**: Cập nhật cách sử dụng useToast()
+- **ui/EnhancedGameView.tsx**: Cập nhật cách sử dụng useToast()
+
+### Lý do:
+- Khắc phục lỗi TypeScript về incompatible types
+- Đảm bảo toast hoạt động đúng cách
+
+## [2025-06-02] Xóa file use-toast-new.ts do lỗi cú pháp
+
+### Thay đổi:
+- **Đã xóa**: src/hooks/use-toast-new.ts
+
+### Lý do:
+- File có lỗi cú pháp TypeScript
 - Sử dụng file use-toast.ts đã hoạt động ổn định
-- System sẽ dùng toast hook từ file use-toast.ts
-
-## 2025-06-02 - Sửa lỗi TypeScript trong use-toast-new.ts (lần 2)
-- Viết lại hoàn toàn file use-toast-new.ts với cú pháp TypeScript đúng
-- Khắc phục tất cả lỗi TS1005, TS1136, TS1109, TS1161, TS1128
-- File toast hook hoạt động ổn định
-
-## 2025-06-02 - Sửa lỗi TypeScript trong use-toast-new.ts
-- Khắc phục lỗi cú pháp trong file use-toast-new.ts
-- Sửa các lỗi TS1005, TS1136, TS1109, TS1161, TS1128
-- File toast hook hoạt động bình thường trở lại
-
-## 2025-06-02 - Thêm lựa chọn chế độ AI và làm sạch code
-- Thêm 3 chế độ AI: Flash (Nhanh), Pro (Bình thường), Super Thinking
-- Hiển thị lựa chọn chế độ trong CustomGameForm
-- Xóa các hàm canvas và difficulty settings không cần thiết
-- Cập nhật logic Super Thinking với 2 bước: Flash phân tích -> Pro viết code
-
-## Thay đổi trước đó
-- Đã sửa lỗi TypeScript với maxParticipants
-- Đã cập nhật các types và interfaces
-- Fixed HTML game rendering issues

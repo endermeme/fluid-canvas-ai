@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import GameErrorDisplay from '../game-components/GameErrorDisplay';
 import GameLoadingIndicator from '../game-components/GameLoadingIndicator';
@@ -10,7 +11,7 @@ import { createAndShareGame } from '@/utils/gameCreator';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getGameAdminSettings } from '@/utils/gameAdmin';
+import { getGameAdminSettings, ensureAdminSettings } from '@/utils/gameAdmin';
 
 interface EnhancedGameViewProps {
   miniGame: {
@@ -62,7 +63,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     checkAdminFeature();
   }, [gameId]);
   
-  // Tạo handle custom share với cài đặt admin
+  // Tạo handle custom share với cài đặt admin đầy đủ
   const customShareHandler = async (): Promise<string> => {
     try {
       // Kiểm tra xem có cài đặt admin tạm thời không
@@ -70,7 +71,8 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       let adminSettings = {
         adminPassword: '1234',
         expiryDays: 30,
-        maxParticipants: 50
+        maxParticipants: 50,
+        requestPlayerInfo: true
       };
       
       if (tempAdminSettingsStr) {
@@ -88,14 +90,15 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         }
       }
       
-      // Sử dụng hàm createAndShareGame với cài đặt admin
+      // Sử dụng hàm createAndShareGame với cài đặt admin đầy đủ
       const result = await createAndShareGame({
         title: miniGame.title || 'Game tương tác',
         htmlContent: miniGame.content,
         description: `Game được tạo bởi AI`,
         expiryDays: adminSettings.expiryDays,
         adminPassword: adminSettings.adminPassword,
-        maxParticipants: adminSettings.maxParticipants
+        maxParticipants: adminSettings.maxParticipants,
+        requestPlayerInfo: adminSettings.requestPlayerInfo
       });
       
       if (result && result.sharedUrl) {

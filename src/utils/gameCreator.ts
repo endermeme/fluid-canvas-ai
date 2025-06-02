@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { saveGameForSharing } from './gameExport';
+import { createDefaultAdminSettings } from './gameAdmin';
 
 export interface GameCreationOptions {
   title: string;
@@ -44,16 +45,12 @@ export const createAndShareGame = async (options: GameCreationOptions) => {
       throw error;
     }
     
-    // Lưu cài đặt admin vào localStorage nếu có
-    if (options.adminPassword || options.maxParticipants || options.requestPlayerInfo === true) {
-      const adminConfig = {
-        adminPassword: options.adminPassword || '1234',
-        maxParticipants: options.maxParticipants || 50,
-        requestPlayerInfo: options.requestPlayerInfo
-      };
-      
-      localStorage.setItem(`game_admin_${gameId}`, JSON.stringify(adminConfig));
-    }
+    // Tạo cài đặt admin cho game này
+    await createDefaultAdminSettings(gameId, {
+      adminPassword: options.adminPassword || '1234',
+      maxParticipants: options.maxParticipants || 50,
+      requestPlayerInfo: options.requestPlayerInfo !== false
+    });
     
     // Lưu game vào localStorage để backup
     const sharedUrl = await saveGameForSharing({
