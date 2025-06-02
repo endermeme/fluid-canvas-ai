@@ -372,8 +372,6 @@ export const tryGeminiGeneration = async (
   }
 };
 
-// Sử dụng các hàm tiêu chuẩn
-
 export const generateWithCustomPrompt = async (
   modelId: string,
   topic: string,
@@ -412,93 +410,5 @@ export const generateWithCustomPrompt = async (
   } catch (error) {
     logError(SOURCE, 'Failed to generate with custom prompt', error);
     return null;
-  }
-};
-
-export const generateWithGemini = async (
-  topic: string, 
-  modelId: string | null = null,
-  settings?: GameSettingsData
-): Promise<MiniGame | null> => {
-  const gameType = getGameTypeByTopic(topic);
-  
-  // Sử dụng mô hình được truyền vào hoặc mặc định
-  const selectedModel = modelId || GEMINI_MODELS.CUSTOM_GAME;
-  
-  logInfo(SOURCE, `Starting game generation for "${topic}"`, {
-    model: selectedModel,
-    apiVersion: API_VERSION,
-    type: gameType?.name || "Not specified",
-    settings: settings || {}
-  });
-
-  // Tạo prompt với template cải tiến từ geminiPrompt.ts
-  const prompt = createGameGenerationPrompt({
-    topic,
-    language: settings?.language || 'vi'
-  });
-
-  try {
-    logInfo(SOURCE, `Sending request to Gemini API using model ${selectedModel}`);
-    
-    const startTime = Date.now();
-    
-    // Đơn giản hóa payload API request
-    const payload = {
-      contents: [{
-        role: "user",
-        parts: [{text: prompt}]
-      }],
-      generationConfig: {
-        ...DEFAULT_GENERATION_SETTINGS,
-        temperature: 0.7
-      }
-    };
-    
-    const response = await fetch(getApiEndpoint(selectedModel), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload)
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
-    }
-    
-    const result = await response.json();
-    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    
-    if (!text) {
-      throw new Error('No content returned from API');
-    }
-    
-    const duration = measureExecutionTime(startTime);
-    logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
-    
-    // Tạo phiên bản gỡ lỗi để xem code gốc
-    logInfo(SOURCE, `Generated Game Code (Original):`, text.substring(0, 500) + '...');
-    
-    // Xử lý code để extract thông tin và clean
-    const { title, content } = processGameCode(text);
-    
-    // Tạo đối tượng game
-    const game: MiniGame = {
-      title: title || topic,
-      content: content
-    };
-    
-    logSuccess(SOURCE, "Game generated successfully", {
-      title: game.title,
-      contentLength: game.content.length,
-      hasDocType: game.content.includes('<!DOCTYPE')
-    });
-    
-    return game;
-  } catch (error) {
-    logError(SOURCE, "Error generating with Gemini", error);
-    throw error;
   }
 };

@@ -1,6 +1,17 @@
 
 # Game Changes Log
 
+## [2025-06-02] Sửa lỗi khai báo hàm trùng lặp
+
+### Thay đổi:
+- **geminiGenerator.ts**: Xóa định nghĩa hàm `generateWithGemini` bị trùng lặp ở cuối file
+  - Giữ lại chỉ một định nghĩa hàm duy nhất
+  - Khắc phục lỗi TypeScript "Cannot redeclare block-scoped variable"
+
+### Lý do:
+- Sửa lỗi build do khai báo hàm trùng lặp
+- Đảm bảo code có thể compile thành công
+
 ## [2025-06-02] Sửa lỗi Super Thinking báo lỗi khi đã tạo game thành công
 
 ### Thay đổi:
