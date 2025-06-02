@@ -1,4 +1,3 @@
-
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
@@ -63,10 +62,12 @@ export class AIGameGenerator {
     return tryGeminiGeneration(this.modelType, topic, settings);
   }
   
-  // Phương thức xử lý chế độ Super Thinking
+  // Phương thức xử lý chế độ Super Thinking - sửa lỗi timeout
   private async generateWithSuperThinking(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
-      // Bước 1: Sử dụng Flash model để phân tích logic game (không có code)
+      logInfo(SOURCE, "Starting Super Thinking mode - Step 1: Analysis");
+      
+      // Bước 1: Sử dụng Flash model để phân tích logic game (timeout 30s)
       const thinkingPrompt = `
 # Yêu cầu Game
 ${topic}
@@ -79,49 +80,64 @@ Hãy phân tích chi tiết game cần tạo dựa trên yêu cầu trên. Hãy 
 3. Luồng chơi (gameplay flow)
 4. Logic xử lý game chính
 5. Điều kiện thắng/thua
-6. Các tính năng nâng cao (nếu có)
-7. Giao diện người dùng và trải nghiệm
-8. Tương tác/animation quan trọng (cho cả mobile và PC)
-9. Vấn đề tiềm ẩn và cách xử lý (hiển thị, điều khiển, tốc độ)
+6. Giao diện người dùng và trải nghiệm
+7. Tương tác/animation quan trọng (cho cả mobile và PC)
 
-Lưu ý: không viết code, chỉ mô tả chi tiết logic và cơ chế.`;
+Lưu ý: không viết code, chỉ mô tả chi tiết logic và cơ chế trong 200 từ.`;
       
-      // Gọi Flash model để phân tích
-      const thinkingResponse = await callGeminiApi(GEMINI_MODELS.FLASH, thinkingPrompt);
+      // Gọi Flash model để phân tích với timeout
+      const analysisStartTime = Date.now();
+      const thinkingResponse = await Promise.race([
+        callGeminiApi(GEMINI_MODELS.FLASH, thinkingPrompt),
+        new Promise<null>((_, reject) => 
+          setTimeout(() => reject(new Error("Analysis timeout")), 30000)
+        )
+      ]);
+      
+      const analysisDuration = measureExecutionTime(analysisStartTime);
+      logInfo(SOURCE, `Analysis completed in ${analysisDuration.seconds}s`);
       
       if (!thinkingResponse) {
-        throw new Error("Flash model analysis failed");
+        logWarning(SOURCE, "Flash analysis failed, falling back to PRO model");
+        return tryGeminiGeneration(GEMINI_MODELS.PRO, topic, settings);
       }
+      
+      logInfo(SOURCE, "Starting Super Thinking mode - Step 2: Enhanced Generation");
       
       // Bước 2: Kết hợp phân tích với yêu cầu ban đầu để tạo prompt nâng cao
       const enhancedPrompt = `
-# Yêu cầu Game
+# Yêu cầu Game Gốc
 ${topic}
 
-# Phân tích chi tiết từ AI Flash
-${thinkingResponse}
+# Phân tích Chi tiết
+${thinkingResponse.substring(0, 1000)} // Giới hạn độ dài để tránh prompt quá lớn
 
-# Nhiệm vụ của bạn
-Hãy tạo một game HTML5 theo phân tích trên. Game phải:
-1. Chạy trên trình duyệt web mà không cần thư viện phức tạp
-2. Tối ưu cho cả desktop và mobile
-3. Tạo trải nghiệm người dùng đẹp và dễ sử dụng
-4. Tích hợp các logic game đã phân tích ở trên
-5. Tránh các lỗi về hiển thị, điều khiển và tốc độ
+# Tạo Game HTML5 
+Dựa trên phân tích trên, hãy tạo một game HTML5 hoàn chỉnh với:
+- HTML, CSS, JavaScript embed trong một file duy nhất
+- Tối ưu cho cả desktop và mobile
+- UI đẹp và dễ sử dụng
+- Logic game rõ ràng dựa trên phân tích
 
-Trả về một tệp HTML duy nhất với Javascript/CSS embed để dễ chạy.`;
+Trả về file HTML hoàn chỉnh có thể chạy trực tiếp.`;
       
-      // Gọi Pro model với prompt nâng cao
-      const gameSettings = {
-        ...settings,
-        enhancedPrompt: enhancedPrompt // Truyền prompt nâng cao đã kết hợp cả hai mô hình
-      };
+      // Gọi Pro model với prompt nâng cao và timeout
+      const generationStartTime = Date.now();
+      const finalGame = await Promise.race([
+        generateWithCustomPrompt(GEMINI_MODELS.PRO, topic, enhancedPrompt, settings),
+        new Promise<null>((_, reject) => 
+          setTimeout(() => reject(new Error("Generation timeout")), 45000)
+        )
+      ]);
       
-      return tryGeminiGeneration(GEMINI_MODELS.PRO, topic, gameSettings);
+      const generationDuration = measureExecutionTime(generationStartTime);
+      logSuccess(SOURCE, `Super Thinking completed in ${generationDuration.seconds}s`);
+      
+      return finalGame;
       
     } catch (error) {
       logError(SOURCE, "Super Thinking mode failed", error);
-      console.warn("Super Thinking mode failed, falling back to PRO model");
+      logWarning(SOURCE, "Falling back to PRO model");
       
       // Fallback to regular PRO model if Super Thinking fails
       return tryGeminiGeneration(GEMINI_MODELS.PRO, topic, settings);
@@ -267,7 +283,7 @@ const processGameCode = (text: string): { title: string, content: string } => {
   };
 };
 
-// Thêm hàm mới để gọi trực tiếp API Gemini với một model cụ thể
+// Thêm hàm mới để gọi trực tiếp API Gemini với một model cụ thể - thêm timeout
 export const callGeminiApi = async (modelId: string, promptText: string): Promise<string | null> => {
   try {
     logInfo(SOURCE, `Calling Gemini API with model: ${modelId}`);
@@ -284,13 +300,19 @@ export const callGeminiApi = async (modelId: string, promptText: string): Promis
       }
     };
     
-    const response = await fetch(getApiEndpoint(modelId), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload)
-    });
+    // Thêm timeout cho API call
+    const response = await Promise.race([
+      fetch(getApiEndpoint(modelId), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      }),
+      new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error("API call timeout")), 30000)
+      )
+    ]);
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -318,7 +340,7 @@ export const tryGeminiGeneration = async (
   settings?: GameSettingsData,
   retryCount = 0
 ): Promise<MiniGame | null> => {
-  const maxRetries = 3;
+  const maxRetries = 2; // Giảm retry để tránh tình trạng kẹt
   
   if (retryCount >= maxRetries) {
     logWarning(SOURCE, `Reached maximum retries (${maxRetries})`);
@@ -336,7 +358,7 @@ export const tryGeminiGeneration = async (
   } catch (error) {
     logError(SOURCE, `Attempt ${retryCount + 1} failed`, error);
     
-    const waitTime = (retryCount + 1) * 1500;
+    const waitTime = (retryCount + 1) * 1000; // Giảm thời gian chờ
     await new Promise(resolve => setTimeout(resolve, waitTime));
     
     return tryGeminiGeneration(model, topic, settings, retryCount + 1);
@@ -372,7 +394,8 @@ export const generateWithCustomPrompt = async (
       code: content,
       settings: settings || {},
       createdAt: new Date().toISOString(),
-      type: 'custom'
+      type: 'custom',
+      content: content // Thêm content để tương thích
     };
   } catch (error) {
     logError(SOURCE, 'Failed to generate with custom prompt', error);

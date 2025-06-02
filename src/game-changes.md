@@ -1,6 +1,22 @@
 
 # Game Changes Log
 
+## [2025-06-02] Sửa lỗi Super Thinking bị kẹt ở "Đang tải game... 0%"
+
+### Thay đổi:
+- **geminiGenerator.ts**: Sửa lỗi timeout trong chế độ Super Thinking
+  - Thêm timeout 30s cho bước phân tích Flash
+  - Thêm timeout 45s cho bước tạo code Pro  
+  - Giảm số lần retry từ 3 xuống 2
+  - Giảm thời gian chờ giữa các retry
+  - Thêm fallback nhanh về chế độ Pro khi Super Thinking thất bại
+  - Giới hạn độ dài prompt để tránh quá tải
+
+### Lý do:
+- Khắc phục tình trạng Super Thinking bị kẹt indefinitely
+- Cải thiện user experience với timeout rõ ràng
+- Đảm bảo luôn có fallback hoạt động
+
 ## [2025-06-02] Sửa lỗi TypeScript trong GameSelector
 
 ### Thay đổi:
