@@ -32,9 +32,9 @@
 - Xem bảng điểm chi tiết
 - Quản lý thời gian hết hạn
 
-### Sửa lỗi TypeScript (Lần 3):
+### Sửa lỗi TypeScript (Lần 4):
 - Đảm bảo StoredGame interface có maxParticipants và adminPassword
-- Loại bỏ hoàn toàn loadAttempts và maxRetryAttempts từ EnhancedGameView
-- Cập nhật GameLoadingIndicator chỉ nhận progress
-- Đơn giản hóa codebase và đảm bảo tính nhất quán giữa các files
-- Sửa destructuring trong EnhancedGameView để chỉ lấy properties tồn tại
+- Sửa AdminDashboard.tsx sử dụng nullish coalescing operator (??) thay vì ||
+- Đảm bảo types đồng bộ giữa các files
+- Kiểm tra và đồng bộ hóa interface StoredGame
+- Sửa hoàn toàn lỗi maxParticipants không tồn tại

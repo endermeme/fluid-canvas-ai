@@ -47,7 +47,7 @@ const AdminDashboard: React.FC = () => {
       setParticipants(participantsData);
       
       // Sử dụng maxParticipants từ game hoặc default 50
-      setMaxParticipants(gameData?.maxParticipants || 50);
+      setMaxParticipants(gameData?.maxParticipants ?? 50);
     } catch (error) {
       console.error('Error loading game data:', error);
       toast({
