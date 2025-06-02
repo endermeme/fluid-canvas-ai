@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { SparklesIcon, Info, Code, Zap, Brain, Layers } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { SparklesIcon, Info, Code, Zap, Brain, Layers, Settings, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { AIGameGenerator } from '../generator/geminiGenerator';
@@ -13,6 +14,8 @@ import { AIModelType, GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
@@ -22,11 +25,18 @@ interface CustomGameFormProps {
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel }) => {
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [aiModelType, setAiModelType] = useState<AIModelType>('pro'); // Mặc định là chế độ bình thường
+  const [aiModelType, setAiModelType] = useState<AIModelType>('pro');
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
+  
+  // Admin settings
+  const [adminPassword, setAdminPassword] = useState('1234');
+  const [expiryDays, setExpiryDays] = useState(30);
+  const [maxParticipants, setMaxParticipants] = useState(50);
+  const [requestPlayerInfo, setRequestPlayerInfo] = useState(true);
+  
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Use the singleton pattern
   const gameGenerator = AIGameGenerator.getInstance();
 
   const getPlaceholderText = () => {
@@ -43,13 +53,19 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       return;
     }
 
+    // Lưu cài đặt admin vào localStorage tạm thời
+    localStorage.setItem('temp_admin_settings', JSON.stringify({
+      adminPassword,
+      expiryDays,
+      maxParticipants,
+      requestPlayerInfo
+    }));
+
     setIsGenerating(true);
     
     try {
-      // Set model type based on user selection
       gameGenerator.setModelType(aiModelType);
       
-      // Minimal settings with AI model type
       const settings: GameSettingsData = {
         category: 'custom',
         aiModelType: aiModelType
@@ -211,6 +227,86 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
                 </RadioGroup>
               </TooltipProvider>
             </div>
+
+            {/* Cài đặt nâng cao */}
+            <Collapsible open={showAdvancedSettings} onOpenChange={setShowAdvancedSettings}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="w-full justify-between p-4 border-2 border-dashed border-primary/20 rounded-xl hover:border-primary/40 transition-all">
+                  <div className="flex items-center gap-2">
+                    <Settings className="h-5 w-5 text-primary" />
+                    <span className="font-medium">Cài đặt nâng cao</span>
+                  </div>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${showAdvancedSettings ? 'rotate-180' : ''}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-6 mt-4">
+                <div className="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Shield className="h-5 w-5 text-primary" />
+                    <h3 className="font-medium text-lg">Cài đặt quản trị game</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="adminPassword" className="text-sm font-medium mb-2 block">
+                        Mật khẩu quản trị
+                      </Label>
+                      <Input
+                        id="adminPassword"
+                        type="password"
+                        value={adminPassword}
+                        onChange={(e) => setAdminPassword(e.target.value)}
+                        placeholder="Nhập mật khẩu quản trị"
+                        className="bg-white/50"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="expiryDays" className="text-sm font-medium mb-2 block">
+                        Thời gian hết hạn (ngày)
+                      </Label>
+                      <Input
+                        id="expiryDays"
+                        type="number"
+                        min="1"
+                        max="365"
+                        value={expiryDays}
+                        onChange={(e) => setExpiryDays(parseInt(e.target.value) || 30)}
+                        className="bg-white/50"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="maxParticipants" className="text-sm font-medium mb-2 block">
+                        Số người tham gia tối đa
+                      </Label>
+                      <Input
+                        id="maxParticipants"
+                        type="number"
+                        min="1"
+                        max="1000"
+                        value={maxParticipants}
+                        onChange={(e) => setMaxParticipants(parseInt(e.target.value) || 50)}
+                        className="bg-white/50"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="requestPlayerInfo"
+                        checked={requestPlayerInfo}
+                        onChange={(e) => setRequestPlayerInfo(e.target.checked)}
+                        className="rounded border-primary/30"
+                      />
+                      <Label htmlFor="requestPlayerInfo" className="text-sm font-medium">
+                        Yêu cầu thông tin người chơi
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
             
             <div className="flex items-start gap-3.5 p-5 bg-primary/5 rounded-2xl border border-primary/15 backdrop-blur-sm">
               <Info className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />

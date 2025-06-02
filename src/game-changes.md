@@ -1,6 +1,29 @@
 
 # Game Changes Log
 
+## [2025-06-02] Thêm cài đặt admin và chế độ AI cho cả Custom và Preset games
+
+### Thay đổi:
+- **CustomGameForm.tsx**: Thêm phần cài đặt nâng cao với mật khẩu admin
+  - Thêm UI collapsible cho cài đặt admin
+  - Bao gồm: mật khẩu quản trị, thời gian hết hạn, số người tham gia tối đa, yêu cầu thông tin người chơi
+  - Lưu cài đặt vào localStorage tạm thời trước khi tạo game
+
+- **GameSettings.tsx**: Thêm chế độ AI và cài đặt admin cho preset games
+  - Thêm RadioGroup cho chế độ AI (Flash, Pro, Super Thinking)
+  - Thêm phần cài đặt quản trị với collapsible UI
+  - Tooltip giải thích từng chế độ AI
+
+### Logic hiện tại:
+1. **Custom Game**: Form tạo game tùy chỉnh với AI + cài đặt admin đầy đủ
+2. **Preset Game**: Form cài đặt game có sẵn với chế độ AI + cài đặt admin đầy đủ  
+3. **Shared Game**: Game được chia sẻ với URL và có tính năng quản trị
+
+### Lý do:
+- Đảm bảo cả custom và preset games đều có đầy đủ tính năng admin và chế độ AI
+- Cung cấp trải nghiệm nhất quán cho người dùng
+- Cho phép tùy chỉnh chi tiết cho cả hai loại game
+
 ## [2025-06-02] Khôi phục cơ chế mật khẩu admin đầy đủ
 
 ### Thay đổi:
