@@ -43,7 +43,9 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     iframeRef,
     iframeError, 
     isIframeLoaded, 
-    loadingProgress,
+    loadingProgress, 
+    loadAttempts, 
+    maxRetryAttempts,
     refreshGame,
     handleFullscreen 
   } = useIframeManager(miniGame, onReload, gameExpired);
@@ -74,7 +76,9 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           <Card className="relative w-full h-full overflow-hidden shadow-lg border-primary/10">
             {!isIframeLoaded && (
               <GameLoadingIndicator 
-                progress={loadingProgress}
+                progress={loadingProgress} 
+                loadAttempts={loadAttempts} 
+                maxAttempts={maxRetryAttempts} 
               />
             )}
             <GameIframeRenderer 

@@ -7,7 +7,6 @@ import GameSharePage from './pages/GameSharePage';
 import GameHistoryPage from './pages/GameHistoryPage';
 import GameController from './components/quiz/custom-games/GameController';
 import TeacherDashboard from './components/quiz/share/TeacherDashboard';
-import AdminDashboard from './components/quiz/admin/AdminDashboard';
 
 function App() {
   return (
@@ -21,7 +20,6 @@ function App() {
       <Route path="/custom-game" element={<GameController />} />
       <Route path="/game/:gameId/dashboard" element={<TeacherDashboard />} />
       <Route path="/play/:gameType/:slug/:gameId/dashboard" element={<TeacherDashboard />} />
-      <Route path="/game/:gameId/admin" element={<AdminDashboard />} />
     </Routes>
   );
 }

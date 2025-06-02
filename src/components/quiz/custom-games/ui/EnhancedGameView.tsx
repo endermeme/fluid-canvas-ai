@@ -1,4 +1,3 @@
-
 import React from 'react';
 import GameErrorDisplay from '../game-components/GameErrorDisplay';
 import GameLoadingIndicator from '../game-components/GameLoadingIndicator';
@@ -22,7 +21,6 @@ interface EnhancedGameViewProps {
   extraButton?: React.ReactNode;
   isTeacher?: boolean;
   gameExpired?: boolean;
-  gameId?: string;
 }
 
 const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({ 
@@ -35,8 +33,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   onNewGame,
   extraButton,
   isTeacher = false,
-  gameExpired = false,
-  gameId
+  gameExpired = false
 }) => {
   const { toast } = useToast();
   const { isSharing, handleShare } = useGameShareManager(miniGame, toast, onShare);
@@ -62,7 +59,6 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           isSharing={isSharing}
           isTeacher={isTeacher}
           gameType={miniGame?.title}
-          gameId={gameId}
         />
       )}
       

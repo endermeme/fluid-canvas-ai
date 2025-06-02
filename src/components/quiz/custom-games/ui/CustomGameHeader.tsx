@@ -1,13 +1,12 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, RefreshCw, Maximize2, Share2, Copy, Check, Settings } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Maximize2, Share2, Copy, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { QRCodeSVG } from 'qrcode.react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 interface CustomGameHeaderProps {
   onBack?: () => void;
@@ -19,7 +18,6 @@ interface CustomGameHeaderProps {
   isSharing?: boolean;
   isTeacher?: boolean;
   gameType?: string;
-  gameId?: string;
 }
 
 const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
@@ -31,13 +29,11 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
   showGameControls = false,
   isSharing = false,
   isTeacher = false,
-  gameId
 }) => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleBack = () => {
     if (onBack) {
@@ -59,18 +55,6 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
       toast({
         title: "Lỗi chia sẻ",
         description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleAdminPanel = () => {
-    if (gameId) {
-      navigate(`/game/${gameId}/admin`);
-    } else {
-      toast({
-        title: "Lỗi",
-        description: "Không tìm thấy ID game để truy cập admin",
         variant: "destructive"
       });
     }
@@ -131,17 +115,6 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
                 title="Toàn màn hình"
               >
                 <Maximize2 className="h-4 w-4" />
-              </Button>
-
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleAdminPanel}
-                className="hover:bg-primary/10"
-                title="Bảng điều khiển"
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                <span>Bảng điều khiển</span>
               </Button>
               
               {onShare && (
