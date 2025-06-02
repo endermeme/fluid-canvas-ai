@@ -8,8 +8,14 @@ export const GEMINI_API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 // Gemini Model configurations - đơn giản hóa
 export const GEMINI_MODELS = {
+  // Các models hiện tại
   CUSTOM_GAME: "gemini-2.5-pro-preview-05-06",
-  PRESET_GAME: "gemini-2.5-pro-preview-05-06"
+  PRESET_GAME: "gemini-2.5-pro-preview-05-06",
+  
+  // Các models lựa chọn khi tạo game
+  FLASH: "gemini-2.5-flash-preview-05-20",   // Chế độ nhanh
+  PRO: "gemini-2.5-pro-preview-05-06",      // Chế độ thường (cân bằng)
+  SUPER_THINKING: "super-thinking"           // Chế độ kết hợp 2 models
 };
 
 // API Version

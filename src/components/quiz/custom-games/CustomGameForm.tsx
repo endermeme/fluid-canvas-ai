@@ -3,14 +3,16 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { SparklesIcon, Info, Code } from 'lucide-react';
+import { SparklesIcon, Info, Code, Zap, Brain, Layers } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { AIGameGenerator } from '../generator/geminiGenerator';
 import { MiniGame } from '../generator/types';
-import { GameSettingsData } from '../types';
+import { AIModelType, GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
 import { GEMINI_MODELS } from '@/constants/api-constants';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
@@ -20,6 +22,7 @@ interface CustomGameFormProps {
 const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel }) => {
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [aiModelType, setAiModelType] = useState<AIModelType>('pro'); // Mặc định là chế độ bình thường
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -46,9 +49,13 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
       // Luôn sử dụng canvas mode
       gameGenerator.setCanvasMode(true);
       
-      // Minimal settings
+      // Set model type based on user selection
+      gameGenerator.setModelType(aiModelType);
+      
+      // Minimal settings with AI model type
       const settings: GameSettingsData = {
-        category: 'custom'
+        category: 'custom',
+        aiModelType: aiModelType
       };
       
       const game = await gameGenerator.generateMiniGame(content, settings);
@@ -126,11 +133,98 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
               <div className="absolute -z-10 w-full h-full max-w-md blur-3xl bg-primary/5 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-50"></div>
             </div>
             
+            {/* Chế độ AI */}
+            <div className="relative">
+              <Label className="flex items-center justify-center gap-2.5 text-lg font-medium mb-4">
+                <Brain className="h-5 w-5 text-primary" /> 
+                Chế độ AI
+              </Label>
+              
+              <TooltipProvider>
+                <RadioGroup 
+                  value={aiModelType} 
+                  onValueChange={(value) => setAiModelType(value as AIModelType)}
+                  className="flex flex-col sm:flex-row gap-4 items-center justify-center"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem 
+                      value="flash" 
+                      id="flash" 
+                      className="border-2 border-orange-400"
+                    />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Label 
+                          htmlFor="flash" 
+                          className="flex items-center cursor-pointer text-base font-medium"
+                        >
+                          <Zap className="h-4 w-4 text-orange-500 mr-2" />
+                          Chế độ nhanh
+                        </Label>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" sideOffset={5}>
+                        <p className="max-w-xs">Dùng mô hình Gemini Flash - nhanh nhưng đơn giản hơn</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem 
+                      value="pro" 
+                      id="pro" 
+                      className="border-2 border-primary"
+                    />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Label 
+                          htmlFor="pro" 
+                          className="flex items-center cursor-pointer text-base font-medium"
+                        >
+                          <SparklesIcon className="h-4 w-4 text-primary mr-2" />
+                          Bình thường
+                        </Label>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" sideOffset={5}>
+                        <p className="max-w-xs">Dùng mô hình Gemini Pro - cân bằng giữa tốc độ và chất lượng</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem 
+                      value="super-thinking" 
+                      id="super" 
+                      className="border-2 border-violet-500"
+                    />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Label 
+                          htmlFor="super" 
+                          className="flex items-center cursor-pointer text-base font-medium"
+                        >
+                          <Layers className="h-4 w-4 text-violet-500 mr-2" />
+                          Super Thinking
+                        </Label>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" sideOffset={5}>
+                        <p className="max-w-xs">Kết hợp hai mô hình: Flash phân tích logic, Pro viết code - độ chính xác cao nhưng chậm hơn</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </RadioGroup>
+              </TooltipProvider>
+            </div>
+            
             <div className="flex items-start gap-3.5 p-5 bg-primary/5 rounded-2xl border border-primary/15 backdrop-blur-sm">
               <Info className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-muted-foreground">
-                AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Game sẽ sử dụng HTML5 Canvas cho hiệu ứng đồ họa tốt hơn.
-              </p>
+              <div className="text-sm text-muted-foreground">
+                <p className="mb-2">AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Game sẽ sử dụng HTML5 Canvas cho hiệu ứng đồ họa tốt hơn.</p>
+                <ul className="list-disc list-inside space-y-1 pl-2">
+                  <li><span className="text-orange-500 font-medium">Chế độ nhanh:</span> Tạo game nhanh hơn, phù hợp với yêu cầu đơn giản</li>
+                  <li><span className="text-primary font-medium">Bình thường:</span> Cân bằng giữa tốc độ và chất lượng code</li>
+                  <li><span className="text-violet-500 font-medium">Super Thinking:</span> Kết hợp hai mô hình để tạo game chất lượng cao, ít lỗi hơn</li>
+                </ul>
+              </div>
             </div>
             
             <div className="flex justify-center gap-5 pt-4">

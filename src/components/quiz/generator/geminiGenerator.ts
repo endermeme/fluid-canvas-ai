@@ -22,6 +22,7 @@ export type { MiniGame } from './types';
 export class AIGameGenerator {
   private static instance: AIGameGenerator | null = null;
   private canvasMode: boolean = true;
+  private modelType: string = GEMINI_MODELS.CUSTOM_GAME; // Mặc định là model hiện tại
 
   private constructor() {}
 
@@ -35,6 +36,26 @@ export class AIGameGenerator {
   public setCanvasMode(mode: boolean): void {
     this.canvasMode = mode;
   }
+  
+  /**
+   * Cài đặt loại mô hình AI sử dụng
+   * @param modelType Loại mô hình AI sử dụng (flash, pro, super-thinking)
+   */
+  public setModelType(modelType: string): void {
+    // Ánh xạ từ AIModelType sang model thực tế
+    switch(modelType) {
+      case 'flash':
+        this.modelType = GEMINI_MODELS.FLASH;
+        break;
+      case 'super-thinking':
+        this.modelType = GEMINI_MODELS.SUPER_THINKING;
+        break;
+      case 'pro':
+      default:
+        this.modelType = GEMINI_MODELS.PRO;
+        break;
+    }
+  }
 
   public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     // Sử dụng biến canvasMode từ instance
@@ -44,19 +65,94 @@ export class AIGameGenerator {
       useCanvas: useCanvasMode
     };
     
-    return tryGeminiGeneration(null, topic, updatedSettings);
+    // Nếu là chế độ Super Thinking, sử dụng flow đặc biệt
+    if (this.modelType === GEMINI_MODELS.SUPER_THINKING) {
+      return this.generateWithSuperThinking(topic, updatedSettings);
+    }
+    
+    // Nếu không, sử dụng flow bình thường với mô hình được chọn
+    return tryGeminiGeneration(this.modelType, topic, updatedSettings);
+  }
+  
+  // Phương thức xử lý chế độ Super Thinking
+  private async generateWithSuperThinking(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
+    try {
+      // Bước 1: Sử dụng Flash model để phân tích logic game (không có code)
+      const thinkingPrompt = `
+# Yêu cầu Game
+${topic}
+
+# Nhiệm vụ của bạn
+Hãy phân tích chi tiết game cần tạo dựa trên yêu cầu trên. Hãy mô tả rõ các phần sau:
+
+1. Thể loại game và cơ chế chính
+2. Các thành phần chính cần có
+3. Luồng chơi (gameplay flow)
+4. Logic xử lý game chính
+5. Điều kiện thắng/thua
+6. Các tính năng nâng cao (nếu có)
+7. Giao diện người dùng và trải nghiệm
+8. Tương tác/animation quan trọng
+9. Vấn đề tiềm ẩn và cách xử lý
+
+Lưu ý: không viết code, chỉ mô tả chi tiết logic và cơ chế.`;
+      
+      // Gọi Flash model để phân tích
+      const thinkingResponse = await callGeminiApi(GEMINI_MODELS.FLASH, thinkingPrompt);
+      
+      if (!thinkingResponse) {
+        throw new Error("Flash model analysis failed");
+      }
+      
+      // Bước 2: Kết hợp phân tích với yêu cầu ban đầu để tạo prompt nâng cao
+      const enhancedPrompt = `
+# Yêu cầu Game
+${topic}
+
+# Phân tích chi tiết
+${thinkingResponse}
+
+# Nhiệm vụ của bạn
+Hãy tạo một game HTML5 theo phân tích trên. Game phải::
+1. Chạy trên trình duyệt web mà không cần thư viện phức tạp
+2. Sử dụng HTML5 Canvas nếu cần hiệu ứng đồ họa
+3. Vẫn hỗ trợ các thiết bị di động
+4. Tạo trải nghiệm người dùng đẹp và dễ sử dụng
+5. Tích hợp các logic game đã phân tích ở trên
+
+Trả về một tệp HTML duy nhất với Javascript/CSS embed để dễ chạy.`;
+      
+      // Gọi Pro model với prompt nâng cao
+      const gameSettings = {
+        ...settings,
+        enhancedPrompt: enhancedPrompt // Truyền prompt nâng cao đã kết hợp cả hai mô hình
+      };
+      
+      return tryGeminiGeneration(GEMINI_MODELS.PRO, topic, gameSettings);
+      
+    } catch (error) {
+      logError(SOURCE, "Super Thinking mode failed", error);
+      console.warn("Super Thinking mode failed, falling back to PRO model");
+      
+      // Fallback to regular PRO model if Super Thinking fails
+      return tryGeminiGeneration(GEMINI_MODELS.PRO, topic, settings);
+    }
   }
 }
 
 export const generateWithGemini = async (
   topic: string, 
+  modelId: string | null = null,
   settings?: GameSettingsData
 ): Promise<MiniGame | null> => {
   const gameType = getGameTypeByTopic(topic);
   const useCanvas = settings?.useCanvas !== undefined ? settings.useCanvas : true;
   
+  // Sử dụng mô hình được truyền vào hoặc mặc định
+  const selectedModel = modelId || GEMINI_MODELS.CUSTOM_GAME;
+  
   logInfo(SOURCE, `Starting game generation for "${topic}"`, {
-    model: GEMINI_MODELS.CUSTOM_GAME,
+    model: selectedModel,
     apiVersion: API_VERSION,
     type: gameType?.name || "Not specified",
     settings: settings || {},
@@ -73,7 +169,7 @@ export const generateWithGemini = async (
   });
 
   try {
-    logInfo(SOURCE, `Sending request to Gemini API`);
+    logInfo(SOURCE, `Sending request to Gemini API using model ${selectedModel}`);
     
     const startTime = Date.now();
     
@@ -89,7 +185,7 @@ export const generateWithGemini = async (
       }
     };
     
-    const response = await fetch(getApiEndpoint(), {
+    const response = await fetch(getApiEndpoint(selectedModel), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -188,8 +284,53 @@ const processGameCode = (text: string): { title: string, content: string } => {
   };
 };
 
+// Thêm hàm mới để gọi trực tiếp API Gemini với một model cụ thể
+export const callGeminiApi = async (modelId: string, promptText: string): Promise<string | null> => {
+  try {
+    logInfo(SOURCE, `Calling Gemini API with model: ${modelId}`);
+    
+    // Đơn giản hóa payload API request
+    const payload = {
+      contents: [{
+        role: "user",
+        parts: [{text: promptText}]
+      }],
+      generationConfig: {
+        ...DEFAULT_GENERATION_SETTINGS,
+        temperature: 0.7
+      }
+    };
+    
+    const response = await fetch(getApiEndpoint(modelId), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API Error: ${response.status} - ${errorText}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.candidates || data.candidates.length === 0) {
+      throw new Error('Empty response from API');
+    }
+    
+    const textContent = data.candidates[0].content.parts[0].text;
+    return textContent;
+    
+  } catch (error) {
+    logError(SOURCE, `Gemini API call failed for model ${modelId}`, error);
+    return null;
+  }
+};
+
 export const tryGeminiGeneration = async (
-  model: any,
+  model: string | null,
   topic: string, 
   settings?: GameSettingsData,
   retryCount = 0
@@ -202,13 +343,56 @@ export const tryGeminiGeneration = async (
   }
   
   try {
-    return await generateWithGemini(topic, settings);
+    // Nếu có enhancedPrompt từ Super Thinking, sử dụng nó
+    if (settings?.enhancedPrompt) {
+      return await generateWithCustomPrompt(model || GEMINI_MODELS.PRO, topic, settings.enhancedPrompt, settings);
+    }
+    
+    // Nếu không, sử dụng flow bình thường với model được chỉ định
+    return await generateWithGemini(topic, model, settings);
   } catch (error) {
     logError(SOURCE, `Attempt ${retryCount + 1} failed`, error);
     
     const waitTime = (retryCount + 1) * 1500;
     await new Promise(resolve => setTimeout(resolve, waitTime));
     
-    return tryGeminiGeneration(null, topic, settings, retryCount + 1);
+    return tryGeminiGeneration(model, topic, settings, retryCount + 1);
+  }
+};
+
+// Sử dụng các hàm tiêu chuẩn
+
+export const generateWithCustomPrompt = async (
+  modelId: string,
+  topic: string,
+  customPrompt: string,
+  settings?: GameSettingsData
+): Promise<MiniGame | null> => {
+  try {
+    logInfo(SOURCE, `Starting game generation with custom prompt`);
+    
+    const textResponse = await callGeminiApi(modelId, customPrompt);
+    
+    if (!textResponse) {
+      throw new Error('Failed to get response from API');
+    }
+    
+    // Xử lý kết quả trả về và tạo game
+    const { title, content } = processGameCode(textResponse);
+    
+    // Trả về đối tượng MiniGame
+    return {
+      id: `game-${Date.now()}`,
+      title: title || `Custom Game: ${topic.substring(0, 30)}...`,
+      description: `Game created from prompt: ${topic.substring(0, 50)}...`,
+      topic,
+      code: content,
+      settings: settings || {},
+      createdAt: new Date().toISOString(),
+      type: 'custom'
+    };
+  } catch (error) {
+    logError(SOURCE, 'Failed to generate with custom prompt', error);
+    return null;
   }
 };

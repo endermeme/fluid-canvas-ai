@@ -54,8 +54,7 @@ export const useCanvasState = () => {
     
     toast({
       title: "Block Added",
-      description: `New ${type} block created.`,
-      duration: 2000,
+      description: `New ${type} block created.`
     });
 
     return newBlock.id; // Return the ID so we can reference it later if needed
@@ -73,8 +72,7 @@ export const useCanvasState = () => {
     
     toast({
       title: "Block Deleted",
-      description: "The block has been removed.",
-      duration: 2000,
+      description: "The block has been removed."
     });
   };
   
@@ -97,8 +95,7 @@ export const useCanvasState = () => {
     
     toast({
       title: "Block Duplicated",
-      description: "A copy of the block has been created.",
-      duration: 2000,
+      description: "A copy of the block has been created."
     });
   };
   
@@ -124,8 +121,7 @@ export const useCanvasState = () => {
     localStorage.removeItem('canvas-blocks');
     toast({
       title: "Canvas Cleared",
-      description: "All blocks have been removed from the canvas.",
-      duration: 2000,
+      description: "All blocks have been removed from the canvas."
     });
   };
   
