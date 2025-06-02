@@ -1,6 +1,22 @@
 
 # Game Changes Log
 
+## [2025-06-02] Sửa lỗi Super Thinking báo lỗi khi đã tạo game thành công
+
+### Thay đổi:
+- **geminiGenerator.ts**: Sửa lỗi xử lý kết quả trong chế độ Super Thinking
+  - Tăng timeout cho bước phân tích từ 30s lên 45s  
+  - Tăng timeout cho bước tạo code từ 45s lên 60s
+  - Thêm kiểm tra kết quả hợp lệ trước khi trả về
+  - Sửa lỗi Promise race trả về null thay vì MiniGame
+  - Thêm validation cho content được tạo ra
+  - Cải thiện xử lý fallback khi Super Thinking thất bại
+
+### Lý do:
+- Khắc phục tình trạng Super Thinking tạo game thành công nhưng vẫn báo lỗi
+- Đảm bảo timeout đủ dài cho quá trình xử lý phức tạp
+- Cải thiện độ tin cậy của chế độ Super Thinking
+
 ## [2025-06-02] Cập nhật thời gian tải game thành 10 phút
 
 ### Thay đổi:

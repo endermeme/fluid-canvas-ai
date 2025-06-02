@@ -1,3 +1,4 @@
+
 import { GameSettingsData } from '../types';
 import { getGameTypeByTopic } from '../gameTypes';
 import { 
@@ -62,12 +63,12 @@ export class AIGameGenerator {
     return tryGeminiGeneration(this.modelType, topic, settings);
   }
   
-  // Phương thức xử lý chế độ Super Thinking - sửa lỗi timeout
+  // Phương thức xử lý chế độ Super Thinking - sửa lỗi timeout và xử lý kết quả
   private async generateWithSuperThinking(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
     try {
       logInfo(SOURCE, "Starting Super Thinking mode - Step 1: Analysis");
       
-      // Bước 1: Sử dụng Flash model để phân tích logic game (timeout 30s)
+      // Bước 1: Sử dụng Flash model để phân tích logic game (timeout 45s)
       const thinkingPrompt = `
 # Yêu cầu Game
 ${topic}
@@ -85,12 +86,12 @@ Hãy phân tích chi tiết game cần tạo dựa trên yêu cầu trên. Hãy 
 
 Lưu ý: không viết code, chỉ mô tả chi tiết logic và cơ chế trong 200 từ.`;
       
-      // Gọi Flash model để phân tích với timeout
+      // Gọi Flash model để phân tích với timeout dài hơn
       const analysisStartTime = Date.now();
       const thinkingResponse = await Promise.race([
         callGeminiApi(GEMINI_MODELS.FLASH, thinkingPrompt),
         new Promise<null>((_, reject) => 
-          setTimeout(() => reject(new Error("Analysis timeout")), 30000)
+          setTimeout(() => reject(new Error("Analysis timeout")), 45000)
         )
       ]);
       
@@ -121,19 +122,25 @@ Dựa trên phân tích trên, hãy tạo một game HTML5 hoàn chỉnh với:
 
 Trả về file HTML hoàn chỉnh có thể chạy trực tiếp.`;
       
-      // Gọi Pro model với prompt nâng cao và timeout
+      // Gọi Pro model với prompt nâng cao và timeout dài hơn
       const generationStartTime = Date.now();
       const finalGame = await Promise.race([
         generateWithCustomPrompt(GEMINI_MODELS.PRO, topic, enhancedPrompt, settings),
-        new Promise<null>((_, reject) => 
-          setTimeout(() => reject(new Error("Generation timeout")), 45000)
+        new Promise<MiniGame | null>((_, reject) => 
+          setTimeout(() => reject(new Error("Generation timeout")), 60000)
         )
       ]);
       
       const generationDuration = measureExecutionTime(generationStartTime);
-      logSuccess(SOURCE, `Super Thinking completed in ${generationDuration.seconds}s`);
       
-      return finalGame;
+      // Kiểm tra kết quả và xử lý đúng cách
+      if (finalGame && finalGame.content) {
+        logSuccess(SOURCE, `Super Thinking completed in ${generationDuration.seconds}s`);
+        return finalGame;
+      } else {
+        logWarning(SOURCE, "Super Thinking generated empty result, falling back to PRO model");
+        return tryGeminiGeneration(GEMINI_MODELS.PRO, topic, settings);
+      }
       
     } catch (error) {
       logError(SOURCE, "Super Thinking mode failed", error);
@@ -283,7 +290,7 @@ const processGameCode = (text: string): { title: string, content: string } => {
   };
 };
 
-// Thêm hàm mới để gọi trực tiếp API Gemini với một model cụ thể - thêm timeout
+// Thêm hàm mới để gọi trực tiếp API Gemini với một model cụ thể - tăng timeout
 export const callGeminiApi = async (modelId: string, promptText: string): Promise<string | null> => {
   try {
     logInfo(SOURCE, `Calling Gemini API with model: ${modelId}`);
@@ -300,7 +307,7 @@ export const callGeminiApi = async (modelId: string, promptText: string): Promis
       }
     };
     
-    // Thêm timeout cho API call
+    // Tăng timeout cho API call
     const response = await Promise.race([
       fetch(getApiEndpoint(modelId), {
         method: 'POST',
@@ -310,7 +317,7 @@ export const callGeminiApi = async (modelId: string, promptText: string): Promis
         body: JSON.stringify(payload)
       }),
       new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error("API call timeout")), 30000)
+        setTimeout(() => reject(new Error("API call timeout")), 45000)
       )
     ]);
     
@@ -385,6 +392,11 @@ export const generateWithCustomPrompt = async (
     // Xử lý kết quả trả về và tạo game
     const { title, content } = processGameCode(textResponse);
     
+    // Kiểm tra nội dung có hợp lệ không
+    if (!content || content.length < 100) {
+      throw new Error('Generated content is too short or empty');
+    }
+    
     // Trả về đối tượng MiniGame
     return {
       id: `game-${Date.now()}`,
@@ -400,5 +412,93 @@ export const generateWithCustomPrompt = async (
   } catch (error) {
     logError(SOURCE, 'Failed to generate with custom prompt', error);
     return null;
+  }
+};
+
+export const generateWithGemini = async (
+  topic: string, 
+  modelId: string | null = null,
+  settings?: GameSettingsData
+): Promise<MiniGame | null> => {
+  const gameType = getGameTypeByTopic(topic);
+  
+  // Sử dụng mô hình được truyền vào hoặc mặc định
+  const selectedModel = modelId || GEMINI_MODELS.CUSTOM_GAME;
+  
+  logInfo(SOURCE, `Starting game generation for "${topic}"`, {
+    model: selectedModel,
+    apiVersion: API_VERSION,
+    type: gameType?.name || "Not specified",
+    settings: settings || {}
+  });
+
+  // Tạo prompt với template cải tiến từ geminiPrompt.ts
+  const prompt = createGameGenerationPrompt({
+    topic,
+    language: settings?.language || 'vi'
+  });
+
+  try {
+    logInfo(SOURCE, `Sending request to Gemini API using model ${selectedModel}`);
+    
+    const startTime = Date.now();
+    
+    // Đơn giản hóa payload API request
+    const payload = {
+      contents: [{
+        role: "user",
+        parts: [{text: prompt}]
+      }],
+      generationConfig: {
+        ...DEFAULT_GENERATION_SETTINGS,
+        temperature: 0.7
+      }
+    };
+    
+    const response = await fetch(getApiEndpoint(selectedModel), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    
+    const result = await response.json();
+    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    
+    if (!text) {
+      throw new Error('No content returned from API');
+    }
+    
+    const duration = measureExecutionTime(startTime);
+    logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
+    
+    // Tạo phiên bản gỡ lỗi để xem code gốc
+    logInfo(SOURCE, `Generated Game Code (Original):`, text.substring(0, 500) + '...');
+    
+    // Xử lý code để extract thông tin và clean
+    const { title, content } = processGameCode(text);
+    
+    // Tạo đối tượng game
+    const game: MiniGame = {
+      title: title || topic,
+      content: content
+    };
+    
+    logSuccess(SOURCE, "Game generated successfully", {
+      title: game.title,
+      contentLength: game.content.length,
+      hasDocType: game.content.includes('<!DOCTYPE')
+    });
+    
+    return game;
+  } catch (error) {
+    logError(SOURCE, "Error generating with Gemini", error);
+    throw error;
   }
 };
