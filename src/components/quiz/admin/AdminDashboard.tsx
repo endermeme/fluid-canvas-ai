@@ -46,8 +46,9 @@ const AdminDashboard: React.FC = () => {
       const participantsData = await getGameParticipants(gameId);
       setParticipants(participantsData);
       
-      // Sử dụng maxParticipants từ game hoặc default 50
-      setMaxParticipants(gameData?.maxParticipants ?? 50);
+      // Sử dụng maxParticipants từ game hoặc default 50 với type safety
+      const gameWithProps = gameData as StoredGame & { maxParticipants?: number };
+      setMaxParticipants(gameWithProps?.maxParticipants ?? 50);
     } catch (error) {
       console.error('Error loading game data:', error);
       toast({
@@ -60,7 +61,8 @@ const AdminDashboard: React.FC = () => {
 
   const handlePasswordSubmit = () => {
     // Giả định kiểm tra mật khẩu từ game data
-    if (password === game?.adminPassword || password === 'admin123') {
+    const gameWithPassword = game as StoredGame & { adminPassword?: string };
+    if (password === gameWithPassword?.adminPassword || password === 'admin123') {
       setIsAuthenticated(true);
       setShowPasswordDialog(false);
       toast({

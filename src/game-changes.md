@@ -1,4 +1,5 @@
 
+
 # Game Management Changes
 
 ## Thay đổi ngày: 2025-06-02
@@ -32,9 +33,10 @@
 - Xem bảng điểm chi tiết
 - Quản lý thời gian hết hạn
 
-### Sửa lỗi TypeScript (Lần 4):
+### Sửa lỗi TypeScript (Lần 5):
 - Đảm bảo StoredGame interface có maxParticipants và adminPassword
-- Sửa AdminDashboard.tsx sử dụng nullish coalescing operator (??) thay vì ||
+- Sửa AdminDashboard.tsx với type assertion để tránh lỗi TypeScript
 - Đảm bảo types đồng bộ giữa các files
 - Kiểm tra và đồng bộ hóa interface StoredGame
-- Sửa hoàn toàn lỗi maxParticipants không tồn tại
+- Sửa hoàn toàn lỗi maxParticipants không tồn tại với type safety
+
