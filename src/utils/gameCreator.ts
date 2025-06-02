@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { saveGameForSharing } from './gameExport';
@@ -21,9 +22,6 @@ export const createAndShareGame = async (options: GameCreationOptions) => {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + expiryDays);
     
-    // Kiểm tra xem có sử dụng tính năng admin không
-    const adminEnabled = !!(options.adminPassword || options.maxParticipants || options.requestPlayerInfo === true);
-    
     // Lưu game vào Supabase
     const { data, error } = await supabase
       .from('games')
@@ -36,7 +34,6 @@ export const createAndShareGame = async (options: GameCreationOptions) => {
           game_type: 'custom',
           is_preset: false,
           is_published: true,
-          admin_enabled: adminEnabled,
           created_at: new Date().toISOString(),
           expires_at: expiryDate.toISOString()
         }
@@ -47,25 +44,8 @@ export const createAndShareGame = async (options: GameCreationOptions) => {
       throw error;
     }
     
-    // Lưu cài đặt admin vào database nếu có
-    if (adminEnabled) {
-      // Lưu vào database
-      const { error: adminError } = await supabase
-        .from('game_admin_settings')
-        .insert([
-          {
-            game_id: gameId,
-            admin_password: options.adminPassword || '1234',
-            max_participants: options.maxParticipants || 50,
-            request_player_info: options.requestPlayerInfo === undefined ? true : options.requestPlayerInfo
-          }
-        ]);
-      
-      if (adminError) {
-        console.error("Error saving admin settings:", adminError);
-      }
-      
-      // Lưu backup vào localStorage
+    // Lưu cài đặt admin vào localStorage nếu có
+    if (options.adminPassword || options.maxParticipants || options.requestPlayerInfo === true) {
       const adminConfig = {
         adminPassword: options.adminPassword || '1234',
         maxParticipants: options.maxParticipants || 50,

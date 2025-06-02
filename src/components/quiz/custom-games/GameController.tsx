@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
 import { AIGameGenerator } from '../generator/geminiGenerator';
 import EnhancedGameView from './ui/EnhancedGameView';
-import CustomGameForm from './ui/CustomGameForm';
+import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle } from 'lucide-react';

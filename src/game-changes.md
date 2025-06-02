@@ -1,6 +1,13 @@
 
 # Game Changes Log
 
+## 2025-06-02 - Sửa lỗi TypeScript và cấu trúc file
+- Sửa lỗi EnhancedGameView: loại bỏ thuộc tính loadAttempts và maxRetryAttempts không tồn tại
+- Sửa lỗi import CustomGameForm trong GameController và ui/index.ts
+- Sửa lỗi toast export trong useGameShareManager và use-toast.ts
+- Viết lại gameAdmin.ts và gameCreator.ts để không dùng bảng game_admin_settings không tồn tại
+- Sử dụng localStorage làm phương án thay thế cho lưu trữ cài đặt admin
+
 ## 2025-06-02 - Xóa file use-toast-new.ts có lỗi cú pháp
 - Xóa file use-toast-new.ts vì có nhiều lỗi TypeScript không sửa được
 - Sử dụng file use-toast.ts đã hoạt động ổn định
