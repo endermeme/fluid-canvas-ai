@@ -13,15 +13,17 @@
 7. **App.tsx** - Thêm route /admin
 8. **gameParticipation.ts** - Sửa lỗi lưu người chơi
 9. **types.ts** - Thêm maxParticipants, adminPassword vào StoredGame
-10. **GameLoadingIndicator.tsx** - Thêm hỗ trợ loadAttempts
-11. **EnhancedGameView.tsx** - Sửa lỗi TypeScript
+10. **GameLoadingIndicator.tsx** - Loại bỏ loadAttempts không cần thiết
+11. **EnhancedGameView.tsx** - Sửa lỗi TypeScript, loại bỏ props không tồn tại
 12. **generator/types.ts** - Thêm useCanvas vào PromptOptions
+13. **useIframeManager.ts** - Dọn dẹp code, loại bỏ loadAttempts
+14. **geminiPrompt.ts** - Sửa sử dụng PromptOptions interface
 
 ### Loại thay đổi:
 - **Thêm mới**: Admin dashboard, password protection
-- **Sửa lỗi**: Lưu người tham gia game, TypeScript errors
+- **Sửa lỗi**: TypeScript errors, lưu người tham gia game
 - **Cải thiện**: UI/UX cho quản lý game
-- **Xóa**: Các hàm không sử dụng
+- **Xóa**: Các hàm và properties không sử dụng
 
 ### Tính năng admin:
 - Nhập mật khẩu khi tạo game
@@ -30,8 +32,9 @@
 - Xem bảng điểm chi tiết
 - Quản lý thời gian hết hạn
 
-### Sửa lỗi TypeScript:
-- Thêm maxParticipants vào StoredGame interface
-- Loại bỏ loadAttempts/maxRetryAttempts từ useIframeManager
-- Cập nhật GameLoadingIndicatorProps
-- Thêm useCanvas vào PromptOptions
+### Sửa lỗi TypeScript (Lần 2):
+- Đảm bảo StoredGame interface có maxParticipants và adminPassword
+- Loại bỏ hoàn toàn loadAttempts và maxRetryAttempts từ useIframeManager
+- Cập nhật EnhancedGameView để không destructure properties không tồn tại
+- Đơn giản hóa GameLoadingIndicator chỉ nhận progress
+- Sửa geminiPrompt.ts sử dụng đúng PromptOptions interface
