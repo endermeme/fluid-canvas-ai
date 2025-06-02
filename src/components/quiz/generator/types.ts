@@ -1,4 +1,3 @@
-
 import { GameSettingsData } from '../types';
 
 export interface MiniGame {
@@ -23,8 +22,4 @@ export interface PromptOptions {
 
 export interface GeneratorSettings {
   temperature?: number;
-  topK?: number;
-  topP?: number;
-  candidateCount?: number;
-  maxOutputTokens?: number;
 }

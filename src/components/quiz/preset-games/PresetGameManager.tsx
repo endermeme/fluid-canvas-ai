@@ -140,10 +140,7 @@ Output must be valid JSON. `;
         }],
         generationConfig: {
           ...DEFAULT_GENERATION_SETTINGS,
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 8192
+          temperature: 0.7
         }
       };
 
