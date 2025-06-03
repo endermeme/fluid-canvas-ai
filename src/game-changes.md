@@ -1,6 +1,20 @@
 
 # Game Changes Log
 
+## 2025-01-03 - Refactor GameSharePage thành các component nhỏ hơn
+
+### Files thay đổi:
+- **src/components/game-share/GameShareForm.tsx** - TẠO MỚI: Component form tham gia game
+- **src/components/game-share/ParticipantsList.tsx** - TẠO MỚI: Component danh sách người chơi 
+- **src/components/game-share/ShareSection.tsx** - TẠO MỚI: Component chia sẻ game
+- **src/pages/GameSharePage.tsx** - SỬA: Refactor thành component nhỏ hơn
+
+### Loại thay đổi:
+- Tách GameSharePage từ 521 dòng thành 4 component riêng biệt
+- Cải thiện khả năng bảo trì và tái sử dụng code
+- Tách logic form, danh sách người chơi và phần chia sẻ
+- Giữ nguyên 100% chức năng hiện tại
+
 ## 2025-01-03 - Sửa lỗi form tham gia game và cải thiện real-time sync
 
 ### Files thay đổi:
