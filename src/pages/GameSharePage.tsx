@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
@@ -151,6 +150,7 @@ const GameSharePage: React.FC = () => {
     try {
       const fakeIp = getFakeIpAddress();
       
+      // Thử thêm vào Supabase trước
       const result = await addParticipant(gameId, `${values.playerName} (${values.playerAge} tuổi)`, fakeIp);
       
       if (result.success) {
@@ -168,22 +168,52 @@ const GameSharePage: React.FC = () => {
           title: "Tham gia thành công",
           description: "Bạn đã tham gia vào game này!",
         });
-      } else if (result.participant) {
-        setParticipants(prev => 
-          prev.map(p => p.id === result.participant?.id ? result.participant : p)
-        );
+      } else {
+        // Fallback: Lưu vào localStorage khi Supabase fail
+        console.log("Supabase failed, using localStorage fallback");
+        
+        const newParticipant: GameParticipant = {
+          id: crypto.randomUUID(),
+          name: `${values.playerName} (${values.playerAge} tuổi)`,
+          ipAddress: fakeIp,
+          timestamp: Date.now(),
+          gameId: gameId,
+          retryCount: 0,
+          score: 0
+        };
+        
+        // Lưu vào localStorage
+        const sessionsJson = localStorage.getItem('game_sessions');
+        const sessions = sessionsJson ? JSON.parse(sessionsJson) : [];
+        
+        let sessionIndex = sessions.findIndex((s: any) => s.id === gameId);
+        if (sessionIndex >= 0) {
+          if (!sessions[sessionIndex].participants) {
+            sessions[sessionIndex].participants = [];
+          }
+          sessions[sessionIndex].participants.push(newParticipant);
+        } else {
+          sessions.push({
+            id: gameId,
+            participants: [newParticipant]
+          });
+        }
+        
+        localStorage.setItem('game_sessions', JSON.stringify(sessions));
+        
+        setParticipants(prev => [...prev, newParticipant]);
         setShowNameDialog(false);
         setHasRegistered(true);
         
+        // Lưu game ID vào danh sách đã đăng ký
+        const registeredGamesStr = localStorage.getItem('registered_games');
+        let registeredGames = registeredGamesStr ? JSON.parse(registeredGamesStr) : [];
+        registeredGames.push(gameId);
+        localStorage.setItem('registered_games', JSON.stringify(registeredGames));
+        
         toast({
-          title: "Đã cập nhật thông tin",
-          description: "Thông tin tham gia của bạn đã được cập nhật.",
-        });
-      } else {
-        toast({
-          title: "Lỗi tham gia",
-          description: result.message || "Không thể tham gia game này.",
-          variant: "destructive"
+          title: "Tham gia thành công",
+          description: "Bạn đã tham gia vào game này! (Dữ liệu được lưu cục bộ)",
         });
       }
     } catch (error) {

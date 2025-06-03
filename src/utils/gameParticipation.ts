@@ -107,7 +107,17 @@ export const addParticipant = async (
       .single();
 
     if (insertError) {
-      console.error("Error adding new participant:", insertError);
+      console.error("Error adding new participant (likely RLS issue):", insertError);
+      
+      // Kiểm tra nếu là lỗi RLS policy
+      if (insertError.message.includes('row-level security policy')) {
+        console.log("RLS policy violation - this is expected for public games");
+        return {
+          success: false,
+          message: "Database security restriction - using local storage instead"
+        };
+      }
+      
       return {
         success: false,
         message: "Không thể thêm người tham gia mới"

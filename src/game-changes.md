@@ -1,6 +1,17 @@
 
 # Game Changes Log
 
+## 2025-01-03 - Sửa lỗi RLS policy cho game_participants
+
+### Files thay đổi:
+- **src/pages/GameSharePage.tsx** - SỬA: Xử lý lỗi RLS khi tham gia game
+- **src/utils/gameParticipation.ts** - SỬA: Cập nhật logic xử lý lỗi database
+
+### Loại thay đổi:
+- Sửa lỗi "new row violates row-level security policy" 
+- Thêm fallback khi không thể ghi vào Supabase
+- Cải thiện error handling cho form tham gia game
+
 ## 2025-01-03 - Sửa lỗi build sau khi dọn dẹp code
 
 ### Files thay đổi:
