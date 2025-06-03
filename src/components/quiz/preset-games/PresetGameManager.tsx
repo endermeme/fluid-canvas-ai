@@ -127,6 +127,9 @@ Output must be valid JSON. `;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
           break;
+        case 'balloonpop':
+          gamePrompt += `JSON format: { "title": "title", "description": "description", "balloons": [{"id": id_number, "question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "color": "color_name", "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "allowSkip": true, "showExplanation": true, "balloonPopAnimation": true} }`;
+          break;
       }
 
       gamePrompt += " Return only JSON, no additional text.";
@@ -212,6 +215,13 @@ Output must be valid JSON. `;
             parsedContent.settings.timePerQuestion = timePerQuestion;
             parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 3;
+            break;
+          case 'balloonpop':
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
+            parsedContent.settings.allowSkip = true;
+            parsedContent.settings.showExplanation = true;
+            parsedContent.settings.balloonPopAnimation = true;
             break;
         }
 
@@ -304,6 +314,13 @@ Output must be valid JSON. `;
             data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
             data.settings.bonusTimePerCorrect = settings.bonusTime || 3;
             break;
+          case 'balloonpop':
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
+            data.settings.allowSkip = true;
+            data.settings.showExplanation = true;
+            data.settings.balloonPopAnimation = true;
+            break;
         }
       }
 
@@ -354,6 +371,7 @@ Output must be valid JSON. `;
       case 'wordsearch': return 'Tìm Từ';
       case 'pictionary': return 'Đoán Hình';
       case 'truefalse': return 'Đúng hay Sai';
+      case 'balloonpop': return 'Bóng Bay Đố Vui';
       default: return 'Trò Chơi';
     }
   };
@@ -433,6 +451,13 @@ Output must be valid JSON. `;
         name: 'Đúng hay Sai',
         description: 'Kiểm tra kiến thức với các câu hỏi đúng/sai',
         icon: 'clock',
+        defaultSettings: settings
+      },
+      'balloonpop': {
+        id: 'balloonpop',
+        name: 'Bóng Bay Đố Vui',
+        description: 'Trò chơi balloon pop với nhiều lựa chọn',
+        icon: 'balloon',
         defaultSettings: settings
       }
     };

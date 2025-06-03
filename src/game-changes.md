@@ -1,6 +1,23 @@
 
 # Game Changes Log
 
+## 2025-01-03 - Thêm Balloon Pop Quiz game
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/data/balloonPopSampleData.ts** - TẠO MỚI: Dữ liệu mẫu cho game Balloon Pop Quiz
+- **src/components/quiz/preset-games/templates/BalloonPopTemplate.tsx** - TẠO MỚI: Template component cho game Balloon Pop Quiz
+- **src/components/quiz/preset-games/templates/index.ts** - SỬA: Thêm BalloonPopTemplate vào exports
+- **src/components/quiz/preset-games/GameSelector.tsx** - SỬA: Thêm Balloon Pop Quiz vào danh sách games
+- **src/components/quiz/preset-games/PresetGameManager.tsx** - SỬA: Thêm logic xử lý cho balloonpop game type
+
+### Loại thay đổi:
+- Thêm game thứ 9: Balloon Pop Quiz (Bóng bay đố vui)
+- Cơ chế: Nổ bóng bay để khám phá câu hỏi, trả lời đúng để ghi điểm
+- Tích hợp AI: Gemini tạo câu hỏi theo chủ đề người dùng nhập
+- Tương tác: Click bóng bay → Hiện câu hỏi → Chọn đáp án → Xem giải thích
+- Animations: Bóng bay nảy lên xuống, hiệu ứng nổ, hover effects
+- Timer, scoring, progress tracking như các game khác
+
 ## 2025-01-03 - Refactor GameSharePage thành các component nhỏ hơn
 
 ### Files thay đổi:
