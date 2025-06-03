@@ -1,69 +1,52 @@
 
 import { useState } from 'react';
+import { saveGameForSharing } from '@/utils/gameExport';
+import { ToastType } from '@/hooks/use-toast';
 
 interface MiniGame {
   title?: string;
   content: string;
 }
 
-interface ToastOptions {
-  title: string;
-  description: string;
-  variant?: 'default' | 'destructive';
-}
-
-interface ToastHook {
-  toast: (options: ToastOptions) => void;
-}
-
 export const useGameShareManager = (
   miniGame: MiniGame, 
-  toastHook: ToastHook, 
+  toast: ToastType,
   onShare?: () => Promise<string>
 ) => {
-  const [isSharing, setIsSharing] = useState(false);
+  const [isSharing, setIsSharing] = useState<boolean>(false);
 
-  const handleShare = async () => {
-    if (isSharing) return;
+  const handleShare = async (): Promise<string | void> => {
+    if (!miniGame?.content) return;
     
     try {
       setIsSharing(true);
+      toast({
+        title: "Đang xử lý",
+        description: "Đang tạo liên kết chia sẻ...",
+      });
       
       if (onShare) {
-        const shareUrl = await onShare();
-        if (shareUrl) {
-          toastHook.toast({
-            title: "Game đã được chia sẻ",
-            description: "Liên kết đã được tạo thành công.",
-          });
-        }
+        return await onShare();
       } else {
-        // Fallback sharing method
-        const shareData = {
-          title: miniGame.title || 'Game tương tác',
-          text: 'Hãy chơi game này cùng tôi!',
-          url: window.location.href
-        };
+        const url = await saveGameForSharing(
+          miniGame.title || 'Game tương tác',
+          'custom',
+          miniGame,
+          miniGame.content
+        );
         
-        if (navigator.share) {
-          await navigator.share(shareData);
-        } else {
-          await navigator.clipboard.writeText(window.location.href);
-          toastHook.toast({
-            title: "Đã sao chép liên kết",
-            description: "Liên kết đã được sao chép vào clipboard.",
-          });
-        }
+        setIsSharing(false);
+        return url;
       }
     } catch (error) {
-      console.error('Error sharing game:', error);
-      toastHook.toast({
+      console.error("Error sharing game:", error);
+      toast({
         title: "Lỗi chia sẻ",
-        description: "Không thể chia sẻ game. Vui lòng thử lại.",
+        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
         variant: "destructive"
       });
-    } finally {
       setIsSharing(false);
+      return undefined;
     }
   };
 

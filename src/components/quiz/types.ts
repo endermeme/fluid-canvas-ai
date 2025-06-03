@@ -4,9 +4,6 @@ export type Difficulty = 'easy' | 'medium' | 'hard';
 export type Category = 'general' | 'history' | 'science' | 'math' | 'geography' | 'arts' | 'custom';
 export type Language = 'en' | 'vi';
 
-// Chế độ mô hình AI cho custom game
-export type AIModelType = 'flash' | 'pro' | 'super-thinking';
-
 export interface GameSettingsData {
   difficulty?: Difficulty;
   questionCount?: number;
@@ -32,13 +29,6 @@ export interface GameSettingsData {
   allowCalculator?: boolean;
   roundingPrecision?: number;
   showSteps?: boolean;
-  // Các trường mới cho chức năng tạo game
-  // Trường tạo game
-  useCanvas?: boolean;               // Sử dụng canvas mode
-  enhancedPrompt?: string;           // Prompt nâng cao cho Super Thinking
-  aiModelType?: AIModelType;        // Loại mô hình AI sử dụng
-
-  // Cấu hình game
   hintCount?: number;
   hintPenalty?: number;
   allowSkip?: boolean;
@@ -55,6 +45,7 @@ export interface GameSettingsData {
   itemsPerCategory?: number;
   allowMultipleCategories?: boolean;
   showCategoryHints?: boolean;
+  useCanvas?: boolean;
 }
 
 export interface GameType {

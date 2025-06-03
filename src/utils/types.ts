@@ -1,3 +1,5 @@
+
+
 // Định nghĩa các kiểu dữ liệu chung cho toàn bộ ứng dụng
 export interface StoredGame {
   id: string;
@@ -18,7 +20,6 @@ export interface GameParticipant {
   gameId: string;
   retryCount: number;
   score?: number;
-  age?: number;
 }
 
 export interface GameSession {
@@ -41,7 +42,6 @@ export interface SupabaseGameParticipant {
   timestamp: string;
   game_id: string;
   retry_count: number;
-  score?: number;
-  age?: number;
+  score?: number;  // Thêm trường score vào đây
 }
 

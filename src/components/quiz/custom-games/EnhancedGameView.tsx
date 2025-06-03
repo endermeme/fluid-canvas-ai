@@ -37,13 +37,15 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   isTeacher = false,
   gameExpired = false
 }) => {
-  const toast = useToast();
+  const { toast } = useToast();
   const { isSharing, handleShare } = useGameShareManager(miniGame, toast, onShare);
   const { 
     iframeRef,
     iframeError, 
     isIframeLoaded, 
     loadingProgress, 
+    loadAttempts, 
+    maxRetryAttempts,
     refreshGame,
     handleFullscreen 
   } = useIframeManager(miniGame, onReload, gameExpired);
@@ -74,7 +76,9 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           <Card className="relative w-full h-full overflow-hidden shadow-lg border-primary/10">
             {!isIframeLoaded && (
               <GameLoadingIndicator 
-                progress={loadingProgress}
+                progress={loadingProgress} 
+                loadAttempts={loadAttempts} 
+                maxAttempts={maxRetryAttempts} 
               />
             )}
             <GameIframeRenderer 

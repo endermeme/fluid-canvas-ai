@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface StoredGame {
@@ -34,88 +35,28 @@ export const formatHtmlContent = (content: string): string => {
   }
 };
 
-// Overload cho cách gọi cũ
-export function saveGameForSharing(
+export const saveGameForSharing = async (
   title: string,
-  gameType: string | null | undefined,
+  gameType: string,
   content: any,
   htmlContent: string,
   description?: string
-): Promise<string>;
-
-// Overload cho cách gọi với StoredGame
-export function saveGameForSharing(
-  gameData: StoredGame
-): Promise<string>;
-
-// Triển khai hàm
-export async function saveGameForSharing(
-  titleOrData: string | StoredGame,
-  gameType?: string | null | undefined,
-  content?: any,
-  htmlContent?: string,
-  description?: string
-): Promise<string> {
-  let title: string;
-  let finalGameType: string;
-  let finalContent: any;
-  let finalHtmlContent: string;
-  let finalDescription: string | undefined;
-  let gameId: string;
-  
-  // Xác định xem đang sử dụng overload nào
-  if (typeof titleOrData === 'object') {
-    // Trường hợp gọi với StoredGame
-    const gameData = titleOrData;
-    console.log("saveGameForSharing called with StoredGame:", {
-      title: gameData.title,
-      gameType: gameData.gameType,
-      hasContent: !!gameData.content,
-      hasHtmlContent: !!gameData.htmlContent
-    });
-    
-    title = gameData.title;
-    finalGameType = gameData.gameType || 'custom'; // Đảm bảo không null
-    finalContent = gameData.content;
-    finalHtmlContent = gameData.htmlContent;
-    finalDescription = gameData.description;
-    gameId = gameData.id || crypto.randomUUID();
-  } else {
-    // Trường hợp gọi với các tham số riêng lẻ
-    console.log("saveGameForSharing called with params:", {
-      title: titleOrData,
-      gameType,
-      hasContent: !!content,
-      hasHtmlContent: !!htmlContent
-    });
-    
-    title = titleOrData;
-    finalGameType = gameType || 'custom'; // Đảm bảo không null
-    finalContent = content;
-    finalHtmlContent = htmlContent || '';
-    finalDescription = description;
-    gameId = crypto.randomUUID();
-  }
-  
-  console.log("Final values before saving:", {
-    title,
-    finalGameType,
-    hasContent: !!finalContent,
-    finalHtmlContentLength: finalHtmlContent?.length || 0
-  });
-  
+): Promise<string> => {
   try {
+    // Tạo một ID mới cho game
+    const gameId = crypto.randomUUID();
+    
     // Tính thời gian hết hạn (3 ngày từ hiện tại)
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 3);
     
     // Nhúng dữ liệu game vào HTML content
-    let processedHtmlContent = finalHtmlContent;
+    let processedHtmlContent = htmlContent;
     
     // Nếu content là object, encode nó và nhúng vào HTML
-    if (typeof finalContent === 'object' && finalContent !== null) {
+    if (typeof content === 'object' && content !== null) {
       try {
-        const encodedContent = encodeURIComponent(JSON.stringify(finalContent));
+        const encodedContent = encodeURIComponent(JSON.stringify(content));
         
         // Thêm data attribute vào thẻ body
         if (!processedHtmlContent.includes('data-game-content')) {
@@ -139,16 +80,14 @@ export async function saveGameForSharing(
     
     // Lưu game vào database với xử lý lỗi tốt hơn
     try {
-      console.log("Saving game with type:", finalGameType);
-      
       const { data, error } = await supabase
         .from('games')
         .insert([
           {
             id: gameId,
             title,
-            game_type: finalGameType,
-            description: finalDescription || `Shared game: ${title}`,
+            game_type: gameType,
+            description: description || `Shared game: ${title}`,
             html_content: processedHtmlContent,
             expires_at: expiresAt.toISOString(),
           }
@@ -176,7 +115,7 @@ export async function saveGameForSharing(
     console.error("Error in saveGameForSharing:", error);
     throw error;
   }
-}
+};
 
 export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
   if (!id) {

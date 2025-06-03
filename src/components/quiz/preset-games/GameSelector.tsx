@@ -171,6 +171,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
             }}
             initialSettings={defaultSettings}
             onCancel={() => setShowSettings(false)}
+            inModal={true}
           />
         </DialogContent>
       </Dialog>

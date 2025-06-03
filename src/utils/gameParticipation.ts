@@ -11,7 +11,7 @@ export const maskIpAddress = (ip?: string): string => {
   return `${parts[0]}.${parts[1]}.*.*`;
 };
 
-export const getFakeIpAddress = async (): Promise<string> => {
+export const getFakeIpAddress = (): string => {
   // Tạo "fake IP" cho mục đích demo
   const segments = [];
   for (let i = 0; i < 4; i++) {
@@ -29,89 +29,12 @@ const mapSupabaseParticipant = (participant: SupabaseGameParticipant): GameParti
     timestamp: participant.timestamp,
     gameId: participant.game_id,
     retryCount: participant.retry_count || 0,
-    score: participant.score || 0,
-    age: participant.age
+    score: participant.score || 0
   };
 };
 
-// Hàm mới: Thêm người tham gia với tham số là một đối tượng
+// Thêm người tham gia mới vào game
 export const addParticipant = async (
-  participant: Partial<GameParticipant>
-): Promise<string | null> => {
-  if (!participant.gameId || !participant.name) {
-    console.error("Missing gameId or name in participant");
-    return null;
-  }
-
-  try {
-    // Kiểm tra xem IP này đã tham gia game này chưa
-    if (participant.ipAddress) {
-      const { data: existingParticipants, error: checkError } = await supabase
-        .from('game_participants')
-        .select('*')
-        .eq('game_id', participant.gameId)
-        .eq('ip_address', participant.ipAddress);
-
-      if (checkError) {
-        console.error("Error checking existing participants:", checkError);
-        return null;
-      }
-
-      if (existingParticipants && existingParticipants.length > 0) {
-        // IP đã tham gia, cập nhật thông tin
-        const existingParticipant = existingParticipants[0];
-        const retryCount = (existingParticipant.retry_count || 0) + 1;
-        
-        const { data: updatedParticipant, error: updateError } = await supabase
-          .from('game_participants')
-          .update({
-            name: participant.name,
-            retry_count: retryCount,
-            age: participant.age,
-            timestamp: new Date().toISOString()
-          })
-          .eq('id', existingParticipant.id)
-          .select()
-          .single();
-
-        if (updateError) {
-          console.error("Error updating participant:", updateError);
-          return null;
-        }
-
-        return updatedParticipant.id;
-      }
-    }
-
-    // Thêm người tham gia mới
-    const { data: newParticipant, error: insertError } = await supabase
-      .from('game_participants')
-      .insert([
-        {
-          game_id: participant.gameId,
-          name: participant.name,
-          ip_address: participant.ipAddress,
-          age: participant.age,
-          retry_count: 0
-        }
-      ])
-      .select()
-      .single();
-
-    if (insertError) {
-      console.error("Error adding new participant:", insertError);
-      return null;
-    }
-
-    return newParticipant.id;
-  } catch (error) {
-    console.error("Unhandled error in addParticipant:", error);
-    return null;
-  }
-};
-
-// Giữ lại hàm cũ để tương thích ngược (sẽ bị xóa trong tương lai)
-export const addParticipantLegacy = async (
   gameId: string,
   name: string,
   ipAddress: string
@@ -497,28 +420,5 @@ export const exportParticipantsToCSV = async (gameId: string): Promise<string> =
   } catch (error) {
     console.error("Error exporting to CSV:", error);
     throw new Error("Không thể xuất dữ liệu CSV");
-  }
-};
-
-// Xóa người tham gia khỏi game
-export const deleteParticipant = async (participantId: string): Promise<boolean> => {
-  if (!participantId) return false;
-  
-  try {
-    // Xóa người tham gia từ Supabase
-    const { error } = await supabase
-      .from('game_participants')
-      .delete()
-      .eq('id', participantId);
-    
-    if (error) {
-      console.error("Error deleting participant:", error);
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    console.error("Unexpected error in deleteParticipant:", error);
-    return false;
   }
 };
