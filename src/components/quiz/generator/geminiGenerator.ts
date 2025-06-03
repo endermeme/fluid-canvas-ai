@@ -1,5 +1,5 @@
+
 import { GameSettingsData } from '../types';
-import { getGameTypeByTopic } from '../gameTypes';
 import { 
   logInfo, logError, logWarning, logSuccess, 
   measureExecutionTime
@@ -18,10 +18,9 @@ const SOURCE = "GEMINI";
 // Export the MiniGame type for use in other files
 export type { MiniGame } from './types';
 
-// Tạo lớp AIGameGenerator để giữ tương thích với code cũ
+// Đơn giản hóa AIGameGenerator - chỉ giữ tính năng cơ bản
 export class AIGameGenerator {
   private static instance: AIGameGenerator | null = null;
-  private canvasMode: boolean = true;
 
   private constructor() {}
 
@@ -32,52 +31,30 @@ export class AIGameGenerator {
     return AIGameGenerator.instance;
   }
 
-  public setCanvasMode(mode: boolean): void {
-    this.canvasMode = mode;
-  }
-
   public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
-    // Sử dụng biến canvasMode từ instance
-    const useCanvasMode = settings?.useCanvas !== undefined ? settings.useCanvas : this.canvasMode;
-    const updatedSettings = {
-      ...settings,
-      useCanvas: useCanvasMode
-    };
-    
-    return tryGeminiGeneration(null, topic, updatedSettings);
+    return tryGeminiGeneration(null, topic, settings);
   }
 }
 
+// Hàm chính để tạo game với Gemini - đơn giản hóa
 export const generateWithGemini = async (
   topic: string, 
   settings?: GameSettingsData
 ): Promise<MiniGame | null> => {
-  const gameType = getGameTypeByTopic(topic);
-  const useCanvas = settings?.useCanvas !== undefined ? settings.useCanvas : true;
-  
   logInfo(SOURCE, `Starting game generation for "${topic}"`, {
     model: GEMINI_MODELS.CUSTOM_GAME,
     apiVersion: API_VERSION,
-    type: gameType?.name || "Not specified",
-    settings: settings || {},
-    canvasMode: useCanvas ? "enabled" : "disabled"
+    settings: settings || {}
   });
 
-  // Tạo prompt với template cải tiến từ geminiPrompt.ts
-  const prompt = createGameGenerationPrompt({
-    topic,
-    useCanvas,
-    language: settings?.language || 'en',
-    difficulty: settings?.difficulty || 'medium',
-    category: settings?.category || 'general'
-  });
+  // Tạo prompt đơn giản
+  const prompt = createGameGenerationPrompt({ topic });
 
   try {
     logInfo(SOURCE, `Sending request to Gemini API`);
     
     const startTime = Date.now();
     
-    // Đơn giản hóa payload API request
     const payload = {
       contents: [{
         role: "user",
@@ -112,17 +89,13 @@ export const generateWithGemini = async (
     const duration = measureExecutionTime(startTime);
     logSuccess(SOURCE, `Response received in ${duration.seconds}s`);
     
-    // Tạo phiên bản gỡ lỗi để xem code gốc
-    logInfo(SOURCE, `Generated Game Code (Original):`, text.substring(0, 500) + '...');
-    
     // Xử lý code để extract thông tin và clean
     const { title, content } = processGameCode(text);
     
     // Tạo đối tượng game
     const game: MiniGame = {
       title: title || topic,
-      content: content,
-      useCanvas: useCanvas
+      content: content
     };
     
     logSuccess(SOURCE, "Game generated successfully", {
@@ -138,20 +111,16 @@ export const generateWithGemini = async (
   }
 };
 
-/**
- * Xử lý mã code trả về từ Gemini - đơn giản hóa tối đa
- */
+// Xử lý mã code trả về từ Gemini - giữ nguyên logic này
 const processGameCode = (text: string): { title: string, content: string } => {
-  // Loại bỏ cú pháp markdown đơn giản
   let cleanedContent = text.trim();
   let title = 'Interactive Game';
   
-  // 1. Xử lý markdown code blocks - chỉ lấy nội dung HTML trong block
+  // Xử lý markdown code blocks
   const codeBlockRegex = /```(?:html|javascript)?\s*([\s\S]*?)```/g;
   const allMatches = [...cleanedContent.matchAll(codeBlockRegex)];
   
   if (allMatches.length > 0) {
-    // Tìm block chứa HTML đầy đủ (ưu tiên có DOCTYPE hoặc thẻ html)
     const htmlBlockMatch = allMatches.find(match => 
       match[1] && (
         match[1].includes('<!DOCTYPE html>') || 
@@ -162,23 +131,20 @@ const processGameCode = (text: string): { title: string, content: string } => {
     if (htmlBlockMatch && htmlBlockMatch[1]) {
       cleanedContent = htmlBlockMatch[1].trim();
     } else {
-      // Nếu không tìm thấy block HTML hoàn chỉnh, dùng block đầu tiên
       cleanedContent = allMatches[0][1].trim();
     }
   } else {
-    // Không tìm thấy code block, giữ nguyên nội dung nhưng xóa các dấu markdown
     cleanedContent = cleanedContent.replace(/```html|```javascript|```/g, '').trim();
   }
 
-  // 2. Trích xuất tiêu đề từ HTML nếu có
+  // Trích xuất tiêu đề từ HTML
   const titleMatch = cleanedContent.match(/<title[^>]*>(.*?)<\/title>/i);
   if (titleMatch && titleMatch[1]) {
     title = titleMatch[1].trim();
   } else {
-    // Thử tìm trong H1
     const h1Match = cleanedContent.match(/<h1[^>]*>(.*?)<\/h1>/i);
     if (h1Match && h1Match[1]) {
-      title = h1Match[1].trim().replace(/<[^>]+>/g, ''); // Loại bỏ các thẻ HTML trong tiêu đề
+      title = h1Match[1].trim().replace(/<[^>]+>/g, '');
     }
   }
   
@@ -188,6 +154,7 @@ const processGameCode = (text: string): { title: string, content: string } => {
   };
 };
 
+// Đơn giản hóa tryGeminiGeneration
 export const tryGeminiGeneration = async (
   model: any,
   topic: string, 
