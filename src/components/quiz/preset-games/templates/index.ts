@@ -11,6 +11,8 @@ import BalloonPopTemplate from './BalloonPopTemplate';
 import SpinWheelTemplate from './SpinWheelTemplate';
 import CatchObjectsTemplate from './CatchObjectsTemplate';
 import JigsawTemplate from './JigsawTemplate';
+import SnakeQuizTemplate from './SnakeQuizTemplate';
+import TetrisQuizTemplate from './TetrisQuizTemplate';
 
 // Export bộ các templates dưới dạng đối tượng
 const gameTemplates = {
@@ -25,7 +27,9 @@ const gameTemplates = {
   balloonpop: BalloonPopTemplate,
   spinwheel: SpinWheelTemplate,
   catchobjects: CatchObjectsTemplate,
-  jigsaw: JigsawTemplate
+  jigsaw: JigsawTemplate,
+  snakequiz: SnakeQuizTemplate,
+  tetrisquiz: TetrisQuizTemplate
 };
 
 export default gameTemplates;

@@ -115,6 +115,18 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       name: 'Ghép Hình', 
       description: 'Ghép các mảnh puzzle thành hình hoàn chỉnh',
       icon: <PuzzleIcon className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'snakequiz', 
+      name: 'Snake Quiz', 
+      description: 'Điều khiển rắn ăn thức ăn và trả lời câu hỏi',
+      icon: <Target className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'tetrisquiz', 
+      name: 'Tetris Quiz', 
+      description: 'Xếp gạch Tetris và trả lời câu hỏi bonus',
+      icon: <PuzzleIcon className="h-8 w-8 text-primary" />
     }
   ];
 

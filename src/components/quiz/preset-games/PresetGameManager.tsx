@@ -72,7 +72,9 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
       'balloonpop': () => import('./data/balloonPopSampleData.ts'),
       'spinwheel': () => import('./data/spinWheelSampleData.ts'),
       'catchobjects': () => import('./data/catchObjectsSampleData.ts'),
-      'jigsaw': () => import('./data/jigsawSampleData.ts')
+      'jigsaw': () => import('./data/jigsawSampleData.ts'),
+      'snakequiz': () => import('./data/snakeQuizSampleData.ts'),
+      'tetrisquiz': () => import('./data/tetrisQuizSampleData.ts')
     };
 
     // Kiểm tra nếu là game mới
@@ -103,6 +105,16 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
             data.settings.timePerQuestion = settings.timePerQuestion;
             data.settings.totalTime = settings.totalTime || 600;
             data.settings.puzzleSize = settings.questionCount > 6 ? 6 : 4;
+            break;
+          case 'snakequiz':
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || 600;
+            data.settings.gameSpeed = 200 - (settings.bonusTime || 5) * 20; // Faster speed = lower delay
+            break;
+          case 'tetrisquiz':
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || 720;
+            data.settings.dropSpeed = 600 - (settings.bonusTime || 5) * 50; // Faster drop = lower delay
             break;
         }
 
@@ -253,6 +265,12 @@ Output must be valid JSON. `;
         case 'jigsaw':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || 600}, "puzzleSize": ${questionCount > 6 ? 6 : 4}} }`;
           break;
+        case 'snakequiz':
+          gamePrompt += `JSON format: { "title": "title", "questions": [{"question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || 600}, "gameSpeed": ${200 - (bonusTime || 5) * 20}} }`;
+          break;
+        case 'tetrisquiz':
+          gamePrompt += `JSON format: { "title": "title", "questions": [{"question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || 720}, "dropSpeed": ${600 - (bonusTime || 5) * 50}} }`;
+          break;
       }
 
       gamePrompt += " Return only JSON, no additional text.";
@@ -358,6 +376,16 @@ Output must be valid JSON. `;
             parsedContent.settings.totalTime = totalTime || 600;
             parsedContent.settings.puzzleSize = questionCount > 6 ? 6 : 4;
             break;
+          case 'snakequiz':
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || 600;
+            parsedContent.settings.gameSpeed = 200 - (bonusTime || 5) * 20;
+            break;
+          case 'tetrisquiz':
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || 720;
+            parsedContent.settings.dropSpeed = 600 - (bonusTime || 5) * 50;
+            break;
         }
 
         clearInterval(progressInterval);
@@ -438,6 +466,8 @@ Output must be valid JSON. `;
       case 'spinwheel': return 'Quay Bánh Xe';
       case 'catchobjects': return 'Bắt Vật Thể';
       case 'jigsaw': return 'Ghép Hình';
+      case 'snakequiz': return 'Snake Quiz';
+      case 'tetrisquiz': return 'Tetris Quiz';
       default: return 'Trò Chơi';
     }
   };
@@ -544,6 +574,20 @@ Output must be valid JSON. `;
         id: 'jigsaw',
         name: 'Ghép Hình',
         description: 'Trò chơi ghép hình với nhiều lựa chọn',
+        icon: 'image',
+        defaultSettings: settings
+      },
+      'snakequiz': {
+        id: 'snakequiz',
+        name: 'Snake Quiz',
+        description: 'Điều khiển rắn ăn thức ăn và trả lời câu hỏi',
+        icon: 'target',
+        defaultSettings: settings
+      },
+      'tetrisquiz': {
+        id: 'tetrisquiz',
+        name: 'Tetris Quiz',
+        description: 'Xếp gạch Tetris và trả lời câu hỏi bonus',
         icon: 'image',
         defaultSettings: settings
       }
