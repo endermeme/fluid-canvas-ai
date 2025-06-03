@@ -1,6 +1,19 @@
 
 # Game Changes Log
 
+## 2025-01-03 - Sửa lỗi build cho SpinWheel và WhackMole games
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/GameSelector.tsx** - SỬA: Thêm import RotateCcw và Target icons từ lucide-react
+- **src/components/quiz/preset-games/templates/SpinWheelTemplate.tsx** - TẠO MỚI: Template component cho game Spin the Wheel
+- **src/components/quiz/preset-games/templates/WhackMoleTemplate.tsx** - TẠO MỚI: Template component cho game Whack-a-Mole Quiz
+
+### Loại thay đổi:
+- Sửa lỗi TypeScript: Missing icon imports trong GameSelector.tsx
+- Sửa lỗi module: Tạo missing template files SpinWheelTemplate.tsx và WhackMoleTemplate.tsx
+- Hoàn thiện 2 game: Spin the Wheel và Whack-a-Mole Quiz với đầy đủ tính năng
+- Tất cả animations, interactions, timer, scoring, AI integration đã được triển khai
+
 ## 2025-01-03 - Thêm 4 game mới: Spin Wheel, Whack-a-Mole, Stack Builder, Catch Objects
 
 ### Files thay đổi:
