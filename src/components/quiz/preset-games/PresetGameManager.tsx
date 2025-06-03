@@ -130,6 +130,18 @@ Output must be valid JSON. `;
         case 'balloonpop':
           gamePrompt += `JSON format: { "title": "title", "description": "description", "balloons": [{"id": id_number, "question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "color": "color_name", "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "allowSkip": true, "showExplanation": true, "balloonPopAnimation": true} }`;
           break;
+        case 'spinwheel':
+          gamePrompt += `JSON format: { "title": "title", "description": "description", "wheelSections": [{"id": id_number, "question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "color": "hex_color", "explanation": "explanation"}], "settings": {"spinDuration": 3, "timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "allowSkip": true, "showExplanation": true, "autoSpin": false} }`;
+          break;
+        case 'whackmole':
+          gamePrompt += `JSON format: { "title": "title", "description": "description", "questions": [{"id": id_number, "question": "question", "correctAnswer": "correct_answer", "wrongAnswers": ["wrong1", "wrong2", "wrong3", "wrong4"]}], "settings": {"gameTime": ${totalTime || 60}, "moleShowTime": 3, "pointsPerCorrect": 10, "pointsPerWrong": -5, "holesCount": 9, "maxMolesAtOnce": 3} }`;
+          break;
+        case 'stackbuilder':
+          gamePrompt += `JSON format: { "title": "title", "description": "description", "sequences": [{"id": id_number, "question": "question", "blocks": [{"id": "block_id", "content": "content", "correctPosition": position_number, "color": "hex_color"}], "explanation": "explanation"}], "settings": {"timePerSequence": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "pointsPerCorrect": 20, "allowHints": true, "showExplanation": true} }`;
+          break;
+        case 'catchobjects':
+          gamePrompt += `JSON format: { "title": "title", "description": "description", "questions": [{"id": id_number, "question": "question", "correctObjects": ["obj1", "obj2", "obj3", "obj4"], "wrongObjects": ["wrong1", "wrong2", "wrong3", "wrong4"], "category": "category_name"}], "settings": {"gameTime": ${totalTime || 90}, "objectSpeed": 2, "spawnRate": 1.5, "pointsPerCorrect": 10, "pointsPerWrong": -5, "basketSize": 80, "objectSize": 40} }`;
+          break;
       }
 
       gamePrompt += " Return only JSON, no additional text.";
@@ -222,6 +234,38 @@ Output must be valid JSON. `;
             parsedContent.settings.allowSkip = true;
             parsedContent.settings.showExplanation = true;
             parsedContent.settings.balloonPopAnimation = true;
+            break;
+          case 'spinwheel':
+            parsedContent.settings.spinDuration = 3;
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
+            parsedContent.settings.allowSkip = true;
+            parsedContent.settings.showExplanation = true;
+            parsedContent.settings.autoSpin = false;
+            break;
+          case 'whackmole':
+            parsedContent.settings.gameTime = totalTime || 60;
+            parsedContent.settings.moleShowTime = 3;
+            parsedContent.settings.pointsPerCorrect = 10;
+            parsedContent.settings.pointsPerWrong = -5;
+            parsedContent.settings.holesCount = 9;
+            parsedContent.settings.maxMolesAtOnce = 3;
+            break;
+          case 'stackbuilder':
+            parsedContent.settings.timePerSequence = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
+            parsedContent.settings.pointsPerCorrect = 20;
+            parsedContent.settings.allowHints = true;
+            parsedContent.settings.showExplanation = true;
+            break;
+          case 'catchobjects':
+            parsedContent.settings.gameTime = totalTime || 90;
+            parsedContent.settings.objectSpeed = 2;
+            parsedContent.settings.spawnRate = 1.5;
+            parsedContent.settings.pointsPerCorrect = 10;
+            parsedContent.settings.pointsPerWrong = -5;
+            parsedContent.settings.basketSize = 80;
+            parsedContent.settings.objectSize = 40;
             break;
         }
 
@@ -321,6 +365,38 @@ Output must be valid JSON. `;
             data.settings.showExplanation = true;
             data.settings.balloonPopAnimation = true;
             break;
+          case 'spinwheel':
+            data.settings.spinDuration = 3;
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
+            data.settings.allowSkip = true;
+            data.settings.showExplanation = true;
+            data.settings.autoSpin = false;
+            break;
+          case 'whackmole':
+            data.settings.gameTime = settings.totalTime || 60;
+            data.settings.moleShowTime = 3;
+            data.settings.pointsPerCorrect = 10;
+            data.settings.pointsPerWrong = -5;
+            data.settings.holesCount = 9;
+            data.settings.maxMolesAtOnce = 3;
+            break;
+          case 'stackbuilder':
+            data.settings.timePerSequence = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
+            data.settings.pointsPerCorrect = 20;
+            data.settings.allowHints = true;
+            data.settings.showExplanation = true;
+            break;
+          case 'catchobjects':
+            data.settings.gameTime = settings.totalTime || 90;
+            data.settings.objectSpeed = 2;
+            data.settings.spawnRate = 1.5;
+            data.settings.pointsPerCorrect = 10;
+            data.settings.pointsPerWrong = -5;
+            data.settings.basketSize = 80;
+            data.settings.objectSize = 40;
+            break;
         }
       }
 
@@ -372,6 +448,10 @@ Output must be valid JSON. `;
       case 'pictionary': return 'Đoán Hình';
       case 'truefalse': return 'Đúng hay Sai';
       case 'balloonpop': return 'Bóng Bay Đố Vui';
+      case 'spinwheel': return 'Quay Bánh Xe';
+      case 'whackmole': return 'Đập Chuột Đố Vui';
+      case 'stackbuilder': return 'Xếp Khối Đố Vui';
+      case 'catchobjects': return 'Bắt Vật Thể';
       default: return 'Trò Chơi';
     }
   };
@@ -458,6 +538,34 @@ Output must be valid JSON. `;
         name: 'Bóng Bay Đố Vui',
         description: 'Trò chơi balloon pop với nhiều lựa chọn',
         icon: 'balloon',
+        defaultSettings: settings
+      },
+      'spinwheel': {
+        id: 'spinwheel',
+        name: 'Quay Bánh Xe',
+        description: 'Quay bánh xe may mắn để nhận câu hỏi',
+        icon: 'rotate-ccw',
+        defaultSettings: settings
+      },
+      'whackmole': {
+        id: 'whackmole',
+        name: 'Đập Chuột Đố Vui',
+        description: 'Đập nhanh chuột có đáp án đúng',
+        icon: 'target',
+        defaultSettings: settings
+      },
+      'stackbuilder': {
+        id: 'stackbuilder',
+        name: 'Xếp Khối Đố Vui',
+        description: 'Kéo thả các khối theo thứ tự đúng',
+        icon: 'layers',
+        defaultSettings: settings
+      },
+      'catchobjects': {
+        id: 'catchobjects',
+        name: 'Bắt Vật Thể',
+        description: 'Bắt các vật thể có đáp án đúng',
+        icon: 'target',
         defaultSettings: settings
       }
     };

@@ -8,6 +8,10 @@ import WordSearchTemplate from './WordSearchTemplate';
 import PictionaryTemplate from './PictionaryTemplate';
 import TrueFalseTemplate from './TrueFalseTemplate';
 import BalloonPopTemplate from './BalloonPopTemplate';
+import SpinWheelTemplate from './SpinWheelTemplate';
+import WhackMoleTemplate from './WhackMoleTemplate';
+import StackBuilderTemplate from './StackBuilderTemplate';
+import CatchObjectsTemplate from './CatchObjectsTemplate';
 
 // Export bộ các templates dưới dạng đối tượng
 const gameTemplates = {
@@ -19,7 +23,11 @@ const gameTemplates = {
   wordsearch: WordSearchTemplate,
   pictionary: PictionaryTemplate,
   truefalse: TrueFalseTemplate,
-  balloonpop: BalloonPopTemplate
+  balloonpop: BalloonPopTemplate,
+  spinwheel: SpinWheelTemplate,
+  whackmole: WhackMoleTemplate,
+  stackbuilder: StackBuilderTemplate,
+  catchobjects: CatchObjectsTemplate
 };
 
 export default gameTemplates;

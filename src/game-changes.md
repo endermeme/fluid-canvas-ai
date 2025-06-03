@@ -1,6 +1,29 @@
 
 # Game Changes Log
 
+## 2025-01-03 - Thêm 4 game mới: Spin Wheel, Whack-a-Mole, Stack Builder, Catch Objects
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/data/spinWheelSampleData.ts** - TẠO MỚI: Dữ liệu mẫu cho game Spin the Wheel
+- **src/components/quiz/preset-games/templates/SpinWheelTemplate.tsx** - TẠO MỚI: Template component cho game Spin the Wheel
+- **src/components/quiz/preset-games/data/whackMoleSampleData.ts** - TẠO MỚI: Dữ liệu mẫu cho game Whack-a-Mole Quiz
+- **src/components/quiz/preset-games/templates/WhackMoleTemplate.tsx** - TẠO MỚI: Template component cho game Whack-a-Mole Quiz
+- **src/components/quiz/preset-games/data/stackBuilderSampleData.ts** - TẠO MỚI: Dữ liệu mẫu cho game Stack Builder
+- **src/components/quiz/preset-games/templates/StackBuilderTemplate.tsx** - TẠO MỚI: Template component cho game Stack Builder
+- **src/components/quiz/preset-games/data/catchObjectsSampleData.ts** - TẠO MỚI: Dữ liệu mẫu cho game Catch the Objects
+- **src/components/quiz/preset-games/templates/CatchObjectsTemplate.tsx** - TẠO MỚI: Template component cho game Catch the Objects
+- **src/components/quiz/preset-games/templates/index.ts** - SỬA: Thêm 4 templates mới vào exports
+- **src/components/quiz/preset-games/GameSelector.tsx** - SỬA: Thêm 4 game mới vào danh sách games
+- **src/components/quiz/preset-games/PresetGameManager.tsx** - SỬA: Thêm logic xử lý cho 4 game types mới
+
+### Loại thay đổi:
+- Thêm 4 game mới: Spin the Wheel, Whack-a-Mole Quiz, Stack Builder, Catch the Objects
+- Tổng cộng 13 game types: quiz, flashcards, matching, memory, ordering, wordsearch, pictionary, truefalse, balloonpop, spinwheel, whackmole, stackbuilder, catchobjects
+- Tất cả tích hợp AI Gemini để tạo câu hỏi theo chủ đề người dùng nhập
+- Mỗi game có cơ chế độc đáo: quay bánh xe, đập chuột, kéo thả khối, bắt vật thể
+- Animations và interactions phong phú: CSS transforms, drag & drop, collision detection
+- Timer, scoring, progress tracking như các game tiền nhiệm
+
 ## 2025-01-03 - Thêm Balloon Pop Quiz game
 
 ### Files thay đổi:

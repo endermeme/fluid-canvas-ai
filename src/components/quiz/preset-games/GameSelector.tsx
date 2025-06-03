@@ -97,6 +97,30 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       name: 'Bóng Bay Đố Vui', 
       description: 'Nổ bóng bay để khám phá câu hỏi thú vị',
       icon: <Zap className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'spinwheel', 
+      name: 'Quay Bánh Xe', 
+      description: 'Quay bánh xe may mắn để nhận câu hỏi',
+      icon: <RotateCcw className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'whackmole', 
+      name: 'Đập Chuột Đố Vui', 
+      description: 'Đập nhanh chuột có đáp án đúng',
+      icon: <Target className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'stackbuilder', 
+      name: 'Xếp Khối Đố Vui', 
+      description: 'Kéo thả các khối theo thứ tự đúng',
+      icon: <Layers className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'catchobjects', 
+      name: 'Bắt Vật Thể', 
+      description: 'Bắt các vật thể có đáp án đúng',
+      icon: <Target className="h-8 w-8 text-primary" />
     }
   ];
 
