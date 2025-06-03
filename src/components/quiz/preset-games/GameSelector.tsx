@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { 
   Brain, BookOpen, Puzzle, Dices, 
   Image, CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
-  ArrowRight
+  ArrowRight, Circle, Zap, Target, PuzzleIcon
 } from 'lucide-react';
 import GameSettings from '../GameSettings';
 import { GameSettingsData } from '../types';
@@ -91,6 +91,30 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       name: 'Đúng hay Sai', 
       description: 'Xác định nội dung là đúng hay sai',
       icon: <CheckSquare className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'balloonpop', 
+      name: 'Nổ Bóng Bay', 
+      description: 'Nhấp vào bóng bay để trả lời câu hỏi',
+      icon: <Circle className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'spinwheel', 
+      name: 'Quay Bánh Xe', 
+      description: 'Quay bánh xe may mắn nhận câu hỏi',
+      icon: <Zap className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'catchobjects', 
+      name: 'Bắt Vật Thể', 
+      description: 'Bắt đáp án đúng rơi từ trên xuống',
+      icon: <Target className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'jigsaw', 
+      name: 'Ghép Hình', 
+      description: 'Ghép các mảnh puzzle thành hình hoàn chỉnh',
+      icon: <PuzzleIcon className="h-8 w-8 text-primary" />
     }
   ];
 

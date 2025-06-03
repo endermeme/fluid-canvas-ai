@@ -1,6 +1,28 @@
 
 # Game Changes Log
 
+## 2025-01-03 - Thêm các web game mới có thể nhận nội dung từ Gemini
+
+### Files tạo mới:
+- **src/components/quiz/preset-games/templates/BalloonPopTemplate.tsx** - TẠO MỚI: Game nổ bóng bay đố vui
+- **src/components/quiz/preset-games/templates/SpinWheelTemplate.tsx** - TẠO MỚI: Game quay bánh xe may mắn
+- **src/components/quiz/preset-games/templates/CatchObjectsTemplate.tsx** - TẠO MỚI: Game bắt vật thể rơi
+- **src/components/quiz/preset-games/templates/JigsawTemplate.tsx** - TẠO MỚI: Game ghép hình puzzle
+- **src/components/quiz/preset-games/data/balloonPopSampleData.ts** - TẠO MỚI: Dữ liệu mẫu cho balloon pop
+- **src/components/quiz/preset-games/data/spinWheelSampleData.ts** - TẠO MỚI: Dữ liệu mẫu cho spin wheel
+- **src/components/quiz/preset-games/data/catchObjectsSampleData.ts** - TẠO MỚI: Dữ liệu mẫu cho catch objects
+- **src/components/quiz/preset-games/data/jigsawSampleData.ts** - TẠO MỚI: Dữ liệu mẫu cho jigsaw
+
+### Files cập nhật:
+- **src/components/quiz/preset-games/templates/index.ts** - SỬA: Thêm export các game mới
+- **src/components/quiz/preset-games/GameSelector.tsx** - SỬA: Thêm 4 game mới vào danh sách
+
+### Loại thay đổi:
+- Thêm 4 game tương tác mới: Balloon Pop, Spin Wheel, Catch Objects, Jigsaw Puzzle
+- Mỗi game có template và sample data riêng biệt
+- Tích hợp vào hệ thống preset games có sẵn
+- Có thể nhận nội dung từ Gemini AI như các game cũ
+
 ## 2025-01-03 - Refactor GameSharePage thành các component nhỏ hơn
 
 ### Files thay đổi:

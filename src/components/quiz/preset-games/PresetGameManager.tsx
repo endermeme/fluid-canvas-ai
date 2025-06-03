@@ -67,6 +67,120 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
     }
   }, [loading, gameContent, gameStartTime]);
 
+  const loadSampleData = (type) => {
+    const sampleDataMap = {
+      'balloonpop': () => import('./data/balloonPopSampleData.ts'),
+      'spinwheel': () => import('./data/spinWheelSampleData.ts'),
+      'catchobjects': () => import('./data/catchObjectsSampleData.ts'),
+      'jigsaw': () => import('./data/jigsawSampleData.ts')
+    };
+
+    // Kiểm tra nếu là game mới
+    if (sampleDataMap[type]) {
+      sampleDataMap[type]().then(module => {
+        const data = module.default;
+        if (data && !data.settings) {
+          data.settings = {};
+        }
+
+        // Cập nhật settings cho từng loại game
+        switch(type) {
+          case 'balloonpop':
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || 300;
+            data.settings.balloonSpeed = settings.bonusTime || 3;
+            break;
+          case 'spinwheel':
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || 400;
+            break;
+          case 'catchobjects':
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || 120;
+            data.settings.objectSpeed = settings.bonusTime || 4;
+            break;
+          case 'jigsaw':
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || 600;
+            data.settings.puzzleSize = settings.questionCount > 6 ? 6 : 4;
+            break;
+        }
+
+        setLoading(false);
+        setGameContent(data);
+      }).catch(err => {
+        console.error(`Error loading sample data for ${type}:`, err);
+        setError(`Không thể tải dữ liệu mẫu cho ${type}. Vui lòng thử lại.`);
+        setLoading(false);
+      });
+      return;
+    }
+
+    // Code cũ cho các game khác
+    import(`./data/${type}SampleData.ts`).then(module => {
+      let data = null;
+
+      if (type === 'wordsearch' && initialTopic) {
+        const lowerTopic = initialTopic.toLowerCase();
+        if (lowerTopic.includes('easy') || lowerTopic.includes('simple')) {
+          data = module.easyWordSearchData || module.default || module[`${type}SampleData`];
+        } else if (lowerTopic.includes('hard') || lowerTopic.includes('difficult')) {
+          data = module.hardWordSearchData || module.default || module[`${type}SampleData`];
+        } else {
+          data = module.default || module[`${type}SampleData`];
+        }
+      } else {
+        data = module.default || module[`${type}SampleData`];
+      }
+
+      if (data) {
+        if (!data.settings) {
+          data.settings = {};
+        }
+
+        switch(type) {
+          case 'quiz':
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
+            data.settings.bonusTimePerCorrect = settings.bonusTime || 5;
+            break;
+          case 'flashcards':
+            data.settings.flipTime = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || 180;
+            break;
+          case 'matching':
+          case 'memory':
+            data.settings.timeLimit = settings.totalTime || 120;
+            break;
+          case 'ordering':
+            data.settings.timeLimit = settings.totalTime || 180;
+            data.settings.bonusTimePerCorrect = settings.bonusTime || 10;
+            break;
+          case 'wordsearch':
+            data.settings.timeLimit = settings.totalTime || 300;
+            data.settings.bonusTimePerWord = settings.bonusTime || 15;
+            break;
+          case 'pictionary':
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
+            break;
+          case 'truefalse':
+            data.settings.timePerQuestion = settings.timePerQuestion;
+            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
+            data.settings.bonusTimePerCorrect = settings.bonusTime || 3;
+            break;
+        }
+      }
+
+      setLoading(false);
+      setGameContent(data);
+    }).catch(err => {
+      console.error(`Error loading sample data for ${type}:`, err);
+      setError(`Không thể tải dữ liệu mẫu cho ${type}. Vui lòng thử lại.`);
+      setLoading(false);
+    });
+  };
+
   const generateAIContent = async (prompt, type, gameSettings: GameSettingsData) => {
     setGenerating(true);
     setError(null);
@@ -126,6 +240,18 @@ Output must be valid JSON. `;
           break;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
+          break;
+        case 'balloonpop':
+          gamePrompt += `JSON format: { "title": "title", "questions": [{"question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || 300}, "balloonSpeed": ${bonusTime || 3}} }`;
+          break;
+        case 'spinwheel':
+          gamePrompt += `JSON format: { "title": "title", "questions": [{"question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || 400}} }`;
+          break;
+        case 'catchobjects':
+          gamePrompt += `JSON format: { "title": "title", "questions": [{"question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || 120}, "objectSpeed": ${bonusTime || 4}} }`;
+          break;
+        case 'jigsaw':
+          gamePrompt += `JSON format: { "title": "title", "questions": [{"question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || 600}, "puzzleSize": ${questionCount > 6 ? 6 : 4}} }`;
           break;
       }
 
@@ -213,6 +339,25 @@ Output must be valid JSON. `;
             parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 3;
             break;
+          case 'balloonpop':
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || 300;
+            parsedContent.settings.balloonSpeed = bonusTime || 3;
+            break;
+          case 'spinwheel':
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || 400;
+            break;
+          case 'catchobjects':
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || 120;
+            parsedContent.settings.objectSpeed = bonusTime || 4;
+            break;
+          case 'jigsaw':
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || 600;
+            parsedContent.settings.puzzleSize = questionCount > 6 ? 6 : 4;
+            break;
         }
 
         clearInterval(progressInterval);
@@ -249,71 +394,6 @@ Output must be valid JSON. `;
     } finally {
       setGenerating(false);
     }
-  };
-
-  const loadSampleData = (type) => {
-    import(`./data/${type}SampleData.ts`).then(module => {
-      let data = null;
-
-      if (type === 'wordsearch' && initialTopic) {
-        const lowerTopic = initialTopic.toLowerCase();
-        if (lowerTopic.includes('easy') || lowerTopic.includes('simple')) {
-          data = module.easyWordSearchData || module.default || module[`${type}SampleData`];
-        } else if (lowerTopic.includes('hard') || lowerTopic.includes('difficult')) {
-          data = module.hardWordSearchData || module.default || module[`${type}SampleData`];
-        } else {
-          data = module.default || module[`${type}SampleData`];
-        }
-      } else {
-        data = module.default || module[`${type}SampleData`];
-      }
-
-      if (data) {
-        if (!data.settings) {
-          data.settings = {};
-        }
-
-        switch(type) {
-          case 'quiz':
-            data.settings.timePerQuestion = settings.timePerQuestion;
-            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
-            data.settings.bonusTimePerCorrect = settings.bonusTime || 5;
-            break;
-          case 'flashcards':
-            data.settings.flipTime = settings.timePerQuestion;
-            data.settings.totalTime = settings.totalTime || 180;
-            break;
-          case 'matching':
-          case 'memory':
-            data.settings.timeLimit = settings.totalTime || 120;
-            break;
-          case 'ordering':
-            data.settings.timeLimit = settings.totalTime || 180;
-            data.settings.bonusTimePerCorrect = settings.bonusTime || 10;
-            break;
-          case 'wordsearch':
-            data.settings.timeLimit = settings.totalTime || 300;
-            data.settings.bonusTimePerWord = settings.bonusTime || 15;
-            break;
-          case 'pictionary':
-            data.settings.timePerQuestion = settings.timePerQuestion;
-            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
-            break;
-          case 'truefalse':
-            data.settings.timePerQuestion = settings.timePerQuestion;
-            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
-            data.settings.bonusTimePerCorrect = settings.bonusTime || 3;
-            break;
-        }
-      }
-
-      setLoading(false);
-      setGameContent(data);
-    }).catch(err => {
-      console.error(`Error loading sample data for ${type}:`, err);
-      setError(`Không thể tải dữ liệu mẫu cho ${type}. Vui lòng thử lại.`);
-      setLoading(false);
-    });
   };
 
   const handleRetry = () => {
@@ -354,6 +434,10 @@ Output must be valid JSON. `;
       case 'wordsearch': return 'Tìm Từ';
       case 'pictionary': return 'Đoán Hình';
       case 'truefalse': return 'Đúng hay Sai';
+      case 'balloonpop': return 'Nổ Bóng Bay';
+      case 'spinwheel': return 'Quay Bánh Xe';
+      case 'catchobjects': return 'Bắt Vật Thể';
+      case 'jigsaw': return 'Ghép Hình';
       default: return 'Trò Chơi';
     }
   };
@@ -433,6 +517,34 @@ Output must be valid JSON. `;
         name: 'Đúng hay Sai',
         description: 'Kiểm tra kiến thức với các câu hỏi đúng/sai',
         icon: 'clock',
+        defaultSettings: settings
+      },
+      'balloonpop': {
+        id: 'balloonpop',
+        name: 'Nổ Bóng Bay',
+        description: 'Trò chơi nổ bóng bay với nhiều lựa chọn',
+        icon: 'balloon',
+        defaultSettings: settings
+      },
+      'spinwheel': {
+        id: 'spinwheel',
+        name: 'Quay Bánh Xe',
+        description: 'Trò chơi quay bánh xe với nhiều lựa chọn',
+        icon: 'wheelchair',
+        defaultSettings: settings
+      },
+      'catchobjects': {
+        id: 'catchobjects',
+        name: 'Bắt Vật Thể',
+        description: 'Trò chơi bắt vật thể với nhiều lựa chọn',
+        icon: 'target',
+        defaultSettings: settings
+      },
+      'jigsaw': {
+        id: 'jigsaw',
+        name: 'Ghép Hình',
+        description: 'Trò chơi ghép hình với nhiều lựa chọn',
+        icon: 'image',
         defaultSettings: settings
       }
     };
