@@ -1,6 +1,19 @@
 
 # Game Changes Log
 
+## 2025-01-03 - Sửa lỗi form tham gia game và cải thiện real-time sync
+
+### Files thay đổi:
+- **src/pages/GameSharePage.tsx** - SỬA: Sửa form không đóng và thêm auto-refresh participants
+
+### Loại thay đổi:
+- Sửa lỗi form không đóng sau khi submit thành công
+- Thêm loading state cho form để tránh double submit
+- Thêm auto-refresh danh sách người chơi mỗi 10 giây
+- Thêm nút "Làm mới" thủ công cho danh sách người chơi
+- Cải thiện UI feedback với loading states và visual indicators
+- Reset form sau khi submit thành công
+
 ## 2025-01-03 - Sửa lỗi RLS policy cho game_participants
 
 ### Files thay đổi:

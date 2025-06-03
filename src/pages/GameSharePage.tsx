@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
-import { addParticipant, getFakeIpAddress } from '@/utils/gameParticipation';
+import { addParticipant, getFakeIpAddress, getGameParticipants } from '@/utils/gameParticipation';
 import { StoredGame, GameParticipant } from '@/utils/types';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
@@ -53,6 +53,7 @@ const GameSharePage: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState('game');
   const [gameExpired, setGameExpired] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
   const form = useForm<PlayerFormValues>({
@@ -62,6 +63,27 @@ const GameSharePage: React.FC = () => {
       playerAge: ""
     },
   });
+  
+  // Hàm để refresh danh sách người tham gia
+  const refreshParticipants = async () => {
+    if (!gameId) return;
+    
+    try {
+      const updatedParticipants = await getGameParticipants(gameId);
+      setParticipants(updatedParticipants);
+    } catch (error) {
+      console.error("Error refreshing participants:", error);
+      // Fallback: đọc từ localStorage
+      const sessionsJson = localStorage.getItem('game_sessions');
+      if (sessionsJson) {
+        const sessions = JSON.parse(sessionsJson);
+        const session = sessions.find((s: any) => s.id === gameId);
+        if (session && session.participants) {
+          setParticipants(session.participants);
+        }
+      }
+    }
+  };
   
   useEffect(() => {
     const loadGame = async () => {
@@ -84,14 +106,8 @@ const GameSharePage: React.FC = () => {
               }
             }
             
-            const sessionsJson = localStorage.getItem('game_sessions');
-            if (sessionsJson) {
-              const sessions = JSON.parse(sessionsJson);
-              const session = sessions.find((s: any) => s.id === gameId);
-              if (session && session.participants) {
-                setParticipants(session.participants);
-              }
-            }
+            // Load danh sách người tham gia
+            await refreshParticipants();
             
             // Kiểm tra xem người chơi đã đăng ký chưa
             const registeredGamesStr = localStorage.getItem('registered_games');
@@ -118,6 +134,17 @@ const GameSharePage: React.FC = () => {
     
     loadGame();
   }, [gameId]);
+
+  // Auto refresh participants mỗi 10 giây
+  useEffect(() => {
+    if (!gameId || gameExpired) return;
+    
+    const interval = setInterval(() => {
+      refreshParticipants();
+    }, 10000); // 10 giây
+    
+    return () => clearInterval(interval);
+  }, [gameId, gameExpired]);
   
   const handleBack = () => {
     navigate('/game-history');
@@ -145,7 +172,9 @@ const GameSharePage: React.FC = () => {
   };
   
   const handleJoinGame = async (values: PlayerFormValues) => {
-    if (!gameId || !game) return;
+    if (!gameId || !game || isSubmitting) return;
+    
+    setIsSubmitting(true);
     
     try {
       const fakeIp = getFakeIpAddress();
@@ -154,20 +183,41 @@ const GameSharePage: React.FC = () => {
       const result = await addParticipant(gameId, `${values.playerName} (${values.playerAge} tuổi)`, fakeIp);
       
       if (result.success) {
-        setParticipants(prev => result.participant ? [...prev, result.participant] : prev);
+        // Cập nhật danh sách participants ngay lập tức
+        if (result.participant) {
+          setParticipants(prev => {
+            // Kiểm tra xem participant đã tồn tại chưa để tránh duplicate
+            const exists = prev.some(p => p.id === result.participant?.id);
+            if (!exists) {
+              return [...prev, result.participant];
+            }
+            return prev;
+          });
+        }
+        
+        // Đóng dialog và reset form
         setShowNameDialog(false);
         setHasRegistered(true);
+        form.reset();
         
         // Lưu game ID vào danh sách đã đăng ký
         const registeredGamesStr = localStorage.getItem('registered_games');
         let registeredGames = registeredGamesStr ? JSON.parse(registeredGamesStr) : [];
-        registeredGames.push(gameId);
-        localStorage.setItem('registered_games', JSON.stringify(registeredGames));
+        if (!registeredGames.includes(gameId)) {
+          registeredGames.push(gameId);
+          localStorage.setItem('registered_games', JSON.stringify(registeredGames));
+        }
         
         toast({
-          title: "Tham gia thành công",
-          description: "Bạn đã tham gia vào game này!",
+          title: "Tham gia thành công! 🎉",
+          description: "Bạn đã được thêm vào danh sách người chơi.",
         });
+        
+        // Refresh participants sau 1 giây để đảm bảo sync
+        setTimeout(() => {
+          refreshParticipants();
+        }, 1000);
+        
       } else {
         // Fallback: Lưu vào localStorage khi Supabase fail
         console.log("Supabase failed, using localStorage fallback");
@@ -202,18 +252,23 @@ const GameSharePage: React.FC = () => {
         localStorage.setItem('game_sessions', JSON.stringify(sessions));
         
         setParticipants(prev => [...prev, newParticipant]);
+        
+        // Đóng dialog và reset form
         setShowNameDialog(false);
         setHasRegistered(true);
+        form.reset();
         
         // Lưu game ID vào danh sách đã đăng ký
         const registeredGamesStr = localStorage.getItem('registered_games');
         let registeredGames = registeredGamesStr ? JSON.parse(registeredGamesStr) : [];
-        registeredGames.push(gameId);
-        localStorage.setItem('registered_games', JSON.stringify(registeredGames));
+        if (!registeredGames.includes(gameId)) {
+          registeredGames.push(gameId);
+          localStorage.setItem('registered_games', JSON.stringify(registeredGames));
+        }
         
         toast({
-          title: "Tham gia thành công",
-          description: "Bạn đã tham gia vào game này! (Dữ liệu được lưu cục bộ)",
+          title: "Tham gia thành công! 🎉",
+          description: "Bạn đã được thêm vào danh sách người chơi (dữ liệu lưu cục bộ).",
         });
       }
     } catch (error) {
@@ -223,6 +278,8 @@ const GameSharePage: React.FC = () => {
         description: "Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại.",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -282,6 +339,7 @@ const GameSharePage: React.FC = () => {
       variant="outline" 
       className="text-xs"
       onClick={() => setShowNameDialog(true)}
+      disabled={isSubmitting}
     >
       <Users className="h-3.5 w-3.5 mr-1" />
       {hasRegistered ? "Cập nhật thông tin" : "Tham gia"}
@@ -300,7 +358,12 @@ const GameSharePage: React.FC = () => {
           <TabsList>
             <TabsTrigger value="game">Game</TabsTrigger>
             <TabsTrigger value="share">Chia sẻ</TabsTrigger>
-            <TabsTrigger value="participants">Người chơi ({participants.length})</TabsTrigger>
+            <TabsTrigger value="participants">
+              Người chơi ({participants.length})
+              {participants.length > 0 && (
+                <span className="ml-1 text-green-500">●</span>
+              )}
+            </TabsTrigger>
           </TabsList>
           
           <div className="flex items-center text-sm text-muted-foreground">
@@ -359,9 +422,10 @@ const GameSharePage: React.FC = () => {
                 <Button 
                   className="w-full" 
                   onClick={() => setShowNameDialog(true)}
+                  disabled={isSubmitting}
                 >
                   <Users className="h-4 w-4 mr-2" />
-                  {hasRegistered ? "Cập nhật thông tin" : "Tham gia game"}
+                  {isSubmitting ? "Đang xử lý..." : (hasRegistered ? "Cập nhật thông tin" : "Tham gia game")}
                 </Button>
               </CardFooter>
             </Card>
@@ -396,7 +460,17 @@ const GameSharePage: React.FC = () => {
           <div className="max-w-md mx-auto space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Danh sách người chơi</CardTitle>
+                <CardTitle className="flex items-center justify-between">
+                  Danh sách người chơi
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={refreshParticipants}
+                    className="text-xs"
+                  >
+                    🔄 Làm mới
+                  </Button>
+                </CardTitle>
                 <CardDescription>
                   {participants.length > 0 
                     ? `${participants.length} người đã tham gia game này` 
@@ -412,8 +486,9 @@ const GameSharePage: React.FC = () => {
                       variant="outline" 
                       className="mt-4"
                       onClick={() => setShowNameDialog(true)}
+                      disabled={isSubmitting}
                     >
-                      Tham gia ngay
+                      {isSubmitting ? "Đang xử lý..." : "Tham gia ngay"}
                     </Button>
                   </div>
                 ) : (
@@ -450,9 +525,10 @@ const GameSharePage: React.FC = () => {
                 <Button 
                   className="w-full" 
                   onClick={() => setShowNameDialog(true)}
+                  disabled={isSubmitting}
                 >
                   <Users className="h-4 w-4 mr-2" />
-                  {hasRegistered ? "Cập nhật thông tin" : "Tham gia game"}
+                  {isSubmitting ? "Đang xử lý..." : (hasRegistered ? "Cập nhật thông tin" : "Tham gia game")}
                 </Button>
               </CardFooter>
             </Card>
@@ -460,7 +536,7 @@ const GameSharePage: React.FC = () => {
         </TabsContent>
       </Tabs>
       
-      <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>
+      <Dialog open={showNameDialog} onOpenChange={(open) => !isSubmitting && setShowNameDialog(open)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Tham gia game</DialogTitle>
@@ -477,7 +553,7 @@ const GameSharePage: React.FC = () => {
                   <FormItem>
                     <FormLabel>Tên của bạn</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Nhập tên của bạn" />
+                      <Input {...field} placeholder="Nhập tên của bạn" disabled={isSubmitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -491,7 +567,7 @@ const GameSharePage: React.FC = () => {
                   <FormItem>
                     <FormLabel>Tuổi</FormLabel>
                     <FormControl>
-                      <Input {...field} type="number" min="6" max="100" placeholder="Nhập tuổi của bạn" />
+                      <Input {...field} type="number" min="6" max="100" placeholder="Nhập tuổi của bạn" disabled={isSubmitting} />
                     </FormControl>
                     <FormDescription>
                       Thông tin này chỉ dùng cho mục đích thống kê
@@ -502,11 +578,16 @@ const GameSharePage: React.FC = () => {
               />
               
               <DialogFooter className="mt-6">
-                <Button type="button" variant="outline" onClick={() => setShowNameDialog(false)}>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowNameDialog(false)}
+                  disabled={isSubmitting}
+                >
                   Hủy
                 </Button>
-                <Button type="submit">
-                  {hasRegistered ? "Cập nhật" : "Tham gia"}
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Đang xử lý..." : (hasRegistered ? "Cập nhật" : "Tham gia")}
                 </Button>
               </DialogFooter>
             </form>
