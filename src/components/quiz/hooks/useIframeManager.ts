@@ -1,3 +1,4 @@
+
 import { useRef, useState, useEffect } from 'react';
 import { enhanceIframeContent } from '../utils/iframe-utils';
 
@@ -26,7 +27,6 @@ export const useIframeManager = (
     try {
       console.log("Đang tải nội dung game...");
       
-      // Thêm thông báo load hoàn thành đơn giản nếu cần
       const content = await enhanceIframeContent(miniGame.content, miniGame.title);
       if (iframeRef.current) {
         iframeRef.current.srcdoc = content;
@@ -64,6 +64,7 @@ export const useIframeManager = (
     if (miniGame?.content) {
       setIsIframeLoaded(false);
       setLoadingProgress(0);
+      setIframeError(null);
       loadIframeContent();
     }
   }, [miniGame]);
@@ -79,6 +80,7 @@ export const useIframeManager = (
       try {
         setIsIframeLoaded(false);
         setLoadingProgress(0);
+        setIframeError(null);
         loadIframeContent();
         
         if (onReload) {

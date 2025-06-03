@@ -1,6 +1,19 @@
 
 # Game Changes Log
 
+## 2025-01-03 - Sửa lỗi build sau khi dọn dẹp code
+
+### Files thay đổi:
+- **src/components/quiz/hooks/useIframeManager.ts** - SỬA: Loại bỏ loadAttempts và maxRetryAttempts không cần thiết
+- **src/components/quiz/custom-games/EnhancedGameView.tsx** - SỬA: Loại bỏ props loadAttempts và maxAttempts
+- **src/components/quiz/custom-games/GameController.tsx** - SỬA: Import từ CustomGameForm đúng path
+- **src/components/quiz/custom-games/ui/index.ts** - SỬA: Loại bỏ export CustomGameForm không tồn tại
+
+### Loại thay đổi:
+- Sửa lỗi TypeScript sau khi dọn dẹp code
+- Đơn giản hóa GameLoadingIndicator chỉ nhận progress prop
+- Sửa import paths sau khi xóa file trùng lặp
+
 ## 2025-01-03 - Dọn dẹp Custom Game và tách Prompt ra JSON
 
 ### Files thay đổi:
