@@ -1,6 +1,12 @@
 
 # Lịch sử thay đổi mã nguồn
 
+## 04/06/2025 - Sửa lỗi Balloon Pop Game
+- Xóa file trùng lặp `balloonpopSampleData.ts` để tránh lỗi TS1149
+- Giữ lại file chuẩn `balloonPopSampleData.ts` với 8 câu hỏi về Việt Nam
+- Cải thiện animation bóng bay bay đa hướng, không ra ngoài màn hình
+- Thêm 5 pattern chuyển động khác nhau cho bóng bay
+
 ## 30/04/2025 - Tái cấu trúc thư mục CustomGame
 - Tạo hai thư mục chính: `src/components/quiz/custom-games/api` và `src/components/quiz/custom-games/ui`
 - Di chuyển `src/utils/customGameAPI.ts` vào `src/components/quiz/custom-games/api/customGameAPI.ts`

@@ -7,11 +7,10 @@
 
 ### Các thay đổi chính:
 
-#### 1. **Sửa lỗi Balloon Pop Game - Không thể tải dữ liệu mẫu**
-- ✅ **Tạo lại file dữ liệu mẫu**: Tạo balloonpopSampleData.ts với 6 câu hỏi đa dạng
-- ✅ **Khắc phục lỗi import**: Sửa lỗi "Unknown variable dynamic import"
-- ✅ **Dữ liệu hoàn chỉnh**: Câu hỏi về Việt Nam, khoa học, văn học, địa lý
-- ✅ **Settings tối ưu**: Thời gian, điểm số, explanation hợp lý
+#### 1. **Sửa lỗi Balloon Pop Game - Xung đột tên file**
+- ✅ **Fix lỗi TS1149**: Xóa file trùng lặp balloonpopSampleData.ts
+- ✅ **Giữ file chuẩn**: balloonPopSampleData.ts với 8 câu hỏi về Việt Nam
+- ✅ **Xóa xung đột**: Không còn lỗi case-sensitive file names
 
 #### 2. **Cải thiện Animation Bóng Bay - Bay đa hướng**
 - ✅ **5 pattern chuyển động khác nhau**:
@@ -68,8 +67,8 @@
 - ✅ **Performance tốt hơn**: Model mới có khả năng tạo content tốt hơn
 
 ### Hoàn thành:
-- ✅ **Balloon Pop Game** - Animation đa hướng, không ra ngoài màn hình
-- ✅ **Sửa lỗi dữ liệu mẫu** - File balloonpopSampleData.ts hoạt động bình thường
+- ✅ **Balloon Pop Game** - Animation đa hướng, không ra ngoài màn hình, sửa lỗi file trùng lặp
+- ✅ **Sửa lỗi dữ liệu mẫu** - File balloonPopSampleData.ts hoạt động bình thường
 - ✅ **Visual effects** - Explosion, particles, smooth animations
 - ✅ **Whack-a-Mole Game** - Giao diện đẹp, ẩn đáp án, tăng độ khó
 - ✅ **Spin Wheel Game** - Giảm tốc độ quay
@@ -77,7 +76,7 @@
 - ✅ **Cập nhật AI model**
 - ✅ **Xóa hoàn toàn Stack Builder và Catch Objects games**
 - ✅ **Sửa lỗi Gemini API Key authentication**
-- ✅ **Sửa lỗi build errors**
+- ✅ **Sửa lỗi build errors và file conflicts**
 
 ### Tiếp theo (cần làm):
 - [ ] **Fix 3 games còn lại**: Quiz, Flashcards, Matching games
@@ -99,4 +98,4 @@
 10. SpinWheel - Quay bánh xe ✅ **IMPROVED**
 11. WhackMole - Đập chuột đố vui ✅ **IMPROVED**
 
-**Lưu ý**: Balloon Pop game đã được sửa lỗi hoàn toàn và cải thiện animation bay đa hướng như yêu cầu.
+**Lưu ý**: Balloon Pop game đã được sửa lỗi hoàn toàn, cải thiện animation bay đa hướng và khắc phục xung đột tên file.
