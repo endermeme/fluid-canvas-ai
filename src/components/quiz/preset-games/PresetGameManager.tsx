@@ -122,7 +122,14 @@ Output must be valid JSON. `;
           gamePrompt += `JSON format: { "title": "title", "description": "description", "words": [{"word": "word 1", "found": false}, {"word": "word 2", "found": false}], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "settings": {"timeLimit": ${totalTime || 300}, "allowDiagonalWords": true, "showWordList": true, "bonusTimePerWord": ${bonusTime || 15}} }`;
           break;
         case 'pictionary':
-          gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "image URL", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }`;
+          gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "URL ảnh từ internet", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
+
+QUAN TRỌNG cho game Pictionary: 
+- Luôn ưu tiên sử dụng ảnh từ nguồn là https://commons.wikimedia.org , tuyệt đối không sử dụng ảnh từ  https://upload.wikimedia.org/
+- imageUrl PHẢI là URL ảnh thật từ internet dạng link
+- KHÔNG cố định nguồn ảnh cụ thể, hãy lấy ảnh từ internet
+- KHÔNG sử dụng placeholder hay ảnh giả
+- Mỗi ảnh phải phù hợp với đáp án và chủ đề`;
           break;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
@@ -140,10 +147,7 @@ Output must be valid JSON. `;
         }],
         generationConfig: {
           ...DEFAULT_GENERATION_SETTINGS,
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 8192
+          temperature: 0.7
         }
       };
 
@@ -248,13 +252,22 @@ Output must be valid JSON. `;
         variant: "destructive"
       });
 
-      loadSampleData(type);
+      // Không load sample data nữa vì đã xóa file
+      setLoading(false);
+      setGameContent(null);
     } finally {
       setGenerating(false);
     }
   };
 
   const loadSampleData = (type) => {
+    if (type === 'pictionary') {
+      // Không có sample data cho pictionary nữa
+      setError('Không có dữ liệu mẫu cho game Đoán Hình. Vui lòng sử dụng AI để tạo nội dung.');
+      setLoading(false);
+      return;
+    }
+
     import(`./data/${type}SampleData.ts`).then(module => {
       let data = null;
 
@@ -372,7 +385,7 @@ Output must be valid JSON. `;
       <div className="flex flex-col h-full">
         <GameTemplate 
           data={gameContent} 
-          onBack={handleRetry}
+          onBack={onBack} // Truyền onBack từ props thay vì handleRetry
           topic={initialTopic || ""}
           content={gameContent}
         />
@@ -503,6 +516,7 @@ Output must be valid JSON. `;
           <PresetGameHeader 
             showShare={false} 
             isGameCreated={false}
+            onBack={onBack}
           />
           <GameSettings 
             initialSettings={settings}
@@ -526,6 +540,7 @@ Output must be valid JSON. `;
           <PresetGameHeader 
             showShare={false} 
             isGameCreated={false}
+            onBack={onBack}
           />
           <Card className="p-6 max-w-md mt-4">
             <div className="text-center">
@@ -547,6 +562,7 @@ Output must be valid JSON. `;
             onShare={handleShare}
             showShare={true}
             isGameCreated={!!gameContent}
+            onBack={onBack}
           />
           {renderGameTemplate()}
           <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>

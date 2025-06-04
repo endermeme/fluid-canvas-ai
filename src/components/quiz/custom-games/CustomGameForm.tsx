@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -10,7 +11,6 @@ import { AIGameGenerator } from '../generator/geminiGenerator';
 import { MiniGame } from '../generator/types';
 import { GameSettingsData } from '../types';
 import GameLoading from '../GameLoading';
-import { GEMINI_MODELS } from '@/constants/api-constants';
 
 interface CustomGameFormProps {
   onGenerate: (content: string, game?: MiniGame) => void;
@@ -23,7 +23,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Use the singleton pattern
   const gameGenerator = AIGameGenerator.getInstance();
 
   const getPlaceholderText = () => {
@@ -43,10 +42,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     setIsGenerating(true);
     
     try {
-      // Luôn sử dụng canvas mode
-      gameGenerator.setCanvasMode(true);
-      
-      // Minimal settings
+      // Settings đơn giản - không cần canvas mode hay difficulty
       const settings: GameSettingsData = {
         category: 'custom'
       };
@@ -129,7 +125,7 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
             <div className="flex items-start gap-3.5 p-5 bg-primary/5 rounded-2xl border border-primary/15 backdrop-blur-sm">
               <Info className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
               <p className="text-sm text-muted-foreground">
-                AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Game sẽ sử dụng HTML5 Canvas cho hiệu ứng đồ họa tốt hơn.
+                AI sẽ tạo một game hoàn chỉnh với HTML, CSS và JavaScript dựa trên mô tả của bạn. Game sẽ tự động tối ưu cho màn hình của bạn.
               </p>
             </div>
             

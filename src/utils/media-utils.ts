@@ -17,7 +17,12 @@ export const isImageUrl = (str: string): boolean => {
   try {
     return str.match(/\.(jpeg|jpg|gif|png|webp)$/) !== null || 
            str.startsWith('http') || 
-           str.startsWith('https');
+           str.startsWith('https') ||
+           str.startsWith('data:image/') ||
+           str.includes('pixabay.com') ||
+           str.includes('pexels.com') ||
+           str.includes('freepik.com') ||
+           str.includes('shutterstock.com');
   } catch {
     return false;
   }
@@ -25,28 +30,40 @@ export const isImageUrl = (str: string): boolean => {
 
 /**
  * Process image source to ensure it's in the correct format
+ * Now supports any image source without conversion restrictions
  */
 export const processImageSource = async (src: string): Promise<string> => {
-  if (!src) return '';
+  if (!src) return '/placeholder.svg';
   
   if (isBase64Image(src)) {
     return src;  // Already in base64 format
   }
   
   if (isImageUrl(src)) {
-    try {
-      const response = await fetch(src);
-      const blob = await response.blob();
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error('Error converting image URL to base64:', error);
-      return src; // Return original URL if conversion fails
-    }
+    return src; // Return URL directly - let browser handle loading
   }
   
-  return src; // Return original if not recognized as image
+  return '/placeholder.svg'; // Fallback to placeholder
+};
+
+/**
+ * Generate fallback placeholder for failed images
+ */
+export const generateImageFallback = (alt: string = 'Image'): string => {
+  return `/placeholder.svg`;
+};
+
+/**
+ * Check if image URL is accessible (simplified check)
+ */
+export const validateImageUrl = async (url: string): Promise<boolean> => {
+  try {
+    if (!isImageUrl(url)) return false;
+    
+    // Simple validation - if it looks like an image URL, assume it's valid
+    // Browser will handle actual loading and fallback
+    return true;
+  } catch {
+    return false;
+  }
 };

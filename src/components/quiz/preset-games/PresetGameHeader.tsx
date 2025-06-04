@@ -7,15 +7,25 @@ import { ArrowLeft, History, Plus, Share2 } from "lucide-react";
 interface PresetGameHeaderProps {
   onShare?: () => void;
   showShare?: boolean;
-  isGameCreated?: boolean; // New prop to control share button visibility
+  isGameCreated?: boolean;
+  onBack?: () => void; // Thêm prop cho custom back handler
 }
 
 const PresetGameHeader: React.FC<PresetGameHeaderProps> = ({ 
   onShare, 
   showShare = true,
-  isGameCreated = false
+  isGameCreated = false,
+  onBack
 }) => {
   const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate("/");
+    }
+  };
 
   return (
     <header className="flex justify-between items-center p-3 bg-background/80 backdrop-blur-md border-b sticky top-0 z-20">
@@ -23,7 +33,7 @@ const PresetGameHeader: React.FC<PresetGameHeaderProps> = ({
         variant="ghost"
         size="icon"
         className="hover:bg-primary/10"
-        onClick={() => navigate("/")}
+        onClick={handleBack}
       >
         <ArrowLeft className="h-5 w-5" />
       </Button>

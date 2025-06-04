@@ -1,4 +1,3 @@
-
 import React, { forwardRef } from 'react';
 
 interface GameIframeRendererProps {
@@ -21,7 +20,12 @@ const GameIframeRenderer = forwardRef<HTMLIFrameElement, GameIframeRendererProps
           height: '100%',
           backgroundColor: '#ffffff',
           opacity: isLoaded ? 1 : 0,
-          transition: 'opacity 0.3s ease-in-out'
+          transition: 'opacity 0.3s ease-in-out',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0
         }}
       />
     );
