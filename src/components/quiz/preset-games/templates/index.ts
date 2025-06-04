@@ -1,3 +1,4 @@
+
 import QuizTemplate from './QuizTemplate';
 import FlashcardsTemplate from './FlashcardsTemplate';
 import MatchingTemplate from './MatchingTemplate';
@@ -9,8 +10,8 @@ import TrueFalseTemplate from './TrueFalseTemplate';
 import BalloonPopTemplate from './balloon-pop';
 import SpinWheelTemplate from './spin-wheel';
 import WhackMoleTemplate from './whack-mole';
-import StackBuilderTemplate from './StackBuilderTemplate';
-import CatchObjectsTemplate from './CatchObjectsTemplate';
+import StackBuilderTemplate from './stack-builder';
+import CatchObjectsTemplate from './catch-objects';
 
 // Export bộ các templates dưới dạng đối tượng
 const gameTemplates = {

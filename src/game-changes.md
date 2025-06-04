@@ -42,6 +42,32 @@
 - **Styles:** `styles/whack-mole.css` - Mole animations
 - **Assets:** `assets/` folder
 
+#### 4. Stack Builder Game - Cấu trúc mới
+- **Tạo thư mục:** `src/components/quiz/preset-games/templates/stack-builder/`
+- **Components:**
+  - `StackBuilderGame.tsx` - Main game logic  
+  - `components/StackBuilderHeader.tsx` - Header với timer
+  - `components/GameArea.tsx` - Main play area
+  - `components/BlockArea.tsx` - Available và stack areas
+  - `components/GameControls.tsx` - Game controls
+  - `components/GameResultModal.tsx` - Results
+  - `components/HintPanel.tsx` - Hint display
+- **Styles:** `styles/stack-builder.css` - Block animations
+- **Assets:** `assets/` folder
+
+#### 5. Catch Objects Game - Cấu trúc mới
+- **Tạo thư mục:** `src/components/quiz/preset-games/templates/catch-objects/`
+- **Components:**
+  - `CatchObjectsGame.tsx` - Main game logic
+  - `components/CatchObjectsHeader.tsx` - Header với stats
+  - `components/GameArea.tsx` - Playing field
+  - `components/FallingObject.tsx` - Falling objects với CSS
+  - `components/Basket.tsx` - Basket component với CSS
+  - `components/GameControls.tsx` - Controls
+  - `components/GameResultModal.tsx` - Results
+- **Styles:** `styles/catch-objects.css` - Object animations
+- **Assets:** `assets/` folder
+
 ### Cải tiến UI/UX:
 
 #### Balloon Pop Game:
@@ -64,14 +90,36 @@
 - ✅ Hit animations và effects
 - ✅ Tốc độ spawn cải thiện
 
+#### Stack Builder Game:
+- ✅ Block CSS với gradients và shadows
+- ✅ Drag & drop với smooth transitions
+- ✅ Numbered sequence display
+- ✅ Hint system cải thiện
+- ✅ Explanation modal đẹp hơn
+
+#### Catch Objects Game:
+- ✅ Falling objects CSS với float animation
+- ✅ Basket CSS với 3D effects
+- ✅ Sky gradient background
+- ✅ Collision detection cải thiện
+- ✅ Object spawn realistic hơn
+
 ### Cấu trúc Code:
 - ✅ Mỗi game có thư mục riêng
 - ✅ Components tách biệt rõ ràng
 - ✅ CSS riêng cho animations
 - ✅ Assets folder sẵn sàng cho hình ảnh
 - ✅ TypeScript interfaces rõ ràng
+- ✅ Responsive design cho mobile
+
+### Hoàn thành:
+- ✅ Balloon Pop Game cấu trúc mới
+- ✅ Spin Wheel Game cấu trúc mới  
+- ✅ Whack-a-Mole Game cấu trúc mới
+- ✅ Stack Builder Game cấu trúc mới
+- ✅ Catch Objects Game cấu trúc mới
 
 ### Chờ cập nhật:
-- [ ] Stack Builder Game cấu trúc mới
-- [ ] Catch Objects Game cấu trúc mới
 - [ ] Các game cũ (Quiz, Memory, etc.) giữ nguyên cấu trúc hiện tại
+- [ ] Thêm sound effects cho các game
+- [ ] Thêm particle effects nâng cao
