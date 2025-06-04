@@ -1,6 +1,15 @@
 
 # Game Changes Log
 
+## 2025-06-04 - Xóa file pictionarySampleData.ts
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/data/pictionarySampleData.ts** - XÓA: Xóa file dữ liệu mẫu Pictionary
+
+### Loại thay đổi:
+- Xóa hoàn toàn file dữ liệu mẫu cho game Đoán Hình
+- Loại bỏ dữ liệu cứng trong code
+
 ## 2025-06-04 - Thay thế hình ảnh mẫu bằng hình ảnh thực tế từ Pexels
 
 ### Files thay đổi:
