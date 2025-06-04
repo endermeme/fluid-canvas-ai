@@ -1,6 +1,17 @@
 
 # Game Changes Log
 
+## 2025-06-04 - Thay thế hình ảnh mẫu bằng hình ảnh thực tế từ Pexels
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/data/pictionarySampleData.ts** - SỬA: Thay thế tất cả URL hình ảnh placeholder bằng URL thực tế từ Pexels
+
+### Loại thay đổi:
+- Loại bỏ hoàn toàn hình ảnh mẫu và placeholder
+- Sử dụng hình ảnh thực tế từ Pexels API
+- Cải thiện chất lượng hình ảnh trong game Đoán Hình
+- Tất cả hình ảnh đều có URL thực tế và hoạt động
+
 ## 2025-06-04 - Loại bỏ phụ thuộc vào Unsplash và cho phép sử dụng ảnh từ bất kỳ nguồn nào
 
 ### Files thay đổi:
