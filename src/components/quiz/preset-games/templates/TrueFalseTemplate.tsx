@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import PresetGameHeader from '../PresetGameHeader';
 import { Button } from '@/components/ui/button';
@@ -121,11 +122,14 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     setGameStarted(true);
   };
 
-  if (!content || !questions.length) {
+  if (!gameContent || !questions.length) {
     return (
       <div className="p-4">
         <PresetGameHeader />
-        <div>Không có dữ liệu câu hỏi</div>
+        <div className="text-center mt-8">
+          <p className="text-lg">Không có dữ liệu câu hỏi</p>
+          <p className="text-sm text-muted-foreground mt-2">Vui lòng thử lại hoặc chọn game khác</p>
+        </div>
       </div>
     );
   }
@@ -191,50 +195,57 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
         </div>
         <Progress value={progress} className="h-2" />
       </div>
+      
       <Card className="p-6 mb-4 mx-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
-        <h2 className="text-xl font-semibold mb-6">{question.statement}</h2>
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <h2 className="text-xl font-semibold mb-6 text-center">{question.statement}</h2>
+        
+        <div className="grid grid-cols-1 gap-4 mb-6 max-w-md mx-auto">
           <Button 
-            className={`p-6 flex items-center justify-center ${
+            className={`p-6 flex items-center justify-center text-lg font-medium min-h-[80px] ${
               currentAnswer === true 
                 ? currentAnswer === question.isTrue
-                  ? 'bg-green-500 hover:bg-green-600'
-                  : 'bg-red-500 hover:bg-red-600'
-                : 'bg-primary/80 hover:bg-primary'
+                  ? 'bg-green-500 hover:bg-green-600 text-white'
+                  : 'bg-red-500 hover:bg-red-600 text-white'
+                : 'bg-primary hover:bg-primary/90 text-primary-foreground'
             }`}
             onClick={() => handleAnswer(true)}
             disabled={currentAnswer !== null}
+            size="lg"
           >
-            <CheckCircle className="h-7 w-7 mr-2" />
-            <span className="text-lg font-medium">Đúng</span>
+            <CheckCircle className="h-8 w-8 mr-3" />
+            <span>ĐÚNG</span>
           </Button>
+          
           <Button 
-            className={`p-6 flex items-center justify-center ${
+            className={`p-6 flex items-center justify-center text-lg font-medium min-h-[80px] ${
               currentAnswer === false 
                 ? currentAnswer === question.isTrue
-                  ? 'bg-green-500 hover:bg-green-600'
-                  : 'bg-red-500 hover:bg-red-600'
-                : 'bg-primary/80 hover:bg-primary'
+                  ? 'bg-green-500 hover:bg-green-600 text-white'
+                  : 'bg-red-500 hover:bg-red-600 text-white'
+                : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground border-2 border-muted'
             }`}
             onClick={() => handleAnswer(false)}
             disabled={currentAnswer !== null}
+            size="lg"
           >
-            <XCircle className="h-7 w-7 mr-2" />
-            <span className="text-lg font-medium">Sai</span>
+            <XCircle className="h-8 w-8 mr-3" />
+            <span>SAI</span>
           </Button>
         </div>
+        
         {showExplanation && (
-          <div className={`p-4 rounded-lg mt-4 ${question.isTrue ? 'bg-green-50 border border-green-200' : 'bg-red-50 border-red-200'}`}>
+          <div className={`p-4 rounded-lg mt-4 ${question.isTrue ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
             <div className="flex items-start">
               <AlertCircle className={`h-5 w-5 mr-2 mt-0.5 ${question.isTrue ? 'text-green-600' : 'text-red-600'}`} />
               <div>
                 <p className="font-medium mb-1">Giải thích:</p>
-                <p>{question.explanation}</p>
+                <p className="text-sm">{question.explanation}</p>
               </div>
             </div>
           </div>
         )}
       </Card>
+      
       <div className="mt-auto flex gap-2 px-4 pb-2">
         <Button 
           variant="outline"

@@ -1,6 +1,18 @@
 
 # Game Changes Log
 
+## 2025-01-03 - Fix lỗi game "Đúng hay Sai" và "Đoán Hình"
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/templates/TrueFalseTemplate.tsx** - SỬA: Fix hiển thị nút lựa chọn Đúng/Sai
+- **src/components/quiz/preset-games/templates/PictionaryTemplate.tsx** - SỬA: Thay thế hình ảnh giả bằng hình ảnh thực từ Unsplash
+- **src/components/quiz/preset-games/data/pictionarySampleData.ts** - SỬA: Cập nhật URL hình ảnh thực tế
+
+### Loại thay đổi:
+- Sửa lỗi game Đúng hay Sai không hiển thị được nút lựa chọn
+- Thay thế hình ảnh example.com bằng hình ảnh thực tế từ Unsplash
+- Cải thiện trải nghiệm người dùng với hình ảnh chất lượng cao
+
 ## 2025-01-03 - Refactor GameSharePage thành các component nhỏ hơn
 
 ### Files thay đổi:
