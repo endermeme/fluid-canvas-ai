@@ -129,7 +129,7 @@ QUAN TRỌNG cho game Pictionary:
 - Ưu tiên sử dụng ảnh từ Wikimedia Commons (https://commons.wikimedia.org)
 - KHÔNG sử dụng placeholder hay ảnh giả
 - Mỗi ảnh phải phù hợp với đáp án và chủ đề
-- Định dạng URL Wikimedia Commons: https://commons.wikimedia.org/wiki/File:filename.jpg`;
+
           break;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
