@@ -123,11 +123,13 @@ Output must be valid JSON. `;
           break;
         case 'pictionary':
           gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "URL ảnh từ internet", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
-- Bỏ qua các nguồn ảnh từ upload.wikipedia
+
 QUAN TRỌNG cho game Pictionary: 
 - imageUrl PHẢI là URL ảnh thật từ internet dạng link
+- Ưu tiên sử dụng ảnh từ Wikimedia Commons (https://commons.wikimedia.org)
 - KHÔNG sử dụng placeholder hay ảnh giả
-- Mỗi ảnh phải phù hợp với đáp án và chủ đề`;
+- Mỗi ảnh phải phù hợp với đáp án và chủ đề
+- Định dạng URL Wikimedia Commons: https://commons.wikimedia.org/wiki/File:filename.jpg`;
           break;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;

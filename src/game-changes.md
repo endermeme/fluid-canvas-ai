@@ -1,6 +1,16 @@
 
 # Game Changes Log
 
+## 2025-06-04 - Ưu tiên sử dụng ảnh từ Wikimedia Commons cho game Đoán Hình
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/PresetGameManager.tsx** - SỬA: Cập nhật prompt AI ưu tiên sử dụng ảnh từ Wikimedia Commons
+
+### Loại thay đổi:
+- Ưu tiên sử dụng ảnh từ Wikimedia Commons (https://commons.wikimedia.org) cho game Đoán Hình
+- Thêm hướng dẫn định dạng URL Wikimedia Commons cho AI
+- Tăng chất lượng và độ tin cậy của nguồn ảnh
+
 ## 2025-06-04 - Chuẩn hóa header cho tất cả game templates
 
 ### Files thay đổi:
