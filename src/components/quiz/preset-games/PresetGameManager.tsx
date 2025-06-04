@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -384,7 +383,7 @@ QUAN TRỌNG cho game Pictionary:
       <div className="flex flex-col h-full">
         <GameTemplate 
           data={gameContent} 
-          onBack={handleRetry}
+          onBack={onBack} // Truyền onBack từ props thay vì handleRetry
           topic={initialTopic || ""}
           content={gameContent}
         />
@@ -515,6 +514,7 @@ QUAN TRỌNG cho game Pictionary:
           <PresetGameHeader 
             showShare={false} 
             isGameCreated={false}
+            onBack={onBack}
           />
           <GameSettings 
             initialSettings={settings}
@@ -538,6 +538,7 @@ QUAN TRỌNG cho game Pictionary:
           <PresetGameHeader 
             showShare={false} 
             isGameCreated={false}
+            onBack={onBack}
           />
           <Card className="p-6 max-w-md mt-4">
             <div className="text-center">
@@ -559,6 +560,7 @@ QUAN TRỌNG cho game Pictionary:
             onShare={handleShare}
             showShare={true}
             isGameCreated={!!gameContent}
+            onBack={onBack}
           />
           {renderGameTemplate()}
           <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>

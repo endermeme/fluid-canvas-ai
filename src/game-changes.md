@@ -1,4 +1,16 @@
+
 # Game Changes Log
+
+## 2025-06-04 - Chuẩn hóa header cho tất cả game templates
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/PresetGameHeader.tsx** - SỬA: Thêm onBack prop để xử lý custom back handler
+- **src/components/quiz/preset-games/PresetGameManager.tsx** - SỬA: Truyền onBack handler cho header và templates
+
+### Loại thay đổi:
+- Chuẩn hóa việc sử dụng header chung cho tất cả game templates
+- Loại bỏ nút "out" riêng trong các game templates
+- Đảm bảo tất cả game sử dụng PresetGameHeader thống nhất
 
 ## 2025-06-04 - Cập nhật prompt AI linh hoạt cho nguồn ảnh
 
