@@ -1,10 +1,26 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, ChevronRight, HelpCircle, Clock, Image, ArrowLeft } from 'lucide-react';
+
+interface WikiImageInfo {
+  url: string;
+}
+
+interface WikiPage {
+  images?: {
+    title: string;
+  }[];
+  imageinfo?: WikiImageInfo[];
+}
+
+interface WikiQueryResponse {
+  query?: {
+    pages?: Record<string, WikiPage>;
+  };
+}
 
 interface PictionaryTemplateProps {
   data?: any;
@@ -25,24 +41,59 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
   const [timerRunning, setTimerRunning] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [processedItems, setProcessedItems] = useState<any[]>([]);
+  const [isProcessing, setIsProcessing] = useState(true);
   const { toast } = useToast();
 
-  const items = gameContent?.items || [];
-  const isLastItem = currentItem === items.length - 1;
+  const rawItems = gameContent?.items || [];
 
   useEffect(() => {
     console.log("PictionaryTemplate - Game content:", gameContent);
-    console.log("PictionaryTemplate - Items:", items);
-  }, [gameContent, items]);
+    console.log("PictionaryTemplate - Raw items:", rawItems);
+    
+    const processItems = async () => {
+      setIsProcessing(true);
+      const processed = [...rawItems];
+      
+      for (let i = 0; i < processed.length; i++) {
+        const item = processed[i];
+        
+        if (item.imageSearchTerm && !item.imageUrl) {
+          try {
+            item.imageUrl = await generateImage(item.imageSearchTerm);
+          } catch (error) {
+            console.error("Error fetching image:", error);
+            item.imageUrl = generatePlaceholder(item.answer || topic);
+          }
+        } else if (!item.imageUrl) {
+          const searchTerm = item.answer || topic;
+          try {
+            item.imageUrl = await generateImage(searchTerm);
+          } catch (error) {
+            console.error("Error generating image:", error);
+            item.imageUrl = generatePlaceholder(searchTerm);
+          }
+        }
+      }
+      
+      setProcessedItems(processed);
+      setIsProcessing(false);
+    };
+    
+    processItems();
+  }, [gameContent]);
+
+  const items = processedItems;
+  const isLastItem = currentItem === items.length - 1;
 
   useEffect(() => {
-    if (timeLeft > 0 && timerRunning) {
+    if (timeLeft > 0 && timerRunning && !isProcessing) {
       const timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
       
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && timerRunning) {
+    } else if (timeLeft === 0 && timerRunning && !isProcessing) {
       handleNextItem();
       toast({
         title: "Hết thời gian!",
@@ -50,10 +101,10 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
         variant: "destructive",
       });
     }
-  }, [timeLeft, timerRunning, toast]);
+  }, [timeLeft, timerRunning, isProcessing, toast]);
 
   const handleOptionSelect = (option: string) => {
-    if (selectedOption !== null) return;
+    if (selectedOption !== null || isProcessing) return;
     
     setSelectedOption(option);
     setTimerRunning(false);
@@ -115,17 +166,53 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
     setImageError(false);
   };
 
+  const generatePlaceholder = (text: string) => `/placeholder.svg`;
+  
+  const generateImage = async (searchTerm: string): Promise<string> => {
+    try {
+      const encodedTerm = encodeURIComponent(searchTerm);
+      const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=images|imageinfo&generator=search&gsrlimit=5&gsrsearch=${encodedTerm}&iiprop=url&origin=*`;
+      
+      const response = await fetch(url);
+      const data = await response.json() as WikiQueryResponse;
+      
+      if (data.query && data.query.pages) {
+        const pages = Object.values(data.query.pages) as WikiPage[];
+        for (const page of pages) {
+          if (page.images && page.images.length > 0) {
+            const imageName = page.images[0].title;
+            const imageInfoUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(imageName)}&prop=imageinfo&iiprop=url&format=json&origin=*`;
+            
+            const imageInfoResponse = await fetch(imageInfoUrl);
+            const imageInfoData = await imageInfoResponse.json() as WikiQueryResponse;
+            
+            if (imageInfoData.query && imageInfoData.query.pages) {
+              const imagePages = Object.values(imageInfoData.query.pages) as WikiPage[];
+              if (imagePages[0].imageinfo && imagePages[0].imageinfo.length > 0) {
+                return imagePages[0].imageinfo[0].url;
+              }
+            }
+          }
+        }
+      }
+      
+      return generatePlaceholder(searchTerm);
+    } catch (error) {
+      console.error("Error fetching image:", error);
+      return generatePlaceholder(searchTerm);
+    }
+  };
+
   const handleImageErrorEvent = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.error("Image failed to load:", items[currentItem]?.imageUrl);
     setImageError(true);
     setImageLoaded(true);
     const img = e.currentTarget;
-    // Fallback to placeholder
-    img.src = "/placeholder.svg";
-    img.alt = `Không thể tải hình ảnh: ${items[currentItem]?.answer || topic}`;
+    const itemAnswer = items[currentItem]?.answer || topic;
+    img.src = generatePlaceholder(itemAnswer);
+    img.alt = `Không thể tải hình ảnh: ${itemAnswer}`;
   };
 
-  if (!gameContent || !items.length) {
+  if (!gameContent || !items.length || isProcessing) {
     return (
       <div className="flex items-center justify-center h-full relative">
         {onBack && (
@@ -140,8 +227,9 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
           </Button>
         )}
         <div className="text-center">
-          <p className="text-lg font-medium">Không có dữ liệu hình ảnh</p>
-          <p className="text-sm text-muted-foreground mt-2">Vui lòng thử lại hoặc chọn game khác</p>
+          <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg font-medium">Đang tải hình ảnh từ Wikipedia...</p>
+          <p className="text-sm text-muted-foreground mt-2">Vui lòng đợi trong giây lát</p>
         </div>
       </div>
     );
@@ -233,13 +321,13 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
           {imageError ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
               <Image className="h-12 w-12 text-muted-foreground mb-2" />
-              <p className="text-muted-foreground text-sm">Không thể tải hình ảnh</p>
+              <p className="text-muted-foreground">Không thể tải hình ảnh</p>
             </div>
           ) : (
             <img 
               src={item.imageUrl} 
               alt={`Hình ảnh: ${item.answer}`}
-              className={`w-full h-full object-cover ${imageLoaded ? 'opacity-100' : 'opacity-0'}`} 
+              className={`w-full h-full object-contain ${imageLoaded ? 'opacity-100' : 'opacity-0'}`} 
               onLoad={handleImageLoad}
               onError={handleImageErrorEvent}
             />
@@ -249,29 +337,28 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
         {showHint && (
           <div className="mb-4 p-3 bg-primary/10 rounded-lg text-center max-w-md">
             <p className="font-medium">Gợi ý:</p>
-            <p className="text-sm">{item.hint}</p>
+            <p>{item.hint}</p>
           </div>
         )}
         
-        <div className="w-full max-w-md grid grid-cols-2 gap-3">
+        <div className="w-full max-w-md grid grid-cols-2 gap-2">
           {options.map((option: string, index: number) => (
-            <Button
+            <button
               key={index}
               onClick={() => handleOptionSelect(option)}
-              className={`p-4 text-center rounded-lg transition-colors min-h-[60px] ${
+              className={`w-full p-3 text-center rounded-lg transition-colors ${
                 selectedOption === option 
                   ? selectedOption === item.answer
-                    ? 'bg-green-500 hover:bg-green-600 text-white'
-                    : 'bg-red-500 hover:bg-red-600 text-white'
+                    ? 'bg-green-100 border-green-500 border'
+                    : 'bg-red-100 border-red-500 border'
                   : selectedOption !== null && option === item.answer
-                    ? 'bg-green-500 hover:bg-green-600 text-white'
-                    : 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                    ? 'bg-green-100 border-green-500 border'
+                    : 'bg-secondary hover:bg-secondary/80 border-transparent border'
               }`}
               disabled={selectedOption !== null}
-              size="lg"
             >
-              <span className="font-medium">{option}</span>
-            </Button>
+              {option}
+            </button>
           ))}
         </div>
       </div>

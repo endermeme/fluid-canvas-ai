@@ -26,11 +26,11 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   const [timerRunning, setTimerRunning] = useState(true);
   const [showResult, setShowResult] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [currentAnswer, setCurrentAnswer] = useState<boolean | null>(null);
   const { toast } = useToast();
 
   const questions = gameContent?.questions || [];
   const isLastQuestion = currentQuestion === questions.length - 1;
-  const currentAnswer = userAnswers[currentQuestion];
 
   useEffect(() => {
     if (!gameStarted && questions.length > 0) {
@@ -39,24 +39,20 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
       const totalTime = gameContent?.settings?.totalTime || (questions.length * questionTime);
       setTimeLeft(questionTime);
       setTotalTimeLeft(totalTime);
+      setUserAnswers(new Array(questions.length).fill(null));
     }
   }, [gameContent, questions, gameStarted]);
 
   useEffect(() => {
-    if (timeLeft > 0 && timerRunning) {
+    if (timeLeft > 0 && timerRunning && !showExplanation) {
       const timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && timerRunning) {
-      setTimerRunning(false);
-      toast({
-        title: "Hết thời gian!",
-        description: "Bạn đã không trả lời kịp thời.",
-        variant: "destructive",
-      });
+    } else if (timeLeft === 0 && timerRunning && !showExplanation) {
+      handleAnswer(null);
     }
-  }, [timeLeft, timerRunning, toast]);
+  }, [timeLeft, timerRunning, showExplanation]);
 
   useEffect(() => {
     if (totalTimeLeft > 0 && gameStarted && !showResult) {
@@ -74,26 +70,36 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     }
   }, [totalTimeLeft, gameStarted, showResult, toast]);
 
-  const handleAnswer = (answer: boolean) => {
+  const handleAnswer = (answer: boolean | null) => {
     if (currentAnswer !== null) return;
+    
+    setCurrentAnswer(answer);
     const newAnswers = [...userAnswers];
     newAnswers[currentQuestion] = answer;
     setUserAnswers(newAnswers);
     setShowExplanation(gameContent?.settings?.showExplanation ?? true);
     setTimerRunning(false);
 
-    const isCorrect = answer === questions[currentQuestion].isTrue;
-    if (isCorrect) {
-      setScore(score + 1);
-      toast({
-        title: "Chính xác! +1 điểm",
-        description: "Câu trả lời của bạn đúng.",
-        variant: "default",
-      });
+    if (answer !== null) {
+      const isCorrect = answer === questions[currentQuestion].isTrue;
+      if (isCorrect) {
+        setScore(score + 1);
+        toast({
+          title: "Chính xác! +1 điểm",
+          description: "Câu trả lời của bạn đúng.",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Không chính xác!",
+          description: "Câu trả lời của bạn không đúng.",
+          variant: "destructive",
+        });
+      }
     } else {
       toast({
-        title: "Không chính xác!",
-        description: "Câu trả lời của bạn không đúng.",
+        title: "Hết thời gian!",
+        description: "Bạn đã không trả lời kịp thời.",
         variant: "destructive",
       });
     }
@@ -104,6 +110,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
       setShowResult(true);
     } else {
       setCurrentQuestion(currentQuestion + 1);
+      setCurrentAnswer(null);
       setShowExplanation(false);
       setTimeLeft(gameContent?.settings?.timePerQuestion || 15);
       setTimerRunning(true);
@@ -112,7 +119,8 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
 
   const handleRestart = () => {
     setCurrentQuestion(0);
-    setUserAnswers([]);
+    setUserAnswers(new Array(questions.length).fill(null));
+    setCurrentAnswer(null);
     setScore(0);
     setShowExplanation(false);
     setShowResult(false);
@@ -122,19 +130,17 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     setGameStarted(true);
   };
 
-  if (!gameContent || !questions.length) {
+  if (!content || !questions.length) {
     return (
       <div className="p-4">
         <PresetGameHeader />
-        <div className="text-center mt-8">
-          <p className="text-lg">Không có dữ liệu câu hỏi</p>
-          <p className="text-sm text-muted-foreground mt-2">Vui lòng thử lại hoặc chọn game khác</p>
-        </div>
+        <div>Không có dữ liệu câu hỏi</div>
       </div>
     );
   }
 
   if (showResult) {
+    const correctAnswers = userAnswers.filter((answer, index) => answer === questions[index].isTrue).length;
     return (
       <div className="flex flex-col items-center justify-center h-full p-6">
         <PresetGameHeader onShare={onShare} />
@@ -146,12 +152,12 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
           <div className="mb-6">
             <div className="flex justify-between mb-2">
               <span>Điểm của bạn</span>
-              <span className="font-bold">{Math.round((userAnswers.filter((answer, index) => answer === questions[index].isTrue).length / questions.length) * 100)}%</span>
+              <span className="font-bold">{Math.round((correctAnswers / questions.length) * 100)}%</span>
             </div>
-            <Progress value={Math.round((userAnswers.filter((answer, index) => answer === questions[index].isTrue).length / questions.length) * 100)} className="h-3" />
+            <Progress value={Math.round((correctAnswers / questions.length) * 100)} className="h-3" />
           </div>
           <div className="text-2xl font-bold mb-6">
-            {userAnswers.filter((answer, index) => answer === questions[index].isTrue).length} / {questions.length}
+            {correctAnswers} / {questions.length}
           </div>
           <div className="text-sm mb-4 text-muted-foreground">
             Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
@@ -195,57 +201,50 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
         </div>
         <Progress value={progress} className="h-2" />
       </div>
-      
       <Card className="p-6 mb-4 mx-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
-        <h2 className="text-xl font-semibold mb-6 text-center">{question.statement}</h2>
-        
-        <div className="grid grid-cols-1 gap-4 mb-6 max-w-md mx-auto">
+        <h2 className="text-xl font-semibold mb-6">{question.statement}</h2>
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <Button 
-            className={`p-6 flex items-center justify-center text-lg font-medium min-h-[80px] ${
+            className={`p-6 flex items-center justify-center ${
               currentAnswer === true 
                 ? currentAnswer === question.isTrue
-                  ? 'bg-green-500 hover:bg-green-600 text-white'
-                  : 'bg-red-500 hover:bg-red-600 text-white'
-                : 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                  ? 'bg-green-500 hover:bg-green-600'
+                  : 'bg-red-500 hover:bg-red-600'
+                : 'bg-primary/80 hover:bg-primary'
             }`}
             onClick={() => handleAnswer(true)}
             disabled={currentAnswer !== null}
-            size="lg"
           >
-            <CheckCircle className="h-8 w-8 mr-3" />
-            <span>ĐÚNG</span>
+            <CheckCircle className="h-7 w-7 mr-2" />
+            <span className="text-lg font-medium">Đúng</span>
           </Button>
-          
           <Button 
-            className={`p-6 flex items-center justify-center text-lg font-medium min-h-[80px] ${
+            className={`p-6 flex items-center justify-center ${
               currentAnswer === false 
                 ? currentAnswer === question.isTrue
-                  ? 'bg-green-500 hover:bg-green-600 text-white'
-                  : 'bg-red-500 hover:bg-red-600 text-white'
-                : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground border-2 border-muted'
+                  ? 'bg-green-500 hover:bg-green-600'
+                  : 'bg-red-500 hover:bg-red-600'
+                : 'bg-primary/80 hover:bg-primary'
             }`}
             onClick={() => handleAnswer(false)}
             disabled={currentAnswer !== null}
-            size="lg"
           >
-            <XCircle className="h-8 w-8 mr-3" />
-            <span>SAI</span>
+            <XCircle className="h-7 w-7 mr-2" />
+            <span className="text-lg font-medium">Sai</span>
           </Button>
         </div>
-        
         {showExplanation && (
-          <div className={`p-4 rounded-lg mt-4 ${question.isTrue ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+          <div className={`p-4 rounded-lg mt-4 ${question.isTrue ? 'bg-green-50 border border-green-200' : 'bg-red-50 border-red-200'}`}>
             <div className="flex items-start">
               <AlertCircle className={`h-5 w-5 mr-2 mt-0.5 ${question.isTrue ? 'text-green-600' : 'text-red-600'}`} />
               <div>
                 <p className="font-medium mb-1">Giải thích:</p>
-                <p className="text-sm">{question.explanation}</p>
+                <p>{question.explanation}</p>
               </div>
             </div>
           </div>
         )}
       </Card>
-      
       <div className="mt-auto flex gap-2 px-4 pb-2">
         <Button 
           variant="outline"

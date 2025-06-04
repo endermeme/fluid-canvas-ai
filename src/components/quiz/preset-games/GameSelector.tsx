@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { 
   Brain, BookOpen, Puzzle, Dices, 
   Image, CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
-  ArrowRight
+  ArrowRight, Zap, RotateCcw, Target, Gamepad2, Settings, CircleDot
 } from 'lucide-react';
 import GameSettings from '../GameSettings';
 import { GameSettingsData } from '../types';
@@ -48,49 +48,79 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       id: 'quiz', 
       name: 'Trắc Nghiệm', 
       description: 'Trả lời câu hỏi nhiều lựa chọn',
-      icon: <Brain className="h-8 w-8 text-primary" />
+      icon: <Brain className="h-8 w-8 text-blue-600" />
     },
     { 
       id: 'flashcards', 
       name: 'Thẻ Ghi Nhớ', 
       description: 'Học với thẻ hai mặt',
-      icon: <BookOpen className="h-8 w-8 text-primary" />
+      icon: <BookOpen className="h-8 w-8 text-green-600" />
     },
     { 
       id: 'matching', 
       name: 'Nối Từ', 
       description: 'Nối các cặp từ tương ứng với nhau',
-      icon: <ArrowRightLeft className="h-8 w-8 text-primary" />
+      icon: <ArrowRightLeft className="h-8 w-8 text-purple-600" />
     },
     { 
       id: 'memory', 
       name: 'Trò Chơi Ghi Nhớ', 
       description: 'Tìm các cặp thẻ giống nhau',
-      icon: <Dices className="h-8 w-8 text-primary" />
+      icon: <Brain className="h-8 w-8 text-pink-600" />
     },
     { 
       id: 'ordering', 
       name: 'Sắp Xếp Câu', 
       description: 'Sắp xếp các từ để tạo thành câu hoàn chỉnh',
-      icon: <Layers className="h-8 w-8 text-primary" />
+      icon: <Layers className="h-8 w-8 text-indigo-600" />
     },
     { 
       id: 'wordsearch', 
       name: 'Tìm Từ Ẩn', 
       description: 'Tìm các từ ẩn trong bảng chữ cái',
-      icon: <Search className="h-8 w-8 text-primary" />
+      icon: <Search className="h-8 w-8 text-orange-600" />
     },
     { 
       id: 'pictionary', 
       name: 'Đoán Hình', 
       description: 'Đoán từ qua hình ảnh',
-      icon: <Image className="h-8 w-8 text-primary" />
+      icon: <Image className="h-8 w-8 text-teal-600" />
     },
     { 
       id: 'truefalse', 
       name: 'Đúng hay Sai', 
       description: 'Xác định nội dung là đúng hay sai',
-      icon: <CheckSquare className="h-8 w-8 text-primary" />
+      icon: <CheckSquare className="h-8 w-8 text-emerald-600" />
+    },
+    { 
+      id: 'balloonpop', 
+      name: 'Bóng Bay Đố Vui', 
+      description: 'Nổ bóng bay để khám phá câu hỏi thú vị',
+      icon: <CircleDot className="h-8 w-8 text-yellow-600" />
+    },
+    { 
+      id: 'spinwheel', 
+      name: 'Quay Bánh Xe', 
+      description: 'Quay bánh xe may mắn để nhận câu hỏi',
+      icon: <RotateCcw className="h-8 w-8 text-cyan-600" />
+    },
+    { 
+      id: 'whackmole', 
+      name: 'Đập Chuột Đố Vui', 
+      description: 'Đập nhanh chuột có đáp án đúng',
+      icon: <Target className="h-8 w-8 text-red-600" />
+    },
+    { 
+      id: 'stackbuilder', 
+      name: 'Xếp Khối Đố Vui', 
+      description: 'Kéo thả các khối theo thứ tự đúng',
+      icon: <Layers className="h-8 w-8 text-violet-600" />
+    },
+    { 
+      id: 'catchobjects', 
+      name: 'Bắt Vật Thể', 
+      description: 'Bắt các vật thể có đáp án đúng',
+      icon: <Target className="h-8 w-8 text-amber-600" />
     }
   ];
 
@@ -143,7 +173,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
             onClick={() => handleSelectGame(game.id)}
           >
             <div className="flex flex-col items-center text-center gap-3">
-              <div className="p-3 bg-primary/10 rounded-full">
+              <div className="p-3 bg-white rounded-full shadow-sm">
                 {game.icon}
               </div>
               <div>

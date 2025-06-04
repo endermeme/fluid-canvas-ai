@@ -1,86 +1,125 @@
 
-# Game Changes Log
+# Game Development Changes Log
 
-## 2025-01-03 - Fix lỗi game "Đúng hay Sai" và "Đoán Hình"
+## Cập nhật mới nhất - Tái cấu trúc Game Templates
 
-### Files thay đổi:
-- **src/components/quiz/preset-games/templates/TrueFalseTemplate.tsx** - SỬA: Fix hiển thị nút lựa chọn Đúng/Sai
-- **src/components/quiz/preset-games/templates/PictionaryTemplate.tsx** - SỬA: Thay thế hình ảnh giả bằng hình ảnh thực từ Unsplash
-- **src/components/quiz/preset-games/data/pictionarySampleData.ts** - SỬA: Cập nhật URL hình ảnh thực tế
+### Ngày cập nhật: [Current Date]
 
-### Loại thay đổi:
-- Sửa lỗi game Đúng hay Sai không hiển thị được nút lựa chọn
-- Thay thế hình ảnh example.com bằng hình ảnh thực tế từ Unsplash
-- Cải thiện trải nghiệm người dùng với hình ảnh chất lượng cao
+### Các thay đổi chính:
 
-## 2025-01-03 - Refactor GameSharePage thành các component nhỏ hơn
+#### 1. Balloon Pop Game - Tái cấu trúc hoàn toàn
+- **Tạo thư mục:** `src/components/quiz/preset-games/templates/balloon-pop/`
+- **Components:** 
+  - `BalloonPopGame.tsx` - Main game logic
+  - `components/BalloonPopHeader.tsx` - Game header với timer và score
+  - `components/BalloonField.tsx` - Playing field với balloons
+  - `components/Balloon.tsx` - Individual balloon component (CSS-based)
+  - `components/QuestionModal.tsx` - Question display
+  - `components/GameResult.tsx` - Result screen
+- **Styles:** `styles/balloon-pop.css` - CSS animations và effects
+- **Assets:** `assets/` folder với README
 
-### Files thay đổi:
-- **src/components/game-share/GameShareForm.tsx** - TẠO MỚI: Component form tham gia game
-- **src/components/game-share/ParticipantsList.tsx** - TẠO MỚI: Component danh sách người chơi 
-- **src/components/game-share/ShareSection.tsx** - TẠO MỚI: Component chia sẻ game
-- **src/pages/GameSharePage.tsx** - SỬA: Refactor thành component nhỏ hơn
+#### 2. Spin Wheel Game - Cấu trúc mới
+- **Tạo thư mục:** `src/components/quiz/preset-games/templates/spin-wheel/`
+- **Components:**
+  - `SpinWheelGame.tsx` - Main game logic
+  - `components/SpinWheelHeader.tsx` - Header với progress
+  - `components/WheelComponent.tsx` - Interactive wheel với SVG
+  - `components/QuestionAnswerModal.tsx` - Question interface
+  - `components/GameResultModal.tsx` - Results display
+- **Styles:** `styles/spin-wheel.css` - Wheel animations
+- **Assets:** `assets/` folder
 
-### Loại thay đổi:
-- Tách GameSharePage từ 521 dòng thành 4 component riêng biệt
-- Cải thiện khả năng bảo trì và tái sử dụng code
-- Tách logic form, danh sách người chơi và phần chia sẻ
-- Giữ nguyên 100% chức năng hiện tại
+#### 3. Whack-a-Mole Game - Cấu trúc mới  
+- **Tạo thư mục:** `src/components/quiz/preset-games/templates/whack-mole/`
+- **Components:**
+  - `WhackMoleGame.tsx` - Main game logic
+  - `components/WhackMoleHeader.tsx` - Game controls
+  - `components/GameField.tsx` - Playing field
+  - `components/MoleComponent.tsx` - CSS-based mole (không dùng emoji)
+  - `components/GameStartScreen.tsx` - Start screen
+  - `components/GameResultModal.tsx` - Results
+- **Styles:** `styles/whack-mole.css` - Mole animations
+- **Assets:** `assets/` folder
 
-## 2025-01-03 - Sửa lỗi form tham gia game và cải thiện real-time sync
+#### 4. Stack Builder Game - Cấu trúc mới
+- **Tạo thư mục:** `src/components/quiz/preset-games/templates/stack-builder/`
+- **Components:**
+  - `StackBuilderGame.tsx` - Main game logic  
+  - `components/StackBuilderHeader.tsx` - Header với timer
+  - `components/GameArea.tsx` - Main play area
+  - `components/BlockArea.tsx` - Available và stack areas
+  - `components/GameControls.tsx` - Game controls
+  - `components/GameResultModal.tsx` - Results
+  - `components/HintPanel.tsx` - Hint display
+- **Styles:** `styles/stack-builder.css` - Block animations
+- **Assets:** `assets/` folder
 
-### Files thay đổi:
-- **src/pages/GameSharePage.tsx** - SỬA: Sửa form không đóng và thêm auto-refresh participants
+#### 5. Catch Objects Game - Cấu trúc mới
+- **Tạo thư mục:** `src/components/quiz/preset-games/templates/catch-objects/`
+- **Components:**
+  - `CatchObjectsGame.tsx` - Main game logic
+  - `components/CatchObjectsHeader.tsx` - Header với stats
+  - `components/GameArea.tsx` - Playing field
+  - `components/FallingObject.tsx` - Falling objects với CSS
+  - `components/Basket.tsx` - Basket component với CSS
+  - `components/GameControls.tsx` - Controls
+  - `components/GameResultModal.tsx` - Results
+- **Styles:** `styles/catch-objects.css` - Object animations
+- **Assets:** `assets/` folder
 
-### Loại thay đổi:
-- Sửa lỗi form không đóng sau khi submit thành công
-- Thêm loading state cho form để tránh double submit
-- Thêm auto-refresh danh sách người chơi mỗi 10 giây
-- Thêm nút "Làm mới" thủ công cho danh sách người chơi
-- Cải thiện UI feedback với loading states và visual indicators
-- Reset form sau khi submit thành công
+### Cải tiến UI/UX:
 
-## 2025-01-03 - Sửa lỗi RLS policy cho game_participants
+#### Balloon Pop Game:
+- ✅ Bóng bay CSS với gradient thay vì emoji
+- ✅ Animation bay lơ lửng tự nhiên
+- ✅ Explosion effects khi pop
+- ✅ Màn hình câu hỏi lớn hơn
+- ✅ Responsive design
 
-### Files thay đổi:
-- **src/pages/GameSharePage.tsx** - SỬA: Xử lý lỗi RLS khi tham gia game
-- **src/utils/gameParticipation.ts** - SỬA: Cập nhật logic xử lý lỗi database
+#### Spin Wheel Game:
+- ✅ Vòng quay SVG với animation tự nhiên
+- ✅ Tốc độ quay realistic với deceleration
+- ✅ Giao diện đẹp hơn với gradients
+- ✅ Pointer và sections có animation
 
-### Loại thay đổi:
-- Sửa lỗi "new row violates row-level security policy" 
-- Thêm fallback khi không thể ghi vào Supabase
-- Cải thiện error handling cho form tham gia game
+#### Whack-a-Mole Game:
+- ✅ Chuột CSS thay vì emoji
+- ✅ 3 chuột xuất hiện đồng thời
+- ✅ Holes với shadow và depth
+- ✅ Hit animations và effects
+- ✅ Tốc độ spawn cải thiện
 
-## 2025-01-03 - Sửa lỗi build sau khi dọn dẹp code
+#### Stack Builder Game:
+- ✅ Block CSS với gradients và shadows
+- ✅ Drag & drop với smooth transitions
+- ✅ Numbered sequence display
+- ✅ Hint system cải thiện
+- ✅ Explanation modal đẹp hơn
 
-### Files thay đổi:
-- **src/components/quiz/hooks/useIframeManager.ts** - SỬA: Loại bỏ loadAttempts và maxRetryAttempts không cần thiết
-- **src/components/quiz/custom-games/EnhancedGameView.tsx** - SỬA: Loại bỏ props loadAttempts và maxAttempts
-- **src/components/quiz/custom-games/GameController.tsx** - SỬA: Import từ CustomGameForm đúng path
-- **src/components/quiz/custom-games/ui/index.ts** - SỬA: Loại bỏ export CustomGameForm không tồn tại
+#### Catch Objects Game:
+- ✅ Falling objects CSS với float animation
+- ✅ Basket CSS với 3D effects
+- ✅ Sky gradient background
+- ✅ Collision detection cải thiện
+- ✅ Object spawn realistic hơn
 
-### Loại thay đổi:
-- Sửa lỗi TypeScript sau khi dọn dẹp code
-- Đơn giản hóa GameLoadingIndicator chỉ nhận progress prop
-- Sửa import paths sau khi xóa file trùng lặp
+### Cấu trúc Code:
+- ✅ Mỗi game có thư mục riêng
+- ✅ Components tách biệt rõ ràng
+- ✅ CSS riêng cho animations
+- ✅ Assets folder sẵn sàng cho hình ảnh
+- ✅ TypeScript interfaces rõ ràng
+- ✅ Responsive design cho mobile
 
-## 2025-01-03 - Dọn dẹp Custom Game và tách Prompt ra JSON
+### Hoàn thành:
+- ✅ Balloon Pop Game cấu trúc mới
+- ✅ Spin Wheel Game cấu trúc mới  
+- ✅ Whack-a-Mole Game cấu trúc mới
+- ✅ Stack Builder Game cấu trúc mới
+- ✅ Catch Objects Game cấu trúc mới
 
-### Files thay đổi:
-- **src/components/quiz/generator/gamePrompts.json** - TẠO MỚI: Tách prompt ra file JSON riêng
-- **src/components/quiz/generator/geminiPrompt.ts** - SỬA: Đọc prompt từ JSON
-- **src/components/quiz/generator/geminiGenerator.ts** - SỬA: Đơn giản hóa, xóa canvas/difficulty functions
-- **src/components/quiz/custom-games/CustomGameForm.tsx** - SỬA: Loại bỏ canvas mode và difficulty settings
-- **src/components/quiz/generator/types.ts** - SỬA: Đơn giản hóa interface
-- **src/components/quiz/custom-games/ui/index.ts** - SỬA: Xóa exports không cần thiết
-
-### Files xóa:
-- **src/components/quiz/custom-games/ui/CustomGameForm.tsx** - XÓA: File trùng lặp
-- **src/components/quiz/generator/customGamePrompt.ts** - XÓA: Đã tách ra JSON
-- **src/components/quiz/generator/promptBuilder.ts** - XÓA: Không cần thiết
-
-### Loại thay đổi:
-- Dọn dẹp code thừa và functions không sử dụng
-- Tách prompt template ra file JSON độc lập
-- Đơn giản hóa logic custom game chỉ còn input textarea
-- Loại bỏ canvas mode và difficulty settings không cần thiết
+### Chờ cập nhật:
+- [ ] Các game cũ (Quiz, Memory, etc.) giữ nguyên cấu trúc hiện tại
+- [ ] Thêm sound effects cho các game
+- [ ] Thêm particle effects nâng cao
