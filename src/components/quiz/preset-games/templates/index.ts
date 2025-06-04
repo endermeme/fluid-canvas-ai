@@ -7,7 +7,7 @@ import OrderingTemplate from './OrderingTemplate';
 import WordSearchTemplate from './WordSearchTemplate';
 import PictionaryTemplate from './PictionaryTemplate';
 import TrueFalseTemplate from './TrueFalseTemplate';
-import BalloonPopTemplate from './BalloonPopTemplate';
+import BalloonPopTemplate from './balloon-pop';
 import SpinWheelTemplate from './SpinWheelTemplate';
 import WhackMoleTemplate from './WhackMoleTemplate';
 import StackBuilderTemplate from './StackBuilderTemplate';
