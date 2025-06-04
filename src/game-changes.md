@@ -1,6 +1,29 @@
 
 # Game Changes Log
 
+## 2025-01-03 - Cập nhật icons độc đáo cho từng game
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/GameSelector.tsx** - SỬA: Thay đổi icons và màu sắc cho 13 game types
+
+### Loại thay đổi:
+- Cập nhật biểu tượng độc đáo cho từng game:
+  - Quiz: Brain (xanh dương)
+  - Flashcards: BookOpen (xanh lá)
+  - Matching: ArrowRightLeft (tím)
+  - Memory: Puzzle (hồng)
+  - Ordering: Layers (chàm)
+  - WordSearch: Search (cam)
+  - Pictionary: Image (ngọc lam)
+  - TrueFalse: CheckSquare (xanh lục)
+  - BalloonPop: Zap (vàng)
+  - SpinWheel: RotateCcw (xanh nhạt)
+  - WhackMole: Target (đỏ)
+  - StackBuilder: Gamepad2 (tím đậm)
+  - CatchObjects: Dices (vàng đậm)
+- Mỗi icon có màu sắc riêng biệt để dễ phân biệt
+- Thay đổi background icon từ primary/10 thành white với shadow
+
 ## 2025-01-03 - Sửa lỗi build cho SpinWheel và WhackMole games
 
 ### Files thay đổi:
