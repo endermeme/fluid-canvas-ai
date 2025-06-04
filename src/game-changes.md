@@ -1,18 +1,23 @@
 
 # Game Development Changes Log
 
-## Cập nhật mới nhất - Loại bỏ Stack Builder Game
+## Cập nhật mới nhất - Sửa lỗi Catch Objects và Loại bỏ hoàn toàn Stack Builder Game
 
 ### Ngày cập nhật: [Current Date]
 
 ### Các thay đổi chính:
 
-#### 1. Balloon Pop Game - Cải thiện Animation
+#### 1. Sửa lỗi Catch Objects Game
+- ✅ **Tạo file dữ liệu mẫu**: Tạo catchObjectsSampleData.ts để khắc phục lỗi "Unknown variable dynamic import"
+- ✅ **Sample data hoàn chình**: 6 câu hỏi với emoji objects đa dạng
+- ✅ **Game settings**: Cấu hình thời gian, tốc độ, điểm số hợp lý
+
+#### 2. Balloon Pop Game - Cải thiện Animation
 - ✅ **Bóng bay bay qua lại**: Thêm animation `balloon-float` và `balloon-sway` tự nhiên
 - ✅ **Font chữ cải thiện**: Sử dụng Inter font family cho tất cả text
 - ✅ **Animation mượt mà hơn**: Balloons không đứng yên mà bay lơ lửng liên tục
 
-#### 2. Whack-a-Mole Game - Tăng độ khó và cải thiện UI
+#### 3. Whack-a-Mole Game - Tăng độ khó và cải thiện UI
 - ✅ **Giao diện chuột mới**: Thiết kế chuột CSS đẹp với gradient, shadow và chi tiết
 - ✅ **Ẩn đáp án**: Không hiển thị đáp án trên chuột để tăng độ khó
 - ✅ **Thuật toán spawn thông minh**: 
@@ -21,29 +26,31 @@
   - Random thời gian hiện chuột
 - ✅ **Tính thử thách cao hơn**: Người chơi phải nhớ đáp án và đoán
 
-#### 3. Spin Wheel Game - Giảm tốc độ quay
+#### 4. Spin Wheel Game - Giảm tốc độ quay
 - ✅ **Vòng quay chậm hơn**: Tăng thời gian quay từ 2s lên 5s
 - ✅ **Animation mượt**: Sử dụng cubic-bezier easing
 - ✅ **Tăng số vòng quay**: 6-10 vòng thay vì 3-5 vòng
 - ✅ **Font chữ cải thiện**: Inter font family cho tất cả components
 
-#### 4. Loại bỏ Stack Builder Game
+#### 5. **Loại bỏ hoàn toàn Stack Builder Game**
 - ✅ **Xóa hoàn toàn**: Xóa tất cả files, components và data liên quan
 - ✅ **Lý do**: Game xếp từ đố vui không phù hợp với yêu cầu
 - ✅ **Clean up**: Loại bỏ khỏi gameTemplates và routes
+- ✅ **Không còn tồn tại**: Đã xóa hoàn toàn khỏi hệ thống
 
-#### 5. Cập nhật AI Model
+#### 6. Cập nhật AI Model
 - ✅ **Model mới**: Chuyển từ gemini-1.5-flash lên gemini-2.0-flash-exp
 - ✅ **Performance tốt hơn**: Model mới có khả năng tạo content tốt hơn
 
-#### 6. Cải thiện Font và UI Global
+#### 7. Cải thiện Font và UI Global
 - ✅ **Font family thống nhất**: Inter font cho tất cả games
 - ✅ **Responsive design**: Tối ưu cho mobile
 - ✅ **Animation timing**: Cải thiện tốc độ và smoothness
 
-#### 7. Sửa lỗi Build Errors
-- ✅ **Import fixes**: Sửa lỗi import GEMINI_API_KEY và PRESET_GAME
+#### 8. Sửa lỗi Build Errors
+- ✅ **Import fixes**: Sửa lỗi import GEMINI_API_KEY
 - ✅ **Clean imports**: Chỉ import những constants cần thiết
+- ✅ **Catch Objects fix**: Tạo missing sample data file
 
 ### Hoàn thành:
 - ✅ Balloon Pop Game - Animation bay qua lại
@@ -52,9 +59,26 @@
 - ✅ Font improvements cho tất cả games
 - ✅ Cập nhật AI model
 - ✅ **Loại bỏ Stack Builder game hoàn toàn**
+- ✅ **Sửa lỗi Catch Objects Sample Data**
 - ✅ Sửa lỗi build errors
 
 ### Tiếp theo:
-- [ ] Catch Objects Game improvements nếu cần
-- [ ] Thêm sound effects
+- [ ] Thêm sound effects cho các games
 - [ ] Particle effects nâng cao
+- [ ] Performance optimization
+
+### Games hiện có:
+1. Quiz - Trắc nghiệm
+2. Flashcards - Thẻ ghi nhớ  
+3. Matching - Nối từ
+4. Memory - Trò chơi ghi nhớ
+5. Ordering - Sắp xếp câu
+6. WordSearch - Tìm từ
+7. Pictionary - Đoán hình
+8. TrueFalse - Đúng hay sai
+9. BalloonPop - Bóng bay đố vui
+10. SpinWheel - Quay bánh xe
+11. WhackMole - Đập chuột đố vui
+12. CatchObjects - Bắt vật thể
+
+**Lưu ý**: Stack Builder game đã được loại bỏ hoàn toàn khỏi hệ thống.
