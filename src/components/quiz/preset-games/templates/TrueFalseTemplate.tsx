@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import PresetGameHeader from '../PresetGameHeader';
 import { Button } from '@/components/ui/button';
@@ -26,11 +25,11 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   const [timerRunning, setTimerRunning] = useState(true);
   const [showResult, setShowResult] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
-  const [currentAnswer, setCurrentAnswer] = useState<boolean | null>(null);
   const { toast } = useToast();
 
   const questions = gameContent?.questions || [];
   const isLastQuestion = currentQuestion === questions.length - 1;
+  const currentAnswer = userAnswers[currentQuestion];
 
   useEffect(() => {
     if (!gameStarted && questions.length > 0) {
@@ -39,20 +38,24 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
       const totalTime = gameContent?.settings?.totalTime || (questions.length * questionTime);
       setTimeLeft(questionTime);
       setTotalTimeLeft(totalTime);
-      setUserAnswers(new Array(questions.length).fill(null));
     }
   }, [gameContent, questions, gameStarted]);
 
   useEffect(() => {
-    if (timeLeft > 0 && timerRunning && !showExplanation) {
+    if (timeLeft > 0 && timerRunning) {
       const timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && timerRunning && !showExplanation) {
-      handleAnswer(null);
+    } else if (timeLeft === 0 && timerRunning) {
+      setTimerRunning(false);
+      toast({
+        title: "Hết thời gian!",
+        description: "Bạn đã không trả lời kịp thời.",
+        variant: "destructive",
+      });
     }
-  }, [timeLeft, timerRunning, showExplanation]);
+  }, [timeLeft, timerRunning, toast]);
 
   useEffect(() => {
     if (totalTimeLeft > 0 && gameStarted && !showResult) {
@@ -70,36 +73,26 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     }
   }, [totalTimeLeft, gameStarted, showResult, toast]);
 
-  const handleAnswer = (answer: boolean | null) => {
+  const handleAnswer = (answer: boolean) => {
     if (currentAnswer !== null) return;
-    
-    setCurrentAnswer(answer);
     const newAnswers = [...userAnswers];
     newAnswers[currentQuestion] = answer;
     setUserAnswers(newAnswers);
     setShowExplanation(gameContent?.settings?.showExplanation ?? true);
     setTimerRunning(false);
 
-    if (answer !== null) {
-      const isCorrect = answer === questions[currentQuestion].isTrue;
-      if (isCorrect) {
-        setScore(score + 1);
-        toast({
-          title: "Chính xác! +1 điểm",
-          description: "Câu trả lời của bạn đúng.",
-          variant: "default",
-        });
-      } else {
-        toast({
-          title: "Không chính xác!",
-          description: "Câu trả lời của bạn không đúng.",
-          variant: "destructive",
-        });
-      }
+    const isCorrect = answer === questions[currentQuestion].isTrue;
+    if (isCorrect) {
+      setScore(score + 1);
+      toast({
+        title: "Chính xác! +1 điểm",
+        description: "Câu trả lời của bạn đúng.",
+        variant: "default",
+      });
     } else {
       toast({
-        title: "Hết thời gian!",
-        description: "Bạn đã không trả lời kịp thời.",
+        title: "Không chính xác!",
+        description: "Câu trả lời của bạn không đúng.",
         variant: "destructive",
       });
     }
@@ -110,7 +103,6 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
       setShowResult(true);
     } else {
       setCurrentQuestion(currentQuestion + 1);
-      setCurrentAnswer(null);
       setShowExplanation(false);
       setTimeLeft(gameContent?.settings?.timePerQuestion || 15);
       setTimerRunning(true);
@@ -119,8 +111,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
 
   const handleRestart = () => {
     setCurrentQuestion(0);
-    setUserAnswers(new Array(questions.length).fill(null));
-    setCurrentAnswer(null);
+    setUserAnswers([]);
     setScore(0);
     setShowExplanation(false);
     setShowResult(false);
@@ -140,7 +131,6 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   }
 
   if (showResult) {
-    const correctAnswers = userAnswers.filter((answer, index) => answer === questions[index].isTrue).length;
     return (
       <div className="flex flex-col items-center justify-center h-full p-6">
         <PresetGameHeader onShare={onShare} />
@@ -152,12 +142,12 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
           <div className="mb-6">
             <div className="flex justify-between mb-2">
               <span>Điểm của bạn</span>
-              <span className="font-bold">{Math.round((correctAnswers / questions.length) * 100)}%</span>
+              <span className="font-bold">{Math.round((userAnswers.filter((answer, index) => answer === questions[index].isTrue).length / questions.length) * 100)}%</span>
             </div>
-            <Progress value={Math.round((correctAnswers / questions.length) * 100)} className="h-3" />
+            <Progress value={Math.round((userAnswers.filter((answer, index) => answer === questions[index].isTrue).length / questions.length) * 100)} className="h-3" />
           </div>
           <div className="text-2xl font-bold mb-6">
-            {correctAnswers} / {questions.length}
+            {userAnswers.filter((answer, index) => answer === questions[index].isTrue).length} / {questions.length}
           </div>
           <div className="text-sm mb-4 text-muted-foreground">
             Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}

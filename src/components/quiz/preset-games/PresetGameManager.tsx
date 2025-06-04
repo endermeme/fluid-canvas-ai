@@ -25,6 +25,7 @@ import { Copy, Check } from 'lucide-react';
 import PresetGameHeader from './PresetGameHeader';
 
 import { 
+  GEMINI_API_KEY, 
   GEMINI_MODELS, 
   getApiEndpoint, 
   DEFAULT_GENERATION_SETTINGS 
@@ -126,18 +127,6 @@ Output must be valid JSON. `;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
           break;
-        case 'balloonpop':
-          gamePrompt += `JSON format: { "title": "title", "description": "description", "balloons": [{"id": id_number, "question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "color": "color_name", "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "allowSkip": true, "showExplanation": true, "balloonPopAnimation": true} }`;
-          break;
-        case 'spinwheel':
-          gamePrompt += `JSON format: { "title": "title", "description": "description", "wheelSections": [{"id": id_number, "question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "color": "hex_color", "explanation": "explanation"}], "settings": {"spinDuration": 3, "timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "allowSkip": true, "showExplanation": true, "autoSpin": false} }`;
-          break;
-        case 'whackmole':
-          gamePrompt += `JSON format: { "title": "title", "description": "description", "questions": [{"id": id_number, "question": "question", "correctAnswer": "correct_answer", "wrongAnswers": ["wrong1", "wrong2", "wrong3", "wrong4"]}], "settings": {"gameTime": ${totalTime || 60}, "moleShowTime": 3, "pointsPerCorrect": 10, "pointsPerWrong": -5, "holesCount": 9, "maxMolesAtOnce": 3} }`;
-          break;
-        case 'catchobjects':
-          gamePrompt += `JSON format: { "title": "title", "description": "description", "questions": [{"id": id_number, "question": "question", "correctObjects": ["obj1", "obj2", "obj3", "obj4"], "wrongObjects": ["wrong1", "wrong2", "wrong3", "wrong4"], "category": "category_name"}], "settings": {"gameTime": ${totalTime || 90}, "objectSpeed": 2, "spawnRate": 1.5, "pointsPerCorrect": 10, "pointsPerWrong": -5, "basketSize": 80, "objectSize": 40} }`;
-          break;
       }
 
       gamePrompt += " Return only JSON, no additional text.";
@@ -155,7 +144,7 @@ Output must be valid JSON. `;
         }
       };
 
-      const response = await fetch(getApiEndpoint(GEMINI_MODELS.CUSTOM_GAME), {
+      const response = await fetch(getApiEndpoint(GEMINI_MODELS.PRESET_GAME), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -223,29 +212,6 @@ Output must be valid JSON. `;
             parsedContent.settings.timePerQuestion = timePerQuestion;
             parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 3;
-            break;
-          case 'balloonpop':
-            parsedContent.settings.timePerQuestion = timePerQuestion;
-            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
-            parsedContent.settings.allowSkip = true;
-            parsedContent.settings.showExplanation = true;
-            parsedContent.settings.balloonPopAnimation = true;
-            break;
-          case 'spinwheel':
-            parsedContent.settings.spinDuration = 3;
-            parsedContent.settings.timePerQuestion = timePerQuestion;
-            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
-            parsedContent.settings.allowSkip = true;
-            parsedContent.settings.showExplanation = true;
-            parsedContent.settings.autoSpin = false;
-            break;
-          case 'whackmole':
-            parsedContent.settings.gameTime = totalTime || 60;
-            parsedContent.settings.moleShowTime = 3;
-            parsedContent.settings.pointsPerCorrect = 10;
-            parsedContent.settings.pointsPerWrong = -5;
-            parsedContent.settings.holesCount = 9;
-            parsedContent.settings.maxMolesAtOnce = 3;
             break;
         }
 
@@ -338,29 +304,6 @@ Output must be valid JSON. `;
             data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
             data.settings.bonusTimePerCorrect = settings.bonusTime || 3;
             break;
-          case 'balloonpop':
-            data.settings.timePerQuestion = settings.timePerQuestion;
-            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
-            data.settings.allowSkip = true;
-            data.settings.showExplanation = true;
-            data.settings.balloonPopAnimation = true;
-            break;
-          case 'spinwheel':
-            data.settings.spinDuration = 3;
-            data.settings.timePerQuestion = settings.timePerQuestion;
-            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
-            data.settings.allowSkip = true;
-            data.settings.showExplanation = true;
-            data.settings.autoSpin = false;
-            break;
-          case 'whackmole':
-            data.settings.gameTime = settings.totalTime || 60;
-            data.settings.moleShowTime = 3;
-            data.settings.pointsPerCorrect = 10;
-            data.settings.pointsPerWrong = -5;
-            data.settings.holesCount = 9;
-            data.settings.maxMolesAtOnce = 3;
-            break;
         }
       }
 
@@ -411,10 +354,6 @@ Output must be valid JSON. `;
       case 'wordsearch': return 'Tìm Từ';
       case 'pictionary': return 'Đoán Hình';
       case 'truefalse': return 'Đúng hay Sai';
-      case 'balloonpop': return 'Bóng Bay Đố Vui';
-      case 'spinwheel': return 'Quay Bánh Xe';
-      case 'whackmole': return 'Đập Chuột Đố Vui';
-      case 'catchobjects': return 'Bắt Vật Thể';
       default: return 'Trò Chơi';
     }
   };
@@ -494,34 +433,6 @@ Output must be valid JSON. `;
         name: 'Đúng hay Sai',
         description: 'Kiểm tra kiến thức với các câu hỏi đúng/sai',
         icon: 'clock',
-        defaultSettings: settings
-      },
-      'balloonpop': {
-        id: 'balloonpop',
-        name: 'Bóng Bay Đố Vui',
-        description: 'Trò chơi balloon pop với nhiều lựa chọn',
-        icon: 'balloon',
-        defaultSettings: settings
-      },
-      'spinwheel': {
-        id: 'spinwheel',
-        name: 'Quay Bánh Xe',
-        description: 'Quay bánh xe may mắn để nhận câu hỏi',
-        icon: 'rotate-ccw',
-        defaultSettings: settings
-      },
-      'whackmole': {
-        id: 'whackmole',
-        name: 'Đập Chuột Đố Vui',
-        description: 'Đập nhanh chuột có đáp án đúng',
-        icon: 'target',
-        defaultSettings: settings
-      },
-      'catchobjects': {
-        id: 'catchobjects',
-        name: 'Bắt Vật Thể',
-        description: 'Bắt các vật thể có đáp án đúng',
-        icon: 'target',
         defaultSettings: settings
       }
     };

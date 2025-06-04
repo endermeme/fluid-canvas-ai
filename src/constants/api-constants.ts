@@ -1,35 +1,35 @@
+/**
+ * API Constants for the application
+ * Centralized location for all API keys and model configurations
+ */
 
-// API Configuration
-export const API_VERSION = 'v1beta';
-export const BASE_URL = 'https://generativelanguage.googleapis.com';
+// Google Gemini API Key (public API key)
+export const GEMINI_API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
-// Gemini Models - Cập nhật model mới
+// Gemini Model configurations - đơn giản hóa
 export const GEMINI_MODELS = {
-  CUSTOM_GAME: 'gemini-2.0-flash-exp', // Cập nhật lên model mới nhất
-  CONTENT_GENERATION: 'gemini-2.0-flash-exp',
-  TEXT_ONLY: 'gemini-2.0-flash-exp'
+  CUSTOM_GAME: "gemini-2.5-pro-preview-05-06",
+  PRESET_GAME: "gemini-2.5-pro-preview-05-06"
 };
 
-// API Endpoints
-export const getApiEndpoint = (model: string = GEMINI_MODELS.CUSTOM_GAME): string => {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
-  return `${BASE_URL}/${API_VERSION}/models/${model}:generateContent?key=${apiKey}`;
-};
+// API Version
+export const API_VERSION = "v1beta";
 
-// Default Generation Settings
+// API Base URL
+export const API_BASE_URL = "https://generativelanguage.googleapis.com";
+
+// Full API Endpoint
+export const getApiEndpoint = (model = GEMINI_MODELS.CUSTOM_GAME) => 
+  `${API_BASE_URL}/${API_VERSION}/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+
+// AI Generation Settings - đơn giản hóa
 export const DEFAULT_GENERATION_SETTINGS = {
-  temperature: 0.7,
-  topK: 40,
-  topP: 0.95,
-  maxOutputTokens: 8192,
-  candidateCount: 1
+  temperature: 0.3
+  // Không cần thêm các thông số phức tạp khác
 };
 
-// Request timeout (30 seconds)
-export const REQUEST_TIMEOUT = 30000;
+// Request timeout in milliseconds
+export const REQUEST_TIMEOUT = 60000; // 60 seconds
 
-// Rate limiting
-export const RATE_LIMIT = {
-  maxRequestsPerMinute: 60,
-  maxRequestsPerHour: 1000
-};
+// Maximum retry attempts for API calls
+export const MAX_RETRY_ATTEMPTS = 3;

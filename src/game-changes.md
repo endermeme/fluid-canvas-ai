@@ -1,101 +1,74 @@
 
-# Game Development Changes Log
+# Game Changes Log
 
-## Cập nhật mới nhất - Sửa lỗi Balloon Pop và cải thiện Animation
+## 2025-01-03 - Refactor GameSharePage thành các component nhỏ hơn
 
-### Ngày cập nhật: [Current Date]
+### Files thay đổi:
+- **src/components/game-share/GameShareForm.tsx** - TẠO MỚI: Component form tham gia game
+- **src/components/game-share/ParticipantsList.tsx** - TẠO MỚI: Component danh sách người chơi 
+- **src/components/game-share/ShareSection.tsx** - TẠO MỚI: Component chia sẻ game
+- **src/pages/GameSharePage.tsx** - SỬA: Refactor thành component nhỏ hơn
 
-### Các thay đổi chính:
+### Loại thay đổi:
+- Tách GameSharePage từ 521 dòng thành 4 component riêng biệt
+- Cải thiện khả năng bảo trì và tái sử dụng code
+- Tách logic form, danh sách người chơi và phần chia sẻ
+- Giữ nguyên 100% chức năng hiện tại
 
-#### 1. **Sửa lỗi Balloon Pop Game - Xung đột tên file**
-- ✅ **Fix lỗi TS1149**: Xóa file trùng lặp balloonpopSampleData.ts
-- ✅ **Giữ file chuẩn**: balloonPopSampleData.ts với 8 câu hỏi về Việt Nam
-- ✅ **Xóa xung đột**: Không còn lỗi case-sensitive file names
+## 2025-01-03 - Sửa lỗi form tham gia game và cải thiện real-time sync
 
-#### 2. **Cải thiện Animation Bóng Bay - Bay đa hướng**
-- ✅ **5 pattern chuyển động khác nhau**:
-  - `balloon-float`: Bay lên xuống nhẹ nhàng
-  - `balloon-sway`: Lắc lư qua lại
-  - `balloon-vertical`: Bay theo chiều dọc
-  - `balloon-diagonal`: Bay chéo đa hướng
-  - Kết hợp nhiều pattern với delay khác nhau
-- ✅ **Giới hạn an toàn**: Bóng bay không bay ra ngoài màn hình
-- ✅ **Responsive animation**: Tối ưu cho mobile
-- ✅ **Smooth transitions**: Animation mượt mà, tự nhiên
+### Files thay đổi:
+- **src/pages/GameSharePage.tsx** - SỬA: Sửa form không đóng và thêm auto-refresh participants
 
-#### 3. **Cải thiện Visual Effects**
-- ✅ **Bóng bay 3D**: Gradient, shadow, highlight chân thực
-- ✅ **Explosion effect**: Hiệu ứng nổ với particles bay tứ tung
-- ✅ **Hover effects**: Scale và glow khi hover
-- ✅ **String animation**: Dây bóng bay có shadow và gradient
+### Loại thay đổi:
+- Sửa lỗi form không đóng sau khi submit thành công
+- Thêm loading state cho form để tránh double submit
+- Thêm auto-refresh danh sách người chơi mỗi 10 giây
+- Thêm nút "Làm mới" thủ công cho danh sách người chơi
+- Cải thiện UI feedback với loading states và visual indicators
+- Reset form sau khi submit thành công
 
-#### 4. **Xóa hoàn toàn Stack Builder và Catch Objects Games** (đã hoàn thành)
-- ✅ **Loại bỏ Stack Builder**: Xóa game "Xếp Khối Đố Vui" khỏi GameSelector
-- ✅ **Loại bỏ Catch Objects**: Xóa game "Bắt Vật Thể" khỏi hệ thống
-- ✅ **Clean templates**: Xóa CatchObjectsTemplate khỏi templates index
-- ✅ **Xóa sample data**: Loại bỏ catchobjectsSampleData.ts
-- ✅ **Xóa thư mục**: Xóa hoàn toàn thư mục catch-objects templates
-- ✅ **Cập nhật logic**: Loại bỏ logic xử lý cho catchobjects trong PresetGameManager
+## 2025-01-03 - Sửa lỗi RLS policy cho game_participants
 
-#### 5. **Cải thiện Balloon Pop Game** (hoàn tất)
-- ✅ **Bóng bay bay qua lại**: Thêm animation `balloon-float` và `balloon-sway` tự nhiên
-- ✅ **Font chữ cải thiện**: Sử dụng Inter font family cho tất cả text
-- ✅ **Animation mượt mà hơn**: Balloons không đứng yên mà bay lơ lửng liên tục
+### Files thay đổi:
+- **src/pages/GameSharePage.tsx** - SỬA: Xử lý lỗi RLS khi tham gia game
+- **src/utils/gameParticipation.ts** - SỬA: Cập nhật logic xử lý lỗi database
 
-#### 6. **Whack-a-Mole Game** (hoàn tất)
-- ✅ **Giao diện chuột mới**: Thiết kế chuột CSS đẹp với gradient, shadow và chi tiết
-- ✅ **Ẩn đáp án**: Không hiển thị đáp án trên chuột để tăng độ khó
-- ✅ **Thuật toán spawn thông minh**: 
-  - Tránh spawn ở những lỗ vừa dùng
-  - Tăng tốc độ theo thời gian
-  - Random thời gian hiện chuột
-- ✅ **Tính thử thách cao hơn**: Người chơi phải nhớ đáp án và đoán
+### Loại thay đổi:
+- Sửa lỗi "new row violates row-level security policy" 
+- Thêm fallback khi không thể ghi vào Supabase
+- Cải thiện error handling cho form tham gia game
 
-#### 7. **Spin Wheel Game** (hoàn tất)
-- ✅ **Vòng quay chậm hơn**: Tăng thời gian quay từ 2s lên 5s
-- ✅ **Animation mượt**: Sử dụng cubic-bezier easing
-- ✅ **Tăng số vòng quay**: 6-10 vòng thay vì 3-5 vòng
-- ✅ **Font chữ cải thiện**: Inter font family cho tất cả components
+## 2025-01-03 - Sửa lỗi build sau khi dọn dẹp code
 
-#### 8. **Sửa lỗi Gemini API Key** (hoàn tất)
-- ✅ **API Key fix**: Thêm fallback API key để game generator hoạt động
-- ✅ **Error handling**: Khắc phục lỗi "API key not valid"
-- ✅ **Constants update**: Cập nhật api-constants.ts với API key backup
+### Files thay đổi:
+- **src/components/quiz/hooks/useIframeManager.ts** - SỬA: Loại bỏ loadAttempts và maxRetryAttempts không cần thiết
+- **src/components/quiz/custom-games/EnhancedGameView.tsx** - SỬA: Loại bỏ props loadAttempts và maxAttempts
+- **src/components/quiz/custom-games/GameController.tsx** - SỬA: Import từ CustomGameForm đúng path
+- **src/components/quiz/custom-games/ui/index.ts** - SỬA: Loại bỏ export CustomGameForm không tồn tại
 
-#### 9. **Cập nhật AI Model** (hoàn tất)
-- ✅ **Model mới**: Chuyển từ gemini-1.5-flash lên gemini-2.0-flash-exp
-- ✅ **Performance tốt hơn**: Model mới có khả năng tạo content tốt hơn
+### Loại thay đổi:
+- Sửa lỗi TypeScript sau khi dọn dẹp code
+- Đơn giản hóa GameLoadingIndicator chỉ nhận progress prop
+- Sửa import paths sau khi xóa file trùng lặp
 
-### Hoàn thành:
-- ✅ **Balloon Pop Game** - Animation đa hướng, không ra ngoài màn hình, sửa lỗi file trùng lặp
-- ✅ **Sửa lỗi dữ liệu mẫu** - File balloonPopSampleData.ts hoạt động bình thường
-- ✅ **Visual effects** - Explosion, particles, smooth animations
-- ✅ **Whack-a-Mole Game** - Giao diện đẹp, ẩn đáp án, tăng độ khó
-- ✅ **Spin Wheel Game** - Giảm tốc độ quay
-- ✅ **Font improvements** cho tất cả games
-- ✅ **Cập nhật AI model**
-- ✅ **Xóa hoàn toàn Stack Builder và Catch Objects games**
-- ✅ **Sửa lỗi Gemini API Key authentication**
-- ✅ **Sửa lỗi build errors và file conflicts**
+## 2025-01-03 - Dọn dẹp Custom Game và tách Prompt ra JSON
 
-### Tiếp theo (cần làm):
-- [ ] **Fix 3 games còn lại**: Quiz, Flashcards, Matching games
-- [ ] **Cải thiện cơ chế share**: Tối ưu gameExport.ts và sharing functionality
-- [ ] **Sound effects** cho các games
-- [ ] **Particle effects** nâng cao
-- [ ] **Performance optimization**
+### Files thay đổi:
+- **src/components/quiz/generator/gamePrompts.json** - TẠO MỚI: Tách prompt ra file JSON riêng
+- **src/components/quiz/generator/geminiPrompt.ts** - SỬA: Đọc prompt từ JSON
+- **src/components/quiz/generator/geminiGenerator.ts** - SỬA: Đơn giản hóa, xóa canvas/difficulty functions
+- **src/components/quiz/custom-games/CustomGameForm.tsx** - SỬA: Loại bỏ canvas mode và difficulty settings
+- **src/components/quiz/generator/types.ts** - SỬA: Đơn giản hóa interface
+- **src/components/quiz/custom-games/ui/index.ts** - SỬA: Xóa exports không cần thiết
 
-### Games hiện có (đã cập nhật):
-1. Quiz - Trắc nghiệm
-2. Flashcards - Thẻ ghi nhớ  
-3. Matching - Nối từ
-4. Memory - Trò chơi ghi nhớ
-5. Ordering - Sắp xếp câu
-6. WordSearch - Tìm từ
-7. Pictionary - Đoán hình
-8. TrueFalse - Đúng hay sai
-9. **BalloonPop - Bóng bay đố vui** ✅ **FIXED & IMPROVED**
-10. SpinWheel - Quay bánh xe ✅ **IMPROVED**
-11. WhackMole - Đập chuột đố vui ✅ **IMPROVED**
+### Files xóa:
+- **src/components/quiz/custom-games/ui/CustomGameForm.tsx** - XÓA: File trùng lặp
+- **src/components/quiz/generator/customGamePrompt.ts** - XÓA: Đã tách ra JSON
+- **src/components/quiz/generator/promptBuilder.ts** - XÓA: Không cần thiết
 
-**Lưu ý**: Balloon Pop game đã được sửa lỗi hoàn toàn, cải thiện animation bay đa hướng và khắc phục xung đột tên file.
+### Loại thay đổi:
+- Dọn dẹp code thừa và functions không sử dụng
+- Tách prompt template ra file JSON độc lập
+- Đơn giản hóa logic custom game chỉ còn input textarea
+- Loại bỏ canvas mode và difficulty settings không cần thiết
