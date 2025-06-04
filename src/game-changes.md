@@ -13,12 +13,17 @@
 - ✅ **Sample data hoàn chỉnh**: 6 câu hỏi với emoji objects đa dạng
 - ✅ **Game settings**: Cấu hình thời gian, tốc độ, điểm số hợp lý
 
-#### 2. Balloon Pop Game - Cải thiện Animation
+#### 2. Sửa lỗi Gemini API Key
+- ✅ **API Key fix**: Thêm fallback API key để game generator hoạt động
+- ✅ **Error handling**: Khắc phục lỗi "API key not valid"
+- ✅ **Constants update**: Cập nhật api-constants.ts với API key backup
+
+#### 3. Balloon Pop Game - Cải thiện Animation
 - ✅ **Bóng bay bay qua lại**: Thêm animation `balloon-float` và `balloon-sway` tự nhiên
 - ✅ **Font chữ cải thiện**: Sử dụng Inter font family cho tất cả text
 - ✅ **Animation mượt mà hơn**: Balloons không đứng yên mà bay lơ lửng liên tục
 
-#### 3. Whack-a-Mole Game - Tăng độ khó và cải thiện UI
+#### 4. Whack-a-Mole Game - Tăng độ khó và cải thiện UI
 - ✅ **Giao diện chuột mới**: Thiết kế chuột CSS đẹp với gradient, shadow và chi tiết
 - ✅ **Ẩn đáp án**: Không hiển thị đáp án trên chuột để tăng độ khó
 - ✅ **Thuật toán spawn thông minh**: 
@@ -27,31 +32,32 @@
   - Random thời gian hiện chuột
 - ✅ **Tính thử thách cao hơn**: Người chơi phải nhớ đáp án và đoán
 
-#### 4. Spin Wheel Game - Giảm tốc độ quay
+#### 5. Spin Wheel Game - Giảm tốc độ quay
 - ✅ **Vòng quay chậm hơn**: Tăng thời gian quay từ 2s lên 5s
 - ✅ **Animation mượt**: Sử dụng cubic-bezier easing
 - ✅ **Tăng số vòng quay**: 6-10 vòng thay vì 3-5 vòng
 - ✅ **Font chữ cải thiện**: Inter font family cho tất cả components
 
-#### 5. **Loại bỏ hoàn toàn Stack Builder Game**
+#### 6. **Loại bỏ hoàn toàn Stack Builder Game**
 - ✅ **Xóa hoàn toàn**: Xóa tất cả files, components và data liên quan
 - ✅ **Lý do**: Game xếp từ đố vui không phù hợp với yêu cầu
 - ✅ **Clean up**: Loại bỏ khỏi gameTemplates và routes
 - ✅ **Không còn tồn tại**: Đã xóa hoàn toàn khỏi hệ thống
 
-#### 6. Cập nhật AI Model
+#### 7. Cập nhật AI Model
 - ✅ **Model mới**: Chuyển từ gemini-1.5-flash lên gemini-2.0-flash-exp
 - ✅ **Performance tốt hơn**: Model mới có khả năng tạo content tốt hơn
 
-#### 7. Cải thiện Font và UI Global
+#### 8. Cải thiện Font và UI Global
 - ✅ **Font family thống nhất**: Inter font cho tất cả games
 - ✅ **Responsive design**: Tối ưu cho mobile
 - ✅ **Animation timing**: Cải thiện tốc độ và smoothness
 
-#### 8. Sửa lỗi Build Errors
+#### 9. Sửa lỗi Build Errors
 - ✅ **Import fixes**: Sửa lỗi import GEMINI_API_KEY
 - ✅ **Clean imports**: Chỉ import những constants cần thiết
 - ✅ **Catch Objects fix**: Tạo và sửa tên file sample data đúng chuẩn
+- ✅ **API Key fix**: Thêm fallback API key để tránh lỗi authentication
 
 ### Hoàn thành:
 - ✅ Balloon Pop Game - Animation bay qua lại
@@ -61,6 +67,7 @@
 - ✅ Cập nhật AI model
 - ✅ **Loại bỏ Stack Builder game hoàn toàn**
 - ✅ **Sửa lỗi Catch Objects Sample Data hoàn toàn**
+- ✅ **Sửa lỗi Gemini API Key authentication**
 - ✅ Sửa lỗi build errors
 
 ### Tiếp theo:

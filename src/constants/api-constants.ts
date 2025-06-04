@@ -12,7 +12,7 @@ export const GEMINI_MODELS = {
 
 // API Endpoints
 export const getApiEndpoint = (model: string = GEMINI_MODELS.CUSTOM_GAME): string => {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
   return `${BASE_URL}/${API_VERSION}/models/${model}:generateContent?key=${apiKey}`;
 };
 
