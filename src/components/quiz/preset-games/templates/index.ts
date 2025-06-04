@@ -1,4 +1,3 @@
-
 import QuizTemplate from './QuizTemplate';
 import FlashcardsTemplate from './FlashcardsTemplate';
 import MatchingTemplate from './MatchingTemplate';
@@ -8,8 +7,8 @@ import WordSearchTemplate from './WordSearchTemplate';
 import PictionaryTemplate from './PictionaryTemplate';
 import TrueFalseTemplate from './TrueFalseTemplate';
 import BalloonPopTemplate from './balloon-pop';
-import SpinWheelTemplate from './SpinWheelTemplate';
-import WhackMoleTemplate from './WhackMoleTemplate';
+import SpinWheelTemplate from './spin-wheel';
+import WhackMoleTemplate from './whack-mole';
 import StackBuilderTemplate from './StackBuilderTemplate';
 import CatchObjectsTemplate from './CatchObjectsTemplate';
 

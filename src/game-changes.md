@@ -1,71 +1,77 @@
 
-# Game Changes Log
+# Game Development Changes Log
 
-## 2024-01-15 - Cấu trúc lại Balloon Pop Game
-### Thay đổi:
-- **Tổ chức lại cấu trúc**: Tạo thư mục riêng cho game `balloon-pop/`
-- **Tách component**: Chia thành các component nhỏ hơn:
-  - `BalloonPopGame.tsx` - Component chính
-  - `BalloonPopHeader.tsx` - Header với thông tin game
-  - `BalloonField.tsx` - Khu vực chứa bóng bay
-  - `Balloon.tsx` - Component bóng bay riêng biệt
-  - `QuestionModal.tsx` - Modal hiển thị câu hỏi
-  - `GameResult.tsx` - Màn hình kết quả
+## Cập nhật mới nhất - Tái cấu trúc Game Templates
 
-### Cải thiện giao diện:
-- **Bóng bay**: Thay thế emoji bằng CSS-based balloons với:
-  - Gradient màu sắc đẹp
-  - Hiệu ứng highlight và shine
-  - Animation bounce tự nhiên
-  - Hiệu ứng hover scale
-  - Dây bóng bay realistic
+### Ngày cập nhật: [Current Date]
 
-- **Animation**: Thêm nhiều hiệu ứng:
-  - Floating background particles
-  - Balloon bounce animation
-  - Explosion effects khi nổ bóng
-  - Smooth transitions
-  - Particle burst effects
+### Các thay đổi chính:
 
-- **Màn hình câu hỏi**: 
-  - Kích thước lớn hơn, dễ đọc
-  - Background overlay đẹp
-  - Animation slide-in
-  - Button hover effects
+#### 1. Balloon Pop Game - Tái cấu trúc hoàn toàn
+- **Tạo thư mục:** `src/components/quiz/preset-games/templates/balloon-pop/`
+- **Components:** 
+  - `BalloonPopGame.tsx` - Main game logic
+  - `components/BalloonPopHeader.tsx` - Game header với timer và score
+  - `components/BalloonField.tsx` - Playing field với balloons
+  - `components/Balloon.tsx` - Individual balloon component (CSS-based)
+  - `components/QuestionModal.tsx` - Question display
+  - `components/GameResult.tsx` - Result screen
+- **Styles:** `styles/balloon-pop.css` - CSS animations và effects
+- **Assets:** `assets/` folder với README
 
-- **Kết quả game**:
-  - Hiệu ứng stars rating
-  - Statistics đầy đủ
-  - Animation fadeIn smooth
+#### 2. Spin Wheel Game - Cấu trúc mới
+- **Tạo thư mục:** `src/components/quiz/preset-games/templates/spin-wheel/`
+- **Components:**
+  - `SpinWheelGame.tsx` - Main game logic
+  - `components/SpinWheelHeader.tsx` - Header với progress
+  - `components/WheelComponent.tsx` - Interactive wheel với SVG
+  - `components/QuestionAnswerModal.tsx` - Question interface
+  - `components/GameResultModal.tsx` - Results display
+- **Styles:** `styles/spin-wheel.css` - Wheel animations
+- **Assets:** `assets/` folder
 
-### Cấu trúc thư mục:
-```
-balloon-pop/
-├── index.tsx              # Entry point
-├── BalloonPopGame.tsx     # Main game component
-├── components/            # Sub-components
-│   ├── BalloonPopHeader.tsx
-│   ├── BalloonField.tsx
-│   ├── Balloon.tsx
-│   ├── QuestionModal.tsx
-│   └── GameResult.tsx
-├── styles/               # CSS styles
-│   └── balloon-pop.css
-└── assets/              # Game assets
-    └── README.md
-```
+#### 3. Whack-a-Mole Game - Cấu trúc mới  
+- **Tạo thư mục:** `src/components/quiz/preset-games/templates/whack-mole/`
+- **Components:**
+  - `WhackMoleGame.tsx` - Main game logic
+  - `components/WhackMoleHeader.tsx` - Game controls
+  - `components/GameField.tsx` - Playing field
+  - `components/MoleComponent.tsx` - CSS-based mole (không dùng emoji)
+  - `components/GameStartScreen.tsx` - Start screen
+  - `components/GameResultModal.tsx` - Results
+- **Styles:** `styles/whack-mole.css` - Mole animations
+- **Assets:** `assets/` folder
 
-### Tính năng:
-- ✅ Bóng bay CSS thay vì emoji
-- ✅ Nhiều màu sắc gradient
-- ✅ Animation tự nhiên
-- ✅ Màn hình câu hỏi to hơn
-- ✅ Particle effects
+### Cải tiến UI/UX:
+
+#### Balloon Pop Game:
+- ✅ Bóng bay CSS với gradient thay vì emoji
+- ✅ Animation bay lơ lửng tự nhiên
+- ✅ Explosion effects khi pop
+- ✅ Màn hình câu hỏi lớn hơn
 - ✅ Responsive design
-- ✅ Smooth transitions
 
-## Tiếp theo cần làm:
-- [ ] Áp dụng cấu trúc tương tự cho các game khác
-- [ ] Thêm sound effects
-- [ ] Tối ưu hóa performance
-- [ ] Thêm themes khác nhau
+#### Spin Wheel Game:
+- ✅ Vòng quay SVG với animation tự nhiên
+- ✅ Tốc độ quay realistic với deceleration
+- ✅ Giao diện đẹp hơn với gradients
+- ✅ Pointer và sections có animation
+
+#### Whack-a-Mole Game:
+- ✅ Chuột CSS thay vì emoji
+- ✅ 3 chuột xuất hiện đồng thời
+- ✅ Holes với shadow và depth
+- ✅ Hit animations và effects
+- ✅ Tốc độ spawn cải thiện
+
+### Cấu trúc Code:
+- ✅ Mỗi game có thư mục riêng
+- ✅ Components tách biệt rõ ràng
+- ✅ CSS riêng cho animations
+- ✅ Assets folder sẵn sàng cho hình ảnh
+- ✅ TypeScript interfaces rõ ràng
+
+### Chờ cập nhật:
+- [ ] Stack Builder Game cấu trúc mới
+- [ ] Catch Objects Game cấu trúc mới
+- [ ] Các game cũ (Quiz, Memory, etc.) giữ nguyên cấu trúc hiện tại
