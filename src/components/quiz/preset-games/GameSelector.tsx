@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { 
   Brain, BookOpen, Puzzle, Dices, 
   Image, CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
-  ArrowRight, Zap, RotateCcw, Target, Gamepad2, Settings
+  ArrowRight, Zap, RotateCcw, Target, Gamepad2, Settings, CircleDot
 } from 'lucide-react';
 import GameSettings from '../GameSettings';
 import { GameSettingsData } from '../types';
@@ -95,7 +96,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       id: 'balloonpop', 
       name: 'Bóng Bay Đố Vui', 
       description: 'Nổ bóng bay để khám phá câu hỏi thú vị',
-      icon: <Zap className="h-8 w-8 text-yellow-600" />
+      icon: <CircleDot className="h-8 w-8 text-yellow-600" />
     },
     { 
       id: 'spinwheel', 
