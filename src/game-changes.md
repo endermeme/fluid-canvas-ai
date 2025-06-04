@@ -1,4 +1,3 @@
-
 # Game Changes Log
 
 ## 2025-01-03 - Kiểm tra và tối ưu icons cho các game
@@ -170,3 +169,43 @@
 - Tách prompt template ra file JSON độc lập
 - Đơn giản hóa logic custom game chỉ còn input textarea
 - Loại bỏ canvas mode và difficulty settings không cần thiết
+
+## 2025-01-03 - Sửa lỗi và cải thiện giao diện các game
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/templates/BalloonPopTemplate.tsx** - SỬA: Thay thế emoji bằng shapes CSS, cải thiện giao diện câu hỏi
+- **src/components/quiz/preset-games/templates/TrueFalseTemplate.tsx** - SỬA: Sửa lỗi không chọn được đáp án, cải thiện logic game
+- **src/components/quiz/preset-games/templates/WhackMoleTemplate.tsx** - SỬA: Tạo chuột CSS đẹp hơn, spawn 3 con cùng lúc, cải thiện giao diện
+- **src/components/quiz/preset-games/templates/OrderingTemplate.tsx** - SỬA: Sửa logic kiểm tra và gợi ý, cải thiện giao diện
+
+### Loại thay đổi:
+- **Balloon Pop**: 
+  - Thay thế emoji 🎈 bằng shapes CSS với gradient và hiệu ứng shadow
+  - Tạo component BalloonShape riêng với nhiều màu sắc đẹp hơn
+  - Cải thiện giao diện câu hỏi lớn hơn và rõ ràng hơn
+  - Thêm hiệu ứng animate và hover cho bóng bay
+
+- **True/False**:
+  - Sửa lỗi state management khiến không chọn được đáp án
+  - Thêm currentAnswer state riêng để track câu trả lời hiện tại
+  - Sửa logic timer và disable buttons đúng cách
+  - Cải thiện feedback khi trả lời (màu xanh/đỏ)
+
+- **Whack-a-Mole**:
+  - Thay thế emoji 🐭 bằng MoleComponent CSS với hình chuột chi tiết
+  - Tạo hình chuột với tai, mắt, mũi, răng bằng CSS
+  - Spawn tối đa 3 con chuột cùng lúc (thay vì 1)
+  - Giảm interval spawn từ 1.5s xuống 1.2s để nhanh hơn
+  - Cải thiện giao diện hole với gradient và shadow
+  - Tăng kích thước hole từ 24x24 lên 28x28
+
+- **Ordering**:
+  - Sửa logic kiểm tra thứ tự từ (so sánh đúng với correctOrder)
+  - Sửa tính năng gợi ý hiển thị từ đầu tiên đúng
+  - Cải thiện giao diện với button states rõ ràng hơn
+  - Thêm visual feedback khi kiểm tra (màu xanh/đỏ)
+  - Cải thiện responsive design
+
+- Tất cả games đều loại bỏ việc lạm dụng emoji và thay bằng CSS shapes/components
+- Cải thiện tính nhất quán trong giao diện và UX
+- Sửa các lỗi logic và tương tác người dùng

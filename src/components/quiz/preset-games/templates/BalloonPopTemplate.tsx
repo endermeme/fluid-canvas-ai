@@ -35,6 +35,36 @@ interface BalloonPopTemplateProps {
   content?: BalloonPopData;
 }
 
+const BalloonShape: React.FC<{ color: string; isPopped: boolean; onClick: () => void }> = ({ color, isPopped, onClick }) => {
+  if (isPopped) {
+    return (
+      <div className="w-20 h-20 flex items-center justify-center">
+        <div className="text-4xl animate-pulse">💥</div>
+      </div>
+    );
+  }
+
+  return (
+    <div 
+      className="cursor-pointer transition-all duration-300 hover:scale-110 animate-bounce"
+      onClick={onClick}
+    >
+      <div className="relative">
+        <div 
+          className="w-16 h-20 rounded-full shadow-lg border-2 border-white"
+          style={{ backgroundColor: color }}
+        />
+        <div 
+          className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-6 rounded-full"
+          style={{ backgroundColor: color, filter: 'brightness(0.8)' }}
+        />
+        <div className="absolute top-2 left-4 w-3 h-3 bg-white rounded-full opacity-60" />
+        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0.5 h-8 bg-gray-600" />
+      </div>
+    </div>
+  );
+};
+
 const BalloonPopTemplate: React.FC<BalloonPopTemplateProps> = ({ 
   data, 
   onBack,
@@ -51,14 +81,16 @@ const BalloonPopTemplate: React.FC<BalloonPopTemplateProps> = ({
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
   const [poppedBalloons, setPoppedBalloons] = useState<number[]>([]);
-  const [balloonPositions, setBalloonPositions] = useState<{x: number, y: number}[]>([]);
+  const [balloonPositions, setBalloonPositions] = useState<{x: number, y: number, color: string}[]>([]);
 
-  // Generate random positions for balloons
+  const balloonColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
+
   useEffect(() => {
     if (gameData?.balloons) {
-      const positions = gameData.balloons.map(() => ({
-        x: Math.random() * 70 + 10, // 10% to 80% from left
-        y: Math.random() * 60 + 20  // 20% to 80% from top
+      const positions = gameData.balloons.map((_, index) => ({
+        x: Math.random() * 70 + 15,
+        y: Math.random() * 50 + 25,
+        color: balloonColors[index % balloonColors.length]
       }));
       setBalloonPositions(positions);
     }
@@ -208,7 +240,6 @@ const BalloonPopTemplate: React.FC<BalloonPopTemplateProps> = ({
     
     return (
       <div className="h-full p-6 bg-gradient-to-b from-blue-50 to-purple-50">
-        {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold">{gameData.title}</h1>
@@ -225,21 +256,19 @@ const BalloonPopTemplate: React.FC<BalloonPopTemplateProps> = ({
           </div>
         </div>
 
-        {/* Progress */}
         <Progress value={(poppedBalloons.length / gameData.balloons.length) * 100} className="mb-6" />
 
-        {/* Question Card */}
-        <Card className="p-6 max-w-2xl mx-auto">
-          <div className="text-center mb-6">
-            <div className={`w-20 h-20 rounded-full mx-auto mb-4 animate-bounce bg-${currentBalloon.color}-400 flex items-center justify-center text-white text-2xl font-bold shadow-lg`}>
+        <Card className="p-8 max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <div className="w-24 h-24 rounded-full mx-auto mb-6 animate-bounce bg-gradient-to-b from-red-400 to-red-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
               💥
             </div>
-            <h3 className="text-xl font-bold mb-2">Câu hỏi {currentBalloonIndex + 1}</h3>
-            <p className="text-lg">{currentBalloon.question}</p>
+            <h3 className="text-2xl font-bold mb-4">Câu hỏi {currentBalloonIndex + 1}</h3>
+            <p className="text-xl">{currentBalloon.question}</p>
           </div>
 
           {!showExplanation ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {currentBalloon.options.map((option, index) => (
                 <Button
                   key={index}
@@ -247,23 +276,23 @@ const BalloonPopTemplate: React.FC<BalloonPopTemplateProps> = ({
                     (index === currentBalloon.correctAnswer ? "default" : "destructive") : 
                     "outline"
                   }
-                  className="p-4 h-auto text-left justify-start"
+                  className="p-6 h-auto text-left justify-start text-lg"
                   onClick={() => handleAnswerSelect(index)}
                   disabled={selectedAnswer !== null}
                 >
-                  <span className="font-semibold mr-2">{String.fromCharCode(65 + index)}.</span>
+                  <span className="font-semibold mr-3 text-xl">{String.fromCharCode(65 + index)}.</span>
                   {option}
                 </Button>
               ))}
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h4 className="font-semibold mb-2">Giải thích:</h4>
-                <p>{currentBalloon.explanation}</p>
+            <div className="space-y-6">
+              <div className="p-6 bg-blue-50 rounded-lg">
+                <h4 className="font-semibold mb-3 text-lg">Giải thích:</h4>
+                <p className="text-lg">{currentBalloon.explanation}</p>
               </div>
               <div className="text-center">
-                <Button onClick={nextQuestion}>
+                <Button onClick={nextQuestion} size="lg">
                   {currentBalloonIndex >= gameData.balloons.length - 1 ? 'Kết thúc' : 'Câu tiếp theo'}
                 </Button>
               </div>
@@ -274,10 +303,8 @@ const BalloonPopTemplate: React.FC<BalloonPopTemplateProps> = ({
     );
   }
 
-  // Main game view with balloons
   return (
     <div className="h-full p-6 bg-gradient-to-b from-blue-50 to-purple-50 relative overflow-hidden">
-      {/* Header */}
       <div className="flex justify-between items-center mb-6 relative z-10">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">{gameData.title}</h1>
@@ -294,16 +321,13 @@ const BalloonPopTemplate: React.FC<BalloonPopTemplateProps> = ({
         </div>
       </div>
 
-      {/* Progress */}
       <Progress value={(poppedBalloons.length / gameData.balloons.length) * 100} className="mb-6 relative z-10" />
 
-      {/* Instructions */}
       <div className="text-center mb-8 relative z-10">
         <h2 className="text-xl font-semibold mb-2">Nhấp vào bóng bay để nổ và xem câu hỏi!</h2>
         <p className="text-muted-foreground">Trả lời đúng để ghi điểm. Thời gian có hạn!</p>
       </div>
 
-      {/* Floating Balloons */}
       <div className="relative h-96 overflow-hidden">
         {gameData.balloons.map((balloon, index) => {
           const position = balloonPositions[index];
@@ -314,26 +338,23 @@ const BalloonPopTemplate: React.FC<BalloonPopTemplateProps> = ({
           return (
             <div
               key={balloon.id}
-              className={`absolute cursor-pointer transition-all duration-300 ${
-                isPopped ? 'opacity-30 scale-75' : 'hover:scale-110 animate-pulse'
-              }`}
+              className="absolute"
               style={{
                 left: `${position.x}%`,
                 top: `${position.y}%`,
                 transform: 'translate(-50%, -50%)'
               }}
-              onClick={() => !isPopped && handleBalloonPop(index)}
             >
-              <div className={`w-16 h-20 rounded-full bg-${balloon.color}-400 shadow-lg flex items-center justify-center text-white font-bold text-lg relative`}>
-                {isPopped ? '💥' : '🎈'}
-                <div className="absolute -bottom-2 w-0.5 h-8 bg-gray-400"></div>
-              </div>
+              <BalloonShape
+                color={position.color}
+                isPopped={isPopped}
+                onClick={() => !isPopped && handleBalloonPop(index)}
+              />
             </div>
           );
         })}
       </div>
 
-      {/* Control Buttons */}
       <div className="fixed bottom-6 right-6 flex gap-3 z-20">
         <Button onClick={resetGame} variant="outline" size="sm">
           <RotateCcw className="h-4 w-4 mr-2" />

@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, ArrowUp, ArrowDown, Check, Clock, Shuffle, Lightbulb, ArrowLeft } from 'lucide-react';
+import { RefreshCw, Check, Clock, Shuffle, Lightbulb, ArrowLeft } from 'lucide-react';
 
 interface OrderingTemplateProps {
   content: any;
@@ -21,6 +22,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
   const [timerRunning, setTimerRunning] = useState(true);
   const [isChecking, setIsChecking] = useState(false);
   const [hasShownHint, setHasShownHint] = useState(false);
+  const [showHint, setShowHint] = useState(false);
   const { toast } = useToast();
 
   const sentences = content?.sentences || [];
@@ -34,6 +36,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
       setOrderedWords([]);
       setIsChecking(false);
       setHasShownHint(false);
+      setShowHint(false);
     }
   }, [currentSentence, sentences]);
 
@@ -131,60 +134,17 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
   const handleHint = () => {
     if (isChecking || hasShownHint) return;
     
-    const correctOrder = sentences[currentSentence].correctOrder;
-    const originalWords = sentences[currentSentence].words;
-    
-    const firstCorrectWordIndex = correctOrder[0];
-    const firstCorrectWord = originalWords[firstCorrectWordIndex];
-    
-    if (orderedWords[0] === firstCorrectWord) {
-      for (let i = 1; i < correctOrder.length; i++) {
-        const correctWordIndex = correctOrder[i];
-        const correctWord = originalWords[correctWordIndex];
-        
-        if (orderedWords[i] !== correctWord) {
-          const shuffledIndex = shuffledWords.indexOf(correctWord);
-          if (shuffledIndex !== -1) {
-            const newShuffled = [...shuffledWords];
-            newShuffled.splice(shuffledIndex, 1);
-            
-            const newOrdered = [...orderedWords];
-            if (i < newOrdered.length) {
-              newShuffled.push(newOrdered[i]);
-            }
-            newOrdered[i] = correctWord;
-            
-            setShuffledWords(newShuffled);
-            setOrderedWords(newOrdered);
-            break;
-          }
-        }
-      }
-    } else {
-      const shuffledIndex = shuffledWords.indexOf(firstCorrectWord);
-      if (shuffledIndex !== -1) {
-        const newShuffled = [...shuffledWords];
-        newShuffled.splice(shuffledIndex, 1);
-        
-        const newOrdered = [...orderedWords];
-        if (newOrdered.length > 0) {
-          newShuffled.push(newOrdered[0]);
-        }
-        newOrdered[0] = firstCorrectWord;
-        
-        setShuffledWords(newShuffled);
-        setOrderedWords(newOrdered);
-      }
+    setShowHint(!showHint);
+    if (!hasShownHint) {
+      setHasShownHint(true);
+      setTimeLeft(Math.max(10, timeLeft - 30));
+      
+      toast({
+        title: "Đã dùng gợi ý",
+        description: "Thời gian bị trừ 30 giây.",
+        variant: "default",
+      });
     }
-    
-    setHasShownHint(true);
-    setTimeLeft(Math.max(10, timeLeft - 30));
-    
-    toast({
-      title: "Đã dùng gợi ý",
-      description: "Thời gian bị trừ 30 giây.",
-      variant: "default",
-    });
   };
 
   const handleRestart = () => {
@@ -194,6 +154,8 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
     setTimeLeft(content?.settings?.timeLimit || 180);
     setTimerRunning(true);
     setIsChecking(false);
+    setShowHint(false);
+    setHasShownHint(false);
     
     if (sentences[0]) {
       const currentWords = [...sentences[0].words];
@@ -240,6 +202,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
   }
 
   const progress = ((currentSentence + 1) / sentences.length) * 100;
+  const currentSentenceData = sentences[currentSentence];
 
   return (
     <div className="flex flex-col p-4 h-full">
@@ -274,25 +237,26 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
           <p className="text-muted-foreground text-sm">Chọn từ theo đúng thứ tự</p>
         </div>
         
-        <Card className="p-4 mb-4 min-h-[100px] flex flex-wrap gap-2 items-start content-start border border-primary/30 bg-background/80">
+        <Card className="p-4 mb-4 min-h-[120px] flex flex-wrap gap-2 items-start content-start border border-primary/30 bg-background/80">
           {orderedWords.map((word, index) => (
             <button
               key={`ordered-${index}`}
               onClick={() => handleWordRemove(word, index)}
               disabled={isChecking}
-              className={`py-2 px-3 rounded-lg ${
+              className={`py-3 px-4 rounded-lg font-medium transition-colors ${
                 isChecking 
-                  ? sentences[currentSentence].correctOrder[index] === sentences[currentSentence].words.indexOf(word)
-                    ? 'bg-green-100 border border-green-500'
-                    : 'bg-red-100 border border-red-500'
-                  : 'bg-primary/20 hover:bg-primary/30'
+                  ? currentSentenceData.correctOrder[index] === currentSentenceData.words.indexOf(word)
+                    ? 'bg-green-100 border-2 border-green-500 text-green-700'
+                    : 'bg-red-100 border-2 border-red-500 text-red-700'
+                  : 'bg-primary/20 hover:bg-primary/30 text-primary-foreground'
               }`}
             >
+              <span className="text-xs opacity-75 mr-2">{index + 1}.</span>
               {word}
             </button>
           ))}
           {orderedWords.length === 0 && (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground p-4">
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground p-8">
               <p>Chọn từ bên dưới để bắt đầu sắp xếp</p>
             </div>
           )}
@@ -304,14 +268,27 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
               key={`shuffled-${index}`}
               onClick={() => handleWordSelect(word, index)}
               disabled={isChecking}
-              className="py-2 px-3 bg-secondary hover:bg-secondary/80 rounded-lg"
+              className="py-3 px-4 bg-secondary hover:bg-secondary/80 rounded-lg font-medium transition-colors"
             >
               {word}
             </button>
           ))}
+          {shuffledWords.length === 0 && (
+            <div className="w-full text-center text-muted-foreground py-4">
+              Tất cả các từ đã được chọn
+            </div>
+          )}
         </div>
+
+        {showHint && currentSentenceData && (
+          <Card className="p-4 mb-4 bg-yellow-50 border-yellow-200">
+            <p className="text-center text-sm text-yellow-800">
+              Gợi ý: Từ đầu tiên là "<strong>{currentSentenceData.words[currentSentenceData.correctOrder[0]]}</strong>"
+            </p>
+          </Card>
+        )}
         
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-3">
           <Button
             variant="outline"
             onClick={handleShuffleWords}
@@ -326,19 +303,19 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
             <Button
               variant="outline"
               onClick={handleHint}
-              disabled={isChecking || hasShownHint}
-              className={hasShownHint ? 'opacity-50' : ''}
+              disabled={isChecking}
+              className={hasShownHint ? 'opacity-75' : ''}
               size="sm"
             >
               <Lightbulb className="h-4 w-4 mr-1" />
-              Gợi ý
+              {showHint ? 'Ẩn gợi ý' : 'Gợi ý'}
             </Button>
           )}
           
           <Button
             onClick={handleCheck}
-            disabled={orderedWords.length !== sentences[currentSentence].words.length || isChecking}
-            className={orderedWords.length !== sentences[currentSentence].words.length ? 'opacity-50' : ''}
+            disabled={orderedWords.length !== currentSentenceData?.words.length || isChecking}
+            className={orderedWords.length !== currentSentenceData?.words.length ? 'opacity-50' : ''}
             size="sm"
           >
             <Check className="h-4 w-4 mr-1" />

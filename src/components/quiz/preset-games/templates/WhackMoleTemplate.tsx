@@ -42,6 +42,45 @@ interface WhackMoleTemplateProps {
   content?: WhackMoleData;
 }
 
+const MoleComponent: React.FC<{ isCorrect: boolean; answer: string; onClick: () => void; isHit: boolean }> = ({ 
+  isCorrect, 
+  answer, 
+  onClick, 
+  isHit 
+}) => {
+  if (isHit) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center text-4xl animate-ping z-10">
+        💥
+      </div>
+    );
+  }
+
+  return (
+    <div 
+      className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer transform hover:scale-110 transition-transform animate-bounce z-10"
+      onClick={onClick}
+    >
+      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg relative ${
+        isCorrect ? 'bg-gradient-to-b from-green-400 to-green-600' : 'bg-gradient-to-b from-red-400 to-red-600'
+      }`}>
+        <div className="w-12 h-10 bg-gray-600 rounded-full relative">
+          <div className="absolute top-1 left-2 w-2 h-2 bg-black rounded-full"></div>
+          <div className="absolute top-1 right-2 w-2 h-2 bg-black rounded-full"></div>
+          <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-pink-300 rounded-full"></div>
+          <div className="absolute top-6 left-3 w-2 h-1 bg-white rounded-full"></div>
+          <div className="absolute top-6 right-3 w-2 h-1 bg-white rounded-full"></div>
+          <div className="absolute -top-1 left-1 w-3 h-3 bg-gray-600 rounded-full"></div>
+          <div className="absolute -top-1 right-1 w-3 h-3 bg-gray-600 rounded-full"></div>
+        </div>
+      </div>
+      <div className="absolute -bottom-8 bg-white px-2 py-1 rounded text-xs font-semibold shadow-md max-w-20 truncate border">
+        {answer}
+      </div>
+    </div>
+  );
+};
+
 const WhackMoleTemplate: React.FC<WhackMoleTemplateProps> = ({ 
   data, 
   onBack,
@@ -58,7 +97,6 @@ const WhackMoleTemplate: React.FC<WhackMoleTemplateProps> = ({
   const [activeMoles, setActiveMoles] = useState<Mole[]>([]);
   const [hitMoles, setHitMoles] = useState<string[]>([]);
 
-  // Timer countdown
   useEffect(() => {
     if (gameState === 'playing' && timeLeft > 0) {
       const timer = setInterval(() => {
@@ -75,7 +113,6 @@ const WhackMoleTemplate: React.FC<WhackMoleTemplateProps> = ({
     }
   }, [gameState, timeLeft]);
 
-  // Mole spawning logic
   const spawnMole = useCallback(() => {
     if (gameState !== 'playing' || currentQuestionIndex >= gameData.questions.length) return;
     
@@ -83,7 +120,7 @@ const WhackMoleTemplate: React.FC<WhackMoleTemplateProps> = ({
     const availableHoles = Array.from({ length: gameData.settings.holesCount }, (_, i) => i)
       .filter(hole => !activeMoles.some(mole => mole.holeIndex === hole));
     
-    if (availableHoles.length === 0 || activeMoles.length >= gameData.settings.maxMolesAtOnce) return;
+    if (availableHoles.length === 0 || activeMoles.length >= 3) return;
     
     const randomHole = availableHoles[Math.floor(Math.random() * availableHoles.length)];
     const allAnswers = [currentQuestion.correctAnswer, ...currentQuestion.wrongAnswers];
@@ -99,19 +136,17 @@ const WhackMoleTemplate: React.FC<WhackMoleTemplateProps> = ({
     
     setActiveMoles(prev => [...prev, newMole]);
     
-    // Remove mole after show time
     setTimeout(() => {
       setActiveMoles(prev => prev.filter(mole => mole.id !== newMole.id));
     }, gameData.settings.moleShowTime * 1000);
     
   }, [gameState, currentQuestionIndex, activeMoles, gameData]);
 
-  // Spawn moles periodically
   useEffect(() => {
     if (gameState === 'playing') {
       const interval = setInterval(() => {
         spawnMole();
-      }, 1500); // Spawn new mole every 1.5 seconds
+      }, 1200);
       
       return () => clearInterval(interval);
     }
@@ -136,7 +171,6 @@ const WhackMoleTemplate: React.FC<WhackMoleTemplateProps> = ({
         description: `+${gameData.settings.pointsPerCorrect} điểm`,
       });
       
-      // Move to next question
       if (currentQuestionIndex < gameData.questions.length - 1) {
         setCurrentQuestionIndex(prev => prev + 1);
       }
@@ -233,11 +267,10 @@ const WhackMoleTemplate: React.FC<WhackMoleTemplateProps> = ({
   const currentQuestion = gameData.questions[currentQuestionIndex];
 
   return (
-    <div className="h-full p-6 bg-gradient-to-b from-green-50 to-yellow-50">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+    <div className="h-full p-4 bg-gradient-to-b from-green-50 to-yellow-50">
+      <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold">{gameData.title}</h1>
+          <h1 className="text-xl font-bold">{gameData.title}</h1>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4" />
             {formatTime(timeLeft)}
@@ -251,19 +284,16 @@ const WhackMoleTemplate: React.FC<WhackMoleTemplateProps> = ({
         </div>
       </div>
 
-      {/* Progress */}
-      <Progress value={(currentQuestionIndex / gameData.questions.length) * 100} className="mb-6" />
+      <Progress value={(currentQuestionIndex / gameData.questions.length) * 100} className="mb-4" />
 
-      {/* Current Question */}
       {gameState !== 'ready' && currentQuestion && (
-        <Card className="p-4 mb-6 text-center bg-blue-50">
+        <Card className="p-4 mb-4 text-center bg-blue-50">
           <h3 className="text-lg font-bold">{currentQuestion.question}</h3>
           <p className="text-sm text-muted-foreground mt-1">Đập chuột có đáp án đúng!</p>
         </Card>
       )}
 
-      {/* Game Controls */}
-      <div className="flex justify-center mb-6 gap-3">
+      <div className="flex justify-center mb-4 gap-3">
         {gameState === 'ready' && (
           <Button onClick={startGame} size="lg">
             <Play className="h-5 w-5 mr-2" />
@@ -282,9 +312,8 @@ const WhackMoleTemplate: React.FC<WhackMoleTemplateProps> = ({
         </Button>
       </div>
 
-      {/* Game Grid */}
-      <div className="max-w-2xl mx-auto">
-        <div className="grid grid-cols-3 gap-4">
+      <div className="max-w-3xl mx-auto">
+        <div className="grid grid-cols-3 gap-6">
           {Array.from({ length: gameData.settings.holesCount }, (_, index) => {
             const moleInHole = activeMoles.find(mole => mole.holeIndex === index);
             const isHit = moleInHole && hitMoles.includes(moleInHole.id);
@@ -292,33 +321,19 @@ const WhackMoleTemplate: React.FC<WhackMoleTemplateProps> = ({
             return (
               <div 
                 key={index}
-                className="relative w-24 h-24 mx-auto"
+                className="relative w-28 h-28 mx-auto"
               >
-                {/* Hole */}
-                <div className="w-24 h-24 bg-amber-800 rounded-full border-4 border-amber-900 shadow-inner"></div>
+                <div className="w-28 h-28 bg-gradient-to-b from-amber-700 to-amber-900 rounded-full border-4 border-amber-800 shadow-inner relative">
+                  <div className="absolute inset-2 bg-black rounded-full opacity-50"></div>
+                </div>
                 
-                {/* Mole */}
-                {moleInHole && !isHit && (
-                  <div 
-                    className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer transform hover:scale-110 transition-transform animate-bounce"
+                {moleInHole && (
+                  <MoleComponent
+                    isCorrect={moleInHole.isCorrect}
+                    answer={moleInHole.answer}
                     onClick={() => handleMoleClick(moleInHole)}
-                  >
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg ${
-                      moleInHole.isCorrect ? 'bg-green-500' : 'bg-red-500'
-                    }`}>
-                      🐭
-                    </div>
-                    <div className="absolute -bottom-6 bg-white px-2 py-1 rounded text-xs font-semibold shadow-md max-w-20 truncate">
-                      {moleInHole.answer}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Hit effect */}
-                {isHit && (
-                  <div className="absolute inset-0 flex items-center justify-center text-2xl animate-ping">
-                    💥
-                  </div>
+                    isHit={isHit}
+                  />
                 )}
               </div>
             );
@@ -326,7 +341,6 @@ const WhackMoleTemplate: React.FC<WhackMoleTemplateProps> = ({
         </div>
       </div>
 
-      {/* Instructions */}
       {gameState === 'ready' && (
         <div className="text-center mt-8">
           <h2 className="text-xl font-semibold mb-2">Cách chơi:</h2>
@@ -337,14 +351,13 @@ const WhackMoleTemplate: React.FC<WhackMoleTemplateProps> = ({
         </div>
       )}
 
-      {/* Control Buttons */}
-      <div className="fixed bottom-6 right-6 flex gap-3 z-20">
-        {onBack && (
+      {onBack && (
+        <div className="fixed bottom-6 right-6">
           <Button onClick={onBack} variant="outline" size="sm">
             Về trang chủ
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
