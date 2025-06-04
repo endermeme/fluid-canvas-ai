@@ -1,6 +1,16 @@
 
 # Game Changes Log
 
+## 2025-06-04 - Cập nhật prompt AI để yêu cầu hình ảnh thật cho game Đoán Hình
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/PresetGameManager.tsx** - SỬA: Cập nhật prompt AI yêu cầu URL hình ảnh thật từ Pexels/Pixabay
+
+### Loại thay đổi:
+- Cập nhật prompt AI cho game Pictionary yêu cầu URL hình ảnh thực tế
+- Loại bỏ việc fallback về sample data cho game Đoán Hình
+- Đảm bảo AI cung cấp URL từ các nguồn ảnh miễn phí như Pexels, Pixabay, Freepik
+
 ## 2025-06-04 - Xóa file pictionarySampleData.ts
 
 ### Files thay đổi:

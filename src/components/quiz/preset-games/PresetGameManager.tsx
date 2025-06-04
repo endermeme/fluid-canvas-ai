@@ -122,7 +122,13 @@ Output must be valid JSON. `;
           gamePrompt += `JSON format: { "title": "title", "description": "description", "words": [{"word": "word 1", "found": false}, {"word": "word 2", "found": false}], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "settings": {"timeLimit": ${totalTime || 300}, "allowDiagonalWords": true, "showWordList": true, "bonusTimePerWord": ${bonusTime || 15}} }`;
           break;
         case 'pictionary':
-          gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "image URL", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }`;
+          gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "REAL IMAGE URL from Pexels/Pixabay/Freepik", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
+
+QUAN TRỌNG cho game Pictionary: 
+- imageUrl PHẢI là URL thật từ Pexels, Pixabay, Freepik hoặc các nguồn ảnh miễn phí khác
+- KHÔNG sử dụng placeholder, example.com hay ảnh giả
+- Ví dụ URL hợp lệ: "https://images.pexels.com/photos/1234567/pexels-photo-1234567.jpeg", "https://pixabay.com/get/123456789_1920.jpg"
+- Mỗi ảnh phải phù hợp với đáp án và chủ đề`;
           break;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
@@ -245,13 +251,22 @@ Output must be valid JSON. `;
         variant: "destructive"
       });
 
-      loadSampleData(type);
+      // Không load sample data nữa vì đã xóa file
+      setLoading(false);
+      setGameContent(null);
     } finally {
       setGenerating(false);
     }
   };
 
   const loadSampleData = (type) => {
+    if (type === 'pictionary') {
+      // Không có sample data cho pictionary nữa
+      setError('Không có dữ liệu mẫu cho game Đoán Hình. Vui lòng sử dụng AI để tạo nội dung.');
+      setLoading(false);
+      return;
+    }
+
     import(`./data/${type}SampleData.ts`).then(module => {
       let data = null;
 
