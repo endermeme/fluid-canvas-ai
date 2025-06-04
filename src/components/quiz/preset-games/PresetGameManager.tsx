@@ -128,8 +128,7 @@ QUAN TRỌNG cho game Pictionary:
 - imageUrl PHẢI là URL ảnh thật từ internet dạng link
 - Ưu tiên sử dụng ảnh từ Wikimedia Commons (https://commons.wikimedia.org)
 - KHÔNG sử dụng placeholder hay ảnh giả
-- Mỗi ảnh phải phù hợp với đáp án và chủ đề
-
+- Mỗi ảnh phải phù hợp với đáp án và chủ đề`;
           break;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
