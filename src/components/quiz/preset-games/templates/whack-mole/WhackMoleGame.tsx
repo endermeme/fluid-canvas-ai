@@ -40,6 +40,8 @@ const WhackMoleGame: React.FC<WhackMoleGameProps> = ({ data, content, topic, onB
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [activeMoles, setActiveMoles] = useState<Mole[]>([]);
   const [hitMoles, setHitMoles] = useState<string[]>([]);
+  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
+  const [lastUsedHoles, setLastUsedHoles] = useState<number[]>([]);
 
   useEffect(() => {
     if (gameState === 'playing' && timeLeft > 0) {
@@ -57,50 +59,64 @@ const WhackMoleGame: React.FC<WhackMoleGameProps> = ({ data, content, topic, onB
     }
   }, [gameState, timeLeft]);
 
+  // Thuật toán spawn chuột thông minh hơn
   const spawnMoles = useCallback(() => {
     if (gameState !== 'playing' || currentQuestionIndex >= gameData.questions.length) return;
     
     const currentQuestion = gameData.questions[currentQuestionIndex];
-    const availableHoles = Array.from({ length: gameData.settings.holesCount }, (_, i) => i)
+    const totalHoles = gameData.settings.holesCount;
+    
+    // Lấy các lỗ có sẵn (không có chuột)
+    const availableHoles = Array.from({ length: totalHoles }, (_, i) => i)
       .filter(hole => !activeMoles.some(mole => mole.holeIndex === hole));
     
-    if (availableHoles.length < 3) return;
+    // Tránh spawn ở những lỗ vừa được sử dụng để tăng độ khó
+    const preferredHoles = availableHoles.filter(hole => !lastUsedHoles.includes(hole));
+    const holesPool = preferredHoles.length >= 3 ? preferredHoles : availableHoles;
     
-    // Spawn 3 moles at once
-    const selectedHoles = availableHoles.sort(() => Math.random() - 0.5).slice(0, 3);
+    if (holesPool.length < 3) return;
+    
+    // Chọn 3 lỗ ngẫu nhiên
+    const selectedHoles = holesPool
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
+    
+    // Tạo danh sách đáp án (1 đúng, 2 sai)
     const allAnswers = [currentQuestion.correctAnswer, ...currentQuestion.wrongAnswers];
+    const shuffledAnswers = allAnswers.sort(() => Math.random() - 0.5).slice(0, 3);
     
-    const newMoles: Mole[] = selectedHoles.map((holeIndex, index) => {
-      const answer = allAnswers[index] || allAnswers[Math.floor(Math.random() * allAnswers.length)];
-      return {
-        id: `mole-${Date.now()}-${holeIndex}`,
-        holeIndex,
-        answer,
-        isCorrect: answer === currentQuestion.correctAnswer,
-        showTime: gameData.settings.moleShowTime
-      };
-    });
+    const newMoles: Mole[] = selectedHoles.map((holeIndex, index) => ({
+      id: `mole-${Date.now()}-${holeIndex}-${Math.random()}`,
+      holeIndex,
+      answer: shuffledAnswers[index],
+      isCorrect: shuffledAnswers[index] === currentQuestion.correctAnswer,
+      showTime: gameData.settings.moleShowTime
+    }));
     
     setActiveMoles(prev => [...prev, ...newMoles]);
+    setLastUsedHoles(selectedHoles);
     
-    // Auto-hide moles after show time
+    // Auto-hide moles sau thời gian show
     newMoles.forEach(mole => {
       setTimeout(() => {
         setActiveMoles(prev => prev.filter(m => m.id !== mole.id));
-      }, gameData.settings.moleShowTime * 1000);
+      }, (gameData.settings.moleShowTime + Math.random() * 0.5) * 1000); // Thêm random để khó đoán hơn
     });
     
-  }, [gameState, currentQuestionIndex, activeMoles, gameData]);
+  }, [gameState, currentQuestionIndex, activeMoles, gameData, lastUsedHoles]);
 
   useEffect(() => {
     if (gameState === 'playing') {
+      // Tăng tốc độ spawn dần theo thời gian để khó hơn
+      const baseInterval = 2500;
+      const speedupFactor = Math.max(0.7, 1 - (60 - timeLeft) / 120); // Nhanh hơn theo thời gian
       const interval = setInterval(() => {
         spawnMoles();
-      }, 2000);
+      }, baseInterval * speedupFactor);
       
       return () => clearInterval(interval);
     }
-  }, [gameState, spawnMoles]);
+  }, [gameState, spawnMoles, timeLeft]);
 
   const handleMoleClick = (mole: Mole) => {
     if (hitMoles.includes(mole.id)) return;
@@ -110,18 +126,23 @@ const WhackMoleGame: React.FC<WhackMoleGameProps> = ({ data, content, topic, onB
     
     if (mole.isCorrect) {
       setScore(prev => prev + gameData.settings.pointsPerCorrect);
+      setCorrectAnswersCount(prev => prev + 1);
       toast({
-        title: "Chính xác!",
+        title: "Chính xác! 🎯",
         description: `+${gameData.settings.pointsPerCorrect} điểm`,
       });
       
+      // Chuyển câu hỏi tiếp theo
       if (currentQuestionIndex < gameData.questions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
+        setTimeout(() => {
+          setCurrentQuestionIndex(prev => prev + 1);
+          setActiveMoles([]); // Clear các chuột hiện tại
+        }, 1000);
       }
     } else {
       setScore(prev => Math.max(0, prev + gameData.settings.pointsPerWrong));
       toast({
-        title: "Sai rồi!",
+        title: "Sai rồi! ❌",
         description: `${gameData.settings.pointsPerWrong} điểm`,
         variant: "destructive"
       });
@@ -135,6 +156,8 @@ const WhackMoleGame: React.FC<WhackMoleGameProps> = ({ data, content, topic, onB
     setCurrentQuestionIndex(0);
     setActiveMoles([]);
     setHitMoles([]);
+    setCorrectAnswersCount(0);
+    setLastUsedHoles([]);
   };
 
   const pauseGame = () => {
@@ -148,6 +171,8 @@ const WhackMoleGame: React.FC<WhackMoleGameProps> = ({ data, content, topic, onB
     setCurrentQuestionIndex(0);
     setActiveMoles([]);
     setHitMoles([]);
+    setCorrectAnswersCount(0);
+    setLastUsedHoles([]);
   };
 
   if (!gameData) {
@@ -163,7 +188,7 @@ const WhackMoleGame: React.FC<WhackMoleGameProps> = ({ data, content, topic, onB
       {gameState === 'ready' && (
         <GameStartScreen 
           title={gameData.title}
-          description={gameData.description}
+          description="Đập chuột có đáp án đúng! Chuột sẽ không hiển thị đáp án - bạn phải nhớ và đoán!"
           onStart={startGame}
         />
       )}
@@ -196,7 +221,7 @@ const WhackMoleGame: React.FC<WhackMoleGameProps> = ({ data, content, topic, onB
       {gameState === 'finished' && (
         <GameResultModal
           score={score}
-          currentQuestionIndex={currentQuestionIndex}
+          currentQuestionIndex={correctAnswersCount}
           totalQuestions={gameData.questions.length}
           hitMoles={hitMoles.length}
           onRestart={resetGame}

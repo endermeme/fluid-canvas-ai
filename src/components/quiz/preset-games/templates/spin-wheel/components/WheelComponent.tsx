@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Play } from 'lucide-react';
 
 interface WheelSection {
   id: number;
   question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation?: string;
   color: string;
 }
 
@@ -21,130 +23,137 @@ const WheelComponent: React.FC<WheelComponentProps> = ({
   spinDuration
 }) => {
   const [isSpinning, setIsSpinning] = useState(false);
-  const [wheelRotation, setWheelRotation] = useState(0);
+  const [rotation, setRotation] = useState(0);
+  const wheelRef = useRef<SVGSVGElement>(null);
 
-  const spinWheel = () => {
+  const handleSpin = () => {
     if (isSpinning) return;
-    
+
     setIsSpinning(true);
-    const spins = 3 + Math.random() * 3; // 3-6 full rotations
-    const randomAngle = Math.random() * 360;
-    const totalRotation = spins * 360 + randomAngle;
     
-    setWheelRotation(prev => prev + totalRotation);
+    // Tăng số vòng quay và thời gian để chậm hơn
+    const spins = 6 + Math.random() * 4; // 6-10 vòng thay vì 3-5
+    const finalAngle = Math.random() * 360;
+    const totalRotation = rotation + (spins * 360) + finalAngle;
+    
+    setRotation(totalRotation);
+    
+    // Tăng thời gian animation lên 5 giây
+    const actualDuration = 5000;
+    
+    if (wheelRef.current) {
+      wheelRef.current.style.transition = `transform ${actualDuration}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
+      wheelRef.current.style.transform = `rotate(${totalRotation}deg)`;
+    }
     
     setTimeout(() => {
-      const sectionAngle = 360 / sections.length;
-      const finalAngle = (wheelRotation + totalRotation) % 360;
-      const selectedIndex = Math.floor((360 - finalAngle) / sectionAngle) % sections.length;
-      
       setIsSpinning(false);
+      
+      // Tính toán section được chọn
+      const normalizedAngle = (360 - (finalAngle % 360)) % 360;
+      const sectionAngle = 360 / sections.length;
+      const selectedIndex = Math.floor(normalizedAngle / sectionAngle) % sections.length;
+      
       onSpinComplete(selectedIndex);
-    }, spinDuration * 1000);
+    }, actualDuration);
   };
 
-  const radius = 180;
-  const center = 200;
+  const radius = 200;
+  const centerX = 250;
+  const centerY = 250;
   const sectionAngle = 360 / sections.length;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[500px] p-6">
+    <div className="flex flex-col items-center justify-center p-8">
       <div className="relative mb-8">
-        {/* Wheel Container */}
-        <div className="relative">
-          <svg width="400" height="400" className="wheel-container">
-            {/* Wheel Sections */}
-            <g
-              style={{
-                transform: `rotate(${wheelRotation}deg)`,
-                transformOrigin: '200px 200px',
-                transition: isSpinning ? `transform ${spinDuration}s cubic-bezier(0.17, 0.67, 0.12, 0.99)` : 'none'
-              }}
-            >
-              {sections.map((section, index) => {
-                const startAngle = index * sectionAngle;
-                const endAngle = (index + 1) * sectionAngle;
-                
-                const startX = center + radius * Math.cos((startAngle * Math.PI) / 180);
-                const startY = center + radius * Math.sin((startAngle * Math.PI) / 180);
-                const endX = center + radius * Math.cos((endAngle * Math.PI) / 180);
-                const endY = center + radius * Math.sin((endAngle * Math.PI) / 180);
-                
-                const largeArcFlag = sectionAngle > 180 ? 1 : 0;
-                
-                const pathData = [
-                  `M ${center} ${center}`,
-                  `L ${startX} ${startY}`,
-                  `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`,
-                  'Z'
-                ].join(' ');
+        {/* Wheel */}
+        <svg width="500" height="500" className="wheel-container">
+          <g ref={wheelRef}>
+            {sections.map((section, index) => {
+              const startAngle = (index * sectionAngle) * (Math.PI / 180);
+              const endAngle = ((index + 1) * sectionAngle) * (Math.PI / 180);
+              
+              const x1 = centerX + radius * Math.cos(startAngle);
+              const y1 = centerY + radius * Math.sin(startAngle);
+              const x2 = centerX + radius * Math.cos(endAngle);
+              const y2 = centerY + radius * Math.sin(endAngle);
+              
+              const largeArcFlag = sectionAngle > 180 ? 1 : 0;
+              
+              const pathData = [
+                `M ${centerX} ${centerY}`,
+                `L ${x1} ${y1}`,
+                `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+                'Z'
+              ].join(' ');
+              
+              const textAngle = (startAngle + endAngle) / 2;
+              const textRadius = radius * 0.7;
+              const textX = centerX + textRadius * Math.cos(textAngle);
+              const textY = centerY + textRadius * Math.sin(textAngle);
 
-                // Text position
-                const textAngle = startAngle + sectionAngle / 2;
-                const textRadius = radius * 0.7;
-                const textX = center + textRadius * Math.cos((textAngle * Math.PI) / 180);
-                const textY = center + textRadius * Math.sin((textAngle * Math.PI) / 180);
-
-                return (
-                  <g key={section.id}>
-                    <path
-                      d={pathData}
-                      fill={section.color}
-                      stroke="#fff"
-                      strokeWidth="2"
-                      className="wheel-section"
-                    />
-                    <text
-                      x={textX}
-                      y={textY}
-                      fill="white"
-                      fontSize="12"
-                      fontWeight="bold"
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      transform={`rotate(${textAngle}, ${textX}, ${textY})`}
-                    >
-                      {`Câu ${index + 1}`}
-                    </text>
-                  </g>
-                );
-              })}
-            </g>
-            
-            {/* Center Circle */}
-            <circle
-              cx={center}
-              cy={center}
-              r="20"
-              fill="#4F46E5"
-              stroke="#fff"
-              strokeWidth="3"
-            />
-            
-            {/* Pointer */}
-            <polygon
-              points={`${center},10 ${center-15},50 ${center+15},50`}
-              fill="#EF4444"
-              stroke="#fff"
-              strokeWidth="2"
-            />
-          </svg>
-        </div>
+              return (
+                <g key={section.id}>
+                  <path
+                    d={pathData}
+                    fill={section.color}
+                    stroke="#fff"
+                    strokeWidth="3"
+                    className="wheel-section"
+                  />
+                  <text
+                    x={textX}
+                    y={textY}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="white"
+                    fontSize="14"
+                    fontWeight="bold"
+                    fontFamily="Inter, system-ui, sans-serif"
+                    transform={`rotate(${(textAngle * 180 / Math.PI)}, ${textX}, ${textY})`}
+                  >
+                    {`Câu ${section.id}`}
+                  </text>
+                </g>
+              );
+            })}
+          </g>
+          
+          {/* Center circle */}
+          <circle
+            cx={centerX}
+            cy={centerY}
+            r="20"
+            fill="#8B4513"
+            stroke="#fff"
+            strokeWidth="3"
+          />
+          
+          {/* Pointer */}
+          <polygon
+            points={`${centerX},${centerY-radius-20} ${centerX-15},${centerY-radius-5} ${centerX+15},${centerY-radius-5}`}
+            fill="#8B4513"
+            stroke="#fff"
+            strokeWidth="2"
+          />
+        </svg>
       </div>
 
-      <Button 
-        onClick={spinWheel}
+      <Button
+        onClick={handleSpin}
         disabled={isSpinning}
         size="lg"
-        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg"
+        className={`px-8 py-4 text-xl font-bold ${isSpinning ? '' : 'pulse-glow'}`}
+        style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
       >
-        <Play className="h-6 w-6 mr-2" />
-        {isSpinning ? 'Đang quay...' : 'Quay vòng may mắn!'}
+        {isSpinning ? '🎡 Đang quay...' : '🎯 QUAY VÒNG!'}
       </Button>
-
-      <p className="text-center text-muted-foreground mt-4 max-w-md">
-        Nhấn nút để quay vòng và chọn câu hỏi ngẫu nhiên. Vòng quay sẽ dừng lại và bạn sẽ trả lời câu hỏi được chọn.
-      </p>
+      
+      {isSpinning && (
+        <p className="mt-4 text-lg text-muted-foreground animate-pulse" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+          Vòng quay đang chậm lại...
+        </p>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 
 .spin-wheel-game {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .wheel-container {
@@ -15,7 +15,7 @@
   filter: brightness(1.1);
 }
 
-/* Wheel spinning animation */
+/* Wheel spinning animation - Giảm tốc độ */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -23,6 +23,10 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.spinning-wheel {
+  animation: spin 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); /* Tăng từ 2s lên 4s và easing mượt hơn */
 }
 
 /* Glowing effect for active elements */
@@ -62,6 +66,12 @@
   }
   
   .wheel-section text {
-    font-size: 10px;
+    font-size: 12px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   }
+}
+
+/* Global font improvements */
+.spin-wheel-game * {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
