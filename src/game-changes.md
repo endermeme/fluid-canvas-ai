@@ -1,6 +1,19 @@
 
 # Game Changes Log
 
+## 2025-06-04 - Loại bỏ phụ thuộc vào Unsplash và cho phép sử dụng ảnh từ bất kỳ nguồn nào
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/data/pictionarySampleData.ts** - SỬA: Thay thế URL Unsplash bằng Pixabay và các nguồn mở khác
+- **src/utils/media-utils.ts** - TẠO MỚI: File utility để xử lý ảnh từ nhiều nguồn
+- **src/components/quiz/preset-games/templates/PictionaryTemplate.tsx** - SỬA: Hỗ trợ nhiều nguồn ảnh và cải thiện xử lý lỗi
+
+### Loại thay đổi:
+- Loại bỏ phụ thuộc vào Unsplash trong PictionaryTemplate
+- Thêm module xử lý media để hỗ trợ nhiều nguồn ảnh
+- Thêm fallback cho ảnh không tải được
+- Tăng tính linh hoạt cho nguồn ảnh trong game
+
 ## 2025-01-03 - Fix lỗi game "Đúng hay Sai" và "Đoán Hình"
 
 ### Files thay đổi:

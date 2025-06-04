@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, ChevronRight, HelpCircle, Clock, Image, ArrowLeft } from 'lucide-react';
+import { processImageSource, generateImageFallback } from '@/utils/media-utils';
 
 interface PictionaryTemplateProps {
   data?: any;
@@ -25,6 +26,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
   const [timerRunning, setTimerRunning] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [processedImageUrl, setProcessedImageUrl] = useState<string>('');
   const { toast } = useToast();
 
   const items = gameContent?.items || [];
@@ -34,6 +36,22 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
     console.log("PictionaryTemplate - Game content:", gameContent);
     console.log("PictionaryTemplate - Items:", items);
   }, [gameContent, items]);
+
+  // Process image URL when item changes
+  useEffect(() => {
+    if (items[currentItem]?.imageUrl) {
+      const processImage = async () => {
+        try {
+          const processed = await processImageSource(items[currentItem].imageUrl);
+          setProcessedImageUrl(processed);
+        } catch (error) {
+          console.error('Error processing image:', error);
+          setProcessedImageUrl(generateImageFallback(items[currentItem].answer));
+        }
+      };
+      processImage();
+    }
+  }, [currentItem, items]);
 
   useEffect(() => {
     if (timeLeft > 0 && timerRunning) {
@@ -116,12 +134,12 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
   };
 
   const handleImageErrorEvent = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.error("Image failed to load:", items[currentItem]?.imageUrl);
+    console.error("Image failed to load:", processedImageUrl);
     setImageError(true);
     setImageLoaded(true);
     const img = e.currentTarget;
     // Fallback to placeholder
-    img.src = "/placeholder.svg";
+    img.src = generateImageFallback(items[currentItem]?.answer || topic);
     img.alt = `Không thể tải hình ảnh: ${items[currentItem]?.answer || topic}`;
   };
 
@@ -237,7 +255,7 @@ const PictionaryTemplate: React.FC<PictionaryTemplateProps> = ({ data, content, 
             </div>
           ) : (
             <img 
-              src={item.imageUrl} 
+              src={processedImageUrl || item.imageUrl || generateImageFallback(item.answer)} 
               alt={`Hình ảnh: ${item.answer}`}
               className={`w-full h-full object-cover ${imageLoaded ? 'opacity-100' : 'opacity-0'}`} 
               onLoad={handleImageLoad}
