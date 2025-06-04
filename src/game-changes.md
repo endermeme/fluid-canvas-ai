@@ -1,4 +1,28 @@
+
 # Game Changes Log
+
+## 2025-01-03 - Kiểm tra và tối ưu icons cho các game
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/GameSelector.tsx** - SỬA: Review và tối ưu icons phù hợp với tên game
+
+### Loại thay đổi:
+- Review lại toàn bộ icons cho 13 game types:
+  - Quiz: Brain (não bộ - câu hỏi trắc nghiệm)
+  - Flashcards: BookOpen (sách mở - thẻ ghi nhớ)
+  - Matching: ArrowRightLeft (mũi tên nối - ghép cặp)
+  - Memory: Brain (não bộ - trò chơi ghi nhớ)
+  - Ordering: Layers (lớp - sắp xếp thứ tự)
+  - WordSearch: Search (tìm kiếm - tìm từ ẩn)
+  - Pictionary: Image (hình ảnh - đoán hình)
+  - TrueFalse: CheckSquare (dấu tick - đúng/sai)
+  - BalloonPop: CircleDot (chấm tròn - bóng bay)
+  - SpinWheel: RotateCcw (mũi tên quay - bánh xe)
+  - WhackMole: Target (bia - đập chuột)
+  - StackBuilder: Layers (lớp - xếp khối)
+  - CatchObjects: Target (bia - bắt vật thể)
+- Đảm bảo icons phản ánh đúng bản chất và cơ chế của từng game
+- Một số game dùng chung icon phù hợp (Brain cho Quiz và Memory, Target cho WhackMole và CatchObjects, Layers cho Ordering và StackBuilder)
 
 ## 2025-01-03 - Cập nhật icons phù hợp với đặc điểm game
 

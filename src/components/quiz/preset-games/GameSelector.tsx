@@ -66,7 +66,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       id: 'memory', 
       name: 'Trò Chơi Ghi Nhớ', 
       description: 'Tìm các cặp thẻ giống nhau',
-      icon: <Puzzle className="h-8 w-8 text-pink-600" />
+      icon: <Brain className="h-8 w-8 text-pink-600" />
     },
     { 
       id: 'ordering', 
@@ -114,13 +114,13 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       id: 'stackbuilder', 
       name: 'Xếp Khối Đố Vui', 
       description: 'Kéo thả các khối theo thứ tự đúng',
-      icon: <Gamepad2 className="h-8 w-8 text-violet-600" />
+      icon: <Layers className="h-8 w-8 text-violet-600" />
     },
     { 
       id: 'catchobjects', 
       name: 'Bắt Vật Thể', 
       description: 'Bắt các vật thể có đáp án đúng',
-      icon: <Dices className="h-8 w-8 text-amber-600" />
+      icon: <Target className="h-8 w-8 text-amber-600" />
     }
   ];
 
