@@ -1,5 +1,14 @@
-
 # Game Changes Log
+
+## 2025-06-04 - Cập nhật prompt AI linh hoạt cho nguồn ảnh
+
+### Files thay đổi:
+- **src/components/quiz/preset-games/PresetGameManager.tsx** - SỬA: Cập nhật prompt AI yêu cầu URL ảnh từ internet mà không cố định nguồn cụ thể
+
+### Loại thay đổi:
+- Loại bỏ yêu cầu nguồn ảnh cụ thể (Pexels/Pixabay/Freepik)
+- Chỉ yêu cầu AI lấy URL ảnh thật từ internet dạng link
+- Tăng tính linh hoạt cho việc tạo game Đoán Hình
 
 ## 2025-06-04 - Cập nhật prompt AI để yêu cầu hình ảnh thật cho game Đoán Hình
 

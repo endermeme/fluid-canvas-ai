@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -122,12 +123,11 @@ Output must be valid JSON. `;
           gamePrompt += `JSON format: { "title": "title", "description": "description", "words": [{"word": "word 1", "found": false}, {"word": "word 2", "found": false}], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "settings": {"timeLimit": ${totalTime || 300}, "allowDiagonalWords": true, "showWordList": true, "bonusTimePerWord": ${bonusTime || 15}} }`;
           break;
         case 'pictionary':
-          gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "REAL IMAGE URL from Pexels/Pixabay/Freepik", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
+          gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "URL ảnh từ internet", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
 
 QUAN TRỌNG cho game Pictionary: 
-- imageUrl PHẢI là URL thật từ Pexels, Pixabay, Freepik hoặc các nguồn ảnh miễn phí khác
-- KHÔNG sử dụng placeholder, example.com hay ảnh giả
-- Ví dụ URL hợp lệ: "https://images.pexels.com/photos/1234567/pexels-photo-1234567.jpeg", "https://pixabay.com/get/123456789_1920.jpg"
+- imageUrl PHẢI là URL ảnh thật từ internet dạng link
+- KHÔNG sử dụng placeholder hay ảnh giả
 - Mỗi ảnh phải phù hợp với đáp án và chủ đề`;
           break;
         case 'truefalse':
