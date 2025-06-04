@@ -123,7 +123,7 @@ Output must be valid JSON. `;
           break;
         case 'pictionary':
           gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "URL ảnh từ internet", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
-
+- Bỏ qua các nguồn ảnh từ upload.wikipedia
 QUAN TRỌNG cho game Pictionary: 
 - imageUrl PHẢI là URL ảnh thật từ internet dạng link
 - KHÔNG sử dụng placeholder hay ảnh giả
