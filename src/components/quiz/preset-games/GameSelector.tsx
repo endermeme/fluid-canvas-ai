@@ -109,18 +109,6 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       name: 'Đập Chuột Đố Vui', 
       description: 'Đập nhanh chuột có đáp án đúng',
       icon: <Target className="h-8 w-8 text-red-600" />
-    },
-    { 
-      id: 'stackbuilder', 
-      name: 'Xếp Khối Đố Vui', 
-      description: 'Kéo thả các khối theo thứ tự đúng',
-      icon: <Layers className="h-8 w-8 text-violet-600" />
-    },
-    { 
-      id: 'catchobjects', 
-      name: 'Bắt Vật Thể', 
-      description: 'Bắt các vật thể có đáp án đúng',
-      icon: <Target className="h-8 w-8 text-amber-600" />
     }
   ];
 

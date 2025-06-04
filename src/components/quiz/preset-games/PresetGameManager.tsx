@@ -247,15 +247,6 @@ Output must be valid JSON. `;
             parsedContent.settings.holesCount = 9;
             parsedContent.settings.maxMolesAtOnce = 3;
             break;
-          case 'catchobjects':
-            parsedContent.settings.gameTime = totalTime || 90;
-            parsedContent.settings.objectSpeed = 2;
-            parsedContent.settings.spawnRate = 1.5;
-            parsedContent.settings.pointsPerCorrect = 10;
-            parsedContent.settings.pointsPerWrong = -5;
-            parsedContent.settings.basketSize = 80;
-            parsedContent.settings.objectSize = 40;
-            break;
         }
 
         clearInterval(progressInterval);
@@ -369,15 +360,6 @@ Output must be valid JSON. `;
             data.settings.pointsPerWrong = -5;
             data.settings.holesCount = 9;
             data.settings.maxMolesAtOnce = 3;
-            break;
-          case 'catchobjects':
-            data.settings.gameTime = settings.totalTime || 90;
-            data.settings.objectSpeed = 2;
-            data.settings.spawnRate = 1.5;
-            data.settings.pointsPerCorrect = 10;
-            data.settings.pointsPerWrong = -5;
-            data.settings.basketSize = 80;
-            data.settings.objectSize = 40;
             break;
         }
       }

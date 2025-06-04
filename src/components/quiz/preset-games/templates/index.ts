@@ -10,7 +10,6 @@ import TrueFalseTemplate from './TrueFalseTemplate';
 import BalloonPopTemplate from './balloon-pop';
 import SpinWheelTemplate from './spin-wheel';
 import WhackMoleTemplate from './whack-mole';
-import CatchObjectsTemplate from './catch-objects';
 
 // Export bộ các templates dưới dạng đối tượng
 const gameTemplates = {
@@ -24,8 +23,7 @@ const gameTemplates = {
   truefalse: TrueFalseTemplate,
   balloonpop: BalloonPopTemplate,
   spinwheel: SpinWheelTemplate,
-  whackmole: WhackMoleTemplate,
-  catchobjects: CatchObjectsTemplate
+  whackmole: WhackMoleTemplate
 };
 
 export default gameTemplates;
