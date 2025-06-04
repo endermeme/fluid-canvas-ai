@@ -136,9 +136,6 @@ Output must be valid JSON. `;
         case 'whackmole':
           gamePrompt += `JSON format: { "title": "title", "description": "description", "questions": [{"id": id_number, "question": "question", "correctAnswer": "correct_answer", "wrongAnswers": ["wrong1", "wrong2", "wrong3", "wrong4"]}], "settings": {"gameTime": ${totalTime || 60}, "moleShowTime": 3, "pointsPerCorrect": 10, "pointsPerWrong": -5, "holesCount": 9, "maxMolesAtOnce": 3} }`;
           break;
-        case 'stackbuilder':
-          gamePrompt += `JSON format: { "title": "title", "description": "description", "sequences": [{"id": id_number, "question": "question", "blocks": [{"id": "block_id", "content": "content", "correctPosition": position_number, "color": "hex_color"}], "explanation": "explanation"}], "settings": {"timePerSequence": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "pointsPerCorrect": 20, "allowHints": true, "showExplanation": true} }`;
-          break;
         case 'catchobjects':
           gamePrompt += `JSON format: { "title": "title", "description": "description", "questions": [{"id": id_number, "question": "question", "correctObjects": ["obj1", "obj2", "obj3", "obj4"], "wrongObjects": ["wrong1", "wrong2", "wrong3", "wrong4"], "category": "category_name"}], "settings": {"gameTime": ${totalTime || 90}, "objectSpeed": 2, "spawnRate": 1.5, "pointsPerCorrect": 10, "pointsPerWrong": -5, "basketSize": 80, "objectSize": 40} }`;
           break;
@@ -159,7 +156,7 @@ Output must be valid JSON. `;
         }
       };
 
-      const response = await fetch(getApiEndpoint(GEMINI_MODELS.PRESET_GAME), {
+      const response = await fetch(getApiEndpoint(GEMINI_MODELS.CUSTOM_GAME), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -250,13 +247,6 @@ Output must be valid JSON. `;
             parsedContent.settings.pointsPerWrong = -5;
             parsedContent.settings.holesCount = 9;
             parsedContent.settings.maxMolesAtOnce = 3;
-            break;
-          case 'stackbuilder':
-            parsedContent.settings.timePerSequence = timePerQuestion;
-            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
-            parsedContent.settings.pointsPerCorrect = 20;
-            parsedContent.settings.allowHints = true;
-            parsedContent.settings.showExplanation = true;
             break;
           case 'catchobjects':
             parsedContent.settings.gameTime = totalTime || 90;
@@ -381,13 +371,6 @@ Output must be valid JSON. `;
             data.settings.holesCount = 9;
             data.settings.maxMolesAtOnce = 3;
             break;
-          case 'stackbuilder':
-            data.settings.timePerSequence = settings.timePerQuestion;
-            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
-            data.settings.pointsPerCorrect = 20;
-            data.settings.allowHints = true;
-            data.settings.showExplanation = true;
-            break;
           case 'catchobjects':
             data.settings.gameTime = settings.totalTime || 90;
             data.settings.objectSpeed = 2;
@@ -450,7 +433,6 @@ Output must be valid JSON. `;
       case 'balloonpop': return 'Bóng Bay Đố Vui';
       case 'spinwheel': return 'Quay Bánh Xe';
       case 'whackmole': return 'Đập Chuột Đố Vui';
-      case 'stackbuilder': return 'Xếp Khối Đố Vui';
       case 'catchobjects': return 'Bắt Vật Thể';
       default: return 'Trò Chơi';
     }
@@ -552,13 +534,6 @@ Output must be valid JSON. `;
         name: 'Đập Chuột Đố Vui',
         description: 'Đập nhanh chuột có đáp án đúng',
         icon: 'target',
-        defaultSettings: settings
-      },
-      'stackbuilder': {
-        id: 'stackbuilder',
-        name: 'Xếp Khối Đố Vui',
-        description: 'Kéo thả các khối theo thứ tự đúng',
-        icon: 'layers',
         defaultSettings: settings
       },
       'catchobjects': {

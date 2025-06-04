@@ -1,7 +1,7 @@
 
 # Game Development Changes Log
 
-## Cập nhật mới nhất - Cải thiện Game Templates
+## Cập nhật mới nhất - Loại bỏ Stack Builder Game
 
 ### Ngày cập nhật: [Current Date]
 
@@ -28,8 +28,9 @@
 - ✅ **Font chữ cải thiện**: Inter font family cho tất cả components
 
 #### 4. Loại bỏ Stack Builder Game
-- ✅ **Xóa khỏi index**: Removed stackbuilder từ gameTemplates
-- ✅ **Lý do**: Game xếp từ đố vui không phù hợp
+- ✅ **Xóa hoàn toàn**: Xóa tất cả files, components và data liên quan
+- ✅ **Lý do**: Game xếp từ đố vui không phù hợp với yêu cầu
+- ✅ **Clean up**: Loại bỏ khỏi gameTemplates và routes
 
 #### 5. Cập nhật AI Model
 - ✅ **Model mới**: Chuyển từ gemini-1.5-flash lên gemini-2.0-flash-exp
@@ -40,13 +41,18 @@
 - ✅ **Responsive design**: Tối ưu cho mobile
 - ✅ **Animation timing**: Cải thiện tốc độ và smoothness
 
+#### 7. Sửa lỗi Build Errors
+- ✅ **Import fixes**: Sửa lỗi import GEMINI_API_KEY và PRESET_GAME
+- ✅ **Clean imports**: Chỉ import những constants cần thiết
+
 ### Hoàn thành:
 - ✅ Balloon Pop Game - Animation bay qua lại
 - ✅ Whack-a-Mole Game - Giao diện đẹp, ẩn đáp án, tăng độ khó
 - ✅ Spin Wheel Game - Giảm tốc độ quay
 - ✅ Font improvements cho tất cả games
 - ✅ Cập nhật AI model
-- ✅ Loại bỏ Stack Builder game
+- ✅ **Loại bỏ Stack Builder game hoàn toàn**
+- ✅ Sửa lỗi build errors
 
 ### Tiếp theo:
 - [ ] Catch Objects Game improvements nếu cần
