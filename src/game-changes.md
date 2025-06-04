@@ -8,8 +8,9 @@
 ### Các thay đổi chính:
 
 #### 1. Sửa lỗi Catch Objects Game
-- ✅ **Tạo file dữ liệu mẫu**: Tạo catchObjectsSampleData.ts để khắc phục lỗi "Unknown variable dynamic import"
-- ✅ **Sample data hoàn chình**: 6 câu hỏi với emoji objects đa dạng
+- ✅ **Tạo file dữ liệu mẫu**: Tạo catchobjectsSampleData.ts để khắc phục lỗi "Unknown variable dynamic import"
+- ✅ **Sửa tên file**: Đổi tên file từ catchObjectsSampleData.ts thành catchobjectsSampleData.ts để khớp với import
+- ✅ **Sample data hoàn chỉnh**: 6 câu hỏi với emoji objects đa dạng
 - ✅ **Game settings**: Cấu hình thời gian, tốc độ, điểm số hợp lý
 
 #### 2. Balloon Pop Game - Cải thiện Animation
@@ -50,7 +51,7 @@
 #### 8. Sửa lỗi Build Errors
 - ✅ **Import fixes**: Sửa lỗi import GEMINI_API_KEY
 - ✅ **Clean imports**: Chỉ import những constants cần thiết
-- ✅ **Catch Objects fix**: Tạo missing sample data file
+- ✅ **Catch Objects fix**: Tạo và sửa tên file sample data đúng chuẩn
 
 ### Hoàn thành:
 - ✅ Balloon Pop Game - Animation bay qua lại
@@ -59,7 +60,7 @@
 - ✅ Font improvements cho tất cả games
 - ✅ Cập nhật AI model
 - ✅ **Loại bỏ Stack Builder game hoàn toàn**
-- ✅ **Sửa lỗi Catch Objects Sample Data**
+- ✅ **Sửa lỗi Catch Objects Sample Data hoàn toàn**
 - ✅ Sửa lỗi build errors
 
 ### Tiếp theo:
