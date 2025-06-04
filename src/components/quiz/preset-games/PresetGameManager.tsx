@@ -125,6 +125,7 @@ Output must be valid JSON. `;
           gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "URL ảnh từ internet", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
 
 QUAN TRỌNG cho game Pictionary: 
+- Luôn ưu tiên sử dụng ảnh từ nguồn là https://commons.wikimedia.org , tuyệt đối không sử dụng ảnh từ  https://upload.wikimedia.org/
 - imageUrl PHẢI là URL ảnh thật từ internet dạng link
 - KHÔNG cố định nguồn ảnh cụ thể, hãy lấy ảnh từ internet
 - KHÔNG sử dụng placeholder hay ảnh giả
