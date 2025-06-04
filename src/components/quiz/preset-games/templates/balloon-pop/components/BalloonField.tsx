@@ -23,11 +23,15 @@ const BalloonField: React.FC<BalloonFieldProps> = ({
 
   useEffect(() => {
     if (balloons) {
-      const positions = balloons.map((_, index) => ({
-        x: Math.random() * 70 + 15,
-        y: Math.random() * 60 + 20,
-        color: balloonColors[index % balloonColors.length]
-      }));
+      const positions = balloons.map((_, index) => {
+        // Ensure balloons stay within safe boundaries
+        const safeMargin = 8; // Margin from edges
+        return {
+          x: Math.random() * (100 - 2 * safeMargin) + safeMargin,
+          y: Math.random() * (80 - 2 * safeMargin) + safeMargin + 10, // +10 for header space
+          color: balloonColors[index % balloonColors.length]
+        };
+      });
       setBalloonPositions(positions);
     }
   }, [balloons]);
@@ -48,6 +52,7 @@ const BalloonField: React.FC<BalloonFieldProps> = ({
             y={position.y}
             isPopped={isPopped}
             onClick={() => !isPopped && onBalloonPop(index)}
+            index={index}
           />
         );
       })}
