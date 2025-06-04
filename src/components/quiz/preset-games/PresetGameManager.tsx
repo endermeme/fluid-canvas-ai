@@ -25,7 +25,6 @@ import { Copy, Check } from 'lucide-react';
 import PresetGameHeader from './PresetGameHeader';
 
 import { 
-  GEMINI_API_KEY, 
   GEMINI_MODELS, 
   getApiEndpoint, 
   DEFAULT_GENERATION_SETTINGS 
