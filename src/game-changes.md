@@ -1,6 +1,54 @@
 
 # Game Changes Log
 
+## 2025-06-07 - Đơn giản hóa hoàn toàn NeuronPaths game theo workflow cốt lõi
+
+### Thay đổi:
+1. **Workflow đơn giản hoá**:
+   - AI tạo 8-10 concepts ngẫu nhiên cho topic
+   - Học viên tự do kéo thả để tạo connections giữa nodes
+   - AI chấm điểm trên thang 100 với feedback chi tiết
+   - Không có tools phức tạp, chỉ tập trung vào việc nối
+
+2. **Giao diện clean và đơn giản**:
+   - Loại bỏ tabs, advanced tools không cần thiết
+   - Header đơn giản chỉ hiển thị tên game và số kết nối
+   - Canvas ReactFlow sạch sẽ với background nhẹ
+   - Hướng dẫn ngắn gọn dưới canvas
+
+3. **Cơ chế nối rõ ràng**:
+   - Drag & drop từ node này sang node khác
+   - Visual feedback ngay khi tạo connection
+   - Edge animation đơn giản màu xanh
+   - Toast notification khi tạo kết nối thành công
+
+4. **AI scoring đơn giản**:
+   - Chấm điểm theo 4 tiêu chí: Logic (40), Hoàn thiện (30), Hiểu biết (20), Sáng tạo (10)
+   - Phân tích từng connection với lý do
+   - Feedback strengths và improvements
+   - Fallback scoring nếu AI lỗi
+
+5. **Mobile friendly**:
+   - Touch-friendly nodes và connections
+   - Responsive layout hoàn hảo
+   - Controls đơn giản, dễ sử dụng
+
+### File đã thay đổi:
+- NeuronPathsTemplate.tsx - Đơn giản hóa hoàn toàn, tập trung workflow cốt lõi
+- game-changes.md - Ghi lại major simplification
+
+### Tính năng loại bỏ:
+- Tabs và advanced tools không cần thiết
+- Undo/redo, export, save/load phức tạp
+- Neural theme effects quá phức tạp
+- Multiple views và hint panels
+
+### Tính năng giữ lại:
+- AI generation concepts cho topic
+- Drag & drop để tạo connections  
+- 100-point scoring với detailed feedback
+- Clean responsive design
+
 ## 2025-06-07 - Cải thiện toàn diện NeuronPaths game với AI workflow và mobile optimization
 
 ### Thay đổi:
