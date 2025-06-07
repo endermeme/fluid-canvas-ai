@@ -1,6 +1,35 @@
 
 # Game Changes Log
 
+## 2025-06-07 - Cải thiện giao diện GroupSort game
+
+### Thay đổi:
+1. **Sửa layout và responsive design**:
+   - Fixed inset để game căn giữa màn hình hoàn toàn
+   - Grid layout responsive cho desktop/mobile
+   - Max-width để kiểm soát kích thước trên màn hình lớn
+
+2. **Cải thiện màu sắc và visual**:
+   - Gradient backgrounds đa dạng màu sắc
+   - Card design với backdrop-blur hiện đại
+   - Color-coded groups với màu riêng biệt
+   - Shadow và hover effects mượt mà
+
+3. **Cải thiện UX/UI**:
+   - Typography tốt hơn với font weights và sizes
+   - Icon sizes và spacing hợp lý
+   - Animation và transition mượt mà
+   - Mobile-friendly design
+
+### File đã thay đổi:
+- GroupSortTemplate.tsx - Redesign layout và styling hoàn toàn
+
+### Tính năng cải thiện:
+- Fixed layout không bị nhổ lên trên
+- Responsive design scale đúng trên mọi màn hình
+- Màu sắc phong phú và hấp dẫn
+- Spacing và typography hợp lý
+
 ## 2025-06-07 - Cập nhật hoàn chỉnh GroupSort game
 
 ### Thay đổi:

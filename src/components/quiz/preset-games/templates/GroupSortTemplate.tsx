@@ -154,32 +154,37 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
   if (gameCompleted) {
     const isSuccess = correctCount === totalItems;
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
-        <Card className="p-8 max-w-md mx-auto text-center bg-white/80 backdrop-blur-sm border-0 shadow-2xl">
+      <div className="fixed inset-0 flex items-center justify-center p-4 bg-gradient-to-br from-violet-500/20 via-purple-500/20 to-fuchsia-500/20 backdrop-blur-sm">
+        <Card className="w-full max-w-md mx-auto text-center bg-white/95 backdrop-blur-md border border-white/30 shadow-2xl rounded-2xl p-8">
           <div className="mb-6">
             {isSuccess ? (
-              <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4 animate-bounce" />
+              <div className="relative">
+                <Trophy className="h-20 w-20 text-yellow-500 mx-auto mb-4 animate-bounce drop-shadow-lg" />
+                <div className="absolute inset-0 h-20 w-20 mx-auto animate-ping">
+                  <Trophy className="h-20 w-20 text-yellow-300 opacity-75" />
+                </div>
+              </div>
             ) : (
-              <Target className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+              <Target className="h-20 w-20 text-blue-500 mx-auto mb-4 drop-shadow-lg" />
             )}
           </div>
           
-          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            {isSuccess ? 'Xuất sắc!' : 'Hoàn thành!'}
+          <h2 className="text-4xl font-bold mb-6 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
+            {isSuccess ? '🎉 Xuất sắc!' : '🎯 Hoàn thành!'}
           </h2>
           
-          <div className="space-y-3 mb-6">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Điểm số:</span>
-              <span className="text-2xl font-bold text-blue-600">{score}</span>
+          <div className="space-y-4 mb-8">
+            <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
+              <span className="text-gray-700 font-medium">Điểm số:</span>
+              <span className="text-3xl font-bold text-blue-600">{score}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Đúng:</span>
-              <span className="text-lg font-semibold text-green-600">{correctCount}/{totalItems}</span>
+            <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
+              <span className="text-gray-700 font-medium">Đúng:</span>
+              <span className="text-xl font-semibold text-green-600">{correctCount}/{totalItems}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Thời gian còn lại:</span>
-              <span className="text-lg font-semibold text-orange-600">
+            <div className="flex justify-between items-center p-3 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg">
+              <span className="text-gray-700 font-medium">Thời gian còn lại:</span>
+              <span className="text-xl font-semibold text-orange-600">
                 {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
               </span>
             </div>
@@ -188,16 +193,16 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
           <div className="flex gap-3">
             <Button 
               onClick={resetGame} 
-              className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
+              className="flex-1 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold py-3 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105"
             >
-              <RefreshCw className="mr-2 h-4 w-4" />
+              <RefreshCw className="mr-2 h-5 w-5" />
               Chơi lại
             </Button>
             {onBack && (
               <Button 
                 onClick={onBack} 
                 variant="outline"
-                className="flex-1"
+                className="flex-1 border-2 border-gray-300 hover:border-gray-400 font-semibold py-3 rounded-xl"
               >
                 Quay lại
               </Button>
@@ -210,44 +215,49 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
   
   if (!gameStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
-        <Card className="p-8 max-w-lg mx-auto text-center bg-white/80 backdrop-blur-sm border-0 shadow-2xl">
-          <div className="mb-6">
-            <Users className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+      <div className="fixed inset-0 flex items-center justify-center p-4 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 backdrop-blur-sm">
+        <Card className="w-full max-w-2xl mx-auto text-center bg-white/95 backdrop-blur-md border border-white/30 shadow-2xl rounded-2xl p-8">
+          <div className="mb-8">
+            <div className="relative mb-6">
+              <Users className="h-24 w-24 text-blue-500 mx-auto drop-shadow-lg" />
+              <div className="absolute inset-0 h-24 w-24 mx-auto animate-pulse">
+                <Users className="h-24 w-24 text-blue-300 opacity-50" />
+              </div>
+            </div>
           </div>
           
-          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
             {gameData.title}
           </h2>
-          <p className="text-gray-600 mb-2">Chủ đề: {topic}</p>
-          <p className="text-gray-500 mb-6">Kéo thả các mục vào nhóm phù hợp</p>
+          <p className="text-xl text-gray-700 mb-2 font-medium">📚 Chủ đề: {topic}</p>
+          <p className="text-gray-600 mb-8 text-lg">Kéo thả các mục vào nhóm phù hợp</p>
           
-          <div className="bg-blue-50 rounded-lg p-4 mb-6">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-blue-500" />
-                <span>{totalItems} mục cần phân nhóm</span>
+          <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-6 mb-8 border border-white/50">
+            <div className="grid grid-cols-2 gap-6 text-sm">
+              <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl">
+                <Target className="h-6 w-6 text-blue-500" />
+                <span className="font-medium text-gray-700">{totalItems} mục cần phân nhóm</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-orange-500" />
-                <span>{Math.floor((gameData.settings?.timeLimit || 120) / 60)} phút</span>
+              <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl">
+                <Clock className="h-6 w-6 text-orange-500" />
+                <span className="font-medium text-gray-700">{Math.floor((gameData.settings?.timeLimit || 120) / 60)} phút</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-yellow-500" />
-                <span>+{gameData.settings?.bonusTimePerCorrect || 10} điểm/đúng</span>
+              <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl">
+                <Trophy className="h-6 w-6 text-yellow-500" />
+                <span className="font-medium text-gray-700">+{gameData.settings?.bonusTimePerCorrect || 10} điểm/đúng</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-purple-500" />
-                <span>{groups.length} nhóm</span>
+              <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl">
+                <Sparkles className="h-6 w-6 text-purple-500" />
+                <span className="font-medium text-gray-700">{groups.length} nhóm</span>
               </div>
             </div>
           </div>
           
           <Button 
             onClick={startGame} 
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white text-lg py-6"
+            className="w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white text-xl font-bold py-6 rounded-2xl shadow-lg transform transition-all duration-200 hover:scale-105"
           >
-            Bắt đầu chơi
+            🚀 Bắt đầu chơi
           </Button>
         </Card>
       </div>
@@ -255,66 +265,66 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4 flex flex-col">
       {/* Header với thông tin game */}
-      <Card className="mb-4 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-        <div className="p-4 flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      <Card className="mb-6 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded-2xl">
+        <div className="p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="text-center sm:text-left">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
               {gameData.title}
             </h2>
-            <p className="text-sm text-gray-600">{topic}</p>
+            <p className="text-gray-600 text-lg font-medium">{topic}</p>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-yellow-500" />
-              <span className="font-bold text-blue-600">{score}</span>
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-yellow-100 to-amber-100 rounded-xl">
+              <Trophy className="h-6 w-6 text-yellow-500" />
+              <span className="font-bold text-yellow-700 text-xl">{score}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Clock className={`h-5 w-5 ${timeLeft < 30 ? 'text-red-500 animate-pulse' : 'text-blue-500'}`} />
-              <span className={`font-bold ${timeLeft < 30 ? 'text-red-500' : 'text-blue-600'}`}>
+            <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl">
+              <Clock className={`h-6 w-6 ${timeLeft < 30 ? 'text-red-500 animate-pulse' : 'text-blue-500'}`} />
+              <span className={`font-bold text-xl ${timeLeft < 30 ? 'text-red-500' : 'text-blue-600'}`}>
                 {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
               </span>
             </div>
           </div>
         </div>
-        <div className="px-4 pb-4">
-          <Progress value={progress} className="h-2" />
-          <p className="text-xs text-gray-500 mt-1 text-center">
-            {correctCount}/{totalItems} hoàn thành
+        <div className="px-6 pb-6">
+          <Progress value={progress} className="h-3 rounded-full" />
+          <p className="text-sm text-gray-500 mt-2 text-center font-medium">
+            {correctCount}/{totalItems} hoàn thành ({Math.round(progress)}%)
           </p>
         </div>
       </Card>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="flex-1 grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-7xl mx-auto w-full">
         {/* Items cần phân loại */}
-        <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-          <div className="flex items-center gap-2 mb-4">
-            <Target className="h-5 w-5 text-blue-500" />
-            <h3 className="font-bold text-gray-800">Các mục cần phân loại</h3>
+        <Card className="p-8 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded-2xl">
+          <div className="flex items-center gap-3 mb-6">
+            <Target className="h-7 w-7 text-blue-500" />
+            <h3 className="font-bold text-gray-800 text-xl">Các mục cần phân loại</h3>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {shuffledItems.map((itemText, index) => (
               <div
                 key={index}
                 draggable
                 onDragStart={(e) => e.dataTransfer.setData('text/plain', itemText)}
-                className="p-4 bg-gradient-to-r from-blue-100 to-indigo-100 border-2 border-blue-200 rounded-lg cursor-move hover:from-blue-200 hover:to-indigo-200 transition-all duration-200 transform hover:scale-105 shadow-md"
+                className="p-6 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 border-2 border-blue-200 rounded-2xl cursor-move hover:from-blue-200 hover:via-indigo-200 hover:to-purple-200 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
               >
-                <span className="text-gray-800 font-medium text-center block">{itemText}</span>
+                <span className="text-gray-800 font-semibold text-center block text-lg">{itemText}</span>
               </div>
             ))}
           </div>
         </Card>
         
         {/* Các nhóm */}
-        <Card className="p-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-          <div className="flex items-center gap-2 mb-4">
-            <Users className="h-5 w-5 text-purple-500" />
-            <h3 className="font-bold text-gray-800">Nhóm phân loại</h3>
+        <Card className="p-8 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded-2xl">
+          <div className="flex items-center gap-3 mb-6">
+            <Users className="h-7 w-7 text-purple-500" />
+            <h3 className="font-bold text-gray-800 text-xl">Nhóm phân loại</h3>
           </div>
-          <div className="space-y-4">
-            {groups.map((group) => (
+          <div className="space-y-6">
+            {groups.map((group, groupIndex) => (
               <div
                 key={group.id}
                 onDragOver={(e) => e.preventDefault()}
@@ -323,24 +333,31 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
                   const itemText = e.dataTransfer.getData('text/plain');
                   handleDrop(itemText, group.id);
                 }}
-                className="p-4 border-2 border-dashed border-purple-300 rounded-lg min-h-[100px] hover:border-purple-400 hover:bg-purple-50/50 transition-all duration-200"
+                className="p-6 border-2 border-dashed border-purple-300 rounded-2xl min-h-[120px] hover:border-purple-400 hover:bg-purple-50/50 transition-all duration-300 shadow-sm hover:shadow-md"
+                style={{
+                  background: `linear-gradient(135deg, ${
+                    groupIndex === 0 ? 'rgba(168, 85, 247, 0.1)' :
+                    groupIndex === 1 ? 'rgba(59, 130, 246, 0.1)' :
+                    'rgba(16, 185, 129, 0.1)'
+                  }, rgba(255, 255, 255, 0.5))`
+                }}
               >
-                <h4 className="font-semibold text-purple-700 mb-3 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4" />
+                <h4 className="font-bold text-purple-700 mb-4 flex items-center gap-2 text-lg">
+                  <Sparkles className="h-5 w-5" />
                   {group.name}
                 </h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-3">
                   {group.items.map((item, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 rounded-full text-sm font-medium border border-green-200 shadow-sm"
+                      className="px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 rounded-full font-semibold border border-green-200 shadow-sm text-sm"
                     >
                       {item}
                     </span>
                   ))}
                 </div>
                 {group.items.length === 0 && (
-                  <p className="text-gray-400 text-center italic">Thả các mục vào đây</p>
+                  <p className="text-gray-400 text-center italic text-lg py-4">Thả các mục vào đây</p>
                 )}
               </div>
             ))}
