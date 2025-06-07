@@ -1,4 +1,3 @@
-
 import QuizTemplate from './QuizTemplate';
 import FlashcardsTemplate from './FlashcardsTemplate';
 import MatchingTemplate from './MatchingTemplate';
@@ -26,14 +25,14 @@ const gameTemplates = {
   wordsearch: WordSearchTemplate,
   pictionary: PictionaryTemplate,
   truefalse: TrueFalseTemplate,
-  neuronpaths: NeuronPathsTemplate,
-  patternrecognition: PatternRecognitionTemplate,
   groupsort: GroupSortTemplate,
   spinwheel: SpinWheelTemplate,
   completesentence: CompleteSentenceTemplate,
   anagram: AnagramTemplate,
   openbox: OpenBoxTemplate,
-  speakingcards: SpeakingCardsTemplate
+  speakingcards: SpeakingCardsTemplate,
+  patternrecognition: PatternRecognitionTemplate,
+  neuronpaths: NeuronPathsTemplate,
 };
 
 export default gameTemplates;

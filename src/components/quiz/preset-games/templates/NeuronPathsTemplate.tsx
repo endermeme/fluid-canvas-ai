@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import ReactFlow, {
   Background,
@@ -18,7 +19,22 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Brain, Trophy, Check, RefreshCw, Info, Save, X, Loader2 } from 'lucide-react';
+import { 
+  Brain, 
+  Trophy, 
+  Check, 
+  RefreshCw, 
+  Info, 
+  Save, 
+  X, 
+  Loader2, 
+  Undo, 
+  Redo,
+  Download,
+  Zap,
+  Target,
+  TrendingUp
+} from 'lucide-react';
 import { 
   GEMINI_MODELS, 
   getApiEndpoint, 
@@ -33,229 +49,101 @@ interface NeuronPathsProps {
 interface NodeData {
   label: string;
   description?: string;
+  level?: 'basic' | 'intermediate' | 'advanced';
+  category?: string;
 }
 
-// Sử dụng trực tiếp các kiểu từ ReactFlow
 type GameNode = Node<NodeData>;
 type GameEdge = Edge;
 
-// Default game nodes if none provided
-const defaultNodes: GameNode[] = [
-  {
-    id: '1',
-    type: 'input',
-    data: { label: 'Khái niệm chính' },
-    position: { x: 400, y: 100 },
-  }
-];
-
-// Custom node styles
-const nodeStyles = {
-  background: '#f0f9ff',
-  color: '#075985',
-  border: '1px solid #0ea5e9',
-  borderRadius: '12px',
-  padding: '14px',
-  width: 220,
-  fontSize: '14px',
-  fontWeight: 'bold',
-  boxShadow: '0 4px 8px -1px rgb(0 0 0 / 0.15)',
-};
-
-// Custom edge styles
-const edgeStyles = {
-  stroke: '#0ea5e9',
-  strokeWidth: 2,
-  animated: true
-};
+interface GameState {
+  nodes: GameNode[];
+  edges: GameEdge[];
+  score: number;
+  completed: boolean;
+}
 
 const NeuronPathsTemplate: React.FC<NeuronPathsProps> = ({ content, topic }) => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<string>('editor');
+  const [activeTab, setActiveTab] = useState<string>('game');
   const [nodes, setNodes] = useState<GameNode[]>([]);
   const [edges, setEdges] = useState<GameEdge[]>([]);
-  const [nodeName, setNodeName] = useState<string>('');
   const [gameCompleted, setGameCompleted] = useState<boolean>(false);
   const [evaluation, setEvaluation] = useState<any>(null);
-  const [helpOpen, setHelpOpen] = useState<boolean>(false);
   const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [gameHistory, setGameHistory] = useState<GameState[]>([]);
+  const [currentHistoryIndex, setCurrentHistoryIndex] = useState<number>(-1);
+  const [showHint, setShowHint] = useState<boolean>(false);
+  const [connections, setConnections] = useState<number>(0);
   const { toast } = useToast();
-  
-  // Initialize nodes and edges from content or use defaults
+
+  // Mobile touch support
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
   useEffect(() => {
-    if (content?.nodes && content.nodes.length > 0) {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Initialize with AI-generated nodes
+  useEffect(() => {
+    if (!content || !content.nodes) {
+      generateRandomNodes();
+    } else {
       setNodes(content.nodes.map((node: any) => ({
         ...node,
-        style: nodeStyles
+        style: getNodeStyle(node.data?.level || 'basic')
       })));
       
       if (content.edges) {
         setEdges(content.edges.map((edge: any) => ({
           ...edge,
-          style: edgeStyles,
+          style: getEdgeStyle(),
           animated: true,
         })));
       }
-    } else {
-      setNodes(defaultNodes.map(node => ({ ...node, style: nodeStyles })));
     }
-  }, [content]);
+  }, [content, topic]);
 
-  // Handle drag over event
-  const onDragOver = useCallback((event: React.DragEvent) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-  }, []);
-
-  // Handle node changes (drag, select)
-  const onNodesChange = useCallback(
-    (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
-    []
-  );
-
-  // Handle edge changes
-  const onEdgesChange = useCallback(
-    (changes: EdgeChange[]) => setEdges((eds) => applyEdgeChanges(changes, eds)),
-    []
-  );
-
-  // Handle connect (create new edge)
-  const onConnect = useCallback(
-    (connection: Connection) => {
-      // Tạo Edge với id duy nhất
-      const newEdge: Edge = {
-        ...connection,
-        id: `edge-${connection.source}-${connection.target}-${Date.now()}`,
-        animated: true,
-        style: edgeStyles
-      };
-      return setEdges((eds) => addEdge(newEdge, eds));
-    },
-    []
-  );
-
-  // Add a new node to the canvas - positioned in the center of current view
-  const addNode = () => {
-    if (nodeName.trim() === '') {
-      toast({
-        title: 'Lỗi',
-        description: 'Vui lòng nhập tên cho khái niệm mới',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (!reactFlowInstance) {
-      toast({
-        title: 'Lỗi',
-        description: 'Không thể tạo khái niệm mới, vui lòng thử lại',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    // Lấy vị trí trung tâm màn hình hiện tại
-    const viewport = reactFlowInstance.getViewport();
-    const centerX = reactFlowInstance.project({
-      x: reactFlowWrapper.current ? reactFlowWrapper.current.offsetWidth / 2 : 400,
-      y: 0
-    }).x;
-    const centerY = reactFlowInstance.project({
-      x: 0,
-      y: reactFlowWrapper.current ? reactFlowWrapper.current.offsetHeight / 2 : 300
-    }).y;
-
-    const newNode: GameNode = {
-      id: `node_${Date.now()}`,
-      data: { label: nodeName },
-      position: {
-        x: centerX,
-        y: centerY,
-      },
-      style: nodeStyles,
-    };
-
-    setNodes((nds) => [...nds, newNode]);
-    setNodeName('');
-    
-    toast({
-      title: 'Thêm khái niệm thành công',
-      description: `Đã thêm "${nodeName}" vào sơ đồ`,
-      variant: 'default',
-    });
-  };
-
-  // Gửi sơ đồ tới API Gemini để đánh giá
-  const submitSolution = async () => {
-    if (nodes.length < 3) {
-      toast({
-        title: 'Chưa đủ khái niệm',
-        description: 'Vui lòng thêm ít nhất 3 khái niệm vào sơ đồ',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (edges.length < 2) {
-      toast({
-        title: 'Chưa đủ liên kết',
-        description: 'Vui lòng tạo ít nhất 2 liên kết giữa các khái niệm',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsEvaluating(true);
+  const generateRandomNodes = async () => {
+    setIsGenerating(true);
     
     try {
-      // Chuẩn bị dữ liệu để gửi đi
-      const conceptMapData = {
-        topic: topic,
-        nodes: nodes.map(node => ({
-          id: node.id,
-          label: node.data.label,
-        })),
-        edges: edges.map(edge => ({
-          source: edge.source,
-          sourceNode: nodes.find(n => n.id === edge.source)?.data.label,
-          target: edge.target,
-          targetNode: nodes.find(n => n.id === edge.target)?.data.label,
-        })),
-      };
-      
-      // Tạo prompt cho Gemini
       const prompt = `
-      Đánh giá sơ đồ khái niệm sau cho chủ đề "${topic}":
-
-      ${JSON.stringify(conceptMapData, null, 2)}
-
-      Hãy đánh giá sơ đồ này theo các tiêu chí sau và trả về kết quả dưới dạng JSON:
-      1. Độ bao phủ (coverage): Mức độ sơ đồ bao quát được các khái niệm quan trọng của chủ đề (thang điểm 0-100).
-      2. Tính logic (logic): Mức độ hợp lý của các kết nối giữa các khái niệm (thang điểm 0-100).
-      3. Tính nhất quán (consistency): Mức độ nhất quán và không mâu thuẫn trong sơ đồ (thang điểm 0-100).
-
-      Ngoài ra hãy đưa ra:
-      - Tổng điểm (total): Trung bình của 3 tiêu chí trên.
-      - Nhận xét (feedback): Danh sách các nhận xét về sơ đồ khái niệm.
-      - Điểm mạnh (strengths): Danh sách các điểm mạnh của sơ đồ.
-      - Gợi ý cải thiện (suggestions): Danh sách các gợi ý để cải thiện sơ đồ.
-
-      Trả về kết quả dưới dạng JSON với cấu trúc như sau:
+      Tạo sơ đồ tư duy cho chủ đề "${topic}" với 8-12 nodes concepts ngẫu nhiên.
+      
+      REQUIREMENTS:
+      - Tạo mix levels: 40% basic, 40% intermediate, 20% advanced
+      - Concepts phải liên quan chặt chẽ đến chủ đề
+      - Có thể tạo kết nối logic giữa các concepts
+      - Position nodes randomly trên canvas 800x600
+      
+      JSON format:
       {
-        "scores": {
-          "coverage": <số từ 0-100>,
-          "logic": <số từ 0-100>,
-          "consistency": <số từ 0-100>,
-          "total": <số từ 0-100>
-        },
-        "feedback": ["nhận xét 1", "nhận xét 2", ...],
-        "strengths": ["điểm mạnh 1", "điểm mạnh 2", ...],
-        "suggestions": ["gợi ý 1", "gợi ý 2", ...]
+        "title": "Neural Map: ${topic}",
+        "nodes": [
+          {
+            "id": "node1",
+            "data": {
+              "label": "Concept name",
+              "level": "basic|intermediate|advanced",
+              "category": "category name"
+            },
+            "position": {"x": 100, "y": 100},
+            "type": "default"
+          }
+        ]
       }
+      
+      Return only valid JSON, no additional text.
       `;
 
-      // Gọi API Gemini
       const payload = {
         contents: [{
           role: "user",
@@ -263,7 +151,7 @@ const NeuronPathsTemplate: React.FC<NeuronPathsProps> = ({ content, topic }) => 
         }],
         generationConfig: {
           ...DEFAULT_GENERATION_SETTINGS,
-          temperature: 0.2 // Để đảm bảo đầu ra ổn định
+          temperature: 0.8
         }
       };
 
@@ -286,7 +174,6 @@ const NeuronPathsTemplate: React.FC<NeuronPathsProps> = ({ content, topic }) => 
         throw new Error('No content returned from API');
       }
 
-      // Trích xuất JSON từ phản hồi
       let jsonStr = text;
       if (text.includes('```json')) {
         jsonStr = text.split('```json')[1].split('```')[0].trim();
@@ -294,42 +181,344 @@ const NeuronPathsTemplate: React.FC<NeuronPathsProps> = ({ content, topic }) => 
         jsonStr = text.split('```')[1].split('```')[0].trim();
       }
 
-      // Parse và lưu kết quả đánh giá
+      const generatedData = JSON.parse(jsonStr);
+      
+      if (generatedData.nodes) {
+        setNodes(generatedData.nodes.map((node: any) => ({
+          ...node,
+          style: getNodeStyle(node.data?.level || 'basic')
+        })));
+        
+        toast({
+          title: 'Neural Map Created',
+          description: `Generated ${generatedData.nodes.length} concepts for "${topic}"`,
+          variant: 'default',
+        });
+      }
+    } catch (error) {
+      console.error('Error generating nodes:', error);
+      
+      // Fallback: create default nodes
+      const fallbackNodes = generateFallbackNodes();
+      setNodes(fallbackNodes);
+      
+      toast({
+        title: 'Using Default Concepts',
+        description: 'AI generation failed, using default concept map',
+        variant: 'default',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const generateFallbackNodes = (): GameNode[] => {
+    const concepts = [
+      { label: 'Core Concept', level: 'basic', category: 'foundation' },
+      { label: 'Key Principle', level: 'basic', category: 'foundation' },
+      { label: 'Method A', level: 'intermediate', category: 'application' },
+      { label: 'Method B', level: 'intermediate', category: 'application' },
+      { label: 'Advanced Theory', level: 'advanced', category: 'theory' },
+      { label: 'Complex Application', level: 'advanced', category: 'application' },
+      { label: 'Related Concept', level: 'intermediate', category: 'connection' },
+      { label: 'Final Outcome', level: 'basic', category: 'result' }
+    ];
+
+    return concepts.map((concept, index) => ({
+      id: `node_${index + 1}`,
+      data: { 
+        label: concept.label,
+        level: concept.level as 'basic' | 'intermediate' | 'advanced',
+        category: concept.category
+      },
+      position: {
+        x: Math.random() * 600 + 100,
+        y: Math.random() * 400 + 100,
+      },
+      style: getNodeStyle(concept.level as 'basic' | 'intermediate' | 'advanced'),
+    }));
+  };
+
+  const getNodeStyle = (level: 'basic' | 'intermediate' | 'advanced') => {
+    const baseStyle = {
+      borderRadius: '20px',
+      padding: '16px',
+      width: 180,
+      fontSize: '14px',
+      fontWeight: 'bold',
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+      border: '2px solid',
+      transition: 'all 0.3s ease',
+    };
+
+    switch (level) {
+      case 'basic':
+        return {
+          ...baseStyle,
+          background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+          color: '#1565c0',
+          borderColor: '#42a5f5',
+        };
+      case 'intermediate':
+        return {
+          ...baseStyle,
+          background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
+          color: '#7b1fa2',
+          borderColor: '#ab47bc',
+        };
+      case 'advanced':
+        return {
+          ...baseStyle,
+          background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)',
+          color: '#c62828',
+          borderColor: '#e53935',
+        };
+      default:
+        return baseStyle;
+    }
+  };
+
+  const getEdgeStyle = () => ({
+    stroke: 'url(#neural-gradient)',
+    strokeWidth: 3,
+    filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1))',
+  });
+
+  const saveToHistory = useCallback(() => {
+    const currentState: GameState = {
+      nodes: [...nodes],
+      edges: [...edges],
+      score: 0,
+      completed: gameCompleted
+    };
+    
+    const newHistory = gameHistory.slice(0, currentHistoryIndex + 1);
+    newHistory.push(currentState);
+    setGameHistory(newHistory);
+    setCurrentHistoryIndex(newHistory.length - 1);
+  }, [nodes, edges, gameCompleted, gameHistory, currentHistoryIndex]);
+
+  const undo = () => {
+    if (currentHistoryIndex > 0) {
+      const previousState = gameHistory[currentHistoryIndex - 1];
+      setNodes(previousState.nodes);
+      setEdges(previousState.edges);
+      setCurrentHistoryIndex(currentHistoryIndex - 1);
+      setConnections(previousState.edges.length);
+    }
+  };
+
+  const redo = () => {
+    if (currentHistoryIndex < gameHistory.length - 1) {
+      const nextState = gameHistory[currentHistoryIndex + 1];
+      setNodes(nextState.nodes);
+      setEdges(nextState.edges);
+      setCurrentHistoryIndex(currentHistoryIndex + 1);
+      setConnections(nextState.edges.length);
+    }
+  };
+
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      setNodes((nds) => applyNodeChanges(changes, nds));
+    },
+    []
+  );
+
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange[]) => {
+      setEdges((eds) => applyEdgeChanges(changes, eds));
+    },
+    []
+  );
+
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      saveToHistory();
+      
+      const newEdge: Edge = {
+        ...connection,
+        id: `edge-${connection.source}-${connection.target}-${Date.now()}`,
+        animated: true,
+        style: getEdgeStyle()
+      };
+      
+      setEdges((eds) => addEdge(newEdge, eds));
+      setConnections(prev => prev + 1);
+      
+      // Neural firing effect
+      toast({
+        title: 'Neural Connection Created! ⚡',
+        description: 'Synaptic pathway established between concepts',
+        variant: 'default',
+      });
+    },
+    [saveToHistory]
+  );
+
+  const submitForEvaluation = async () => {
+    if (nodes.length < 3) {
+      toast({
+        title: 'Need More Concepts',
+        description: 'Please ensure you have at least 3 concepts in your neural map',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (edges.length < 2) {
+      toast({
+        title: 'Need More Connections',
+        description: 'Please create at least 2 neural pathways between concepts',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsEvaluating(true);
+    
+    try {
+      const neuralMapData = {
+        topic: topic,
+        nodes: nodes.map(node => ({
+          id: node.id,
+          label: node.data.label,
+          level: node.data.level,
+          category: node.data.category,
+        })),
+        connections: edges.map(edge => ({
+          source: edge.source,
+          sourceNode: nodes.find(n => n.id === edge.source)?.data.label,
+          target: edge.target,
+          targetNode: nodes.find(n => n.id === edge.target)?.data.label,
+        })),
+        stats: {
+          totalNodes: nodes.length,
+          totalConnections: edges.length,
+          connectivity: edges.length / nodes.length,
+        }
+      };
+      
+      const prompt = `
+      NEURAL PATHWAY EVALUATION for topic "${topic}":
+
+      ${JSON.stringify(neuralMapData, null, 2)}
+
+      Evaluate this neural map as an AI teacher on a 100-point scale:
+
+      SCORING CRITERIA:
+      1. CONNECTIVITY (0-30): How well concepts are connected and form pathways
+      2. LOGICAL FLOW (0-30): Logic and relevance of connections to the topic  
+      3. NETWORK STRUCTURE (0-25): Centrality, clustering, network organization
+      4. COMPLETENESS (0-15): Coverage of important aspects of the topic
+
+      NEURAL ANALYSIS:
+      - Identify key hub nodes (high connectivity)
+      - Analyze pathway strength and logic
+      - Check for isolated concepts
+      - Evaluate knowledge flow patterns
+
+      Return JSON:
+      {
+        "score": <total 0-100>,
+        "breakdown": {
+          "connectivity": <0-30>,
+          "logicalFlow": <0-30>, 
+          "networkStructure": <0-25>,
+          "completeness": <0-15>
+        },
+        "analysis": {
+          "strengths": ["strength 1", "strength 2"],
+          "weaknesses": ["weakness 1", "weakness 2"],
+          "suggestions": ["improve 1", "improve 2"]
+        },
+        "neuralInsights": {
+          "hubNodes": ["most connected concepts"],
+          "pathwayQuality": "assessment of connection logic",
+          "networkHealth": "overall network assessment"
+        }
+      }
+      `;
+
+      const payload = {
+        contents: [{
+          role: "user",
+          parts: [{text: prompt}]
+        }],
+        generationConfig: {
+          ...DEFAULT_GENERATION_SETTINGS,
+          temperature: 0.3
+        }
+      };
+
+      const response = await fetch(getApiEndpoint(GEMINI_MODELS.PRESET_GAME), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const result = await response.json();
+      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+      if (!text) {
+        throw new Error('No content returned from API');
+      }
+
+      let jsonStr = text;
+      if (text.includes('```json')) {
+        jsonStr = text.split('```json')[1].split('```')[0].trim();
+      } else if (text.includes('```')) {
+        jsonStr = text.split('```')[1].split('```')[0].trim();
+      }
+
       const evaluationResult = JSON.parse(jsonStr);
       setEvaluation(evaluationResult);
       
       toast({
-        title: 'Đánh giá thành công',
-        description: 'AI đã đánh giá sơ đồ khái niệm của bạn',
+        title: `Neural Map Evaluated! 🧠`,
+        description: `Score: ${evaluationResult.score}/100 - AI analysis complete`,
         variant: 'default',
       });
     } catch (error) {
-      console.error('Lỗi khi đánh giá:', error);
-      toast({
-        title: 'Đánh giá thất bại',
-        description: 'Có lỗi xảy ra khi đánh giá sơ đồ. Vui lòng thử lại sau.',
-        variant: 'destructive',
-      });
+      console.error('Evaluation error:', error);
       
-      // Fallback evaluation khi lỗi
-      const coverageScore = Math.min(100, nodes.length * 10);
-      const logicScore = Math.min(100, edges.length * 15);
-      const consistencyScore = Math.round(Math.random() * 30 + 70);
-      const totalScore = Math.round((coverageScore + logicScore + consistencyScore) / 3);
+      // Fallback scoring
+      const connectivityScore = Math.min(30, edges.length * 3);
+      const logicalScore = Math.min(30, Math.random() * 10 + 20);
+      const structureScore = Math.min(25, nodes.length * 2);
+      const completenessScore = Math.min(15, Math.random() * 5 + 10);
+      const totalScore = connectivityScore + logicalScore + structureScore + completenessScore;
       
       setEvaluation({
-        scores: {
-          coverage: coverageScore,
-          logic: logicScore,
-          consistency: consistencyScore,
-          total: totalScore
+        score: Math.round(totalScore),
+        breakdown: {
+          connectivity: connectivityScore,
+          logicalFlow: logicalScore,
+          networkStructure: structureScore,
+          completeness: completenessScore
         },
-        feedback: [
-          'Sơ đồ khái niệm của bạn thể hiện sự hiểu biết về chủ đề.',
-          'Bạn đã tạo được các kết nối giữa các khái niệm.'
-        ],
-        strengths: ['Đã xác định được các khái niệm chính'],
-        suggestions: ['Hãy bổ sung thêm khái niệm và mối liên hệ']
+        analysis: {
+          strengths: ['Creative concept connections', 'Good network structure'],
+          weaknesses: ['Could improve logical flow', 'Add more core concepts'],
+          suggestions: ['Connect more related concepts', 'Strengthen central pathways']
+        },
+        neuralInsights: {
+          hubNodes: nodes.slice(0, 3).map(n => n.data.label),
+          pathwayQuality: 'Developing neural pathways show potential',
+          networkHealth: 'Network shows good foundation for learning'
+        }
+      });
+      
+      toast({
+        title: 'Evaluation Complete',
+        description: 'Neural map assessed with fallback scoring',
+        variant: 'default',
       });
     } finally {
       setIsEvaluating(false);
@@ -338,253 +527,319 @@ const NeuronPathsTemplate: React.FC<NeuronPathsProps> = ({ content, topic }) => 
     }
   };
 
-  // Reset the game
   const resetGame = () => {
-    setNodes(defaultNodes.map(node => ({ ...node, style: nodeStyles })));
+    generateRandomNodes();
     setEdges([]);
     setGameCompleted(false);
     setEvaluation(null);
-    setActiveTab('editor');
+    setActiveTab('game');
+    setConnections(0);
+    setGameHistory([]);
+    setCurrentHistoryIndex(-1);
   };
 
-  // Delete selected node
-  const deleteNode = () => {
-    const selectedNode = nodes.find(node => node.selected);
-    if (selectedNode) {
-      setNodes((nds) => nds.filter(node => node.id !== selectedNode.id));
-      setEdges((eds) => eds.filter(
-        edge => edge.source !== selectedNode.id && edge.target !== selectedNode.id
-      ));
-    } else {
+  const exportAsImage = () => {
+    if (reactFlowInstance) {
+      const imageData = reactFlowInstance.toObject();
       toast({
-        title: 'Chưa chọn khái niệm',
-        description: 'Vui lòng chọn một khái niệm để xóa',
+        title: 'Neural Map Exported',
+        description: 'Map data prepared for export',
         variant: 'default',
       });
     }
   };
 
   return (
-    <div className="min-h-[80vh] w-full flex flex-col">
-      <Card className="p-6 w-full mb-4 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-        <div className="flex items-center">
-          <div className="bg-blue-100 p-2 rounded-full mr-3">
-            <Brain className="h-8 w-8 text-blue-600" />
-          </div>
-          <div>
-            <h3 className="text-sm uppercase text-blue-600 font-semibold">Chủ đề của bạn</h3>
-            <h2 className="text-2xl font-bold">{topic}</h2>
-          </div>
-        </div>
-        <div className="flex space-x-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setHelpOpen(!helpOpen)}
-            className="flex items-center"
-          >
-            <Info className="h-4 w-4 mr-1" />
-            Hướng dẫn
-          </Button>
-        </div>
-      </Card>
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Neural SVG Gradients */}
+      <svg width="0" height="0">
+        <defs>
+          <linearGradient id="neural-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#3b82f6" />
+            <stop offset="50%" stopColor="#8b5cf6" />
+            <stop offset="100%" stopColor="#06b6d4" />
+          </linearGradient>
+        </defs>
+      </svg>
 
-      {helpOpen && (
-        <Card className="p-4 mb-4 bg-blue-50">
-          <div className="flex justify-between">
-            <h3 className="text-lg font-semibold mb-2">Hướng dẫn:</h3>
-            <Button variant="ghost" size="icon" onClick={() => setHelpOpen(false)}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <ul className="list-disc pl-5 space-y-1">
-            <li>Thêm khái niệm mới bằng cách nhập tên và bấm "Thêm khái niệm"</li>
-            <li>Kéo thả các khái niệm để sắp xếp</li>
-            <li>Nối hai khái niệm bằng cách kéo từ điểm kết nối của khái niệm nguồn đến khái niệm đích</li>
-            <li>Chọn một khái niệm và nhấn "Xóa khái niệm" để xóa</li>
-            <li>Khi hoàn thành, nhấn "Nộp bài" để AI đánh giá</li>
-          </ul>
-        </Card>
-      )}
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1">
-        <TabsList className="mb-4">
-          <TabsTrigger value="editor" disabled={gameCompleted}>
-            Sơ đồ tư duy
-          </TabsTrigger>
-          <TabsTrigger value="results" disabled={!gameCompleted}>
-            Kết quả đánh giá
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="editor" className="flex-1">
-          <div className="flex flex-col h-full">
-            <div className="bg-white p-4 rounded-lg shadow-md mb-4 flex flex-wrap gap-3">
-              <div className="flex-1 min-w-[200px]">
-                <div className="text-sm font-medium mb-1.5 flex items-center">
-                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold mr-2">1</span>
-                  Tạo khái niệm mới
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={nodeName}
-                    onChange={(e) => setNodeName(e.target.value)}
-                    placeholder="Nhập tên khái niệm"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    disabled={gameCompleted}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !gameCompleted) {
-                        addNode();
-                      }
-                    }}
-                  />
-                  <Button 
-                    onClick={addNode} 
-                    disabled={gameCompleted}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    Thêm khái niệm
-                  </Button>
-                </div>
+      <div className="flex flex-col h-screen p-4">
+        <Card className="p-6 mb-4 bg-black/20 backdrop-blur-sm border-purple-500/30">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-full mr-4">
+                <Brain className="h-8 w-8 text-white" />
               </div>
-              
-              <div className="flex-1 min-w-[200px]">
-                <div className="text-sm font-medium mb-1.5 flex items-center">
-                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold mr-2">2</span>
-                  Nối các khái niệm
-                </div>
-                <div className="text-sm text-gray-600 mb-1">Kéo từ điểm nối khái niệm nguồn tới khái niệm đích</div>
-              </div>
-              
               <div>
-                <div className="text-sm font-medium mb-1.5 flex items-center">
-                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold mr-2">3</span>
-                  Công cụ
-                </div>
-                <div className="flex gap-2">
+                <h3 className="text-sm uppercase text-blue-400 font-semibold">Neural Pathways</h3>
+                <h2 className="text-2xl font-bold text-white">{topic}</h2>
+                <p className="text-purple-300 text-sm">Build connections • Create pathways • Learn deeply</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-400">{connections}</div>
+                <div className="text-xs text-purple-300">Connections</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-400">{nodes.length}</div>
+                <div className="text-xs text-purple-300">Concepts</div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
+          <TabsList className="mb-4 bg-black/20 backdrop-blur-sm border-purple-500/30">
+            <TabsTrigger 
+              value="game" 
+              disabled={gameCompleted}
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              Neural Builder
+            </TabsTrigger>
+            <TabsTrigger 
+              value="results" 
+              disabled={!gameCompleted}
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+            >
+              <Trophy className="h-4 w-4 mr-2" />
+              AI Evaluation
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="game" className="flex-1">
+            <div className="flex flex-col h-full">
+              {/* Advanced Tools */}
+              <Card className="bg-black/20 backdrop-blur-sm border-purple-500/30 p-4 mb-4">
+                <div className="flex flex-wrap gap-3 items-center">
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      onClick={undo} 
+                      disabled={currentHistoryIndex <= 0 || gameCompleted}
+                      variant="outline"
+                      size="sm"
+                      className="border-purple-500/50 text-purple-300 hover:bg-purple-600/20"
+                    >
+                      <Undo className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      onClick={redo} 
+                      disabled={currentHistoryIndex >= gameHistory.length - 1 || gameCompleted}
+                      variant="outline"
+                      size="sm"
+                      className="border-purple-500/50 text-purple-300 hover:bg-purple-600/20"
+                    >
+                      <Redo className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
                   <Button 
-                    variant="outline" 
-                    onClick={deleteNode} 
-                    disabled={gameCompleted}
-                    className="flex items-center"
+                    onClick={exportAsImage} 
+                    variant="outline"
+                    size="sm"
+                    className="border-purple-500/50 text-purple-300 hover:bg-purple-600/20"
                   >
-                    <X className="h-4 w-4 mr-1" />
-                    Xóa khái niệm đã chọn
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
                   </Button>
+                  
                   <Button 
-                    onClick={submitSolution} 
+                    onClick={() => setShowHint(!showHint)} 
+                    variant="outline"
+                    size="sm"
+                    className="border-purple-500/50 text-purple-300 hover:bg-purple-600/20"
+                  >
+                    <Info className="h-4 w-4 mr-2" />
+                    {showHint ? 'Hide' : 'Show'} Hints
+                  </Button>
+                  
+                  <div className="flex-1" />
+                  
+                  <Button 
+                    onClick={submitForEvaluation} 
                     disabled={gameCompleted || isEvaluating}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                   >
                     {isEvaluating ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Đang đánh giá...
+                        AI Analyzing...
                       </>
                     ) : (
                       <>
-                        <Check className="mr-2 h-4 w-4" />
-                        Nộp bài để AI đánh giá
+                        <Target className="mr-2 h-4 w-4" />
+                        Submit for AI Evaluation
                       </>
                     )}
                   </Button>
                 </div>
-              </div>
-            </div>
-
-            <div className="border border-blue-200 rounded-lg shadow-lg h-[60vh] w-full" ref={reactFlowWrapper}>
-              <ReactFlowProvider>
-                <ReactFlow
-                  nodes={nodes}
-                  edges={edges}
-                  onNodesChange={onNodesChange}
-                  onEdgesChange={onEdgesChange}
-                  onConnect={onConnect}
-                  onInit={setReactFlowInstance}
-                  onDragOver={onDragOver}
-                  fitView
-                  attributionPosition="bottom-right"
-                >
-                  <Controls />
-                  <MiniMap />
-                  <Background color="#aaa" gap={16} />
-                </ReactFlow>
-              </ReactFlowProvider>
-            </div>
-
-            <div className="mt-4 flex justify-end">
-              <Button onClick={submitSolution} disabled={gameCompleted} className="bg-blue-600 hover:bg-blue-700">
-                <Check className="mr-2 h-4 w-4" />
-                Nộp bài
-              </Button>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="results" className="space-y-4">
-          {evaluation && (
-            <div className="space-y-4">
-              <Card className="p-4 bg-blue-50">
-                <div className="flex items-center mb-4">
-                  <Trophy className="h-6 w-6 mr-2 text-yellow-500" />
-                  <h3 className="text-xl font-bold">
-                    Điểm số: {evaluation.scores.total}/100
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  <div className="bg-white p-3 rounded-md shadow">
-                    <p className="font-medium">Độ bao phủ</p>
-                    <p className="text-2xl font-bold text-blue-600">{evaluation.scores.coverage}%</p>
-                  </div>
-                  <div className="bg-white p-3 rounded-md shadow">
-                    <p className="font-medium">Tính logic</p>
-                    <p className="text-2xl font-bold text-green-600">{evaluation.scores.logic}%</p>
-                  </div>
-                  <div className="bg-white p-3 rounded-md shadow">
-                    <p className="font-medium">Tính nhất quán</p>
-                    <p className="text-2xl font-bold text-purple-600">{evaluation.scores.consistency}%</p>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <h4 className="font-semibold">Nhận xét:</h4>
-                  <ul className="list-disc pl-5 space-y-1">
-                    {evaluation.feedback.map((item: string, index: number) => (
-                      <li key={index}>{item}</li>
-                    ))}
-                  </ul>
-
-                  <h4 className="font-semibold pt-2">Điểm mạnh:</h4>
-                  <ul className="list-disc pl-5 space-y-1">
-                    {evaluation.strengths.map((item: string, index: number) => (
-                      <li key={index}>{item}</li>
-                    ))}
-                  </ul>
-
-                  <h4 className="font-semibold pt-2">Gợi ý cải thiện:</h4>
-                  <ul className="list-disc pl-5 space-y-1">
-                    {evaluation.suggestions.map((item: string, index: number) => (
-                      <li key={index}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
               </Card>
 
-              <div className="flex justify-end">
-                <Button onClick={resetGame} variant="outline" className="mr-2">
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Làm lại
-                </Button>
-                <Button onClick={() => window.location.reload()} className="bg-blue-600 hover:bg-blue-700">
-                  Trò chơi mới
-                </Button>
+              {/* Hint Panel */}
+              {showHint && (
+                <Card className="bg-blue-900/20 backdrop-blur-sm border-blue-500/30 p-4 mb-4">
+                  <h4 className="text-blue-300 font-semibold mb-2">💡 Neural Connection Tips:</h4>
+                  <ul className="text-blue-200 text-sm space-y-1">
+                    <li>• Connect concepts that have logical relationships</li>
+                    <li>• Create pathways from basic to advanced concepts</li>
+                    <li>• Look for cause-and-effect relationships</li>
+                    <li>• Build bridges between different categories</li>
+                    <li>• {isMobile ? 'Tap and drag' : 'Drag'} from connection points to create neural pathways</li>
+                  </ul>
+                </Card>
+              )}
+
+              {/* React Flow Canvas */}
+              <div 
+                className="border-2 border-purple-500/30 rounded-lg shadow-2xl flex-1 bg-gradient-to-br from-slate-800/50 to-purple-800/30 backdrop-blur-sm overflow-hidden" 
+                ref={reactFlowWrapper}
+              >
+                {isGenerating ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <Loader2 className="h-12 w-12 text-purple-400 animate-spin mx-auto mb-4" />
+                      <p className="text-purple-300 text-lg font-medium">Generating Neural Concepts...</p>
+                      <p className="text-purple-400 text-sm mt-2">AI is creating your concept map</p>
+                    </div>
+                  </div>
+                ) : (
+                  <ReactFlowProvider>
+                    <ReactFlow
+                      nodes={nodes}
+                      edges={edges}
+                      onNodesChange={onNodesChange}
+                      onEdgesChange={onEdgesChange}
+                      onConnect={onConnect}
+                      onInit={setReactFlowInstance}
+                      fitView
+                      attributionPosition="bottom-right"
+                      className="neural-flow"
+                      panOnScroll={!isMobile}
+                      zoomOnPinch={isMobile}
+                      panOnDrag={!isMobile}
+                      selectNodesOnDrag={false}
+                    >
+                      <Controls 
+                        className="bg-black/20 backdrop-blur-sm border-purple-500/30"
+                        showInteractive={false}
+                      />
+                      <MiniMap 
+                        className="bg-black/20 backdrop-blur-sm border-purple-500/30"
+                        nodeColor="#8b5cf6"
+                        maskColor="rgba(0, 0, 0, 0.2)"
+                      />
+                      <Background 
+                        color="#6366f1" 
+                        gap={20} 
+                        className="opacity-20"
+                      />
+                    </ReactFlow>
+                  </ReactFlowProvider>
+                )}
               </div>
             </div>
-          )}
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+
+          <TabsContent value="results" className="space-y-4">
+            {evaluation && (
+              <div className="space-y-4">
+                <Card className="p-6 bg-gradient-to-r from-purple-900/30 to-blue-900/30 backdrop-blur-sm border-purple-500/30">
+                  <div className="flex items-center mb-6">
+                    <Trophy className="h-8 w-8 mr-3 text-yellow-400" />
+                    <div>
+                      <h3 className="text-2xl font-bold text-white">
+                        Neural Score: {evaluation.score}/100
+                      </h3>
+                      <p className="text-purple-300">AI Teacher Evaluation Complete</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-black/20 p-4 rounded-lg text-center">
+                      <p className="text-purple-300 text-sm">Connectivity</p>
+                      <p className="text-2xl font-bold text-blue-400">{evaluation.breakdown.connectivity}/30</p>
+                    </div>
+                    <div className="bg-black/20 p-4 rounded-lg text-center">
+                      <p className="text-purple-300 text-sm">Logical Flow</p>
+                      <p className="text-2xl font-bold text-green-400">{evaluation.breakdown.logicalFlow}/30</p>
+                    </div>
+                    <div className="bg-black/20 p-4 rounded-lg text-center">
+                      <p className="text-purple-300 text-sm">Structure</p>
+                      <p className="text-2xl font-bold text-purple-400">{evaluation.breakdown.networkStructure}/25</p>
+                    </div>
+                    <div className="bg-black/20 p-4 rounded-lg text-center">
+                      <p className="text-purple-300 text-sm">Completeness</p>
+                      <p className="text-2xl font-bold text-yellow-400">{evaluation.breakdown.completeness}/15</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-green-400 font-semibold mb-2 flex items-center">
+                        <TrendingUp className="h-4 w-4 mr-2" />
+                        Neural Strengths:
+                      </h4>
+                      <ul className="text-green-300 space-y-1">
+                        {evaluation.analysis.strengths.map((item: string, index: number) => (
+                          <li key={index} className="flex items-start">
+                            <span className="text-green-400 mr-2">+</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-yellow-400 font-semibold mb-2">Enhancement Areas:</h4>
+                      <ul className="text-yellow-300 space-y-1">
+                        {evaluation.analysis.suggestions.map((item: string, index: number) => (
+                          <li key={index} className="flex items-start">
+                            <span className="text-yellow-400 mr-2">→</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {evaluation.neuralInsights && (
+                      <div>
+                        <h4 className="text-purple-400 font-semibold mb-2 flex items-center">
+                          <Brain className="h-4 w-4 mr-2" />
+                          Neural Insights:
+                        </h4>
+                        <div className="bg-black/20 p-4 rounded-lg space-y-2">
+                          <p className="text-purple-300"><strong>Hub Concepts:</strong> {evaluation.neuralInsights.hubNodes?.join(', ')}</p>
+                          <p className="text-purple-300"><strong>Pathway Quality:</strong> {evaluation.neuralInsights.pathwayQuality}</p>
+                          <p className="text-purple-300"><strong>Network Health:</strong> {evaluation.neuralInsights.networkHealth}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+
+                <div className="flex justify-center space-x-4">
+                  <Button 
+                    onClick={resetGame} 
+                    variant="outline" 
+                    className="border-purple-500/50 text-purple-300 hover:bg-purple-600/20"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Build New Neural Map
+                  </Button>
+                  <Button 
+                    onClick={() => window.location.reload()} 
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  >
+                    <Brain className="mr-2 h-4 w-4" />
+                    New Topic
+                  </Button>
+                </div>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };

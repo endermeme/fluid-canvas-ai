@@ -217,6 +217,33 @@ QUAN TRỌNG - YÊU CẦU VỀ TÊN:
 - KHÔNG dùng câu hỏi khó hiểu hay mơ hồ
 - Ví dụ: {"id": "1", "prompt": "Mô tả món ăn yêu thích của bạn", "category": "Mô tả", "difficulty": "easy", "timeLimit": 45}`;
           break;
+        case 'neuronpaths':
+          gamePrompt += `JSON format: { "title": "title", "nodes": [{"id": "node1", "data": {"label": "concept name", "level": "basic|intermediate|advanced", "category": "category"}, "position": {"x": 100, "y": 100}, "type": "default"}], "settings": {"timeLimit": ${totalTime || 300}, "allowHints": true}} }
+
+HƯỚNG DẪN CHI TIẾT cho game NeuronPaths:
+- Tạo 8-12 nodes concepts cho neural map
+- Mix levels: 40% basic, 40% intermediate, 20% advanced  
+- Position nodes ngẫu nhiên trên canvas 800x600
+- Concepts phải liên quan chặt chẽ đến chủ đề "${promptContent}"
+- Có thể tạo kết nối logic giữa các concepts
+- Categories gợi ý: "foundation", "application", "theory", "connection", "result"
+
+QUAN TRỌNG - YÊU CẦU VỀ CONCEPTS:
+- Label phải CHUẨN, RÕ RÀNG, DỨT KHOÁT
+- KHÔNG dùng cụm từ khó hiểu hay mơ hồ  
+- Concepts phải ngắn gọn, dễ hiểu (tối đa 20 ký tự)
+- Ví dụ tốt: "Core Theory", "Method A", "Final Result"
+- Ví dụ tránh: "Complex interconnected principle", "Advanced methodological approach"
+
+VÍ DỤ cụ thể với chủ đề "Machine Learning":
+- Basic: "Data Input", "Training", "Model"
+- Intermediate: "Feature Selection", "Validation", "Optimization"  
+- Advanced: "Deep Learning", "Neural Networks", "AI Ethics"
+
+VÍ DỤ position:
+- {"x": 150, "y": 100}, {"x": 400, "y": 150}, {"x": 600, "y": 200}
+- Spread concepts across canvas, avoid clustering`;
+          break;
       }
 
       gamePrompt += " Return only JSON, no additional text.";
@@ -303,6 +330,10 @@ QUAN TRỌNG - YÊU CẦU VỀ TÊN:
             parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 3;
             break;
+          case 'neuronpaths':
+            parsedContent.settings.timeLimit = totalTime || 300;
+            parsedContent.settings.allowHints = true;
+            break;
         }
 
         clearInterval(progressInterval);
@@ -343,7 +374,7 @@ QUAN TRỌNG - YÊU CẦU VỀ TÊN:
   };
 
   const loadSampleData = (type) => {
-    const newGames = ['groupsort', 'spinwheel', 'completesentence', 'anagram', 'openbox', 'speakingcards'];
+    const newGames = ['groupsort', 'spinwheel', 'completesentence', 'anagram', 'openbox', 'speakingcards', 'neuronpaths'];
     
     if (newGames.includes(type) || type === 'pictionary') {
       setError(`Không có dữ liệu mẫu cho game ${getGameTypeName()}. Vui lòng sử dụng AI để tạo nội dung.`);
@@ -459,6 +490,7 @@ QUAN TRỌNG - YÊU CẦU VỀ TÊN:
       case 'anagram': return 'Đảo Chữ';
       case 'openbox': return 'Mở Hộp Bí Ẩn';
       case 'speakingcards': return 'Thẻ Luyện Nói';
+      case 'neuronpaths': return 'Đường Dẫn Thần Kinh';
       default: return 'Trò Chơi';
     }
   };
@@ -580,6 +612,13 @@ QUAN TRỌNG - YÊU CẦU VỀ TÊN:
         name: 'Thẻ Luyện Nói',
         description: 'Thẻ luyện nói với các câu hỏi',
         icon: 'pencil',
+        defaultSettings: settings
+      },
+      'neuronpaths': {
+        id: 'neuronpaths',
+        name: 'Đường Dẫn Thần Kinh',
+        description: 'Tạo neural map với các nodes concepts',
+        icon: 'brain-circuit',
         defaultSettings: settings
       }
     };

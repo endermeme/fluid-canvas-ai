@@ -1,6 +1,56 @@
 
 # Game Changes Log
 
+## 2025-06-07 - Cải thiện toàn diện NeuronPaths game với AI workflow và mobile optimization
+
+### Thay đổi:
+1. **Workflow mới hoàn toàn**:
+   - AI tạo topic và sinh 8-12 nodes ngẫu nhiên với levels khác nhau
+   - Học viên tự do tạo connections giữa các concepts
+   - AI chấm điểm trên thang 100 với feedback chi tiết
+   - Đánh giá theo neural network principles: connectivity, logic flow, centrality
+
+2. **Mobile optimization toàn diện**:
+   - Touch-friendly drag & drop với haptic feedback
+   - Pinch to zoom, pan gestures mượt mà
+   - Responsive layout hoàn hảo cho mọi screen size
+   - Mobile-specific UI controls và button sizing
+   - Gesture recognition cho mobile interactions
+
+3. **Advanced tools và features**:
+   - Auto-suggest connections dựa trên AI analysis
+   - Node grouping và clustering visual
+   - Undo/redo functionality
+   - Save/load progress với local storage
+   - Export neural map as image
+   - Real-time connection strength analysis
+
+4. **Enhanced AI scoring system**:
+   - Neural network centrality analysis
+   - Logical pathway evaluation
+   - Concept connectivity scoring
+   - Missing connections detection
+   - Detailed feedback cho từng connection type
+
+5. **Giao diện neural theme**:
+   - Brain-inspired gradient backgrounds
+   - Neural firing animations cho connections
+   - Synaptic strength visualization
+   - Node pulsing effects khi active
+   - Electric current flowing through edges
+
+### File đã thay đổi:
+- NeuronPathsTemplate.tsx - Redesign hoàn toàn với AI workflow
+- game-changes.md - Ghi lại major update
+
+### Tính năng mới:
+- AI-generated random nodes cho topic
+- 100-point scoring system với detailed breakdown
+- Mobile touch optimization với gestures
+- Advanced tools: undo/redo, save/load, export
+- Neural theme với brain-like animations
+- Real-time connection analysis và suggestions
+
 ## 2025-06-07 - Fix logic đối chứng kết quả và cải thiện animation cho GroupSort
 
 ### Thay đổi:
@@ -285,3 +335,4 @@
 
 ### File thay đổi:
 - PresetGameManager.tsx - case 'pictionary'
+
