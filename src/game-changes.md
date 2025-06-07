@@ -1,6 +1,36 @@
 
 # Game Changes Log
 
+## 2025-06-07 - Fix logic đối chứng kết quả và cải thiện animation cho GroupSort
+
+### Thay đổi:
+1. **Sửa logic đối chứng kết quả**:
+   - Fix bug hiển thị tất cả items đều sai (✗)
+   - So sánh chính xác group.name với originalItem.group
+   - Đảm bảo kết quả đúng được hiển thị ✓
+
+2. **Cải thiện animation kéo thả**:
+   - Thêm dragOverGroup state để track group đang hover
+   - Visual feedback rõ ràng khi kéo item vào group
+   - Animation mượt mà với scale, rotate, shadow effects
+   - Drag enter/leave events chính xác
+
+3. **Cập nhật AI prompt cho GroupSort**:
+   - Yêu cầu tên items phải chuẩn, rõ ràng, dứt khoát
+   - Không dùng cụm từ khó hiểu hay úp mở
+   - Tên phải đơn giản, dễ hiểu cho người chơi
+
+### File đã thay đổi:
+- GroupSortTemplate.tsx - Fix logic và animation hoàn toàn
+- PresetGameManager.tsx - Cập nhật prompt AI
+- game-changes.md - Ghi lại thay đổi
+
+### Tính năng cải thiện:
+- Kết quả đúng/sai hiển thị chính xác
+- Animation kéo thả mượt mà với visual feedback
+- Tên items rõ ràng, không khó hiểu
+- UX tốt hơn với hover effects và transitions
+
 ## 2025-06-07 - Cập nhật cơ chế scoring cho GroupSort game
 
 ### Thay đổi:

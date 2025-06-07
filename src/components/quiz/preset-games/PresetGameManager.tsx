@@ -144,7 +144,13 @@ HƯỚNG DẪN CHI TIẾT cho game GroupSort:
 - Phân bố items ĐỀU NHAU giữa các groups (mỗi group 3-4 items)
 - Items phải thú vị, đa dạng và liên quan chặt chẽ đến chủ đề
 - Group names phải khác biệt rõ ràng, không gây nhầm lẫn
-- Text của items ngắn gọn (5-15 từ), dễ hiểu
+
+QUAN TRỌNG - YÊU CẦU VỀ TÊN:
+- Tên items phải CHUẨN, RÕ RÀNG, DỨT KHOÁT
+- KHÔNG dùng cụm từ khó hiểu, úp mở hay mơ hồ
+- Tên phải đơn giản, dễ hiểu cho người chơi
+- Ví dụ tốt: "Sư tử", "Táo", "Máy tính"
+- Ví dụ tránh: "Sinh vật tuyệt vời", "Thứ ngọt ngào", "Công cụ hiện đại"
 
 VÍ DỤ cụ thể với chủ đề "Động vật":
 - Groups: "Động vật có vú", "Chim", "Cá", "Bò sát"
@@ -163,7 +169,12 @@ HƯỚNG DẪN CHI TIẾT cho game SpinWheel:
 - Colors gợi ý: "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD", "#FFB6C1", "#98FB98"
 - Text phải liên quan đến chủ đề và ngắn (tối đa 15 ký tự)
 - Points tăng dần theo độ khó: 10, 20, 30, 40, 50, 60
-- Ví dụ chủ đề "Toán học": segments có thể là "Cộng", "Trừ", "Nhân", "Chia"`;
+- Ví dụ chủ đề "Toán học": segments có thể là "Cộng", "Trừ", "Nhân", "Chia"
+
+QUAN TRỌNG - YÊU CẦU VỀ TÊN:
+- Text segments phải CHUẨN, RÕ RÀNG, DỨT KHOÁT  
+- KHÔNG dùng từ khó hiểu hay mơ hồ
+- Tên phải ngắn gọn, dễ đọc trên vòng quay`;
           break;
         case 'completesentence':
           gamePrompt += `JSON format: { "title": "title", "sentences": [{"sentence": "Sentence with _____ blanks", "blanks": ["word1", "word2"], "options": ["option1", "option2", "option3", "option4"]}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }`;
@@ -182,6 +193,10 @@ HƯỚNG DẪN CHI TIẾT cho game OpenBox:
 - Rewards: "Phần thưởng: Bonus X điểm!" với points 15-30
 - Challenges: "Thử thách: [hành động]" với points 20-25
 - Content phải ngắn gọn và rõ ràng
+
+QUAN TRỌNG - YÊU CẦU VỀ TÊN:
+- Content phải CHUẨN, RÕ RÀNG, DỨT KHOÁT
+- KHÔNG dùng cụm từ khó hiểu hay úp mở
 - Ví dụ: {"id": "1", "content": "Câu hỏi: Thủ đô Việt Nam?", "type": "question", "points": 10, "opened": false}`;
           break;
         case 'speakingcards':
@@ -196,6 +211,10 @@ HƯỚNG DẪN CHI TIẾT cho game SpeakingCards:
 - Easy: Câu hỏi đơn giản, timeLimit 30-45s
 - Medium: Câu hỏi phức tạp hơn, timeLimit 60s  
 - Hard: Câu hỏi sâu sắc, timeLimit 90s
+
+QUAN TRỌNG - YÊU CẦU VỀ TÊN:
+- Prompts phải CHUẨN, RÕ RÀNG, DỨT KHOÁT
+- KHÔNG dùng câu hỏi khó hiểu hay mơ hồ
 - Ví dụ: {"id": "1", "prompt": "Mô tả món ăn yêu thích của bạn", "category": "Mô tả", "difficulty": "easy", "timeLimit": 45}`;
           break;
       }
@@ -283,29 +302,6 @@ HƯỚNG DẪN CHI TIẾT cho game SpeakingCards:
             parsedContent.settings.timePerQuestion = timePerQuestion;
             parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 3;
-            break;
-          case 'groupsort':
-            parsedContent.settings.timeLimit = totalTime || 120;
-            parsedContent.settings.bonusTimePerCorrect = bonusTime || 10;
-            break;
-          case 'spinwheel':
-            parsedContent.settings.allowMultipleSpins = true;
-            parsedContent.settings.maxSpins = 10;
-            break;
-          case 'completesentence':
-            parsedContent.settings.timePerQuestion = timePerQuestion;
-            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
-            break;
-          case 'anagram':
-            parsedContent.settings.timePerQuestion = timePerQuestion;
-            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
-            break;
-          case 'openbox':
-            parsedContent.settings.bonusTimePerBox = bonusTime || 5;
-            break;
-          case 'speakingcards':
-            parsedContent.settings.defaultTimeLimit = timePerQuestion || 60;
-            parsedContent.settings.allowExtension = true;
             break;
         }
 

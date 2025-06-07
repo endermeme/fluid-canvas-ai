@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -53,6 +54,7 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
   const [gameStarted, setGameStarted] = useState(false);
   const [totalItems] = useState(gameData.items.length);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [dragOverGroup, setDragOverGroup] = useState<string | null>(null);
   
   useEffect(() => {
     const itemTexts = items.map(item => item.text);
@@ -117,11 +119,25 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
 
   const handleDragEnd = () => {
     setDraggedItem(null);
+    setDragOverGroup(null);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDragEnter = (e: React.DragEvent, groupId: string) => {
+    e.preventDefault();
+    setDragOverGroup(groupId);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    // Chỉ clear khi thực sự rời khỏi group
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setDragOverGroup(null);
+    }
   };
 
   const handleDrop = (e: React.DragEvent, groupId: string) => {
@@ -147,6 +163,7 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
     }
     
     setDraggedItem(null);
+    setDragOverGroup(null);
   };
   
   const startGame = () => {
@@ -162,6 +179,8 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
     const itemTexts = items.map(item => item.text);
     const shuffled = [...itemTexts].sort(() => Math.random() - 0.5);
     setShuffledItems(shuffled);
+    setDraggedItem(null);
+    setDragOverGroup(null);
   };
   
   const progress = ((totalItems - shuffledItems.length) / totalItems) * 100;
@@ -216,6 +235,7 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
                     <h4 className="font-semibold text-lg mb-2">{group.name}:</h4>
                     <div className="flex flex-wrap gap-2">
                       {group.items.map((itemText) => {
+                        // FIX: So sánh chính xác với tên group từ data gốc
                         const originalItem = items.find(item => item.text === itemText);
                         const isCorrect = originalItem && originalItem.group === group.name;
                         return (
@@ -346,7 +366,9 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
                     onDragStart={(e) => handleDragStart(e, itemText)}
                     onDragEnd={handleDragEnd}
                     className={`p-4 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 border-2 border-blue-200 rounded-xl cursor-move hover:from-blue-200 hover:via-indigo-200 hover:to-purple-200 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg select-none ${
-                      draggedItem === itemText ? 'opacity-50 scale-95 rotate-3' : ''
+                      draggedItem === itemText 
+                        ? 'opacity-40 scale-90 rotate-2 shadow-2xl border-blue-400' 
+                        : 'hover:rotate-1'
                     }`}
                   >
                     <span className="text-gray-800 font-semibold text-center block text-lg">{itemText}</span>
@@ -374,17 +396,22 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
                 <div
                   key={group.id}
                   onDragOver={handleDragOver}
+                  onDragEnter={(e) => handleDragEnter(e, group.id)}
+                  onDragLeave={handleDragLeave}
                   onDrop={(e) => handleDrop(e, group.id)}
-                  className={`p-6 border-2 border-dashed rounded-xl min-h-[120px] transition-all duration-300 ${
-                    draggedItem 
-                      ? 'border-purple-500 bg-purple-50/80 scale-105' 
-                      : 'border-purple-300 hover:border-purple-400 hover:bg-purple-50/50'
+                  className={`p-6 border-2 border-dashed rounded-xl min-h-[120px] transition-all duration-300 transform ${
+                    dragOverGroup === group.id && draggedItem
+                      ? 'border-purple-500 bg-purple-100/80 scale-105 shadow-lg rotate-1' 
+                      : draggedItem 
+                        ? 'border-purple-300 bg-purple-50/50 hover:scale-102' 
+                        : 'border-purple-300 hover:border-purple-400 hover:bg-purple-50/50'
                   }`}
                   style={{
-                    background: draggedItem ? undefined : `linear-gradient(135deg, ${
+                    background: dragOverGroup === group.id && draggedItem ? undefined : `linear-gradient(135deg, ${
                       groupIndex === 0 ? 'rgba(168, 85, 247, 0.1)' :
                       groupIndex === 1 ? 'rgba(59, 130, 246, 0.1)' :
-                      'rgba(16, 185, 129, 0.1)'
+                      groupIndex === 2 ? 'rgba(16, 185, 129, 0.1)' :
+                      'rgba(239, 68, 68, 0.1)'
                     }, rgba(255, 255, 255, 0.5))`
                   }}
                 >
@@ -396,14 +423,20 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
                     {group.items.map((item, index) => (
                       <span
                         key={index}
-                        className="px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 rounded-full font-semibold border border-gray-300 shadow-sm text-sm"
+                        className="px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 rounded-full font-semibold border border-gray-300 shadow-sm text-sm transition-all duration-200 hover:scale-105"
                       >
                         {item}
                       </span>
                     ))}
                   </div>
                   {group.items.length === 0 && (
-                    <p className="text-gray-400 text-center italic py-8 text-lg">Thả các mục vào đây</p>
+                    <p className={`text-center italic py-8 text-lg transition-all duration-300 ${
+                      dragOverGroup === group.id && draggedItem 
+                        ? 'text-purple-600 font-semibold animate-pulse' 
+                        : 'text-gray-400'
+                    }`}>
+                      {dragOverGroup === group.id && draggedItem ? '🎯 Thả vào đây!' : 'Thả các mục vào đây'}
+                    </p>
                   )}
                 </div>
               ))}
