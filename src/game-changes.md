@@ -1,53 +1,52 @@
-
 # Game Changes Log
 
-## 2025-06-07 - Đơn giản hóa hoàn toàn NeuronPaths game theo workflow cốt lõi
+## 2025-06-07 - Redesign hoàn toàn NeuronPaths với workflow tự tạo và giao diện hiện đại
 
 ### Thay đổi:
-1. **Workflow đơn giản hoá**:
-   - AI tạo 8-10 concepts ngẫu nhiên cho topic
-   - Học viên tự do kéo thả để tạo connections giữa nodes
+1. **Workflow mới hoàn toàn**:
+   - AI chỉ đưa ra topic/chủ đề 
+   - Người dùng tự tư duy tạo nodes (concepts)
+   - Người dùng tự nối các nodes với nhau
    - AI chấm điểm trên thang 100 với feedback chi tiết
-   - Không có tools phức tạp, chỉ tập trung vào việc nối
 
-2. **Giao diện clean và đơn giản**:
-   - Loại bỏ tabs, advanced tools không cần thiết
-   - Header đơn giản chỉ hiển thị tên game và số kết nối
-   - Canvas ReactFlow sạch sẽ với background nhẹ
-   - Hướng dẫn ngắn gọn dưới canvas
+2. **Giao diện hiện đại và panel công cụ chi tiết**:
+   - Custom nodes với gradient đẹp mắt, hover effects
+   - Panel công cụ sidebar với 3 loại concepts: Basic, Intermediate, Advanced
+   - Click để edit tên concept trực tiếp trên node
+   - Responsive design hoàn hảo cho PC và mobile
+   - Modern gradient backgrounds và backdrop-blur effects
 
-3. **Cơ chế nối rõ ràng**:
-   - Drag & drop từ node này sang node khác
-   - Visual feedback ngay khi tạo connection
-   - Edge animation đơn giản màu xanh
-   - Toast notification khi tạo kết nối thành công
+3. **Tính năng tương tác nâng cao**:
+   - Multi-selection với Shift key
+   - Xóa nodes được chọn
+   - Clear toàn bộ canvas
+   - Hướng dẫn tương tác có thể toggle
+   - Visual feedback khi tạo connections
 
-4. **AI scoring đơn giản**:
-   - Chấm điểm theo 4 tiêu chí: Logic (40), Hoàn thiện (30), Hiểu biết (20), Sáng tạo (10)
-   - Phân tích từng connection với lý do
-   - Feedback strengths và improvements
-   - Fallback scoring nếu AI lỗi
+4. **AI scoring system cải tiến**:
+   - Chấm điểm theo 4 tiêu chí: Concept Quality (30), Logic Connections (30), Network Structure (25), Creativity (15)
+   - Phân tích chi tiết từng concept và connection
+   - Feedback strengths, improvements và overall comment
+   - Fallback scoring nếu API lỗi
 
-5. **Mobile friendly**:
-   - Touch-friendly nodes và connections
-   - Responsive layout hoàn hảo
-   - Controls đơn giản, dễ sử dụng
+5. **UX/UI tối ưu**:
+   - Toast notifications cho mọi action
+   - Loading states và error handling
+   - Modern color scheme với indigo/purple gradients
+   - Mobile-friendly với responsive layout
+   - Touch-friendly controls và button sizing
 
 ### File đã thay đổi:
-- NeuronPathsTemplate.tsx - Đơn giản hóa hoàn toàn, tập trung workflow cốt lõi
-- game-changes.md - Ghi lại major simplification
+- NeuronPathsTemplate.tsx - Redesign hoàn toàn với workflow tự tạo
+- game-changes.md - Ghi lại major redesign
 
-### Tính năng loại bỏ:
-- Tabs và advanced tools không cần thiết
-- Undo/redo, export, save/load phức tạp
-- Neural theme effects quá phức tạp
-- Multiple views và hint panels
-
-### Tính năng giữ lại:
-- AI generation concepts cho topic
-- Drag & drop để tạo connections  
-- 100-point scoring với detailed feedback
-- Clean responsive design
+### Tính năng mới:
+- Workflow tự tạo: user tạo concepts thay vì AI generate
+- Custom node component với edit tên trực tiếp
+- Panel công cụ sidebar hiện đại với tools đầy đủ
+- Multi-selection và batch operations
+- Modern responsive design cho mọi thiết bị
+- Enhanced AI scoring với detailed analysis
 
 ## 2025-06-07 - Cải thiện toàn diện NeuronPaths game với AI workflow và mobile optimization
 
@@ -62,14 +61,14 @@
    - Touch-friendly drag & drop với haptic feedback
    - Pinch to zoom, pan gestures mượt mà
    - Responsive layout hoàn hảo cho mọi screen size
-   - Mobile-specific UI controls và button sizing
+   - Mobile-specific UI controls and button sizing
    - Gesture recognition cho mobile interactions
 
 3. **Advanced tools và features**:
    - Auto-suggest connections dựa trên AI analysis
-   - Node grouping và clustering visual
+   - Node grouping and clustering visual
    - Undo/redo functionality
-   - Save/load progress với local storage
+   - Save/load progress with local storage
    - Export neural map as image
    - Real-time connection strength analysis
 
@@ -78,13 +77,13 @@
    - Logical pathway evaluation
    - Concept connectivity scoring
    - Missing connections detection
-   - Detailed feedback cho từng connection type
+   - Detailed feedback for each connection type
 
 5. **Giao diện neural theme**:
    - Brain-inspired gradient backgrounds
-   - Neural firing animations cho connections
+   - Neural firing animations for connections
    - Synaptic strength visualization
-   - Node pulsing effects khi active
+   - Node pulsing effects when active
    - Electric current flowing through edges
 
 ### File đã thay đổi:
@@ -93,11 +92,11 @@
 
 ### Tính năng mới:
 - AI-generated random nodes cho topic
-- 100-point scoring system với detailed breakdown
-- Mobile touch optimization với gestures
+- 100-point scoring system with detailed breakdown
+- Mobile touch optimization with gestures
 - Advanced tools: undo/redo, save/load, export
-- Neural theme với brain-like animations
-- Real-time connection analysis và suggestions
+- Neural theme with brain-like animations
+- Real-time connection analysis and suggestions
 
 ## 2025-06-07 - Fix logic đối chứng kết quả và cải thiện animation cho GroupSort
 
@@ -130,7 +129,7 @@
    - Cải thiện responsive cho màn hình kết quả
    - Fix text "Hoàn thành!" không bị cắt
    - Scroll container cho kết quả chi tiết
-   - Better spacing và typography
+   - Better spacing and typography
 
 ### File đã thay đổi:
 - GroupSortTemplate.tsx - Fix logic hoàn toàn (HOTFIX critical)
@@ -183,7 +182,7 @@
    - Responsive design hoàn hảo cho mọi thiết bị
 
 2. **Fix drag & drop mechanism cho GroupSort**:
-   - Drag state tracking với visual feedback
+   - Drag state tracking with visual feedback
    - Proper drag events with onDragEnd
    - Drop zone highlighting when item is being dragged
    - Smooth animations and transitions
@@ -383,4 +382,3 @@
 
 ### File thay đổi:
 - PresetGameManager.tsx - case 'pictionary'
-
