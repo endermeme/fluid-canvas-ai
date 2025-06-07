@@ -1,6 +1,43 @@
 
 # Game Changes Log
 
+## 2025-06-07 - Fix layout và drag & drop cho GroupSort game
+
+### Thay đổi:
+1. **Fix layout bị nén 2 bên**:
+   - Sử dụng w-full h-screen thay vì fixed inset
+   - Loại bỏ max-width constraints gây nén layout
+   - Grid layout tối ưu cho desktop và mobile
+   - Flex layout với overflow handling
+
+2. **Cải thiện drag & drop mechanism**:
+   - Thêm drag state tracking với draggedItem
+   - Visual feedback khi đang kéo (opacity, scale)
+   - Proper drag events handling
+   - Drop zone highlighting khi có item đang được kéo
+   - Smooth animations cho drag operations
+
+3. **Responsive design tốt hơn**:
+   - Flexible grid system
+   - Overflow handling cho content dài
+   - Mobile-friendly touch interactions
+   - Proper spacing và scaling
+
+4. **Visual improvements**:
+   - Better visual feedback cho drag operations
+   - Improved hover states
+   - Smooth transitions và animations
+   - Better contrast và readability
+
+### File đã thay đổi:
+- GroupSortTemplate.tsx - Fix layout và drag & drop hoàn toàn
+
+### Tính năng cải thiện:
+- Layout không bị nén, fill toàn màn hình
+- Drag & drop hoạt động mượt mà
+- Visual feedback rõ ràng khi kéo thả
+- Responsive trên mọi kích thước màn hình
+
 ## 2025-06-07 - Cải thiện giao diện GroupSort game
 
 ### Thay đổi:
