@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -85,20 +84,51 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
     let correctCount = 0;
     let totalScore = 0;
 
+    console.log("=== DEBUGGING SCORE CALCULATION ===");
+    console.log("Groups:", groups);
+    console.log("Original items:", items);
+
     // Tính điểm dựa trên các items đã được phân nhóm đúng
     groups.forEach(group => {
+      console.log(`\nChecking group: ${group.name}`);
+      console.log(`Items in group:`, group.items);
+      
       group.items.forEach(itemText => {
-        const originalItem = items.find(item => item.text === itemText);
-        if (originalItem && originalItem.group === group.name) {
-          correctCount++;
-          totalScore += gameData.settings?.bonusTimePerCorrect || 10;
+        console.log(`\nChecking item: "${itemText}"`);
+        const originalItem = items.find(item => {
+          console.log(`Comparing with original item: "${item.text}" (group: "${item.group}")`);
+          return item.text.trim() === itemText.trim();
+        });
+        
+        if (originalItem) {
+          console.log(`Found original item: "${originalItem.text}" should be in group: "${originalItem.group}"`);
+          console.log(`Current group name: "${group.name}"`);
+          
+          // So sánh chính xác tên group
+          const isCorrect = originalItem.group.trim() === group.name.trim();
+          console.log(`Is correct: ${isCorrect}`);
+          
+          if (isCorrect) {
+            correctCount++;
+            totalScore += gameData.settings?.bonusTimePerCorrect || 10;
+            console.log(`✓ Correct! Total correct so far: ${correctCount}`);
+          } else {
+            console.log(`✗ Wrong group! Expected: "${originalItem.group}", Got: "${group.name}"`);
+          }
+        } else {
+          console.log(`❌ Could not find original item for: "${itemText}"`);
         }
       });
     });
 
+    console.log(`\nFINAL RESULTS:`);
+    console.log(`Correct count: ${correctCount}/${totalItems}`);
+    console.log(`Total score: ${totalScore}`);
+
     // Bonus điểm thời gian nếu hoàn thành trước hạn
     if (shuffledItems.length === 0 && timeLeft > 0) {
       totalScore += timeLeft * 2;
+      console.log(`Time bonus added: ${timeLeft * 2}, New total: ${totalScore}`);
     }
 
     setScore(totalScore);
@@ -129,13 +159,19 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
 
   const handleDragEnter = (e: React.DragEvent, groupId: string) => {
     e.preventDefault();
-    setDragOverGroup(groupId);
+    if (draggedItem) {
+      setDragOverGroup(groupId);
+    }
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     // Chỉ clear khi thực sự rời khỏi group
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
       setDragOverGroup(null);
     }
   };
@@ -188,8 +224,8 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
   if (gameCompleted) {
     const correctCount = groups.reduce((count, group) => {
       return count + group.items.filter(itemText => {
-        const originalItem = items.find(item => item.text === itemText);
-        return originalItem && originalItem.group === group.name;
+        const originalItem = items.find(item => item.text.trim() === itemText.trim());
+        return originalItem && originalItem.group.trim() === group.name.trim();
       }).length;
     }, 0);
     
@@ -197,7 +233,7 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
     
     return (
       <div className="min-h-screen w-full bg-gradient-to-br from-violet-500/10 via-purple-500/10 to-fuchsia-500/10 flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl">
+        <div className="w-full max-w-4xl">
           <Card className="text-center bg-white/95 backdrop-blur-md border border-white/30 shadow-2xl rounded-2xl p-8">
             <div className="mb-6">
               {isSuccess ? (
@@ -207,7 +243,7 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
               )}
             </div>
             
-            <h2 className="text-4xl font-bold mb-6 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-6 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent leading-tight">
               {isSuccess ? '🎉 Xuất sắc!' : '🎯 Hoàn thành!'}
             </h2>
             
@@ -229,15 +265,16 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
             {/* Hiển thị kết quả chi tiết */}
             <div className="mb-8 text-left">
               <h3 className="text-xl font-bold mb-4 text-center">Kết quả chi tiết:</h3>
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-96 overflow-y-auto">
                 {groups.map((group, index) => (
                   <div key={group.id} className="p-4 bg-gray-50 rounded-lg">
                     <h4 className="font-semibold text-lg mb-2">{group.name}:</h4>
                     <div className="flex flex-wrap gap-2">
                       {group.items.map((itemText) => {
-                        // FIX: So sánh chính xác với tên group từ data gốc
-                        const originalItem = items.find(item => item.text === itemText);
-                        const isCorrect = originalItem && originalItem.group === group.name;
+                        // So sánh chính xác với tên group từ data gốc
+                        const originalItem = items.find(item => item.text.trim() === itemText.trim());
+                        const isCorrect = originalItem && originalItem.group.trim() === group.name.trim();
+                        
                         return (
                           <span
                             key={itemText}
@@ -367,7 +404,7 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
                     onDragEnd={handleDragEnd}
                     className={`p-4 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 border-2 border-blue-200 rounded-xl cursor-move hover:from-blue-200 hover:via-indigo-200 hover:to-purple-200 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg select-none ${
                       draggedItem === itemText 
-                        ? 'opacity-40 scale-90 rotate-2 shadow-2xl border-blue-400' 
+                        ? 'opacity-50 scale-95 rotate-3 shadow-2xl border-blue-400 bg-gradient-to-r from-blue-200 via-indigo-200 to-purple-200' 
                         : 'hover:rotate-1'
                     }`}
                   >
@@ -401,9 +438,9 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
                   onDrop={(e) => handleDrop(e, group.id)}
                   className={`p-6 border-2 border-dashed rounded-xl min-h-[120px] transition-all duration-300 transform ${
                     dragOverGroup === group.id && draggedItem
-                      ? 'border-purple-500 bg-purple-100/80 scale-105 shadow-lg rotate-1' 
+                      ? 'border-purple-500 bg-purple-100/80 scale-105 shadow-lg rotate-1 ring-2 ring-purple-300' 
                       : draggedItem 
-                        ? 'border-purple-300 bg-purple-50/50 hover:scale-102' 
+                        ? 'border-purple-300 bg-purple-50/50 hover:scale-102 hover:border-purple-400' 
                         : 'border-purple-300 hover:border-purple-400 hover:bg-purple-50/50'
                   }`}
                   style={{
@@ -432,7 +469,7 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
                   {group.items.length === 0 && (
                     <p className={`text-center italic py-8 text-lg transition-all duration-300 ${
                       dragOverGroup === group.id && draggedItem 
-                        ? 'text-purple-600 font-semibold animate-pulse' 
+                        ? 'text-purple-600 font-semibold animate-pulse scale-110' 
                         : 'text-gray-400'
                     }`}>
                       {dragOverGroup === group.id && draggedItem ? '🎯 Thả vào đây!' : 'Thả các mục vào đây'}
