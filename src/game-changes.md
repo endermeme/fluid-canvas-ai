@@ -1,6 +1,46 @@
 
 # Game Changes Log
 
+## 2025-06-07 - Cập nhật hoàn chỉnh GroupSort game
+
+### Thay đổi:
+1. **Thiết kế lại giao diện GroupSort**:
+   - Gradient background hiện đại
+   - Card design với backdrop blur
+   - Hover effects và animations
+   - Progress bar trực quan
+   - Icons cho mỗi thành phần
+
+2. **Cải thiện UX/UI**:
+   - Drag & drop responsive
+   - Visual feedback khi thả đúng/sai
+   - Màn hình kết quả chi tiết
+   - Timer với cảnh báo khi sắp hết giờ
+   - Progress tracking realtime
+
+3. **Cập nhật AI generation cho GroupSort**:
+   - Prompt chi tiết và cụ thể hơn
+   - Hướng dẫn phân bố items đều nhau
+   - Ví dụ cụ thể cho từng chủ đề
+   - Validation cho số lượng items chính xác
+
+4. **Cơ chế share game**:
+   - Tích hợp với hệ thống share hiện có
+   - Game data được encode trong link
+   - Có thể chia sẻ qua QR code
+
+### File đã thay đổi:
+- GroupSortTemplate.tsx - Redesign hoàn toàn
+- PresetGameManager.tsx - Cập nhật AI prompt
+- game-changes.md - Ghi lại thay đổi
+
+### Tính năng mới:
+- Giao diện gradient hiện đại
+- Feedback system với toast notifications
+- Progress tracking và scoring system
+- Responsive design cho mobile/desktop
+- Animation effects cho better UX
+
 ## 2025-06-07 - Cập nhật AI generation cho GroupSort và SpinWheel
 
 ### Thay đổi:

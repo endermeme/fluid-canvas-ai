@@ -137,12 +137,22 @@ QUAN TRỌNG cho game Pictionary:
           gamePrompt += `JSON format: { "title": "title", "items": [{"id": "1", "text": "item text", "group": "group name"}], "groups": [{"id": "group1", "name": "Group Name", "items": []}], "settings": {"timeLimit": ${totalTime || 120}, "bonusTimePerCorrect": ${bonusTime || 10}} }
 
 HƯỚNG DẪN CHI TIẾT cho game GroupSort:
-- Tạo ${questionCount || 12} items để phân nhóm
-- Tạo 3-4 groups phù hợp với chủ đề
-- Mỗi item phải có: id duy nhất, text mô tả, group tương ứng
-- Groups phải có: id duy nhất, name rõ ràng, items array rỗng
-- Đảm bảo các items được phân bố đều giữa các groups
-- Ví dụ chủ đề "Động vật": groups có thể là "Thú", "Chim", "Cá"`;
+- Tạo CHÍNH XÁC ${questionCount || 12} items để phân nhóm
+- Tạo 3-4 groups phù hợp và cân bằng với chủ đề "${promptContent}"
+- Mỗi item phải có: id duy nhất (item1, item2...), text mô tả rõ ràng, group chính xác
+- Groups phải có: id duy nhất (group1, group2...), name rõ ràng, items array rỗng []
+- Phân bố items ĐỀU NHAU giữa các groups (mỗi group 3-4 items)
+- Items phải thú vị, đa dạng và liên quan chặt chẽ đến chủ đề
+- Group names phải khác biệt rõ ràng, không gây nhầm lẫn
+- Text của items ngắn gọn (5-15 từ), dễ hiểu
+
+VÍ DỤ cụ thể với chủ đề "Động vật":
+- Groups: "Động vật có vú", "Chim", "Cá", "Bò sát"
+- Items: "Sư tử" (group: "Động vật có vú"), "Đại bàng" (group: "Chim")
+
+VÍ DỤ với chủ đề "Học tập":
+- Groups: "Phương pháp học", "Công cụ học tập", "Kỹ năng cần thiết"
+- Items: "Đọc sách" (group: "Phương pháp học"), "Máy tính" (group: "Công cụ học tập")`;
           break;
         case 'spinwheel':
           gamePrompt += `JSON format: { "title": "title", "segments": [{"id": "1", "text": "segment text", "color": "#FF6B6B", "points": 10}], "settings": {"allowMultipleSpins": true, "maxSpins": 10}} }
