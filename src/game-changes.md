@@ -1,6 +1,34 @@
 
 # Game Changes Log
 
+## 2025-06-07 - Cập nhật cơ chế scoring cho GroupSort game
+
+### Thay đổi:
+1. **Cho phép thả sai không bị chặn**:
+   - Người chơi có thể thả item vào bất kỳ nhóm nào
+   - Không có feedback ngay lập tức về đúng/sai
+   - Game chỉ tính điểm khi kết thúc
+
+2. **Cập nhật logic tính điểm**:
+   - Tính điểm dựa trên số lượng items phân nhóm đúng cuối game
+   - Hiển thị kết quả chi tiết với đánh dấu đúng/sai
+   - Bonus điểm thời gian nếu hoàn thành sớm
+
+3. **Cải thiện UI/UX**:
+   - Progress bar theo số lượng items đã thả (không phải đúng)
+   - Màn hình kết quả chi tiết với breakdown từng nhóm
+   - Items được đánh dấu ✓ hoặc ✗ trong kết quả
+
+### File đã thay đổi:
+- GroupSortTemplate.tsx - Cập nhật logic scoring và gameplay
+- game-changes.md - Ghi lại thay đổi
+
+### Tính năng mới:
+- Cho phép thả sai mà không bị chặn
+- Tính điểm cuối game thay vì realtime
+- Hiển thị kết quả chi tiết với đúng/sai từng item
+- Đếm tiến độ theo items đã thả chứ không phải đúng
+
 ## 2025-06-07 - Redesign toàn bộ các game với giao diện hiện đại
 
 ### Thay đổi:
