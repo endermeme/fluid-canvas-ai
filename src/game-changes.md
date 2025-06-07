@@ -1,29 +1,42 @@
 
 # Game Changes Log
 
-## 2024-06-04 - Template String Syntax Fix
-- **File Modified**: src/components/quiz/preset-games/PresetGameManager.tsx
-- **Change Type**: Bug Fix
-- **Description**: Sửa lỗi syntax template string cho case 'pictionary' - đóng template string đúng cách trước break statement
+## 2025-06-07 - Thêm template cho các game mới và đồng bộ AI
 
-## 2024-06-04 - Image Source Prioritization 
-- **File Modified**: src/components/quiz/preset-games/PresetGameManager.tsx
-- **Change Type**: AI Prompt Enhancement
-- **Description**: Ưu tiên sử dụng ảnh từ Wikimedia Commons cho game Đoán Hình
+### Thay đổi:
+1. **Tạo template cho 5 game mới**:
+   - GroupSortTemplate.tsx - Game phân nhóm với drag & drop
+   - SpinWheelTemplate.tsx - Vòng quay may mắn với SVG animation 
+   - OpenBoxTemplate.tsx - Mở hộp bí ẩn với rewards/challenges
+   - SpeakingCardsTemplate.tsx - Thẻ luyện nói với timer
+   - CompleteSentenceTemplate.tsx (đã có sẵn)
 
-## 2024-06-04 - Image Source Flexibility
-- **File Modified**: src/components/quiz/preset-games/PresetGameManager.tsx  
-- **Change Type**: AI Prompt Update
-- **Description**: Không cố định nguồn ảnh cụ thể, yêu cầu AI lấy ảnh từ internet dạng link
+2. **Cập nhật AI generation trong PresetGameManager.tsx**:
+   - Thêm JSON format cho các game mới
+   - Cập nhật settings cho từng loại game
+   - Thêm error handling cho game không có sample data
 
-## 2024-06-04 - Header Standardization
-- **Files Modified**: 
-  - src/components/quiz/preset-games/PresetGameHeader.tsx
-  - src/components/quiz/preset-games/PresetGameManager.tsx
-- **Change Type**: UI Enhancement  
-- **Description**: Chuẩn hóa header cho tất cả game templates, loại bỏ nút "out" riêng biệt
+3. **File đã thay đổi**:
+   - templates/GroupSortTemplate.tsx (mới)
+   - templates/SpinWheelTemplate.tsx (mới) 
+   - templates/OpenBoxTemplate.tsx (mới)
+   - templates/SpeakingCardsTemplate.tsx (mới)
+   - PresetGameManager.tsx (cập nhật)
+   - game-development-decisions.md (mới)
 
-## 2024-06-04 - Initial Setup
-- **Files Modified**: Multiple template files and manager
-- **Change Type**: Feature Implementation
-- **Description**: Thiết lập hệ thống game preset với AI generation và sample data fallback
+### Tính năng:
+- Tất cả game mới đều hỗ trợ AI generation
+- Responsive design với Tailwind CSS
+- Toast notifications cho feedback
+- Timer và scoring system
+- Game state management hoàn chỉnh
+
+## 2025-06-07 - Cập nhật prompt AI cho game Đoán Hình
+
+### Thay đổi:
+- Cập nhật prompt AI để lấy ảnh từ internet linh hoạt hơn
+- Không cố định nguồn ảnh cụ thể
+- Yêu cầu AI tìm ảnh phù hợp với chủ đề
+
+### File thay đổi:
+- PresetGameManager.tsx - case 'pictionary'

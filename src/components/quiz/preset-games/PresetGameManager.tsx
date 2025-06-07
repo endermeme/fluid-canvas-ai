@@ -125,14 +125,31 @@ Output must be valid JSON. `;
           gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "URL ảnh từ internet", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
 
 QUAN TRỌNG cho game Pictionary: 
-- Luôn ưu tiên sử dụng ảnh từ nguồn là https://commons.wikimedia.org , tuyệt đối không sử dụng ảnh từ  https://upload.wikimedia.org/
 - imageUrl PHẢI là URL ảnh thật từ internet dạng link
-- KHÔNG cố định nguồn ảnh cụ thể, hãy lấy ảnh từ internet
+- Tìm ảnh từ các nguồn internet phù hợp với chủ đề
 - KHÔNG sử dụng placeholder hay ảnh giả
 - Mỗi ảnh phải phù hợp với đáp án và chủ đề`;
           break;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
+          break;
+        case 'groupsort':
+          gamePrompt += `JSON format: { "title": "title", "items": [{"id": "1", "text": "item text", "group": "group name"}], "groups": [{"id": "group1", "name": "Group Name", "items": []}], "settings": {"timeLimit": ${totalTime || 120}, "bonusTimePerCorrect": ${bonusTime || 10}} }`;
+          break;
+        case 'spinwheel':
+          gamePrompt += `JSON format: { "title": "title", "segments": [{"id": "1", "text": "segment text", "color": "#FF6B6B", "points": 10}], "settings": {"allowMultipleSpins": true, "maxSpins": 10}} }`;
+          break;
+        case 'completesentence':
+          gamePrompt += `JSON format: { "title": "title", "sentences": [{"sentence": "Sentence with _____ blanks", "blanks": ["word1", "word2"], "options": ["option1", "option2", "option3", "option4"]}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }`;
+          break;
+        case 'anagram':
+          gamePrompt += `JSON format: { "title": "title", "words": [{"id": "1", "original": "original word", "scrambled": "scrambled", "hint": "hint text"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }`;
+          break;
+        case 'openbox':
+          gamePrompt += `JSON format: { "title": "title", "boxes": [{"id": "1", "content": "box content", "type": "question/reward/challenge", "points": 10, "opened": false}], "settings": {"allowHints": true, "bonusTimePerBox": ${bonusTime || 5}} }`;
+          break;
+        case 'speakingcards':
+          gamePrompt += `JSON format: { "title": "title", "cards": [{"id": "1", "prompt": "speaking prompt", "category": "category", "difficulty": "easy/medium/hard", "timeLimit": 60}], "settings": {"defaultTimeLimit": ${timePerQuestion || 60}, "allowExtension": true}} }`;
           break;
       }
 
@@ -220,6 +237,29 @@ QUAN TRỌNG cho game Pictionary:
             parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 3;
             break;
+          case 'groupsort':
+            parsedContent.settings.timeLimit = totalTime || 120;
+            parsedContent.settings.bonusTimePerCorrect = bonusTime || 10;
+            break;
+          case 'spinwheel':
+            parsedContent.settings.allowMultipleSpins = true;
+            parsedContent.settings.maxSpins = 10;
+            break;
+          case 'completesentence':
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
+            break;
+          case 'anagram':
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
+            break;
+          case 'openbox':
+            parsedContent.settings.bonusTimePerBox = bonusTime || 5;
+            break;
+          case 'speakingcards':
+            parsedContent.settings.defaultTimeLimit = timePerQuestion || 60;
+            parsedContent.settings.allowExtension = true;
+            break;
         }
 
         clearInterval(progressInterval);
@@ -252,7 +292,6 @@ QUAN TRỌNG cho game Pictionary:
         variant: "destructive"
       });
 
-      // Không load sample data nữa vì đã xóa file
       setLoading(false);
       setGameContent(null);
     } finally {
@@ -261,9 +300,10 @@ QUAN TRỌNG cho game Pictionary:
   };
 
   const loadSampleData = (type) => {
-    if (type === 'pictionary') {
-      // Không có sample data cho pictionary nữa
-      setError('Không có dữ liệu mẫu cho game Đoán Hình. Vui lòng sử dụng AI để tạo nội dung.');
+    const newGames = ['groupsort', 'spinwheel', 'completesentence', 'anagram', 'openbox', 'speakingcards'];
+    
+    if (newGames.includes(type) || type === 'pictionary') {
+      setError(`Không có dữ liệu mẫu cho game ${getGameTypeName()}. Vui lòng sử dụng AI để tạo nội dung.`);
       setLoading(false);
       return;
     }
@@ -370,6 +410,12 @@ QUAN TRỌNG cho game Pictionary:
       case 'wordsearch': return 'Tìm Từ';
       case 'pictionary': return 'Đoán Hình';
       case 'truefalse': return 'Đúng hay Sai';
+      case 'groupsort': return 'Phân Nhóm';
+      case 'spinwheel': return 'Vòng Quay May Mắn';
+      case 'completesentence': return 'Hoàn Thành Câu';
+      case 'anagram': return 'Đảo Chữ';
+      case 'openbox': return 'Mở Hộp Bí Ẩn';
+      case 'speakingcards': return 'Thẻ Luyện Nói';
       default: return 'Trò Chơi';
     }
   };
@@ -449,6 +495,48 @@ QUAN TRỌNG cho game Pictionary:
         name: 'Đúng hay Sai',
         description: 'Kiểm tra kiến thức với các câu hỏi đúng/sai',
         icon: 'clock',
+        defaultSettings: settings
+      },
+      'groupsort': {
+        id: 'groupsort',
+        name: 'Phân Nhóm',
+        description: 'Phân nhóm các câu hỏi theo nhóm',
+        icon: 'users',
+        defaultSettings: settings
+      },
+      'spinwheel': {
+        id: 'spinwheel',
+        name: 'Vòng Quay May Mắn',
+        description: 'Vòng quay may mắn với các phần thưởng',
+        icon: 'dices',
+        defaultSettings: settings
+      },
+      'completesentence': {
+        id: 'completesentence',
+        name: 'Hoàn Thành Câu',
+        description: 'Hoàn thành câu hỏi với các từ trống',
+        icon: 'pencil',
+        defaultSettings: settings
+      },
+      'anagram': {
+        id: 'anagram',
+        name: 'Đảo Chữ',
+        description: 'Đảo chữ của các từ',
+        icon: 'pencil',
+        defaultSettings: settings
+      },
+      'openbox': {
+        id: 'openbox',
+        name: 'Mở Hộp Bí Ẩn',
+        description: 'Mở hộp bí ẩn với các phần thưởng',
+        icon: 'box',
+        defaultSettings: settings
+      },
+      'speakingcards': {
+        id: 'speakingcards',
+        name: 'Thẻ Luyện Nói',
+        description: 'Thẻ luyện nói với các câu hỏi',
+        icon: 'pencil',
         defaultSettings: settings
       }
     };

@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { MessageSquare, RefreshCw, Clock, Mic, ThumbsUp, SkipForward, Timer } from 'lucide-react';
+import { Mic, MicOff, RefreshCw, Play, ArrowRight, ArrowLeft } from 'lucide-react';
 
 interface SpeakingCardsProps {
   content: any;
@@ -14,9 +14,8 @@ interface SpeakingCard {
   id: string;
   prompt: string;
   category: string;
-  timeLimit: number;
   difficulty: 'easy' | 'medium' | 'hard';
-  hints?: string[];
+  timeLimit: number;
 }
 
 const SpeakingCardsTemplate: React.FC<SpeakingCardsProps> = ({ content, topic }) => {
@@ -24,194 +23,123 @@ const SpeakingCardsTemplate: React.FC<SpeakingCardsProps> = ({ content, topic })
   
   // Data mẫu nếu không có content
   const cards: SpeakingCard[] = content?.cards || [
-    {
-      id: '1',
-      prompt: 'Nêu 3 lý do tại sao internet lại quan trọng trong cuộc sống hiện đại.',
-      category: 'Công nghệ',
-      timeLimit: 45,
-      difficulty: 'easy',
-      hints: ['Kết nối toàn cầu', 'Nguồn thông tin', 'Thương mại điện tử']
-    },
-    {
-      id: '2',
-      prompt: 'Mô tả một cuốn sách bạn đã đọc gần đây và lý do bạn thích nó.',
-      category: 'Văn học',
-      timeLimit: 60,
-      difficulty: 'medium',
-      hints: ['Cốt truyện', 'Nhân vật', 'Bài học']
-    },
-    {
-      id: '3',
-      prompt: 'Nếu bạn có thể phát minh một thiết bị công nghệ mới, đó sẽ là gì và tại sao?',
-      category: 'Sáng tạo',
-      timeLimit: 75,
-      difficulty: 'hard',
-      hints: ['Mục đích', 'Tính năng', 'Lợi ích']
-    },
-    {
-      id: '4',
-      prompt: 'Nói về một kỷ niệm đáng nhớ trong cuộc đời bạn.',
-      category: 'Cá nhân',
-      timeLimit: 45,
-      difficulty: 'medium',
-      hints: ['Thời điểm', 'Cảm xúc', 'Bài học']
-    },
-    {
-      id: '5',
-      prompt: 'Giải thích cách bạn sẽ giải quyết vấn đề biến đổi khí hậu.',
-      category: 'Môi trường',
-      timeLimit: 90,
-      difficulty: 'hard',
-      hints: ['Giải pháp cá nhân', 'Chính sách', 'Công nghệ']
-    }
+    { id: '1', prompt: 'Hãy kể về gia đình của bạn', category: 'Cá nhân', difficulty: 'easy', timeLimit: 60 },
+    { id: '2', prompt: 'Mô tả món ăn yêu thích của bạn', category: 'Ẩm thực', difficulty: 'easy', timeLimit: 45 },
+    { id: '3', prompt: 'Bạn nghĩ gì về biến đổi khí hậu?', category: 'Môi trường', difficulty: 'medium', timeLimit: 90 },
+    { id: '4', prompt: 'Kể về một kỷ niệm đáng nhớ', category: 'Cá nhân', difficulty: 'medium', timeLimit: 75 },
+    { id: '5', prompt: 'Giải thích tầm quan trọng của giáo dục', category: 'Xã hội', difficulty: 'hard', timeLimit: 120 }
   ];
-
-  // State
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
+  
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [isRecording, setIsRecording] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
-  const [showHints, setShowHints] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [cardStarted, setCardStarted] = useState(false);
   const [completedCards, setCompletedCards] = useState<string[]>([]);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [selfRating, setSelfRating] = useState<number | null>(null);
-  const [gameCompleted, setGameCompleted] = useState(false);
   
-  const currentCard = cards[currentIndex];
+  const currentCard = cards[currentCardIndex];
   
-  // Đặt lại thời gian khi chuyển card
-  useEffect(() => {
-    if (currentCard) {
-      setTimeLeft(currentCard.timeLimit);
-    }
-  }, [currentIndex, currentCard]);
-  
-  // Xử lý đếm ngược
+  // Đếm ngược thời gian cho thẻ hiện tại
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    
-    if (isPlaying && timeLeft > 0) {
+    if (timeLeft > 0 && cardStarted) {
       timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
-    } else if (isPlaying && timeLeft === 0) {
-      handleTimeUp();
+    } else if (timeLeft === 0 && cardStarted) {
+      handleCardComplete();
     }
     
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [isPlaying, timeLeft]);
+  }, [timeLeft, cardStarted]);
   
-  // Xử lý khi hết thời gian
-  const handleTimeUp = () => {
-    setIsPlaying(false);
-    setIsSpeaking(false);
-    
-    toast({
-      title: 'Hết giờ!',
-      description: 'Thời gian trả lời đã kết thúc.',
-      variant: 'default',
-    });
+  const startGame = () => {
+    setGameStarted(true);
   };
   
-  // Bắt đầu nói
-  const startSpeaking = () => {
-    setIsPlaying(true);
-    setIsSpeaking(true);
-    setShowHints(false);
-    setSelfRating(null);
+  const startCard = () => {
+    setCardStarted(true);
+    setTimeLeft(currentCard.timeLimit);
+    setIsRecording(true);
     
     toast({
       title: 'Bắt đầu nói!',
-      description: `Bạn có ${currentCard.timeLimit} giây để trả lời.`,
+      description: `Bạn có ${currentCard.timeLimit} giây để hoàn thành`,
       variant: 'default',
     });
   };
   
-  // Dừng nói
-  const stopSpeaking = () => {
-    setIsPlaying(false);
-    setIsSpeaking(false);
+  const stopRecording = () => {
+    setIsRecording(false);
+    handleCardComplete();
+  };
+  
+  const handleCardComplete = () => {
+    setCardStarted(false);
+    setIsRecording(false);
+    setCompletedCards(prev => [...prev, currentCard.id]);
     
     toast({
-      title: 'Hoàn thành!',
-      description: 'Hãy đánh giá bài nói của bạn.',
+      title: 'Hoàn thành thẻ!',
+      description: 'Bạn đã hoàn thành thẻ này',
       variant: 'default',
     });
   };
   
-  // Xử lý đánh giá
-  const handleRating = (rating: number) => {
-    setSelfRating(rating);
-    setCompletedCards([...completedCards, currentCard.id]);
-    
-    toast({
-      title: 'Đã ghi nhận!',
-      description: 'Bạn có thể tiếp tục với thẻ tiếp theo.',
-      variant: 'default',
-    });
-  };
-  
-  // Đi tới thẻ tiếp theo
-  const goToNextCard = () => {
-    if (currentIndex < cards.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setIsPlaying(false);
-      setIsSpeaking(false);
-      setShowHints(false);
-      setSelfRating(null);
-    } else {
-      setGameCompleted(true);
+  const nextCard = () => {
+    if (currentCardIndex < cards.length - 1) {
+      setCurrentCardIndex(currentCardIndex + 1);
+      setCardStarted(false);
+      setTimeLeft(0);
     }
   };
   
-  // Bỏ qua thẻ hiện tại
-  const skipCurrentCard = () => {
-    toast({
-      title: 'Đã bỏ qua',
-      description: 'Đã chuyển sang thẻ tiếp theo.',
-      variant: 'default',
-    });
-    
-    goToNextCard();
+  const prevCard = () => {
+    if (currentCardIndex > 0) {
+      setCurrentCardIndex(currentCardIndex - 1);
+      setCardStarted(false);
+      setTimeLeft(0);
+    }
   };
   
-  // Khởi động lại trò chơi
   const resetGame = () => {
-    setCurrentIndex(0);
-    setIsPlaying(false);
-    setTimeLeft(cards[0]?.timeLimit || 60);
-    setShowHints(false);
+    setGameStarted(false);
+    setCurrentCardIndex(0);
+    setCardStarted(false);
+    setIsRecording(false);
+    setTimeLeft(0);
     setCompletedCards([]);
-    setSelfRating(null);
-    setIsSpeaking(false);
-    setGameCompleted(false);
   };
   
-  // Format thời gian
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'easy': return 'text-green-600 bg-green-100';
+      case 'medium': return 'text-yellow-600 bg-yellow-100';
+      case 'hard': return 'text-red-600 bg-red-100';
+      default: return 'text-gray-600 bg-gray-100';
+    }
   };
   
-  // Hiển thị màn hình kết thúc trò chơi
-  if (gameCompleted) {
+  const getDifficultyText = (difficulty: string) => {
+    switch (difficulty) {
+      case 'easy': return 'Dễ';
+      case 'medium': return 'Trung bình';
+      case 'hard': return 'Khó';
+      default: return 'Không xác định';
+    }
+  };
+  
+  if (!gameStarted) {
     return (
       <div className="min-h-[500px] p-6">
         <Card className="p-6 max-w-md mx-auto text-center">
-          <ThumbsUp className="h-16 w-16 text-green-500 mx-auto mb-4" />
-          
-          <h2 className="text-2xl font-bold mb-4">Hoàn thành!</h2>
-          
-          <p className="mb-6">
-            Bạn đã hoàn thành {completedCards.length}/{cards.length} thẻ nói.
-            Tiếp tục luyện tập để cải thiện kỹ năng nói của bạn!
-          </p>
-          
-          <Button onClick={resetGame} className="bg-blue-600 hover:bg-blue-700">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Bắt đầu lại
+          <h2 className="text-2xl font-bold mb-4">Thẻ Luyện Nói: {topic}</h2>
+          <p className="mb-6">Luyện tập kỹ năng nói với các chủ đề đa dạng</p>
+          <Button onClick={startGame} className="bg-blue-600 hover:bg-blue-700">
+            <Play className="mr-2 h-4 w-4" />
+            Bắt đầu luyện tập
           </Button>
         </Card>
       </div>
@@ -221,163 +149,98 @@ const SpeakingCardsTemplate: React.FC<SpeakingCardsProps> = ({ content, topic })
   return (
     <div className="min-h-[500px] p-6">
       <Card className="p-4 w-full mb-4 flex justify-between items-center">
-        <div className="flex items-center">
-          <MessageSquare className="h-6 w-6 mr-2 text-blue-500" />
-          <h2 className="text-xl font-bold">Thẻ Nói Ngẫu Nhiên: {topic}</h2>
-        </div>
-        <div className="flex items-center gap-2">
-          {isPlaying && (
-            <>
-              <Clock className="h-5 w-5 text-blue-500" />
-              <span className={`font-medium ${timeLeft < 10 ? 'text-red-500' : 'text-blue-500'}`}>
-                {formatTime(timeLeft)}
-              </span>
-            </>
-          )}
+        <h2 className="text-xl font-bold">Thẻ Luyện Nói: {topic}</h2>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-500">
+            Thẻ {currentCardIndex + 1}/{cards.length}
+          </span>
+          <span className="text-sm text-gray-500">
+            Hoàn thành: {completedCards.length}/{cards.length}
+          </span>
         </div>
       </Card>
       
-      <div className="mb-4">
-        <Progress value={((currentIndex) / cards.length) * 100} className="h-2" />
-        <div className="flex justify-between mt-1 text-sm text-gray-500">
-          <span>Thẻ {currentIndex + 1}</span>
-          <span>Tổng {cards.length} thẻ</span>
-        </div>
-      </div>
-      
-      <Card className="p-6 mb-4 relative">
-        <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${
-          currentCard.difficulty === 'easy' 
-            ? 'bg-green-100 text-green-800' 
-            : currentCard.difficulty === 'medium' 
-            ? 'bg-yellow-100 text-yellow-800' 
-            : 'bg-red-100 text-red-800'
-        }`}>
-          {currentCard.difficulty === 'easy' && 'Dễ'}
-          {currentCard.difficulty === 'medium' && 'Trung bình'}
-          {currentCard.difficulty === 'hard' && 'Khó'}
-        </div>
-        
-        <div className="flex flex-col gap-4">
-          <div>
-            <div className="text-sm text-blue-600 font-medium mb-1">{currentCard.category}</div>
-            <h3 className="text-xl font-medium mb-4">{currentCard.prompt}</h3>
-            
-            <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-              <Timer className="h-4 w-4" />
-              <span>Thời gian nói: {formatTime(currentCard.timeLimit)}</span>
+      <div className="max-w-2xl mx-auto">
+        <Card className="p-6 mb-6">
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex items-center gap-2">
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(currentCard.difficulty)}`}>
+                {getDifficultyText(currentCard.difficulty)}
+              </span>
+              <span className="text-sm text-gray-500">{currentCard.category}</span>
             </div>
+            
+            {cardStarted && (
+              <div className="flex items-center gap-2">
+                <span className={`font-medium ${timeLeft < 30 ? 'text-red-500' : 'text-blue-500'}`}>
+                  {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+                </span>
+                {isRecording && (
+                  <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                )}
+              </div>
+            )}
           </div>
           
-          {!isPlaying && !selfRating && (
-            <Button
-              onClick={startSpeaking}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Mic className="mr-2 h-4 w-4" />
-              Bắt đầu nói
-            </Button>
-          )}
+          <h3 className="text-lg font-medium mb-6">{currentCard.prompt}</h3>
           
-          {isPlaying && isSpeaking && (
-            <Button
-              onClick={stopSpeaking}
-              variant="outline"
-              className="border-red-300 text-red-600 hover:bg-red-50"
-            >
-              Dừng lại
-            </Button>
-          )}
-          
-          {!isPlaying && !isSpeaking && !selfRating && completedCards.includes(currentCard.id) && (
-            <Button
-              onClick={goToNextCard}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Thẻ tiếp theo
-            </Button>
-          )}
-          
-          {!isPlaying && !isSpeaking && !selfRating && !completedCards.includes(currentCard.id) && (
-            <div className="flex justify-between">
-              <Button
-                onClick={() => setShowHints(!showHints)}
-                variant="outline"
-                className="text-yellow-600 border-yellow-300 hover:bg-yellow-50"
-              >
-                {showHints ? 'Ẩn gợi ý' : 'Xem gợi ý'}
+          <div className="flex justify-center gap-4">
+            {!cardStarted ? (
+              <Button onClick={startCard} className="bg-green-600 hover:bg-green-700">
+                <Mic className="mr-2 h-4 w-4" />
+                Bắt đầu nói ({currentCard.timeLimit}s)
               </Button>
-              
-              <Button
-                onClick={skipCurrentCard}
-                variant="outline"
+            ) : (
+              <Button 
+                onClick={stopRecording} 
+                className="bg-red-600 hover:bg-red-700"
+                disabled={!isRecording}
               >
-                <SkipForward className="mr-2 h-4 w-4" />
-                Bỏ qua
+                <MicOff className="mr-2 h-4 w-4" />
+                Dừng ghi âm
               </Button>
-            </div>
-          )}
+            )}
+          </div>
+        </Card>
+        
+        {/* Navigation */}
+        <div className="flex justify-between items-center">
+          <Button
+            onClick={prevCard}
+            disabled={currentCardIndex === 0}
+            variant="outline"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Thẻ trước
+          </Button>
           
-          {showHints && currentCard.hints && (
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-              <div className="font-medium mb-1">Gợi ý:</div>
-              <ul className="list-disc list-inside text-sm">
-                {currentCard.hints.map((hint, index) => (
-                  <li key={index}>{hint}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <Button onClick={resetGame} variant="outline">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Chơi lại
+          </Button>
           
-          {!isPlaying && !isSpeaking && !selfRating && completedCards.includes(currentCard.id) && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-              <p className="text-green-800">Bạn đã hoàn thành thẻ này!</p>
-            </div>
-          )}
-          
-          {!isPlaying && !isSpeaking && selfRating === null && !completedCards.includes(currentCard.id) && (
-            <div className="mt-2">
-              <h4 className="font-medium mb-2">Đánh giá bài nói của bạn:</h4>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map((rating) => (
-                  <Button
-                    key={rating}
-                    onClick={() => handleRating(rating)}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    {rating}
-                  </Button>
-                ))}
-              </div>
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>Cần cải thiện</span>
-                <span>Xuất sắc</span>
-              </div>
-            </div>
-          )}
-          
-          {!isPlaying && selfRating !== null && (
-            <div className="flex justify-center mt-2">
-              <Button
-                onClick={goToNextCard}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                Tiếp tục
-              </Button>
-            </div>
-          )}
+          <Button
+            onClick={nextCard}
+            disabled={currentCardIndex === cards.length - 1}
+            variant="outline"
+          >
+            Thẻ sau
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
         </div>
-      </Card>
-      
-      <div className="flex justify-between">
-        <Button
-          onClick={resetGame}
-          variant="outline"
-        >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Làm lại
-        </Button>
+        
+        {/* Progress */}
+        <div className="mt-6">
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+              style={{ width: `${(completedCards.length / cards.length) * 100}%` }}
+            />
+          </div>
+          <p className="text-center text-sm text-gray-500 mt-2">
+            Tiến độ: {completedCards.length}/{cards.length} thẻ hoàn thành
+          </p>
+        </div>
       </div>
     </div>
   );
