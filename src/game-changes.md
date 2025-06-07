@@ -1,6 +1,27 @@
 
 # Game Changes Log
 
+## 2025-06-07 - Cập nhật AI generation cho GroupSort và SpinWheel
+
+### Thay đổi:
+1. **Cập nhật prompt AI chi tiết cho GroupSort**:
+   - Thêm hướng dẫn tạo items và groups
+   - Định nghĩa rõ format JSON
+   - Ví dụ cụ thể về phân nhóm
+
+2. **Cập nhật prompt AI chi tiết cho SpinWheel**:
+   - Thêm hướng dẫn tạo segments với colors
+   - Định nghĩa points system
+   - Gợi ý colors hex cụ thể
+
+3. **File đã thay đổi**:
+   - PresetGameManager.tsx - case 'groupsort' và 'spinwheel'
+
+### Tính năng:
+- AI generation cho GroupSort với 12 items và 3-4 groups
+- AI generation cho SpinWheel với 6-8 segments và color system
+- Prompt chi tiết với ví dụ cụ thể
+
 ## 2025-06-07 - Thêm template cho các game mới và đồng bộ AI
 
 ### Thay đổi:

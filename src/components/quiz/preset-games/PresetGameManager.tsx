@@ -134,10 +134,26 @@ QUAN TRỌNG cho game Pictionary:
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
           break;
         case 'groupsort':
-          gamePrompt += `JSON format: { "title": "title", "items": [{"id": "1", "text": "item text", "group": "group name"}], "groups": [{"id": "group1", "name": "Group Name", "items": []}], "settings": {"timeLimit": ${totalTime || 120}, "bonusTimePerCorrect": ${bonusTime || 10}} }`;
+          gamePrompt += `JSON format: { "title": "title", "items": [{"id": "1", "text": "item text", "group": "group name"}], "groups": [{"id": "group1", "name": "Group Name", "items": []}], "settings": {"timeLimit": ${totalTime || 120}, "bonusTimePerCorrect": ${bonusTime || 10}} }
+
+HƯỚNG DẪN CHI TIẾT cho game GroupSort:
+- Tạo ${questionCount || 12} items để phân nhóm
+- Tạo 3-4 groups phù hợp với chủ đề
+- Mỗi item phải có: id duy nhất, text mô tả, group tương ứng
+- Groups phải có: id duy nhất, name rõ ràng, items array rỗng
+- Đảm bảo các items được phân bố đều giữa các groups
+- Ví dụ chủ đề "Động vật": groups có thể là "Thú", "Chim", "Cá"`;
           break;
         case 'spinwheel':
-          gamePrompt += `JSON format: { "title": "title", "segments": [{"id": "1", "text": "segment text", "color": "#FF6B6B", "points": 10}], "settings": {"allowMultipleSpins": true, "maxSpins": 10}} }`;
+          gamePrompt += `JSON format: { "title": "title", "segments": [{"id": "1", "text": "segment text", "color": "#FF6B6B", "points": 10}], "settings": {"allowMultipleSpins": true, "maxSpins": 10}} }
+
+HƯỚNG DẪN CHI TIẾT cho game SpinWheel:
+- Tạo 6-8 segments cho vòng quay
+- Mỗi segment phải có: id duy nhất, text ngắn gọn, color hex khác nhau, points (5-50)
+- Colors gợi ý: "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD", "#FFB6C1", "#98FB98"
+- Text phải liên quan đến chủ đề và ngắn (tối đa 15 ký tự)
+- Points tăng dần theo độ khó: 10, 20, 30, 40, 50, 60
+- Ví dụ chủ đề "Toán học": segments có thể là "Cộng", "Trừ", "Nhân", "Chia"`;
           break;
         case 'completesentence':
           gamePrompt += `JSON format: { "title": "title", "sentences": [{"sentence": "Sentence with _____ blanks", "blanks": ["word1", "word2"], "options": ["option1", "option2", "option3", "option4"]}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }`;
@@ -146,10 +162,31 @@ QUAN TRỌNG cho game Pictionary:
           gamePrompt += `JSON format: { "title": "title", "words": [{"id": "1", "original": "original word", "scrambled": "scrambled", "hint": "hint text"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }`;
           break;
         case 'openbox':
-          gamePrompt += `JSON format: { "title": "title", "boxes": [{"id": "1", "content": "box content", "type": "question/reward/challenge", "points": 10, "opened": false}], "settings": {"allowHints": true, "bonusTimePerBox": ${bonusTime || 5}} }`;
+          gamePrompt += `JSON format: { "title": "title", "boxes": [{"id": "1", "content": "box content", "type": "question/reward/challenge", "points": 10, "opened": false}], "settings": {"allowHints": true, "bonusTimePerBox": ${bonusTime || 5}} }
+
+HƯỚNG DẪN CHI TIẾT cho game OpenBox:
+- Tạo 9 boxes (3x3 grid)
+- Mỗi box phải có: id duy nhất (1-9), content mô tả, type, points, opened: false
+- Type distribution: 4 questions, 3 rewards, 2 challenges
+- Questions: Câu hỏi liên quan chủ đề với points 10-20
+- Rewards: "Phần thưởng: Bonus X điểm!" với points 15-30
+- Challenges: "Thử thách: [hành động]" với points 20-25
+- Content phải ngắn gọn và rõ ràng
+- Ví dụ: {"id": "1", "content": "Câu hỏi: Thủ đô Việt Nam?", "type": "question", "points": 10, "opened": false}`;
           break;
         case 'speakingcards':
-          gamePrompt += `JSON format: { "title": "title", "cards": [{"id": "1", "prompt": "speaking prompt", "category": "category", "difficulty": "easy/medium/hard", "timeLimit": 60}], "settings": {"defaultTimeLimit": ${timePerQuestion || 60}, "allowExtension": true}} }`;
+          gamePrompt += `JSON format: { "title": "title", "cards": [{"id": "1", "prompt": "speaking prompt", "category": "category", "difficulty": "easy/medium/hard", "timeLimit": 60}], "settings": {"defaultTimeLimit": ${timePerQuestion || 60}, "allowExtension": true}} }
+
+HƯỚNG DẪN CHI TIẾT cho game SpeakingCards:
+- Tạo ${questionCount || 8} thẻ luyện nói
+- Mỗi card phải có: id duy nhất, prompt rõ ràng, category, difficulty, timeLimit
+- Difficulty distribution: 30% easy, 50% medium, 20% hard
+- Categories gợi ý: "Mô tả", "Thảo luận", "Kể chuyện", "Tranh luận"
+- Prompts phải khuyến khích người chơi nói trong 30-90 giây
+- Easy: Câu hỏi đơn giản, timeLimit 30-45s
+- Medium: Câu hỏi phức tạp hơn, timeLimit 60s  
+- Hard: Câu hỏi sâu sắc, timeLimit 90s
+- Ví dụ: {"id": "1", "prompt": "Mô tả món ăn yêu thích của bạn", "category": "Mô tả", "difficulty": "easy", "timeLimit": 45}`;
           break;
       }
 
