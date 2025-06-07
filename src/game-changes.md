@@ -1,6 +1,51 @@
 
 # Game Changes Log
 
+## 2025-06-07 - Redesign toàn bộ các game với giao diện hiện đại
+
+### Thay đổi:
+1. **Redesign hoàn toàn giao diện cho tất cả game**:
+   - Layout fullscreen không bị nén 2 bên
+   - Gradient backgrounds hiện đại và màu sắc phong phú
+   - Card design với backdrop-blur và shadows
+   - Typography và spacing hợp lý
+   - Responsive design hoàn hảo cho mọi thiết bị
+
+2. **Fix drag & drop mechanism cho GroupSort**:
+   - Drag state tracking với visual feedback
+   - Proper drag events với onDragEnd
+   - Drop zone highlighting khi có item đang được kéo
+   - Smooth animations và transitions
+   - Touch-friendly cho mobile
+
+3. **Cải thiện UX/UI cho tất cả game**:
+   - Animation và transition mượt mà
+   - Color-coded elements với gradients
+   - Better progress tracking và scoring
+   - Enhanced visual feedback
+   - Modern button designs với hover effects
+
+4. **Layout improvements**:
+   - Min-height screen để fill toàn màn hình
+   - Flexible grid systems cho responsive
+   - Proper spacing và padding
+   - Card-based design pattern nhất quán
+   - Center alignment cho tất cả components
+
+### File đã thay đổi:
+- GroupSortTemplate.tsx - Redesign với drag & drop fix
+- SpinWheelTemplate.tsx - Redesign với wheel animations
+- OpenBoxTemplate.tsx - Redesign với modern card grid
+- SpeakingCardsTemplate.tsx - Redesign với progress tracking
+- game-changes.md - Ghi lại thay đổi
+
+### Tính năng cải thiện:
+- Tất cả game đều fullscreen, không bị nén
+- Drag & drop hoạt động mượt mà với visual feedback
+- Giao diện hiện đại với gradients và animations
+- Responsive design hoàn hảo
+- Consistent design pattern cho tất cả game
+
 ## 2025-06-07 - Fix layout và drag & drop cho GroupSort game
 
 ### Thay đổi:
