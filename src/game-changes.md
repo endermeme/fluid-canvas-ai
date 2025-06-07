@@ -1,39 +1,46 @@
+
 # Game Changes Log
 
 ## 2025-06-07 - Fix logic đối chứng kết quả và cải thiện animation cho GroupSort
 
 ### Thay đổi:
-1. **Sửa logic đối chứng kết quả**:
+1. **Fix logic đối chứng kết quả - HOTFIX**:
+   - Sửa bug logic so sánh sai: originalItem.group vs group.name → originalItem.group vs group.id
+   - Đây là lỗi nghiêm trọng khiến tất cả kết quả hiển thị sai ✗
+   - Console.log cho thấy đang so sánh "group1" với "Động vật có vú đặc biệt" thay vì "group1"
+   - Cần so sánh originalItem.group với group.id để đúng logic
+
+2. **Sửa logic đối chứng kết quả**:
    - Fix bug hiển thị tất cả items đều sai (✗)
-   - So sánh chính xác group.name với originalItem.group
+   - So sánh chính xác group.id với originalItem.group  
    - Đảm bảo kết quả đúng được hiển thị ✓
    - Thêm console.log để debug và trace logic
 
-2. **Cải thiện animation kéo thả**:
+3. **Cải thiện animation kéo thả**:
    - Thêm dragOverGroup state để track group đang hover
    - Visual feedback rõ ràng khi kéo item vào group
    - Animation mượt mà với scale, rotate, shadow effects
    - Drag enter/leave events chính xác với getBoundingClientRect
    - Ring effect khi drop zone active
 
-3. **Cập nhật AI prompt cho GroupSort**:
+4. **Cập nhật AI prompt cho GroupSort**:
    - Yêu cầu tên items phải chuẩn, rõ ràng, dứt khoát
    - KHÔNG dùng cụm từ khó hiểu hay úp mở
    - Tên phải đơn giản, dễ hiểu cho người chơi
 
-4. **Fix giao diện kết quả**:
+5. **Fix giao diện kết quả**:
    - Cải thiện responsive cho màn hình kết quả
    - Fix text "Hoàn thành!" không bị cắt
    - Scroll container cho kết quả chi tiết
    - Better spacing và typography
 
 ### File đã thay đổi:
-- GroupSortTemplate.tsx - Fix logic và animation hoàn toàn
+- GroupSortTemplate.tsx - Fix logic hoàn toàn (HOTFIX critical)
 - PresetGameManager.tsx - Cập nhật prompt AI
 - game-changes.md - Ghi lại thay đổi
 
 ### Tính năng cải thiện:
-- Kết quả đúng/sai hiển thị chính xác
+- Kết quả đúng/sai hiển thị chính xác (FIX CRITICAL BUG)
 - Animation kéo thả mượt mà với visual feedback
 - Tên items rõ ràng, không khó hiểu
 - UX tốt hơn với hover effects và transitions

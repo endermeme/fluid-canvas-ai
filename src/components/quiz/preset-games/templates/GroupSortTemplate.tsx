@@ -90,7 +90,7 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
 
     // Tính điểm dựa trên các items đã được phân nhóm đúng
     groups.forEach(group => {
-      console.log(`\nChecking group: ${group.name}`);
+      console.log(`\nChecking group: ${group.name} (id: ${group.id})`);
       console.log(`Items in group:`, group.items);
       
       group.items.forEach(itemText => {
@@ -102,10 +102,10 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
         
         if (originalItem) {
           console.log(`Found original item: "${originalItem.text}" should be in group: "${originalItem.group}"`);
-          console.log(`Current group name: "${group.name}"`);
+          console.log(`Current group id: "${group.id}"`);
           
-          // So sánh chính xác tên group
-          const isCorrect = originalItem.group.trim() === group.name.trim();
+          // So sánh chính xác group.id với originalItem.group
+          const isCorrect = originalItem.group.trim() === group.id.trim();
           console.log(`Is correct: ${isCorrect}`);
           
           if (isCorrect) {
@@ -113,7 +113,7 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
             totalScore += gameData.settings?.bonusTimePerCorrect || 10;
             console.log(`✓ Correct! Total correct so far: ${correctCount}`);
           } else {
-            console.log(`✗ Wrong group! Expected: "${originalItem.group}", Got: "${group.name}"`);
+            console.log(`✗ Wrong group! Expected group id: "${originalItem.group}", Got group id: "${group.id}"`);
           }
         } else {
           console.log(`❌ Could not find original item for: "${itemText}"`);
@@ -225,7 +225,7 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
     const correctCount = groups.reduce((count, group) => {
       return count + group.items.filter(itemText => {
         const originalItem = items.find(item => item.text.trim() === itemText.trim());
-        return originalItem && originalItem.group.trim() === group.name.trim();
+        return originalItem && originalItem.group.trim() === group.id.trim();
       }).length;
     }, 0);
     
@@ -271,9 +271,9 @@ const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack })
                     <h4 className="font-semibold text-lg mb-2">{group.name}:</h4>
                     <div className="flex flex-wrap gap-2">
                       {group.items.map((itemText) => {
-                        // So sánh chính xác với tên group từ data gốc
+                        // So sánh chính xác với group.id từ data gốc
                         const originalItem = items.find(item => item.text.trim() === itemText.trim());
-                        const isCorrect = originalItem && originalItem.group.trim() === group.name.trim();
+                        const isCorrect = originalItem && originalItem.group.trim() === group.id.trim();
                         
                         return (
                           <span
