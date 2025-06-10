@@ -1,21 +1,20 @@
-
 # Quyết định phát triển game
 
 ## Ngày: 2025-06-10
 
 ### Thay đổi thực hiện:
-1. **Xóa game Luyện Viết** - Loại bỏ game "Luyện Viết với AI" (trước đây là "Thẻ Nói") khỏi hệ thống
-2. **Cập nhật GameSelector** - Xóa speakingcards khỏi danh sách game có sẵn  
-3. **Cập nhật templates index** - Loại bỏ import và export của SpeakingCardsTemplate
+1. **Cải thiện game Mở Hộp Bí Ẩn** - Thêm logic yêu cầu trả lời câu hỏi khi mở hộp
+2. **Thêm dialog trả lời** - Modal cho phép người chơi nhập câu trả lời cho câu hỏi
+3. **Tính điểm thông minh** - Cộng điểm nếu đúng, trừ một nửa điểm nếu sai
+4. **Cải thiện màu sắc** - Đồng bộ màu sắc các hộp và UI đẹp hơn
 
 ### File thay đổi:
-- templates/SpeakingCardsTemplate.tsx (xóa)
-- templates/index.ts (cập nhật exports)
-- GameSelector.tsx (xóa game khỏi danh sách)
+- templates/OpenBoxTemplate.tsx (cập nhật logic game)
 
 ### Loại thay đổi:
-- Xóa: 1 game template
-- Cập nhật: GameSelector và template exports
+- Thêm: Logic trả lời câu hỏi với dialog
+- Cải thiện: Tính điểm dựa trên đúng/sai
+- Cải thiện: Màu sắc và UI đồng bộ
 
 ## Trước đó - Ngày: 2025-06-10
 
@@ -112,3 +111,19 @@
 ### Loại thay đổi:
 - Tạo mới: 5 template components
 - Cập nhật: AI generation logic
+
+## Trước đó - Ngày: 2025-06-10
+
+### Thay đổi thực hiện:
+1. **Xóa game Luyện Viết** - Loại bỏ game "Luyện Viết với AI" (trước đây là "Thẻ Nói") khỏi hệ thống
+2. **Cập nhật GameSelector** - Xóa speakingcards khỏi danh sách game có sẵn  
+3. **Cập nhật templates index** - Loại bỏ import và export của SpeakingCardsTemplate
+
+### File thay đổi:
+- templates/SpeakingCardsTemplate.tsx (xóa)
+- templates/index.ts (cập nhật exports)
+- GameSelector.tsx (xóa game khỏi danh sách)
+
+### Loại thay đổi:
+- Xóa: 1 game template
+- Cập nhật: GameSelector và template exports
