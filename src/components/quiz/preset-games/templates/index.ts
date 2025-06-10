@@ -1,3 +1,4 @@
+
 import QuizTemplate from './QuizTemplate';
 import FlashcardsTemplate from './FlashcardsTemplate';
 import MatchingTemplate from './MatchingTemplate';
@@ -6,7 +7,6 @@ import OrderingTemplate from './OrderingTemplate';
 import WordSearchTemplate from './WordSearchTemplate';
 import PictionaryTemplate from './PictionaryTemplate';
 import TrueFalseTemplate from './TrueFalseTemplate';
-import NeuronPathsTemplate from './NeuronPathsTemplate';
 import PatternRecognitionTemplate from './PatternRecognitionTemplate';
 import GroupSortTemplate from './GroupSortTemplate';
 import SpinWheelTemplate from './SpinWheelTemplate';
@@ -32,7 +32,6 @@ const gameTemplates = {
   openbox: OpenBoxTemplate,
   speakingcards: SpeakingCardsTemplate,
   patternrecognition: PatternRecognitionTemplate,
-  neuronpaths: NeuronPathsTemplate,
 };
 
 export default gameTemplates;

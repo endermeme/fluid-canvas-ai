@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { 
   Brain, BookOpen, Puzzle, Dices, 
   Image, CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
-  ArrowRight, Network, BarChart2, SlidersHorizontal, PenTool, 
+  ArrowRight, BarChart2, SlidersHorizontal, PenTool, 
   SlidersHorizontal as AlphabetIcon, Box, MessageCircleMore
 } from 'lucide-react';
 import GameSettings from '../GameSettings';
@@ -94,12 +93,6 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       icon: <CheckSquare className="h-8 w-8 text-primary" />
     },
     { 
-      id: 'neuronpaths', 
-      name: 'Đường Dẫn Thần Kinh', 
-      description: 'AI phân tích sơ đồ khái niệm của bạn',
-      icon: <Network className="h-8 w-8 text-primary" />
-    },
-    { 
       id: 'groupsort', 
       name: 'Phân Nhóm', 
       description: 'AI đánh giá cách bạn phân loại thông tin',
@@ -116,6 +109,24 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       name: 'Đảo Chữ', 
       description: 'AI tạo các từ đảo chữ theo chủ đề bạn chọn',
       icon: <AlphabetIcon className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'patternrecognition', 
+      name: 'Nhận Dạng Mẫu', 
+      description: 'AI tạo game nhận dạng pattern và logic',
+      icon: <BarChart2 className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'openbox', 
+      name: 'Mở Hộp Bí Ẩn', 
+      description: 'AI tạo các hộp với nội dung bất ngờ',
+      icon: <Box className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'speakingcards', 
+      name: 'Thẻ Nói', 
+      description: 'AI tạo các thẻ để luyện nói và thuyết trình',
+      icon: <MessageCircleMore className="h-8 w-8 text-primary" />
     }
   ];
 
