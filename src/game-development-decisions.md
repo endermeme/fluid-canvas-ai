@@ -1,20 +1,19 @@
-
 # Quyết định phát triển game
 
 ## Ngày: 2025-06-10
 
 ### Thay đổi thực hiện:
-1. **Đơn giản hóa game Luyện Viết** - Chỉ 1 bài viết, thời gian cố định 10 phút
-2. **Loại bỏ hệ thống phức tạp** - Bỏ nhiều bài, bỏ độ khó, chỉ giữ chức năng cốt lõi
-3. **Tối ưu UI đơn giản** - Giao diện rõ ràng, dễ sử dụng
+1. **Sửa lỗi game Luyện Viết** - Thêm logic chấm điểm AI hoàn chỉnh
+2. **Hoàn thiện workflow** - Thêm textarea nhập bài, gửi Gemini API, hiển thị kết quả
+3. **Sửa logic flow** - Đảm bảo không quay về màn hình sẵn sàng sau khi gửi
 
 ### File thay đổi:
-- templates/SpeakingCardsTemplate.tsx (đơn giản hóa toàn bộ)
+- templates/SpeakingCardsTemplate.tsx (sửa logic hoàn chỉnh)
 
 ### Loại thay đổi:
-- Đơn giản hóa: Từ nhiều bài thành 1 bài duy nhất
-- Cố định: Thời gian 10 phút cho mọi bài viết
-- Loại bỏ: Hệ thống độ khó, nhiều thẻ, navigation phức tạp
+- Sửa lỗi: Logic thiếu xử lý AI chấm điểm
+- Thêm: Textarea nhập bài viết và API call đến Gemini
+- Sửa: Flow game không bị reset sau khi gửi bài
 
 ## Trước đó - Ngày: 2025-06-10
 
