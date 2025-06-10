@@ -1,185 +1,68 @@
 
-# Quyết định phát triển game
+# Các Quyết Định Phát Triển Game
 
-## Ngày: 2025-06-10
+## 2025-01-10: Xóa bỏ các game mới và sửa lỗi syntax
+- **Thay đổi**: Xóa toàn bộ 5 game mới (GroupSort, SpinWheel, CompleteSentence, Anagram, OpenBox)
+- **Giữ lại**: Chỉ 8 game cũ gốc (quiz, flashcards, matching, memory, ordering, wordsearch, pictionary, truefalse)  
+- **Lý do**: Theo yêu cầu người dùng muốn giữ lại game cũ và loại bỏ game mới
+- **Tệp sửa đổi**: 
+  - `templates/index.ts` - cập nhật export chỉ game cũ
+  - `GameSelector.tsx` - loại bỏ game mới khỏi danh sách
+  - `PresetGameManager.tsx` - xóa tag HTML không hợp lệ `</initial_code>` gây lỗi syntax
+  - Xóa 5 file template game mới
 
-### Thay đổi thực hiện:
-1. **Xóa các game mới** - Loại bỏ hoàn toàn 5 game template: GroupSort, SpinWheel, CompleteSentence, Anagram, OpenBox
-2. **Giữ lại game cũ** - Chỉ giữ lại 8 game template cơ bản: Quiz, Flashcards, Matching, Memory, Ordering, WordSearch, Pictionary, TrueFalse
-3. **Cập nhật GameSelector** - Xóa các game mới khỏi danh sách, chỉ hiển thị game cũ
-4. **Cập nhật templates index** - Loại bỏ import và export của các game mới
+## 2025-01-10: Tạo game "Mở Hộp Bí Ẩn" - OpenBox  
+- **Loại**: Game thể loại mới
+- **Tính năng**: Người chơi mở hộp để khám phá câu hỏi bên trong
+- **UI**: Hiệu ứng mở hộp với animation, màu sắc tươi sáng (cyan, blue, green, orange)
+- **Cơ chế**: Trắc nghiệm và đúng/sai với dialog hiển thị câu hỏi khi mở hộp
+- **Tệp**: `OpenBoxTemplate.tsx`
+- **Trạng thái**: Đã xóa theo yêu cầu
 
-### File thay đổi:
-- templates/GroupSortTemplate.tsx (xóa)
-- templates/SpinWheelTemplate.tsx (xóa)
-- templates/CompleteSentenceTemplate.tsx (xóa)
-- templates/AnagramTemplate.tsx (xóa)
-- templates/OpenBoxTemplate.tsx (xóa)
-- templates/index.ts (cập nhật exports)
-- GameSelector.tsx (cập nhật danh sách game)
+## 2025-01-10: Tạo game "Xếp Chữ" - Anagram
+- **Loại**: Game sắp xếp từ
+- **Tính năng**: Người chơi kéo thả các chữ cái để tạo thành từ đúng
+- **UI**: Drag & drop với hiệu ứng visual feedback  
+- **Cơ chế**: Hint system và animation khi hoàn thành
+- **Tệp**: `AnagramTemplate.tsx`
+- **Trạng thái**: Đã xóa theo yêu cầu
 
-### Loại thay đổi:
-- Xóa: 5 game template mới
-- Cập nhật: GameSelector và template exports
-- Giữ lại: 8 game template cơ bản
+## 2025-01-10: Tạo game "Hoàn Thành Câu" - CompleteSentence
+- **Loại**: Game điền từ vào chỗ trống
+- **Tính năng**: Điền từ thiếu vào câu với gợi ý
+- **UI**: Input fields với validation real-time
+- **Cơ chế**: Multiple blanks per sentence với scoring
+- **Tệp**: `CompleteSentenceTemplate.tsx` 
+- **Trạng thái**: Đã xóa theo yêu cầu
 
-## Trước đó - Ngày: 2025-06-10
+## 2025-01-10: Tạo game "Vòng Xoay May Mắn" - SpinWheel
+- **Loại**: Game quay số may mắn
+- **Tính năng**: Quay bánh xe để chọn câu hỏi ngẫu nhiên
+- **UI**: Animated spinning wheel với sound effects
+- **Cơ chế**: Random question selection với bonus points
+- **Tệp**: `SpinWheelTemplate.tsx`
+- **Trạng thái**: Đã xóa theo yêu cầu
 
-### Thay đổi thực hiện:
-1. **Sửa lỗi game Mở Hộp Bí Ẩn** - Dialog câu hỏi không hiện, màu sắc vẫn xám
-2. **Sửa logic câu hỏi** - Đảm bảo dialog xuất hiện khi mở hộp câu hỏi
-3. **Cải thiện màu sắc** - Dùng màu tươi sáng: cyan, blue, green, orange thay vì xám
-4. **Tối ưu UI** - RadioGroup và dialog hiển thị chính xác
+## 2025-01-10: Tạo game "Phân Loại Nhóm" - GroupSort  
+- **Loại**: Game phân loại và sắp xếp
+- **Tính năng**: Kéo thả các item vào nhóm phù hợp
+- **UI**: Multiple drop zones với color coding
+- **Cơ chế**: Drag & drop validation với feedback
+- **Tệp**: `GroupSortTemplate.tsx`
+- **Trạng thái**: Đã xóa theo yêu cầu
 
-### File thay đổi:
-- templates/OpenBoxTemplate.tsx (sửa logic dialog và màu sắc hoàn chỉnh)
+## Các Game Gốc Được Giữ Lại:
+1. **Quiz** - Trắc nghiệm nhiều lựa chọn
+2. **Flashcards** - Thẻ ghi nhớ hai mặt  
+3. **Matching** - Nối cặp từ tương ứng
+4. **Memory** - Lật thẻ tìm cặp giống nhau
+5. **Ordering** - Sắp xếp từ thành câu
+6. **WordSearch** - Tìm từ ẩn trong lưới chữ
+7. **Pictionary** - Đoán hình qua ảnh
+8. **TrueFalse** - Câu hỏi đúng/sai
 
-### Loại thay đổi:
-- Sửa lỗi: Dialog câu hỏi không hiện khi mở hộp
-- Sửa lỗi: Màu sắc vẫn xám thay vì tươi sáng
-- Cải thiện: Logic xử lý câu hỏi và UI
-
-## Trước đó - Ngày: 2025-06-10
-
-### Thay đổi thực hiện:
-1. **Cải thiện game Mở Hộp Bí Ẩn** - Bỏ bonus box, chỉ giữ câu hỏi và thử thách
-2. **Thêm dạng câu hỏi mới** - Câu hỏi 4 lựa chọn và câu hỏi đúng/sai với RadioGroup
-3. **Cải thiện màu sắc** - Dùng màu tươi hơn: cyan, blue, indigo thay vì tím đậm
-4. **Tối ưu UX** - Dialog rõ ràng với RadioGroup cho việc chọn đáp án
-
-### File thay đổi:
-- templates/OpenBoxTemplate.tsx (cập nhật toàn bộ logic câu hỏi và màu sắc)
-
-### Loại thay đổi:
-- Bỏ: Bonus box (reward type)
-- Thêm: Câu hỏi trắc nghiệm 4 lựa chọn và đúng/sai
-- Cải thiện: Màu sắc tươi sáng hơn
-- Cải thiện: UI/UX với RadioGroup
-
-## Trước đó - Ngày: 2025-06-10
-
-### Thay đổi thực hiện:
-1. **Cải thiện game Mở Hộp Bí Ẩn** - Thêm logic yêu cầu trả lời câu hỏi khi mở hộp
-2. **Thêm dialog trả lời** - Modal cho phép người chơi nhập câu trả lời cho câu hỏi
-3. **Tính điểm thông minh** - Cộng điểm nếu đúng, trừ một nửa điểm nếu sai
-4. **Cải thiện màu sắc** - Đồng bộ màu sắc các hộp và UI đẹp hơn
-
-### File thay đổi:
-- templates/OpenBoxTemplate.tsx (cập nhật logic game)
-
-### Loại thay đổi:
-- Thêm: Logic trả lời câu hỏi với dialog
-- Cải thiện: Tính điểm dựa trên đúng/sai
-- Cải thiện: Màu sắc và UI đồng bộ
-
-## Trước đó - Ngày: 2025-06-10
-
-### Thay đổi thực hiện:
-1. **Thêm AI tạo đề tài** - AI tự động tạo đề tài viết thay vì dùng chủ đề có sẵn
-2. **Cải thiện workflow** - AI tạo đề tài → hiển thị đề tài → người dùng viết → AI chấm điểm
-3. **Tối ưu UX** - Hiển thị rõ ràng đề tài và quá trình từng bước
-
-### File thay đổi:
-- templates/SpeakingCardsTemplate.tsx (thêm AI tạo đề tài)
-
-### Loại thay đổi:
-- Thêm: AI tự động tạo đề tài viết dựa trên chủ đề chung
-- Cải thiện: Workflow rõ ràng từ tạo đề tài đến chấm điểm
-- Tối ưu: UI/UX hiển thị đề tài và quá trình
-
-## Trước đó - Ngày: 2025-06-10
-
-### Thay đổi thực hiện:
-1. **Sửa lỗi game Luyện Viết** - Thêm logic chấm điểm AI hoàn chỉnh
-2. **Hoàn thiện workflow** - Thêm textarea nhập bài, gửi Gemini API, hiển thị kết quả
-3. **Sửa logic flow** - Đảm bảo không quay về màn hình sẵn sàng sau khi gửi
-
-### File thay đổi:
-- templates/SpeakingCardsTemplate.tsx (sửa logic hoàn chỉnh)
-
-### Loại thay đổi:
-- Sửa lỗi: Logic thiếu xử lý AI chấm điểm
-- Thêm: Textarea nhập bài viết và API call đến Gemini
-- Sửa: Flow game không bị reset sau khi gửi bài
-
-## Trước đó - Ngày: 2025-06-10
-
-### Thay đổi thực hiện:
-1. **Cập nhật SpeakingCardsTemplate** - Chuyển từ game luyện nói thành game luyện viết
-2. **Tích hợp AI chấm điểm** - Sử dụng Gemini API để chấm điểm bài viết của người dùng
-3. **Thêm textarea và UI mới** - Giao diện cho phép nhập văn bản và hiển thị kết quả chấm điểm
-
-### File thay đổi:
-- templates/SpeakingCardsTemplate.tsx (cập nhật toàn bộ logic)
-
-### Loại thay đổi:
-- Cập nhật: Logic game từ speaking sang writing
-- Thêm: Tích hợp Gemini API cho chấm điểm
-- Thêm: UI textarea và hiển thị kết quả
-
-## Trước đó - Ngày: 2025-06-10
-
-### Thay đổi thực hiện:
-1. **Xóa game PatternRecognition** - Loại bỏ game "Nhận Dạng Mẫu" khỏi hệ thống
-2. **Cập nhật GameSelector** - Xóa PatternRecognition khỏi danh sách game có sẵn  
-3. **Cập nhật templates index** - Loại bỏ import và export của PatternRecognitionTemplate
-
-### File thay đổi:
-- templates/PatternRecognitionTemplate.tsx (xóa)
-- templates/index.ts (cập nhật exports)
-- GameSelector.tsx (xóa game khỏi danh sách)
-
-### Loại thay đổi:
-- Xóa: 1 game template
-- Cập nhật: GameSelector và template exports
-
-## Trước đó - Ngày: 2025-06-10
-
-### Thay đổi thực hiện:
-1. **Xóa game NeuronPaths** - Loại bỏ game "Đường Dẫn Thần Kinh" khỏi hệ thống
-2. **Cập nhật GameSelector** - Xóa NeuronPaths khỏi danh sách game có sẵn  
-3. **Cập nhật templates index** - Loại bỏ import và export của NeuronPathsTemplate
-
-### File thay đổi:
-- templates/NeuronPathsTemplate.tsx (xóa)
-- templates/index.ts (cập nhật exports)
-- GameSelector.tsx (xóa game khỏi danh sách)
-
-### Loại thay đổi:
-- Xóa: 1 game template
-- Cập nhật: GameSelector và template exports
-
-## Ngày: 2025-06-07
-
-### Thay đổi thực hiện:
-1. **Thêm template cho các game mới** - Tạo template cho GroupSortTemplate, SpinWheelTemplate, CompleteSentenceTemplate, OpenBoxTemplate, SpeakingCardsTemplate
-2. **Đồng bộ AI generation** - Cập nhật PresetGameManager để hỗ trợ tạo nội dung AI cho các game mới
-3. **Sửa lỗi template missing** - Các game trong GameSelector đã có nhưng thiếu template
-
-### File thay đổi:
-- templates/GroupSortTemplate.tsx (tạo mới)
-- templates/SpinWheelTemplate.tsx (tạo mới) 
-- templates/CompleteSentenceTemplate.tsx (tạo mới)
-- templates/OpenBoxTemplate.tsx (tạo mới)
-- templates/SpeakingCardsTemplate.tsx (tạo mới)
-- PresetGameManager.tsx (cập nhật AI generation)
-
-### Loại thay đổi:
-- Tạo mới: 5 template components
-- Cập nhật: AI generation logic
-
-## Trước đó - Ngày: 2025-06-10
-
-### Thay đổi thực hiện:
-1. **Xóa game Luyện Viết** - Loại bỏ game "Luyện Viết với AI" (trước đây là "Thẻ Nói") khỏi hệ thống
-2. **Cập nhật GameSelector** - Xóa speakingcards khỏi danh sách game có sẵn  
-3. **Cập nhật templates index** - Loại bỏ import và export của SpeakingCardsTemplate
-
-### File thay đổi:
-- templates/SpeakingCardsTemplate.tsx (xóa)
-- templates/index.ts (cập nhật exports)
-- GameSelector.tsx (xóa game khỏi danh sách)
-
-### Loại thay đổi:
-- Xóa: 1 game template
-- Cập nhật: GameSelector và template exports
+## Nguyên Tắc Phát Triển:
+- Không tạo giao diện code chuyên biệt trong quá trình tạo game custom
+- Luôn kiểm tra file MD trước khi sửa đổi
+- Ghi lại mọi thay đổi một cách ngắn gọn và rõ ràng
+- Đảm bảo syntax hợp lệ cho tất cả file TypeScript/TSX

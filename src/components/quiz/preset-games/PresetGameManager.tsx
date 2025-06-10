@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -609,5 +610,3 @@ QUAN TRỌNG cho game Pictionary:
 };
 
 export default PresetGameManager;
-
-</initial_code>
