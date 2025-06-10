@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { PenTool, Send, RefreshCw, Clock, BookOpen, Loader2 } from 'lucide-react';
+import { PenTool, Send, RefreshCw, Clock, BookOpen, Loader2, Lightbulb } from 'lucide-react';
 
 interface SpeakingCardsProps {
   content: any;
@@ -26,6 +26,9 @@ const SpeakingCardsTemplate: React.FC<SpeakingCardsProps> = ({ content, topic, o
   const TIME_LIMIT = 600; // 10 phút = 600 giây
   
   const [gameStarted, setGameStarted] = useState(false);
+  const [topicGenerated, setTopicGenerated] = useState(false);
+  const [generatedTopic, setGeneratedTopic] = useState('');
+  const [isGeneratingTopic, setIsGeneratingTopic] = useState(false);
   const [writingStarted, setWritingStarted] = useState(false);
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
   const [userText, setUserText] = useState('');
@@ -50,6 +53,66 @@ const SpeakingCardsTemplate: React.FC<SpeakingCardsProps> = ({ content, topic, o
   
   const startGame = () => {
     setGameStarted(true);
+    generateWritingTopic();
+  };
+  
+  const generateWritingTopic = async () => {
+    setIsGeneratingTopic(true);
+    
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-05-06:generateContent?key=AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            role: "user",
+            parts: [{
+              text: `Tạo một đề tài viết thú vị và phù hợp cho học sinh trong 10 phút. Đề tài cần:
+- Thú vị, gần gũi với cuộc sống
+- Không quá khó hoặc quá dễ
+- Khuyến khích sáng tạo
+- Phù hợp để viết trong 10 phút (khoảng 200-400 từ)
+
+Chủ đề chung: ${topic}
+
+Chỉ trả về đề tài viết, không có text khác.`
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.7
+          }
+        })
+      });
+      
+      const result = await response.json();
+      const generatedTopicText = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      
+      if (generatedTopicText) {
+        setGeneratedTopic(generatedTopicText.trim());
+        setTopicGenerated(true);
+        
+        toast({
+          title: '💡 Đề tài đã sẵn sàng!',
+          description: 'AI đã tạo đề tài viết cho bạn',
+          variant: 'default',
+        });
+      } else {
+        throw new Error('Không thể tạo đề tài');
+      }
+    } catch (error) {
+      console.error('Error generating topic:', error);
+      toast({
+        title: '⚠️ Lỗi tạo đề tài',
+        description: 'Không thể tạo đề tài. Sử dụng đề tài mặc định.',
+        variant: 'destructive',
+      });
+      setGeneratedTopic(`Viết về chủ đề: ${topic}`);
+      setTopicGenerated(true);
+    } finally {
+      setIsGeneratingTopic(false);
+    }
   };
   
   const startWriting = () => {
@@ -83,7 +146,7 @@ const SpeakingCardsTemplate: React.FC<SpeakingCardsProps> = ({ content, topic, o
             parts: [{
               text: `Hãy chấm điểm bài viết của học sinh theo thang điểm 10.
 
-Chủ đề: ${topic}
+Đề tài: ${generatedTopic}
 Thời gian: 10 phút
 
 Bài viết của học sinh:
@@ -141,6 +204,8 @@ Chỉ trả về JSON, không có text khác.`
   
   const resetGame = () => {
     setGameStarted(false);
+    setTopicGenerated(false);
+    setGeneratedTopic('');
     setWritingStarted(false);
     setTimeLeft(TIME_LIMIT);
     setUserText('');
@@ -173,7 +238,7 @@ Chỉ trả về JSON, không có text khác.`
               Luyện Viết với AI
             </h2>
             <p className="text-xl text-gray-700 mb-2 font-medium">✍️ Chủ đề: {topic}</p>
-            <p className="text-gray-600 mb-8 text-lg">Viết bài trong 10 phút và nhận chấm điểm từ AI</p>
+            <p className="text-gray-600 mb-8 text-lg">AI sẽ tạo đề tài và chấm điểm bài viết của bạn</p>
             
             <div className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-6 mb-8">
               <div className="grid grid-cols-2 gap-6 text-sm">
@@ -182,8 +247,8 @@ Chỉ trả về JSON, không có text khác.`
                   <span className="font-medium text-gray-700">10 phút</span>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl">
-                  <PenTool className="h-6 w-6 text-purple-500" />
-                  <span className="font-medium text-gray-700">AI chấm điểm</span>
+                  <Lightbulb className="h-6 w-6 text-purple-500" />
+                  <span className="font-medium text-gray-700">AI tạo đề tài</span>
                 </div>
               </div>
             </div>
@@ -192,7 +257,7 @@ Chỉ trả về JSON, không có text khác.`
               onClick={startGame} 
               className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white text-xl font-bold py-6 rounded-2xl"
             >
-              ✍️ Bắt đầu luyện viết
+              🎲 Bắt đầu - AI tạo đề tài
             </Button>
           </Card>
         </div>
@@ -227,13 +292,38 @@ Chỉ trả về JSON, không có text khác.`
         <div className="flex-1 flex items-center justify-center">
           <div className="w-full max-w-3xl">
             <Card className="p-8 bg-white/95 backdrop-blur-md border border-white/50 shadow-lg rounded-2xl">
-              {!writingStarted && !gradingResult ? (
+              {isGeneratingTopic ? (
+                <div className="text-center">
+                  <Loader2 className="h-16 w-16 text-indigo-500 mx-auto mb-6 animate-spin" />
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                    AI đang tạo đề tài viết...
+                  </h3>
+                  <p className="text-gray-600 text-lg">
+                    Vui lòng chờ trong giây lát
+                  </p>
+                </div>
+              ) : !topicGenerated ? (
                 <div className="text-center">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6">
-                    Sẵn sàng bắt đầu viết?
+                    Đang khởi tạo...
                   </h3>
+                </div>
+              ) : !writingStarted && !gradingResult ? (
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 mb-8">
+                    <Lightbulb className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                      Đề tài viết của bạn:
+                    </h3>
+                    <div className="bg-white rounded-xl p-4 shadow-sm">
+                      <p className="text-lg font-medium text-gray-800 leading-relaxed">
+                        {generatedTopic}
+                      </p>
+                    </div>
+                  </div>
+                  
                   <p className="text-gray-600 mb-8 text-lg">
-                    Bạn sẽ có 10 phút để viết về chủ đề: <strong>{topic}</strong>
+                    Bạn sẽ có <strong>10 phút</strong> để viết về đề tài này
                   </p>
                   
                   <Button 
@@ -246,6 +336,11 @@ Chỉ trả về JSON, không có text khác.`
                 </div>
               ) : gradingResult ? (
                 <div className="space-y-6">
+                  <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-4 mb-4">
+                    <h4 className="text-lg font-bold text-gray-800 mb-2">Đề tài:</h4>
+                    <p className="text-gray-700">{generatedTopic}</p>
+                  </div>
+                  
                   <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6">
                     <h4 className="text-lg font-bold text-gray-800 mb-3">Bài viết của bạn:</h4>
                     <p className="text-gray-700 leading-relaxed">{userText}</p>
@@ -293,13 +388,15 @@ Chỉ trả về JSON, không có text khác.`
               ) : (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                      Viết về: {topic}
-                    </h3>
-                    <div className="bg-blue-50 p-4 rounded-xl mb-4">
-                      <p className="text-blue-700 font-medium">
-                        ⏰ Thời gian còn lại: {formatTime(timeLeft)}
-                      </p>
+                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-4 mb-6">
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">
+                        📝 Đề tài: {generatedTopic}
+                      </h3>
+                      <div className="bg-blue-50 p-4 rounded-xl">
+                        <p className="text-blue-700 font-medium">
+                          ⏰ Thời gian còn lại: {formatTime(timeLeft)}
+                        </p>
+                      </div>
                     </div>
                   </div>
                   

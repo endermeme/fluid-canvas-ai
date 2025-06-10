@@ -1,6 +1,22 @@
+
 # Quyết định phát triển game
 
 ## Ngày: 2025-06-10
+
+### Thay đổi thực hiện:
+1. **Thêm AI tạo đề tài** - AI tự động tạo đề tài viết thay vì dùng chủ đề có sẵn
+2. **Cải thiện workflow** - AI tạo đề tài → hiển thị đề tài → người dùng viết → AI chấm điểm
+3. **Tối ưu UX** - Hiển thị rõ ràng đề tài và quá trình từng bước
+
+### File thay đổi:
+- templates/SpeakingCardsTemplate.tsx (thêm AI tạo đề tài)
+
+### Loại thay đổi:
+- Thêm: AI tự động tạo đề tài viết dựa trên chủ đề chung
+- Cải thiện: Workflow rõ ràng từ tạo đề tài đến chấm điểm
+- Tối ưu: UI/UX hiển thị đề tài và quá trình
+
+## Trước đó - Ngày: 2025-06-10
 
 ### Thay đổi thực hiện:
 1. **Sửa lỗi game Luyện Viết** - Thêm logic chấm điểm AI hoàn chỉnh
