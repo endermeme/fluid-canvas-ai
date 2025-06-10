@@ -7,8 +7,8 @@ import OrderingTemplate from './OrderingTemplate';
 import WordSearchTemplate from './WordSearchTemplate';
 import PictionaryTemplate from './PictionaryTemplate';
 import TrueFalseTemplate from './TrueFalseTemplate';
+import ProgressiveRevealTemplate from './ProgressiveRevealTemplate';
 
-// Export bộ các templates dưới dạng đối tượng - chỉ giữ lại game cũ
 const gameTemplates = {
   quiz: QuizTemplate,
   flashcards: FlashcardsTemplate,
@@ -18,6 +18,7 @@ const gameTemplates = {
   wordsearch: WordSearchTemplate,
   pictionary: PictionaryTemplate,
   truefalse: TrueFalseTemplate,
+  progressivereveal: ProgressiveRevealTemplate,
 };
 
 export default gameTemplates;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -134,6 +133,17 @@ QUAN TRỌNG cho game Pictionary:
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
           break;
+        case 'progressivereveal':
+          gamePrompt += `JSON format: { "title": "title", "description": "description", "items": [{"imageUrl": "URL ảnh thật từ Wikimedia Commons hoặc Wikipedia", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "revealLevels": 5, "revealInterval": 3000} }
+
+QUAN TRỌNG cho game Progressive Reveal:
+- imageUrl PHẢI là URL ảnh thật từ Wikimedia Commons hoặc Wikipedia
+- Tìm ảnh có độ phân giải cao, rõ nét để phù hợp với cơ chế blur
+- Ảnh phải dễ nhận diện và phù hợp với chủ đề
+- Mỗi ảnh phải có 4 đáp án nhiều lựa chọn hợp lý
+- Sử dụng URL dạng: https://upload.wikimedia.org/wikipedia/commons/...
+- KHÔNG sử dụng placeholder hay ảnh giả`;
+          break;
       }
 
       gamePrompt += " Return only JSON, no additional text.";
@@ -220,6 +230,12 @@ QUAN TRỌNG cho game Pictionary:
             parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 3;
             break;
+          case 'progressivereveal':
+            parsedContent.settings.timePerQuestion = timePerQuestion;
+            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
+            parsedContent.settings.revealLevels = 5;
+            parsedContent.settings.revealInterval = 3000;
+            break;
         }
 
         clearInterval(progressInterval);
@@ -260,10 +276,10 @@ QUAN TRỌNG cho game Pictionary:
   };
 
   const loadSampleData = (type) => {
-    // Chỉ support dữ liệu mẫu cho các game cũ
+    // Chỉ support dữ liệu mẫu cho các game cũ, progressivereveal chỉ dùng AI
     const supportedGames = ['quiz', 'flashcards', 'matching', 'memory', 'ordering', 'wordsearch', 'truefalse'];
     
-    if (!supportedGames.includes(type) || type === 'pictionary') {
+    if (!supportedGames.includes(type) || type === 'pictionary' || type === 'progressivereveal') {
       setError(`Không có dữ liệu mẫu cho game ${getGameTypeName()}. Vui lòng sử dụng AI để tạo nội dung.`);
       setLoading(false);
       return;
@@ -371,6 +387,7 @@ QUAN TRỌNG cho game Pictionary:
       case 'wordsearch': return 'Tìm Từ';
       case 'pictionary': return 'Đoán Hình';
       case 'truefalse': return 'Đúng hay Sai';
+      case 'progressivereveal': return 'Đoán Hình Từ Từ';
       default: return 'Trò Chơi';
     }
   };
@@ -450,6 +467,13 @@ QUAN TRỌNG cho game Pictionary:
         name: 'Đúng hay Sai',
         description: 'Kiểm tra kiến thức với các câu hỏi đúng/sai',
         icon: 'clock',
+        defaultSettings: settings
+      },
+      'progressivereveal': {
+        id: 'progressivereveal',
+        name: 'Đoán Hình Từ Từ',
+        description: 'Hình ảnh hiện từ mờ đến rõ, đoán càng sớm điểm càng cao',
+        icon: 'eye',
         defaultSettings: settings
       }
     };

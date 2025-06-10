@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { 
   Brain, BookOpen, Puzzle, Dices, 
   Image, CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
-  ArrowRight, SlidersHorizontal
+  ArrowRight, SlidersHorizontal, Eye
 } from 'lucide-react';
 import GameSettings from '../GameSettings';
 import { GameSettingsData } from '../types';
@@ -91,6 +91,12 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       name: 'Đúng hay Sai', 
       description: 'Xác định nội dung là đúng hay sai',
       icon: <CheckSquare className="h-8 w-8 text-primary" />
+    },
+    { 
+      id: 'progressivereveal', 
+      name: 'Đoán Hình Từ Từ', 
+      description: 'Hình ảnh hiện từ mờ đến rõ, đoán càng sớm điểm càng cao',
+      icon: <Eye className="h-8 w-8 text-primary" />
     }
   ];
 
