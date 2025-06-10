@@ -1,6 +1,24 @@
+
 # Quyết định phát triển game
 
 ## Ngày: 2025-06-10
+
+### Thay đổi thực hiện:
+1. **Cải thiện game Mở Hộp Bí Ẩn** - Bỏ bonus box, chỉ giữ câu hỏi và thử thách
+2. **Thêm dạng câu hỏi mới** - Câu hỏi 4 lựa chọn và câu hỏi đúng/sai với RadioGroup
+3. **Cải thiện màu sắc** - Dùng màu tươi hơn: cyan, blue, indigo thay vì tím đậm
+4. **Tối ưu UX** - Dialog rõ ràng với RadioGroup cho việc chọn đáp án
+
+### File thay đổi:
+- templates/OpenBoxTemplate.tsx (cập nhật toàn bộ logic câu hỏi và màu sắc)
+
+### Loại thay đổi:
+- Bỏ: Bonus box (reward type)
+- Thêm: Câu hỏi trắc nghiệm 4 lựa chọn và đúng/sai
+- Cải thiện: Màu sắc tươi sáng hơn
+- Cải thiện: UI/UX với RadioGroup
+
+## Trước đó - Ngày: 2025-06-10
 
 ### Thay đổi thực hiện:
 1. **Cải thiện game Mở Hộp Bí Ẩn** - Thêm logic yêu cầu trả lời câu hỏi khi mở hộp
