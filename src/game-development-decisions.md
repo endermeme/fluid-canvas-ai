@@ -4,6 +4,22 @@
 ## Ngày: 2025-06-10
 
 ### Thay đổi thực hiện:
+1. **Xóa game Luyện Viết** - Loại bỏ game "Luyện Viết với AI" (trước đây là "Thẻ Nói") khỏi hệ thống
+2. **Cập nhật GameSelector** - Xóa speakingcards khỏi danh sách game có sẵn  
+3. **Cập nhật templates index** - Loại bỏ import và export của SpeakingCardsTemplate
+
+### File thay đổi:
+- templates/SpeakingCardsTemplate.tsx (xóa)
+- templates/index.ts (cập nhật exports)
+- GameSelector.tsx (xóa game khỏi danh sách)
+
+### Loại thay đổi:
+- Xóa: 1 game template
+- Cập nhật: GameSelector và template exports
+
+## Trước đó - Ngày: 2025-06-10
+
+### Thay đổi thực hiện:
 1. **Thêm AI tạo đề tài** - AI tự động tạo đề tài viết thay vì dùng chủ đề có sẵn
 2. **Cải thiện workflow** - AI tạo đề tài → hiển thị đề tài → người dùng viết → AI chấm điểm
 3. **Tối ưu UX** - Hiển thị rõ ràng đề tài và quá trình từng bước

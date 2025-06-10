@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import {
   Brain, BookOpen, Puzzle, Dices, 
   Image, CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
   ArrowRight, SlidersHorizontal, PenTool, 
-  SlidersHorizontal as AlphabetIcon, Box, MessageCircleMore
+  SlidersHorizontal as AlphabetIcon, Box
 } from 'lucide-react';
 import GameSettings from '../GameSettings';
 import { GameSettingsData } from '../types';
@@ -115,12 +116,6 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       name: 'Mở Hộp Bí Ẩn', 
       description: 'AI tạo các hộp với nội dung bất ngờ',
       icon: <Box className="h-8 w-8 text-primary" />
-    },
-    { 
-      id: 'speakingcards', 
-      name: 'Thẻ Nói', 
-      description: 'AI tạo các thẻ để luyện nói và thuyết trình',
-      icon: <MessageCircleMore className="h-8 w-8 text-primary" />
     }
   ];
 

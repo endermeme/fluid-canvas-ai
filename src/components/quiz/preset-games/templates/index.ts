@@ -1,5 +1,4 @@
 
-
 import QuizTemplate from './QuizTemplate';
 import FlashcardsTemplate from './FlashcardsTemplate';
 import MatchingTemplate from './MatchingTemplate';
@@ -13,7 +12,6 @@ import SpinWheelTemplate from './SpinWheelTemplate';
 import CompleteSentenceTemplate from './CompleteSentenceTemplate';
 import AnagramTemplate from './AnagramTemplate';
 import OpenBoxTemplate from './OpenBoxTemplate';
-import SpeakingCardsTemplate from './SpeakingCardsTemplate';
 
 // Export bộ các templates dưới dạng đối tượng
 const gameTemplates = {
@@ -30,8 +28,6 @@ const gameTemplates = {
   completesentence: CompleteSentenceTemplate,
   anagram: AnagramTemplate,
   openbox: OpenBoxTemplate,
-  speakingcards: SpeakingCardsTemplate,
 };
 
 export default gameTemplates;
-
