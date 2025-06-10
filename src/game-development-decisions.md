@@ -5,6 +5,22 @@
 ## Ngày: 2025-06-10
 
 ### Thay đổi thực hiện:
+1. **Xóa game PatternRecognition** - Loại bỏ game "Nhận Dạng Mẫu" khỏi hệ thống
+2. **Cập nhật GameSelector** - Xóa PatternRecognition khỏi danh sách game có sẵn  
+3. **Cập nhật templates index** - Loại bỏ import và export của PatternRecognitionTemplate
+
+### File thay đổi:
+- templates/PatternRecognitionTemplate.tsx (xóa)
+- templates/index.ts (cập nhật exports)
+- GameSelector.tsx (xóa game khỏi danh sách)
+
+### Loại thay đổi:
+- Xóa: 1 game template
+- Cập nhật: GameSelector và template exports
+
+## Trước đó - Ngày: 2025-06-10
+
+### Thay đổi thực hiện:
 1. **Xóa game NeuronPaths** - Loại bỏ game "Đường Dẫn Thần Kinh" khỏi hệ thống
 2. **Cập nhật GameSelector** - Xóa NeuronPaths khỏi danh sách game có sẵn  
 3. **Cập nhật templates index** - Loại bỏ import và export của NeuronPathsTemplate

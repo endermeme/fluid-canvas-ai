@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { 
   Brain, BookOpen, Puzzle, Dices, 
   Image, CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
-  ArrowRight, BarChart2, SlidersHorizontal, PenTool, 
+  ArrowRight, SlidersHorizontal, PenTool, 
   SlidersHorizontal as AlphabetIcon, Box, MessageCircleMore
 } from 'lucide-react';
 import GameSettings from '../GameSettings';
@@ -109,12 +109,6 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       name: 'Đảo Chữ', 
       description: 'AI tạo các từ đảo chữ theo chủ đề bạn chọn',
       icon: <AlphabetIcon className="h-8 w-8 text-primary" />
-    },
-    { 
-      id: 'patternrecognition', 
-      name: 'Nhận Dạng Mẫu', 
-      description: 'AI tạo game nhận dạng pattern và logic',
-      icon: <BarChart2 className="h-8 w-8 text-primary" />
     },
     { 
       id: 'openbox', 

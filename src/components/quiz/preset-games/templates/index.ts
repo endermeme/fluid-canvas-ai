@@ -1,4 +1,5 @@
 
+
 import QuizTemplate from './QuizTemplate';
 import FlashcardsTemplate from './FlashcardsTemplate';
 import MatchingTemplate from './MatchingTemplate';
@@ -7,7 +8,6 @@ import OrderingTemplate from './OrderingTemplate';
 import WordSearchTemplate from './WordSearchTemplate';
 import PictionaryTemplate from './PictionaryTemplate';
 import TrueFalseTemplate from './TrueFalseTemplate';
-import PatternRecognitionTemplate from './PatternRecognitionTemplate';
 import GroupSortTemplate from './GroupSortTemplate';
 import SpinWheelTemplate from './SpinWheelTemplate';
 import CompleteSentenceTemplate from './CompleteSentenceTemplate';
@@ -31,7 +31,7 @@ const gameTemplates = {
   anagram: AnagramTemplate,
   openbox: OpenBoxTemplate,
   speakingcards: SpeakingCardsTemplate,
-  patternrecognition: PatternRecognitionTemplate,
 };
 
 export default gameTemplates;
+
