@@ -133,117 +133,6 @@ QUAN TRỌNG cho game Pictionary:
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
           break;
-        case 'groupsort':
-          gamePrompt += `JSON format: { "title": "title", "items": [{"id": "1", "text": "item text", "group": "group name"}], "groups": [{"id": "group1", "name": "Group Name", "items": []}], "settings": {"timeLimit": ${totalTime || 120}, "bonusTimePerCorrect": ${bonusTime || 10}} }
-
-HƯỚNG DẪN CHI TIẾT cho game GroupSort:
-- Tạo CHÍNH XÁC ${questionCount || 12} items để phân nhóm
-- Tạo 3-4 groups phù hợp và cân bằng với chủ đề "${promptContent}"
-- Mỗi item phải có: id duy nhất (item1, item2...), text mô tả rõ ràng, group chính xác
-- Groups phải có: id duy nhất (group1, group2...), name rõ ràng, items array rỗng []
-- Phân bố items ĐỀU NHAU giữa các groups (mỗi group 3-4 items)
-- Items phải thú vị, đa dạng và liên quan chặt chẽ đến chủ đề
-- Group names phải khác biệt rõ ràng, không gây nhầm lẫn
-
-QUAN TRỌNG - YÊU CẦU VỀ TÊN:
-- Tên items phải CHUẨN, RÕ RÀNG, DỨT KHOÁT
-- KHÔNG dùng cụm từ khó hiểu, úp mở hay mơ hồ
-- Tên phải đơn giản, dễ hiểu cho người chơi
-- Ví dụ tốt: "Sư tử", "Táo", "Máy tính"
-- Ví dụ tránh: "Sinh vật tuyệt vời", "Thứ ngọt ngào", "Công cụ hiện đại"
-
-VÍ DỤ cụ thể với chủ đề "Động vật":
-- Groups: "Động vật có vú", "Chim", "Cá", "Bò sát"
-- Items: "Sư tử" (group: "Động vật có vú"), "Đại bàng" (group: "Chim")
-
-VÍ DỤ với chủ đề "Học tập":
-- Groups: "Phương pháp học", "Công cụ học tập", "Kỹ năng cần thiết"
-- Items: "Đọc sách" (group: "Phương pháp học"), "Máy tính" (group: "Công cụ học tập")`;
-          break;
-        case 'spinwheel':
-          gamePrompt += `JSON format: { "title": "title", "segments": [{"id": "1", "text": "segment text", "color": "#FF6B6B", "points": 10}], "settings": {"allowMultipleSpins": true, "maxSpins": 10}} }
-
-HƯỚNG DẪN CHI TIẾT cho game SpinWheel:
-- Tạo 6-8 segments cho vòng quay
-- Mỗi segment phải có: id duy nhất, text ngắn gọn, color hex khác nhau, points (5-50)
-- Colors gợi ý: "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD", "#FFB6C1", "#98FB98"
-- Text phải liên quan đến chủ đề và ngắn (tối đa 15 ký tự)
-- Points tăng dần theo độ khó: 10, 20, 30, 40, 50, 60
-- Ví dụ chủ đề "Toán học": segments có thể là "Cộng", "Trừ", "Nhân", "Chia"
-
-QUAN TRỌNG - YÊU CẦU VỀ TÊN:
-- Text segments phải CHUẨN, RÕ RÀNG, DỨT KHOÁT  
-- KHÔNG dùng từ khó hiểu hay mơ hồ
-- Tên phải ngắn gọn, dễ đọc trên vòng quay`;
-          break;
-        case 'completesentence':
-          gamePrompt += `JSON format: { "title": "title", "sentences": [{"sentence": "Sentence with _____ blanks", "blanks": ["word1", "word2"], "options": ["option1", "option2", "option3", "option4"]}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }`;
-          break;
-        case 'anagram':
-          gamePrompt += `JSON format: { "title": "title", "words": [{"id": "1", "original": "original word", "scrambled": "scrambled", "hint": "hint text"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }`;
-          break;
-        case 'openbox':
-          gamePrompt += `JSON format: { "title": "title", "boxes": [{"id": "1", "content": "box content", "type": "question/reward/challenge", "points": 10, "opened": false}], "settings": {"allowHints": true, "bonusTimePerBox": ${bonusTime || 5}} }
-
-HƯỚNG DẪN CHI TIẾT cho game OpenBox:
-- Tạo 9 boxes (3x3 grid)
-- Mỗi box phải có: id duy nhất (1-9), content mô tả, type, points, opened: false
-- Type distribution: 4 questions, 3 rewards, 2 challenges
-- Questions: Câu hỏi liên quan chủ đề với points 10-20
-- Rewards: "Phần thưởng: Bonus X điểm!" với points 15-30
-- Challenges: "Thử thách: [hành động]" với points 20-25
-- Content phải ngắn gọn và rõ ràng
-
-QUAN TRỌNG - YÊU CẦU VỀ TÊN:
-- Content phải CHUẨN, RÕ RÀNG, DỨT KHOÁT
-- KHÔNG dùng cụm từ khó hiểu hay úp mở
-- Ví dụ: {"id": "1", "content": "Câu hỏi: Thủ đô Việt Nam?", "type": "question", "points": 10, "opened": false}`;
-          break;
-        case 'speakingcards':
-          gamePrompt += `JSON format: { "title": "title", "cards": [{"id": "1", "prompt": "speaking prompt", "category": "category", "difficulty": "easy/medium/hard", "timeLimit": 60}], "settings": {"defaultTimeLimit": ${timePerQuestion || 60}, "allowExtension": true}} }
-
-HƯỚNG DẪN CHI TIẾT cho game SpeakingCards:
-- Tạo ${questionCount || 8} thẻ luyện nói
-- Mỗi card phải có: id duy nhất, prompt rõ ràng, category, difficulty, timeLimit
-- Difficulty distribution: 30% easy, 50% medium, 20% hard
-- Categories gợi ý: "Mô tả", "Thảo luận", "Kể chuyện", "Tranh luận"
-- Prompts phải khuyến khích người chơi nói trong 30-90 giây
-- Easy: Câu hỏi đơn giản, timeLimit 30-45s
-- Medium: Câu hỏi phức tạp hơn, timeLimit 60s  
-- Hard: Câu hỏi sâu sắc, timeLimit 90s
-
-QUAN TRỌNG - YÊU CẦU VỀ TÊN:
-- Prompts phải CHUẨN, RÕ RÀNG, DỨT KHOÁT
-- KHÔNG dùng câu hỏi khó hiểu hay mơ hồ
-- Ví dụ: {"id": "1", "prompt": "Mô tả món ăn yêu thích của bạn", "category": "Mô tả", "difficulty": "easy", "timeLimit": 45}`;
-          break;
-        case 'neuronpaths':
-          gamePrompt += `JSON format: { "title": "title", "nodes": [{"id": "node1", "data": {"label": "concept name", "level": "basic|intermediate|advanced", "category": "category"}, "position": {"x": 100, "y": 100}, "type": "default"}], "settings": {"timeLimit": ${totalTime || 300}, "allowHints": true}} }
-
-HƯỚNG DẪN CHI TIẾT cho game NeuronPaths:
-- Tạo 8-12 nodes concepts cho neural map
-- Mix levels: 40% basic, 40% intermediate, 20% advanced  
-- Position nodes ngẫu nhiên trên canvas 800x600
-- Concepts phải liên quan chặt chẽ đến chủ đề "${promptContent}"
-- Có thể tạo kết nối logic giữa các concepts
-- Categories gợi ý: "foundation", "application", "theory", "connection", "result"
-
-QUAN TRỌNG - YÊU CẦU VỀ CONCEPTS:
-- Label phải CHUẨN, RÕ RÀNG, DỨT KHOÁT
-- KHÔNG dùng cụm từ khó hiểu hay mơ hồ  
-- Concepts phải ngắn gọn, dễ hiểu (tối đa 20 ký tự)
-- Ví dụ tốt: "Core Theory", "Method A", "Final Result"
-- Ví dụ tránh: "Complex interconnected principle", "Advanced methodological approach"
-
-VÍ DỤ cụ thể với chủ đề "Machine Learning":
-- Basic: "Data Input", "Training", "Model"
-- Intermediate: "Feature Selection", "Validation", "Optimization"  
-- Advanced: "Deep Learning", "Neural Networks", "AI Ethics"
-
-VÍ DỤ position:
-- {"x": 150, "y": 100}, {"x": 400, "y": 150}, {"x": 600, "y": 200}
-- Spread concepts across canvas, avoid clustering`;
-          break;
       }
 
       gamePrompt += " Return only JSON, no additional text.";
@@ -330,10 +219,6 @@ VÍ DỤ position:
             parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 3;
             break;
-          case 'neuronpaths':
-            parsedContent.settings.timeLimit = totalTime || 300;
-            parsedContent.settings.allowHints = true;
-            break;
         }
 
         clearInterval(progressInterval);
@@ -374,9 +259,10 @@ VÍ DỤ position:
   };
 
   const loadSampleData = (type) => {
-    const newGames = ['groupsort', 'spinwheel', 'completesentence', 'anagram', 'openbox', 'speakingcards', 'neuronpaths'];
+    // Chỉ support dữ liệu mẫu cho các game cũ
+    const supportedGames = ['quiz', 'flashcards', 'matching', 'memory', 'ordering', 'wordsearch', 'truefalse'];
     
-    if (newGames.includes(type) || type === 'pictionary') {
+    if (!supportedGames.includes(type) || type === 'pictionary') {
       setError(`Không có dữ liệu mẫu cho game ${getGameTypeName()}. Vui lòng sử dụng AI để tạo nội dung.`);
       setLoading(false);
       return;
@@ -484,13 +370,6 @@ VÍ DỤ position:
       case 'wordsearch': return 'Tìm Từ';
       case 'pictionary': return 'Đoán Hình';
       case 'truefalse': return 'Đúng hay Sai';
-      case 'groupsort': return 'Phân Nhóm';
-      case 'spinwheel': return 'Vòng Quay May Mắn';
-      case 'completesentence': return 'Hoàn Thành Câu';
-      case 'anagram': return 'Đảo Chữ';
-      case 'openbox': return 'Mở Hộp Bí Ẩn';
-      case 'speakingcards': return 'Thẻ Luyện Nói';
-      case 'neuronpaths': return 'Đường Dẫn Thần Kinh';
       default: return 'Trò Chơi';
     }
   };
@@ -506,7 +385,7 @@ VÍ DỤ position:
       <div className="flex flex-col h-full">
         <GameTemplate 
           data={gameContent} 
-          onBack={onBack} // Truyền onBack từ props thay vì handleRetry
+          onBack={onBack}
           topic={initialTopic || ""}
           content={gameContent}
         />
@@ -570,55 +449,6 @@ VÍ DỤ position:
         name: 'Đúng hay Sai',
         description: 'Kiểm tra kiến thức với các câu hỏi đúng/sai',
         icon: 'clock',
-        defaultSettings: settings
-      },
-      'groupsort': {
-        id: 'groupsort',
-        name: 'Phân Nhóm',
-        description: 'Phân nhóm các câu hỏi theo nhóm',
-        icon: 'users',
-        defaultSettings: settings
-      },
-      'spinwheel': {
-        id: 'spinwheel',
-        name: 'Vòng Quay May Mắn',
-        description: 'Vòng quay may mắn với các phần thưởng',
-        icon: 'dices',
-        defaultSettings: settings
-      },
-      'completesentence': {
-        id: 'completesentence',
-        name: 'Hoàn Thành Câu',
-        description: 'Hoàn thành câu hỏi với các từ trống',
-        icon: 'pencil',
-        defaultSettings: settings
-      },
-      'anagram': {
-        id: 'anagram',
-        name: 'Đảo Chữ',
-        description: 'Đảo chữ của các từ',
-        icon: 'pencil',
-        defaultSettings: settings
-      },
-      'openbox': {
-        id: 'openbox',
-        name: 'Mở Hộp Bí Ẩn',
-        description: 'Mở hộp bí ẩn với các phần thưởng',
-        icon: 'box',
-        defaultSettings: settings
-      },
-      'speakingcards': {
-        id: 'speakingcards',
-        name: 'Thẻ Luyện Nói',
-        description: 'Thẻ luyện nói với các câu hỏi',
-        icon: 'pencil',
-        defaultSettings: settings
-      },
-      'neuronpaths': {
-        id: 'neuronpaths',
-        name: 'Đường Dẫn Thần Kinh',
-        description: 'Tạo neural map với các nodes concepts',
-        icon: 'brain-circuit',
         defaultSettings: settings
       }
     };
@@ -779,3 +609,5 @@ VÍ DỤ position:
 };
 
 export default PresetGameManager;
+
+</initial_code>

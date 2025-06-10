@@ -7,13 +7,8 @@ import OrderingTemplate from './OrderingTemplate';
 import WordSearchTemplate from './WordSearchTemplate';
 import PictionaryTemplate from './PictionaryTemplate';
 import TrueFalseTemplate from './TrueFalseTemplate';
-import GroupSortTemplate from './GroupSortTemplate';
-import SpinWheelTemplate from './SpinWheelTemplate';
-import CompleteSentenceTemplate from './CompleteSentenceTemplate';
-import AnagramTemplate from './AnagramTemplate';
-import OpenBoxTemplate from './OpenBoxTemplate';
 
-// Export bộ các templates dưới dạng đối tượng
+// Export bộ các templates dưới dạng đối tượng - chỉ giữ lại game cũ
 const gameTemplates = {
   quiz: QuizTemplate,
   flashcards: FlashcardsTemplate,
@@ -23,11 +18,6 @@ const gameTemplates = {
   wordsearch: WordSearchTemplate,
   pictionary: PictionaryTemplate,
   truefalse: TrueFalseTemplate,
-  groupsort: GroupSortTemplate,
-  spinwheel: SpinWheelTemplate,
-  completesentence: CompleteSentenceTemplate,
-  anagram: AnagramTemplate,
-  openbox: OpenBoxTemplate,
 };
 
 export default gameTemplates;

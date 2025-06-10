@@ -7,8 +7,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { 
   Brain, BookOpen, Puzzle, Dices, 
   Image, CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
-  ArrowRight, SlidersHorizontal, PenTool, 
-  SlidersHorizontal as AlphabetIcon, Box
+  ArrowRight, SlidersHorizontal
 } from 'lucide-react';
 import GameSettings from '../GameSettings';
 import { GameSettingsData } from '../types';
@@ -92,30 +91,6 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       name: 'Đúng hay Sai', 
       description: 'Xác định nội dung là đúng hay sai',
       icon: <CheckSquare className="h-8 w-8 text-primary" />
-    },
-    { 
-      id: 'groupsort', 
-      name: 'Phân Nhóm', 
-      description: 'AI đánh giá cách bạn phân loại thông tin',
-      icon: <SlidersHorizontal className="h-8 w-8 text-primary" />
-    },
-    { 
-      id: 'completesentence', 
-      name: 'Hoàn Thành Câu', 
-      description: 'AI tạo câu với các từ cần điền vào',
-      icon: <PenTool className="h-8 w-8 text-primary" />
-    },
-    { 
-      id: 'anagram', 
-      name: 'Đảo Chữ', 
-      description: 'AI tạo các từ đảo chữ theo chủ đề bạn chọn',
-      icon: <AlphabetIcon className="h-8 w-8 text-primary" />
-    },
-    { 
-      id: 'openbox', 
-      name: 'Mở Hộp Bí Ẩn', 
-      description: 'AI tạo các hộp với nội dung bất ngờ',
-      icon: <Box className="h-8 w-8 text-primary" />
     }
   ];
 

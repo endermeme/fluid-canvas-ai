@@ -4,6 +4,28 @@
 ## Ngày: 2025-06-10
 
 ### Thay đổi thực hiện:
+1. **Xóa các game mới** - Loại bỏ hoàn toàn 5 game template: GroupSort, SpinWheel, CompleteSentence, Anagram, OpenBox
+2. **Giữ lại game cũ** - Chỉ giữ lại 8 game template cơ bản: Quiz, Flashcards, Matching, Memory, Ordering, WordSearch, Pictionary, TrueFalse
+3. **Cập nhật GameSelector** - Xóa các game mới khỏi danh sách, chỉ hiển thị game cũ
+4. **Cập nhật templates index** - Loại bỏ import và export của các game mới
+
+### File thay đổi:
+- templates/GroupSortTemplate.tsx (xóa)
+- templates/SpinWheelTemplate.tsx (xóa)
+- templates/CompleteSentenceTemplate.tsx (xóa)
+- templates/AnagramTemplate.tsx (xóa)
+- templates/OpenBoxTemplate.tsx (xóa)
+- templates/index.ts (cập nhật exports)
+- GameSelector.tsx (cập nhật danh sách game)
+
+### Loại thay đổi:
+- Xóa: 5 game template mới
+- Cập nhật: GameSelector và template exports
+- Giữ lại: 8 game template cơ bản
+
+## Trước đó - Ngày: 2025-06-10
+
+### Thay đổi thực hiện:
 1. **Sửa lỗi game Mở Hộp Bí Ẩn** - Dialog câu hỏi không hiện, màu sắc vẫn xám
 2. **Sửa logic câu hỏi** - Đảm bảo dialog xuất hiện khi mở hộp câu hỏi
 3. **Cải thiện màu sắc** - Dùng màu tươi sáng: cyan, blue, green, orange thay vì xám
