@@ -1,28 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Trophy, 
-  RefreshCw, 
-  Clock, 
-  Target,
-  CheckCircle2,
-  XCircle,
-  Users,
-  ArrowLeft
-} from 'lucide-react';
+import { Clock, RefreshCw, Trophy, Target, Users, Sparkles } from 'lucide-react';
 
 interface GroupSortProps {
-  data: any;
-  onBack: () => void;
-  topic: string;
   content: any;
+  topic: string;
+  onBack?: () => void;
 }
 
-interface Item {
+interface GroupItem {
   id: string;
   text: string;
   group: string;
@@ -31,337 +20,465 @@ interface Item {
 interface Group {
   id: string;
   name: string;
-  items: Item[];
+  items: string[];
 }
 
-const GroupSortTemplate: React.FC<GroupSortProps> = ({ data, onBack, topic }) => {
-  const [items, setItems] = useState<Item[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [draggedItem, setDraggedItem] = useState<Item | null>(null);
-  const [dragOverGroup, setDragOverGroup] = useState<string | null>(null);
+const GroupSortTemplate: React.FC<GroupSortProps> = ({ content, topic, onBack }) => {
+  const { toast } = useToast();
+  
+  const gameData = content || {
+    title: 'Phân Nhóm Tương Tác',
+    items: [
+      { id: '1', text: 'Táo', group: 'Trái cây' },
+      { id: '2', text: 'Cà rót', group: 'Rau củ' },
+      { id: '3', text: 'Cam', group: 'Trái cây' },
+      { id: '4', text: 'Khoai tây', group: 'Rau củ' },
+      { id: '5', text: 'Bò', group: 'Thịt' },
+      { id: '6', text: 'Gà', group: 'Thịt' }
+    ],
+    groups: [
+      { id: 'fruit', name: 'Trái cây', items: [] },
+      { id: 'vegetable', name: 'Rau củ', items: [] },
+      { id: 'meat', name: 'Thịt', items: [] }
+    ],
+    settings: { timeLimit: 120, bonusTimePerCorrect: 10 }
+  };
+  
+  const [items] = useState<GroupItem[]>(gameData.items);
+  const [groups, setGroups] = useState<Group[]>(gameData.groups);
+  const [shuffledItems, setShuffledItems] = useState<string[]>([]);
   const [gameCompleted, setGameCompleted] = useState(false);
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(120);
+  const [timeLeft, setTimeLeft] = useState(gameData.settings?.timeLimit || 120);
   const [gameStarted, setGameStarted] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
-  const { toast } = useToast();
-
+  const [totalItems] = useState(gameData.items.length);
+  const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [dragOverGroup, setDragOverGroup] = useState<string | null>(null);
+  
   useEffect(() => {
-    if (data && data.items && data.groups) {
-      setItems(data.items);
-      setGroups(data.groups.map((group: any) => ({ ...group, items: [] })));
-    }
-  }, [data]);
-
+    const itemTexts = items.map(item => item.text);
+    const shuffled = [...itemTexts].sort(() => Math.random() - 0.5);
+    setShuffledItems(shuffled);
+  }, [items]);
+  
   useEffect(() => {
-    if (gameStarted && timeLeft > 0 && !gameCompleted) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && !gameCompleted) {
-      handleGameEnd();
+    let timer: NodeJS.Timeout;
+    if (timeLeft > 0 && gameStarted && !gameCompleted) {
+      timer = setTimeout(() => {
+        setTimeLeft(timeLeft - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && gameStarted && !gameCompleted) {
+      handleTimeUp();
     }
+    
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [timeLeft, gameStarted, gameCompleted]);
+  
+  const handleTimeUp = () => {
+    calculateFinalScore();
+  };
 
-  const startGame = () => {
-    setGameStarted(true);
+  const calculateFinalScore = () => {
+    let correctCount = 0;
+    let totalScore = 0;
+
+    console.log("=== DEBUGGING SCORE CALCULATION ===");
+    console.log("Groups:", groups);
+    console.log("Original items:", items);
+
+    // Tính điểm dựa trên các items đã được phân nhóm đúng
+    groups.forEach(group => {
+      console.log(`\nChecking group: ${group.name} (id: ${group.id})`);
+      console.log(`Items in group:`, group.items);
+      
+      group.items.forEach(itemText => {
+        console.log(`\nChecking item: "${itemText}"`);
+        const originalItem = items.find(item => {
+          console.log(`Comparing with original item: "${item.text}" (group: "${item.group}")`);
+          return item.text.trim() === itemText.trim();
+        });
+        
+        if (originalItem) {
+          console.log(`Found original item: "${originalItem.text}" should be in group: "${originalItem.group}"`);
+          console.log(`Current group id: "${group.id}"`);
+          
+          // So sánh chính xác group.id với originalItem.group
+          const isCorrect = originalItem.group.trim() === group.id.trim();
+          console.log(`Is correct: ${isCorrect}`);
+          
+          if (isCorrect) {
+            correctCount++;
+            totalScore += gameData.settings?.bonusTimePerCorrect || 10;
+            console.log(`✓ Correct! Total correct so far: ${correctCount}`);
+          } else {
+            console.log(`✗ Wrong group! Expected group id: "${originalItem.group}", Got group id: "${group.id}"`);
+          }
+        } else {
+          console.log(`❌ Could not find original item for: "${itemText}"`);
+        }
+      });
+    });
+
+    console.log(`\nFINAL RESULTS:`);
+    console.log(`Correct count: ${correctCount}/${totalItems}`);
+    console.log(`Total score: ${totalScore}`);
+
+    // Bonus điểm thời gian nếu hoàn thành trước hạn
+    if (shuffledItems.length === 0 && timeLeft > 0) {
+      totalScore += timeLeft * 2;
+      console.log(`Time bonus added: ${timeLeft * 2}, New total: ${totalScore}`);
+    }
+
+    setScore(totalScore);
+    setGameCompleted(true);
+    
     toast({
-      title: "🎯 Game bắt đầu!",
-      description: "Kéo thả các items vào nhóm phù hợp",
+      title: correctCount === totalItems ? '🏆 Hoàn hảo!' : '🎯 Hoàn thành!',
+      description: `Bạn đã phân nhóm đúng ${correctCount}/${totalItems} mục. Điểm: ${totalScore}`,
+      variant: correctCount === totalItems ? 'default' : 'destructive',
     });
   };
 
-  const handleDragStart = (e: React.DragEvent, item: Item) => {
-    setDraggedItem(item);
+  const handleDragStart = (e: React.DragEvent, itemText: string) => {
+    setDraggedItem(itemText);
+    e.dataTransfer.setData('text/plain', itemText);
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e: React.DragEvent, groupId: string) => {
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setDragOverGroup(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    setDragOverGroup(groupId);
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDragEnter = (e: React.DragEvent, groupId: string) => {
+    e.preventDefault();
+    if (draggedItem) {
+      setDragOverGroup(groupId);
+    }
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+    e.preventDefault();
+    // Chỉ clear khi thực sự rời khỏi group
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
       setDragOverGroup(null);
     }
   };
 
   const handleDrop = (e: React.DragEvent, groupId: string) => {
     e.preventDefault();
-    setDragOverGroup(null);
+    const itemText = e.dataTransfer.getData('text/plain');
     
-    if (!draggedItem) return;
-
-    // Move item to group
-    setItems(items.filter(item => item.id !== draggedItem.id));
-    setGroups(groups.map(group => {
-      if (group.id === groupId) {
-        return { ...group, items: [...group.items, draggedItem] };
-      }
-      return group;
-    }));
-
-    toast({
-      title: "✅ Item đã thêm",
-      description: `"${draggedItem.text}" đã được thêm vào nhóm`,
-    });
-
-    setDraggedItem(null);
-
-    // Check if all items are placed
-    if (items.length === 1) { // Will be 0 after this move
-      setTimeout(handleGameEnd, 500);
+    if (!itemText) return;
+    
+    const targetGroup = groups.find(g => g.id === groupId);
+    if (!targetGroup) return;
+    
+    // Cho phép thả vào bất kỳ nhóm nào, không kiểm tra đúng sai
+    setShuffledItems(prev => prev.filter(text => text !== itemText));
+    setGroups(prev => prev.map(group => 
+      group.id === groupId 
+        ? { ...group, items: [...group.items, itemText] }
+        : group
+    ));
+    
+    // Kiểm tra nếu đã hết items để phân nhóm
+    if (shuffledItems.length === 1) { // length === 1 vì setState async
+      calculateFinalScore();
     }
-  };
-
-  const handleGameEnd = () => {
-    setGameCompleted(true);
     
-    // Calculate score and results
-    let correctCount = 0;
-    const gameResults: any[] = [];
-    
-    groups.forEach(group => {
-      group.items.forEach(item => {
-        const originalItem = data.items.find((orig: Item) => orig.id === item.id);
-        const isCorrect = originalItem && originalItem.group === group.id;
-        if (isCorrect) correctCount++;
-        
-        gameResults.push({
-          item: item.text,
-          placedGroup: group.name,
-          correctGroup: data.groups.find((g: Group) => g.id === originalItem?.group)?.name,
-          isCorrect
-        });
-      });
-    });
-
-    const finalScore = Math.round((correctCount / data.items.length) * 100);
-    setScore(finalScore);
-    setResults(gameResults);
-
-    toast({
-      title: `🎊 Hoàn thành! Điểm: ${finalScore}`,
-      description: `Bạn đã phân nhóm đúng ${correctCount}/${data.items.length} items`,
-    });
-  };
-
-  const resetGame = () => {
-    setItems(data.items);
-    setGroups(data.groups.map((group: any) => ({ ...group, items: [] })));
-    setGameCompleted(false);
-    setGameStarted(false);
-    setScore(0);
-    setTimeLeft(120);
-    setResults([]);
     setDraggedItem(null);
     setDragOverGroup(null);
   };
-
-  const getProgressPercentage = () => {
-    const totalItems = data?.items?.length || 0;
-    const placedItems = groups.reduce((acc, group) => acc + group.items.length, 0);
-    return totalItems > 0 ? (placedItems / totalItems) * 100 : 0;
+  
+  const startGame = () => {
+    setGameStarted(true);
   };
-
-  if (!data) {
+  
+  const resetGame = () => {
+    setGameStarted(false);
+    setGameCompleted(false);
+    setScore(0);
+    setTimeLeft(gameData.settings?.timeLimit || 120);
+    setGroups(gameData.groups.map(group => ({ ...group, items: [] })));
+    const itemTexts = items.map(item => item.text);
+    const shuffled = [...itemTexts].sort(() => Math.random() - 0.5);
+    setShuffledItems(shuffled);
+    setDraggedItem(null);
+    setDragOverGroup(null);
+  };
+  
+  const progress = ((totalItems - shuffledItems.length) / totalItems) * 100;
+  
+  if (gameCompleted) {
+    const correctCount = groups.reduce((count, group) => {
+      return count + group.items.filter(itemText => {
+        const originalItem = items.find(item => item.text.trim() === itemText.trim());
+        return originalItem && originalItem.group.trim() === group.id.trim();
+      }).length;
+    }, 0);
+    
+    const isSuccess = correctCount === totalItems;
+    
     return (
-      <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <Card className="p-8 max-w-md">
-          <div className="text-center">
-            <h3 className="text-xl font-bold mb-4">Đang tải game...</h3>
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="flex flex-col h-screen">
-        {/* Header */}
-        <Card className="m-4 p-4 bg-white/80 backdrop-blur-sm border-blue-200 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Button
-                onClick={onBack}
-                variant="ghost"
-                className="mr-4 text-blue-700 hover:bg-blue-100"
-              >
-                <ArrowLeft className="h-5 w-5 mr-2" />
-                Quay lại
-              </Button>
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-xl mr-4">
-                <Users className="h-7 w-7 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">{data.title}</h2>
-                <p className="text-gray-600">
-                  <span className="font-medium">{topic}</span> • 
-                  <span className="ml-2 text-blue-600">{data.items?.length || 0} items</span> • 
-                  <span className="ml-2 text-purple-600">{data.groups?.length || 0} nhóm</span>
-                </p>
-              </div>
+      <div className="min-h-screen w-full bg-gradient-to-br from-violet-500/10 via-purple-500/10 to-fuchsia-500/10 flex items-center justify-center p-4">
+        <div className="w-full max-w-4xl">
+          <Card className="text-center bg-white/95 backdrop-blur-md border border-white/30 shadow-2xl rounded-2xl p-8">
+            <div className="mb-6">
+              {isSuccess ? (
+                <Trophy className="h-20 w-20 text-yellow-500 mx-auto mb-4 animate-bounce" />
+              ) : (
+                <Target className="h-20 w-20 text-blue-500 mx-auto mb-4" />
+              )}
             </div>
             
-            {gameStarted && !gameCompleted && (
-              <div className="flex items-center gap-4 text-lg font-medium">
-                <div className="flex items-center text-blue-600">
-                  <Clock className="mr-2 h-5 w-5" />
-                  {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-                </div>
-                <div className="flex items-center text-purple-600">
-                  <Target className="mr-2 h-5 w-5" />
-                  {getProgressPercentage().toFixed(0)}%
-                </div>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-6 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent leading-tight">
+              {isSuccess ? '🎉 Xuất sắc!' : '🎯 Hoàn thành!'}
+            </h2>
+            
+            <div className="space-y-4 mb-8">
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
+                <span className="text-gray-700 font-medium">Điểm số:</span>
+                <span className="text-3xl font-bold text-blue-600">{score}</span>
               </div>
-            )}
-          </div>
-          
-          {gameStarted && !gameCompleted && (
-            <div className="mt-4">
-              <Progress value={getProgressPercentage()} className="h-2" />
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
+                <span className="text-gray-700 font-medium">Đúng:</span>
+                <span className="text-xl font-semibold text-green-600">{correctCount}/{totalItems}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg">
+                <span className="text-gray-700 font-medium">Sai:</span>
+                <span className="text-xl font-semibold text-red-600">{totalItems - correctCount}/{totalItems}</span>
+              </div>
             </div>
-          )}
-        </Card>
 
-        {/* Game Content */}
-        <div className="flex-1 p-4">
-          {!gameStarted ? (
-            <div className="flex items-center justify-center h-full">
-              <Card className="p-8 max-w-md bg-white/90 backdrop-blur-sm shadow-xl">
-                <div className="text-center">
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                    <Users className="h-10 w-10 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">Phân Nhóm Thông Minh</h3>
-                  <p className="text-gray-600 mb-6">
-                    Kéo thả các items vào nhóm phù hợp. Bạn có {Math.floor(timeLeft / 60)} phút để hoàn thành!
-                  </p>
-                  <Button onClick={startGame} size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                    Bắt Đầu Game
-                  </Button>
-                </div>
-              </Card>
-            </div>
-          ) : gameCompleted ? (
-            <div className="flex items-center justify-center h-full">
-              <Card className="p-8 max-w-2xl bg-white/90 backdrop-blur-sm shadow-xl">
-                <div className="text-center mb-6">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                    <Trophy className="h-10 w-10 text-white" />
-                  </div>
-                  <h3 className="text-3xl font-bold text-gray-800 mb-2">
-                    Hoàn thành! Điểm: {score}/100
-                  </h3>
-                  <p className="text-gray-600">
-                    Bạn đã phân nhóm đúng {results.filter(r => r.isCorrect).length}/{results.length} items
-                  </p>
-                </div>
-
-                <div className="max-h-60 overflow-y-auto mb-6">
-                  <h4 className="font-semibold mb-3 text-gray-700">Kết quả chi tiết:</h4>
-                  <div className="space-y-2">
-                    {results.map((result, index) => (
-                      <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${
-                        result.isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-                      } border`}>
-                        <div className="flex items-center">
-                          {result.isCorrect ? (
-                            <CheckCircle2 className="h-5 w-5 text-green-600 mr-3" />
-                          ) : (
-                            <XCircle className="h-5 w-5 text-red-600 mr-3" />
-                          )}
-                          <span className="font-medium">{result.item}</span>
-                        </div>
-                        <div className="text-sm">
-                          <span className={`px-2 py-1 rounded ${
-                            result.isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {result.placedGroup}
+            {/* Hiển thị kết quả chi tiết */}
+            <div className="mb-8 text-left">
+              <h3 className="text-xl font-bold mb-4 text-center">Kết quả chi tiết:</h3>
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {groups.map((group, index) => (
+                  <div key={group.id} className="p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-semibold text-lg mb-2">{group.name}:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {group.items.map((itemText) => {
+                        // So sánh chính xác với group.id từ data gốc
+                        const originalItem = items.find(item => item.text.trim() === itemText.trim());
+                        const isCorrect = originalItem && originalItem.group.trim() === group.id.trim();
+                        
+                        return (
+                          <span
+                            key={itemText}
+                            className={`px-3 py-1 rounded-full font-medium ${
+                              isCorrect 
+                                ? 'bg-green-100 text-green-800 border border-green-200' 
+                                : 'bg-red-100 text-red-800 border border-red-200'
+                            }`}
+                          >
+                            {itemText} {isCorrect ? '✓' : '✗'}
                           </span>
-                          {!result.isCorrect && (
-                            <span className="ml-2 text-gray-500">
-                              (Đúng: {result.correctGroup})
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-
-                <div className="flex gap-3 justify-center">
-                  <Button onClick={resetGame} variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50">
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Chơi lại
-                  </Button>
-                  <Button onClick={onBack} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                    Kết thúc
-                  </Button>
-                </div>
-              </Card>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
-              {/* Items to sort */}
-              <Card className="lg:col-span-1 p-4 bg-white/90 backdrop-blur-sm shadow-lg">
-                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                  <Target className="mr-2 h-5 w-5 text-blue-600" />
-                  Items cần phân nhóm
-                </h3>
-                <div className="space-y-3">
-                  {items.map((item) => (
-                    <div
-                      key={item.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, item)}
-                      className="p-3 bg-gradient-to-r from-blue-100 to-purple-100 border border-blue-200 rounded-xl cursor-move hover:shadow-lg transition-all duration-200 hover:scale-105"
-                    >
-                      <span className="font-medium text-gray-800">{item.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Groups */}
-              <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {groups.map((group) => (
-                  <Card
-                    key={group.id}
-                    className={`p-4 transition-all duration-200 ${
-                      dragOverGroup === group.id
-                        ? 'bg-gradient-to-b from-blue-100 to-purple-100 border-blue-400 shadow-xl scale-105'
-                        : 'bg-white/90 backdrop-blur-sm border-gray-200 hover:shadow-lg'
-                    }`}
-                    onDragOver={(e) => handleDragOver(e, group.id)}
-                    onDragLeave={handleDragLeave}
-                    onDrop={(e) => handleDrop(e, group.id)}
-                  >
-                    <h4 className="font-bold text-lg text-gray-800 mb-4 text-center">
-                      {group.name}
-                    </h4>
-                    <div className="min-h-[200px] space-y-2">
-                      {group.items.map((item) => (
-                        <div
-                          key={item.id}
-                          className="p-3 bg-gradient-to-r from-green-100 to-blue-100 border border-green-200 rounded-lg shadow-sm"
-                        >
-                          <span className="text-gray-800 font-medium">{item.text}</span>
-                        </div>
-                      ))}
-                      {group.items.length === 0 && (
-                        <div className="flex items-center justify-center h-full text-gray-400 border-2 border-dashed border-gray-300 rounded-lg">
-                          <span>Thả items vào đây</span>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
                 ))}
               </div>
             </div>
-          )}
+            
+            <div className="flex gap-3">
+              <Button 
+                onClick={resetGame} 
+                className="flex-1 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold py-3 rounded-xl"
+              >
+                <RefreshCw className="mr-2 h-5 w-5" />
+                Chơi lại
+              </Button>
+              {onBack && (
+                <Button 
+                  onClick={onBack} 
+                  variant="outline"
+                  className="flex-1 border-2 border-gray-300 hover:border-gray-400 font-semibold py-3 rounded-xl"
+                >
+                  Quay lại
+                </Button>
+              )}
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!gameStarted) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl">
+          <Card className="text-center bg-white/95 backdrop-blur-md border border-white/30 shadow-2xl rounded-2xl p-8">
+            <div className="mb-8">
+              <Users className="h-24 w-24 text-blue-500 mx-auto mb-6" />
+            </div>
+            
+            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              {gameData.title}
+            </h2>
+            <p className="text-xl text-gray-700 mb-2 font-medium">📚 Chủ đề: {topic}</p>
+            <p className="text-gray-600 mb-8 text-lg">Kéo thả các mục vào nhóm phù hợp</p>
+            
+            <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-6 mb-8">
+              <div className="grid grid-cols-2 gap-6 text-sm">
+                <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl">
+                  <Target className="h-6 w-6 text-blue-500" />
+                  <span className="font-medium text-gray-700">{totalItems} mục cần phân nhóm</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl">
+                  <Clock className="h-6 w-6 text-orange-500" />
+                  <span className="font-medium text-gray-700">{Math.floor((gameData.settings?.timeLimit || 120) / 60)} phút</span>
+                </div>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={startGame} 
+              className="w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white text-xl font-bold py-6 rounded-2xl"
+            >
+              🚀 Bắt đầu chơi
+            </Button>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4">
+      <div className="max-w-7xl mx-auto h-full flex flex-col">
+        {/* Header */}
+        <Card className="mb-6 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded-2xl flex-shrink-0">
+          <div className="p-6 flex flex-col lg:flex-row justify-between items-center gap-4">
+            <div className="text-center lg:text-left">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                {gameData.title}
+              </h2>
+              <p className="text-gray-600 text-lg font-medium">{topic}</p>
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl">
+                <Clock className={`h-6 w-6 ${timeLeft < 30 ? 'text-red-500 animate-pulse' : 'text-blue-500'}`} />
+                <span className={`font-bold text-xl ${timeLeft < 30 ? 'text-red-500' : 'text-blue-600'}`}>
+                  {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="px-6 pb-6">
+            <Progress value={progress} className="h-3 rounded-full" />
+            <p className="text-sm text-gray-500 mt-2 text-center font-medium">
+              {totalItems - shuffledItems.length}/{totalItems} đã phân nhóm ({Math.round(progress)}%)
+            </p>
+          </div>
+        </Card>
+        
+        <div className="flex-1 grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {/* Items cần phân loại */}
+          <Card className="p-6 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded-2xl flex flex-col">
+            <div className="flex items-center gap-3 mb-6">
+              <Target className="h-8 w-8 text-blue-500" />
+              <h3 className="font-bold text-gray-800 text-xl">Các mục cần phân loại</h3>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {shuffledItems.map((itemText, index) => (
+                  <div
+                    key={index}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, itemText)}
+                    onDragEnd={handleDragEnd}
+                    className={`p-4 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 border-2 border-blue-200 rounded-xl cursor-move hover:from-blue-200 hover:via-indigo-200 hover:to-purple-200 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg select-none ${
+                      draggedItem === itemText 
+                        ? 'opacity-50 scale-95 rotate-3 shadow-2xl border-blue-400 bg-gradient-to-r from-blue-200 via-indigo-200 to-purple-200' 
+                        : 'hover:rotate-1'
+                    }`}
+                  >
+                    <span className="text-gray-800 font-semibold text-center block text-lg">{itemText}</span>
+                  </div>
+                ))}
+              </div>
+              {shuffledItems.length === 0 && (
+                <div className="text-center py-8">
+                  <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+                  <p className="text-xl font-semibold text-gray-700">Đã phân loại xong!</p>
+                  <p className="text-gray-500">Đang tính điểm...</p>
+                </div>
+              )}
+            </div>
+          </Card>
+          
+          {/* Các nhóm */}
+          <Card className="p-6 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded-2xl flex flex-col">
+            <div className="flex items-center gap-3 mb-6">
+              <Users className="h-8 w-8 text-purple-500" />
+              <h3 className="font-bold text-gray-800 text-xl">Nhóm phân loại</h3>
+            </div>
+            <div className="flex-1 overflow-y-auto space-y-4">
+              {groups.map((group, groupIndex) => (
+                <div
+                  key={group.id}
+                  onDragOver={handleDragOver}
+                  onDragEnter={(e) => handleDragEnter(e, group.id)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, group.id)}
+                  className={`p-6 border-2 border-dashed rounded-xl min-h-[120px] transition-all duration-300 transform ${
+                    dragOverGroup === group.id && draggedItem
+                      ? 'border-purple-500 bg-purple-100/80 scale-105 shadow-lg rotate-1 ring-2 ring-purple-300' 
+                      : draggedItem 
+                        ? 'border-purple-300 bg-purple-50/50 hover:scale-102 hover:border-purple-400' 
+                        : 'border-purple-300 hover:border-purple-400 hover:bg-purple-50/50'
+                  }`}
+                  style={{
+                    background: dragOverGroup === group.id && draggedItem ? undefined : `linear-gradient(135deg, ${
+                      groupIndex === 0 ? 'rgba(168, 85, 247, 0.1)' :
+                      groupIndex === 1 ? 'rgba(59, 130, 246, 0.1)' :
+                      groupIndex === 2 ? 'rgba(16, 185, 129, 0.1)' :
+                      'rgba(239, 68, 68, 0.1)'
+                    }, rgba(255, 255, 255, 0.5))`
+                  }}
+                >
+                  <h4 className="font-bold text-purple-700 mb-4 flex items-center gap-2 text-lg">
+                    <Sparkles className="h-5 w-5" />
+                    {group.name}
+                  </h4>
+                  <div className="flex flex-wrap gap-3">
+                    {group.items.map((item, index) => (
+                      <span
+                        key={index}
+                        className="px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 rounded-full font-semibold border border-gray-300 shadow-sm text-sm transition-all duration-200 hover:scale-105"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                  {group.items.length === 0 && (
+                    <p className={`text-center italic py-8 text-lg transition-all duration-300 ${
+                      dragOverGroup === group.id && draggedItem 
+                        ? 'text-purple-600 font-semibold animate-pulse scale-110' 
+                        : 'text-gray-400'
+                    }`}>
+                      {dragOverGroup === group.id && draggedItem ? '🎯 Thả vào đây!' : 'Thả các mục vào đây'}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card>
         </div>
       </div>
     </div>

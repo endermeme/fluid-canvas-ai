@@ -1,50 +1,5 @@
 # Game Changes Log
 
-## 2025-06-10 - Redesign hoàn toàn templates với giao diện hiện đại và cải thiện AI workflow
-
-### Thay đổi:
-1. **Redesign toàn bộ game templates với giao diện hiện đại**:
-   - Fullscreen layout không bị nén, sử dụng toàn bộ màn hình
-   - Gradient backgrounds đa dạng và màu sắc phong phú
-   - Card design với backdrop-blur effects hiện đại
-   - Responsive design hoàn hảo cho mọi thiết bị
-   - Typography và spacing hợp lý
-
-2. **Cải thiện gameplay và UX/UI**:
-   - Animation và transition mượt mà
-   - Visual feedback rõ ràng cho mọi action
-   - Color-coded elements với gradients đẹp mắt
-   - Progress tracking và scoring system tốt hơn
-   - Modern button designs với hover effects
-
-3. **Cải thiện AI workflow**:
-   - Drag & drop mechanism hoạt động mượt mà
-   - Real-time feedback và toast notifications
-   - Timer và scoring system chính xác
-   - Game state management hoàn chỉnh
-   - Touch-friendly cho mobile devices
-
-4. **Layout improvements**:
-   - Min-height screen để fill toàn bộ màn hình
-   - Flexible grid systems cho responsive
-   - Proper spacing và padding
-   - Consistent design pattern cho tất cả games
-   - Center alignment cho các components
-
-### File đã thay đổi:
-- GroupSortTemplate.tsx - Redesign với drag & drop cải thiện
-- SpinWheelTemplate.tsx - Redesign với wheel animations
-- OpenBoxTemplate.tsx - Redesign với modern card grid
-- SpeakingCardsTemplate.tsx - Redesign với progress tracking
-- game-changes.md - Ghi lại thay đổi
-
-### Tính năng cải thiện:
-- Tất cả game đều fullscreen, không bị nén 2 bên
-- Giao diện hiện đại với gradients và animations
-- Responsive design perfect cho PC và mobile
-- Consistent design pattern cho all games
-- Enhanced user experience với visual feedback
-
 ## 2025-06-07 - Redesign hoàn toàn NeuronPaths với workflow tự tạo và giao diện hiện đại
 
 ### Thay đổi:
@@ -71,15 +26,15 @@
 4. **AI scoring system cải tiến**:
    - Chấm điểm theo 4 tiêu chí: Concept Quality (30), Logic Connections (30), Network Structure (25), Creativity (15)
    - Phân tích chi tiết từng concept và connection
-   - Feedback strengths, improvements and overall comment
-   - Fallback scoring if API error
+   - Feedback strengths, improvements và overall comment
+   - Fallback scoring nếu API lỗi
 
 5. **UX/UI tối ưu**:
-   - Toast notifications for every action
-   - Loading states and error handling
-   - Modern color scheme with indigo/purple gradients
-   - Mobile-friendly with responsive layout
-   - Touch-friendly controls and button sizing
+   - Toast notifications cho mọi action
+   - Loading states và error handling
+   - Modern color scheme với indigo/purple gradients
+   - Mobile-friendly với responsive layout
+   - Touch-friendly controls và button sizing
 
 ### File đã thay đổi:
 - NeuronPathsTemplate.tsx - Redesign hoàn toàn với workflow tự tạo
@@ -87,11 +42,11 @@
 
 ### Tính năng mới:
 - Workflow tự tạo: user tạo concepts thay vì AI generate
-- Custom node component with edit name directly
-- Panel công cụ sidebar modern with full tools
-- Multi-selection and batch operations
-- Modern responsive design for all devices
-- Enhanced AI scoring with detailed analysis
+- Custom node component với edit tên trực tiếp
+- Panel công cụ sidebar hiện đại với tools đầy đủ
+- Multi-selection và batch operations
+- Modern responsive design cho mọi thiết bị
+- Enhanced AI scoring với detailed analysis
 
 ## 2025-06-07 - Cải thiện toàn diện NeuronPaths game với AI workflow và mobile optimization
 
@@ -103,14 +58,14 @@
    - Đánh giá theo neural network principles: connectivity, logic flow, centrality
 
 2. **Mobile optimization toàn diện**:
-   - Touch-friendly drag & drop with haptic feedback
-   - Pinch to zoom, pan gestures smooth
-   - Responsive layout perfect for all screen sizes
+   - Touch-friendly drag & drop với haptic feedback
+   - Pinch to zoom, pan gestures mượt mà
+   - Responsive layout hoàn hảo cho mọi screen size
    - Mobile-specific UI controls and button sizing
-   - Gesture recognition for mobile interactions
+   - Gesture recognition cho mobile interactions
 
-3. **Advanced tools and features**:
-   - Auto-suggest connections based on AI analysis
+3. **Advanced tools và features**:
+   - Auto-suggest connections dựa trên AI analysis
    - Node grouping and clustering visual
    - Undo/redo functionality
    - Save/load progress with local storage
@@ -136,7 +91,7 @@
 - game-changes.md - Ghi lại major update
 
 ### Tính năng mới:
-- AI-generated random nodes for topic
+- AI-generated random nodes cho topic
 - 100-point scoring system with detailed breakdown
 - Mobile touch optimization with gestures
 - Advanced tools: undo/redo, save/load, export
