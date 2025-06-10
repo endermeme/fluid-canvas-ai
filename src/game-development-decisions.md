@@ -1,8 +1,22 @@
 
-
 # Quyết định phát triển game
 
 ## Ngày: 2025-06-10
+
+### Thay đổi thực hiện:
+1. **Cập nhật SpeakingCardsTemplate** - Chuyển từ game luyện nói thành game luyện viết
+2. **Tích hợp AI chấm điểm** - Sử dụng Gemini API để chấm điểm bài viết của người dùng
+3. **Thêm textarea và UI mới** - Giao diện cho phép nhập văn bản và hiển thị kết quả chấm điểm
+
+### File thay đổi:
+- templates/SpeakingCardsTemplate.tsx (cập nhật toàn bộ logic)
+
+### Loại thay đổi:
+- Cập nhật: Logic game từ speaking sang writing
+- Thêm: Tích hợp Gemini API cho chấm điểm
+- Thêm: UI textarea và hiển thị kết quả
+
+## Trước đó - Ngày: 2025-06-10
 
 ### Thay đổi thực hiện:
 1. **Xóa game PatternRecognition** - Loại bỏ game "Nhận Dạng Mẫu" khỏi hệ thống
@@ -52,4 +66,3 @@
 ### Loại thay đổi:
 - Tạo mới: 5 template components
 - Cập nhật: AI generation logic
-
