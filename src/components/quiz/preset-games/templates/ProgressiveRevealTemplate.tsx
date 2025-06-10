@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Eye, EyeOff, Trophy, Clock, Zap } from 'lucide-react';
@@ -212,10 +211,12 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
 
   if (!data || !data.items || data.items.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Card className="p-6 text-center">
-          <p className="text-muted-foreground">Không có dữ liệu game Progressive Reveal</p>
-          <Button onClick={onBack} className="mt-4">Quay lại</Button>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-muted/20">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground mb-4">Không có dữ liệu game Progressive Reveal</p>
+            <Button onClick={onBack} size="lg" className="w-full">Quay lại</Button>
+          </CardContent>
         </Card>
       </div>
     );
@@ -223,186 +224,199 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
 
   if (gameOver) {
     return (
-      <div className="flex items-center justify-center h-full p-4">
-        <Card className="p-8 text-center max-w-md w-full">
-          <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-4">Hoàn thành!</h2>
-          <div className="text-3xl font-bold text-primary mb-2">{score} điểm</div>
-          <p className="text-muted-foreground mb-2">
-            Bạn đã hoàn thành {data.items.length} câu hỏi
-          </p>
-          <p className="text-sm text-muted-foreground mb-6">
-            Điểm trung bình: {Math.round(score / data.items.length)} điểm/câu
-          </p>
-          <div className="flex gap-3">
-            <Button onClick={resetGame} variant="outline" className="flex-1">
-              Chơi lại
-            </Button>
-            <Button onClick={onBack} className="flex-1">
-              Quay lại
-            </Button>
-          </div>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-muted/20">
+        <Card className="w-full max-w-lg">
+          <CardContent className="p-8 text-center">
+            <Trophy className="h-20 w-20 text-yellow-500 mx-auto mb-6" />
+            <h2 className="text-3xl font-bold mb-4">Hoàn thành!</h2>
+            <div className="text-4xl font-bold text-primary mb-4">{score} điểm</div>
+            <p className="text-muted-foreground mb-2">
+              Bạn đã hoàn thành {data.items.length} câu hỏi
+            </p>
+            <p className="text-sm text-muted-foreground mb-8">
+              Điểm trung bình: {Math.round(score / data.items.length)} điểm/câu
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <Button onClick={resetGame} variant="outline" size="lg">
+                Chơi lại
+              </Button>
+              <Button onClick={onBack} size="lg">
+                Quay lại
+              </Button>
+            </div>
+          </CardContent>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col p-4 max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={onBack}>
-            ← Quay lại
-          </Button>
-          <h1 className="text-xl font-bold">{data.title || "Progressive Reveal"}</h1>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <Badge variant="outline" className="flex items-center gap-1">
-            <Eye className="h-4 w-4" />
-            Level {blurLevel}/{maxBlur}
-          </Badge>
-          <Badge variant="secondary" className="flex items-center gap-1">
-            <Trophy className="h-4 w-4" />
-            {score} điểm
-          </Badge>
-        </div>
-      </div>
-
-      {/* Progress */}
-      <div className="mb-4">
-        <div className="flex justify-between text-sm text-muted-foreground mb-2">
-          <span>Câu {currentIndex + 1}/{data.items.length}</span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            {timeLeft}s
-          </span>
-        </div>
-        <Progress value={(currentIndex / data.items.length) * 100} className="mb-2" />
-        <Progress value={(timeLeft / (data?.settings?.timePerQuestion || 30)) * 100} className="h-2" />
-      </div>
-
-      {/* Main Game Area */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-6">
-        {/* Image Area */}
-        <div className="flex-1 flex items-center justify-center">
-          <Card className={`p-4 ${isRevealing ? 'animate-pulse' : ''}`}>
-            <div className="relative">
-              {/* Loading spinner khi đang load ảnh */}
-              {(isTransitioning || !imageLoaded) && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg">
-                  <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              )}
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-4">
+      <div className="max-w-6xl mx-auto h-full">
+        {/* Header Card */}
+        <Card className="mb-6">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-3">
+                <Button variant="outline" onClick={onBack} size="sm">
+                  ← Quay lại
+                </Button>
+                <h1 className="text-xl font-bold truncate">{data.title || "Progressive Reveal"}</h1>
+              </div>
               
-              <img
-                src={currentItem?.imageUrl || '/placeholder.svg'}
-                alt="Progressive reveal image"
-                className={`w-full max-w-md mx-auto rounded-lg transition-all duration-500 ${
-                  imageLoaded ? 'opacity-100' : 'opacity-0'
-                }`}
-                style={{
-                  filter: imageLoaded ? `blur(${getBlurIntensity()}px)` : 'blur(20px)',
-                  maxHeight: '400px',
-                  objectFit: 'cover',
-                  minHeight: '300px'
-                }}
-                onLoad={() => setImageLoaded(true)}
-                onError={(e) => {
-                  e.currentTarget.src = '/placeholder.svg';
-                  setImageLoaded(true);
-                }}
-              />
-              
-              {/* Score indicator */}
-              {imageLoaded && (
-                <div className="absolute top-2 right-2">
-                  <Badge className={`${getScoreColor()} bg-background/80`}>
-                    <Zap className="h-3 w-3 mr-1" />
-                    +{calculateScore()} điểm
-                  </Badge>
-                </div>
-              )}
-              
-              {/* Reveal hint */}
-              {imageLoaded && blurLevel > 1 && !showResult && (
-                <div className="absolute bottom-2 left-2 right-2">
-                  <Badge variant="outline" className="bg-background/80 w-full justify-center">
-                    {blurLevel > 3 ? <EyeOff className="h-3 w-3 mr-1" /> : <Eye className="h-3 w-3 mr-1" />}
-                    {blurLevel === maxBlur ? "Ảnh sẽ rõ dần..." : `Còn ${blurLevel - 1} level nữa`}
-                  </Badge>
-                </div>
-              )}
+              <div className="flex items-center gap-3 flex-wrap">
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Eye className="h-4 w-4" />
+                  Level {blurLevel}/{maxBlur}
+                </Badge>
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Trophy className="h-4 w-4" />
+                  {score} điểm
+                </Badge>
+                <Badge variant="destructive" className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {timeLeft}s
+                </Badge>
+              </div>
             </div>
-          </Card>
-        </div>
 
-        {/* Answer Options */}
-        <div className="flex-1 max-w-md">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Đây là gì?</h3>
-            
-            {/* Disable buttons khi đang load */}
-            <div className="grid grid-cols-1 gap-3">
-              {currentItem?.options?.map((option, index) => {
-                const isSelected = selectedAnswer === option;
-                const isCorrect = option === currentItem.answer;
-                const shouldShowCorrect = showResult && isCorrect;
-                const shouldShowWrong = showResult && isSelected && !isCorrect;
-                const isDisabled = showResult || !imageLoaded || isTransitioning;
+            {/* Progress Bars */}
+            <div className="space-y-3 mt-4">
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Câu {currentIndex + 1}/{data.items.length}</span>
+                <span>Thời gian còn lại</span>
+              </div>
+              <Progress value={(currentIndex / data.items.length) * 100} className="h-2" />
+              <Progress value={(timeLeft / (data?.settings?.timePerQuestion || 30)) * 100} className="h-2" />
+            </div>
+          </CardHeader>
+        </Card>
+
+        {/* Main Game Grid */}
+        <div className="grid lg:grid-cols-2 gap-6 h-auto">
+          {/* Image Section */}
+          <Card className={`${isRevealing ? 'animate-pulse' : ''}`}>
+            <CardContent className="p-6">
+              <div className="relative bg-muted/30 rounded-lg overflow-hidden" style={{ aspectRatio: '4/3' }}>
+                {/* Loading State */}
+                {(isTransitioning || !imageLoaded) && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-muted/50 z-10">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      <p className="text-sm text-muted-foreground">Đang tải ảnh...</p>
+                    </div>
+                  </div>
+                )}
                 
-                return (
-                  <Button
-                    key={index}
-                    variant={shouldShowCorrect ? "default" : shouldShowWrong ? "destructive" : "outline"}
-                    className={`justify-start h-auto p-4 text-left transition-all ${
-                      shouldShowCorrect ? "bg-green-500 hover:bg-green-600" : ""
-                    } ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                    onClick={() => handleAnswer(option)}
-                    disabled={isDisabled}
-                  >
-                    <span className="font-medium mr-2">
-                      {String.fromCharCode(65 + index)}.
-                    </span>
-                    {option}
-                    {shouldShowCorrect && (
-                      <span className="ml-auto">✓</span>
-                    )}
-                    {shouldShowWrong && (
-                      <span className="ml-auto">✗</span>
-                    )}
-                  </Button>
-                );
-              })}
-            </div>
-
-            {/* Loading state cho buttons */}
-            {!imageLoaded && (
-              <div className="mt-4 text-center text-sm text-muted-foreground">
-                Đang tải ảnh...
+                {/* Main Image */}
+                <img
+                  src={currentItem?.imageUrl || '/placeholder.svg'}
+                  alt="Progressive reveal image"
+                  className={`w-full h-full object-cover transition-all duration-500 ${
+                    imageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  style={{
+                    filter: imageLoaded ? `blur(${getBlurIntensity()}px)` : 'blur(20px)'
+                  }}
+                  onLoad={() => setImageLoaded(true)}
+                  onError={(e) => {
+                    e.currentTarget.src = '/placeholder.svg';
+                    setImageLoaded(true);
+                  }}
+                />
+                
+                {/* Score Overlay */}
+                {imageLoaded && (
+                  <div className="absolute top-4 right-4">
+                    <Badge className={`${getScoreColor()} bg-background/90 backdrop-blur-sm`}>
+                      <Zap className="h-3 w-3 mr-1" />
+                      +{calculateScore()} điểm
+                    </Badge>
+                  </div>
+                )}
+                
+                {/* Reveal Status Overlay */}
+                {imageLoaded && blurLevel > 1 && !showResult && (
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <Badge variant="outline" className="bg-background/90 backdrop-blur-sm w-full justify-center">
+                      {blurLevel > 3 ? <EyeOff className="h-3 w-3 mr-1" /> : <Eye className="h-3 w-3 mr-1" />}
+                      {blurLevel === maxBlur ? "Ảnh sẽ rõ dần..." : `Còn ${blurLevel - 1} level nữa`}
+                    </Badge>
+                  </div>
+                )}
               </div>
-            )}
+            </CardContent>
+          </Card>
 
-            {/* Hint */}
-            {currentItem?.hint && blurLevel <= 2 && imageLoaded && (
-              <div className="mt-4 p-3 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-medium">Gợi ý:</span> {currentItem.hint}
-                </p>
+          {/* Answer Section */}
+          <Card>
+            <CardHeader>
+              <h3 className="text-xl font-semibold text-center">Đây là gì?</h3>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Answer Options Grid */}
+              <div className="grid grid-cols-1 gap-3">
+                {currentItem?.options?.map((option, index) => {
+                  const isSelected = selectedAnswer === option;
+                  const isCorrect = option === currentItem.answer;
+                  const shouldShowCorrect = showResult && isCorrect;
+                  const shouldShowWrong = showResult && isSelected && !isCorrect;
+                  const isDisabled = showResult || !imageLoaded || isTransitioning;
+                  
+                  return (
+                    <Button
+                      key={index}
+                      variant={shouldShowCorrect ? "default" : shouldShowWrong ? "destructive" : "outline"}
+                      className={`justify-between h-auto p-4 text-left transition-all ${
+                        shouldShowCorrect ? "bg-green-500 hover:bg-green-600 text-white" : ""
+                      } ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                      onClick={() => handleAnswer(option)}
+                      disabled={isDisabled}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="font-bold text-lg">
+                          {String.fromCharCode(65 + index)}.
+                        </span>
+                        <span className="text-base">{option}</span>
+                      </div>
+                      {shouldShowCorrect && (
+                        <span className="text-xl">✓</span>
+                      )}
+                      {shouldShowWrong && (
+                        <span className="text-xl">✗</span>
+                      )}
+                    </Button>
+                  );
+                })}
               </div>
-            )}
 
-            {/* Skip option */}
-            {!showResult && blurLevel === 1 && imageLoaded && (
-              <Button
-                variant="ghost"
-                className="w-full mt-4"
-                onClick={() => handleAnswer("")}
-              >
-                Bỏ qua câu này
-              </Button>
-            )}
+              {/* Hint Section */}
+              {currentItem?.hint && blurLevel <= 2 && imageLoaded && (
+                <div className="mt-6 p-4 bg-muted/50 rounded-lg border">
+                  <p className="text-sm">
+                    <span className="font-semibold text-primary">💡 Gợi ý:</span> {currentItem.hint}
+                  </p>
+                </div>
+              )}
+
+              {/* Skip Option */}
+              {!showResult && blurLevel === 1 && imageLoaded && (
+                <Button
+                  variant="ghost"
+                  className="w-full mt-4"
+                  onClick={() => handleAnswer("")}
+                >
+                  Bỏ qua câu này
+                </Button>
+              )}
+
+              {/* Loading State for Options */}
+              {!imageLoaded && (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Vui lòng đợi ảnh tải xong...</p>
+                </div>
+              )}
+            </CardContent>
           </Card>
         </div>
       </div>
