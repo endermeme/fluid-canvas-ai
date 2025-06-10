@@ -4,12 +4,16 @@
 ## Ngày: 2025-06-10
 
 ### Thay đổi thực hiện:
-1. **Refactor PresetGameManager** - Chia file lớn thành các module nhỏ hơn
-2. **Tạo custom hooks** - useGameGeneration, useGameSharing để quản lý logic riêng biệt
-3. **Tạo components tái sử dụng** - GameErrorDisplay, GameContentRenderer, ShareDialog
-4. **Tạo utility functions** - gameUtils, sampleDataLoader để tách logic chung
+1. **Xóa game NeuronPaths** - Loại bỏ game "Đường Dẫn Thần Kinh" khỏi hệ thống
+2. **Refactor PresetGameManager** - Chia file lớn thành các module nhỏ hơn
+3. **Tạo custom hooks** - useGameGeneration, useGameSharing để quản lý logic riêng biệt
+4. **Tạo components tái sử dụng** - GameErrorDisplay, GameContentRenderer, ShareDialog
+5. **Tạo utility functions** - gameUtils, sampleDataLoader để tách logic chung
 
 ### File thay đổi:
+- templates/NeuronPathsTemplate.tsx (xóa) - Game đường dẫn thần kinh
+- templates/index.ts (cập nhật) - Xóa import NeuronPathsTemplate
+- GameSelector.tsx (cập nhật) - Xóa entry neuronpaths
 - hooks/useGameGeneration.ts (tạo mới) - Quản lý AI generation
 - hooks/useGameSharing.ts (tạo mới) - Quản lý game sharing
 - components/GameErrorDisplay.tsx (tạo mới) - Component hiển thị lỗi
@@ -20,6 +24,7 @@
 - PresetGameManager.tsx (refactor) - Giảm từ 782 lines xuống ~150 lines
 
 ### Loại thay đổi:
+- Xóa: Game NeuronPaths (đường dẫn thần kinh)
 - Refactor: Chia file lớn thành module nhỏ
 - Tối ưu: Cải thiện maintainability và readability
 - Tái cấu trúc: Tách logic thành hooks và components riêng biệt
