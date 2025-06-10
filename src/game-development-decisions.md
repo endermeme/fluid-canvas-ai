@@ -4,6 +4,21 @@
 ## Ngày: 2025-06-10
 
 ### Thay đổi thực hiện:
+1. **Đơn giản hóa game Luyện Viết** - Chỉ 1 bài viết, thời gian cố định 10 phút
+2. **Loại bỏ hệ thống phức tạp** - Bỏ nhiều bài, bỏ độ khó, chỉ giữ chức năng cốt lõi
+3. **Tối ưu UI đơn giản** - Giao diện rõ ràng, dễ sử dụng
+
+### File thay đổi:
+- templates/SpeakingCardsTemplate.tsx (đơn giản hóa toàn bộ)
+
+### Loại thay đổi:
+- Đơn giản hóa: Từ nhiều bài thành 1 bài duy nhất
+- Cố định: Thời gian 10 phút cho mọi bài viết
+- Loại bỏ: Hệ thống độ khó, nhiều thẻ, navigation phức tạp
+
+## Trước đó - Ngày: 2025-06-10
+
+### Thay đổi thực hiện:
 1. **Cập nhật SpeakingCardsTemplate** - Chuyển từ game luyện nói thành game luyện viết
 2. **Tích hợp AI chấm điểm** - Sử dụng Gemini API để chấm điểm bài viết của người dùng
 3. **Thêm textarea và UI mới** - Giao diện cho phép nhập văn bản và hiển thị kết quả chấm điểm

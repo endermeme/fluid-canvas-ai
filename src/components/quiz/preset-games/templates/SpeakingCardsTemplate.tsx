@@ -5,20 +5,12 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { PenTool, Send, RefreshCw, ArrowRight, ArrowLeft, Clock, Trophy, BookOpen, Loader2 } from 'lucide-react';
+import { PenTool, Send, RefreshCw, Clock, BookOpen, Loader2 } from 'lucide-react';
 
 interface SpeakingCardsProps {
   content: any;
   topic: string;
   onBack?: () => void;
-}
-
-interface WritingCard {
-  id: string;
-  prompt: string;
-  category: string;
-  difficulty: 'easy' | 'medium' | 'hard';
-  timeLimit: number;
 }
 
 interface GradingResult {
@@ -31,53 +23,44 @@ interface GradingResult {
 const SpeakingCardsTemplate: React.FC<SpeakingCardsProps> = ({ content, topic, onBack }) => {
   const { toast } = useToast();
   
-  const cards: WritingCard[] = content?.cards || [
-    { id: '1', prompt: 'Hãy viết về gia đình của bạn', category: 'Cá nhân', difficulty: 'easy', timeLimit: 300 },
-    { id: '2', prompt: 'Mô tả món ăn yêu thích của bạn', category: 'Ẩm thực', difficulty: 'easy', timeLimit: 240 },
-    { id: '3', prompt: 'Bạn nghĩ gì về biến đổi khí hậu?', category: 'Môi trường', difficulty: 'medium', timeLimit: 450 },
-    { id: '4', prompt: 'Kể về một kỷ niệm đáng nhớ', category: 'Cá nhân', difficulty: 'medium', timeLimit: 360 },
-    { id: '5', prompt: 'Giải thích tầm quan trọng của giáo dục', category: 'Xã hội', difficulty: 'hard', timeLimit: 600 }
-  ];
+  const TIME_LIMIT = 600; // 10 phút = 600 giây
   
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
-  const [cardStarted, setCardStarted] = useState(false);
+  const [writingStarted, setWritingStarted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
   const [userText, setUserText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [gradingResult, setGradingResult] = useState<GradingResult | null>(null);
-  const [completedCards, setCompletedCards] = useState<string[]>([]);
-  
-  const currentCard = cards[currentCardIndex];
+  const [gameCompleted, setGameCompleted] = useState(false);
   
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (timeLeft > 0 && cardStarted && !gradingResult) {
+    if (timeLeft > 0 && writingStarted && !gradingResult) {
       timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
-    } else if (timeLeft === 0 && cardStarted && !gradingResult) {
+    } else if (timeLeft === 0 && writingStarted && !gradingResult) {
       handleSubmitText();
     }
     
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [timeLeft, cardStarted, gradingResult]);
+  }, [timeLeft, writingStarted, gradingResult]);
   
   const startGame = () => {
     setGameStarted(true);
   };
   
-  const startCard = () => {
-    setCardStarted(true);
-    setTimeLeft(currentCard.timeLimit);
+  const startWriting = () => {
+    setWritingStarted(true);
+    setTimeLeft(TIME_LIMIT);
     setUserText('');
     setGradingResult(null);
     
     toast({
       title: '✍️ Bắt đầu viết!',
-      description: `Bạn có ${Math.floor(currentCard.timeLimit / 60)} phút để hoàn thành`,
+      description: 'Bạn có 10 phút để hoàn thành bài viết',
       variant: 'default',
     });
   };
@@ -86,7 +69,7 @@ const SpeakingCardsTemplate: React.FC<SpeakingCardsProps> = ({ content, topic, o
     if (!userText.trim() || isSubmitting) return;
     
     setIsSubmitting(true);
-    setCardStarted(false);
+    setWritingStarted(false);
     
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-05-06:generateContent?key=AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA`, {
@@ -98,11 +81,10 @@ const SpeakingCardsTemplate: React.FC<SpeakingCardsProps> = ({ content, topic, o
           contents: [{
             role: "user",
             parts: [{
-              text: `Hãy chấm điểm bài viết của học sinh theo thang điểm 10 và đưa ra nhận xét chi tiết.
+              text: `Hãy chấm điểm bài viết của học sinh theo thang điểm 10.
 
 Chủ đề: ${topic}
-Câu hỏi: ${currentCard.prompt}
-Độ khó: ${currentCard.difficulty}
+Thời gian: 10 phút
 
 Bài viết của học sinh:
 "${userText}"
@@ -130,7 +112,7 @@ Chỉ trả về JSON, không có text khác.`
       try {
         const gradingData = JSON.parse(text);
         setGradingResult(gradingData);
-        setCompletedCards(prev => [...prev, currentCard.id]);
+        setGameCompleted(true);
         
         toast({
           title: `🎯 Điểm: ${gradingData.score}/10`,
@@ -157,52 +139,13 @@ Chỉ trả về JSON, không có text khác.`
     }
   };
   
-  const nextCard = () => {
-    if (currentCardIndex < cards.length - 1) {
-      setCurrentCardIndex(currentCardIndex + 1);
-      setCardStarted(false);
-      setTimeLeft(0);
-      setUserText('');
-      setGradingResult(null);
-    }
-  };
-  
-  const prevCard = () => {
-    if (currentCardIndex > 0) {
-      setCurrentCardIndex(currentCardIndex - 1);
-      setCardStarted(false);
-      setTimeLeft(0);
-      setUserText('');
-      setGradingResult(null);
-    }
-  };
-  
   const resetGame = () => {
     setGameStarted(false);
-    setCurrentCardIndex(0);
-    setCardStarted(false);
-    setTimeLeft(0);
+    setWritingStarted(false);
+    setTimeLeft(TIME_LIMIT);
     setUserText('');
     setGradingResult(null);
-    setCompletedCards([]);
-  };
-  
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'easy': return 'text-green-600 bg-green-100 border-green-200';
-      case 'medium': return 'text-yellow-600 bg-yellow-100 border-yellow-200';
-      case 'hard': return 'text-red-600 bg-red-100 border-red-200';
-      default: return 'text-gray-600 bg-gray-100 border-gray-200';
-    }
-  };
-  
-  const getDifficultyText = (difficulty: string) => {
-    switch (difficulty) {
-      case 'easy': return 'Dễ';
-      case 'medium': return 'Trung bình';
-      case 'hard': return 'Khó';
-      default: return 'Không xác định';
-    }
+    setGameCompleted(false);
   };
   
   const getScoreColor = (score: number) => {
@@ -211,7 +154,11 @@ Chỉ trả về JSON, không có text khác.`
     return 'text-red-600 bg-red-100 border-red-200';
   };
   
-  const progress = ((currentCardIndex + (cardStarted || gradingResult ? 1 : 0)) / cards.length) * 100;
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
   
   if (!gameStarted) {
     return (
@@ -223,20 +170,20 @@ Chỉ trả về JSON, không có text khác.`
             </div>
             
             <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Thẻ Luyện Viết
+              Luyện Viết với AI
             </h2>
             <p className="text-xl text-gray-700 mb-2 font-medium">✍️ Chủ đề: {topic}</p>
-            <p className="text-gray-600 mb-8 text-lg">Luyện tập kỹ năng viết với AI chấm điểm</p>
+            <p className="text-gray-600 mb-8 text-lg">Viết bài trong 10 phút và nhận chấm điểm từ AI</p>
             
             <div className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-6 mb-8">
               <div className="grid grid-cols-2 gap-6 text-sm">
                 <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl">
-                  <PenTool className="h-6 w-6 text-indigo-500" />
-                  <span className="font-medium text-gray-700">{cards.length} bài viết</span>
+                  <Clock className="h-6 w-6 text-indigo-500" />
+                  <span className="font-medium text-gray-700">10 phút</span>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl">
-                  <Clock className="h-6 w-6 text-purple-500" />
-                  <span className="font-medium text-gray-700">AI chấm điểm tự động</span>
+                  <PenTool className="h-6 w-6 text-purple-500" />
+                  <span className="font-medium text-gray-700">AI chấm điểm</span>
                 </div>
               </div>
             </div>
@@ -261,76 +208,40 @@ Chỉ trả về JSON, không có text khác.`
           <div className="p-6 flex flex-col lg:flex-row justify-between items-center gap-4">
             <div className="text-center lg:text-left">
               <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Thẻ Luyện Viết
+                Luyện Viết với AI
               </h2>
               <p className="text-gray-600 text-lg font-medium">{topic}</p>
             </div>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl">
-                <BookOpen className="h-6 w-6 text-indigo-500" />
-                <span className="font-bold text-indigo-700 text-xl">
-                  Bài {currentCardIndex + 1}/{cards.length}
+            
+            {(writingStarted || gradingResult) && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl">
+                <Clock className={`h-5 w-5 ${timeLeft < 60 ? 'text-red-500' : 'text-blue-500'}`} />
+                <span className={`font-bold text-lg ${timeLeft < 60 && timeLeft > 0 ? 'text-red-500 animate-pulse' : 'text-blue-500'}`}>
+                  {formatTime(timeLeft)}
                 </span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl">
-                <Trophy className="h-6 w-6 text-green-500" />
-                <span className="font-bold text-green-700 text-xl">
-                  {completedCards.length} hoàn thành
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="px-6 pb-6">
-            <Progress value={progress} className="h-3 rounded-full" />
-            <p className="text-sm text-gray-500 mt-2 text-center font-medium">
-              Tiến độ: {Math.round(progress)}%
-            </p>
+            )}
           </div>
         </Card>
         
         <div className="flex-1 flex items-center justify-center">
           <div className="w-full max-w-3xl">
             <Card className="p-8 bg-white/95 backdrop-blur-md border border-white/50 shadow-lg rounded-2xl">
-              <div className="flex justify-between items-start mb-6">
-                <div className="flex items-center gap-3">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getDifficultyColor(currentCard.difficulty)}`}>
-                    {getDifficultyText(currentCard.difficulty)}
-                  </span>
-                  <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full font-medium">
-                    {currentCard.category}
-                  </span>
-                </div>
-                
-                {(cardStarted || gradingResult) && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl">
-                    <Clock className={`h-5 w-5 ${timeLeft < 60 ? 'text-red-500' : 'text-blue-500'}`} />
-                    <span className={`font-bold text-lg ${timeLeft < 60 && timeLeft > 0 ? 'text-red-500 animate-pulse' : 'text-blue-500'}`}>
-                      {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-                    </span>
-                  </div>
-                )}
-              </div>
-              
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold text-gray-800 mb-4 leading-relaxed">
-                  {currentCard.prompt}
-                </h3>
-                
-                {!cardStarted && !gradingResult && (
-                  <p className="text-gray-600 text-lg">
-                    Thời gian: {Math.floor(currentCard.timeLimit / 60)} phút
+              {!writingStarted && !gradingResult ? (
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6">
+                    Sẵn sàng bắt đầu viết?
+                  </h3>
+                  <p className="text-gray-600 mb-8 text-lg">
+                    Bạn sẽ có 10 phút để viết về chủ đề: <strong>{topic}</strong>
                   </p>
-                )}
-              </div>
-              
-              {!cardStarted && !gradingResult ? (
-                <div className="flex justify-center">
+                  
                   <Button 
-                    onClick={startCard} 
+                    onClick={startWriting} 
                     className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-4 text-lg font-bold rounded-2xl shadow-lg transform transition-all duration-200 hover:scale-105"
                   >
                     <PenTool className="mr-3 h-6 w-6" />
-                    Bắt đầu viết ({Math.floor(currentCard.timeLimit / 60)} phút)
+                    Bắt đầu viết (10 phút)
                   </Button>
                 </div>
               ) : gradingResult ? (
@@ -381,6 +292,17 @@ Chỉ trả về JSON, không có text khác.`
                 </div>
               ) : (
                 <div className="space-y-6">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                      Viết về: {topic}
+                    </h3>
+                    <div className="bg-blue-50 p-4 rounded-xl mb-4">
+                      <p className="text-blue-700 font-medium">
+                        ⏰ Thời gian còn lại: {formatTime(timeLeft)}
+                      </p>
+                    </div>
+                  </div>
+                  
                   <Textarea
                     value={userText}
                     onChange={(e) => setUserText(e.target.value)}
@@ -414,47 +336,26 @@ Chỉ trả về JSON, không có text khác.`
           </div>
         </div>
         
-        {/* Navigation */}
-        <div className="flex justify-between items-center mt-6 flex-shrink-0">
-          <Button
-            onClick={prevCard}
-            disabled={currentCardIndex === 0}
+        {/* Footer Navigation */}
+        <div className="flex justify-center items-center mt-6 gap-4 flex-shrink-0">
+          <Button 
+            onClick={resetGame} 
             variant="outline"
-            className="border-2 border-gray-300 hover:border-gray-400 px-6 py-3 text-lg font-semibold rounded-2xl disabled:opacity-50"
+            className="border-2 border-gray-300 hover:border-gray-400 px-6 py-3 text-lg font-semibold rounded-2xl"
           >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            Bài trước
+            <RefreshCw className="mr-2 h-5 w-5" />
+            Làm lại
           </Button>
           
-          <div className="flex gap-4">
+          {onBack && (
             <Button 
-              onClick={resetGame} 
+              onClick={onBack} 
               variant="outline"
               className="border-2 border-gray-300 hover:border-gray-400 px-6 py-3 text-lg font-semibold rounded-2xl"
             >
-              <RefreshCw className="mr-2 h-5 w-5" />
-              Chơi lại
+              Quay lại
             </Button>
-            {onBack && (
-              <Button 
-                onClick={onBack} 
-                variant="outline"
-                className="border-2 border-gray-300 hover:border-gray-400 px-6 py-3 text-lg font-semibold rounded-2xl"
-              >
-                Quay lại
-              </Button>
-            )}
-          </div>
-          
-          <Button
-            onClick={nextCard}
-            disabled={currentCardIndex === cards.length - 1}
-            variant="outline"
-            className="border-2 border-gray-300 hover:border-gray-400 px-6 py-3 text-lg font-semibold rounded-2xl disabled:opacity-50"
-          >
-            Bài sau
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+          )}
         </div>
       </div>
     </div>
