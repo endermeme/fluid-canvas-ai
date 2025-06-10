@@ -1,18 +1,29 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { Mic, MicOff, RefreshCw, Play, ArrowRight, ArrowLeft, Clock, Trophy, Volume2 } from 'lucide-react';
+import { 
+  Trophy, 
+  RefreshCw, 
+  Mic,
+  Clock,
+  ArrowLeft,
+  Play,
+  Pause,
+  SkipForward,
+  Star,
+  Volume2
+} from 'lucide-react';
 
 interface SpeakingCardsProps {
-  content: any;
+  data: any;
+  onBack: () => void;
   topic: string;
-  onBack?: () => void;
+  content: any;
 }
 
-interface SpeakingCard {
+interface Card {
   id: string;
   prompt: string;
   category: string;
@@ -20,297 +31,402 @@ interface SpeakingCard {
   timeLimit: number;
 }
 
-const SpeakingCardsTemplate: React.FC<SpeakingCardsProps> = ({ content, topic, onBack }) => {
-  const { toast } = useToast();
-  
-  const cards: SpeakingCard[] = content?.cards || [
-    { id: '1', prompt: 'Hãy kể về gia đình của bạn', category: 'Cá nhân', difficulty: 'easy', timeLimit: 60 },
-    { id: '2', prompt: 'Mô tả món ăn yêu thích của bạn', category: 'Ẩm thực', difficulty: 'easy', timeLimit: 45 },
-    { id: '3', prompt: 'Bạn nghĩ gì về biến đổi khí hậu?', category: 'Môi trường', difficulty: 'medium', timeLimit: 90 },
-    { id: '4', prompt: 'Kể về một kỷ niệm đáng nhớ', category: 'Cá nhân', difficulty: 'medium', timeLimit: 75 },
-    { id: '5', prompt: 'Giải thích tầm quan trọng của giáo dục', category: 'Xã hội', difficulty: 'hard', timeLimit: 120 }
-  ];
-  
+const SpeakingCardsTemplate: React.FC<SpeakingCardsProps> = ({ data, onBack, topic }) => {
+  const [cards, setCards] = useState<Card[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [isRecording, setIsRecording] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [isActive, setIsActive] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
-  const [cardStarted, setCardStarted] = useState(false);
-  const [completedCards, setCompletedCards] = useState<string[]>([]);
-  
-  const currentCard = cards[currentCardIndex];
-  
+  const [gameCompleted, setGameCompleted] = useState(false);
+  const [completedCards, setCompletedCards] = useState<number[]>([]);
+  const [totalScore, setTotalScore] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { toast } = useToast();
+
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (timeLeft > 0 && cardStarted) {
-      timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1);
-      }, 1000);
-    } else if (timeLeft === 0 && cardStarted) {
-      handleCardComplete();
+    if (data && data.cards) {
+      setCards(data.cards);
+      setTimeLeft(data.cards[0]?.timeLimit || 60);
     }
-    
+  }, [data]);
+
+  useEffect(() => {
+    if (isActive && !isPaused && timeLeft > 0) {
+      intervalRef.current = setInterval(() => {
+        setTimeLeft(time => time - 1);
+      }, 1000);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    }
+
+    if (timeLeft === 0 && isActive) {
+      handleTimeUp();
+    }
+
     return () => {
-      if (timer) clearTimeout(timer);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
-  }, [timeLeft, cardStarted]);
-  
+  }, [isActive, isPaused, timeLeft]);
+
   const startGame = () => {
     setGameStarted(true);
-  };
-  
-  const startCard = () => {
-    setCardStarted(true);
-    setTimeLeft(currentCard.timeLimit);
-    setIsRecording(true);
-    
     toast({
-      title: '🎤 Bắt đầu nói!',
-      description: `Bạn có ${currentCard.timeLimit} giây để hoàn thành`,
-      variant: 'default',
+      title: "🎤 Game bắt đầu!",
+      description: "Thực hành nói với các thẻ luyện tập!",
     });
   };
-  
-  const stopRecording = () => {
-    setIsRecording(false);
-    handleCardComplete();
-  };
-  
-  const handleCardComplete = () => {
-    setCardStarted(false);
-    setIsRecording(false);
-    setCompletedCards(prev => [...prev, currentCard.id]);
-    
+
+  const startTimer = () => {
+    setIsActive(true);
+    setIsPaused(false);
     toast({
-      title: '✅ Hoàn thành thẻ!',
-      description: 'Bạn đã hoàn thành thẻ này',
-      variant: 'default',
+      title: "⏰ Bắt đầu nói!",
+      description: `Bạn có ${timeLeft} giây để trả lời`,
     });
   };
-  
+
+  const pauseTimer = () => {
+    setIsPaused(true);
+    toast({
+      title: "⏸️ Đã tạm dừng",
+      description: "Timer đã được tạm dừng",
+    });
+  };
+
+  const resumeTimer = () => {
+    setIsPaused(false);
+    toast({
+      title: "▶️ Tiếp tục",
+      description: "Timer đã được tiếp tục",
+    });
+  };
+
+  const handleTimeUp = () => {
+    setIsActive(false);
+    setIsPaused(false);
+    setCompletedCards(prev => [...prev, currentCardIndex]);
+    
+    // Award points based on difficulty
+    const currentCard = cards[currentCardIndex];
+    let points = 0;
+    switch (currentCard.difficulty) {
+      case 'easy': points = 10; break;
+      case 'medium': points = 20; break;
+      case 'hard': points = 30; break;
+    }
+    setTotalScore(prev => prev + points);
+
+    toast({
+      title: "⏰ Hết giờ!",
+      description: `Bạn được ${points} điểm cho thẻ này`,
+    });
+
+    // Auto move to next card after 2 seconds
+    setTimeout(() => {
+      nextCard();
+    }, 2000);
+  };
+
   const nextCard = () => {
     if (currentCardIndex < cards.length - 1) {
-      setCurrentCardIndex(currentCardIndex + 1);
-      setCardStarted(false);
-      setTimeLeft(0);
+      const nextIndex = currentCardIndex + 1;
+      setCurrentCardIndex(nextIndex);
+      setTimeLeft(cards[nextIndex].timeLimit);
+      setIsActive(false);
+      setIsPaused(false);
+    } else {
+      // Game completed
+      setGameCompleted(true);
+      toast({
+        title: "🎊 Hoàn thành!",
+        description: `Bạn đã hoàn thành tất cả ${cards.length} thẻ!`,
+      });
     }
   };
-  
-  const prevCard = () => {
-    if (currentCardIndex > 0) {
-      setCurrentCardIndex(currentCardIndex - 1);
-      setCardStarted(false);
-      setTimeLeft(0);
-    }
+
+  const skipCard = () => {
+    setIsActive(false);
+    setIsPaused(false);
+    nextCard();
+    toast({
+      title: "⏭️ Đã bỏ qua",
+      description: "Chuyển sang thẻ tiếp theo",
+    });
   };
-  
+
   const resetGame = () => {
-    setGameStarted(false);
     setCurrentCardIndex(0);
-    setCardStarted(false);
-    setIsRecording(false);
-    setTimeLeft(0);
+    setTimeLeft(cards[0]?.timeLimit || 60);
+    setIsActive(false);
+    setIsPaused(false);
+    setGameStarted(false);
+    setGameCompleted(false);
     setCompletedCards([]);
+    setTotalScore(0);
   };
-  
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'text-green-600 bg-green-100 border-green-200';
-      case 'medium': return 'text-yellow-600 bg-yellow-100 border-yellow-200';
-      case 'hard': return 'text-red-600 bg-red-100 border-red-200';
-      default: return 'text-gray-600 bg-gray-100 border-gray-200';
+      case 'easy': return 'from-green-400 to-green-600';
+      case 'medium': return 'from-yellow-400 to-orange-500';
+      case 'hard': return 'from-red-400 to-red-600';
+      default: return 'from-gray-400 to-gray-600';
     }
   };
-  
-  const getDifficultyText = (difficulty: string) => {
+
+  const getDifficultyBadge = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'Dễ';
-      case 'medium': return 'Trung bình';
-      case 'hard': return 'Khó';
-      default: return 'Không xác định';
+      case 'easy': return 'bg-green-100 text-green-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'hard': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
-  
-  const progress = ((currentCardIndex + (cardStarted ? 1 : 0)) / cards.length) * 100;
-  
-  if (!gameStarted) {
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  if (!data) {
     return (
-      <div className="min-h-screen w-full bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl">
-          <Card className="text-center bg-white/95 backdrop-blur-md border border-white/30 shadow-2xl rounded-2xl p-8">
-            <div className="mb-8">
-              <Volume2 className="h-24 w-24 text-indigo-500 mx-auto mb-6 animate-pulse" />
-            </div>
-            
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Thẻ Luyện Nói
-            </h2>
-            <p className="text-xl text-gray-700 mb-2 font-medium">🗣️ Chủ đề: {topic}</p>
-            <p className="text-gray-600 mb-8 text-lg">Luyện tập kỹ năng nói với các chủ đề đa dạng</p>
-            
-            <div className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-6 mb-8">
-              <div className="grid grid-cols-2 gap-6 text-sm">
-                <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl">
-                  <Mic className="h-6 w-6 text-indigo-500" />
-                  <span className="font-medium text-gray-700">{cards.length} thẻ luyện tập</span>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl">
-                  <Clock className="h-6 w-6 text-purple-500" />
-                  <span className="font-medium text-gray-700">Có thời gian giới hạn</span>
-                </div>
-              </div>
-            </div>
-            
-            <Button 
-              onClick={startGame} 
-              className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white text-xl font-bold py-6 rounded-2xl"
-            >
-              🎤 Bắt đầu luyện tập
-            </Button>
-          </Card>
-        </div>
+      <div className="min-h-screen w-full bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center">
+        <Card className="p-8 max-w-md">
+          <div className="text-center">
+            <h3 className="text-xl font-bold mb-4">Đang tải game...</h3>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+          </div>
+        </Card>
       </div>
     );
   }
-  
+
+  const currentCard = cards[currentCardIndex];
+
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4">
-      <div className="max-w-4xl mx-auto h-full flex flex-col">
+    <div className="min-h-screen w-full bg-gradient-to-br from-green-50 via-white to-blue-50">
+      <div className="flex flex-col h-screen">
         {/* Header */}
-        <Card className="mb-6 bg-white/90 backdrop-blur-md border border-white/50 shadow-lg rounded-2xl flex-shrink-0">
-          <div className="p-6 flex flex-col lg:flex-row justify-between items-center gap-4">
-            <div className="text-center lg:text-left">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Thẻ Luyện Nói
-              </h2>
-              <p className="text-gray-600 text-lg font-medium">{topic}</p>
-            </div>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl">
-                <Volume2 className="h-6 w-6 text-indigo-500" />
-                <span className="font-bold text-indigo-700 text-xl">
-                  Thẻ {currentCardIndex + 1}/{cards.length}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl">
-                <Trophy className="h-6 w-6 text-green-500" />
-                <span className="font-bold text-green-700 text-xl">
-                  {completedCards.length} hoàn thành
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="px-6 pb-6">
-            <Progress value={progress} className="h-3 rounded-full" />
-            <p className="text-sm text-gray-500 mt-2 text-center font-medium">
-              Tiến độ: {Math.round(progress)}%
-            </p>
-          </div>
-        </Card>
-        
-        <div className="flex-1 flex items-center justify-center">
-          <div className="w-full max-w-2xl">
-            <Card className="p-8 bg-white/95 backdrop-blur-md border border-white/50 shadow-lg rounded-2xl">
-              <div className="flex justify-between items-start mb-6">
-                <div className="flex items-center gap-3">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getDifficultyColor(currentCard.difficulty)}`}>
-                    {getDifficultyText(currentCard.difficulty)}
-                  </span>
-                  <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full font-medium">
-                    {currentCard.category}
-                  </span>
-                </div>
-                
-                {cardStarted && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl">
-                    <Clock className={`h-5 w-5 ${timeLeft < 30 ? 'text-red-500' : 'text-blue-500'}`} />
-                    <span className={`font-bold text-lg ${timeLeft < 30 ? 'text-red-500 animate-pulse' : 'text-blue-500'}`}>
-                      {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-                    </span>
-                    {isRecording && (
-                      <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse ml-2"></div>
-                    )}
-                  </div>
-                )}
-              </div>
-              
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-800 mb-4 leading-relaxed">
-                  {currentCard.prompt}
-                </h3>
-                
-                {!cardStarted && (
-                  <p className="text-gray-600 text-lg">
-                    Thời gian: {currentCard.timeLimit} giây
-                  </p>
-                )}
-              </div>
-              
-              <div className="flex justify-center mb-8">
-                {!cardStarted ? (
-                  <Button 
-                    onClick={startCard} 
-                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-4 text-lg font-bold rounded-2xl shadow-lg transform transition-all duration-200 hover:scale-105"
-                  >
-                    <Mic className="mr-3 h-6 w-6" />
-                    Bắt đầu nói ({currentCard.timeLimit}s)
-                  </Button>
-                ) : (
-                  <Button 
-                    onClick={stopRecording} 
-                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-8 py-4 text-lg font-bold rounded-2xl shadow-lg"
-                    disabled={!isRecording}
-                  >
-                    <MicOff className="mr-3 h-6 w-6" />
-                    Dừng ghi âm
-                  </Button>
-                )}
-              </div>
-            </Card>
-          </div>
-        </div>
-        
-        {/* Navigation */}
-        <div className="flex justify-between items-center mt-6 flex-shrink-0">
-          <Button
-            onClick={prevCard}
-            disabled={currentCardIndex === 0}
-            variant="outline"
-            className="border-2 border-gray-300 hover:border-gray-400 px-6 py-3 text-lg font-semibold rounded-2xl disabled:opacity-50"
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            Thẻ trước
-          </Button>
-          
-          <div className="flex gap-4">
-            <Button 
-              onClick={resetGame} 
-              variant="outline"
-              className="border-2 border-gray-300 hover:border-gray-400 px-6 py-3 text-lg font-semibold rounded-2xl"
-            >
-              <RefreshCw className="mr-2 h-5 w-5" />
-              Chơi lại
-            </Button>
-            {onBack && (
-              <Button 
-                onClick={onBack} 
-                variant="outline"
-                className="border-2 border-gray-300 hover:border-gray-400 px-6 py-3 text-lg font-semibold rounded-2xl"
+        <Card className="m-4 p-4 bg-white/80 backdrop-blur-sm border-green-200 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Button
+                onClick={onBack}
+                variant="ghost"
+                className="mr-4 text-green-700 hover:bg-green-100"
               >
+                <ArrowLeft className="h-5 w-5 mr-2" />
                 Quay lại
               </Button>
+              <div className="bg-gradient-to-r from-green-500 to-blue-600 p-3 rounded-xl mr-4">
+                <Mic className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">{data.title}</h2>
+                <p className="text-gray-600">
+                  <span className="font-medium">{topic}</span> • 
+                  <span className="ml-2 text-green-600">{cards.length} thẻ luyện tập</span>
+                </p>
+              </div>
+            </div>
+            
+            {gameStarted && (
+              <div className="flex items-center gap-4 text-lg font-medium">
+                <div className="flex items-center text-green-600">
+                  <Clock className="mr-2 h-5 w-5" />
+                  {currentCardIndex + 1}/{cards.length}
+                </div>
+                <div className="flex items-center text-blue-600">
+                  <Star className="mr-2 h-5 w-5" />
+                  {totalScore} điểm
+                </div>
+              </div>
             )}
           </div>
-          
-          <Button
-            onClick={nextCard}
-            disabled={currentCardIndex === cards.length - 1}
-            variant="outline"
-            className="border-2 border-gray-300 hover:border-gray-400 px-6 py-3 text-lg font-semibold rounded-2xl disabled:opacity-50"
-          >
-            Thẻ sau
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+        </Card>
+
+        {/* Game Content */}
+        <div className="flex-1 p-4">
+          {!gameStarted ? (
+            <div className="flex items-center justify-center h-full">
+              <Card className="p-8 max-w-md bg-white/90 backdrop-blur-sm shadow-xl">
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-green-500 to-blue-600 p-4 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                    <Mic className="h-10 w-10 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4">Thẻ Luyện Nói</h3>
+                  <p className="text-gray-600 mb-6">
+                    Thực hành kỹ năng nói với {cards.length} thẻ luyện tập. Mỗi thẻ có thời gian giới hạn khác nhau.
+                  </p>
+                  <Button onClick={startGame} size="lg" className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
+                    Bắt Đầu Game
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          ) : gameCompleted ? (
+            <div className="flex items-center justify-center h-full">
+              <Card className="p-8 max-w-2xl bg-white/90 backdrop-blur-sm shadow-xl">
+                <div className="text-center mb-6">
+                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                    <Trophy className="h-10 w-10 text-white" />
+                  </div>
+                  <h3 className="text-3xl font-bold text-gray-800 mb-2">
+                    Hoàn thành! Tổng điểm: {totalScore}
+                  </h3>
+                  <p className="text-gray-600">
+                    Bạn đã hoàn thành {completedCards.length}/{cards.length} thẻ luyện nói
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-green-100 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-green-700">{completedCards.length}</div>
+                    <div className="text-sm text-green-600">Thẻ hoàn thành</div>
+                  </div>
+                  <div className="bg-blue-100 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-blue-700">{totalScore}</div>
+                    <div className="text-sm text-blue-600">Tổng điểm</div>
+                  </div>
+                  <div className="bg-purple-100 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-purple-700">
+                      {Math.round((completedCards.length / cards.length) * 100)}%
+                    </div>
+                    <div className="text-sm text-purple-600">Hoàn thành</div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 justify-center">
+                  <Button onClick={resetGame} variant="outline" className="border-green-300 text-green-700 hover:bg-green-50">
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Chơi lại
+                  </Button>
+                  <Button onClick={onBack} className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
+                    Kết thúc
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <div className="max-w-4xl mx-auto">
+              {/* Progress Bar */}
+              <Card className="p-4 mb-6 bg-white/90 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-600">
+                    Tiến độ: {currentCardIndex + 1}/{cards.length}
+                  </span>
+                  <span className="text-sm font-medium text-gray-600">
+                    {Math.round(((currentCardIndex + 1) / cards.length) * 100)}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-green-500 to-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${((currentCardIndex + 1) / cards.length) * 100}%` }}
+                  ></div>
+                </div>
+              </Card>
+
+              {/* Main Card */}
+              <Card className={`p-8 bg-gradient-to-br ${getDifficultyColor(currentCard.difficulty)} text-white shadow-xl mb-6`}>
+                <div className="text-center mb-6">
+                  <div className="flex items-center justify-center mb-4">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getDifficultyBadge(currentCard.difficulty).replace('text-', 'text-').replace('bg-', 'bg-white/20 ')}`}>
+                      {currentCard.category}
+                    </span>
+                    <span className="mx-3">•</span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium bg-white/20`}>
+                      {currentCard.difficulty.toUpperCase()}
+                    </span>
+                  </div>
+                  
+                  <h3 className="text-3xl font-bold mb-4">Câu hỏi luyện nói</h3>
+                  <p className="text-xl font-medium leading-relaxed">
+                    {currentCard.prompt}
+                  </p>
+                </div>
+
+                {/* Timer */}
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center bg-white/20 rounded-full px-6 py-3">
+                    <Clock className="h-6 w-6 mr-2" />
+                    <span className="text-2xl font-bold">
+                      {formatTime(timeLeft)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Controls */}
+                <div className="flex justify-center gap-4">
+                  {!isActive ? (
+                    <Button
+                      onClick={startTimer}
+                      size="lg"
+                      className="bg-white/20 hover:bg-white/30 border-white/50"
+                      variant="outline"
+                    >
+                      <Play className="mr-2 h-5 w-5" />
+                      Bắt đầu nói
+                    </Button>
+                  ) : (
+                    <>
+                      {isPaused ? (
+                        <Button
+                          onClick={resumeTimer}
+                          size="lg"
+                          className="bg-white/20 hover:bg-white/30 border-white/50"
+                          variant="outline"
+                        >
+                          <Play className="mr-2 h-5 w-5" />
+                          Tiếp tục
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={pauseTimer}
+                          size="lg"
+                          className="bg-white/20 hover:bg-white/30 border-white/50"
+                          variant="outline"
+                        >
+                          <Pause className="mr-2 h-5 w-5" />
+                          Tạm dừng
+                        </Button>
+                      )}
+                    </>
+                  )}
+                  
+                  <Button
+                    onClick={skipCard}
+                    size="lg"
+                    className="bg-white/20 hover:bg-white/30 border-white/50"
+                    variant="outline"
+                  >
+                    <SkipForward className="mr-2 h-5 w-5" />
+                    Bỏ qua
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Speaking Tips */}
+              <Card className="p-4 bg-white/90 backdrop-blur-sm">
+                <h4 className="font-semibold text-gray-700 mb-2 flex items-center">
+                  <Volume2 className="mr-2 h-5 w-5 text-blue-600" />
+                  Gợi ý khi nói:
+                </h4>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• Nói rõ ràng và từ tốn</li>
+                  <li>• Sử dụng các từ nối để liên kết ý tưởng</li>
+                  <li>• Đưa ra ví dụ cụ thể để minh họa</li>
+                  <li>• Sử dụng hết thời gian được cho</li>
+                </ul>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
     </div>
