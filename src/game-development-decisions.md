@@ -4,6 +4,22 @@
 ## Ngày: 2025-06-10
 
 ### Thay đổi thực hiện:
+1. **Sửa lỗi game Mở Hộp Bí Ẩn** - Dialog câu hỏi không hiện, màu sắc vẫn xám
+2. **Sửa logic câu hỏi** - Đảm bảo dialog xuất hiện khi mở hộp câu hỏi
+3. **Cải thiện màu sắc** - Dùng màu tươi sáng: cyan, blue, green, orange thay vì xám
+4. **Tối ưu UI** - RadioGroup và dialog hiển thị chính xác
+
+### File thay đổi:
+- templates/OpenBoxTemplate.tsx (sửa logic dialog và màu sắc hoàn chỉnh)
+
+### Loại thay đổi:
+- Sửa lỗi: Dialog câu hỏi không hiện khi mở hộp
+- Sửa lỗi: Màu sắc vẫn xám thay vì tươi sáng
+- Cải thiện: Logic xử lý câu hỏi và UI
+
+## Trước đó - Ngày: 2025-06-10
+
+### Thay đổi thực hiện:
 1. **Cải thiện game Mở Hộp Bí Ẩn** - Bỏ bonus box, chỉ giữ câu hỏi và thử thách
 2. **Thêm dạng câu hỏi mới** - Câu hỏi 4 lựa chọn và câu hỏi đúng/sai với RadioGroup
 3. **Cải thiện màu sắc** - Dùng màu tươi hơn: cyan, blue, indigo thay vì tím đậm

@@ -124,9 +124,9 @@ const OpenBoxTemplate: React.FC<OpenBoxProps> = ({ content, topic, onBack }) => 
       setCurrentQuestion(box);
       setShowQuestionDialog(true);
       setSelectedAnswer('');
-    } else {
-      // Xử lý challenge như cũ
-      processBoxOpening(box);
+    } else if (box.type === 'challenge') {
+      // Xử lý challenge - tự động cộng điểm
+      processBoxOpening(box, true);
     }
   };
   
