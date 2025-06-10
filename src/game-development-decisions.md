@@ -1,6 +1,16 @@
 
 # Các Quyết Định Phát Triển Game
 
+## 2025-01-10: Sửa lỗi game "Progressive Image Reveal"
+- **Vấn đề**: Điểm số quá cao (có thể > 100), giao diện bị lỗi, load ảnh chậm
+- **Sửa chữa**:
+  - Giới hạn điểm max = 100 điểm mỗi câu
+  - Fix state management cho việc load ảnh mới
+  - Cải thiện UI responsiveness và error handling
+  - Đảm bảo ảnh load xong mới cho chơi câu tiếp theo
+- **Tệp**: `ProgressiveRevealTemplate.tsx`
+- **Trạng thái**: Đã sửa
+
 ## 2025-01-10: Tạo game "Progressive Image Reveal" mới
 - **Loại**: Game đoán hình ảnh với cơ chế unique
 - **Tính năng**: 
