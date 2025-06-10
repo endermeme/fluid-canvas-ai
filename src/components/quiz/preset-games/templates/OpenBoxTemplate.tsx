@@ -116,21 +116,30 @@ const OpenBoxTemplate: React.FC<OpenBoxProps> = ({ content, topic, onBack }) => 
   const [currentQuestion, setCurrentQuestion] = useState<Box | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
   
+  console.log('Current state:', { showQuestionDialog, currentQuestion, selectedAnswer });
+  
   const openBox = (boxId: string) => {
+    console.log('Opening box:', boxId);
     const box = boxes.find(b => b.id === boxId);
-    if (!box || box.opened) return;
+    if (!box || box.opened) {
+      console.log('Box not found or already opened:', box);
+      return;
+    }
     
     if (box.type === 'multiple_choice' || box.type === 'true_false') {
+      console.log('Opening question box:', box);
       setCurrentQuestion(box);
       setShowQuestionDialog(true);
       setSelectedAnswer('');
     } else if (box.type === 'challenge') {
-      // Xử lý challenge - tự động cộng điểm
+      console.log('Opening challenge box:', box);
       processBoxOpening(box, true);
     }
   };
   
   const processBoxOpening = (box: Box, isCorrect?: boolean) => {
+    console.log('Processing box opening:', box, 'isCorrect:', isCorrect);
+    
     setBoxes(prev => prev.map(b => 
       b.id === box.id ? { ...b, opened: true } : b
     ));
@@ -173,7 +182,12 @@ const OpenBoxTemplate: React.FC<OpenBoxProps> = ({ content, topic, onBack }) => 
   };
   
   const handleAnswerSubmit = () => {
-    if (!currentQuestion || !selectedAnswer) return;
+    console.log('Submitting answer:', selectedAnswer, 'for question:', currentQuestion);
+    
+    if (!currentQuestion || !selectedAnswer) {
+      console.log('Missing question or answer');
+      return;
+    }
     
     let isCorrect = false;
     
@@ -182,6 +196,8 @@ const OpenBoxTemplate: React.FC<OpenBoxProps> = ({ content, topic, onBack }) => 
     } else if (currentQuestion.type === 'true_false') {
       isCorrect = selectedAnswer === currentQuestion.correctAnswer;
     }
+    
+    console.log('Answer is correct:', isCorrect);
     
     processBoxOpening(currentQuestion, isCorrect);
     setShowQuestionDialog(false);
@@ -222,7 +238,7 @@ const OpenBoxTemplate: React.FC<OpenBoxProps> = ({ content, topic, onBack }) => 
   
   const getBoxColor = (type: string, opened: boolean) => {
     if (!opened) {
-      return 'bg-gradient-to-br from-indigo-400 to-indigo-600 hover:from-indigo-300 hover:to-indigo-500 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-indigo-200';
+      return 'bg-gradient-to-br from-cyan-400 to-cyan-600 hover:from-cyan-300 hover:to-cyan-500 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-cyan-200';
     }
     
     switch (type) {
