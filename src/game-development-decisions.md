@@ -1,6 +1,19 @@
 
 # Các Quyết Định Phát Triển Game
 
+## 2025-01-11: Cải tiến GameSettings - Loại bỏ "Learn interactively" và tăng kích thước
+- **Thay đổi**: Redesign hoàn toàn GameSettings để hiện đại và user-friendly hơn
+- **Cải tiến**:
+  - Loại bỏ text "Learn interactively" không phù hợp
+  - Tăng kích thước tổng thể của form settings (max-w-2xl)
+  - Thêm header gradient với icon game tương ứng từng loại
+  - Cải thiện placeholder text phù hợp với từng loại game
+  - Typography và spacing lớn hơn, rõ ràng hơn
+  - Color scheme xanh da trời nhất quán
+  - Animation và hover effects mượt mà
+- **Tệp sửa đổi**: `GameSettings.tsx` - redesign toàn bộ component
+- **Trạng thái**: Đã hoàn thành
+
 ## 2025-01-11: Cải thiện layout và căn giữa giao diện
 - **Thay đổi**: Điều chỉnh layout HomePage và GameSelector để hiển thị ở giữa màn hình
 - **Cải tiến**:
@@ -74,3 +87,5 @@
 - **Bỏ hoàn toàn mọi cơ chế tìm kiếm và xử lý ảnh**
 - **Giao diện phải hiện đại, căn giữa và cân bằng trên màn hình**
 - **Sử dụng tông màu xanh da trời làm chủ đạo với các điểm nhấn khác**
+- **Settings phải rõ ràng, lớn và phù hợp với từng loại game**
+- **Loại bỏ các text placeholder không phù hợp như "Learn interactively"**
