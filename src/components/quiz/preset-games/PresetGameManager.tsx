@@ -124,12 +124,14 @@ Output must be valid JSON. `;
         case 'pictionary':
           gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "URL ảnh từ internet", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
 
-QUAN TRỌNG cho game Pictionary: 
-- imageUrl PHẢI là URL ảnh thật từ https://commons.wikimedia.org
+BẮT BUỘC cho game Pictionary: 
+- imageUrl CHỈ ĐƯỢC SỬ DỤNG URL từ https://commons.wikimedia.org
+- TUYỆT ĐỐI KHÔNG được dùng upload.wikimedia.org hay bất kỳ domain nào khác
 - Tìm ảnh từ Wikimedia Commons phù hợp với chủ đề
 - KHÔNG sử dụng placeholder hay ảnh giả
 - Mỗi ảnh phải phù hợp với đáp án và chủ đề
-- Sử dụng URL dạng: https://commons.wikimedia.org/...`;
+- CHỈ SỬ DỤNG URL dạng: https://commons.wikimedia.org/wiki/File:...
+- VÍ DỤ URL hợp lệ: https://commons.wikimedia.org/wiki/File:Example.jpg`;
           break;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
@@ -137,12 +139,14 @@ QUAN TRỌNG cho game Pictionary:
         case 'progressivereveal':
           gamePrompt += `JSON format: { "title": "title", "description": "description", "items": [{"imageUrl": "URL ảnh thật từ Wikimedia Commons", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "revealLevels": 5, "revealInterval": 3000} }
 
-QUAN TRỌNG cho game Progressive Reveal:
-- imageUrl PHẢI là URL ảnh thật từ https://commons.wikimedia.org
+BẮT BUỘC cho game Progressive Reveal:
+- imageUrl CHỈ ĐƯỢC SỬ DỤNG URL từ https://commons.wikimedia.org
+- TUYỆT ĐỐI KHÔNG được dùng upload.wikimedia.org hay bất kỳ domain nào khác
 - Tìm ảnh có độ phân giải cao, rõ nét từ Wikimedia Commons để phù hợp với cơ chế blur
 - Ảnh phải dễ nhận diện và phù hợp với chủ đề
 - Mỗi ảnh phải có 4 đáp án nhiều lựa chọn hợp lý
-- Sử dụng URL dạng: https://commons.wikimedia.org/...
+- CHỈ SỬ DỤNG URL dạng: https://commons.wikimedia.org/wiki/File:...
+- VÍ DỤ URL hợp lệ: https://commons.wikimedia.org/wiki/File:Example.jpg
 - KHÔNG sử dụng placeholder hay ảnh giả`;
           break;
       }

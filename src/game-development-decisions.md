@@ -1,6 +1,13 @@
 
 # Các Quyết Định Phát Triển Game
 
+## 2025-01-10: Cố định URL ảnh trong prompt Gemini
+- **Thay đổi**: Cố định trong prompt gửi cho Gemini rằng PHẢI dùng URL từ `https://commons.wikimedia.org`
+- **Áp dụng cho**: Pictionary, ProgressiveReveal và các game ảnh khác
+- **Lý do**: Đảm bảo Gemini không tự ý dùng upload.wikimedia.org hay URL khác
+- **Tệp sửa đổi**: `PresetGameManager.tsx` - cập nhật prompt AI với yêu cầu bắt buộc
+- **Trạng thái**: Đã cập nhật với prompt bắt buộc
+
 ## 2025-01-10: Cập nhật URL ảnh từ commons.wikimedia.org
 - **Thay đổi**: Tất cả game sử dụng ảnh phải dùng URL từ `https://commons.wikimedia.org` 
 - **Áp dụng cho**: Pictionary, ProgressiveReveal và các game ảnh khác
@@ -69,4 +76,4 @@
 - Đảm bảo syntax hợp lệ cho tất cả file TypeScript/TSX
 - Tất cả game mới phải hỗ trợ cả mobile và PC (click/touch only)
 - Sử dụng Gemini API để lấy nội dung thay vì dữ liệu mẫu tĩnh
-- **URL ảnh phải dùng format: https://commons.wikimedia.org cho tất cả game về ảnh**
+- **URL ảnh PHẢI được cố định trong prompt gửi cho Gemini: chỉ được dùng https://commons.wikimedia.org cho tất cả game về ảnh**
