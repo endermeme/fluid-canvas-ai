@@ -125,11 +125,13 @@ Output must be valid JSON. `;
           gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "direct_image_URL", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
 
 SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
-- Tìm kiếm ảnh liên quan đến chủ đề bằng Google Search
-- Lấy URL ảnh trực tiếp từ kết quả tìm kiếm
-- Đảm bảo ảnh có chất lượng tốt và rõ nét
-- Chỉ sử dụng ảnh có URL trực tiếp (jpg, png, gif, webp)
-- KHÔNG sử dụng link trang web, chỉ dùng link ảnh trực tiếp`;
+- PHẢI sử dụng Google Search tool để tìm kiếm ảnh liên quan đến chủ đề
+- Tìm ảnh có chất lượng cao, rõ nét, dễ nhận diện
+- Lấy URL ảnh trực tiếp từ kết quả search (jpg, png, gif, webp)
+- ĐẢM BẢO ảnh phù hợp 100% với chủ đề được yêu cầu
+- KHÔNG sử dụng bất kỳ URL nào từ commons.wikimedia.org
+- Ưu tiên ảnh từ các trang web uy tín có chất lượng tốt
+- Mỗi ảnh phải rõ ràng, dễ nhận diện và phù hợp với đáp án`;
           break;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
@@ -138,14 +140,14 @@ SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
           gamePrompt += `JSON format: { "title": "title", "description": "description", "items": [{"imageUrl": "direct_image_URL", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "revealLevels": 5, "revealInterval": 3000} }
 
 SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
-- Tìm kiếm ảnh liên quan đến chủ đề bằng Google Search
-- Lấy URL ảnh trực tiếp từ kết quả tìm kiếm web
-- Đảm bảo ảnh có độ phân giải cao, rõ nét cho cơ chế blur
-- Ảnh phải dễ nhận diện và phù hợp với chủ đề
-- Chỉ sử dụng URL ảnh trực tiếp (jpg, png, gif, webp)
-- KHÔNG sử dụng link trang web, chỉ dùng link ảnh có thể load được
-- Ưu tiên ảnh có kích thước lớn hơn 500px
-- Mỗi ảnh phải có 4 đáp án nhiều lựa chọn hợp lý`;
+- BẮT BUỘC phải sử dụng Google Search tool để tìm kiếm ảnh
+- Tìm ảnh có độ phân giải cao, rõ nét, chất lượng tốt
+- ĐẢM BẢO ảnh hoàn toàn phù hợp với chủ đề được yêu cầu
+- Lấy URL ảnh trực tiếp từ web, KHÔNG sử dụng commons.wikimedia.org
+- Ưu tiên ảnh từ các website uy tín, có thể search được
+- Ảnh phải dễ nhận diện ngay cả khi bị blur
+- Chỉ sử dụng URL ảnh có thể truy cập trực tiếp (jpg, png, gif, webp)
+- Mỗi ảnh phải có 4 đáp án hợp lý và rõ ràng`;
           break;
       }
 

@@ -1,5 +1,14 @@
-
 # Các Quyết Định Phát Triển Game
+
+## 2025-01-10: Fix prompt để loại bỏ hoàn toàn Wikimedia Commons
+- **Vấn đề**: Mặc dù đã tích hợp Google Search, prompt vẫn còn tham chiếu đến commons.wikimedia.org
+- **Sửa chữa**: 
+  - Cập nhật prompt trong `PresetGameManager.tsx` để BẮT BUỘC sử dụng Google Search
+  - Loại bỏ hoàn toàn mọi tham chiếu đến Wikimedia Commons
+  - Thêm yêu cầu rõ ràng về chất lượng và độ phù hợp của ảnh
+  - Đảm bảo AI chỉ tìm ảnh từ Google Search, không dùng nguồn cũ
+- **Tệp sửa đổi**: `PresetGameManager.tsx` - loại bỏ hoàn toàn Wikimedia Commons khỏi prompt
+- **Trạng thái**: Đã cập nhật prompt để chỉ sử dụng Google Search
 
 ## 2025-01-10: Tích hợp Google Search để tìm ảnh cho Progressive Reveal
 - **Thay đổi**: Bỏ cơ chế tìm ảnh cũ từ Wikimedia Commons, chuyển sang sử dụng Google Search tool trong Gemini API
@@ -15,7 +24,7 @@
 - **Tệp sửa đổi**: 
   - `PresetGameManager.tsx` - cập nhật prompt để sử dụng Google Search
   - `ProgressiveRevealTemplate.tsx` - đơn giản hoá xử lý URL ảnh
-- **Trạng thái**: Đang implement hệ thống mới với Google Search
+- **Trạng thái**: Đã implement và fix prompt để loại bỏ hoàn toàn Wikimedia Commons
 
 ## 2025-01-10: Fix lỗi URL ảnh Wikimedia Commons - Chuyển sang URL trực tiếp (Lần 3)
 - **Vấn đề**: Vẫn dùng Special:FilePath thay vì URL ảnh trực tiếp thực sự
@@ -140,3 +149,5 @@
 - **Sử dụng Google Search tool trong Gemini 2.0 để tìm ảnh thực tế từ web**
 - **Bỏ cơ chế Wikimedia Commons cũ, chuyển sang tìm ảnh trực tiếp từ Google Search**
 - **AI sẽ tự động search và validate ảnh phù hợp với chủ đề game**
+
+</edits_to_apply>
