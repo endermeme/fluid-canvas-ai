@@ -125,23 +125,24 @@ Output must be valid JSON. `;
           gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "URL ảnh từ internet", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
 
 QUAN TRỌNG cho game Pictionary: 
-- imageUrl PHẢI là URL ảnh thật từ internet dạng link
-- Tìm ảnh từ các nguồn internet phù hợp với chủ đề
+- imageUrl PHẢI là URL ảnh thật từ https://commons.wikimedia.org
+- Tìm ảnh từ Wikimedia Commons phù hợp với chủ đề
 - KHÔNG sử dụng placeholder hay ảnh giả
-- Mỗi ảnh phải phù hợp với đáp án và chủ đề`;
+- Mỗi ảnh phải phù hợp với đáp án và chủ đề
+- Sử dụng URL dạng: https://commons.wikimedia.org/...`;
           break;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
           break;
         case 'progressivereveal':
-          gamePrompt += `JSON format: { "title": "title", "description": "description", "items": [{"imageUrl": "URL ảnh thật từ Wikimedia Commons hoặc Wikipedia", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "revealLevels": 5, "revealInterval": 3000} }
+          gamePrompt += `JSON format: { "title": "title", "description": "description", "items": [{"imageUrl": "URL ảnh thật từ Wikimedia Commons", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "revealLevels": 5, "revealInterval": 3000} }
 
 QUAN TRỌNG cho game Progressive Reveal:
-- imageUrl PHẢI là URL ảnh thật từ Wikimedia Commons hoặc Wikipedia
-- Tìm ảnh có độ phân giải cao, rõ nét để phù hợp với cơ chế blur
+- imageUrl PHẢI là URL ảnh thật từ https://commons.wikimedia.org
+- Tìm ảnh có độ phân giải cao, rõ nét từ Wikimedia Commons để phù hợp với cơ chế blur
 - Ảnh phải dễ nhận diện và phù hợp với chủ đề
 - Mỗi ảnh phải có 4 đáp án nhiều lựa chọn hợp lý
-- Sử dụng URL dạng: https://upload.wikimedia.org/wikipedia/commons/...
+- Sử dụng URL dạng: https://commons.wikimedia.org/...
 - KHÔNG sử dụng placeholder hay ảnh giả`;
           break;
       }
