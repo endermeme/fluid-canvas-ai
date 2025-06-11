@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -54,9 +53,11 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
   const maxBlur = data?.settings?.revealLevels || 5;
   const userTimePerQuestion = data?.settings?.timePerQuestion || 30;
 
-  // Convert Wikimedia Commons URL to direct image URL
+  // Convert Wikimedia Commons URL to direct image URL - Fixed version
   const getDirectImageUrl = (wikiUrl: string): string => {
     if (!wikiUrl) return '/placeholder.svg';
+    
+    console.log('Original URL:', wikiUrl);
     
     // If already a direct URL, return it
     if (wikiUrl.includes('upload.wikimedia.org') || wikiUrl.includes('.jpg') || wikiUrl.includes('.png')) {
@@ -65,15 +66,26 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
     
     // Convert commons.wikimedia.org URL to direct image URL
     if (wikiUrl.includes('commons.wikimedia.org/wiki/File:')) {
-      const fileName = wikiUrl.split('File:')[1];
-      // Convert to MD5 hash based URL structure used by Wikimedia
-      const firstChar = fileName.charAt(0).toLowerCase();
-      const secondChar = fileName.charAt(1).toLowerCase();
-      
-      // Use the Special:FilePath API which automatically redirects to the actual file
-      return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=800`;
+      try {
+        const fileName = wikiUrl.split('File:')[1];
+        if (!fileName) return '/placeholder.svg';
+        
+        // Method 1: Use Special:FilePath API (most reliable)
+        const directUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=800`;
+        console.log('Converted to direct URL:', directUrl);
+        return directUrl;
+      } catch (error) {
+        console.error('Error converting URL:', error);
+        return '/placeholder.svg';
+      }
     }
     
+    // If it's already a Special:FilePath URL, just ensure proper encoding
+    if (wikiUrl.includes('Special:FilePath')) {
+      return wikiUrl;
+    }
+    
+    console.warn('Unknown URL format:', wikiUrl);
     return '/placeholder.svg';
   };
 
@@ -356,9 +368,26 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
                     maxWidth: '100%',
                     maxHeight: '100%'
                   }}
-                  onLoad={() => setImageLoaded(true)}
+                  onLoad={() => {
+                    console.log('Image loaded successfully:', currentImageSrc);
+                    setImageLoaded(true);
+                  }}
                   onError={(e) => {
-                    console.warn('Image load error, using placeholder');
+                    console.error('Image load error for URL:', currentImageSrc);
+                    
+                    // Try alternative conversion method
+                    if (currentItem?.imageUrl && currentItem.imageUrl.includes('File:')) {
+                      const fileName = currentItem.imageUrl.split('File:')[1];
+                      const fallbackUrl = `https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/${encodeURIComponent(fileName)}/800px-${fileName}`;
+                      console.log('Trying fallback URL:', fallbackUrl);
+                      
+                      if (e.currentTarget.src !== fallbackUrl && e.currentTarget.src !== '/placeholder.svg') {
+                        e.currentTarget.src = fallbackUrl;
+                        return;
+                      }
+                    }
+                    
+                    console.warn('Using placeholder image');
                     e.currentTarget.src = '/placeholder.svg';
                     setImageLoaded(true);
                   }}
