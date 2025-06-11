@@ -1,6 +1,18 @@
 
 # Các Quyết Định Phát Triển Game
 
+## 2025-01-11: Cải tiến giao diện HomePage hiện đại
+- **Quyết định**: Redesign toàn bộ giao diện HomePage để nhất quán với GameSelector
+- **Thay đổi chính**:
+  - Thêm hero section với gradient và typography hiện đại
+  - Redesign main action cards với design card đẹp mắt hơn
+  - Cải thiện layout để dàn đều toàn màn hình
+  - Thêm feature highlights cho từng loại game
+  - Cải thiện hover effects và animations
+  - Thiết kế responsive tốt hơn
+- **Tệp sửa đổi**: `HomePage.tsx` - redesign toàn bộ UI
+- **Trạng thái**: Đã hoàn thành redesign hiện đại
+
 ## 2025-01-11: Tái thiết kế giao diện GameSelector hiện đại
 - **Quyết định**: Redesign toàn bộ giao diện preset games để hiện đại và dày dặn hơn
 - **Thay đổi chính**:
