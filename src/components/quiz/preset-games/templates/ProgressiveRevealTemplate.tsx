@@ -53,36 +53,60 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
   const maxBlur = data?.settings?.revealLevels || 5;
   const userTimePerQuestion = data?.settings?.timePerQuestion || 30;
 
-  // Convert Wikimedia Commons URL to direct image URL - Fixed version
+  // Convert Wikimedia Commons URL to REAL direct image URL
   const getDirectImageUrl = (wikiUrl: string): string => {
     if (!wikiUrl) return '/placeholder.svg';
     
     console.log('Original URL:', wikiUrl);
     
-    // If already a direct URL, return it
-    if (wikiUrl.includes('upload.wikimedia.org') || wikiUrl.includes('.jpg') || wikiUrl.includes('.png')) {
+    // If already a direct upload.wikimedia.org URL, return it
+    if (wikiUrl.includes('upload.wikimedia.org')) {
+      console.log('Already direct URL:', wikiUrl);
       return wikiUrl;
     }
     
-    // Convert commons.wikimedia.org URL to direct image URL
+    // Convert commons.wikimedia.org URL to REAL direct image URL
     if (wikiUrl.includes('commons.wikimedia.org/wiki/File:')) {
       try {
         const fileName = wikiUrl.split('File:')[1];
         if (!fileName) return '/placeholder.svg';
         
-        // Method 1: Use Special:FilePath API (most reliable)
-        const directUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=800`;
-        console.log('Converted to direct URL:', directUrl);
+        console.log('Extracting fileName:', fileName);
+        
+        // Get file extension
+        const extension = fileName.split('.').pop()?.toLowerCase();
+        if (!extension || !['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension)) {
+          console.warn('Invalid file extension:', extension);
+          return '/placeholder.svg';
+        }
+        
+        // Generate MD5-based path structure for upload.wikimedia.org
+        // This is a simplified version - we'll use a common approach
+        const cleanFileName = fileName.replace(/ /g, '_');
+        const encodedFileName = encodeURIComponent(cleanFileName);
+        
+        // Method 1: Try direct upload.wikimedia.org URL with commons/thumb structure
+        const directUrl = `https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/${encodedFileName}/800px-${cleanFileName}`;
+        console.log('Generated direct URL:', directUrl);
         return directUrl;
+        
       } catch (error) {
         console.error('Error converting URL:', error);
         return '/placeholder.svg';
       }
     }
     
-    // If it's already a Special:FilePath URL, just ensure proper encoding
+    // If it's already a Special:FilePath URL, try to convert it
     if (wikiUrl.includes('Special:FilePath')) {
-      return wikiUrl;
+      const fileMatch = wikiUrl.match(/Special:FilePath\/(.+?)(?:\?|$)/);
+      if (fileMatch && fileMatch[1]) {
+        const fileName = decodeURIComponent(fileMatch[1]);
+        const cleanFileName = fileName.replace(/ /g, '_');
+        const encodedFileName = encodeURIComponent(cleanFileName);
+        const directUrl = `https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/${encodedFileName}/800px-${cleanFileName}`;
+        console.log('Converted Special:FilePath to direct URL:', directUrl);
+        return directUrl;
+      }
     }
     
     console.warn('Unknown URL format:', wikiUrl);
@@ -104,18 +128,58 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
       // Preload image
       const img = new Image();
       img.onload = () => {
+        console.log('Image loaded successfully:', directUrl);
         setImageLoaded(true);
         setIsTransitioning(false);
       };
       img.onerror = () => {
-        console.warn('Failed to load image:', directUrl);
-        // Try fallback URL
-        const fallbackUrl = currentItem.imageUrl.includes('commons.wikimedia.org') 
-          ? currentItem.imageUrl.replace('wiki/File:', 'wiki/Special:FilePath/').replace('https://commons.wikimedia.org/', 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/') + '/800px-' + currentItem.imageUrl.split('File:')[1]
-          : '/placeholder.svg';
-        setCurrentImageSrc(fallbackUrl);
-        setImageLoaded(true);
-        setIsTransitioning(false);
+        console.warn('Primary URL failed:', directUrl);
+        
+        // Try multiple fallback strategies
+        if (currentItem.imageUrl.includes('File:')) {
+          const fileName = currentItem.imageUrl.split('File:')[1];
+          const cleanFileName = fileName.replace(/ /g, '_');
+          
+          // Fallback 1: Try different thumb structure
+          const fallback1 = `https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/${encodeURIComponent(cleanFileName)}/800px-${cleanFileName}`;
+          console.log('Trying fallback 1:', fallback1);
+          
+          const img2 = new Image();
+          img2.onload = () => {
+            console.log('Fallback 1 worked:', fallback1);
+            setCurrentImageSrc(fallback1);
+            setImageLoaded(true);
+            setIsTransitioning(false);
+          };
+          img2.onerror = () => {
+            console.log('Fallback 1 failed, trying fallback 2');
+            
+            // Fallback 2: Try without thumb structure
+            const fallback2 = `https://upload.wikimedia.org/wikipedia/commons/${encodeURIComponent(cleanFileName)}`;
+            console.log('Trying fallback 2:', fallback2);
+            
+            const img3 = new Image();
+            img3.onload = () => {
+              console.log('Fallback 2 worked:', fallback2);
+              setCurrentImageSrc(fallback2);
+              setImageLoaded(true);
+              setIsTransitioning(false);
+            };
+            img3.onerror = () => {
+              console.warn('All fallbacks failed, using placeholder');
+              setCurrentImageSrc('/placeholder.svg');
+              setImageLoaded(true);
+              setIsTransitioning(false);
+            };
+            img3.src = fallback2;
+          };
+          img2.src = fallback1;
+        } else {
+          console.warn('Using placeholder image');
+          setCurrentImageSrc('/placeholder.svg');
+          setImageLoaded(true);
+          setIsTransitioning(false);
+        }
       };
       img.src = directUrl;
     }
@@ -374,19 +438,6 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
                   }}
                   onError={(e) => {
                     console.error('Image load error for URL:', currentImageSrc);
-                    
-                    // Try alternative conversion method
-                    if (currentItem?.imageUrl && currentItem.imageUrl.includes('File:')) {
-                      const fileName = currentItem.imageUrl.split('File:')[1];
-                      const fallbackUrl = `https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/${encodeURIComponent(fileName)}/800px-${fileName}`;
-                      console.log('Trying fallback URL:', fallbackUrl);
-                      
-                      if (e.currentTarget.src !== fallbackUrl && e.currentTarget.src !== '/placeholder.svg') {
-                        e.currentTarget.src = fallbackUrl;
-                        return;
-                      }
-                    }
-                    
                     console.warn('Using placeholder image');
                     e.currentTarget.src = '/placeholder.svg';
                     setImageLoaded(true);

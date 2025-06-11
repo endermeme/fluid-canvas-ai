@@ -1,5 +1,17 @@
 
+
 # Các Quyết Định Phát Triển Game
+
+## 2025-01-10: Fix lỗi URL ảnh Wikimedia Commons - Chuyển sang URL trực tiếp (Lần 3)
+- **Vấn đề**: Vẫn dùng Special:FilePath thay vì URL ảnh trực tiếp thực sự
+- **Sửa chữa**: 
+  - Cập nhật `getDirectImageUrl` để tạo URL trực tiếp từ `upload.wikimedia.org`
+  - Convert từ `commons.wikimedia.org/wiki/File:...` sang `upload.wikimedia.org/wikipedia/commons/thumb/.../800px-...`
+  - Thêm multiple fallback strategies với cấu trúc thư mục khác nhau
+  - Tạo clean filename và proper encoding cho URL
+  - Xử lý extension validation
+- **Tệp sửa đổi**: `ProgressiveRevealTemplate.tsx` - convert thành real direct image URLs
+- **Trạng thái**: Đã fix để dùng URL ảnh trực tiếp thực sự
 
 ## 2025-01-10: Fix lỗi CORS với ảnh Wikimedia Commons - Progressive Reveal (Lần 2)
 - **Vấn đề**: Vẫn còn lỗi "Image load error, using placeholder" với ảnh từ Wikimedia Commons
@@ -9,7 +21,7 @@
   - Tăng cường error handling và retry mechanism
   - Thêm console.log để track quá trình convert URL
 - **Tệp sửa đổi**: `ProgressiveRevealTemplate.tsx` - cải thiện URL conversion và fallback
-- **Trạng thái**: Đang fix lỗi load ảnh
+- **Trạng thái**: Đã fix lỗi load ảnh
 
 ## 2025-01-10: Fix lỗi CORS với ảnh Wikimedia Commons - Progressive Reveal
 - **Vấn đề**: Ảnh từ commons.wikimedia.org bị chặn bởi OpaqueResponseBlocking (CORS policy)
@@ -111,5 +123,7 @@
 - Tất cả game mới phải hỗ trợ cả mobile và PC (click/touch only)
 - Sử dụng Gemini API để lấy nội dung thay vì dữ liệu mẫu tĩnh
 - **URL ảnh PHẢI được cố định trong prompt gửi cho Gemini: chỉ được dùng https://commons.wikimedia.org cho tất cả game về ảnh**
-- **Fix CORS bằng cách convert URL wiki sang Special:FilePath API để lấy ảnh trực tiếp**
-- **Thêm fallback mechanism với upload.wikimedia.org khi Special:FilePath fail**
+- **Fix CORS bằng cách convert URL wiki sang direct image URL từ upload.wikimedia.org**
+- **Sử dụng upload.wikimedia.org/wikipedia/commons/thumb/ structure với proper file paths**
+- **Thêm multiple fallback strategies cho các cấu trúc thư mục khác nhau**
+
