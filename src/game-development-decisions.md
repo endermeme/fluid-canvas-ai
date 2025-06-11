@@ -1,6 +1,18 @@
 
 # Các Quyết Định Phát Triển Game
 
+## 2025-01-11: Tái thiết kế giao diện GameSelector hiện đại
+- **Quyết định**: Redesign toàn bộ giao diện preset games để hiện đại và dày dặn hơn
+- **Thay đổi chính**:
+  - Thêm hero section với gradient và typography đẹp
+  - Tạo quick start panel với design card hiện đại
+  - Redesign game cards với gradient riêng cho từng loại game
+  - Cải thiện layout để dàn đều toàn màn hình
+  - Loại bỏ text "learning inattractive" và thay thế bằng UI chuyên nghiệp
+  - Thêm hover effects và animations mượt mà
+- **Tệp sửa đổi**: `GameSelector.tsx` - redesign toàn bộ UI
+- **Trạng thái**: Đã hoàn thành redesign hiện đại
+
 ## 2025-01-11: Xóa 2 game liên quan đến hình ảnh
 - **Quyết định**: Loại bỏ hoàn toàn 2 game sử dụng hình ảnh
 - **Game bị xóa**:
@@ -64,3 +76,4 @@
 - Sử dụng Gemini API để lấy nội dung thay vì dữ liệu mẫu tĩnh
 - **Chỉ tập trung vào game văn bản, không sử dụng hình ảnh**
 - **Bỏ hoàn toàn mọi cơ chế tìm kiếm và xử lý ảnh**
+- **Thiết kế giao diện hiện đại, responsive và thân thiện người dùng**
