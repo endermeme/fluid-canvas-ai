@@ -1,6 +1,20 @@
 
 # Các Quyết Định Phát Triển Game
 
+## 2025-01-11: Redesign HomePage với thiết kế hiện đại xanh da trời
+- **Quyết định**: Redesign toàn bộ giao diện HomePage với theme xanh da trời hiện đại và tinh tế
+- **Thay đổi chính**:
+  - Thay đổi color scheme chủ đạo thành xanh da trời (sky/blue tones)
+  - Thêm background gradient với các blur effects tinh tế
+  - Redesign cards với glass morphism và backdrop blur
+  - Cải thiện typography với font sizes lớn hơn và spacing tốt hơn
+  - Thêm animated background elements với gradient bubbles
+  - Cải thiện hover effects với scale và shadow transitions
+  - Thêm icons với background gradient cho visual hierarchy
+  - Responsive design tốt hơn cho mobile và desktop
+- **Tệp sửa đổi**: `HomePage.tsx` - redesign toàn bộ với theme xanh da trời hiện đại
+- **Trạng thái**: Đã hoàn thành redesign với thiết kế tinh tế và hiện đại
+
 ## 2025-01-11: Cải tiến giao diện HomePage hiện đại
 - **Quyết định**: Redesign toàn bộ giao diện HomePage để nhất quán với GameSelector
 - **Thay đổi chính**:
