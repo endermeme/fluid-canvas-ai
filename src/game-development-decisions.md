@@ -1,6 +1,20 @@
 
 # Các Quyết Định Phát Triển Game
 
+## 2025-01-10: Cải thiện Progressive Reveal - Image scaling và scoring system
+- **Thay đổi**: 
+  - Fix việc hiển thị ảnh từ Wikimedia Commons với URL conversion
+  - Cải thiện image scaling trong khung cố định (aspect-square)
+  - Sửa scoring system theo thang điểm 10 trừ dần theo user settings
+  - Thêm fallback loading cho ảnh lỗi
+- **Tính năng**: 
+  - Convert Wikimedia Commons URL thành direct image URL
+  - Fixed aspect ratio container cho ảnh
+  - Thời gian countdown theo thang 10 points, chia đều theo user timePerQuestion setting
+  - Scoring = timeLeft (1-10) + blurLevel bonus
+- **Tệp sửa đổi**: `ProgressiveRevealTemplate.tsx` - cải thiện image loading và scoring
+- **Trạng thái**: Đã cập nhật với image scaling và scoring system mới
+
 ## 2025-01-10: Cố định URL ảnh trong prompt Gemini
 - **Thay đổi**: Cố định trong prompt gửi cho Gemini rằng PHẢI dùng URL từ `https://commons.wikimedia.org`
 - **Áp dụng cho**: Pictionary, ProgressiveReveal và các game ảnh khác

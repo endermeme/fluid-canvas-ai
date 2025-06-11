@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Eye, EyeOff, Trophy, Clock, Zap } from 'lucide-react';
+import { Eye, EyeOff, Trophy, Clock, Zap, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProgressiveRevealData {
@@ -41,22 +42,48 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [gameOver, setGameOver] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(data?.settings?.timePerQuestion || 30);
+  const [timeLeft, setTimeLeft] = useState(10); // Thang điểm 10
   const [revealTimer, setRevealTimer] = useState(0);
   const [isRevealing, setIsRevealing] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [currentImageSrc, setCurrentImageSrc] = useState('');
   const { toast } = useToast();
 
   const currentItem = data?.items?.[currentIndex];
   const maxBlur = data?.settings?.revealLevels || 5;
-  const revealInterval = data?.settings?.revealInterval || 3000;
+  const userTimePerQuestion = data?.settings?.timePerQuestion || 30;
+
+  // Convert Wikimedia Commons URL to direct image URL
+  const getDirectImageUrl = (wikiUrl: string): string => {
+    if (!wikiUrl) return '/placeholder.svg';
+    
+    // If already a direct URL, return it
+    if (wikiUrl.includes('upload.wikimedia.org') || wikiUrl.includes('.jpg') || wikiUrl.includes('.png')) {
+      return wikiUrl;
+    }
+    
+    // Convert commons.wikimedia.org URL to direct image URL
+    if (wikiUrl.includes('commons.wikimedia.org/wiki/File:')) {
+      const fileName = wikiUrl.split('File:')[1];
+      // Use thumbnail API for better loading
+      return `https://commons.wikimedia.org/wiki/Special:FilePath/${fileName}?width=800`;
+    }
+    
+    return '/placeholder.svg';
+  };
 
   // Reset khi chuyển câu mới
   useEffect(() => {
     if (currentItem) {
       setImageLoaded(false);
       setIsTransitioning(true);
+      setTimeLeft(10); // Reset về thang điểm 10
+      setBlurLevel(maxBlur);
+      setRevealTimer(0);
+      
+      const directUrl = getDirectImageUrl(currentItem.imageUrl);
+      setCurrentImageSrc(directUrl);
       
       // Preload image
       const img = new Image();
@@ -65,17 +92,24 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
         setIsTransitioning(false);
       };
       img.onerror = () => {
+        console.warn('Failed to load image:', directUrl);
+        // Try fallback URL
+        const fallbackUrl = currentItem.imageUrl.includes('commons.wikimedia.org') 
+          ? currentItem.imageUrl.replace('wiki/File:', 'wiki/Special:FilePath/').replace('https://commons.wikimedia.org/', 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/') + '/800px-' + currentItem.imageUrl.split('File:')[1]
+          : '/placeholder.svg';
+        setCurrentImageSrc(fallbackUrl);
         setImageLoaded(true);
         setIsTransitioning(false);
       };
-      img.src = currentItem.imageUrl;
+      img.src = directUrl;
     }
-  }, [currentIndex, currentItem]);
+  }, [currentIndex, currentItem, maxBlur]);
 
-  // Timer cho countdown
+  // Timer cho countdown - trừ dần theo thang 10
   useEffect(() => {
     if (gameOver || showResult || !imageLoaded) return;
 
+    const interval = userTimePerQuestion / 10; // Chia thời gian user setting thành 10 nấc
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -84,15 +118,16 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
         }
         return prev - 1;
       });
-    }, 1000);
+    }, interval * 1000); // Thời gian mỗi nấc
 
     return () => clearInterval(timer);
-  }, [currentIndex, gameOver, showResult, imageLoaded]);
+  }, [currentIndex, gameOver, showResult, imageLoaded, userTimePerQuestion]);
 
   // Timer cho reveal
   useEffect(() => {
     if (gameOver || showResult || !imageLoaded) return;
 
+    const revealInterval = (userTimePerQuestion * 1000) / maxBlur; // Chia đều thời gian cho reveal
     const timer = setInterval(() => {
       setRevealTimer(prev => {
         const newTime = prev + 1000;
@@ -109,15 +144,13 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentIndex, gameOver, showResult, imageLoaded, blurLevel]);
+  }, [currentIndex, gameOver, showResult, imageLoaded, blurLevel, userTimePerQuestion, maxBlur]);
 
   const calculateScore = () => {
-    // Giới hạn điểm max = 100
-    const baseScore = 50; // Base điểm thấp hơn
-    const blurBonus = blurLevel * 8; // Giảm bonus từ 20 xuống 8
-    const timeBonus = Math.min(20, Math.floor(timeLeft / 2)); // Max time bonus = 20
-    const totalScore = baseScore + blurBonus + timeBonus;
-    return Math.min(100, totalScore); // Đảm bảo không quá 100
+    // Điểm = timeLeft (1-10) + bonus cho blur level
+    const timeBonus = timeLeft;
+    const blurBonus = blurLevel;
+    return timeBonus + blurBonus;
   };
 
   const handleAnswer = (answer: string) => {
@@ -134,7 +167,7 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
       
       toast({
         title: "Chính xác! 🎉",
-        description: `+${earnedScore} điểm (Blur: ${blurLevel}/${maxBlur}, Time: +${Math.min(20, Math.floor(timeLeft / 2))})`,
+        description: `+${earnedScore} điểm (Thời gian: ${timeLeft}/10, Blur: ${blurLevel}/${maxBlur})`,
       });
     } else {
       toast({
@@ -174,11 +207,8 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
 
     // Reset tất cả state cho câu mới
     setCurrentIndex(prev => prev + 1);
-    setBlurLevel(maxBlur);
     setSelectedAnswer(null);
     setShowResult(false);
-    setTimeLeft(data?.settings?.timePerQuestion || 30);
-    setRevealTimer(0);
     setImageLoaded(false);
     setIsTransitioning(true);
   };
@@ -190,7 +220,7 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
     setSelectedAnswer(null);
     setShowResult(false);
     setGameOver(false);
-    setTimeLeft(data?.settings?.timePerQuestion || 30);
+    setTimeLeft(10);
     setRevealTimer(0);
     setImageLoaded(false);
     setIsTransitioning(true);
@@ -203,9 +233,9 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
 
   const getScoreColor = () => {
     const currentScore = calculateScore();
-    if (currentScore >= 80) return "text-green-600";
-    if (currentScore >= 60) return "text-blue-600";
-    if (currentScore >= 40) return "text-orange-600";
+    if (currentScore >= 12) return "text-green-600";
+    if (currentScore >= 8) return "text-blue-600";
+    if (currentScore >= 5) return "text-orange-600";
     return "text-red-600";
   };
 
@@ -238,6 +268,7 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
             </p>
             <div className="grid grid-cols-2 gap-4">
               <Button onClick={resetGame} variant="outline" size="lg">
+                <RotateCcw className="h-4 w-4 mr-2" />
                 Chơi lại
               </Button>
               <Button onClick={onBack} size="lg">
@@ -252,7 +283,7 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-4">
-      <div className="max-w-6xl mx-auto h-full">
+      <div className="max-w-6xl mx-auto">
         {/* Header Card */}
         <Card className="mb-6">
           <CardHeader className="pb-4">
@@ -267,7 +298,7 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
               <div className="flex items-center gap-3 flex-wrap">
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Eye className="h-4 w-4" />
-                  Level {blurLevel}/{maxBlur}
+                  Độ mờ {blurLevel}/{maxBlur}
                 </Badge>
                 <Badge variant="secondary" className="flex items-center gap-1">
                   <Trophy className="h-4 w-4" />
@@ -275,7 +306,7 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
                 </Badge>
                 <Badge variant="destructive" className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
-                  {timeLeft}s
+                  {timeLeft}/10
                 </Badge>
               </div>
             </div>
@@ -284,20 +315,20 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
             <div className="space-y-3 mt-4">
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Câu {currentIndex + 1}/{data.items.length}</span>
-                <span>Thời gian còn lại</span>
+                <span>Điểm thời gian: {timeLeft}/10</span>
               </div>
               <Progress value={(currentIndex / data.items.length) * 100} className="h-2" />
-              <Progress value={(timeLeft / (data?.settings?.timePerQuestion || 30)) * 100} className="h-2" />
+              <Progress value={(timeLeft / 10) * 100} className="h-2" />
             </div>
           </CardHeader>
         </Card>
 
         {/* Main Game Grid */}
-        <div className="grid lg:grid-cols-2 gap-6 h-auto">
+        <div className="grid lg:grid-cols-2 gap-6">
           {/* Image Section */}
           <Card className={`${isRevealing ? 'animate-pulse' : ''}`}>
             <CardContent className="p-6">
-              <div className="relative bg-muted/30 rounded-lg overflow-hidden" style={{ aspectRatio: '4/3' }}>
+              <div className="relative bg-muted/30 rounded-lg overflow-hidden aspect-square max-w-full">
                 {/* Loading State */}
                 {(isTransitioning || !imageLoaded) && (
                   <div className="absolute inset-0 flex items-center justify-center bg-muted/50 z-10">
@@ -308,18 +339,22 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
                   </div>
                 )}
                 
-                {/* Main Image */}
+                {/* Main Image - Fixed scaling */}
                 <img
-                  src={currentItem?.imageUrl || '/placeholder.svg'}
+                  src={currentImageSrc || '/placeholder.svg'}
                   alt="Progressive reveal image"
                   className={`w-full h-full object-cover transition-all duration-500 ${
                     imageLoaded ? 'opacity-100' : 'opacity-0'
                   }`}
                   style={{
-                    filter: imageLoaded ? `blur(${getBlurIntensity()}px)` : 'blur(20px)'
+                    filter: imageLoaded ? `blur(${getBlurIntensity()}px)` : 'blur(20px)',
+                    aspectRatio: '1',
+                    maxWidth: '100%',
+                    maxHeight: '100%'
                   }}
                   onLoad={() => setImageLoaded(true)}
                   onError={(e) => {
+                    console.warn('Image load error, using placeholder');
                     e.currentTarget.src = '/placeholder.svg';
                     setImageLoaded(true);
                   }}
@@ -352,6 +387,9 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
           <Card>
             <CardHeader>
               <h3 className="text-xl font-semibold text-center">Đây là gì?</h3>
+              <p className="text-sm text-muted-foreground text-center">
+                Điểm = Thời gian còn lại ({timeLeft}/10) + Độ mờ ({blurLevel}/{maxBlur})
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Answer Options Grid */}
