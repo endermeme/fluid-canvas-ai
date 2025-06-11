@@ -1,6 +1,16 @@
 
-
 # Các Quyết Định Phát Triển Game
+
+## 2025-01-10: Fix lỗi URL ảnh Wikimedia Commons - Chuyển sang URL trực tiếp thực sự từ upload.wikimedia.org (Lần 4)
+- **Vấn đề**: Vẫn chưa tạo được URL ảnh trực tiếp đúng format upload.wikimedia.org
+- **Sửa chữa**: 
+  - Cập nhật `getDirectImageUrl` để tạo URL trực tiếp từ `upload.wikimedia.org/wikipedia/commons/{hash}/{filename}`
+  - Sử dụng hash structure đơn giản dựa trên ký tự đầu của tên file
+  - Format: `https://upload.wikimedia.org/wikipedia/commons/{firstChar}/{firstChar}{secondChar}/{encodedFileName}`
+  - Loại bỏ hoàn toàn Special:FilePath và thumb structure
+  - Simplify fallback mechanism chỉ dùng placeholder khi fail
+- **Tệp sửa đổi**: `ProgressiveRevealTemplate.tsx` - tạo URL ảnh trực tiếp đúng format
+- **Trạng thái**: Đã fix để dùng URL ảnh trực tiếp từ upload.wikimedia.org
 
 ## 2025-01-10: Fix lỗi URL ảnh Wikimedia Commons - Chuyển sang URL trực tiếp (Lần 3)
 - **Vấn đề**: Vẫn dùng Special:FilePath thay vì URL ảnh trực tiếp thực sự
@@ -124,6 +134,5 @@
 - Sử dụng Gemini API để lấy nội dung thay vì dữ liệu mẫu tĩnh
 - **URL ảnh PHẢI được cố định trong prompt gửi cho Gemini: chỉ được dùng https://commons.wikimedia.org cho tất cả game về ảnh**
 - **Fix CORS bằng cách convert URL wiki sang direct image URL từ upload.wikimedia.org**
-- **Sử dụng upload.wikimedia.org/wikipedia/commons/thumb/ structure với proper file paths**
-- **Thêm multiple fallback strategies cho các cấu trúc thư mục khác nhau**
-
+- **Sử dụng upload.wikimedia.org/wikipedia/commons/{hash}/ structure với simple hash logic dựa trên filename**
+- **Format URL ảnh trực tiếp: https://upload.wikimedia.org/wikipedia/commons/{firstChar}/{firstChar}{secondChar}/{encodedFileName}**
