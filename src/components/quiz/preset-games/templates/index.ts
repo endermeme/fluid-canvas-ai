@@ -5,9 +5,7 @@ import MatchingTemplate from './MatchingTemplate';
 import MemoryTemplate from './MemoryTemplate';
 import OrderingTemplate from './OrderingTemplate';
 import WordSearchTemplate from './WordSearchTemplate';
-import PictionaryTemplate from './PictionaryTemplate';
 import TrueFalseTemplate from './TrueFalseTemplate';
-import ProgressiveRevealTemplate from './ProgressiveRevealTemplate';
 
 const gameTemplates = {
   quiz: QuizTemplate,
@@ -16,9 +14,7 @@ const gameTemplates = {
   memory: MemoryTemplate,
   ordering: OrderingTemplate,
   wordsearch: WordSearchTemplate,
-  pictionary: PictionaryTemplate,
   truefalse: TrueFalseTemplate,
-  progressivereveal: ProgressiveRevealTemplate,
 };
 
 export default gameTemplates;

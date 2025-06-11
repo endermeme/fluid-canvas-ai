@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { 
   Brain, BookOpen, Puzzle, Dices, 
-  Image, CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
-  ArrowRight, SlidersHorizontal, Eye
+  CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
+  ArrowRight, SlidersHorizontal
 } from 'lucide-react';
 import GameSettings from '../GameSettings';
 import { GameSettingsData } from '../types';
@@ -81,22 +81,10 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
       icon: <Search className="h-8 w-8 text-primary" />
     },
     { 
-      id: 'pictionary', 
-      name: 'Đoán Hình', 
-      description: 'Đoán từ qua hình ảnh',
-      icon: <Image className="h-8 w-8 text-primary" />
-    },
-    { 
       id: 'truefalse', 
       name: 'Đúng hay Sai', 
       description: 'Xác định nội dung là đúng hay sai',
       icon: <CheckSquare className="h-8 w-8 text-primary" />
-    },
-    { 
-      id: 'progressivereveal', 
-      name: 'Đoán Hình Từ Từ', 
-      description: 'Hình ảnh hiện từ mờ đến rõ, đoán càng sớm điểm càng cao',
-      icon: <Eye className="h-8 w-8 text-primary" />
     }
   ];
 

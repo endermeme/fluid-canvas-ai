@@ -121,39 +121,14 @@ Output must be valid JSON. `;
         case 'wordsearch':
           gamePrompt += `JSON format: { "title": "title", "description": "description", "words": [{"word": "word 1", "found": false}, {"word": "word 2", "found": false}], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "settings": {"timeLimit": ${totalTime || 300}, "allowDiagonalWords": true, "showWordList": true, "bonusTimePerWord": ${bonusTime || 15}} }`;
           break;
-        case 'pictionary':
-          gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "direct_image_URL", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
-
-SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
-- PHẢI sử dụng Google Search tool để tìm kiếm ảnh liên quan đến chủ đề
-- Tìm ảnh có chất lượng cao, rõ nét, dễ nhận diện
-- Lấy URL ảnh trực tiếp từ kết quả search (jpg, png, gif, webp)
-- ĐẢM BẢO ảnh phù hợp 100% với chủ đề được yêu cầu
-- KHÔNG sử dụng bất kỳ URL nào từ commons.wikimedia.org
-- Ưu tiên ảnh từ các trang web uy tín có chất lượng tốt
-- Mỗi ảnh phải rõ ràng, dễ nhận diện và phù hợp với đáp án`;
-          break;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
-          break;
-        case 'progressivereveal':
-          gamePrompt += `JSON format: { "title": "title", "description": "description", "items": [{"imageUrl": "direct_image_URL", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "revealLevels": 5, "revealInterval": 3000} }
-
-SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
-- BẮT BUỘC phải sử dụng Google Search tool để tìm kiếm ảnh
-- Tìm ảnh có độ phân giải cao, rõ nét, chất lượng tốt
-- ĐẢM BẢO ảnh hoàn toàn phù hợp với chủ đề được yêu cầu
-- Lấy URL ảnh trực tiếp từ web, KHÔNG sử dụng commons.wikimedia.org
-- Ưu tiên ảnh từ các website uy tín, có thể search được
-- Ảnh phải dễ nhận diện ngay cả khi bị blur
-- Chỉ sử dụng URL ảnh có thể truy cập trực tiếp (jpg, png, gif, webp)
-- Mỗi ảnh phải có 4 đáp án hợp lý và rõ ràng`;
           break;
       }
 
       gamePrompt += " Return only JSON, no additional text.";
 
-      console.log("Sending prompt to Gemini with Google Search:", gamePrompt);
+      console.log("Sending prompt to Gemini:", gamePrompt);
 
       const payload = {
         contents: [{
@@ -163,12 +138,7 @@ SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
         generationConfig: {
           ...DEFAULT_GENERATION_SETTINGS,
           temperature: 0.7
-        },
-        tools: [
-          {
-            google_search: {}
-          }
-        ]
+        }
       };
 
       const response = await fetch(getApiEndpoint(GEMINI_MODELS.PRESET_GAME), {
@@ -192,7 +162,7 @@ SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
         throw new Error('No content returned from API');
       }
 
-      console.log("Received response from Gemini with Google Search:", text);
+      console.log("Received response from Gemini:", text);
 
       try {
         const jsonStr = text.includes('```json') 
@@ -231,20 +201,10 @@ SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
             parsedContent.settings.timeLimit = totalTime || 300;
             parsedContent.settings.bonusTimePerWord = bonusTime || 15;
             break;
-          case 'pictionary':
-            parsedContent.settings.timePerQuestion = timePerQuestion;
-            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
-            break;
           case 'truefalse':
             parsedContent.settings.timePerQuestion = timePerQuestion;
             parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 3;
-            break;
-          case 'progressivereveal':
-            parsedContent.settings.timePerQuestion = timePerQuestion;
-            parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
-            parsedContent.settings.revealLevels = 5;
-            parsedContent.settings.revealInterval = 3000;
             break;
         }
 
@@ -286,10 +246,10 @@ SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
   };
 
   const loadSampleData = (type) => {
-    // Chỉ support dữ liệu mẫu cho các game cũ, progressivereveal chỉ dùng AI
+    // Chỉ support dữ liệu mẫu cho các game còn lại
     const supportedGames = ['quiz', 'flashcards', 'matching', 'memory', 'ordering', 'wordsearch', 'truefalse'];
     
-    if (!supportedGames.includes(type) || type === 'pictionary' || type === 'progressivereveal') {
+    if (!supportedGames.includes(type)) {
       setError(`Không có dữ liệu mẫu cho game ${getGameTypeName()}. Vui lòng sử dụng AI để tạo nội dung.`);
       setLoading(false);
       return;
@@ -337,10 +297,6 @@ SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
           case 'wordsearch':
             data.settings.timeLimit = settings.totalTime || 300;
             data.settings.bonusTimePerWord = settings.bonusTime || 15;
-            break;
-          case 'pictionary':
-            data.settings.timePerQuestion = settings.timePerQuestion;
-            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
             break;
           case 'truefalse':
             data.settings.timePerQuestion = settings.timePerQuestion;
@@ -395,9 +351,7 @@ SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
       case 'memory': return 'Trò Chơi Ghi Nhớ';
       case 'ordering': return 'Sắp Xếp Câu';
       case 'wordsearch': return 'Tìm Từ';
-      case 'pictionary': return 'Đoán Hình';
       case 'truefalse': return 'Đúng hay Sai';
-      case 'progressivereveal': return 'Đoán Hình Từ Từ';
       default: return 'Trò Chơi';
     }
   };
@@ -465,25 +419,11 @@ SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
         icon: 'pen-tool',
         defaultSettings: settings
       },
-      'pictionary': {
-        id: 'pictionary',
-        name: 'Đoán Hình',
-        description: 'Chọn đáp án đúng dựa trên hình ảnh',
-        icon: 'heart-handshake',
-        defaultSettings: settings
-      },
       'truefalse': {
         id: 'truefalse',
         name: 'Đúng hay Sai',
         description: 'Kiểm tra kiến thức với các câu hỏi đúng/sai',
         icon: 'clock',
-        defaultSettings: settings
-      },
-      'progressivereveal': {
-        id: 'progressivereveal',
-        name: 'Đoán Hình Từ Từ',
-        description: 'Hình ảnh hiện từ mờ đến rõ, đoán càng sớm điểm càng cao',
-        icon: 'eye',
         defaultSettings: settings
       }
     };
