@@ -1,6 +1,40 @@
 
 # Các Quyết Định Phát Triển Game
 
+## 2025-01-11: Cải thiện layout và căn giữa giao diện
+- **Thay đổi**: Điều chỉnh layout HomePage và GameSelector để hiển thị ở giữa màn hình
+- **Cải tiến**:
+  - Sử dụng `flex items-center justify-center` để căn giữa content theo cả 2 chiều
+  - Điều chỉnh `min-h-screen` và padding để content không bị lệch lên trên
+  - Cải thiện spacing và margin để tạo cân bằng tốt hơn
+  - Tăng kích thước typography và spacing cho trải nghiệm tốt hơn
+- **Tệp sửa đổi**:
+  - `HomePage.tsx` - điều chỉnh layout căn giữa và spacing
+  - `GameSelector.tsx` - cải thiện layout và alignment
+- **Trạng thái**: Đã hoàn thành
+
+## 2025-01-11: Redesign giao diện HomePage với tông màu xanh da trời
+- **Thay đổi**: Redesign hoàn toàn giao diện HomePage để hiện đại và tinh tế hơn
+- **Cải tiến**:
+  - Sử dụng gradient background xanh da trời (sky-50, blue-50, indigo-100)
+  - Cards với glass morphism effect (bg-white/70 backdrop-blur-md)
+  - Typography cải thiện với font-bold và spacing tốt hơn
+  - Hover effects và animations mượt mà hơn
+  - Color scheme nhất quán với tông xanh da trời
+- **Tệp sửa đổi**: `HomePage.tsx` - redesign toàn bộ giao diện
+- **Trạng thái**: Đã hoàn thành
+
+## 2025-01-11: Cải thiện giao diện GameSelector
+- **Thay đổi**: Redesign GameSelector để hiện đại và user-friendly hơn
+- **Cải tiến**:
+  - Layout cải thiện với grid responsive
+  - Cards với shadow và hover effects đẹp hơn
+  - Quick start section với UI/UX tốt hơn
+  - Loại bỏ text "Learn interactively" không phù hợp
+  - Typography và spacing được cải thiện
+- **Tệp sửa đổi**: `GameSelector.tsx` - cải thiện toàn bộ UI/UX
+- **Trạng thái**: Đã hoàn thành
+
 ## 2025-01-11: Xóa 2 game liên quan đến hình ảnh
 - **Quyết định**: Loại bỏ hoàn toàn 2 game sử dụng hình ảnh
 - **Game bị xóa**:
@@ -15,32 +49,6 @@
   - `GameSelector.tsx` - loại bỏ khỏi danh sách
   - `PresetGameManager.tsx` - xóa prompt tạo nội dung cho game ảnh
 - **Trạng thái**: Đã xóa hoàn toàn
-
-## 2025-01-10: Fix prompt để loại bỏ hoàn toàn Wikimedia Commons
-- **Vấn đề**: Mặc dù đã tích hợp Google Search, prompt vẫn còn tham chiếu đến commons.wikimedia.org
-- **Sửa chữa**: 
-  - Cập nhật prompt trong `PresetGameManager.tsx` để BẮT BUỘC sử dụng Google Search
-  - Loại bỏ hoàn toàn mọi tham chiếu đến Wikimedia Commons
-  - Thêm yêu cầu rõ ràng về chất lượng và độ phù hợp của ảnh
-  - Đảm bảo AI chỉ tìm ảnh từ Google Search, không dùng nguồn cũ
-- **Tệp sửa đổi**: `PresetGameManager.tsx` - loại bỏ hoàn toàn Wikimedia Commons khỏi prompt
-- **Trạng thái**: Đã cập nhật prompt để chỉ sử dụng Google Search - DEPRECATED, đã xóa game ảnh
-
-## 2025-01-10: Tích hợp Google Search để tìm ảnh cho Progressive Reveal
-- **Thay đổi**: Bỏ cơ chế tìm ảnh cũ từ Wikimedia Commons, chuyển sang sử dụng Google Search tool trong Gemini API
-- **Tính năng mới**: 
-  - Sử dụng Gemini 2.0 với Google Search tool để tìm ảnh thực tế từ web
-  - AI sẽ tự động tìm kiếm ảnh phù hợp với chủ đề
-  - Lấy URL ảnh trực tiếp từ kết quả search thay vì dùng Wikimedia Commons
-  - Cải thiện độ chính xác và tính mới mẻ của ảnh
-- **Cơ chế**: 
-  - Prompt yêu cầu Gemini search ảnh trên Google với từ khoá phù hợp
-  - Lấy URL ảnh trực tiếp từ kết quả search
-  - Validate ảnh trước khi sử dụng trong game
-- **Tệp sửa đổi**: 
-  - `PresetGameManager.tsx` - cập nhật prompt để sử dụng Google Search
-  - `ProgressiveRevealTemplate.tsx` - đơn giản hoá xử lý URL ảnh
-- **Trạng thái**: Đã implement và fix prompt để loại bỏ hoàn toàn Wikimedia Commons - DEPRECATED, đã xóa game ảnh
 
 ## Các Game Gốc Được Giữ Lại:
 1. **Quiz** - Trắc nghiệm nhiều lựa chọn
@@ -64,3 +72,5 @@
 - Sử dụng Gemini API để lấy nội dung thay vì dữ liệu mẫu tĩnh
 - **Chỉ tập trung vào game văn bản, không sử dụng hình ảnh**
 - **Bỏ hoàn toàn mọi cơ chế tìm kiếm và xử lý ảnh**
+- **Giao diện phải hiện đại, căn giữa và cân bằng trên màn hình**
+- **Sử dụng tông màu xanh da trời làm chủ đạo với các điểm nhấn khác**
