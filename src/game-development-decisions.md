@@ -1,6 +1,20 @@
 
 # Các Quyết Định Phát Triển Game
 
+## 2025-01-11: Tối ưu kích thước GameSettings - Giảm padding và spacing
+- **Thay đổi**: Điều chỉnh kích thước GameSettings để vừa phải, không quá to phải scroll
+- **Cải tiến**:
+  - Giảm max-width từ max-w-2xl xuống max-w-xl
+  - Giảm padding header từ p-8 xuống p-6
+  - Giảm padding main content từ p-8 xuống p-6
+  - Giảm spacing từ space-y-8 xuống space-y-6
+  - Giảm kích thước icon từ h-12 w-12 xuống h-10 w-10
+  - Giảm kích thước textarea từ min-h-[120px] xuống min-h-[100px]
+  - Giảm height các input và button từ h-14 xuống h-12 và h-10
+  - Điều chỉnh spacing cho grid và labels để compact hơn
+- **Tệp sửa đổi**: `GameSettings.tsx` - tối ưu kích thước và spacing
+- **Trạng thái**: Đã hoàn thành
+
 ## 2025-01-11: Cải tiến GameSettings - Loại bỏ "Learn interactively" và tăng kích thước
 - **Thay đổi**: Redesign hoàn toàn GameSettings để hiện đại và user-friendly hơn
 - **Cải tiến**:
@@ -12,7 +26,7 @@
   - Color scheme xanh da trời nhất quán
   - Animation và hover effects mượt mà
 - **Tệp sửa đổi**: `GameSettings.tsx` - redesign toàn bộ component
-- **Trạng thái**: Đã hoàn thành
+- **Trạng thái**: Đã hoàn thành (sau đó được tối ưu lại)
 
 ## 2025-01-11: Cải thiện layout và căn giữa giao diện
 - **Thay đổi**: Điều chỉnh layout HomePage và GameSelector để hiển thị ở giữa màn hình
@@ -87,5 +101,6 @@
 - **Bỏ hoàn toàn mọi cơ chế tìm kiếm và xử lý ảnh**
 - **Giao diện phải hiện đại, căn giữa và cân bằng trên màn hình**
 - **Sử dụng tông màu xanh da trời làm chủ đạo với các điểm nhấn khác**
-- **Settings phải rõ ràng, lớn và phù hợp với từng loại game**
+- **Settings phải rõ ràng, lớn và phù hợp với từng loại game nhưng không quá to phải scroll**
 - **Loại bỏ các text placeholder không phù hợp như "Learn interactively"**
+- **Tối ưu kích thước để vừa phải với màn hình, tránh scroll không cần thiết**
