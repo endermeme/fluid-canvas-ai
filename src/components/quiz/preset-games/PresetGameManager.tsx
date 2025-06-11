@@ -122,38 +122,36 @@ Output must be valid JSON. `;
           gamePrompt += `JSON format: { "title": "title", "description": "description", "words": [{"word": "word 1", "found": false}, {"word": "word 2", "found": false}], "grid": [["A", "B", "C"], ["D", "E", "F"], ["G", "H", "I"]], "settings": {"timeLimit": ${totalTime || 300}, "allowDiagonalWords": true, "showWordList": true, "bonusTimePerWord": ${bonusTime || 15}} }`;
           break;
         case 'pictionary':
-          gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "URL ảnh từ internet", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
+          gamePrompt += `JSON format: { "title": "title", "items": [{"imageUrl": "direct_image_URL", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showHints": true, "totalTime": ${totalTime || questionCount * timePerQuestion}} }
 
-BẮT BUỘC cho game Pictionary: 
-- imageUrl CHỈ ĐƯỢC SỬ DỤNG URL từ https://commons.wikimedia.org
-- TUYỆT ĐỐI KHÔNG được dùng upload.wikimedia.org hay bất kỳ domain nào khác
-- Tìm ảnh từ Wikimedia Commons phù hợp với chủ đề
-- KHÔNG sử dụng placeholder hay ảnh giả
-- Mỗi ảnh phải phù hợp với đáp án và chủ đề
-- CHỈ SỬ DỤNG URL dạng: https://commons.wikimedia.org/wiki/File:...
-- VÍ DỤ URL hợp lệ: https://commons.wikimedia.org/wiki/File:Example.jpg`;
+SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
+- Tìm kiếm ảnh liên quan đến chủ đề bằng Google Search
+- Lấy URL ảnh trực tiếp từ kết quả tìm kiếm
+- Đảm bảo ảnh có chất lượng tốt và rõ nét
+- Chỉ sử dụng ảnh có URL trực tiếp (jpg, png, gif, webp)
+- KHÔNG sử dụng link trang web, chỉ dùng link ảnh trực tiếp`;
           break;
         case 'truefalse':
           gamePrompt += `JSON format: { "title": "title", "questions": [{"statement": "statement", "isTrue": true/false, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "showExplanation": true, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 3}} }`;
           break;
         case 'progressivereveal':
-          gamePrompt += `JSON format: { "title": "title", "description": "description", "items": [{"imageUrl": "URL ảnh thật từ Wikimedia Commons", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "revealLevels": 5, "revealInterval": 3000} }
+          gamePrompt += `JSON format: { "title": "title", "description": "description", "items": [{"imageUrl": "direct_image_URL", "answer": "answer", "options": ["option 1", "option 2", "option 3", "option 4"], "hint": "hint"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "revealLevels": 5, "revealInterval": 3000} }
 
-BẮT BUỘC cho game Progressive Reveal:
-- imageUrl CHỈ ĐƯỢC SỬ DỤNG URL từ https://commons.wikimedia.org
-- TUYỆT ĐỐI KHÔNG được dùng upload.wikimedia.org hay bất kỳ domain nào khác
-- Tìm ảnh có độ phân giải cao, rõ nét từ Wikimedia Commons để phù hợp với cơ chế blur
+SỬ DỤNG GOOGLE SEARCH để tìm ảnh thực tế:
+- Tìm kiếm ảnh liên quan đến chủ đề bằng Google Search
+- Lấy URL ảnh trực tiếp từ kết quả tìm kiếm web
+- Đảm bảo ảnh có độ phân giải cao, rõ nét cho cơ chế blur
 - Ảnh phải dễ nhận diện và phù hợp với chủ đề
-- Mỗi ảnh phải có 4 đáp án nhiều lựa chọn hợp lý
-- CHỈ SỬ DỤNG URL dạng: https://commons.wikimedia.org/wiki/File:...
-- VÍ DỤ URL hợp lệ: https://commons.wikimedia.org/wiki/File:Example.jpg
-- KHÔNG sử dụng placeholder hay ảnh giả`;
+- Chỉ sử dụng URL ảnh trực tiếp (jpg, png, gif, webp)
+- KHÔNG sử dụng link trang web, chỉ dùng link ảnh có thể load được
+- Ưu tiên ảnh có kích thước lớn hơn 500px
+- Mỗi ảnh phải có 4 đáp án nhiều lựa chọn hợp lý`;
           break;
       }
 
       gamePrompt += " Return only JSON, no additional text.";
 
-      console.log("Sending prompt to Gemini:", gamePrompt);
+      console.log("Sending prompt to Gemini with Google Search:", gamePrompt);
 
       const payload = {
         contents: [{
@@ -163,7 +161,12 @@ BẮT BUỘC cho game Progressive Reveal:
         generationConfig: {
           ...DEFAULT_GENERATION_SETTINGS,
           temperature: 0.7
-        }
+        },
+        tools: [
+          {
+            google_search: {}
+          }
+        ]
       };
 
       const response = await fetch(getApiEndpoint(GEMINI_MODELS.PRESET_GAME), {
@@ -187,7 +190,7 @@ BẮT BUỘC cho game Progressive Reveal:
         throw new Error('No content returned from API');
       }
 
-      console.log("Received response from Gemini:", text);
+      console.log("Received response from Gemini with Google Search:", text);
 
       try {
         const jsonStr = text.includes('```json') 

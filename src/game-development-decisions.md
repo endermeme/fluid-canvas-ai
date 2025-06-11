@@ -1,6 +1,21 @@
 
-
 # Các Quyết Định Phát Triển Game
+
+## 2025-01-10: Tích hợp Google Search để tìm ảnh cho Progressive Reveal
+- **Thay đổi**: Bỏ cơ chế tìm ảnh cũ từ Wikimedia Commons, chuyển sang sử dụng Google Search tool trong Gemini API
+- **Tính năng mới**: 
+  - Sử dụng Gemini 2.0 với Google Search tool để tìm ảnh thực tế từ web
+  - AI sẽ tự động tìm kiếm ảnh phù hợp với chủ đề
+  - Lấy URL ảnh trực tiếp từ kết quả search thay vì dùng Wikimedia Commons
+  - Cải thiện độ chính xác và tính mới mẻ của ảnh
+- **Cơ chế**: 
+  - Prompt yêu cầu Gemini search ảnh trên Google với từ khoá phù hợp
+  - Lấy URL ảnh trực tiếp từ kết quả search
+  - Validate ảnh trước khi sử dụng trong game
+- **Tệp sửa đổi**: 
+  - `PresetGameManager.tsx` - cập nhật prompt để sử dụng Google Search
+  - `ProgressiveRevealTemplate.tsx` - đơn giản hoá xử lý URL ảnh
+- **Trạng thái**: Đang implement hệ thống mới với Google Search
 
 ## 2025-01-10: Fix lỗi URL ảnh Wikimedia Commons - Chuyển sang URL trực tiếp (Lần 3)
 - **Vấn đề**: Vẫn dùng Special:FilePath thay vì URL ảnh trực tiếp thực sự
@@ -11,7 +26,7 @@
   - Tạo clean filename và proper encoding cho URL
   - Xử lý extension validation
 - **Tệp sửa đổi**: `ProgressiveRevealTemplate.tsx` - convert thành real direct image URLs
-- **Trạng thái**: Đã fix để dùng URL ảnh trực tiếp thực sự
+- **Trạng thái**: Đã fix để dùng URL ảnh trực tiếp thực sự - DEPRECATED, chuyển sang Google Search
 
 ## 2025-01-10: Fix lỗi CORS với ảnh Wikimedia Commons - Progressive Reveal (Lần 2)
 - **Vấn đề**: Vẫn còn lỗi "Image load error, using placeholder" với ảnh từ Wikimedia Commons
@@ -21,7 +36,7 @@
   - Tăng cường error handling và retry mechanism
   - Thêm console.log để track quá trình convert URL
 - **Tệp sửa đổi**: `ProgressiveRevealTemplate.tsx` - cải thiện URL conversion và fallback
-- **Trạng thái**: Đã fix lỗi load ảnh
+- **Trạng thái**: Đã fix lỗi load ảnh - DEPRECATED, chuyển sang Google Search
 
 ## 2025-01-10: Fix lỗi CORS với ảnh Wikimedia Commons - Progressive Reveal
 - **Vấn đề**: Ảnh từ commons.wikimedia.org bị chặn bởi OpaqueResponseBlocking (CORS policy)
@@ -31,7 +46,7 @@
   - Thêm encodeURIComponent cho tên file để xử lý ký tự đặc biệt
   - Đảm bảo ảnh được load từ URL trực tiếp thay vì trang wiki
 - **Tệp sửa đổi**: `ProgressiveRevealTemplate.tsx` - cải thiện image URL conversion
-- **Trạng thái**: Đã fix lỗi CORS và cải thiện hiển thị ảnh
+- **Trạng thái**: Đã fix lỗi CORS và cải thiện hiển thị ảnh - DEPRECATED, chuyển sang Google Search
 
 ## 2025-01-10: Cải thiện Progressive Reveal - Image scaling và scoring system
 - **Thay đổi**: 
@@ -52,14 +67,14 @@
 - **Áp dụng cho**: Pictionary, ProgressiveReveal và các game ảnh khác
 - **Lý do**: Đảm bảo Gemini không tự ý dùng upload.wikimedia.org hay URL khác
 - **Tệp sửa đổi**: `PresetGameManager.tsx` - cập nhật prompt AI với yêu cầu bắt buộc
-- **Trạng thái**: Đã cập nhật với prompt bắt buộc
+- **Trạng thái**: Đã cập nhật với prompt bắt buộc - DEPRECATED, chuyển sang Google Search
 
 ## 2025-01-10: Cập nhật URL ảnh từ commons.wikimedia.org
 - **Thay đổi**: Tất cả game sử dụng ảnh phải dùng URL từ `https://commons.wikimedia.org` 
 - **Áp dụng cho**: Pictionary, ProgressiveReveal và các game ảnh khác
 - **Lý do**: Thống nhất format URL và đảm bảo ảnh load được tốt nhất
 - **Tệp sửa đổi**: `PresetGameManager.tsx` - cập nhật prompt AI
-- **Trạng thái**: Đã cập nhật
+- **Trạng thái**: Đã cập nhật - DEPRECATED, chuyển sang Google Search
 
 ## 2025-01-10: Sửa lỗi giao diện game "Progressive Image Reveal"
 - **Vấn đề**: Layout không liền khối, không cân xứng, có phần bị chéo
@@ -113,7 +128,7 @@
 8. **TrueFalse** - Câu hỏi đúng/sai
 
 ## Game Mới Đang Phát Triển:
-9. **ProgressiveReveal** - Đoán hình từ blur dần rõ (đang implement)
+9. **ProgressiveReveal** - Đoán hình từ blur dần rõ (sử dụng Google Search để tìm ảnh)
 
 ## Nguyên Tắc Phát Triển:
 - Không tạo giao diện code chuyên biệt trong quá trình tạo game custom
@@ -122,8 +137,6 @@
 - Đảm bảo syntax hợp lệ cho tất cả file TypeScript/TSX
 - Tất cả game mới phải hỗ trợ cả mobile và PC (click/touch only)
 - Sử dụng Gemini API để lấy nội dung thay vì dữ liệu mẫu tĩnh
-- **URL ảnh PHẢI được cố định trong prompt gửi cho Gemini: chỉ được dùng https://commons.wikimedia.org cho tất cả game về ảnh**
-- **Fix CORS bằng cách convert URL wiki sang direct image URL từ upload.wikimedia.org**
-- **Sử dụng upload.wikimedia.org/wikipedia/commons/thumb/ structure với proper file paths**
-- **Thêm multiple fallback strategies cho các cấu trúc thư mục khác nhau**
-
+- **Sử dụng Google Search tool trong Gemini 2.0 để tìm ảnh thực tế từ web**
+- **Bỏ cơ chế Wikimedia Commons cũ, chuyển sang tìm ảnh trực tiếp từ Google Search**
+- **AI sẽ tự động search và validate ảnh phù hợp với chủ đề game**
