@@ -66,8 +66,12 @@ const ProgressiveRevealTemplate: React.FC<ProgressiveRevealTemplateProps> = ({
     // Convert commons.wikimedia.org URL to direct image URL
     if (wikiUrl.includes('commons.wikimedia.org/wiki/File:')) {
       const fileName = wikiUrl.split('File:')[1];
-      // Use thumbnail API for better loading
-      return `https://commons.wikimedia.org/wiki/Special:FilePath/${fileName}?width=800`;
+      // Convert to MD5 hash based URL structure used by Wikimedia
+      const firstChar = fileName.charAt(0).toLowerCase();
+      const secondChar = fileName.charAt(1).toLowerCase();
+      
+      // Use the Special:FilePath API which automatically redirects to the actual file
+      return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=800`;
     }
     
     return '/placeholder.svg';

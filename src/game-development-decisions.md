@@ -1,6 +1,16 @@
 
 # Các Quyết Định Phát Triển Game
 
+## 2025-01-10: Fix lỗi CORS với ảnh Wikimedia Commons - Progressive Reveal
+- **Vấn đề**: Ảnh từ commons.wikimedia.org bị chặn bởi OpaqueResponseBlocking (CORS policy)
+- **Sửa chữa**: 
+  - Cập nhật hàm `getDirectImageUrl` để convert URL từ `commons.wikimedia.org/wiki/File:...`
+  - Sử dụng Special:FilePath API với width parameter để lấy ảnh trực tiếp
+  - Thêm encodeURIComponent cho tên file để xử lý ký tự đặc biệt
+  - Đảm bảo ảnh được load từ URL trực tiếp thay vì trang wiki
+- **Tệp sửa đổi**: `ProgressiveRevealTemplate.tsx` - cải thiện image URL conversion
+- **Trạng thái**: Đã fix lỗi CORS và cải thiện hiển thị ảnh
+
 ## 2025-01-10: Cải thiện Progressive Reveal - Image scaling và scoring system
 - **Thay đổi**: 
   - Fix việc hiển thị ảnh từ Wikimedia Commons với URL conversion
@@ -91,3 +101,4 @@
 - Tất cả game mới phải hỗ trợ cả mobile và PC (click/touch only)
 - Sử dụng Gemini API để lấy nội dung thay vì dữ liệu mẫu tĩnh
 - **URL ảnh PHẢI được cố định trong prompt gửi cho Gemini: chỉ được dùng https://commons.wikimedia.org cho tất cả game về ảnh**
+- **Fix CORS bằng cách convert URL wiki sang Special:FilePath API để lấy ảnh trực tiếp**

@@ -121,6 +121,183 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      question_options: {
+        Row: {
+          created_at: string
+          id: string
+          is_correct: boolean | null
+          option_text: string
+          order_index: number
+          question_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          option_text: string
+          order_index: number
+          question_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          option_text?: string
+          order_index?: number
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
+        Row: {
+          created_at: string
+          id: string
+          order_index: number
+          points: number | null
+          question_text: string
+          question_type: string
+          quiz_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_index: number
+          points?: number | null
+          question_text: string
+          question_type: string
+          quiz_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          points?: number | null
+          question_text?: string
+          question_type?: string
+          quiz_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_attempts: {
+        Row: {
+          completed_at: string
+          id: string
+          quiz_id: string
+          score: number
+          time_taken: number | null
+          total_questions: number
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          quiz_id: string
+          score: number
+          time_taken?: number | null
+          total_questions: number
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          quiz_id?: string
+          score?: number
+          time_taken?: number | null
+          total_questions?: number
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quizzes: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          difficulty: string
+          duration: number
+          id: string
+          is_published: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty: string
+          duration?: number
+          id?: string
+          is_published?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty?: string
+          duration?: number
+          id?: string
+          is_published?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       shared_games: {
         Row: {
           created_at: string | null
@@ -152,6 +329,55 @@ export type Database = {
             columns: ["game_id"]
             isOneToOne: false
             referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_answers: {
+        Row: {
+          attempt_id: string
+          created_at: string
+          id: string
+          is_correct: boolean
+          question_id: string
+          selected_option_id: string | null
+        }
+        Insert: {
+          attempt_id: string
+          created_at?: string
+          id?: string
+          is_correct: boolean
+          question_id: string
+          selected_option_id?: string | null
+        }
+        Update: {
+          attempt_id?: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          question_id?: string
+          selected_option_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_answers_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_answers_selected_option_id_fkey"
+            columns: ["selected_option_id"]
+            isOneToOne: false
+            referencedRelation: "question_options"
             referencedColumns: ["id"]
           },
         ]
