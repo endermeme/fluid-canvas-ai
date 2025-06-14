@@ -49,7 +49,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   } = useIframeManager(miniGame, onReload, gameExpired);
 
   return (
-    <div className={`w-full h-full flex flex-col bg-gradient-to-b from-background to-background/95 ${className || ''}`}>
+    <div className={`w-full h-full flex flex-col bg-gradient-to-br from-background via-background/98 to-primary/3 ${className || ''}`}>
       {!hideHeader && (
         <CustomGameHeader
           onBack={onBack}
@@ -71,22 +71,28 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
             onRetry={refreshGame} 
           />
         ) : (
-          <Card className="relative w-full h-full overflow-hidden shadow-lg border-primary/10">
+          <Card className={`relative w-full h-full overflow-hidden shadow-xl border-primary/20 transition-all duration-500 ${
+            isIframeLoaded ? 'shadow-2xl scale-100' : 'shadow-lg scale-[0.98]'
+          }`}>
             {!isIframeLoaded && (
               <GameLoadingIndicator 
                 progress={loadingProgress}
               />
             )}
-            <GameIframeRenderer 
-              ref={iframeRef} 
-              title={miniGame.title || "Game tương tác"} 
-              isLoaded={isIframeLoaded}
-            />
+            <div className={`w-full h-full transition-opacity duration-700 ${
+              isIframeLoaded ? 'opacity-100' : 'opacity-0'
+            }`}>
+              <GameIframeRenderer 
+                ref={iframeRef} 
+                title={miniGame.title || "Game tương tác"} 
+                isLoaded={isIframeLoaded}
+              />
+            </div>
           </Card>
         )}
         
         {extraButton && (
-          <div className="absolute bottom-4 right-4 z-10">
+          <div className="absolute bottom-6 right-6 z-10 transform transition-all duration-300 hover:scale-105">
             {extraButton}
           </div>
         )}
