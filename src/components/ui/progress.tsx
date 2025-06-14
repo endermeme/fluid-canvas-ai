@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as ProgressPrimitive from "@radix-ui/react-progress"
 
@@ -17,29 +16,27 @@ const Progress = React.forwardRef<
     <ProgressPrimitive.Root
       ref={ref}
       className={cn(
-        "relative h-4 w-full overflow-hidden rounded-full bg-secondary/30 shadow-inner",
+        "relative h-3 w-full overflow-hidden rounded-full bg-muted/60 shadow-inner",
         className
       )}
       {...props}
     >
       <ProgressPrimitive.Indicator
         className={cn(
-          "h-full w-full flex-1 transition-all duration-700 ease-out rounded-full shadow-sm", 
+          "h-full w-full flex-1 transition-all duration-700 ease-out rounded-full",
           indicatorColor || "bg-primary"
         )}
         style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
       />
-      
-      {/* Shine effect */}
+      {/* Subtle shine effect */}
       <div 
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 animate-pulse"
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-0 pointer-events-none"
         style={{ 
-          transform: `translateX(-${100 - (value || 0)}%) skewX(-12deg)`,
+          transform: `translateX(-${100 - (value || 0)}%)`,
           transition: 'transform 0.7s ease-out'
         }}
       />
     </ProgressPrimitive.Root>
-    
     {showPercentage && (
       <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-foreground drop-shadow-sm">
         {Math.round(value || 0)}%
