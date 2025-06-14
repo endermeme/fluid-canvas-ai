@@ -543,6 +543,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      increment_share_count: {
+        Args: { game_id: string }
+        Returns: undefined
+      }
       update_user_role: {
         Args: { target_user_id: string; new_role: string }
         Returns: undefined

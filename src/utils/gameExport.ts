@@ -131,15 +131,20 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
     console.log("Fetching game with ID:", id);
     
     // Cập nhật last_accessed_at và tăng share_count khi game được truy cập
-    // Sử dụng raw SQL để increment share_count
-    const { error: updateError } = await supabase.rpc('increment_share_count', {
-      game_id: id
-    });
+    // Sử dụng direct update thay vì RPC function để tránh type issues
+    const { error: updateError } = await supabase
+      .from('games')
+      .update({ 
+        last_accessed_at: new Date().toISOString(),
+        share_count: supabase.sql`COALESCE(share_count, 0) + 1`
+      })
+      .eq('id', id)
+      .eq('is_published', true);
 
     if (updateError) {
-      console.warn("Could not update access stats, trying alternative method:", updateError);
+      console.warn("Could not update access stats:", updateError);
       
-      // Fallback: thử update trực tiếp
+      // Fallback: thử update trực tiếp chỉ last_accessed_at
       const { error: fallbackError } = await supabase
         .from('games')
         .update({ 
@@ -191,8 +196,8 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
       description: game.description || `Shared game: ${game.title}`,
       expiresAt: new Date(game.expires_at).getTime(),
       createdAt: new Date(game.created_at).getTime(),
-      shareCount: (game as any).share_count || 0,
-      lastAccessedAt: (game as any).last_accessed_at ? new Date((game as any).last_accessed_at).getTime() : undefined
+      shareCount: game.share_count || 0,
+      lastAccessedAt: game.last_accessed_at ? new Date(game.last_accessed_at).getTime() : undefined
     };
   } catch (error) {
     console.error("Unhandled error in getSharedGame:", error);
