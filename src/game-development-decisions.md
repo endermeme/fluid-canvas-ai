@@ -1,6 +1,25 @@
 
 # Các Quyết Định Phát Triển Game
 
+## 2025-01-11: Tối ưu settings template cho từng loại game
+- **Thay đổi**: Điều chỉnh settings template để phù hợp với từng loại game cụ thể
+- **Cải tiến**:
+  - **Quiz**: Chỉ giữ các settings liên quan đến câu hỏi trắc nghiệm (difficulty, questionCount, timePerQuestion, useTimer, showExplanation, shuffleQuestions, shuffleOptions, bonusTime)
+  - **Flashcards**: Chỉ các settings cho thẻ ghi nhớ (autoFlip, flipTime, shuffleCards, showProgress)
+  - **Matching**: Settings cho game nối từ (difficulty, timeLimit, shuffleItems, allowPartialMatching)
+  - **Memory**: Settings cho game ghi nhớ (useTimer, timeLimit, allowHints, shuffleCards)
+  - **Ordering**: Settings cho sắp xếp câu (timeLimit, showHints, allowShuffle)
+  - **WordSearch**: Settings cho tìm từ ẩn (gridSize, allowDiagonalWords, showWordList, timeLimit)
+  - **TrueFalse**: Settings cho đúng/sai (timePerQuestion, totalTime, showExplanation)
+- **Logic fixes**:
+  - TrueFalseTemplate: Fix timer logic và state management tương tự QuizTemplate
+  - Cải thiện xử lý timer và useEffect hooks
+  - Đảm bảo các settings được sử dụng đúng cách trong từng template
+- **Tệp sửa đổi**:
+  - `GameSelector.tsx` - thêm defaultSettings cho từng game type
+  - `TrueFalseTemplate.tsx` - fix logic timer và state management
+- **Trạng thái**: Đã hoàn thành
+
 ## 2025-01-11: Fix lỗi logic templates và redesign GameSelector
 - **Thay đổi**: Sửa lỗi logic và cải thiện giao diện toàn bộ
 - **Lỗi đã sửa**:
@@ -104,7 +123,7 @@
 4. **Memory** - Lật thẻ tìm cặp giống nhau ✅ Fixed logic
 5. **Ordering** - Sắp xếp từ thành câu
 6. **WordSearch** - Tìm từ ẩn trong lưới chữ
-7. **TrueFalse** - Câu hỏi đúng/sai
+7. **TrueFalse** - Câu hỏi đúng/sai ✅ Fixed logic
 
 ## Game Đã Xóa:
 - **Pictionary** - Đoán hình qua ảnh (đã xóa 2025-01-11)
@@ -127,3 +146,5 @@
 - **Cards game phải đều đặn, không thò thụt, với hover effects mượt mà**
 - **Loại bỏ các tính năng quick start vô dụng không cần thiết**
 - **Fix tất cả lỗi logic trong game templates để hoạt động chính xác**
+- **Settings template phải tối ưu cho từng loại game, loại bỏ các settings thừa không cần thiết**
+- **Mỗi game type chỉ có những settings phù hợp với chức năng của nó**

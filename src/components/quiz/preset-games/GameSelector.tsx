@@ -28,7 +28,17 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
       description: 'Trả lời câu hỏi nhiều lựa chọn với thời gian giới hạn',
       icon: <Brain className="h-8 w-8" />,
       gradient: 'from-sky-500 to-blue-600',
-      color: 'text-sky-600'
+      color: 'text-sky-600',
+      defaultSettings: {
+        difficulty: 'medium',
+        questionCount: 10,
+        timePerQuestion: 30,
+        useTimer: true,
+        showExplanation: true,
+        shuffleQuestions: true,
+        shuffleOptions: true,
+        bonusTime: 5
+      }
     },
     { 
       id: 'flashcards', 
@@ -36,7 +46,13 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
       description: 'Học bằng thẻ hai mặt với tính năng lật tự động',
       icon: <BookOpen className="h-8 w-8" />,
       gradient: 'from-emerald-500 to-teal-600',
-      color: 'text-emerald-600'
+      color: 'text-emerald-600',
+      defaultSettings: {
+        autoFlip: false,
+        flipTime: 5,
+        shuffleCards: true,
+        showProgress: true
+      }
     },
     { 
       id: 'matching', 
@@ -44,7 +60,13 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
       description: 'Ghép các cặp từ tương ứng với nhau',
       icon: <ArrowRightLeft className="h-8 w-8" />,
       gradient: 'from-purple-500 to-indigo-600',
-      color: 'text-purple-600'
+      color: 'text-purple-600',
+      defaultSettings: {
+        difficulty: 'medium',
+        timeLimit: 60,
+        shuffleItems: true,
+        allowPartialMatching: false
+      }
     },
     { 
       id: 'memory', 
@@ -52,7 +74,13 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
       description: 'Lật thẻ và tìm các cặp thẻ giống nhau',
       icon: <Dices className="h-8 w-8" />,
       gradient: 'from-orange-500 to-red-600',
-      color: 'text-orange-600'
+      color: 'text-orange-600',
+      defaultSettings: {
+        useTimer: true,
+        timeLimit: 120,
+        allowHints: true,
+        shuffleCards: true
+      }
     },
     { 
       id: 'ordering', 
@@ -60,7 +88,12 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
       description: 'Sắp xếp các từ để tạo thành câu hoàn chỉnh',
       icon: <Layers className="h-8 w-8" />,
       gradient: 'from-pink-500 to-rose-600',
-      color: 'text-pink-600'
+      color: 'text-pink-600',
+      defaultSettings: {
+        timeLimit: 180,
+        showHints: true,
+        allowShuffle: true
+      }
     },
     { 
       id: 'wordsearch', 
@@ -68,7 +101,13 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
       description: 'Tìm kiếm các từ được ẩn trong bảng chữ cái',
       icon: <Search className="h-8 w-8" />,
       gradient: 'from-cyan-500 to-blue-600',
-      color: 'text-cyan-600'
+      color: 'text-cyan-600',
+      defaultSettings: {
+        gridSize: 15,
+        allowDiagonalWords: true,
+        showWordList: true,
+        timeLimit: 300
+      }
     },
     { 
       id: 'truefalse', 
@@ -76,7 +115,12 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
       description: 'Phán đoán các câu khẳng định là đúng hay sai',
       icon: <CheckSquare className="h-8 w-8" />,
       gradient: 'from-green-500 to-emerald-600',
-      color: 'text-green-600'
+      color: 'text-green-600',
+      defaultSettings: {
+        timePerQuestion: 15,
+        totalTime: 150,
+        showExplanation: true
+      }
     }
   ];
 
