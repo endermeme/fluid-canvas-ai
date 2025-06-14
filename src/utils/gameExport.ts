@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface StoredGame {
@@ -131,30 +130,13 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
     console.log("Fetching game with ID:", id);
     
     // Cập nhật last_accessed_at và tăng share_count khi game được truy cập
-    // Sử dụng direct update thay vì RPC function để tránh type issues
-    const { error: updateError } = await supabase
-      .from('games')
-      .update({ 
-        last_accessed_at: new Date().toISOString(),
-        share_count: supabase.sql`COALESCE(share_count, 0) + 1`
-      })
-      .eq('id', id)
-      .eq('is_published', true);
+    // Sử dụng RPC function increment_share_count
+    const { error: updateError } = await supabase.rpc('increment_share_count', {
+      game_id: id
+    });
 
     if (updateError) {
       console.warn("Could not update access stats:", updateError);
-      
-      // Fallback: thử update trực tiếp chỉ last_accessed_at
-      const { error: fallbackError } = await supabase
-        .from('games')
-        .update({ 
-          last_accessed_at: new Date().toISOString()
-        })
-        .eq('id', id);
-
-      if (fallbackError) {
-        console.warn("Fallback update also failed:", fallbackError);
-      }
     }
 
     const { data: game, error } = await supabase
