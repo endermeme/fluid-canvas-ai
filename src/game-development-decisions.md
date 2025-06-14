@@ -1,6 +1,26 @@
 
 # Các Quyết Định Phát Triển Game
 
+## 2025-01-11: Fix lỗi logic templates và redesign GameSelector
+- **Thay đổi**: Sửa lỗi logic và cải thiện giao diện toàn bộ
+- **Lỗi đã sửa**:
+  - QuizTemplate: Fix timer logic, xử lý useTimer properly, bonus time logic
+  - FlashcardsTemplate: Fix auto-flip timer conflicts, state management
+  - MemoryTemplate: Fix matching logic, card state handling, timer integration
+- **Cải tiến GameSelector**:
+  - Loại bỏ phần "quick start" vô dụng
+  - Redesign cards đều đặn với grid responsive 
+  - Thêm hover effects và animations mượt mà
+  - Icon và gradient riêng cho từng game type
+  - Layout centered và cân bằng trên màn hình
+  - Typography và spacing được cải thiện
+- **Tệp sửa đổi**:
+  - `QuizTemplate.tsx` - fix timer và state logic
+  - `FlashcardsTemplate.tsx` - fix auto-flip và timer conflicts  
+  - `MemoryTemplate.tsx` - fix matching algorithm và state
+  - `GameSelector.tsx` - redesign hoàn toàn giao diện
+- **Trạng thái**: Đã hoàn thành
+
 ## 2025-01-11: Tối ưu kích thước GameSettings - Giảm padding và spacing
 - **Thay đổi**: Điều chỉnh kích thước GameSettings để vừa phải, không quá to phải scroll
 - **Cải tiến**:
@@ -60,7 +80,7 @@
   - Loại bỏ text "Learn interactively" không phù hợp
   - Typography và spacing được cải thiện
 - **Tệp sửa đổi**: `GameSelector.tsx` - cải thiện toàn bộ UI/UX
-- **Trạng thái**: Đã hoàn thành
+- **Trạng thái**: Đã hoàn thành (sau đó được redesign lại hoàn toàn)
 
 ## 2025-01-11: Xóa 2 game liên quan đến hình ảnh
 - **Quyết định**: Loại bỏ hoàn toàn 2 game sử dụng hình ảnh
@@ -78,10 +98,10 @@
 - **Trạng thái**: Đã xóa hoàn toàn
 
 ## Các Game Gốc Được Giữ Lại:
-1. **Quiz** - Trắc nghiệm nhiều lựa chọn
-2. **Flashcards** - Thẻ ghi nhớ hai mặt  
+1. **Quiz** - Trắc nghiệm nhiều lựa chọn ✅ Fixed logic
+2. **Flashcards** - Thẻ ghi nhớ hai mặt ✅ Fixed logic  
 3. **Matching** - Nối cặp từ tương ứng
-4. **Memory** - Lật thẻ tìm cặp giống nhau
+4. **Memory** - Lật thẻ tìm cặp giống nhau ✅ Fixed logic
 5. **Ordering** - Sắp xếp từ thành câu
 6. **WordSearch** - Tìm từ ẩn trong lưới chữ
 7. **TrueFalse** - Câu hỏi đúng/sai
@@ -104,3 +124,6 @@
 - **Settings phải rõ ràng, lớn và phù hợp với từng loại game nhưng không quá to phải scroll**
 - **Loại bỏ các text placeholder không phù hợp như "Learn interactively"**
 - **Tối ưu kích thước để vừa phải với màn hình, tránh scroll không cần thiết**
+- **Cards game phải đều đặn, không thò thụt, với hover effects mượt mà**
+- **Loại bỏ các tính năng quick start vô dụng không cần thiết**
+- **Fix tất cả lỗi logic trong game templates để hoạt động chính xác**

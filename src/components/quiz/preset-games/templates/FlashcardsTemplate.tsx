@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, RefreshCw, Check, X, Clock, Shuffle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RefreshCw, Check, X, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Toggle } from '@/components/ui/toggle';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface FlashcardsTemplateProps {
@@ -16,24 +16,29 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
   const [currentCard, setCurrentCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [cardsState, setCardsState] = useState<Array<'unreviewed' | 'known' | 'unknown'>>([]);
-  const [autoFlip, setAutoFlip] = useState(content?.settings?.autoFlip || false);
+  const [autoFlip, setAutoFlip] = useState(false);
   const [flipTimer, setFlipTimer] = useState<NodeJS.Timeout | null>(null);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const { toast } = useToast();
 
   const cards = content?.cards || [];
-  const progress = ((currentCard + 1) / cards.length) * 100;
+  const progress = cards.length > 0 ? ((currentCard + 1) / cards.length) * 100 : 0;
   const flipTime = content?.settings?.flipTime || 5;
+  const useAutoFlip = content?.settings?.autoFlip || false;
 
+  // Initialize cards state
   useEffect(() => {
     if (cards.length > 0) {
       setCardsState(new Array(cards.length).fill('unreviewed'));
+      setAutoFlip(useAutoFlip);
     }
-  }, [cards.length]);
+  }, [cards.length, useAutoFlip]);
 
+  // Auto flip logic
   useEffect(() => {
-    if (autoFlip && !isFlipped) {
+    if (autoFlip && !isFlipped && cards.length > 0) {
       setTimeRemaining(flipTime);
+      
       const countdownTimer = setInterval(() => {
         setTimeRemaining(prev => {
           if (prev <= 1) {
@@ -47,6 +52,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
       const timer = setTimeout(() => {
         setIsFlipped(true);
         clearInterval(countdownTimer);
+        setTimeRemaining(0);
       }, flipTime * 1000);
       
       setFlipTimer(timer);
@@ -58,14 +64,19 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
     }
 
     return () => {
-      if (flipTimer) clearTimeout(flipTimer);
+      if (flipTimer) {
+        clearTimeout(flipTimer);
+        setFlipTimer(null);
+      }
     };
   }, [currentCard, isFlipped, autoFlip, flipTime]);
 
   const handleFlip = () => {
     if (flipTimer) {
       clearTimeout(flipTimer);
+      setFlipTimer(null);
     }
+    setTimeRemaining(0);
     setIsFlipped(!isFlipped);
   };
 
@@ -73,6 +84,11 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
     if (currentCard > 0) {
       setCurrentCard(currentCard - 1);
       setIsFlipped(false);
+      if (flipTimer) {
+        clearTimeout(flipTimer);
+        setFlipTimer(null);
+      }
+      setTimeRemaining(0);
     }
   };
 
@@ -80,27 +96,28 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
     if (currentCard < cards.length - 1) {
       setCurrentCard(currentCard + 1);
       setIsFlipped(false);
+      if (flipTimer) {
+        clearTimeout(flipTimer);
+        setFlipTimer(null);
+      }
+      setTimeRemaining(0);
     }
   };
 
   const handleMarkCard = (status: 'known' | 'unknown') => {
+    if (currentCard >= cardsState.length) return;
+    
     const newCardsState = [...cardsState];
     newCardsState[currentCard] = status;
     setCardsState(newCardsState);
     
-    if (status === 'known') {
-      toast({
-        title: "Đã thuộc!",
-        description: "Đã đánh dấu thẻ này là đã thuộc.",
-        variant: "default",
-      });
-    } else {
-      toast({
-        title: "Chưa thuộc!",
-        description: "Đã đánh dấu thẻ này là chưa thuộc.",
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: status === 'known' ? "Đã thuộc!" : "Chưa thuộc!",
+      description: status === 'known' 
+        ? "Đã đánh dấu thẻ này là đã thuộc." 
+        : "Đã đánh dấu thẻ này là chưa thuộc.",
+      variant: status === 'known' ? "default" : "destructive",
+    });
     
     if (currentCard < cards.length - 1) {
       handleNextCard();
@@ -111,6 +128,12 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
     setCurrentCard(0);
     setIsFlipped(false);
     setCardsState(new Array(cards.length).fill('unreviewed'));
+    if (flipTimer) {
+      clearTimeout(flipTimer);
+      setFlipTimer(null);
+    }
+    setTimeRemaining(0);
+    
     toast({
       title: "Làm lại từ đầu",
       description: "Đã đặt lại tất cả thẻ ghi nhớ.",
@@ -119,10 +142,20 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
   };
 
   const toggleAutoFlip = () => {
-    setAutoFlip(!autoFlip);
+    const newAutoFlip = !autoFlip;
+    setAutoFlip(newAutoFlip);
+    
+    if (!newAutoFlip && flipTimer) {
+      clearTimeout(flipTimer);
+      setFlipTimer(null);
+      setTimeRemaining(0);
+    }
+    
     toast({
-      title: autoFlip ? "Đã tắt tự động lật" : "Đã bật tự động lật",
-      description: autoFlip ? "Thẻ sẽ không tự động lật." : `Thẻ sẽ tự động lật sau ${flipTime} giây.`,
+      title: newAutoFlip ? "Đã bật tự động lật" : "Đã tắt tự động lật",
+      description: newAutoFlip 
+        ? `Thẻ sẽ tự động lật sau ${flipTime} giây.` 
+        : "Thẻ sẽ không tự động lật.",
       variant: "default",
     });
   };
@@ -138,21 +171,25 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
   };
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative overflow-hidden">
+    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
       <div className="mb-4 mt-12">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
             Thẻ {currentCard + 1}/{cards.length}
           </div>
-          <div className="text-sm font-medium flex space-x-3">
-            <span className="px-3 py-1 bg-green-100/30 text-green-600 rounded-full">Đã thuộc: {stats.known}</span>
-            <span className="px-3 py-1 bg-red-100/30 text-red-600 rounded-full">Chưa thuộc: {stats.unknown}</span>
+          <div className="text-sm font-medium flex space-x-2">
+            <span className="px-3 py-1 bg-green-100/30 text-green-600 rounded-full">
+              Đã thuộc: {stats.known}
+            </span>
+            <span className="px-3 py-1 bg-red-100/30 text-red-600 rounded-full">
+              Chưa thuộc: {stats.unknown}
+            </span>
           </div>
         </div>
         <Progress value={progress} className="h-2 bg-secondary" />
       </div>
 
-      <div className="flex-grow flex items-center justify-center mb-4 perspective-1000 overflow-hidden">
+      <div className="flex-grow flex items-center justify-center mb-4 perspective-1000">
         <div 
           className="w-full max-w-4xl aspect-[3/2] cursor-pointer relative group px-4"
           onClick={handleFlip}
@@ -164,14 +201,12 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
         >
           <Card 
             className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-2 border-primary/20 shadow-lg group-hover:shadow-xl transition-all duration-300 overflow-auto"
-            style={{
-              backfaceVisibility: 'hidden'
-            }}
+            style={{ backfaceVisibility: 'hidden' }}
           >
             <div className="text-center max-w-full">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
                 Nhấn để lật thẻ
-                {autoFlip && !isFlipped && (
+                {autoFlip && !isFlipped && timeRemaining > 0 && (
                   <div className="mt-1 flex items-center justify-center">
                     <Clock className="h-3 w-3 mr-1 text-primary/60" />
                     <span>Tự động lật sau {timeRemaining}s</span>
@@ -179,7 +214,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
                 )}
               </div>
               <div className="text-3xl font-bold text-primary/90 break-words whitespace-pre-wrap">
-                {cards[currentCard].front}
+                {cards[currentCard]?.front || ''}
               </div>
             </div>
           </Card>
@@ -194,7 +229,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
             <div className="text-center max-w-full">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Mặt sau</div>
               <div className="text-2xl text-primary/90 break-words whitespace-pre-wrap">
-                {cards[currentCard].back}
+                {cards[currentCard]?.back || ''}
               </div>
             </div>
           </Card>

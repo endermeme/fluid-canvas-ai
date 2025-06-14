@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, RefreshCw, Clock, ArrowLeft, ChevronRight } from 'lucide-react';
+import { CheckCircle, XCircle, RefreshCw, Clock, ChevronRight } from 'lucide-react';
 
 interface QuizTemplateProps {
   data?: any;
@@ -19,39 +20,38 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(gameContent?.settings?.timePerQuestion || 30);
-  const [totalTimeLeft, setTotalTimeLeft] = useState(gameContent?.settings?.totalTime || 300);
-  const [timerRunning, setTimerRunning] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [totalTimeLeft, setTotalTimeLeft] = useState(0);
+  const [timerRunning, setTimerRunning] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
   const questions = gameContent?.questions || [];
   const isLastQuestion = currentQuestion === questions.length - 1;
+  const useTimer = gameContent?.settings?.useTimer !== false;
 
+  // Initialize game when questions are available
   useEffect(() => {
     if (!gameStarted && questions.length > 0) {
-      setGameStarted(true);
-      
       const questionTime = gameContent?.settings?.timePerQuestion || 30;
       const totalTime = gameContent?.settings?.totalTime || (questions.length * questionTime);
       
-      setTimeLeft(questionTime);
-      setTotalTimeLeft(totalTime);
-      
-      console.log(`Game initialized with ${questionTime}s per question and ${totalTime}s total time`);
-      console.log("Game content:", gameContent);
-      console.log("Questions:", questions);
+      setTimeLeft(useTimer ? questionTime : 0);
+      setTotalTimeLeft(useTimer ? totalTime : 0);
+      setTimerRunning(useTimer);
+      setGameStarted(true);
     }
-  }, [gameContent, questions, gameStarted]);
+  }, [gameContent, questions, gameStarted, useTimer]);
 
+  // Question timer
   useEffect(() => {
-    if (timeLeft > 0 && timerRunning && !isAnswered) {
+    if (useTimer && timeLeft > 0 && timerRunning && !isAnswered) {
       const timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1);
+        setTimeLeft(prev => prev - 1);
       }, 1000);
       
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && timerRunning && !isAnswered) {
+    } else if (useTimer && timeLeft === 0 && timerRunning && !isAnswered) {
       setTimerRunning(false);
       setIsAnswered(true);
       
@@ -61,16 +61,17 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         variant: "destructive",
       });
     }
-  }, [timeLeft, timerRunning, isAnswered, toast]);
+  }, [timeLeft, timerRunning, isAnswered, useTimer, toast]);
 
+  // Total timer
   useEffect(() => {
-    if (totalTimeLeft > 0 && gameStarted && !showResult) {
+    if (useTimer && totalTimeLeft > 0 && gameStarted && !showResult) {
       const timer = setTimeout(() => {
-        setTotalTimeLeft(totalTimeLeft - 1);
+        setTotalTimeLeft(prev => prev - 1);
       }, 1000);
       
       return () => clearTimeout(timer);
-    } else if (totalTimeLeft === 0 && gameStarted && !showResult) {
+    } else if (useTimer && totalTimeLeft === 0 && gameStarted && !showResult) {
       setShowResult(true);
       
       toast({
@@ -79,7 +80,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         variant: "destructive",
       });
     }
-  }, [totalTimeLeft, gameStarted, showResult, toast]);
+  }, [totalTimeLeft, gameStarted, showResult, useTimer, toast]);
 
   const handleOptionSelect = (optionIndex: number) => {
     if (isAnswered) return;
@@ -88,16 +89,17 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
     setIsAnswered(true);
     setTimerRunning(false);
     
-    if (optionIndex === questions[currentQuestion].correctAnswer) {
-      setScore(score + 1);
+    const isCorrect = optionIndex === questions[currentQuestion].correctAnswer;
+    if (isCorrect) {
+      setScore(prev => prev + 1);
       
-      if (gameContent?.settings?.bonusTimePerCorrect) {
-        const bonusTime = gameContent.settings.bonusTimePerCorrect;
+      const bonusTime = gameContent?.settings?.bonusTime || 0;
+      if (useTimer && bonusTime > 0) {
         setTotalTimeLeft(prev => prev + bonusTime);
         
         toast({
           title: "Chính xác! +1 điểm",
-          description: `Câu trả lời của bạn đúng. +${bonusTime}s thời gian thư��ng.`,
+          description: `Câu trả lời đúng. +${bonusTime}s thời gian thưởng.`,
           variant: "default",
         });
       } else {
@@ -108,9 +110,10 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         });
       }
     } else {
+      const correctAnswer = questions[currentQuestion].options[questions[currentQuestion].correctAnswer];
       toast({
         title: "Không chính xác!",
-        description: `Đáp án đúng là: ${questions[currentQuestion].options[questions[currentQuestion].correctAnswer]}`,
+        description: `Đáp án đúng là: ${correctAnswer}`,
         variant: "destructive",
       });
     }
@@ -120,11 +123,15 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
     if (isLastQuestion) {
       setShowResult(true);
     } else {
-      setCurrentQuestion(currentQuestion + 1);
+      setCurrentQuestion(prev => prev + 1);
       setSelectedOption(null);
       setIsAnswered(false);
-      setTimeLeft(gameContent?.settings?.timePerQuestion || 30);
-      setTimerRunning(true);
+      
+      if (useTimer) {
+        const questionTime = gameContent?.settings?.timePerQuestion || 30;
+        setTimeLeft(questionTime);
+        setTimerRunning(true);
+      }
     }
   };
 
@@ -134,10 +141,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
     setScore(0);
     setShowResult(false);
     setIsAnswered(false);
-    setTimeLeft(gameContent?.settings?.timePerQuestion || 30);
-    setTotalTimeLeft(gameContent?.settings?.totalTime || 300);
-    setTimerRunning(true);
-    setGameStarted(true);
+    setGameStarted(false);
   };
 
   if (!gameContent || !questions.length) {
@@ -148,7 +152,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
     const percentage = Math.round((score / questions.length) * 100);
     
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80 relative">
+      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
         <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
           <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả</h2>
           <p className="text-lg mb-4">
@@ -167,11 +171,13 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
             {score} / {questions.length}
           </div>
           
-          <div className="text-sm mb-4 text-muted-foreground">
-            Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
-          </div>
+          {useTimer && (
+            <div className="text-sm mb-4 text-muted-foreground">
+              Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
+            </div>
+          )}
           
-          <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary">
+          <Button onClick={handleRestart} className="w-full">
             <RefreshCw className="mr-2 h-4 w-4" />
             Chơi Lại
           </Button>
@@ -182,27 +188,27 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
 
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
-  
-  const minutesLeft = Math.floor(totalTimeLeft / 60);
-  const secondsLeft = totalTimeLeft % 60;
-  const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
+    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
       <div className="mb-4 mt-12">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
             Câu hỏi {currentQuestion + 1}/{questions.length}
           </div>
           <div className="text-sm font-medium flex items-center gap-2">
-            <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full">
-              <Clock className="h-4 w-4 mr-1 text-primary" />
-              {timeLeft}s
-            </div>
-            <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full text-primary/80">
-              <Clock className="h-4 w-4 mr-1" />
-              {formattedTotalTime}
-            </div>
+            {useTimer && (
+              <>
+                <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full">
+                  <Clock className="h-4 w-4 mr-1 text-primary" />
+                  {timeLeft}s
+                </div>
+                <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full text-primary/80">
+                  <Clock className="h-4 w-4 mr-1" />
+                  {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
+                </div>
+              </>
+            )}
             <div className="px-3 py-1 bg-primary/10 rounded-full">
               Điểm: <span className="font-bold">{score}</span>
             </div>

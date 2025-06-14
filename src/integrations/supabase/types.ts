@@ -44,6 +44,98 @@ export type Database = {
           },
         ]
       }
+      educational_games: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          difficulty: string
+          duration: number
+          game_content: Json
+          id: string
+          image_url: string | null
+          instructions: string | null
+          is_published: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty: string
+          duration?: number
+          game_content?: Json
+          id?: string
+          image_url?: string | null
+          instructions?: string | null
+          is_published?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty?: string
+          duration?: number
+          game_content?: Json
+          id?: string
+          image_url?: string | null
+          instructions?: string | null
+          is_published?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      game_attempts: {
+        Row: {
+          completed_at: string
+          correct_answers: number
+          game_id: string
+          id: string
+          score: number
+          time_taken: number | null
+          total_questions: number
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          completed_at?: string
+          correct_answers?: number
+          game_id: string
+          id?: string
+          score: number
+          time_taken?: number | null
+          total_questions: number
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          completed_at?: string
+          correct_answers?: number
+          game_id?: string
+          id?: string
+          score?: number
+          time_taken?: number | null
+          total_questions?: number
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_attempts_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "educational_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_participants: {
         Row: {
           game_id: string | null
@@ -263,7 +355,7 @@ export type Database = {
         Row: {
           category: string
           created_at: string
-          created_by: string | null
+          created_by: string
           description: string | null
           difficulty: string
           duration: number
@@ -275,7 +367,7 @@ export type Database = {
         Insert: {
           category: string
           created_at?: string
-          created_by?: string | null
+          created_by: string
           description?: string | null
           difficulty: string
           duration?: number
@@ -287,7 +379,7 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string
-          created_by?: string | null
+          created_by?: string
           description?: string | null
           difficulty?: string
           duration?: number
@@ -417,6 +509,10 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      update_user_role: {
+        Args: { target_user_id: string; new_role: string }
+        Returns: undefined
       }
     }
     Enums: {

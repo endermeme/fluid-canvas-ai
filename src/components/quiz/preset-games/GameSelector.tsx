@@ -2,195 +2,170 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { 
   Brain, BookOpen, Puzzle, Dices, 
-  CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
-  ArrowRight, SlidersHorizontal
+  CheckSquare, Layers, ArrowRightLeft, Search,
+  Gamepad2, Sparkles
 } from 'lucide-react';
-import GameSettings from '../GameSettings';
-import { GameSettingsData } from '../types';
 
 interface GameSelectorProps {
   onSelectGame: (gameType: string) => void;
-  onQuickStart?: (gameType: string, prompt: string, settings: GameSettingsData) => void;
+  onQuickStart?: (gameType: string, prompt: string, settings: any) => void;
 }
 
-const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart }) => {
+const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
   const [selectedGameType, setSelectedGameType] = useState<string>('');
-  const [quickPrompt, setQuickPrompt] = useState<string>('');
-  const [showSettings, setShowSettings] = useState(false);
-  
-  const defaultSettings: GameSettingsData = {
-    difficulty: 'medium',
-    questionCount: 10,
-    timePerQuestion: 30,
-    category: 'general',
-    useTimer: true
-  };
-  
-  const handleQuickStart = () => {
-    if (onQuickStart && selectedGameType && quickPrompt.trim()) {
-      onQuickStart(selectedGameType, quickPrompt, defaultSettings);
-    }
-  };
   
   const handleSelectGame = (gameType: string) => {
     setSelectedGameType(gameType);
-    if (gameType) {
-      onSelectGame(gameType);
-    }
+    onSelectGame(gameType);
   };
 
   const gameTypes = [
     { 
       id: 'quiz', 
       name: 'Trắc Nghiệm', 
-      description: 'Trả lời câu hỏi nhiều lựa chọn',
-      icon: <Brain className="h-8 w-8 text-sky-600" />,
-      gradient: 'from-sky-400 to-blue-500'
+      description: 'Trả lời câu hỏi nhiều lựa chọn với thời gian giới hạn',
+      icon: <Brain className="h-8 w-8" />,
+      gradient: 'from-sky-500 to-blue-600',
+      color: 'text-sky-600'
     },
     { 
       id: 'flashcards', 
       name: 'Thẻ Ghi Nhớ', 
-      description: 'Học với thẻ hai mặt',
-      icon: <BookOpen className="h-8 w-8 text-emerald-600" />,
-      gradient: 'from-emerald-400 to-teal-500'
+      description: 'Học bằng thẻ hai mặt với tính năng lật tự động',
+      icon: <BookOpen className="h-8 w-8" />,
+      gradient: 'from-emerald-500 to-teal-600',
+      color: 'text-emerald-600'
     },
     { 
       id: 'matching', 
       name: 'Nối Từ', 
-      description: 'Nối các cặp từ tương ứng với nhau',
-      icon: <ArrowRightLeft className="h-8 w-8 text-purple-600" />,
-      gradient: 'from-purple-400 to-indigo-500'
+      description: 'Ghép các cặp từ tương ứng với nhau',
+      icon: <ArrowRightLeft className="h-8 w-8" />,
+      gradient: 'from-purple-500 to-indigo-600',
+      color: 'text-purple-600'
     },
     { 
       id: 'memory', 
       name: 'Trò Chơi Ghi Nhớ', 
-      description: 'Tìm các cặp thẻ giống nhau',
-      icon: <Dices className="h-8 w-8 text-orange-600" />,
-      gradient: 'from-orange-400 to-red-500'
+      description: 'Lật thẻ và tìm các cặp thẻ giống nhau',
+      icon: <Dices className="h-8 w-8" />,
+      gradient: 'from-orange-500 to-red-600',
+      color: 'text-orange-600'
     },
     { 
       id: 'ordering', 
       name: 'Sắp Xếp Câu', 
       description: 'Sắp xếp các từ để tạo thành câu hoàn chỉnh',
-      icon: <Layers className="h-8 w-8 text-pink-600" />,
-      gradient: 'from-pink-400 to-rose-500'
+      icon: <Layers className="h-8 w-8" />,
+      gradient: 'from-pink-500 to-rose-600',
+      color: 'text-pink-600'
     },
     { 
       id: 'wordsearch', 
       name: 'Tìm Từ Ẩn', 
-      description: 'Tìm các từ ẩn trong bảng chữ cái',
-      icon: <Search className="h-8 w-8 text-cyan-600" />,
-      gradient: 'from-cyan-400 to-blue-500'
+      description: 'Tìm kiếm các từ được ẩn trong bảng chữ cái',
+      icon: <Search className="h-8 w-8" />,
+      gradient: 'from-cyan-500 to-blue-600',
+      color: 'text-cyan-600'
     },
     { 
       id: 'truefalse', 
       name: 'Đúng hay Sai', 
-      description: 'Xác định nội dung là đúng hay sai',
-      icon: <CheckSquare className="h-8 w-8 text-green-600" />,
-      gradient: 'from-green-400 to-emerald-500'
+      description: 'Phán đoán các câu khẳng định là đúng hay sai',
+      icon: <CheckSquare className="h-8 w-8" />,
+      gradient: 'from-green-500 to-emerald-600',
+      color: 'text-green-600'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100 flex items-center justify-center p-6">
-      <div className="w-full max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-6xl mx-auto">
+        {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-            Chọn Loại Trò Chơi
-          </h2>
-          <p className="text-xl text-gray-600 font-medium">Tạo trò chơi tương tác bằng AI</p>
-          <div className="mt-4 w-24 h-1 bg-gradient-to-r from-sky-400 to-blue-500 mx-auto rounded-full" />
-        </div>
-        
-        {/* Quick Start Panel */}
-        <div className="bg-white/70 backdrop-blur-md p-8 rounded-2xl mb-12 border-0 shadow-xl">
-          <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-gray-800">
-            <div className="p-2 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl">
-              <Sparkles className="h-6 w-6 text-sky-600" />
+          <div className="flex items-center justify-center mb-6">
+            <div className="p-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg">
+              <Gamepad2 className="h-12 w-12 text-sky-600" />
             </div>
-            Tạo Nhanh Với Chủ Đề
-          </h3>
-          <div className="flex flex-col lg:flex-row gap-6">
-            <Input
-              placeholder="Nhập chủ đề của bạn (ví dụ: Lịch sử Việt Nam)..."
-              value={quickPrompt}
-              onChange={(e) => setQuickPrompt(e.target.value)}
-              className="flex-1 h-14 text-lg border-2 border-gray-200 rounded-xl focus:border-sky-400 transition-colors bg-white/80"
-            />
-            <Button 
-              onClick={handleQuickStart}
-              disabled={!quickPrompt.trim() || !selectedGameType}
-              className="group whitespace-nowrap h-14 px-8 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-semibold rounded-xl"
-            >
-              Tạo Ngay
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
           </div>
-          <div className="mt-6 flex flex-wrap gap-3">
-            {gameTypes.map((game) => (
-              <Button
-                key={game.id}
-                size="sm"
-                variant={selectedGameType === game.id ? "default" : "outline"}
-                className={`transition-all duration-200 rounded-xl font-medium ${
-                  selectedGameType === game.id 
-                    ? `bg-gradient-to-r ${game.gradient} text-white shadow-lg` 
-                    : 'bg-white/80 hover:bg-white text-gray-700 border-gray-200 hover:border-gray-300'
-                }`}
-                onClick={() => setSelectedGameType(game.id)}
-              >
-                {game.name}
-              </Button>
-            ))}
-          </div>
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+            Chọn Loại Trò Chơi
+          </h1>
+          <p className="text-xl text-gray-600 font-medium max-w-2xl mx-auto">
+            Tạo trò chơi tương tác học tập với công nghệ AI. Chọn một loại game để bắt đầu.
+          </p>
+          <div className="mt-6 w-24 h-1 bg-gradient-to-r from-sky-400 to-blue-500 mx-auto rounded-full" />
         </div>
         
+        {/* Game Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {gameTypes.map((game) => (
             <Card 
               key={game.id}
-              className={`p-6 hover:shadow-2xl transition-all duration-300 cursor-pointer border-0 bg-white/70 backdrop-blur-md rounded-2xl group ${
-                selectedGameType === game.id ? 'shadow-2xl ring-2 ring-sky-400' : 'shadow-xl hover:shadow-2xl'
+              className={`group relative overflow-hidden bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer rounded-2xl transform hover:scale-105 ${
+                selectedGameType === game.id ? 'ring-2 ring-sky-400 shadow-2xl scale-105' : ''
               }`}
               onClick={() => handleSelectGame(game.id)}
             >
-              <div className="flex flex-col items-center text-center gap-4">
-                <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-md">
-                  {game.icon}
+              {/* Background Pattern */}
+              <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0 bg-gradient-to-br from-current to-transparent" />
+              </div>
+              
+              {/* Content */}
+              <div className="relative p-6 flex flex-col h-full">
+                {/* Icon */}
+                <div className="flex items-center justify-center mb-4">
+                  <div className={`p-4 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110 ${game.color}`}>
+                    {game.icon}
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-xl text-gray-800 mb-2">{game.name}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{game.description}</p>
-                </div>
-                <div className={`mt-2 flex items-center justify-center w-full px-4 py-3 rounded-xl bg-gradient-to-r ${game.gradient} text-white text-sm font-semibold shadow-lg group-hover:shadow-xl transition-all duration-300`}>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Tạo với AI
+                
+                {/* Title */}
+                <h3 className="text-xl font-bold text-gray-800 text-center mb-3 group-hover:text-gray-900 transition-colors">
+                  {game.name}
+                </h3>
+                
+                {/* Description */}
+                <p className="text-sm text-gray-600 text-center leading-relaxed mb-6 flex-grow">
+                  {game.description}
+                </p>
+                
+                {/* Action Button */}
+                <div className="mt-auto">
+                  <Button 
+                    className={`w-full py-3 rounded-xl bg-gradient-to-r ${game.gradient} text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105 border-0`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectGame(game.id);
+                    }}
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Tạo Game
+                  </Button>
                 </div>
               </div>
+              
+              {/* Hover Effect Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
             </Card>
           ))}
         </div>
         
-        <Dialog open={showSettings} onOpenChange={setShowSettings}>
-          <DialogContent className="sm:max-w-md">
-            <DialogTitle>Cài đặt cho {gameTypes.find(g => g.id === selectedGameType)?.name || "trò chơi"}</DialogTitle>
-            <GameSettings 
-              topic={quickPrompt}
-              onStart={(settings) => {
-                if (onQuickStart && selectedGameType) {
-                  onQuickStart(selectedGameType, quickPrompt, settings);
-                }
-              }}
-              initialSettings={defaultSettings}
-              onCancel={() => setShowSettings(false)}
-              inModal={true}
-            />
-          </DialogContent>
-        </Dialog>
+        {/* Footer Info */}
+        <div className="text-center mt-12">
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 max-w-3xl mx-auto border border-sky-200/30">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              Được hỗ trợ bởi AI
+            </h3>
+            <p className="text-gray-600">
+              Tất cả nội dung game sẽ được tạo tự động dựa trên chủ đề bạn nhập. 
+              Mỗi game có cài đặt riêng để tùy chỉnh độ khó và thời gian chơi.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
