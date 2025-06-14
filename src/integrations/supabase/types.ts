@@ -171,6 +171,33 @@ export type Database = {
           },
         ]
       }
+      game_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          template_data: Json
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          template_data?: Json
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          template_data?: Json
+        }
+        Relationships: []
+      }
       games: {
         Row: {
           content_type: string | null
@@ -183,6 +210,8 @@ export type Database = {
           id: string
           is_preset: boolean | null
           is_published: boolean | null
+          last_accessed_at: string | null
+          share_count: number | null
           title: string
         }
         Insert: {
@@ -196,6 +225,8 @@ export type Database = {
           id?: string
           is_preset?: boolean | null
           is_published?: boolean | null
+          last_accessed_at?: string | null
+          share_count?: number | null
           title: string
         }
         Update: {
@@ -209,6 +240,8 @@ export type Database = {
           id?: string
           is_preset?: boolean | null
           is_published?: boolean | null
+          last_accessed_at?: string | null
+          share_count?: number | null
           title?: string
         }
         Relationships: []
