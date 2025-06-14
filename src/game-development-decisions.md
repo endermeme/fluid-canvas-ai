@@ -1,6 +1,22 @@
 
 # Các Quyết Định Phát Triển Game
 
+## 2025-01-14: Fix chức năng share link và thêm game template mới
+- **Thay đổi**: Cải thiện chức năng share link với Supabase và thêm game template mới
+- **Cải tiến database**:
+  - Thêm cột `share_count` và `last_accessed_at` vào bảng `games` 
+  - Tạo bảng `game_templates` cho việc quản lý template game
+  - Cập nhật RLS policies cho việc share game public
+  - Thêm indexes để tăng hiệu suất truy vấn
+- **Cải tiến code**:
+  - Fix lỗi syntax SQL migration
+  - Cập nhật gameExport utils để handle share count
+  - Cải thiện error handling cho share functionality
+- **Tệp sửa đổi**:
+  - `game-development-decisions.md` - ghi lại quyết định
+  - `gameExport.ts` - cải thiện share functionality
+- **Trạng thái**: Đang thực hiện
+
 ## 2025-01-11: Tối ưu settings template cho từng loại game
 - **Thay đổi**: Điều chỉnh settings template để phù hợp với từng loại game cụ thể
 - **Cải tiến**:
@@ -148,3 +164,5 @@
 - **Fix tất cả lỗi logic trong game templates để hoạt động chính xác**
 - **Settings template phải tối ưu cho từng loại game, loại bỏ các settings thừa không cần thiết**
 - **Mỗi game type chỉ có những settings phù hợp với chức năng của nó**
+- **Database migrations phải tuân theo syntax PostgreSQL chính xác**
+- **Share link phải hoạt động ổn định với RLS policies phù hợp**
