@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Sparkles, Crown, Brain, Zap, Star, Gamepad2, Wand2, Rocket } from 'lucide-react';
-import LoadingSpinner from './custom-games/game-components/LoadingSpinner';
 
 interface GameLoadingProps {
   topic: string;
@@ -128,19 +127,74 @@ const GameLoading: React.FC<GameLoadingProps> = ({ topic, progress: externalProg
       <div className="w-full max-w-lg relative z-10">
         {/* Main content card */}
         <div className="bg-card/90 backdrop-blur-lg rounded-2xl p-8 border border-border/50 shadow-2xl animate-scale-in">
-          {/* Header with main spinner */}
+          {/* Header with enhanced spinner */}
           <div className="text-center mb-8">
-            <div className="relative mb-6">
-              <LoadingSpinner size="lg" />
-              {/* Pulsing ring around spinner */}
-              <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" style={{ animationDuration: '2s' }} />
+            <div className="relative mb-6 flex items-center justify-center">
+              {/* Multi-layered spinner design */}
+              <div className="relative w-20 h-20">
+                {/* Outer ring */}
+                <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
+                
+                {/* Spinning outer ring */}
+                <div className="absolute inset-0 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+                
+                {/* Middle ring */}
+                <div className="absolute inset-2 border-3 border-secondary/30 rounded-full"></div>
+                
+                {/* Spinning middle ring (reverse direction) */}
+                <div 
+                  className="absolute inset-2 border-3 border-transparent border-r-secondary rounded-full animate-spin"
+                  style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}
+                ></div>
+                
+                {/* Inner ring */}
+                <div className="absolute inset-4 border-2 border-accent/40 rounded-full"></div>
+                
+                {/* Spinning inner ring */}
+                <div 
+                  className="absolute inset-4 border-2 border-transparent border-b-accent rounded-full animate-spin"
+                  style={{ animationDuration: '0.8s' }}
+                ></div>
+                
+                {/* Center core with pulsing effect */}
+                <div className="absolute inset-6 bg-gradient-to-r from-primary to-secondary rounded-full animate-pulse-soft flex items-center justify-center">
+                  <div className="w-2 h-2 bg-background rounded-full animate-pulse"></div>
+                </div>
+                
+                {/* Orbital dots */}
+                <div className="absolute inset-0">
+                  <div 
+                    className="absolute w-2 h-2 bg-primary rounded-full animate-spin"
+                    style={{ 
+                      top: '-4px', 
+                      left: '50%', 
+                      transform: 'translateX(-50%)',
+                      animationDuration: '2s'
+                    }}
+                  ></div>
+                  <div 
+                    className="absolute w-2 h-2 bg-secondary rounded-full animate-spin"
+                    style={{ 
+                      bottom: '-4px', 
+                      left: '50%', 
+                      transform: 'translateX(-50%)',
+                      animationDuration: '2s',
+                      animationDirection: 'reverse'
+                    }}
+                  ></div>
+                </div>
+              </div>
+              
+              {/* Pulsing rings around spinner */}
+              <div className="absolute inset-0 rounded-full border-2 border-primary/10 animate-ping" style={{ animationDuration: '2s' }} />
+              <div className="absolute inset-2 rounded-full border border-secondary/10 animate-ping" style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
             </div>
             
             <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-2">
               Đang tạo minigame
             </h2>
-            <p className="text-muted-foreground">
-              Chủ đề: <span className="font-semibold text-primary px-3 py-1 bg-primary/10 rounded-full">{topic}</span>
+            <p className="text-muted-foreground text-sm">
+              Vui lòng chờ trong giây lát...
             </p>
           </div>
 

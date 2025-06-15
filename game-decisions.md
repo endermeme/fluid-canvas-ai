@@ -3,6 +3,27 @@
 
 ## Ngày: 2025-01-15
 
+### Phase 18 - Enhanced Spinner Design & Remove Topic Name - 2025-01-15:
+- **Thay đổi**: Thiết kế lại vòng xoay đẹp hơn và bỏ tên chủ đề
+- **GameLoading.tsx**: 
+  - Complete redesign của spinner với multi-layered rings
+  - Outer ring: Primary color với spinning animation
+  - Middle ring: Secondary color với reverse animation (1.5s)
+  - Inner ring: Accent color với faster animation (0.8s)
+  - Center core: Gradient background với pulsing effect
+  - Orbital dots: Rotating dots around the spinner
+  - Multiple pulsing rings around spinner với different delays
+  - Removed topic name display - chỉ hiển thị "Đang tạo minigame"
+  - Enhanced visual hierarchy với better spacing
+  - Improved spinner size (20x20) cho better visual impact
+- **Cải thiện chính**:
+  - Multi-layer Spinner: 3 spinning rings với different speeds và directions
+  - Visual Depth: Gradient colors, pulsing effects, orbital elements
+  - Animation Quality: Smooth transitions với varied timing
+  - Cleaner UI: Removed topic name để focus vào loading process
+  - Better Proportions: Larger spinner với enhanced visual presence
+  - Enhanced Effects: Multiple pulsing rings và animated orbital dots
+
 ### Phase 17 - Enhanced Game Loading Screen - 2025-01-15:
 - **Thay đổi**: Cải thiện hoàn toàn màn hình loading game
 - **GameLoading.tsx**: 
