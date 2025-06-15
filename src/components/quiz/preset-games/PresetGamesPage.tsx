@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
-  BrainCircuit, Lightbulb, PuzzlePiece, Clock4, 
+  BrainCircuit, Lightbulb, Puzzle, Clock4, 
   Dices, HeartHandshake, PenTool, ArrowLeft, Home
 } from 'lucide-react';
 
@@ -29,7 +28,7 @@ const gameTypes = [
     id: 'matching',
     name: 'Nối Từ',
     description: 'Nối các cặp từ tương ứng với nhau',
-    icon: PuzzlePiece,
+    icon: Puzzle,
     color: 'from-green-500 to-emerald-600',
     difficulty: 'Trung bình'
   },

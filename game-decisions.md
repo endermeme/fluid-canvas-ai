@@ -1,6 +1,15 @@
+
 # Game Development Decisions
 
 ## Lịch sử thay đổi và quyết định phát triển
+
+### 2025-06-15 - Fix lucide-react icon import error
+- **Files changed**: PresetGamesPage.tsx
+- **Type**: Bug Fix
+- **Changes**:
+  - Replaced invalid `PuzzlePiece` icon with `Puzzle` icon
+  - Fixed TypeScript compilation error for matching game type
+  - All icons now properly imported from lucide-react
 
 ### 2025-06-15 - Cải thiện giao diện Preset Games Page
 - **Files changed**: PresetGamesPage.tsx
@@ -49,6 +58,7 @@
 - Keep UI responsive and accessible
 - Use TypeScript for type safety
 - Implement proper error handling
+- Use valid lucide-react icon names
 
 ## Current Architecture
 - React + TypeScript frontend
