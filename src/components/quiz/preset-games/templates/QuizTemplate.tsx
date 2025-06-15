@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, RefreshCw, Clock, ChevronRight } from 'lucide-react';
+import { CheckCircle, XCircle, RefreshCw, Clock, ChevronRight, Trophy, Sparkles, Target } from 'lucide-react';
 
 interface QuizTemplateProps {
   data?: any;
@@ -24,6 +23,8 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
   const [totalTimeLeft, setTotalTimeLeft] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [isAnswering, setIsAnswering] = useState(false);
+  const [ripplePosition, setRipplePosition] = useState<{x: number, y: number} | null>(null);
   const { toast } = useToast();
 
   const questions = gameContent?.questions || [];
@@ -82,41 +83,57 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
     }
   }, [totalTimeLeft, gameStarted, showResult, useTimer, toast]);
 
-  const handleOptionSelect = (optionIndex: number) => {
-    if (isAnswered) return;
+  const handleOptionSelect = (optionIndex: number, event: React.MouseEvent) => {
+    if (isAnswered || isAnswering) return;
     
+    setIsAnswering(true);
     setSelectedOption(optionIndex);
-    setIsAnswered(true);
-    setTimerRunning(false);
     
-    const isCorrect = optionIndex === questions[currentQuestion].correctAnswer;
-    if (isCorrect) {
-      setScore(prev => prev + 1);
+    // Create ripple effect
+    const rect = event.currentTarget.getBoundingClientRect();
+    setRipplePosition({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top
+    });
+    
+    setTimeout(() => {
+      setIsAnswered(true);
+      setTimerRunning(false);
       
-      const bonusTime = gameContent?.settings?.bonusTime || 0;
-      if (useTimer && bonusTime > 0) {
-        setTotalTimeLeft(prev => prev + bonusTime);
+      const isCorrect = optionIndex === questions[currentQuestion].correctAnswer;
+      if (isCorrect) {
+        setScore(prev => prev + 1);
         
-        toast({
-          title: "Chính xác! +1 điểm",
-          description: `Câu trả lời đúng. +${bonusTime}s thời gian thưởng.`,
-          variant: "default",
-        });
+        const bonusTime = gameContent?.settings?.bonusTime || 0;
+        if (useTimer && bonusTime > 0) {
+          setTotalTimeLeft(prev => prev + bonusTime);
+          
+          toast({
+            title: "Chính xác! ✨ +1 điểm",
+            description: `Câu trả lời đúng. +${bonusTime}s thời gian thưởng.`,
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "Chính xác! ✨ +1 điểm",
+            description: "Câu trả lời của bạn đúng.",
+            variant: "default",
+          });
+        }
       } else {
+        const correctAnswer = questions[currentQuestion].options[questions[currentQuestion].correctAnswer];
         toast({
-          title: "Chính xác! +1 điểm",
-          description: "Câu trả lời của bạn đúng.",
-          variant: "default",
+          title: "Không chính xác! 🤔",
+          description: `Đáp án đúng là: ${correctAnswer}`,
+          variant: "destructive",
         });
       }
-    } else {
-      const correctAnswer = questions[currentQuestion].options[questions[currentQuestion].correctAnswer];
-      toast({
-        title: "Không chính xác!",
-        description: `Đáp án đúng là: ${correctAnswer}`,
-        variant: "destructive",
-      });
-    }
+      
+      setTimeout(() => {
+        setIsAnswering(false);
+        setRipplePosition(null);
+      }, 500);
+    }, 800);
   };
 
   const handleNextQuestion = () => {
@@ -152,32 +169,41 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
     const percentage = Math.round((score / questions.length) * 100);
     
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-b from-background to-background/80">
-        <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
-          <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả</h2>
-          <p className="text-lg mb-4">
-            Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
+      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-br from-background via-background/95 to-primary/5">
+        <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 via-card/95 to-primary/10 backdrop-blur-sm border-primary/20 shadow-2xl animate-scale-in">
+          <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br from-yellow-500/20 to-yellow-400/10 animate-glow">
+            <Trophy className="h-12 w-12 text-yellow-500 animate-celebration" />
+          </div>
+          <h2 className="text-3xl font-bold mb-4 text-primary animate-fade-in">Kết Quả 🎉</h2>
+          <p className="text-lg mb-4 text-muted-foreground">
+            Chủ đề: <span className="font-semibold text-primary">{gameContent.title || topic}</span>
           </p>
           
-          <div className="mb-6">
-            <div className="flex justify-between mb-2">
-              <span>Điểm của bạn</span>
-              <span className="font-bold">{percentage}%</span>
+          <div className="mb-6 animate-fade-in">
+            <div className="flex justify-between mb-3">
+              <span className="text-muted-foreground">Điểm của bạn</span>
+              <span className="font-bold text-primary text-lg">{percentage}%</span>
             </div>
-            <Progress value={percentage} className="h-3 bg-secondary" />
+            <Progress 
+              value={percentage} 
+              className="h-4 shadow-lg animate-progress-glow" 
+              indicatorColor="bg-gradient-to-r from-primary via-primary/90 to-primary/80"
+              showPercentage={false}
+            />
           </div>
           
-          <div className="text-4xl font-bold mb-6 text-primary">
+          <div className="text-4xl font-bold mb-6 text-primary animate-pulse">
             {score} / {questions.length}
           </div>
           
           {useTimer && (
-            <div className="text-sm mb-4 text-muted-foreground">
+            <div className="text-sm mb-6 text-muted-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
+              <Clock className="inline h-4 w-4 mr-1" />
               Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
             </div>
           )}
           
-          <Button onClick={handleRestart} className="w-full">
+          <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg transition-all duration-300 hover:scale-105 btn-enhanced">
             <RefreshCw className="mr-2 h-4 w-4" />
             Chơi Lại
           </Button>
@@ -188,70 +214,104 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
 
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
+  const isTimerUrgent = useTimer && timeLeft <= 10;
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
+    <div className="flex flex-col p-4 h-full bg-gradient-to-br from-background via-background/95 to-primary/5">
       <div className="mb-4 mt-12">
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+        <div className="flex justify-between items-center mb-3">
+          <div className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20 backdrop-blur-sm">
+            <Sparkles className="inline h-4 w-4 mr-1 text-primary" />
             Câu hỏi {currentQuestion + 1}/{questions.length}
           </div>
-          <div className="text-sm font-medium flex items-center gap-2">
+          <div className="text-sm font-medium flex items-center gap-3">
             {useTimer && (
               <>
-                <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full">
-                  <Clock className="h-4 w-4 mr-1 text-primary" />
+                <div className={`flex items-center px-3 py-2 rounded-full border backdrop-blur-sm transition-all duration-300 ${
+                  isTimerUrgent 
+                    ? 'bg-gradient-to-r from-red-500/20 to-red-400/15 border-red-300/30 text-red-700 animate-pulse' 
+                    : 'bg-gradient-to-r from-primary/15 to-primary/10 border-primary/20'
+                }`}>
+                  <Clock className={`h-4 w-4 mr-1 ${isTimerUrgent ? 'text-red-600 animate-pulse' : 'text-primary'}`} />
                   {timeLeft}s
                 </div>
-                <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full text-primary/80">
+                <div className="flex items-center px-3 py-2 bg-gradient-to-r from-primary/10 to-primary/5 rounded-full border border-primary/15 backdrop-blur-sm text-primary/80">
                   <Clock className="h-4 w-4 mr-1" />
                   {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
                 </div>
               </>
             )}
-            <div className="px-3 py-1 bg-primary/10 rounded-full">
+            <div className="px-3 py-2 bg-gradient-to-r from-green-500/15 to-green-400/10 text-green-700 rounded-full border border-green-300/30 backdrop-blur-sm">
+              <Target className="inline h-4 w-4 mr-1" />
               Điểm: <span className="font-bold">{score}</span>
             </div>
           </div>
         </div>
-        <Progress value={progress} className="h-2 bg-secondary" />
+        <Progress 
+          value={progress} 
+          className="h-3 shadow-lg" 
+          indicatorColor="bg-gradient-to-r from-primary via-primary/90 to-primary/80"
+          showPercentage={false}
+        />
       </div>
 
-      <Card className="p-6 mb-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
-        <h2 className="text-xl font-semibold mb-6 text-primary">{question.question}</h2>
+      <Card className={`p-6 mb-4 bg-gradient-to-br from-primary/5 via-card/95 to-primary/10 backdrop-blur-sm border-primary/20 shadow-xl transition-all duration-500 ${
+        isAnswering ? 'animate-pulse scale-[1.02]' : 'hover:shadow-2xl card-depth'
+      }`}>
+        <h2 className="text-xl font-semibold mb-6 text-primary text-center relative">
+          {question.question}
+          <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center animate-bounce-subtle">
+            <div className="w-2 h-2 bg-primary/40 rounded-full"></div>
+          </div>
+        </h2>
         
         <div className="space-y-3">
           {question.options.map((option: string, index: number) => (
             <button
               key={index}
-              onClick={() => handleOptionSelect(index)}
-              className={`w-full p-4 text-left rounded-lg transition-all duration-200 ${
+              onClick={(e) => handleOptionSelect(index, e)}
+              className={`w-full p-4 text-left rounded-lg transition-all duration-300 transform relative overflow-hidden btn-enhanced ${
                 selectedOption === index 
                   ? selectedOption === question.correctAnswer
-                    ? 'bg-green-100/50 border-green-500 border shadow-md'
-                    : 'bg-red-100/50 border-red-500 border shadow-md'
+                    ? 'bg-gradient-to-r from-green-500/20 to-green-400/15 border-green-500/40 border-2 shadow-lg scale-105 animate-glow'
+                    : 'bg-gradient-to-r from-red-500/20 to-red-400/15 border-red-500/40 border-2 shadow-lg animate-shake'
                   : isAnswered && index === question.correctAnswer
-                    ? 'bg-green-100/50 border-green-500 border shadow-md'
-                    : 'bg-secondary/50 hover:bg-secondary/80 border-transparent border hover:shadow-md'
+                    ? 'bg-gradient-to-r from-green-500/20 to-green-400/15 border-green-500/40 border-2 shadow-lg animate-glow'
+                    : `bg-gradient-to-r from-card to-card/90 hover:from-primary/10 hover:to-primary/5 border-border hover:border-primary/50 border-2 hover:shadow-lg ${
+                        !isAnswered ? 'hover:scale-105 interactive-scale' : ''
+                      }`
               }`}
               disabled={isAnswered}
             >
-              <div className="flex items-center">
+              <div className="flex items-center relative z-10">
                 {selectedOption === index ? (
                   selectedOption === question.correctAnswer ? (
-                    <CheckCircle className="h-5 w-5 mr-2 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 mr-3 text-green-600 flex-shrink-0 animate-celebration" />
                   ) : (
-                    <XCircle className="h-5 w-5 mr-2 text-red-600 flex-shrink-0" />
+                    <XCircle className="h-5 w-5 mr-3 text-red-600 flex-shrink-0 animate-shake" />
                   )
                 ) : isAnswered && index === question.correctAnswer ? (
-                  <CheckCircle className="h-5 w-5 mr-2 text-green-600 flex-shrink-0" />
+                  <CheckCircle className="h-5 w-5 mr-3 text-green-600 flex-shrink-0 animate-celebration" />
                 ) : (
-                  <div className="h-5 w-5 rounded-full border border-primary/30 mr-2 flex items-center justify-center flex-shrink-0 bg-primary/5">
-                    {String.fromCharCode(65 + index)}
+                  <div className="h-5 w-5 rounded-full border-2 border-primary/30 mr-3 flex items-center justify-center flex-shrink-0 bg-primary/5 transition-all duration-300">
+                    <span className="text-xs font-bold text-primary/70">{String.fromCharCode(65 + index)}</span>
                   </div>
                 )}
-                <span>{option}</span>
+                <span className="font-medium">{option}</span>
               </div>
+              
+              {/* Ripple effect */}
+              {ripplePosition && selectedOption === index && (
+                <span 
+                  className="absolute rounded-full bg-primary/20 animate-ripple pointer-events-none"
+                  style={{
+                    left: ripplePosition.x - 20,
+                    top: ripplePosition.y - 20,
+                    width: 40,
+                    height: 40
+                  }}
+                />
+              )}
             </button>
           ))}
         </div>
@@ -262,7 +322,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
           variant="outline"
           size="sm"
           onClick={handleRestart}
-          className="bg-background/70 border-primary/20 flex-1"
+          className="bg-card/70 border-primary/20 hover:bg-primary/10 hover:border-primary/40 flex-1 transition-all duration-300 hover:scale-105 btn-enhanced"
         >
           <RefreshCw className="h-4 w-4 mr-1" />
           Làm lại
@@ -270,12 +330,25 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         
         <Button 
           onClick={handleNextQuestion} 
-          disabled={!isAnswered}
-          className={`flex-1 ${isAnswered ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary' : 'bg-primary/50'}`}
+          disabled={!isAnswered || isAnswering}
+          className={`flex-1 transition-all duration-300 hover:scale-105 btn-enhanced ${
+            isAnswered && !isAnswering
+              ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg' 
+              : 'bg-primary/50 pointer-events-none'
+          }`}
           size="sm"
         >
-          {isLastQuestion ? 'Xem Kết Quả' : 'Câu Tiếp Theo'}
-          <ChevronRight className="h-4 w-4 ml-1" />
+          {isAnswering ? (
+            <div className="flex items-center">
+              <div className="w-4 h-4 mr-2 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              Đang xử lý...
+            </div>
+          ) : (
+            <>
+              {isLastQuestion ? 'Xem Kết Quả' : 'Câu Tiếp Theo'}
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </>
+          )}
         </Button>
       </div>
     </div>

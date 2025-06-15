@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Clock, RotateCcw, Search, LayoutGrid, Sparkles, Target, Trophy, Zap } from 'lucide-react';
+import { RefreshCw, Clock, Search, Sparkles, Target, Trophy, Zap, Check } from 'lucide-react';
 
 interface WordSearchTemplateProps {
   content: any;
@@ -27,8 +26,8 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
   const [timeLeft, setTimeLeft] = useState(content?.settings?.timeLimit || 300);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
-  const [gridSize, setGridSize] = useState('medium');
   const [celebratingWord, setCelebratingWord] = useState<string | null>(null);
+  const [showHint, setShowHint] = useState(false);
   const { toast } = useToast();
 
   const grid = content?.grid || [];
@@ -70,20 +69,15 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
     if (gameOver || gameWon) return;
     
     if (!selectedStart) {
-      // First click - set start position
       setSelectedStart({ row, col });
     } else if (!selectedEnd) {
-      // Second click - set end position and check word
       setSelectedEnd({ row, col });
       
-      // Check if this is a valid word selection
       const wordFound = checkForWord(selectedStart.row, selectedStart.col, row, col);
       
       if (wordFound) {
-        // Show celebration animation
         setCelebratingWord(wordFound);
         
-        // Add to found words
         setFoundWords([...foundWords, {
           word: wordFound,
           startRow: selectedStart.row,
@@ -99,7 +93,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
             description: `Bạn đã tìm thấy từ "${wordFound}"`,
             variant: "default",
           });
-        }, 800);
+        }, 1000);
       } else {
         toast({
           title: "Không tìm thấy từ 🔍",
@@ -108,7 +102,6 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
         });
       }
       
-      // Reset selection
       setSelectedStart(null);
       setSelectedEnd(null);
     }
@@ -125,7 +118,6 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
     let isValidSelection = false;
     
     if (startRow === endRow) {
-      // Horizontal word
       const row = startRow;
       const start = Math.min(startCol, endCol);
       const end = Math.max(startCol, endCol);
@@ -135,7 +127,6 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
       }
       isValidSelection = true;
     } else if (startCol === endCol) {
-      // Vertical word
       const col = startCol;
       const start = Math.min(startRow, endRow);
       const end = Math.max(startRow, endRow);
@@ -145,37 +136,33 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
       }
       isValidSelection = true;
     } else if (allowDiagonalWords) {
-      // Diagonal word (if allowed)
       const rowDiff = endRow - startRow;
       const colDiff = endCol - startCol;
       
-      // Check if it's a proper diagonal (same number of steps in both directions)
       if (Math.abs(rowDiff) === Math.abs(colDiff)) {
-        const rowStep = rowDiff > 0 ? 1 : -1;
-        const colStep = colDiff > 0 ? 1 : -1;
+        const rowDir = rowDiff > 0 ? 1 : -1;
+        const colDir = colDiff > 0 ? 1 : -1;
         const steps = Math.abs(rowDiff);
         
         for (let i = 0; i <= steps; i++) {
-          const row = startRow + (i * rowStep);
-          const col = startCol + (i * colStep);
-          extractedLetters += grid[row][col];
+          const checkRow = selectedStart.row + (i * rowDir);
+          const checkCol = selectedStart.col + (i * colDir);
+          if (checkRow === row && checkCol === col) {
+            return true;
+          }
         }
-        isValidSelection = true;
       }
     }
     
     if (!isValidSelection) return null;
     
-    // Check if this matches any word in our list
     const foundWord = words.find((w: any) => !w.found && w.word === extractedLetters);
     
     if (foundWord) {
-      // Mark this word as found
       const updatedWords = words.map((w: any) => 
         w.word === foundWord.word ? { ...w, found: true } : w
       );
       
-      // Update the content object with found words
       if (content) {
         content.words = updatedWords;
       }
@@ -183,17 +170,14 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
       return foundWord.word;
     }
     
-    // Check reverse word too
     const reversedLetters = extractedLetters.split('').reverse().join('');
     const foundReversedWord = words.find((w: any) => !w.found && w.word === reversedLetters);
     
     if (foundReversedWord) {
-      // Mark this word as found
       const updatedWords = words.map((w: any) => 
         w.word === foundReversedWord.word ? { ...w, found: true } : w
       );
       
-      // Update the content object with found words
       if (content) {
         content.words = updatedWords;
       }
@@ -209,21 +193,18 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
     
     const endPos = selectedEnd || hoveredCell;
     
-    // Check if in same row (horizontal)
     if (selectedStart.row === endPos.row && row === selectedStart.row) {
       const startCol = Math.min(selectedStart.col, endPos.col);
       const endCol = Math.max(selectedStart.col, endPos.col);
       return col >= startCol && col <= endCol;
     }
     
-    // Check if in same column (vertical)
     if (selectedStart.col === endPos.col && col === selectedStart.col) {
       const startRow = Math.min(selectedStart.row, endPos.row);
       const endRow = Math.max(selectedStart.row, endPos.row);
       return row >= startRow && row <= endRow;
     }
     
-    // Check if in diagonal path (if allowed)
     if (allowDiagonalWords) {
       const rowDiff = endPos.row - selectedStart.row;
       const colDiff = endPos.col - selectedStart.col;
@@ -231,16 +212,14 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
       if (Math.abs(rowDiff) === Math.abs(colDiff)) {
         const rowDir = rowDiff > 0 ? 1 : -1;
         const colDir = colDiff > 0 ? 1 : -1;
+        const steps = Math.abs(rowDiff);
         
-        let checkRow = selectedStart.row;
-        let checkCol = selectedStart.col;
-        
-        for (let i = 0; i <= Math.abs(rowDiff); i++) {
+        for (let i = 0; i <= steps; i++) {
+          const checkRow = selectedStart.row + (i * rowDir);
+          const checkCol = selectedStart.col + (i * colDir);
           if (checkRow === row && checkCol === col) {
             return true;
           }
-          checkRow += rowDir;
-          checkCol += colDir;
         }
       }
     }
@@ -248,40 +227,33 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
     return false;
   };
 
-  const isInFoundWord = (row: number, col: number): WordLocation | undefined => {
-    return foundWords.find(word => {
-      // Check if horizontal word
+  const isInFoundWord = (row: number, col: number): boolean => {
+    return foundWords.some(word => {
       if (word.startRow === word.endRow && row === word.startRow) {
         const startCol = Math.min(word.startCol, word.endCol);
         const endCol = Math.max(word.startCol, word.endCol);
         return col >= startCol && col <= endCol;
       }
       
-      // Check if vertical word
       if (word.startCol === word.endCol && col === word.startCol) {
         const startRow = Math.min(word.startRow, word.endRow);
         const endRow = Math.max(word.startRow, word.endRow);
         return row >= startRow && row <= endRow;
       }
       
-      // Check if diagonal word
-      if (allowDiagonalWords) {
-        const rowDiff = word.endRow - word.startRow;
-        const colDiff = word.endCol - word.startCol;
+      const rowDiff = word.endRow - word.startRow;
+      const colDiff = word.endCol - word.startCol;
+      
+      if (Math.abs(rowDiff) === Math.abs(colDiff)) {
+        const rowDir = rowDiff > 0 ? 1 : -1;
+        const colDir = colDiff > 0 ? 1 : -1;
+        const steps = Math.abs(rowDiff);
         
-        if (Math.abs(rowDiff) === Math.abs(colDiff)) {
-          const rowDir = rowDiff > 0 ? 1 : -1;
-          const colDir = colDiff > 0 ? 1 : -1;
-          
-          let checkRow = word.startRow;
-          let checkCol = word.startCol;
-          
-          for (let i = 0; i <= Math.abs(rowDiff); i++) {
-            if (checkRow === row && checkCol === col) {
-              return true;
-            }
-            checkRow += rowDir;
-            checkCol += colDir;
+        for (let i = 0; i <= steps; i++) {
+          const checkRow = word.startRow + (i * rowDir);
+          const checkCol = word.startCol + (i * colDir);
+          if (checkRow === row && checkCol === col) {
+            return true;
           }
         }
       }
@@ -291,7 +263,6 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
   };
 
   const handleRestart = () => {
-    // Reset the game state
     setSelectedStart(null);
     setSelectedEnd(null);
     setHoveredCell(null);
@@ -300,257 +271,199 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
     setGameOver(false);
     setGameWon(false);
     setCelebratingWord(null);
+    setShowHint(false);
     
-    // Reset found status for words
-    if (content && content.words) {
-      content.words = content.words.map((w: any) => ({ ...w, found: false }));
+    if (content?.words) {
+      content.words.forEach((w: any) => {
+        w.found = false;
+      });
     }
-    
-    toast({
-      title: "Đã bắt đầu lại! 🔄",
-      description: "Trò chơi đã được reset về trạng thái ban đầu.",
-      variant: "default",
-    });
   };
 
-  if (!content || !grid.length || !words.length) {
+  const handleHint = () => {
+    if (showHint) return;
+    
+    const unFoundWords = words.filter((w: any) => !w.found);
+    if (unFoundWords.length > 0) {
+      setShowHint(true);
+      setTimeLeft(Math.max(30, timeLeft - 30));
+      
+      toast({
+        title: "Gợi ý được kích hoạt! 💡",
+        description: "Thời gian bị trừ 30 giây. Quan sát grid kỹ hơn!",
+        variant: "default",
+      });
+      
+      setTimeout(() => setShowHint(false), 3000);
+    }
+  };
+
+  if (!content || !grid.length) {
     return <div className="p-4">Không có dữ liệu trò chơi tìm từ</div>;
+  }
+
+  if (gameWon) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-br from-background via-background/95 to-green-500/10">
+        <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 via-card/95 to-green-500/10 backdrop-blur-sm border-primary/20 shadow-2xl animate-scale-in">
+          <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br from-green-500/20 to-green-400/10 animate-glow">
+            <Trophy className="h-12 w-12 text-green-500 animate-celebration" />
+          </div>
+          <h2 className="text-3xl font-bold mb-4 text-primary animate-fade-in">Xuất sắc! 🎉</h2>
+          <p className="text-lg mb-4">Bạn đã tìm thấy tất cả <span className="font-bold text-green-600">{totalWords}</span> từ!</p>
+          <div className="mb-6 p-4 bg-gradient-to-r from-green-50/80 to-emerald-50/80 rounded-lg border border-green-200/50">
+            <p className="text-green-700 font-medium flex items-center justify-center">
+              <Clock className="h-5 w-5 mr-2" />
+              Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+            </p>
+          </div>
+          <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg transition-all duration-300 hover:scale-105 btn-enhanced">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Chơi lại
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  if (gameOver) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-br from-background via-background/95 to-red-500/5">
+        <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-card via-card/95 to-red-500/5 border-red-200/30 shadow-2xl animate-scale-in">
+          <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br from-red-500/20 to-red-400/10">
+            <Clock className="h-12 w-12 text-red-500 animate-pulse" />
+          </div>
+          <h2 className="text-3xl font-bold mb-4 text-red-600 animate-fade-in">Hết thời gian! ⏰</h2>
+          <p className="text-lg mb-4">Bạn đã tìm được <span className="font-bold text-primary">{foundWords.length}</span> trong tổng số <span className="font-bold">{totalWords}</span> từ.</p>
+          <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg transition-all duration-300 hover:scale-105 btn-enhanced">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Thử lại
+          </Button>
+        </Card>
+      </div>
+    );
   }
 
   const progressPercentage = (foundWords.length / totalWords) * 100;
 
-  const handleResetSelection = () => {
-    setSelectedStart(null);
-    setSelectedEnd(null);
-    setHoveredCell(null);
-  };
-
-  const progressBarText = () => {
-    if (gameWon) {
-      return "Hoàn thành! 🎉";
-    } else {
-      return `Đã tìm: ${foundWords.length}/${totalWords}`;
-    }
-  };
-
-  const handleChangeGridSize = (size: string) => {
-    setGridSize(size);
-  };
-
-  // Calculate cell size based on grid size
-  const getCellSize = () => {
-    switch (gridSize) {
-      case 'small':
-        return 'w-6 h-6 sm:w-8 sm:h-8 text-sm';
-      case 'large':
-        return 'w-10 h-10 sm:w-12 sm:h-12 text-lg';
-      default: // medium
-        return 'w-8 h-8 sm:w-10 sm:h-10 text-lg';
-    }
-  };
-
   return (
     <div className="flex flex-col p-4 h-full bg-gradient-to-br from-background via-background/95 to-primary/5">
-      {/* Header with progress and timer */}
       <div className="mb-4 mt-12">
         <div className="flex justify-between items-center mb-3">
           <div className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20 backdrop-blur-sm">
-            <Target className="inline h-4 w-4 mr-1 text-primary" />
-            {progressBarText()}
+            <Search className="inline h-4 w-4 mr-1 text-primary" />
+            Đã tìm: {foundWords.length}/{totalWords}
           </div>
-          <div className="text-sm font-medium flex items-center px-3 py-2 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20 backdrop-blur-sm">
-            <Clock className="h-4 w-4 mr-1 text-primary animate-pulse" />
-            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+          <div className="flex items-center gap-3">
+            <div className="text-sm font-medium flex items-center px-3 py-2 bg-gradient-to-r from-blue-500/15 to-blue-400/10 rounded-full border border-blue-300/30 backdrop-blur-sm">
+              <Clock className="h-4 w-4 mr-1 text-blue-600 animate-pulse" />
+              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+            </div>
           </div>
         </div>
         <Progress 
           value={progressPercentage} 
-          className="h-3 shadow-lg" 
+          className="h-3 shadow-lg animate-progress-glow" 
           indicatorColor="bg-gradient-to-r from-primary via-primary/90 to-primary/80"
           showPercentage={false}
         />
       </div>
 
-      {/* Game content */}
-      <div className="flex flex-col md:flex-row gap-4 flex-grow">
-        {/* Word grid */}
-        <Card className="p-4 flex-grow h-full bg-gradient-to-br from-card via-card/95 to-primary/5 backdrop-blur-sm border-primary/20 shadow-xl">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-medium text-primary flex items-center">
-              <Search className="h-5 w-5 mr-2" />
-              Tìm từ ẩn
-            </h3>
-            <div className="flex items-center space-x-1">
-              <Button
-                variant={gridSize === 'small' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleChangeGridSize('small')}
-                className={`px-2 py-1 h-8 transition-all duration-300 hover:scale-105 ${
-                  gridSize === 'small' 
-                    ? 'bg-gradient-to-r from-primary to-primary/80 shadow-md' 
-                    : 'bg-card/70 border-primary/20 hover:bg-primary/10'
-                }`}
-              >
-                <LayoutGrid className="h-3 w-3 mr-1" />
-                Nhỏ
-              </Button>
-              <Button
-                variant={gridSize === 'medium' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleChangeGridSize('medium')}
-                className={`px-2 py-1 h-8 transition-all duration-300 hover:scale-105 ${
-                  gridSize === 'medium' 
-                    ? 'bg-gradient-to-r from-primary to-primary/80 shadow-md' 
-                    : 'bg-card/70 border-primary/20 hover:bg-primary/10'
-                }`}
-              >
-                <LayoutGrid className="h-4 w-4 mr-1" />
-                Vừa
-              </Button>
-              <Button
-                variant={gridSize === 'large' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleChangeGridSize('large')}
-                className={`px-2 py-1 h-8 transition-all duration-300 hover:scale-105 ${
-                  gridSize === 'large' 
-                    ? 'bg-gradient-to-r from-primary to-primary/80 shadow-md' 
-                    : 'bg-card/70 border-primary/20 hover:bg-primary/10'
-                }`}
-              >
-                <LayoutGrid className="h-5 w-5 mr-1" />
-                Lớn
-              </Button>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-1 h-full place-content-center">
-            {grid.map((row: string[], rowIndex: number) => (
-              <div key={`row-${rowIndex}`} className="flex justify-center gap-1">
-                {row.map((cell: string, colIndex: number) => {
-                  const isSelected = selectedStart?.row === rowIndex && selectedStart?.col === colIndex;
-                  const isInPath = isInSelectedPath(rowIndex, colIndex);
-                  const foundWord = isInFoundWord(rowIndex, colIndex);
-                  
-                  return (
-                    <button
-                      key={`cell-${rowIndex}-${colIndex}`}
-                      className={`${getCellSize()} flex items-center justify-center rounded-md font-medium transition-all duration-300 transform relative overflow-hidden ${
-                        isSelected ? 'bg-gradient-to-r from-primary to-primary/80 text-white scale-105 shadow-lg' : ''
-                      } ${
-                        isInPath && !isSelected ? 'bg-primary/30 scale-105' : ''
-                      } ${
-                        foundWord ? 'bg-gradient-to-r from-green-500/20 to-green-400/10 text-green-800 border border-green-300/30' : (!isSelected && !isInPath ? 'bg-card border border-primary/10 hover:bg-primary/5 hover:scale-105' : '')
-                      } ${
-                        celebratingWord && foundWord?.word === celebratingWord ? 'animate-glow scale-110' : ''
-                      }`}
-                      onClick={() => handleCellClick(rowIndex, colIndex)}
-                      onMouseEnter={() => handleCellHover(rowIndex, colIndex)}
-                      disabled={gameOver || gameWon || Boolean(foundWord)}
-                    >
-                      {cell}
-                      {foundWord && (
-                        <div className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
-                          <Sparkles className="h-1.5 w-1.5 text-white" />
-                        </div>
-                      )}
-                      {!foundWord && !isInPath && !isSelected && (
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none animate-shimmer"></div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </Card>
-        
-        {/* Word list */}
-        {content?.settings?.showWordList && (
-          <Card className="p-4 w-full md:w-56 flex-shrink-0 overflow-y-auto bg-gradient-to-br from-card via-card/95 to-primary/5 backdrop-blur-sm border-primary/20 shadow-xl">
-            <h3 className="text-lg font-medium mb-3 flex items-center text-primary">
-              <Search className="h-4 w-4 mr-2" />
-              Danh sách từ
-            </h3>
-            <ul className="space-y-2">
-              {words.map((word: any, index: number) => (
-                <li 
-                  key={index}
-                  className={`py-2 px-3 rounded-lg transition-all duration-300 ${
-                    word.found || foundWords.some(fw => fw.word === word.word)
-                      ? 'line-through opacity-70 bg-gradient-to-r from-green-500/20 to-green-400/10 text-green-800 border border-green-300/30 scale-95'
-                      : 'bg-card border border-primary/10 hover:bg-primary/5 hover:scale-105'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span>{word.word}</span>
-                    {(word.found || foundWords.some(fw => fw.word === word.word)) && (
-                      <Sparkles className="h-3 w-3 text-green-600 animate-pulse" />
+      <div className="flex-grow grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="lg:col-span-3">
+          <Card className={`p-4 bg-gradient-to-br from-card/80 to-card/60 border-2 border-primary/10 shadow-lg backdrop-blur-sm ${
+            showHint ? 'animate-glow' : ''
+          }`}>
+            <h3 className="text-lg font-semibold mb-3 text-center text-primary">Lưới từ</h3>
+            <div className="grid gap-1 justify-center" style={{ gridTemplateColumns: `repeat(${grid[0]?.length || 0}, 1fr)` }}>
+              {grid.map((row: string[], rowIndex: number) =>
+                row.map((letter: string, colIndex: number) => (
+                  <button
+                    key={`${rowIndex}-${colIndex}`}
+                    onClick={() => handleCellClick(rowIndex, colIndex)}
+                    onMouseEnter={() => handleCellHover(rowIndex, colIndex)}
+                    onMouseLeave={() => setHoveredCell(null)}
+                    className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg font-bold text-sm transition-all duration-200 transform relative overflow-hidden ${
+                      isInFoundWord(rowIndex, colIndex)
+                        ? 'bg-gradient-to-r from-green-500/30 to-green-400/20 border-green-500/40 text-green-800 scale-105 shadow-lg animate-glow'
+                        : isInSelectedPath(rowIndex, colIndex)
+                          ? 'bg-gradient-to-r from-primary/30 to-primary/20 border-primary/40 text-primary scale-105 shadow-md'
+                          : 'bg-gradient-to-r from-secondary/80 to-secondary/60 hover:from-primary/20 hover:to-primary/10 border-transparent hover:border-primary/30 hover:scale-110 hover:shadow-md interactive-scale'
+                    } border-2`}
+                  >
+                    {letter.toUpperCase()}
+                    {celebratingWord && isInFoundWord(rowIndex, colIndex) && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-green-400/50 to-emerald-400/50 animate-pulse rounded-lg"></div>
                     )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        )}
-      </div>
-
-      {/* Controls */}
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <Button
-          variant="outline"
-          onClick={handleResetSelection}
-          disabled={!selectedStart}
-          className="bg-card/70 border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300 hover:scale-105"
-        >
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Hủy chọn
-        </Button>
-        
-        <Button 
-          variant="outline" 
-          onClick={handleRestart}
-          className="bg-card/70 border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300 hover:scale-105"
-        >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Chơi lại
-        </Button>
-      </div>
-      
-      {/* Game over or win state */}
-      {(gameOver || gameWon) && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <Card className="p-8 max-w-md w-full text-center bg-gradient-to-br from-card via-card/95 to-primary/10 backdrop-blur-sm border-primary/20 shadow-2xl animate-scale-in">
-            <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/10 animate-glow">
-              {gameWon ? (
-                <Trophy className="h-12 w-12 text-yellow-500 animate-bounce" />
-              ) : (
-                <Clock className="h-12 w-12 text-amber-500 animate-pulse" />
+                  </button>
+                ))
               )}
             </div>
-            
-            <h2 className="text-3xl font-bold mb-4 text-primary animate-fade-in">
-              {gameWon ? 'Chúc mừng! 🎉' : 'Hết thời gian! ⏰'}
-            </h2>
-            
-            <p className="mb-4 text-muted-foreground">
-              {gameWon 
-                ? `Bạn đã tìm thấy tất cả ${totalWords} từ!` 
-                : `Bạn đã tìm thấy ${foundWords.length} trong tổng số ${totalWords} từ.`
-              }
-            </p>
-            
-            <p className="mb-6 text-muted-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
-              <Clock className="inline h-4 w-4 mr-1" />
-              Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-            </p>
-            
-            <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg transition-all duration-300 hover:scale-105">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
           </Card>
         </div>
-      )}
+        
+        <div className="lg:col-span-1">
+          <Card className="p-4 bg-gradient-to-br from-card/80 to-card/60 border-2 border-primary/10 shadow-lg backdrop-blur-sm">
+            <h3 className="text-lg font-semibold mb-3 text-center text-primary flex items-center justify-center">
+              <Target className="h-5 w-5 mr-2" />
+              Danh sách từ
+            </h3>
+            <div className="space-y-2">
+              {words.map((word: any, index: number) => {
+                const isFound = foundWords.some(fw => fw.word === word.word);
+                const isCelebrating = celebratingWord === word.word;
+                
+                return (
+                  <div
+                    key={index}
+                    className={`p-3 rounded-lg transition-all duration-300 transform ${
+                      isFound
+                        ? 'bg-gradient-to-r from-green-100/80 to-green-50/80 border border-green-300/50 text-green-800 line-through scale-95'
+                        : 'bg-gradient-to-r from-secondary/50 to-secondary/30 border border-secondary/20'
+                    } ${isCelebrating ? 'animate-celebration scale-110 shadow-lg' : ''}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className={`font-medium ${isFound ? 'text-green-700' : 'text-primary'}`}>
+                        {word.word.toUpperCase()}
+                      </span>
+                      {isFound && (
+                        <Check className="h-4 w-4 text-green-600 animate-fade-in" />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      <div className="mt-4 flex gap-3">
+        <Button
+          variant="outline"
+          onClick={handleHint}
+          disabled={showHint}
+          className={`transition-all duration-300 hover:scale-105 ${
+            showHint 
+              ? 'opacity-50 bg-card/50 border-primary/10' 
+              : 'bg-gradient-to-r from-yellow-500/15 to-yellow-400/10 border-yellow-300/30 text-yellow-700 hover:bg-yellow-50 hover:border-yellow-400 btn-enhanced'
+          }`}
+          size="sm"
+        >
+          <Sparkles className="h-4 w-4 mr-1 text-yellow-500" />
+          {showHint ? 'Đã dùng gợi ý' : 'Gợi ý (-30s)'}
+        </Button>
+        
+        <Button
+          variant="outline"
+          onClick={handleRestart}
+          className="flex-1 bg-card/70 border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300 hover:scale-105 btn-enhanced"
+          size="sm"
+        >
+          <RefreshCw className="h-4 w-4 mr-1" />
+          Làm lại
+        </Button>
+      </div>
     </div>
   );
 };
