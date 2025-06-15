@@ -41,6 +41,16 @@
 - Tối ưu: Layout overflow hidden, height management, compact headers/footers
 - Mobile: Giảm kích thước cells, compact spacing, touch-friendly design
 
+### Phase 4 - GameSettings Scroll Fix - 2025-01-15:
+- GameSettings.tsx: Tối ưu compact layout để giảm scroll
+- Giảm icon size từ h-10 w-10 xuống h-8 w-8
+- Giảm padding từ p-6 xuống p-4 cho content area
+- Giảm min-height textarea từ 100px xuống 80px
+- Giảm height input/button từ h-12 xuống h-10/h-8
+- Thêm max-height và custom scrollbar cho content area
+- Tối ưu spacing giữa các elements (space-y-6 -> space-y-4 -> space-y-2)
+- Giảm font-size và padding cho labels và buttons
+
 ### Files đã sửa:
 - src/components/quiz/preset-games/templates/FlashcardsTemplate.tsx
 - src/components/quiz/preset-games/templates/MatchingTemplate.tsx  
@@ -53,6 +63,7 @@
 - src/components/quiz/custom-games/game-components/LoadingSpinner.tsx
 - src/styles/animations.css (New)
 - src/index.css (Scroll optimization)
+- src/components/quiz/GameSettings.tsx (Scroll optimization)
 
 ### Cải tiến đã thực hiện:
 1. **Animation System**: Tất cả template đều có animation mượt mà
@@ -65,3 +76,4 @@
 8. **Micro-interactions**: Hover states, click feedback, loading states
 9. **Bug Fixes**: Sửa lỗi TypeScript trong WordSearchTemplate
 10. **Scroll Optimization**: Compact layout, no unnecessary scrolling, better space usage
+11. **GameSettings Compact**: Tối ưu layout settings để fit màn hình mà không cần scroll

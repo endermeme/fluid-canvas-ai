@@ -129,17 +129,17 @@ const GameSettings = ({
   }, [gameType]);
 
   const getGameIcon = () => {
-    if (!gameType) return <Gamepad className="h-10 w-10 text-primary" />;
+    if (!gameType) return <Gamepad className="h-8 w-8 text-primary" />;
     
     switch (gameType.icon) {
-      case 'brain-circuit': return <BrainCircuit className="h-10 w-10 text-primary" />;
-      case 'puzzle-piece': return <Puzzle className="h-10 w-10 text-primary" />;
-      case 'light-bulb': return <Lightbulb className="h-10 w-10 text-primary" />;
-      case 'clock': return <Clock4 className="h-10 w-10 text-primary" />;
-      case 'dices': return <Dices className="h-10 w-10 text-primary" />;
-      case 'heart-handshake': return <HeartHandshake className="h-10 w-10 text-primary" />;
-      case 'pen-tool': return <PenTool className="h-10 w-10 text-primary" />;
-      default: return <Gamepad className="h-10 w-10 text-primary" />;
+      case 'brain-circuit': return <BrainCircuit className="h-8 w-8 text-primary" />;
+      case 'puzzle-piece': return <Puzzle className="h-8 w-8 text-primary" />;
+      case 'light-bulb': return <Lightbulb className="h-8 w-8 text-primary" />;
+      case 'clock': return <Clock4 className="h-8 w-8 text-primary" />;
+      case 'dices': return <Dices className="h-8 w-8 text-primary" />;
+      case 'heart-handshake': return <HeartHandshake className="h-8 w-8 text-primary" />;
+      case 'pen-tool': return <PenTool className="h-8 w-8 text-primary" />;
+      default: return <Gamepad className="h-8 w-8 text-primary" />;
     }
   };
 
@@ -195,26 +195,26 @@ const GameSettings = ({
   return (
     <div 
       ref={containerRef} 
-      className={`${inDrawer || inModal ? '' : 'min-h-screen'} flex flex-col items-center justify-center py-4 ${inModal ? 'px-2' : 'px-4'}`}
+      className={`${inDrawer || inModal ? 'h-full' : 'min-h-screen'} flex flex-col items-center justify-start py-2 ${inModal ? 'px-2' : 'px-3'} overflow-hidden`}
     >
       <Card className="w-full max-w-xl bg-white/80 backdrop-blur-md border-0 shadow-2xl mx-auto rounded-2xl overflow-hidden">
-        <div className="bg-gradient-to-br from-sky-500 via-blue-500 to-indigo-600 p-6 text-white">
+        <div className="bg-gradient-to-br from-sky-500 via-blue-500 to-indigo-600 p-4 text-white">
           <div className="flex flex-col items-center text-center">
-            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl mb-4">
+            <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl mb-3">
               {getGameIcon()}
             </div>
-            <h2 className="text-2xl font-bold mb-1">
+            <h2 className="text-xl font-bold mb-1">
               Cài Đặt {getGameTitle()}
             </h2>
-            <p className="text-blue-100">
+            <p className="text-blue-100 text-sm">
               Tùy chỉnh trò chơi theo ý muốn của bạn
             </p>
           </div>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div className="space-y-3">
-            <Label htmlFor="prompt" className="flex items-center gap-2 text-base font-semibold text-gray-800">
+        <div className="p-4 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
+          <div className="space-y-2">
+            <Label htmlFor="prompt" className="flex items-center gap-2 text-sm font-semibold text-gray-800">
               <Type className="h-4 w-4 text-sky-600" /> 
               Nội dung trò chơi
             </Label>
@@ -223,12 +223,12 @@ const GameSettings = ({
               value={settings.prompt || ''}
               onChange={(e) => handleInputChange('prompt', e.target.value)}
               placeholder={getPromptPlaceholder()}
-              className="min-h-[100px] border-2 border-gray-200 bg-gray-50/50 backdrop-blur-sm transition-all shadow-sm hover:border-sky-300 focus:border-sky-500 focus:ring-4 focus:ring-sky-200 rounded-xl resize-none"
+              className="min-h-[80px] border-2 border-gray-200 bg-gray-50/50 backdrop-blur-sm transition-all shadow-sm hover:border-sky-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 rounded-xl resize-none text-sm"
             />
           </div>
           
-          <div className="space-y-3">
-            <Label htmlFor="difficulty" className="flex items-center gap-2 text-base font-semibold text-gray-800">
+          <div className="space-y-2">
+            <Label htmlFor="difficulty" className="flex items-center gap-2 text-sm font-semibold text-gray-800">
               <Trophy className="h-4 w-4 text-sky-600" /> 
               Độ Khó
             </Label>
@@ -236,24 +236,24 @@ const GameSettings = ({
               value={settings.difficulty} 
               onValueChange={(value) => handleSelectChange('difficulty', value)}
             >
-              <SelectTrigger className="h-12 rounded-xl border-2 border-gray-200 bg-gray-50/50 backdrop-blur-sm transition-all shadow-sm hover:border-sky-300 focus:ring-4 focus:ring-sky-200">
+              <SelectTrigger className="h-10 rounded-xl border-2 border-gray-200 bg-gray-50/50 backdrop-blur-sm transition-all shadow-sm hover:border-sky-300 focus:ring-2 focus:ring-sky-200">
                 <SelectValue placeholder="Chọn độ khó" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-2 bg-white/95 backdrop-blur-lg shadow-xl">
-                <SelectItem value="easy" className="cursor-pointer focus:bg-sky-50 py-2">🟢 Dễ</SelectItem>
-                <SelectItem value="medium" className="cursor-pointer focus:bg-sky-50 py-2">🟡 Trung bình</SelectItem>
-                <SelectItem value="hard" className="cursor-pointer focus:bg-sky-50 py-2">🔴 Khó</SelectItem>
+                <SelectItem value="easy" className="cursor-pointer focus:bg-sky-50 py-1.5">🟢 Dễ</SelectItem>
+                <SelectItem value="medium" className="cursor-pointer focus:bg-sky-50 py-1.5">🟡 Trung bình</SelectItem>
+                <SelectItem value="hard" className="cursor-pointer focus:bg-sky-50 py-1.5">🔴 Khó</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <Label htmlFor="questionCount" className="text-base font-semibold flex items-center gap-2 text-gray-800">
+              <Label htmlFor="questionCount" className="text-sm font-semibold flex items-center gap-2 text-gray-800">
                 <Medal className="h-4 w-4 text-sky-600" /> 
                 {getCountLabel()}
               </Label>
-              <span className="px-3 py-1 bg-sky-100 rounded-full text-sm font-bold text-sky-700">
+              <span className="px-2 py-1 bg-sky-100 rounded-full text-xs font-bold text-sky-700">
                 {settings.questionCount}
               </span>
             </div>
@@ -268,14 +268,14 @@ const GameSettings = ({
             />
           </div>
 
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
+          <div className="flex items-center space-x-3 p-2 bg-gray-50 rounded-xl">
             <Switch 
               id="useTimer" 
               checked={settings.useTimer !== false}
               onCheckedChange={(checked) => handleSwitchChange('useTimer', checked)} 
-              className="scale-110"
+              className="scale-100"
             />
-            <Label htmlFor="useTimer" className="text-base font-semibold flex items-center gap-2 text-gray-800">
+            <Label htmlFor="useTimer" className="text-sm font-semibold flex items-center gap-2 text-gray-800">
               <Timer className="h-4 w-4 text-sky-600" /> 
               Sử dụng bộ đếm thời gian
             </Label>
@@ -283,13 +283,13 @@ const GameSettings = ({
 
           {settings.useTimer !== false && (
             <>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="timePerQuestion" className="text-base font-semibold flex items-center gap-2 text-gray-800">
+                  <Label htmlFor="timePerQuestion" className="text-sm font-semibold flex items-center gap-2 text-gray-800">
                     <Clock className="h-4 w-4 text-sky-600" /> 
                     {getTimeLabel()}
                   </Label>
-                  <span className="px-3 py-1 bg-sky-100 rounded-full text-sm font-bold text-sky-700">
+                  <span className="px-2 py-1 bg-sky-100 rounded-full text-xs font-bold text-sky-700">
                     {settings.timePerQuestion} giây
                   </span>
                 </div>
@@ -304,10 +304,10 @@ const GameSettings = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="totalTime" className="text-sm font-semibold flex items-center gap-2 text-gray-800">
-                    <Clock4 className="h-4 w-4 text-sky-600" /> 
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="totalTime" className="text-xs font-semibold flex items-center gap-1.5 text-gray-800">
+                    <Clock4 className="h-3 w-3 text-sky-600" /> 
                     Tổng thời gian (giây)
                   </Label>
                   <Input
@@ -317,13 +317,13 @@ const GameSettings = ({
                     placeholder="0 = không giới hạn"
                     value={settings.totalTime || 0}
                     onChange={(e) => handleInputChange('totalTime', e.target.value)}
-                    className="h-10 border-2 border-gray-200 bg-gray-50/50 focus-visible:ring-sky-200 focus-visible:border-sky-500 rounded-xl"
+                    className="h-8 border-2 border-gray-200 bg-gray-50/50 focus-visible:ring-sky-200 focus-visible:border-sky-500 rounded-xl text-sm"
                   />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="bonusTime" className="text-sm font-semibold flex items-center gap-2 text-gray-800">
-                    <Timer className="h-4 w-4 text-sky-600" /> 
+                <div className="space-y-1">
+                  <Label htmlFor="bonusTime" className="text-xs font-semibold flex items-center gap-1.5 text-gray-800">
+                    <Timer className="h-3 w-3 text-sky-600" /> 
                     Thời gian thưởng (giây)
                   </Label>
                   <Input
@@ -333,25 +333,25 @@ const GameSettings = ({
                     placeholder="Thời gian thưởng mỗi câu"
                     value={settings.bonusTime || 0}
                     onChange={(e) => handleInputChange('bonusTime', e.target.value)}
-                    className="h-10 border-2 border-gray-200 bg-gray-50/50 focus-visible:ring-sky-200 focus-visible:border-sky-500 rounded-xl"
+                    className="h-8 border-2 border-gray-200 bg-gray-50/50 focus-visible:ring-sky-200 focus-visible:border-sky-500 rounded-xl text-sm"
                   />
                 </div>
               </div>
             </>
           )}
 
-          <div className="pt-4 flex gap-3">
+          <div className="pt-2 flex gap-3">
             {onCancel && (
               <Button 
                 variant="outline"
-                className="w-full h-12 transition-all border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 active:scale-95 rounded-xl font-semibold"
+                className="w-full h-10 transition-all border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 active:scale-95 rounded-xl font-semibold text-sm"
                 onClick={onCancel}
               >
                 Hủy
               </Button>
             )}
             <Button 
-              className="w-full h-12 transition-all active:scale-95 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 hover:from-sky-600 hover:via-blue-600 hover:to-indigo-700 rounded-xl shadow-lg shadow-sky-200 font-bold"
+              className="w-full h-10 transition-all active:scale-95 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 hover:from-sky-600 hover:via-blue-600 hover:to-indigo-700 rounded-xl shadow-lg shadow-sky-200 font-bold text-sm"
               onClick={handleStart}
             >
               Bắt Đầu Trò Chơi 🎮
