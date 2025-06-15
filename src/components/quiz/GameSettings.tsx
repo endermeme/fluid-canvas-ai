@@ -7,15 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { 
   Gamepad, BrainCircuit, Puzzle, Lightbulb, Clock4, Dices, 
-  HeartHandshake, PenTool, Timer, Trophy, Clock, Medal, Type,
-  ArrowLeft, Home
+  HeartHandshake, PenTool, Timer, Trophy, Clock, Medal, Type
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { animateToolbarAppear } from '@/lib/animations';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { useNavigate } from 'react-router-dom';
 
 interface GameSettingsProps {
   onStart: (settings: GameSettingsData) => void;
@@ -37,7 +35,6 @@ const GameSettings = ({
   gameType
 }: GameSettingsProps) => {
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
   const [settings, setSettings] = useState<GameSettingsData>({
     difficulty: 'medium',
     questionCount: 10,
@@ -196,198 +193,171 @@ const GameSettings = ({
   };
 
   return (
-    <div className="h-full w-full flex flex-col overflow-hidden">
-      {/* Header with navigation */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white shadow-lg">
-        <div className="flex justify-between items-center p-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/20 border border-white/30 backdrop-blur-sm"
-              onClick={onCancel || (() => navigate('/preset-games'))}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Quay lại
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/20 border border-white/30 backdrop-blur-sm"
-              onClick={() => navigate('/')}
-            >
-              <Home className="h-4 w-4 mr-2" />
-              Trang chủ
-            </Button>
+    <div 
+      ref={containerRef} 
+      className="h-full w-full flex items-center justify-center p-4 overflow-hidden"
+    >
+      <Card className="w-full max-w-2xl bg-white/80 backdrop-blur-md border-0 shadow-2xl rounded-2xl overflow-hidden">
+        <div className="bg-gradient-to-br from-sky-500 via-blue-500 to-indigo-600 p-6 text-white">
+          <div className="flex flex-col items-center text-center">
+            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl mb-3">
+              {getGameIcon()}
+            </div>
+            <h2 className="text-2xl font-bold mb-2">
+              Cài Đặt {getGameTitle()}
+            </h2>
+            <p className="text-blue-100 text-sm">
+              Tùy chỉnh trò chơi theo ý muốn của bạn
+            </p>
           </div>
-
-          <h1 className="text-xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
-            Cài Đặt {getGameTitle()}
-          </h1>
-          
-          <div className="w-24"></div> {/* Spacer for centering */}
         </div>
-      </div>
 
-      {/* Main content */}
-      <div 
-        ref={containerRef} 
-        className="flex-1 flex items-center justify-center p-4 overflow-auto"
-      >
-        <Card className="w-full max-w-2xl bg-white/80 backdrop-blur-md border-0 shadow-2xl rounded-2xl overflow-hidden">
-          <div className="bg-gradient-to-br from-sky-500 via-blue-500 to-indigo-600 p-6 text-white">
-            <div className="flex flex-col items-center text-center">
-              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl mb-3">
-                {getGameIcon()}
-              </div>
-              <h2 className="text-2xl font-bold mb-2">
-                Cài Đặt {getGameTitle()}
-              </h2>
-              <p className="text-blue-100 text-sm">
-                Tùy chỉnh trò chơi theo ý muốn của bạn
-              </p>
-            </div>
+        <div className="p-6 space-y-5 max-h-[calc(100vh-320px)] overflow-y-auto custom-scrollbar">
+          <div className="space-y-2">
+            <Label htmlFor="prompt" className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+              <Type className="h-4 w-4 text-sky-600" /> 
+              Nội dung trò chơi
+            </Label>
+            <Textarea
+              id="prompt"
+              value={settings.prompt || ''}
+              onChange={(e) => handleInputChange('prompt', e.target.value)}
+              placeholder={getPromptPlaceholder()}
+              className="min-h-[100px] border-2 border-gray-200 bg-gray-50/50 backdrop-blur-sm transition-all shadow-sm hover:border-sky-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 rounded-xl resize-none text-sm"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="difficulty" className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+              <Trophy className="h-4 w-4 text-sky-600" /> 
+              Độ Khó
+            </Label>
+            <Select 
+              value={settings.difficulty} 
+              onValueChange={(value) => handleSelectChange('difficulty', value)}
+            >
+              <SelectTrigger className="h-10 rounded-xl border-2 border-gray-200 bg-gray-50/50 backdrop-blur-sm transition-all shadow-sm hover:border-sky-300 focus:ring-2 focus:ring-sky-200">
+                <SelectValue placeholder="Chọn độ khó" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-2 bg-white/95 backdrop-blur-lg shadow-xl">
+                <SelectItem value="easy" className="cursor-pointer focus:bg-sky-50 py-2">🟢 Dễ</SelectItem>
+                <SelectItem value="medium" className="cursor-pointer focus:bg-sky-50 py-2">🟡 Trung bình</SelectItem>
+                <SelectItem value="hard" className="cursor-pointer focus:bg-sky-50 py-2">🔴 Khó</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="p-6 space-y-5 max-h-[calc(100vh-320px)] overflow-y-auto custom-scrollbar">
-            <div className="space-y-2">
-              <Label htmlFor="prompt" className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                <Type className="h-4 w-4 text-sky-600" /> 
-                Nội dung trò chơi
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="questionCount" className="text-sm font-semibold flex items-center gap-2 text-gray-800">
+                <Medal className="h-4 w-4 text-sky-600" /> 
+                {getCountLabel()}
               </Label>
-              <Textarea
-                id="prompt"
-                value={settings.prompt || ''}
-                onChange={(e) => handleInputChange('prompt', e.target.value)}
-                placeholder={getPromptPlaceholder()}
-                className="min-h-[100px] border-2 border-gray-200 bg-gray-50/50 backdrop-blur-sm transition-all shadow-sm hover:border-sky-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 rounded-xl resize-none text-sm"
-              />
+              <span className="px-2 py-1 bg-sky-100 rounded-full text-sm font-bold text-sky-700">
+                {settings.questionCount}
+              </span>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="difficulty" className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                <Trophy className="h-4 w-4 text-sky-600" /> 
-                Độ Khó
-              </Label>
-              <Select 
-                value={settings.difficulty} 
-                onValueChange={(value) => handleSelectChange('difficulty', value)}
-              >
-                <SelectTrigger className="h-10 rounded-xl border-2 border-gray-200 bg-gray-50/50 backdrop-blur-sm transition-all shadow-sm hover:border-sky-300 focus:ring-2 focus:ring-sky-200">
-                  <SelectValue placeholder="Chọn độ khó" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-2 bg-white/95 backdrop-blur-lg shadow-xl">
-                  <SelectItem value="easy" className="cursor-pointer focus:bg-sky-50 py-2">🟢 Dễ</SelectItem>
-                  <SelectItem value="medium" className="cursor-pointer focus:bg-sky-50 py-2">🟡 Trung bình</SelectItem>
-                  <SelectItem value="hard" className="cursor-pointer focus:bg-sky-50 py-2">🔴 Khó</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Slider 
+              id="questionCount"
+              min={gameType?.id === 'drawing' ? 1 : (gameType?.id === 'puzzle' ? 2 : 3)} 
+              max={gameType?.id === 'memory' ? 12 : (gameType?.id === 'puzzle' ? 6 : 20)} 
+              step={1} 
+              value={[settings.questionCount]} 
+              onValueChange={(value) => handleSliderChange('questionCount', value)}
+              className="cursor-pointer h-2"
+            />
+          </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="questionCount" className="text-sm font-semibold flex items-center gap-2 text-gray-800">
-                  <Medal className="h-4 w-4 text-sky-600" /> 
-                  {getCountLabel()}
-                </Label>
-                <span className="px-2 py-1 bg-sky-100 rounded-full text-sm font-bold text-sky-700">
-                  {settings.questionCount}
-                </span>
+          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
+            <Switch 
+              id="useTimer" 
+              checked={settings.useTimer !== false}
+              onCheckedChange={(checked) => handleSwitchChange('useTimer', checked)} 
+            />
+            <Label htmlFor="useTimer" className="text-sm font-semibold flex items-center gap-2 text-gray-800">
+              <Timer className="h-4 w-4 text-sky-600" /> 
+              Sử dụng bộ đếm thời gian
+            </Label>
+          </div>
+
+          {settings.useTimer !== false && (
+            <>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="timePerQuestion" className="text-sm font-semibold flex items-center gap-2 text-gray-800">
+                    <Clock className="h-4 w-4 text-sky-600" /> 
+                    {getTimeLabel()}
+                  </Label>
+                  <span className="px-2 py-1 bg-sky-100 rounded-full text-sm font-bold text-sky-700">
+                    {settings.timePerQuestion} giây
+                  </span>
+                </div>
+                <Slider 
+                  id="timePerQuestion"
+                  min={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 10} 
+                  max={gameType?.id === 'reflex' ? 10 : (gameType?.id === 'drawing' ? 120 : 60)} 
+                  step={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 5} 
+                  value={[settings.timePerQuestion]} 
+                  onValueChange={(value) => handleSliderChange('timePerQuestion', value)}
+                  className="cursor-pointer h-2"
+                />
               </div>
-              <Slider 
-                id="questionCount"
-                min={gameType?.id === 'drawing' ? 1 : (gameType?.id === 'puzzle' ? 2 : 3)} 
-                max={gameType?.id === 'memory' ? 12 : (gameType?.id === 'puzzle' ? 6 : 20)} 
-                step={1} 
-                value={[settings.questionCount]} 
-                onValueChange={(value) => handleSliderChange('questionCount', value)}
-                className="cursor-pointer h-2"
-              />
-            </div>
 
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
-              <Switch 
-                id="useTimer" 
-                checked={settings.useTimer !== false}
-                onCheckedChange={(checked) => handleSwitchChange('useTimer', checked)} 
-              />
-              <Label htmlFor="useTimer" className="text-sm font-semibold flex items-center gap-2 text-gray-800">
-                <Timer className="h-4 w-4 text-sky-600" /> 
-                Sử dụng bộ đếm thời gian
-              </Label>
-            </div>
-
-            {settings.useTimer !== false && (
-              <>
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="timePerQuestion" className="text-sm font-semibold flex items-center gap-2 text-gray-800">
-                      <Clock className="h-4 w-4 text-sky-600" /> 
-                      {getTimeLabel()}
-                    </Label>
-                    <span className="px-2 py-1 bg-sky-100 rounded-full text-sm font-bold text-sky-700">
-                      {settings.timePerQuestion} giây
-                    </span>
-                  </div>
-                  <Slider 
-                    id="timePerQuestion"
-                    min={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 10} 
-                    max={gameType?.id === 'reflex' ? 10 : (gameType?.id === 'drawing' ? 120 : 60)} 
-                    step={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 5} 
-                    value={[settings.timePerQuestion]} 
-                    onValueChange={(value) => handleSliderChange('timePerQuestion', value)}
-                    className="cursor-pointer h-2"
+                  <Label htmlFor="totalTime" className="text-sm font-semibold flex items-center gap-1.5 text-gray-800">
+                    <Clock4 className="h-4 w-4 text-sky-600" /> 
+                    Tổng thời gian (giây)
+                  </Label>
+                  <Input
+                    id="totalTime"
+                    type="number"
+                    min="0"
+                    placeholder="0 = không giới hạn"
+                    value={settings.totalTime || 0}
+                    onChange={(e) => handleInputChange('totalTime', e.target.value)}
+                    className="h-10 border-2 border-gray-200 bg-gray-50/50 focus-visible:ring-sky-200 focus-visible:border-sky-500 rounded-xl text-sm"
                   />
                 </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="totalTime" className="text-sm font-semibold flex items-center gap-1.5 text-gray-800">
-                      <Clock4 className="h-4 w-4 text-sky-600" /> 
-                      Tổng thời gian (giây)
-                    </Label>
-                    <Input
-                      id="totalTime"
-                      type="number"
-                      min="0"
-                      placeholder="0 = không giới hạn"
-                      value={settings.totalTime || 0}
-                      onChange={(e) => handleInputChange('totalTime', e.target.value)}
-                      className="h-10 border-2 border-gray-200 bg-gray-50/50 focus-visible:ring-sky-200 focus-visible:border-sky-500 rounded-xl text-sm"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="bonusTime" className="text-sm font-semibold flex items-center gap-1.5 text-gray-800">
-                      <Timer className="h-4 w-4 text-sky-600" /> 
-                      Thời gian thưởng (giây)
-                    </Label>
-                    <Input
-                      id="bonusTime"
-                      type="number"
-                      min="0"
-                      placeholder="Thời gian thưởng mỗi câu"
-                      value={settings.bonusTime || 0}
-                      onChange={(e) => handleInputChange('bonusTime', e.target.value)}
-                      className="h-10 border-2 border-gray-200 bg-gray-50/50 focus-visible:ring-sky-200 focus-visible:border-sky-500 rounded-xl text-sm"
-                    />
-                  </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="bonusTime" className="text-sm font-semibold flex items-center gap-1.5 text-gray-800">
+                    <Timer className="h-4 w-4 text-sky-600" /> 
+                    Thời gian thưởng (giây)
+                  </Label>
+                  <Input
+                    id="bonusTime"
+                    type="number"
+                    min="0"
+                    placeholder="Thời gian thưởng mỗi câu"
+                    value={settings.bonusTime || 0}
+                    onChange={(e) => handleInputChange('bonusTime', e.target.value)}
+                    className="h-10 border-2 border-gray-200 bg-gray-50/50 focus-visible:ring-sky-200 focus-visible:border-sky-500 rounded-xl text-sm"
+                  />
                 </div>
-              </>
-            )}
+              </div>
+            </>
+          )}
 
-            <div className="pt-3">
+          <div className="pt-3 flex gap-3">
+            {onCancel && (
               <Button 
-                className="w-full h-12 transition-all active:scale-95 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 hover:from-sky-600 hover:via-blue-600 hover:to-indigo-700 rounded-xl shadow-lg shadow-sky-200 font-bold text-sm"
-                onClick={handleStart}
+                variant="outline"
+                className="w-full h-12 transition-all border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 active:scale-95 rounded-xl font-semibold text-sm"
+                onClick={onCancel}
               >
-                Bắt Đầu Trò Chơi 🎮
+                Hủy
               </Button>
-            </div>
+            )}
+            <Button 
+              className="w-full h-12 transition-all active:scale-95 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 hover:from-sky-600 hover:via-blue-600 hover:to-indigo-700 rounded-xl shadow-lg shadow-sky-200 font-bold text-sm"
+              onClick={handleStart}
+            >
+              Bắt Đầu Trò Chơi 🎮
+            </Button>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Card>
     </div>
   );
 };
