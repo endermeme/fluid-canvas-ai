@@ -106,11 +106,22 @@
 - Thêm proper spacing và padding cho tất cả elements
 - Đảm bảo tất cả game cards hiển thị đầy đủ với scroll mượt mà
 
+### Phase 11 - TrueFalse Center Layout & Button Fix - 2025-01-15:
+- TrueFalseTemplate.tsx: Sửa hoàn toàn layout để center giữa màn hình
+- Chuyển từ flex h-full sang min-h-screen flex items-center justify-center
+- Tăng kích thước nút từ min-h-[80px] lên min-h-[100px] và padding p-8
+- Tăng font-size từ text-lg lên text-xl cho nút bấm
+- Tăng icon size từ h-8 w-8 lên h-10 w-10 cho nút ĐÚNG/SAI
+- Cải thiện spacing và max-width để giao diện cân đối hơn
+- Fix button disabled state và onClick handlers để chắc chắn hoạt động
+- Thêm proper initialization cho userAnswers array
+- Cải thiện responsive layout với max-w-2xl container
+
 ### Files đã sửa:
 - src/components/quiz/preset-games/templates/FlashcardsTemplate.tsx
 - src/components/quiz/preset-games/templates/MatchingTemplate.tsx  
 - src/components/quiz/preset-games/templates/QuizTemplate.tsx (Fixed TypeScript errors + Scroll optimization + Layout balance + Share mode fix)
-- src/components/quiz/preset-games/templates/TrueFalseTemplate.tsx
+- src/components/quiz/preset-games/templates/TrueFalseTemplate.tsx (Center layout fix + Button interaction fix + Enhanced UI)
 - src/components/quiz/preset-games/templates/MemoryTemplate.tsx
 - src/components/quiz/preset-games/templates/OrderingTemplate.tsx
 - src/components/quiz/preset-games/templates/WordSearchTemplate.tsx (Fixed TypeScript errors + Scroll optimization)
@@ -142,3 +153,4 @@
 15. **Share Mode Score Fix**: Sửa lỗi nút "Làm lại" cộng điểm không đúng ở chế độ share link, chỉ lưu điểm khi game kết thúc
 16. **TypeScript Compatibility**: Sửa tất cả lỗi build TypeScript để đảm bảo code hoạt động ổn định
 17. **GameSelector Navigation**: Thêm nút quay lại và scroll area để điều hướng dễ dàng hơn, giao diện thẩm mỹ hơn
+18. **TrueFalse Complete Overhaul**: Sửa toàn bộ layout center, button interaction, và UI enhancement cho game Đúng/Sai
