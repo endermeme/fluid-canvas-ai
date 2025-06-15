@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Clock, Trophy } from 'lucide-react';
+import { RefreshCw, Clock, Trophy, Sparkles, Zap } from 'lucide-react';
 
 interface MatchingTemplateProps {
   content: any;
@@ -26,6 +26,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [gameWon, setGameWon] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
+  const [isMatching, setIsMatching] = useState<boolean>(false);
+  const [showCelebration, setShowCelebration] = useState<boolean>(false);
   const { toast } = useToast();
 
   const pairs = content?.pairs || [];
@@ -55,6 +57,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
       setGameWon(false);
       setSelectedLeft(null);
       setSelectedRight(null);
+      setIsMatching(false);
+      setShowCelebration(false);
     }
   }, [pairs, content?.settings?.timeLimit]);
 
@@ -68,7 +72,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
     } else if (timeLeft === 0 && !gameOver && !gameWon) {
       setGameOver(true);
       toast({
-        title: "Hết thời gian!",
+        title: "Hết thời gian! ⏰",
         description: "Bạn đã hết thời gian làm bài.",
         variant: "destructive",
       });
@@ -78,14 +82,17 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   useEffect(() => {
     if (matchedPairs === totalPairs && totalPairs > 0 && !gameWon) {
       setGameWon(true);
+      setShowCelebration(true);
       const finalScore = calculateFinalScore();
       setScore(finalScore);
       
       toast({
-        title: "Chúc mừng!",
-        description: `Bạn đã hoàn thành trò chơi với ${totalPairs} cặp từ và đạt ${finalScore} điểm.`,
+        title: "Chúc mừng! 🎉🏆",
+        description: `Bạn đã hoàn thành với ${totalPairs} cặp từ và đạt ${finalScore} điểm!`,
         variant: "default",
       });
+
+      setTimeout(() => setShowCelebration(false), 3000);
     }
   }, [matchedPairs, totalPairs, gameWon, toast]);
 
@@ -104,7 +111,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   };
 
   const handleLeftItemClick = (id: number) => {
-    if (gameOver || gameWon) return;
+    if (gameOver || gameWon || isMatching) return;
     
     if (leftItems.find(item => item.id === id)?.matched) return;
     
@@ -112,7 +119,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   };
 
   const handleRightItemClick = (id: number) => {
-    if (gameOver || gameWon) return;
+    if (gameOver || gameWon || isMatching) return;
     
     if (rightItems.find(item => item.id === id)?.matched) return;
     
@@ -121,6 +128,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
 
   useEffect(() => {
     if (selectedLeft !== null && selectedRight !== null) {
+      setIsMatching(true);
+      
       const checkMatch = () => {
         if (selectedLeft === selectedRight) {
           setLeftItems(prevLeftItems => 
@@ -136,33 +145,32 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
           );
           
           setMatchedPairs(prev => prev + 1);
-          
           setScore(prev => prev + 10);
           
           toast({
-            title: "Tuyệt vời!",
-            description: "Bạn đã ghép đúng một cặp.",
+            title: "Tuyệt vời! ✨",
+            description: "Bạn đã ghép đúng một cặp! +10 điểm",
             variant: "default",
           });
         } else {
           setScore(prev => Math.max(0, prev - 2));
           
           toast({
-            title: "Không khớp",
-            description: "Hãy thử lại với cặp khác.",
+            title: "Không khớp 😅",
+            description: "Hãy thử lại với cặp khác. -2 điểm",
             variant: "destructive",
           });
         }
       };
       
-      checkMatch();
-      
-      const timer = setTimeout(() => {
-        setSelectedLeft(null);
-        setSelectedRight(null);
-      }, 1000);
-      
-      return () => clearTimeout(timer);
+      setTimeout(() => {
+        checkMatch();
+        setTimeout(() => {
+          setSelectedLeft(null);
+          setSelectedRight(null);
+          setIsMatching(false);
+        }, 800);
+      }, 500);
     }
   }, [selectedLeft, selectedRight, toast]);
 
@@ -189,6 +197,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
       setTimeLeft(content?.settings?.timeLimit || 60);
       setGameOver(false);
       setGameWon(false);
+      setIsMatching(false);
+      setShowCelebration(false);
     }
   };
 
@@ -209,35 +219,77 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
         : "min-h-12 text-lg";
   };
 
+  const getItemClassName = (item: MatchingItem, isSelected: boolean, side: 'left' | 'right') => {
+    let baseClass = `w-full p-4 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center transition-all duration-300 border-2 relative overflow-hidden`;
+    
+    if (item.matched) {
+      return `${baseClass} bg-gradient-to-r from-green-100 to-green-50 border-green-400 text-green-800 cursor-not-allowed transform scale-95 shadow-lg animate-pulse-soft`;
+    }
+    
+    if (isSelected) {
+      return `${baseClass} bg-gradient-to-r from-primary/20 to-primary/10 border-primary text-primary-foreground transform scale-105 shadow-xl animate-glow`;
+    }
+    
+    if (isMatching) {
+      return `${baseClass} bg-secondary/30 border-transparent cursor-not-allowed`;
+    }
+    
+    return `${baseClass} bg-gradient-to-r from-card to-card/90 hover:from-primary/10 hover:to-primary/5 border-border hover:border-primary/50 hover:shadow-lg hover:scale-105 cursor-pointer`;
+  };
+
   return (
-    <div className="flex flex-col p-4 h-full">
+    <div className="flex flex-col p-4 h-full bg-gradient-to-br from-background via-background/95 to-primary/5 relative">
+      {showCelebration && (
+        <div className="absolute inset-0 flex items-center justify-center z-50 bg-background/90 backdrop-blur-sm">
+          <div className="text-6xl animate-bounce">🎉</div>
+        </div>
+      )}
+      
       <div className="relative mb-4">
-        <div className="flex justify-between items-center mb-2 mt-12">
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+        <div className="flex justify-between items-center mb-3 mt-12">
+          <div className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20 backdrop-blur-sm">
+            <Sparkles className="inline h-4 w-4 mr-1 text-primary" />
             Đã ghép: {matchedPairs}/{totalPairs}
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
-              <Trophy className="h-4 w-4 mr-1 text-yellow-500" />
-              Điểm: {score}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center text-sm font-medium px-4 py-2 bg-gradient-to-r from-yellow-500/15 to-yellow-400/10 rounded-full border border-yellow-300/30 backdrop-blur-sm">
+              <Trophy className="h-4 w-4 mr-2 text-yellow-600" />
+              <span className="font-bold">{score}</span>
             </div>
-            <div className="text-sm font-medium flex items-center px-3 py-1 bg-primary/10 rounded-full">
-              <Clock className="h-4 w-4 mr-1" />
+            <div className="text-sm font-medium flex items-center px-4 py-2 bg-gradient-to-r from-blue-500/15 to-blue-400/10 rounded-full border border-blue-300/30 backdrop-blur-sm">
+              <Clock className="h-4 w-4 mr-2 text-blue-600" />
               {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
             </div>
           </div>
         </div>
-        <Progress value={progressPercentage} className="h-2" />
+        <Progress 
+          value={progressPercentage} 
+          className="h-3 shadow-lg" 
+          indicatorColor="bg-gradient-to-r from-primary via-primary/90 to-primary/80"
+          showPercentage={false}
+        />
       </div>
 
       {gameWon ? (
         <div className="flex-grow flex items-center justify-center">
-          <Card className="p-6 text-center max-w-md">
-            <h2 className="text-2xl font-bold mb-4">Chúc mừng!</h2>
-            <p className="mb-2">Bạn đã hoàn thành trò chơi với {totalPairs} cặp từ.</p>
-            <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
-            <p className="mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
-            <Button onClick={handleRestart}>
+          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-card via-card/95 to-primary/5 border-2 border-primary/20 shadow-2xl animate-scale-in">
+            <div className="mb-4 flex justify-center">
+              <Trophy className="h-16 w-16 text-yellow-500 animate-bounce" />
+            </div>
+            <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              Chúc mừng!
+            </h2>
+            <p className="mb-3 text-lg">Bạn đã hoàn thành với {totalPairs} cặp từ.</p>
+            <div className="mb-3 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
+              <p className="text-2xl font-bold text-yellow-700 flex items-center justify-center">
+                <Zap className="h-6 w-6 mr-2" />
+                {score} điểm
+              </p>
+            </div>
+            <p className="mb-6 text-muted-foreground">
+              Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+            </p>
+            <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg">
               <RefreshCw className="mr-2 h-4 w-4" />
               Chơi lại
             </Button>
@@ -245,57 +297,64 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
         </div>
       ) : gameOver ? (
         <div className="flex-grow flex items-center justify-center">
-          <Card className="p-6 text-center max-w-md">
-            <h2 className="text-2xl font-bold mb-4">Hết thời gian!</h2>
-            <p className="mb-2">Bạn đã ghép được {matchedPairs} trong tổng số {totalPairs} cặp từ.</p>
-            <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
-            <Button onClick={handleRestart}>
+          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-card via-card/95 to-red-500/5 border-2 border-red-200 shadow-2xl animate-scale-in">
+            <h2 className="text-2xl font-bold mb-4 text-red-600">Hết thời gian! ⏰</h2>
+            <p className="mb-3">Bạn đã ghép được {matchedPairs} trong tổng số {totalPairs} cặp từ.</p>
+            <div className="mb-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+              <p className="text-xl font-bold text-blue-700 flex items-center justify-center">
+                <Trophy className="h-5 w-5 mr-2" />
+                {score} điểm
+              </p>
+            </div>
+            <Button onClick={handleRestart} className="w-full">
               <RefreshCw className="mr-2 h-4 w-4" />
               Chơi lại
             </Button>
           </Card>
         </div>
       ) : (
-        <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="p-3 bg-background/50 border border-primary/10">
-            <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột A</h3>
-            <div className="space-y-2">
+        <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="p-4 bg-gradient-to-br from-card/80 to-card/60 border-2 border-primary/10 shadow-lg backdrop-blur-sm">
+            <h3 className="text-lg font-semibold mb-3 text-center bg-gradient-to-r from-primary/15 to-primary/10 py-2 px-4 rounded-lg border border-primary/20">
+              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                Cột A
+              </span>
+            </h3>
+            <div className="space-y-3">
               {leftItems.map((item) => (
                 <button
                   key={`left-${item.id}`}
-                  className={`w-full p-3 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
-                    item.matched 
-                      ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
-                      : selectedLeft === item.id
-                        ? 'bg-primary/20 border-primary border'
-                        : 'bg-secondary hover:bg-secondary/80 border-transparent border'
-                  }`}
+                  className={getItemClassName(item, selectedLeft === item.id, 'left')}
                   onClick={() => handleLeftItemClick(item.id)}
-                  disabled={item.matched}
+                  disabled={item.matched || isMatching}
                 >
-                  <span className="line-clamp-2">{item.text}</span>
+                  <span className="line-clamp-2 relative z-10">{item.text}</span>
+                  {!item.matched && selectedLeft === item.id && (
+                    <div className="absolute inset-0 bg-primary/10 animate-pulse"></div>
+                  )}
                 </button>
               ))}
             </div>
           </Card>
           
-          <Card className="p-3 bg-background/50 border border-primary/10">
-            <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột B</h3>
-            <div className="space-y-2">
+          <Card className="p-4 bg-gradient-to-br from-card/80 to-card/60 border-2 border-primary/10 shadow-lg backdrop-blur-sm">
+            <h3 className="text-lg font-semibold mb-3 text-center bg-gradient-to-r from-primary/15 to-primary/10 py-2 px-4 rounded-lg border border-primary/20">
+              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                Cột B
+              </span>
+            </h3>
+            <div className="space-y-3">
               {rightItems.map((item) => (
                 <button
                   key={`right-${item.id}`}
-                  className={`w-full p-3 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
-                    item.matched 
-                      ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
-                      : selectedRight === item.id
-                        ? 'bg-primary/20 border-primary border'
-                        : 'bg-secondary hover:bg-secondary/80 border-transparent border'
-                  }`}
+                  className={getItemClassName(item, selectedRight === item.id, 'right')}
                   onClick={() => handleRightItemClick(item.id)}
-                  disabled={item.matched}
+                  disabled={item.matched || isMatching}
                 >
-                  <span className="line-clamp-2">{item.text}</span>
+                  <span className="line-clamp-2 relative z-10">{item.text}</span>
+                  {!item.matched && selectedRight === item.id && (
+                    <div className="absolute inset-0 bg-primary/10 animate-pulse"></div>
+                  )}
                 </button>
               ))}
             </div>
@@ -303,11 +362,11 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
         </div>
       )}
 
-      <div className="mt-4">
+      <div className="mt-6">
         <Button 
           variant="outline" 
           onClick={handleRestart}
-          className="w-full bg-gradient-to-r from-secondary/30 to-background/90 border-primary/20"
+          className="w-full bg-gradient-to-r from-card/70 to-card/50 border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300 hover:scale-105 shadow-lg"
           size="sm"
         >
           <RefreshCw className="mr-2 h-4 w-4" />

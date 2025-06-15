@@ -1,17 +1,23 @@
 
-# Game Development Decisions
+# Game Template Enhancement Decisions
 
-## Database Updates (2025-06-14)
+## Ngày: 2025-01-15
 
-### Files Changed:
-- supabase/migrations: Thêm cột share_count, last_accessed_at vào bảng games
-- src/utils/gameExport.ts: Sửa lỗi TypeScript, sử dụng RPC function increment_share_count
-- src/integrations/supabase/types.ts: Tự động cập nhật từ database schema
+### Thay đổi thực hiện:
+- FlashcardsTemplate.tsx: Thêm flip animation mượt mà, hiệu ứng shimmer, progress glow
+- MatchingTemplate.tsx: Thêm ripple effect, shake animation, match celebration
+- QuizTemplate.tsx: Thêm hover effects, answer feedback animation, result celebration
+- Progress component: Thêm gradient animation và glow effect
+- LoadingSpinner: Cải thiện animation cho hiện đại hơn
 
 ### Loại thay đổi:
-- **Database Schema**: Thêm tracking cho game statistics
-- **Bug Fix**: Sửa TypeScript errors liên quan đến supabase.sql không tồn tại
-- **Function Usage**: Sử dụng RPC function thay vì raw SQL để update game stats
+- Enhancement: Animation và visual effects
+- UI/UX: Giao diện hiện đại, responsive tốt hơn
+- Performance: Tối ưu hiệu ứng không ảnh hưởng performance
 
-### Mô tả:
-Thêm khả năng theo dõi số lần share và lần truy cập cuối của games. Sử dụng RPC function increment_share_count để tránh TypeScript errors với raw SQL.
+### Files đã sửa:
+- src/components/quiz/preset-games/templates/FlashcardsTemplate.tsx
+- src/components/quiz/preset-games/templates/MatchingTemplate.tsx  
+- src/components/quiz/preset-games/templates/QuizTemplate.tsx
+- src/components/ui/progress.tsx
+- src/components/quiz/custom-games/game-components/LoadingSpinner.tsx
