@@ -92,6 +92,12 @@
 - GameSharePage.tsx: Thêm handleQuizScoreSubmit để xử lý điểm từ quiz
 - EnhancedGameView.tsx: Truyền props isSharedMode và onQuizScoreSubmit
 
+### Phase 9 - TypeScript Build Errors Fix - 2025-01-15:
+- EnhancedGameView.tsx: Sửa lỗi props không tương thích với GameIframeRenderer
+- GameController.tsx: Loại bỏ prop onNewGame không tồn tại trong EnhancedGameView
+- Đảm bảo tất cả props được truyền đúng theo interface definitions
+- Chuẩn bị cho việc kiểm tra SQL Supabase để đảm bảo tính năng lưu điểm hoạt động chính xác
+
 ### Files đã sửa:
 - src/components/quiz/preset-games/templates/FlashcardsTemplate.tsx
 - src/components/quiz/preset-games/templates/MatchingTemplate.tsx  
@@ -106,7 +112,8 @@
 - src/index.css (Scroll optimization)
 - src/components/quiz/GameSettings.tsx (Scroll optimization + Center layout fix + Size balance)
 - src/pages/GameSharePage.tsx (Share mode score handling)
-- src/components/quiz/custom-games/EnhancedGameView.tsx (Share mode props)
+- src/components/quiz/custom-games/EnhancedGameView.tsx (Share mode props + TypeScript fixes)
+- src/components/quiz/custom-games/GameController.tsx (TypeScript fixes)
 
 ### Cải tiến đã thực hiện:
 1. **Animation System**: Tất cả template đều có animation mượt mà
@@ -124,3 +131,4 @@
 13. **Size Balance**: Cân bằng kích thước GameSettings vừa phải - không quá nhỏ khó dùng, không quá to phải scroll
 14. **Quiz Layout Balance**: QuizTemplate giờ chia đều không gian màn hình với header/content/footer phân bố hợp lý
 15. **Share Mode Score Fix**: Sửa lỗi nút "Làm lại" cộng điểm không đúng ở chế độ share link, chỉ lưu điểm khi game kết thúc
+16. **TypeScript Compatibility**: Sửa tất cả lỗi build TypeScript để đảm bảo code hoạt động ổn định

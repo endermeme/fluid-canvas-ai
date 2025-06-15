@@ -117,7 +117,6 @@ const GameController: React.FC<GameControllerProps> = ({
               content: currentGame.content || ""
             }} 
             onBack={handleBack}
-            onNewGame={handleNewGame}
             hideHeader={false}
           />
         </div>
