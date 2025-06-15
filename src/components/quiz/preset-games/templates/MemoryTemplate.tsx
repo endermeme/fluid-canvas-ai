@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -265,9 +264,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
       window.parent.postMessage(completionData, '*');
     }
     
-    // Also trigger any global completion handlers
-    if (window.onGameComplete) {
-      window.onGameComplete(completionData);
+    // Also trigger any global completion handlers - with safe check
+    if (typeof (window as any).onGameComplete === 'function') {
+      (window as any).onGameComplete(completionData);
     }
   };
 
