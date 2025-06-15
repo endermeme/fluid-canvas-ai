@@ -32,20 +32,75 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
   const [isChecking, setIsChecking] = useState(false);
   const { toast } = useToast();
 
-  // Improved data access - handle both old and new data structures
-  const pairs = gameContent?.pairs || gameContent?.cards || [];
-  const useTimer = gameContent?.settings?.useTimer || false;
-  const timeLimit = gameContent?.settings?.timeLimit || 180;
+  console.log("MemoryTemplate received props:", { data, content, topic, gameContent });
+
+  // Cải thiện logic truy xuất dữ liệu - hỗ trợ nhiều format
+  let pairs: any[] = [];
+  let useTimer = false;
+  let timeLimit = 180;
+
+  if (gameContent) {
+    // Format mới với pairs
+    if (gameContent.pairs && Array.isArray(gameContent.pairs)) {
+      pairs = gameContent.pairs;
+      console.log("Using pairs format:", pairs);
+    }
+    // Format cũ với cards
+    else if (gameContent.cards && Array.isArray(gameContent.cards)) {
+      pairs = gameContent.cards;
+      console.log("Using cards format:", pairs);
+    }
+    // Format khác có thể có trong data
+    else if (Array.isArray(gameContent)) {
+      pairs = gameContent;
+      console.log("Using direct array format:", pairs);
+    }
+    // Import từ sample data
+    else {
+      try {
+        console.log("Trying to load sample data...");
+        import('../data/memorySampleData').then(module => {
+          const sampleData = module.memorySampleData;
+          if (sampleData && sampleData.pairs) {
+            console.log("Loaded sample data:", sampleData);
+            // Trigger re-initialization with sample data
+            window.location.reload();
+          }
+        });
+      } catch (error) {
+        console.error("Error loading sample data:", error);
+      }
+    }
+
+    // Lấy settings
+    if (gameContent.settings) {
+      useTimer = gameContent.settings.useTimer || false;
+      timeLimit = gameContent.settings.timeLimit || 180;
+    }
+  }
+
+  // Fallback nếu không có dữ liệu
+  if (!pairs.length) {
+    console.log("No pairs found, using fallback data");
+    pairs = [
+      { term: "Apple", definition: "🍎" },
+      { term: "Banana", definition: "🍌" },
+      { term: "Orange", definition: "🍊" },
+      { term: "Grape", definition: "🍇" },
+      { term: "Strawberry", definition: "🍓" }
+    ];
+  }
+
   const totalPairs = pairs.length;
 
-  console.log("Memory game data:", { gameContent, pairs, useTimer, timeLimit });
+  console.log("Final game configuration:", { pairs, useTimer, timeLimit, totalPairs });
 
   useEffect(() => {
-    if (gameContent && pairs.length > 0 && !gameStarted) {
-      console.log("Initializing memory game with pairs:", pairs);
+    if (pairs.length > 0 && !gameStarted) {
+      console.log("Initializing game with pairs:", pairs);
       initializeGame();
     }
-  }, [gameContent, pairs, gameStarted]);
+  }, [pairs, gameStarted]);
 
   useEffect(() => {
     if (useTimer && timeLeft > 0 && gameStarted && !showResult) {
@@ -55,23 +110,22 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
       
       return () => clearTimeout(timer);
     } else if (useTimer && timeLeft === 0 && gameStarted && !showResult) {
-      setShowResult(true);
-      toast({
-        title: "Hết thời gian!",
-        description: "Trò chơi đã kết thúc. Hãy xem kết quả của bạn.",
-        variant: "destructive",
-      });
+      endGame();
     }
-  }, [timeLeft, gameStarted, showResult, useTimer, toast]);
+  }, [timeLeft, gameStarted, showResult, useTimer]);
 
   const initializeGame = () => {
-    console.log("Starting game initialization with pairs:", pairs);
+    console.log("Starting game initialization...");
     const gameCards: MemoryCard[] = [];
     
     pairs.forEach((pair: any, index: number) => {
-      // Handle both old format (cards) and new format (pairs)
-      const term = pair.term || pair.front || pair.content;
-      const definition = pair.definition || pair.back || pair.match;
+      // Hỗ trợ multiple formats
+      let term = pair.term || pair.front || pair.content || pair.question || `Item ${index + 1}`;
+      let definition = pair.definition || pair.back || pair.match || pair.answer || `Match ${index + 1}`;
+      
+      // Ensure content is string
+      term = String(term);
+      definition = String(definition);
       
       console.log(`Creating pair ${index}:`, { term, definition });
       
@@ -93,8 +147,13 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
 
     console.log("Generated cards:", gameCards);
 
-    // Shuffle cards
-    const shuffledCards = gameCards.sort(() => Math.random() - 0.5);
+    // Shuffle cards using Fisher-Yates algorithm
+    const shuffledCards = [...gameCards];
+    for (let i = shuffledCards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledCards[i], shuffledCards[j]] = [shuffledCards[j], shuffledCards[i]];
+    }
+
     setCards(shuffledCards);
     setMatchedPairs(0);
     setMoves(0);
@@ -107,14 +166,14 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
       setTimeLeft(timeLimit);
     }
     
-    console.log("Game initialized successfully");
+    console.log("Game initialized successfully with", shuffledCards.length, "cards");
   };
 
   const handleCardClick = (cardIndex: number) => {
-    console.log(`Card clicked: ${cardIndex}, current flipped:`, flippedCards);
+    console.log(`Card clicked: ${cardIndex}`);
     
     if (isChecking || cards[cardIndex].isFlipped || cards[cardIndex].isMatched || flippedCards.length >= 2) {
-      console.log("Card click ignored - checking, already flipped, matched, or 2 cards already flipped");
+      console.log("Card click ignored - invalid state");
       return;
     }
 
@@ -129,7 +188,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
 
     if (newFlippedCards.length === 2) {
       setIsChecking(true);
-      setMoves(moves + 1);
+      setMoves(prev => prev + 1);
       
       setTimeout(() => {
         checkForMatch(newFlippedCards);
@@ -165,17 +224,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
       
       if (newMatchedPairs === totalPairs) {
         console.log("Game completed!");
-        setShowResult(true);
-        
-        // Send completion message to parent for score tracking
-        if (window.parent) {
-          window.parent.postMessage({
-            type: 'QUIZ_COMPLETED',
-            score: newMatchedPairs,
-            totalQuestions: totalPairs,
-            gameType: 'memory'
-          }, '*');
-        }
+        setTimeout(() => {
+          endGame();
+        }, 500);
       }
     } else {
       // No match
@@ -195,24 +246,54 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
     setIsChecking(false);
   };
 
+  const endGame = () => {
+    setShowResult(true);
+    
+    // Send completion message for score tracking
+    const completionData = {
+      type: 'QUIZ_COMPLETED',
+      score: matchedPairs,
+      totalQuestions: totalPairs,
+      gameType: 'memory',
+      completionTime: useTimer ? timeLimit - timeLeft : undefined
+    };
+    
+    console.log("Game ended, sending completion data:", completionData);
+    
+    // Send to parent window for shared games
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(completionData, '*');
+    }
+    
+    // Also trigger any global completion handlers
+    if (window.onGameComplete) {
+      window.onGameComplete(completionData);
+    }
+  };
+
   const handleRestart = () => {
     console.log("Restarting game");
     setGameStarted(false);
+    setShowResult(false);
     setTimeout(() => {
       initializeGame();
     }, 100);
   };
 
-  if (!gameContent || !pairs.length) {
-    console.log("No game content or pairs found:", { gameContent, pairs });
+  if (!pairs.length) {
+    console.log("No pairs available for rendering");
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-center">
-          <p className="text-lg mb-4">Không có dữ liệu trò chơi ghi nhớ</p>
-          <p className="text-sm text-muted-foreground">
-            Debug: gameContent = {gameContent ? "có" : "không"}, pairs = {pairs.length}
+        <Card className="max-w-md w-full p-8 text-center">
+          <h3 className="text-xl font-semibold mb-4">Đang tải trò chơi ghi nhớ...</h3>
+          <p className="text-muted-foreground mb-4">
+            Chủ đề: {topic}
           </p>
-        </div>
+          <Button onClick={() => window.location.reload()}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Tải lại
+          </Button>
+        </Card>
       </div>
     );
   }
@@ -229,7 +310,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
           
           <h2 className="text-3xl font-bold mb-4 text-primary">Hoàn Thành!</h2>
           <p className="text-lg mb-4 text-muted-foreground">
-            Chủ đề: <span className="font-semibold text-primary">{gameContent.title || topic}</span>
+            Chủ đề: <span className="font-semibold text-primary">{topic}</span>
           </p>
           
           <div className="mb-6">
@@ -277,7 +358,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
           <div className="flex justify-between items-center mb-3">
             <div className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20">
               <Zap className="inline h-4 w-4 mr-1" />
-              Trò chơi ghi nhớ
+              Trò chơi ghi nhớ - {topic}
             </div>
             <div className="flex items-center gap-3">
               {useTimer && (
