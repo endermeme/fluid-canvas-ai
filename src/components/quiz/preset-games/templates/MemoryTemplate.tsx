@@ -32,13 +32,17 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
   const [isChecking, setIsChecking] = useState(false);
   const { toast } = useToast();
 
-  const pairs = gameContent?.pairs || [];
-  const useTimer = gameContent?.settings?.useTimer;
+  // Improved data access - handle both old and new data structures
+  const pairs = gameContent?.pairs || gameContent?.cards || [];
+  const useTimer = gameContent?.settings?.useTimer || false;
   const timeLimit = gameContent?.settings?.timeLimit || 180;
   const totalPairs = pairs.length;
 
+  console.log("Memory game data:", { gameContent, pairs, useTimer, timeLimit });
+
   useEffect(() => {
     if (gameContent && pairs.length > 0 && !gameStarted) {
+      console.log("Initializing memory game with pairs:", pairs);
       initializeGame();
     }
   }, [gameContent, pairs, gameStarted]);
@@ -61,24 +65,33 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
   }, [timeLeft, gameStarted, showResult, useTimer, toast]);
 
   const initializeGame = () => {
+    console.log("Starting game initialization with pairs:", pairs);
     const gameCards: MemoryCard[] = [];
     
-    pairs.forEach((pair: { term: string; definition: string }, index: number) => {
+    pairs.forEach((pair: any, index: number) => {
+      // Handle both old format (cards) and new format (pairs)
+      const term = pair.term || pair.front || pair.content;
+      const definition = pair.definition || pair.back || pair.match;
+      
+      console.log(`Creating pair ${index}:`, { term, definition });
+      
       gameCards.push({
         id: index * 2,
-        content: pair.term,
+        content: term,
         pairId: index,
         isFlipped: false,
         isMatched: false,
       });
       gameCards.push({
         id: index * 2 + 1,
-        content: pair.definition,
+        content: definition,
         pairId: index,
         isFlipped: false,
         isMatched: false,
       });
     });
+
+    console.log("Generated cards:", gameCards);
 
     // Shuffle cards
     const shuffledCards = gameCards.sort(() => Math.random() - 0.5);
@@ -93,10 +106,15 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
     if (useTimer) {
       setTimeLeft(timeLimit);
     }
+    
+    console.log("Game initialized successfully");
   };
 
   const handleCardClick = (cardIndex: number) => {
+    console.log(`Card clicked: ${cardIndex}, current flipped:`, flippedCards);
+    
     if (isChecking || cards[cardIndex].isFlipped || cards[cardIndex].isMatched || flippedCards.length >= 2) {
+      console.log("Card click ignored - checking, already flipped, matched, or 2 cards already flipped");
       return;
     }
 
@@ -106,6 +124,8 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
 
     const newFlippedCards = [...flippedCards, cardIndex];
     setFlippedCards(newFlippedCards);
+
+    console.log("Updated flipped cards:", newFlippedCards);
 
     if (newFlippedCards.length === 2) {
       setIsChecking(true);
@@ -122,24 +142,44 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
     const firstCard = cards[firstIndex];
     const secondCard = cards[secondIndex];
     
+    console.log("Checking match:", {
+      first: { pairId: firstCard.pairId, content: firstCard.content },
+      second: { pairId: secondCard.pairId, content: secondCard.content }
+    });
+    
     const newCards = [...cards];
     
     if (firstCard.pairId === secondCard.pairId) {
       // Match found
+      console.log("Match found!");
       newCards[firstIndex].isMatched = true;
       newCards[secondIndex].isMatched = true;
-      setMatchedPairs(matchedPairs + 1);
+      
+      const newMatchedPairs = matchedPairs + 1;
+      setMatchedPairs(newMatchedPairs);
       
       toast({
         title: "Tìm được cặp! 🎉",
         description: "Tuyệt vời! Bạn đã ghép đúng một cặp.",
       });
       
-      if (matchedPairs + 1 === totalPairs) {
+      if (newMatchedPairs === totalPairs) {
+        console.log("Game completed!");
         setShowResult(true);
+        
+        // Send completion message to parent for score tracking
+        if (window.parent) {
+          window.parent.postMessage({
+            type: 'QUIZ_COMPLETED',
+            score: newMatchedPairs,
+            totalQuestions: totalPairs,
+            gameType: 'memory'
+          }, '*');
+        }
       }
     } else {
       // No match
+      console.log("No match found");
       newCards[firstIndex].isFlipped = false;
       newCards[secondIndex].isFlipped = false;
       
@@ -156,14 +196,22 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
   };
 
   const handleRestart = () => {
-    initializeGame();
+    console.log("Restarting game");
+    setGameStarted(false);
+    setTimeout(() => {
+      initializeGame();
+    }, 100);
   };
 
   if (!gameContent || !pairs.length) {
+    console.log("No game content or pairs found:", { gameContent, pairs });
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center">
-          <p className="text-lg">Không có dữ liệu trò chơi ghi nhớ</p>
+          <p className="text-lg mb-4">Không có dữ liệu trò chơi ghi nhớ</p>
+          <p className="text-sm text-muted-foreground">
+            Debug: gameContent = {gameContent ? "có" : "không"}, pairs = {pairs.length}
+          </p>
         </div>
       </div>
     );
