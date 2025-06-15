@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Clock, RotateCcw, Search, LayoutGrid } from 'lucide-react';
+import { RefreshCw, Clock, RotateCcw, Search, LayoutGrid, Sparkles, Target, Trophy, Zap } from 'lucide-react';
 
 interface WordSearchTemplateProps {
   content: any;
@@ -28,6 +28,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [gridSize, setGridSize] = useState('medium');
+  const [celebratingWord, setCelebratingWord] = useState<string | null>(null);
   const { toast } = useToast();
 
   const grid = content?.grid || [];
@@ -79,6 +80,9 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
       const wordFound = checkForWord(selectedStart.row, selectedStart.col, row, col);
       
       if (wordFound) {
+        // Show celebration animation
+        setCelebratingWord(wordFound);
+        
         // Add to found words
         setFoundWords([...foundWords, {
           word: wordFound,
@@ -88,14 +92,17 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
           endCol: col
         }]);
         
-        toast({
-          title: "Tìm thấy từ!",
-          description: `Bạn đã tìm thấy từ "${wordFound}"`,
-          variant: "default",
-        });
+        setTimeout(() => {
+          setCelebratingWord(null);
+          toast({
+            title: "Tìm thấy từ! ✨",
+            description: `Bạn đã tìm thấy từ "${wordFound}"`,
+            variant: "default",
+          });
+        }, 800);
       } else {
         toast({
-          title: "Không tìm thấy từ",
+          title: "Không tìm thấy từ 🔍",
           description: "Không có từ nào ở đây.",
           variant: "destructive",
         });
@@ -292,11 +299,18 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
     setTimeLeft(content?.settings?.timeLimit || 300);
     setGameOver(false);
     setGameWon(false);
+    setCelebratingWord(null);
     
     // Reset found status for words
     if (content && content.words) {
       content.words = content.words.map((w: any) => ({ ...w, found: false }));
     }
+    
+    toast({
+      title: "Đã bắt đầu lại! 🔄",
+      description: "Trò chơi đã được reset về trạng thái ban đầu.",
+      variant: "default",
+    });
   };
 
   if (!content || !grid.length || !words.length) {
@@ -308,11 +322,12 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
   const handleResetSelection = () => {
     setSelectedStart(null);
     setSelectedEnd(null);
+    setHoveredCell(null);
   };
 
   const progressBarText = () => {
     if (gameWon) {
-      return "Hoàn thành!";
+      return "Hoàn thành! 🎉";
     } else {
       return `Đã tìm: ${foundWords.length}/${totalWords}`;
     }
@@ -335,33 +350,46 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
   };
 
   return (
-    <div className="flex flex-col p-4 h-full">
+    <div className="flex flex-col p-4 h-full bg-gradient-to-br from-background via-background/95 to-primary/5">
       {/* Header with progress and timer */}
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium">
+      <div className="mb-4 mt-12">
+        <div className="flex justify-between items-center mb-3">
+          <div className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20 backdrop-blur-sm">
+            <Target className="inline h-4 w-4 mr-1 text-primary" />
             {progressBarText()}
           </div>
-          <div className="text-sm font-medium flex items-center">
-            <Clock className="h-4 w-4 mr-1" />
+          <div className="text-sm font-medium flex items-center px-3 py-2 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20 backdrop-blur-sm">
+            <Clock className="h-4 w-4 mr-1 text-primary animate-pulse" />
             {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
           </div>
         </div>
-        <Progress value={progressPercentage} className="h-2" />
+        <Progress 
+          value={progressPercentage} 
+          className="h-3 shadow-lg" 
+          indicatorColor="bg-gradient-to-r from-primary via-primary/90 to-primary/80"
+          showPercentage={false}
+        />
       </div>
 
       {/* Game content */}
       <div className="flex flex-col md:flex-row gap-4 flex-grow">
         {/* Word grid */}
-        <Card className="p-4 flex-grow h-full bg-gradient-to-br from-white to-blue-50">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-medium">Tìm từ ẩn</h3>
+        <Card className="p-4 flex-grow h-full bg-gradient-to-br from-card via-card/95 to-primary/5 backdrop-blur-sm border-primary/20 shadow-xl">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-lg font-medium text-primary flex items-center">
+              <Search className="h-5 w-5 mr-2" />
+              Tìm từ ẩn
+            </h3>
             <div className="flex items-center space-x-1">
               <Button
                 variant={gridSize === 'small' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handleChangeGridSize('small')}
-                className="px-2 py-1 h-8"
+                className={`px-2 py-1 h-8 transition-all duration-300 hover:scale-105 ${
+                  gridSize === 'small' 
+                    ? 'bg-gradient-to-r from-primary to-primary/80 shadow-md' 
+                    : 'bg-card/70 border-primary/20 hover:bg-primary/10'
+                }`}
               >
                 <LayoutGrid className="h-3 w-3 mr-1" />
                 Nhỏ
@@ -370,7 +398,11 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
                 variant={gridSize === 'medium' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handleChangeGridSize('medium')}
-                className="px-2 py-1 h-8"
+                className={`px-2 py-1 h-8 transition-all duration-300 hover:scale-105 ${
+                  gridSize === 'medium' 
+                    ? 'bg-gradient-to-r from-primary to-primary/80 shadow-md' 
+                    : 'bg-card/70 border-primary/20 hover:bg-primary/10'
+                }`}
               >
                 <LayoutGrid className="h-4 w-4 mr-1" />
                 Vừa
@@ -379,7 +411,11 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
                 variant={gridSize === 'large' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handleChangeGridSize('large')}
-                className="px-2 py-1 h-8"
+                className={`px-2 py-1 h-8 transition-all duration-300 hover:scale-105 ${
+                  gridSize === 'large' 
+                    ? 'bg-gradient-to-r from-primary to-primary/80 shadow-md' 
+                    : 'bg-card/70 border-primary/20 hover:bg-primary/10'
+                }`}
               >
                 <LayoutGrid className="h-5 w-5 mr-1" />
                 Lớn
@@ -398,17 +434,28 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
                   return (
                     <button
                       key={`cell-${rowIndex}-${colIndex}`}
-                      className={`${getCellSize()} flex items-center justify-center rounded-md font-medium transition-all
-                        ${isSelected ? 'bg-primary text-white' : ''}
-                        ${isInPath && !isSelected ? 'bg-primary/30' : ''}
-                        ${foundWord ? 'bg-green-500/20 text-green-800' : (!isSelected && !isInPath ? 'bg-white border border-blue-100 hover:bg-blue-50' : '')}
-                        ${!foundWord && !isInPath && !isSelected ? 'shadow-sm' : ''}
-                      `}
+                      className={`${getCellSize()} flex items-center justify-center rounded-md font-medium transition-all duration-300 transform relative overflow-hidden ${
+                        isSelected ? 'bg-gradient-to-r from-primary to-primary/80 text-white scale-105 shadow-lg' : ''
+                      } ${
+                        isInPath && !isSelected ? 'bg-primary/30 scale-105' : ''
+                      } ${
+                        foundWord ? 'bg-gradient-to-r from-green-500/20 to-green-400/10 text-green-800 border border-green-300/30' : (!isSelected && !isInPath ? 'bg-card border border-primary/10 hover:bg-primary/5 hover:scale-105' : '')
+                      } ${
+                        celebratingWord && foundWord?.word === celebratingWord ? 'animate-glow scale-110' : ''
+                      }`}
                       onClick={() => handleCellClick(rowIndex, colIndex)}
                       onMouseEnter={() => handleCellHover(rowIndex, colIndex)}
                       disabled={gameOver || gameWon || Boolean(foundWord)}
                     >
                       {cell}
+                      {foundWord && (
+                        <div className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+                          <Sparkles className="h-1.5 w-1.5 text-white" />
+                        </div>
+                      )}
+                      {!foundWord && !isInPath && !isSelected && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none animate-shimmer"></div>
+                      )}
                     </button>
                   );
                 })}
@@ -419,22 +466,27 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
         
         {/* Word list */}
         {content?.settings?.showWordList && (
-          <Card className="p-4 w-full md:w-56 flex-shrink-0 overflow-y-auto bg-gradient-to-br from-white to-blue-50">
-            <h3 className="text-lg font-medium mb-2 flex items-center text-blue-900">
-              <Search className="h-4 w-4 mr-1" />
+          <Card className="p-4 w-full md:w-56 flex-shrink-0 overflow-y-auto bg-gradient-to-br from-card via-card/95 to-primary/5 backdrop-blur-sm border-primary/20 shadow-xl">
+            <h3 className="text-lg font-medium mb-3 flex items-center text-primary">
+              <Search className="h-4 w-4 mr-2" />
               Danh sách từ
             </h3>
-            <ul className="space-y-1">
+            <ul className="space-y-2">
               {words.map((word: any, index: number) => (
                 <li 
                   key={index}
-                  className={`py-2 px-3 rounded ${
+                  className={`py-2 px-3 rounded-lg transition-all duration-300 ${
                     word.found || foundWords.some(fw => fw.word === word.word)
-                      ? 'line-through opacity-70 bg-green-100 text-green-800'
-                      : 'bg-white border border-blue-100'
+                      ? 'line-through opacity-70 bg-gradient-to-r from-green-500/20 to-green-400/10 text-green-800 border border-green-300/30 scale-95'
+                      : 'bg-card border border-primary/10 hover:bg-primary/5 hover:scale-105'
                   }`}
                 >
-                  {word.word}
+                  <div className="flex items-center justify-between">
+                    <span>{word.word}</span>
+                    {(word.found || foundWords.some(fw => fw.word === word.word)) && (
+                      <Sparkles className="h-3 w-3 text-green-600 animate-pulse" />
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -443,12 +495,12 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
       </div>
 
       {/* Controls */}
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className="mt-4 grid grid-cols-2 gap-3">
         <Button
           variant="outline"
           onClick={handleResetSelection}
           disabled={!selectedStart}
-          className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
+          className="bg-card/70 border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300 hover:scale-105"
         >
           <RotateCcw className="h-4 w-4 mr-2" />
           Hủy chọn
@@ -457,7 +509,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
         <Button 
           variant="outline" 
           onClick={handleRestart}
-          className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
+          className="bg-card/70 border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300 hover:scale-105"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Chơi lại
@@ -467,31 +519,32 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
       {/* Game over or win state */}
       {(gameOver || gameWon) && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <Card className="p-6 max-w-md w-full text-center bg-gradient-to-br from-white to-blue-50 border-blue-200">
-            <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-blue-100">
+          <Card className="p-8 max-w-md w-full text-center bg-gradient-to-br from-card via-card/95 to-primary/10 backdrop-blur-sm border-primary/20 shadow-2xl animate-scale-in">
+            <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/10 animate-glow">
               {gameWon ? (
-                <div className="text-green-500 text-3xl">🎉</div>
+                <Trophy className="h-12 w-12 text-yellow-500 animate-bounce" />
               ) : (
-                <div className="text-amber-500 text-3xl">⏰</div>
+                <Clock className="h-12 w-12 text-amber-500 animate-pulse" />
               )}
             </div>
             
-            <h2 className="text-2xl font-bold mb-4 text-blue-900">
-              {gameWon ? 'Chúc mừng!' : 'Hết thời gian!'}
+            <h2 className="text-3xl font-bold mb-4 text-primary animate-fade-in">
+              {gameWon ? 'Chúc mừng! 🎉' : 'Hết thời gian! ⏰'}
             </h2>
             
-            <p className="mb-4 text-gray-700">
+            <p className="mb-4 text-muted-foreground">
               {gameWon 
                 ? `Bạn đã tìm thấy tất cả ${totalWords} từ!` 
                 : `Bạn đã tìm thấy ${foundWords.length} trong tổng số ${totalWords} từ.`
               }
             </p>
             
-            <p className="mb-6 text-gray-600">
+            <p className="mb-6 text-muted-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
+              <Clock className="inline h-4 w-4 mr-1" />
               Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
             </p>
             
-            <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
+            <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg transition-all duration-300 hover:scale-105">
               <RefreshCw className="mr-2 h-4 w-4" />
               Chơi lại
             </Button>

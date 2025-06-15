@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Clock, Trophy, Lightbulb } from 'lucide-react';
+import { RefreshCw, Clock, Trophy, Lightbulb, Sparkles, Target, Zap } from 'lucide-react';
 
 interface MemoryCard {
   id: number;
@@ -27,6 +27,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [canFlip, setCanFlip] = useState(true);
+  const [celebratingCard, setCelebratingCard] = useState<number | null>(null);
   const { toast } = useToast();
 
   const memoryCards = content?.cards || [];
@@ -98,7 +99,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
       const secondCard = cards[secondIndex];
       
       if (firstCard && secondCard && firstCard.content === secondCard.content) {
-        // Match found
+        // Match found - show celebration
+        setCelebratingCard(firstIndex);
+        
         setTimeout(() => {
           setCards(prev => prev.map((card, idx) => 
             idx === firstIndex || idx === secondIndex 
@@ -108,15 +111,16 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
           setMatchedPairs(prev => prev + 1);
           setFlippedCards([]);
           setCanFlip(true);
+          setCelebratingCard(null);
           
           toast({
-            title: "Tuyệt vời!",
-            description: "Bạn đã tìm thấy một cặp khớp.",
+            title: "Tuyệt vời! ✨",
+            description: "Bạn đã tìm thấy một cặp khớp!",
             variant: "default",
           });
-        }, 500);
+        }, 800);
       } else {
-        // No match
+        // No match - show shake effect
         setTimeout(() => {
           setCards(prev => prev.map((card, idx) => 
             idx === firstIndex || idx === secondIndex 
@@ -179,7 +183,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
         }
         
         toast({
-          title: "Đã dùng gợi ý",
+          title: "Đã dùng gợi ý ⚡",
           description: useTimer ? "Thời gian bị trừ 10 giây." : "Đã hiển thị một cặp thẻ.",
           variant: "default",
         });
@@ -216,37 +220,48 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   const progressPercentage = totalPairs > 0 ? (matchedPairs / totalPairs) * 100 : 0;
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80">
+    <div className="flex flex-col p-4 h-full bg-gradient-to-br from-background via-background/95 to-primary/5">
       <div className="mb-4 mt-12">
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+        <div className="flex justify-between items-center mb-3">
+          <div className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20 backdrop-blur-sm">
+            <Target className="inline h-4 w-4 mr-1 text-primary" />
             Cặp đã ghép: {matchedPairs}/{totalPairs}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {useTimer && (
-              <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full flex items-center">
-                <Clock className="h-4 w-4 mr-1 text-primary" />
+              <div className="text-sm font-medium px-3 py-2 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20 backdrop-blur-sm flex items-center">
+                <Clock className="h-4 w-4 mr-1 text-primary animate-pulse" />
                 {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
               </div>
             )}
-            <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
-              Lượt: {moves}
+            <div className="text-sm font-medium px-3 py-2 bg-gradient-to-r from-blue-500/15 to-blue-400/10 text-blue-700 rounded-full border border-blue-300/30 backdrop-blur-sm">
+              Lượt: <span className="font-bold">{moves}</span>
             </div>
           </div>
         </div>
-        <Progress value={progressPercentage} className="h-2 bg-secondary" />
+        <Progress 
+          value={progressPercentage} 
+          className="h-3 shadow-lg" 
+          indicatorColor="bg-gradient-to-r from-primary via-primary/90 to-primary/80"
+          showPercentage={false}
+        />
       </div>
 
       {gameWon ? (
         <div className="flex-grow flex items-center justify-center">
-          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-primary/5 to-secondary/20 backdrop-blur-sm border-primary/20">
-            <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
-            <p className="mb-2 text-lg">Bạn đã hoàn thành trò chơi với {moves} lượt.</p>
+          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-primary/5 via-card/95 to-secondary/20 backdrop-blur-sm border-primary/20 shadow-2xl animate-scale-in">
+            <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br from-yellow-500/20 to-yellow-400/10 animate-glow">
+              <Trophy className="h-12 w-12 text-yellow-500 animate-bounce" />
+            </div>
+            <h2 className="text-3xl font-bold mb-4 text-primary animate-fade-in">Chúc mừng! 🎉</h2>
+            <p className="mb-3 text-lg">Bạn đã hoàn thành trò chơi với <span className="font-bold text-primary">{moves}</span> lượt.</p>
             {useTimer && (
-              <p className="mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
+              <p className="mb-6 text-muted-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
+                <Clock className="inline h-4 w-4 mr-1" />
+                Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+              </p>
             )}
-            <Button onClick={handleRestart} className="w-full">
+            <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg transition-all duration-300 hover:scale-105">
               <RefreshCw className="mr-2 h-4 w-4" />
               Chơi lại
             </Button>
@@ -254,10 +269,13 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
         </div>
       ) : gameOver ? (
         <div className="flex-grow flex items-center justify-center">
-          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-destructive/5 to-background backdrop-blur-sm border-destructive/20">
-            <h2 className="text-3xl font-bold mb-4 text-destructive">Hết thời gian!</h2>
-            <p className="mb-4 text-lg">Bạn đã tìm được {matchedPairs} trong tổng số {totalPairs} cặp thẻ.</p>
-            <Button onClick={handleRestart} className="w-full">
+          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-destructive/5 via-card/95 to-background backdrop-blur-sm border-destructive/20 shadow-xl animate-scale-in">
+            <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br from-red-500/20 to-red-400/10">
+              <Clock className="h-12 w-12 text-red-500 animate-pulse" />
+            </div>
+            <h2 className="text-3xl font-bold mb-4 text-destructive animate-fade-in">Hết thời gian! ⏰</h2>
+            <p className="mb-4 text-lg">Bạn đã tìm được <span className="font-bold text-primary">{matchedPairs}</span> trong tổng số <span className="font-bold">{totalPairs}</span> cặp thẻ.</p>
+            <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg transition-all duration-300 hover:scale-105">
               <RefreshCw className="mr-2 h-4 w-4" />
               Chơi lại
             </Button>
@@ -269,19 +287,32 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
             {cards.map((card, index) => (
               <div 
                 key={`card-${card.id}`}
-                className={`aspect-square flex items-center justify-center rounded-xl cursor-pointer transition-all duration-300 transform ${
+                className={`aspect-square flex items-center justify-center rounded-xl cursor-pointer transition-all duration-300 transform relative overflow-hidden ${
                   card.flipped || card.matched 
                     ? 'bg-gradient-to-br from-primary/20 to-primary/5 border-primary/30 border-2 scale-105 shadow-lg hover:shadow-xl' 
-                    : 'bg-gradient-to-br from-secondary/80 to-secondary/20 border-transparent border-2 hover:scale-105'
-                } ${!canFlip ? 'pointer-events-none' : ''}`}
+                    : 'bg-gradient-to-br from-secondary/80 to-secondary/20 border-transparent border-2 hover:scale-105 hover:shadow-md'
+                } ${!canFlip ? 'pointer-events-none' : ''} ${
+                  celebratingCard === index ? 'animate-glow scale-110' : ''
+                } ${
+                  flippedCards.includes(index) && flippedCards.length === 2 && !card.matched ? 'animate-shake' : ''
+                }`}
                 onClick={() => handleCardClick(index)}
               >
                 {(card.flipped || card.matched) ? (
-                  <div className="text-lg md:text-xl font-bold text-primary/90 text-center p-2 break-words">
+                  <div className="text-lg md:text-xl font-bold text-primary/90 text-center p-2 break-words animate-fade-in">
                     {card.content}
                   </div>
                 ) : (
-                  <div className="text-2xl font-bold text-secondary/80">?</div>
+                  <div className="text-2xl font-bold text-secondary/80 relative">
+                    ?
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none animate-shimmer"></div>
+                  </div>
+                )}
+                
+                {card.matched && (
+                  <div className="absolute top-1 right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+                    <Sparkles className="h-2 w-2 text-white" />
+                  </div>
                 )}
               </div>
             ))}
@@ -294,7 +325,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
                   variant="outline"
                   size="sm"
                   onClick={handleHint}
-                  className="bg-gradient-to-r from-primary/10 to-background border-primary/20"
+                  className="bg-gradient-to-r from-yellow-500/15 to-yellow-400/10 border-yellow-300/30 text-yellow-700 hover:bg-yellow-50 hover:border-yellow-400 transition-all duration-300 hover:scale-105"
                 >
                   <Lightbulb className="h-4 w-4 mr-1 text-yellow-500" />
                   Gợi ý {useTimer && '(-10s)'}
@@ -305,7 +336,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
                 variant="outline"
                 size="sm"
                 onClick={handleRestart}
-                className="bg-gradient-to-r from-secondary/50 to-background border-primary/20"
+                className="bg-card/70 border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300 hover:scale-105"
               >
                 <RefreshCw className="h-4 w-4 mr-1" />
                 Làm lại
