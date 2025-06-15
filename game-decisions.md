@@ -61,6 +61,18 @@
 - Giảm gap trong grid và flex layouts
 - Card width max-w-xl -> max-w-lg để phù hợp màn hình nhỏ hơn
 
+### Phase 6 - GameSettings Size Balance - 2025-01-15:
+- GameSettings.tsx: Cân bằng lại kích thước để vừa phải, không quá nhỏ
+- Tăng card width từ max-w-lg lên max-w-2xl cho không gian rộng rãi hơn
+- Tăng icon size từ h-6 w-6 lên h-8 w-8 để dễ nhìn hơn
+- Tăng padding header (p-3 -> p-6), content (p-3 -> p-6) cho thoải mái hơn
+- Tăng min-height textarea (60px -> 100px) để dễ nhập text hơn
+- Tăng height buttons (h-8 -> h-12) cho dễ nhấn hơn
+- Tăng spacing (space-y-3 -> space-y-5, space-y-1 -> space-y-2) cho rõ ràng hơn
+- Tăng font-size (text-xs -> text-sm) cho dễ đọc hơn
+- Tăng slider height (h-1.5 -> h-2) cho dễ kéo hơn
+- Giữ được layout center và no-scroll với max-height responsive
+
 ### Files đã sửa:
 - src/components/quiz/preset-games/templates/FlashcardsTemplate.tsx
 - src/components/quiz/preset-games/templates/MatchingTemplate.tsx  
@@ -73,7 +85,7 @@
 - src/components/quiz/custom-games/game-components/LoadingSpinner.tsx
 - src/styles/animations.css (New)
 - src/index.css (Scroll optimization)
-- src/components/quiz/GameSettings.tsx (Scroll optimization + Center layout fix)
+- src/components/quiz/GameSettings.tsx (Scroll optimization + Center layout fix + Size balance)
 
 ### Cải tiến đã thực hiện:
 1. **Animation System**: Tất cả template đều có animation mượt mà
@@ -88,3 +100,4 @@
 10. **Scroll Optimization**: Compact layout, no unnecessary scrolling, better space usage
 11. **GameSettings Compact**: Tối ưu layout settings để fit màn hình mà không cần scroll
 12. **Center Layout**: GameSettings giờ hiển thị chính giữa màn hình, không bị đẩy cao hay thấp
+13. **Size Balance**: Cân bằng kích thước GameSettings vừa phải - không quá nhỏ khó dùng, không quá to phải scroll
