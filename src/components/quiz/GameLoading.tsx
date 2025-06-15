@@ -147,91 +147,98 @@ const GameLoading: React.FC<GameLoadingProps> = ({ topic, progress: externalProg
                 </div>
                 
                 {/* Planet 1 - Mercury (closest, fastest) */}
-                <div 
-                  className="absolute w-2 h-2 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full shadow-lg border border-white/30"
-                  style={{ 
-                    top: '-4px', 
-                    left: '50%', 
-                    transform: 'translateX(-50%)',
-                    animation: 'spin 2s linear infinite',
-                    transformOrigin: '4px 84px'
-                  }}
-                ></div>
+                <div className="absolute w-full h-full">
+                  <div 
+                    className="absolute w-3 h-3 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full shadow-lg border border-white/50 -translate-x-1.5 -translate-y-1.5"
+                    style={{ 
+                      top: '0px', 
+                      left: '50%',
+                      animation: 'spin 2s linear infinite',
+                      transformOrigin: '6px 80px'
+                    }}
+                  ></div>
+                </div>
                 
                 {/* Planet 2 - Venus */}
-                <div 
-                  className="absolute w-2.5 h-2.5 bg-gradient-to-r from-orange-300 to-yellow-400 rounded-full shadow-lg border border-white/30"
-                  style={{ 
-                    top: '-5px', 
-                    left: '50%', 
-                    transform: 'translateX(-50%)',
-                    animation: 'spin 3s linear infinite reverse',
-                    transformOrigin: '5px 85px'
-                  }}
-                ></div>
+                <div className="absolute w-full h-full">
+                  <div 
+                    className="absolute w-3.5 h-3.5 bg-gradient-to-r from-orange-300 to-yellow-400 rounded-full shadow-lg border border-white/50 -translate-x-1.5 -translate-y-1.5"
+                    style={{ 
+                      top: '0px', 
+                      left: '50%',
+                      animation: 'spin 3s linear infinite reverse',
+                      transformOrigin: '7px 84px'
+                    }}
+                  ></div>
+                </div>
                 
                 {/* Planet 3 - Earth */}
-                <div 
-                  className="absolute w-3 h-3 bg-gradient-to-r from-blue-400 to-green-400 rounded-full shadow-lg border border-white/30"
-                  style={{ 
-                    top: '-6px', 
-                    left: '50%', 
-                    transform: 'translateX(-50%)',
-                    animation: 'spin 4s linear infinite',
-                    transformOrigin: '6px 86px'
-                  }}
-                ></div>
+                <div className="absolute w-full h-full">
+                  <div 
+                    className="absolute w-4 h-4 bg-gradient-to-r from-blue-400 to-green-400 rounded-full shadow-lg border border-white/50 -translate-x-2 -translate-y-2"
+                    style={{ 
+                      top: '0px', 
+                      left: '50%',
+                      animation: 'spin 4s linear infinite',
+                      transformOrigin: '8px 88px'
+                    }}
+                  ></div>
+                </div>
                 
                 {/* Planet 4 - Mars */}
-                <div 
-                  className="absolute w-2.5 h-2.5 bg-gradient-to-r from-red-400 to-red-600 rounded-full shadow-lg border border-white/30"
-                  style={{ 
-                    top: '-5px', 
-                    left: '50%', 
-                    transform: 'translateX(-50%)',
-                    animation: 'spin 5s linear infinite reverse',
-                    transformOrigin: '5px 87px'
-                  }}
-                ></div>
+                <div className="absolute w-full h-full">
+                  <div 
+                    className="absolute w-3.5 h-3.5 bg-gradient-to-r from-red-400 to-red-600 rounded-full shadow-lg border border-white/50 -translate-x-1.5 -translate-y-1.5"
+                    style={{ 
+                      top: '0px', 
+                      left: '50%',
+                      animation: 'spin 5s linear infinite reverse',
+                      transformOrigin: '7px 92px'
+                    }}
+                  ></div>
+                </div>
                 
                 {/* Planet 5 - Jupiter */}
-                <div 
-                  className="absolute w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-lg border border-white/30"
-                  style={{ 
-                    top: '-8px', 
-                    left: '50%', 
-                    transform: 'translateX(-50%)',
-                    animation: 'spin 6s linear infinite',
-                    transformOrigin: '8px 88px'
-                  }}
-                ></div>
+                <div className="absolute w-full h-full">
+                  <div 
+                    className="absolute w-5 h-5 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-lg border border-white/50 -translate-x-2.5 -translate-y-2.5"
+                    style={{ 
+                      top: '0px', 
+                      left: '50%',
+                      animation: 'spin 6s linear infinite',
+                      transformOrigin: '10px 96px'
+                    }}
+                  ></div>
+                </div>
                 
                 {/* Planet 6 - Saturn */}
-                <div 
-                  className="absolute w-3.5 h-3.5 bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-full shadow-lg border border-white/30"
-                  style={{ 
-                    top: '-7px', 
-                    left: '50%', 
-                    transform: 'translateX(-50%)',
-                    animation: 'spin 7s linear infinite reverse',
-                    transformOrigin: '7px 87px'
-                  }}
-                >
-                  {/* Saturn's ring */}
-                  <div className="absolute inset-0 border border-yellow-200/50 rounded-full scale-150"></div>
+                <div className="absolute w-full h-full">
+                  <div 
+                    className="absolute w-4.5 h-4.5 bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-full shadow-lg border border-white/50 relative -translate-x-2 -translate-y-2"
+                    style={{ 
+                      top: '0px', 
+                      left: '50%',
+                      animation: 'spin 7s linear infinite reverse',
+                      transformOrigin: '9px 100px'
+                    }}
+                  >
+                    {/* Saturn's ring */}
+                    <div className="absolute inset-0 border border-yellow-200/70 rounded-full scale-150"></div>
+                  </div>
                 </div>
                 
                 {/* Planet 7 - Neptune */}
-                <div 
-                  className="absolute w-3 h-3 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full shadow-lg border border-white/30"
-                  style={{ 
-                    top: '-6px', 
-                    left: '50%', 
-                    transform: 'translateX(-50%)',
-                    animation: 'spin 8s linear infinite',
-                    transformOrigin: '6px 86px'
-                  }}
-                ></div>
+                <div className="absolute w-full h-full">
+                  <div 
+                    className="absolute w-4 h-4 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full shadow-lg border border-white/50 -translate-x-2 -translate-y-2"
+                    style={{ 
+                      top: '0px', 
+                      left: '50%',
+                      animation: 'spin 8s linear infinite',
+                      transformOrigin: '8px 104px'
+                    }}
+                  ></div>
+                </div>
                 
                 {/* Outer glow rings */}
                 <div className="absolute inset-0 rounded-full border border-primary/5 animate-ping" style={{ animationDuration: '4s' }} />
