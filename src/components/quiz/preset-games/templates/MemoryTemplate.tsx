@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import { RefreshCw, Clock, Trophy, Eye, Zap } from 'lucide-react';
 interface MemoryCard {
   id: number;
   content: string;
+  pairId: number;
   isFlipped: boolean;
   isMatched: boolean;
 }
@@ -32,7 +34,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
 
   const pairs = gameContent?.pairs || [];
   const useTimer = gameContent?.settings?.useTimer;
-  const timeLimit = gameContent?.settings?.timeLimit || 120;
+  const timeLimit = gameContent?.settings?.timeLimit || 180;
   const totalPairs = pairs.length;
 
   useEffect(() => {
@@ -65,12 +67,14 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
       gameCards.push({
         id: index * 2,
         content: pair.term,
+        pairId: index,
         isFlipped: false,
         isMatched: false,
       });
       gameCards.push({
         id: index * 2 + 1,
         content: pair.definition,
+        pairId: index,
         isFlipped: false,
         isMatched: false,
       });
@@ -118,13 +122,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic })
     const firstCard = cards[firstIndex];
     const secondCard = cards[secondIndex];
     
-    // Check if cards belong to the same pair
-    const firstPairIndex = Math.floor(firstCard.id / 2);
-    const secondPairIndex = Math.floor(secondCard.id / 2);
-    
     const newCards = [...cards];
     
-    if (firstPairIndex === secondPairIndex) {
+    if (firstCard.pairId === secondCard.pairId) {
       // Match found
       newCards[firstIndex].isMatched = true;
       newCards[secondIndex].isMatched = true;

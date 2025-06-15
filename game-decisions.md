@@ -2,6 +2,32 @@
 
 ## Ngày: 2025-01-15
 
+### Phase 13 - Memory Game Data Fix & Supabase Integration Enhancement - 2025-01-15:
+- **Thay đổi**: Sửa lỗi dữ liệu Memory game và cải thiện tích hợp Supabase
+- **memorySampleData.ts**: Thay đổi cấu trúc từ cards thành pairs
+  - Sử dụng cấu trúc { term: "text", definition: "emoji" } thay vì cards array
+  - Thêm settings với useTimer, timeLimit, allowHints
+  - Tổng cộng 10 cặp thẻ với fruit theme
+- **MemoryTemplate.tsx**: Cải thiện logic xử lý cặp thẻ
+  - Sửa cấu trúc MemoryCard với pairId để định danh cặp
+  - Cải thiện checkForMatch logic sử dụng pairId thay vì id calculation
+  - Thêm console.log để debug game flow
+  - Tối ưu responsive grid layout
+- **EnhancedGameView.tsx**: Thêm hỗ trợ quiz score submission trong shared mode
+  - Thêm props isSharedMode và onQuizScoreSubmit
+  - Pass onQuizScoreSubmit xuống useIframeManager
+  - Cải thiện handling cho shared games
+- **useIframeManager.ts**: Thêm message listener cho quiz completion
+  - Listen cho QUIZ_COMPLETED messages từ iframe
+  - Auto submit score khi quiz hoàn thành trong shared mode
+  - Improved error handling và debugging
+- **Loại cải tiến**:
+  - Data Structure: Sửa cấu trúc dữ liệu Memory game từ cards sang pairs
+  - Game Logic: Cải thiện logic matching và pair identification
+  - Supabase Integration: Enhance score submission và participant tracking
+  - Shared Mode: Better support cho shared games với score tracking
+  - Debugging: Thêm console.log statements để debug issues
+
 ### Phase 12 - All Templates Center Layout & No Scroll Fix - 2025-01-15:
 - **Thay đổi**: Cải thiện layout tất cả game templates để center và tránh scroll không cần thiết
 - **QuizTemplate.tsx**: Chuyển sang min-h-screen flex items-center justify-center layout
@@ -44,24 +70,21 @@
 - Đảm bảo tất cả game cards hiển thị đầy đủ với scroll mượt mà
 
 ### Files đã sửa:
-- src/components/quiz/preset-games/templates/QuizTemplate.tsx (Center layout + No scroll + Share mode fix + Enhanced UI)
-- src/components/quiz/preset-games/templates/FlashcardsTemplate.tsx (Center layout + Enhanced UI + Better controls)
-- src/components/quiz/preset-games/templates/MemoryTemplate.tsx (Center layout + Responsive grid + Enhanced visual feedback)
-- src/components/quiz/preset-games/templates/TrueFalseTemplate.tsx (Center layout fix + Button interaction fix + Enhanced UI)
-- src/components/quiz/preset-games/GameSelector.tsx (Scroll fix + Navigation enhancement)
+- src/components/quiz/preset-games/data/memorySampleData.ts (Data structure fix)
+- src/components/quiz/preset-games/templates/MemoryTemplate.tsx (Logic enhancement + Center layout)
+- src/components/quiz/custom-games/ui/EnhancedGameView.tsx (Shared mode support)
+- src/components/quiz/hooks/useIframeManager.ts (Quiz score submission support)
 - game-decisions.md (Documentation updates)
 
 ### Cải tiến đã thực hiện:
-1. **Center Layout System**: Tất cả templates giờ sử dụng consistent center layout with min-h-screen
-2. **No Unnecessary Scroll**: Compact design to fit the screen without unnecessary scrolling
-3. **Responsive Design**: Grid layouts and spacing responsive for all devices
-4. **Enhanced Visual Feedback**: Better shadows, gradients, and animations for modern UI
-5. **Improved Interactions**: Larger buttons, better hover effects, clear visual states
-6. **Consistent Spacing**: Unified padding, margin, and spacing system across templates
-7. **Better Typography**: Improved font sizes and hierarchy for readability
-8. **Performance Optimized**: Smooth animations without affecting performance
-9. **Share Mode Fixed**: Quiz template does not duplicate scores in shared mode
-10. **Navigation Enhanced**: GameSelector has a scroll area and back button with proper design
+1. **Memory Game Data Fix**: Sửa cấu trúc dữ liệu từ cards sang pairs format
+2. **Enhanced Pair Matching**: Improved logic với pairId system
+3. **Supabase Integration**: Better score submission và participant tracking
+4. **Shared Mode Support**: Enhanced support cho shared games
+5. **Debug Improvements**: Added console.log for better troubleshooting
+6. **Responsive Layout**: Grid system responsive cho different card counts
+7. **Error Handling**: Better error handling cho Supabase operations
+8. **Message Communication**: Iframe to parent communication cho quiz scores
 
 ### Nguyên Tắc Phát Triển Đã Áp Dụng:
 - Tất cả giao diện phải center và cân bằng trên màn hình
@@ -72,10 +95,11 @@
 - Performance-optimized animations and transitions
 - Maintainable code structure with reusable patterns
 
-### Trạng thái: ✅ Hoàn thành - Tất cả templates đã được cải thiện layout center và tối ưu scroll
+### Trạng thái: ✅ Hoàn thành - Memory game data fixed, Supabase integration enhanced
 
 ### Tiếp theo cần làm:
-- [ ] Cập nhật các templates còn lại (Matching, Ordering, WordSearch) theo cùng pattern
-- [ ] Test trên các device sizes khác nhau để đảm bảo responsive
-- [ ] Optimize performance for animations and transitions
-- [ ] Consider adding more visual enhancements if needed
+- [ ] Test Memory game với dữ liệu mới
+- [ ] Verify Supabase participant tracking hoạt động đúng
+- [ ] Test shared game links và score submission
+- [ ] Monitor console logs để đảm bảo không còn lỗi
+- [ ] Consider adding more comprehensive error boundary cho games

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import GameErrorDisplay from '../game-components/GameErrorDisplay';
 import GameLoadingIndicator from '../game-components/GameLoadingIndicator';
@@ -21,6 +22,8 @@ interface EnhancedGameViewProps {
   extraButton?: React.ReactNode;
   isTeacher?: boolean;
   gameExpired?: boolean;
+  isSharedMode?: boolean;
+  onQuizScoreSubmit?: (score: number, totalQuestions: number) => Promise<void>;
 }
 
 const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({ 
@@ -33,7 +36,9 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   onNewGame,
   extraButton,
   isTeacher = false,
-  gameExpired = false
+  gameExpired = false,
+  isSharedMode = false,
+  onQuizScoreSubmit
 }) => {
   const { toast } = useToast();
   const { isSharing, handleShare } = useGameShareManager(miniGame, toast, onShare);
@@ -44,7 +49,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     loadingProgress,
     refreshGame,
     handleFullscreen 
-  } = useIframeManager(miniGame, onReload, gameExpired);
+  } = useIframeManager(miniGame, onReload, gameExpired, onQuizScoreSubmit);
 
   return (
     <div className={`w-full h-full flex flex-col ${className || ''}`}>
