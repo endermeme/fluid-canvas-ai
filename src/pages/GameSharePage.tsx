@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
 import { addParticipant, getFakeIpAddress, getGameParticipants } from '@/utils/gameParticipation';
+import { submitGameScore } from '@/utils/scoreSubmission';
 import { StoredGame, GameParticipant } from '@/utils/types';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
@@ -38,6 +39,7 @@ const GameSharePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('game');
   const [gameExpired, setGameExpired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentPlayerName, setCurrentPlayerName] = useState<string>('');
   const { toast } = useToast();
   
   const refreshParticipants = async () => {
@@ -86,6 +88,13 @@ const GameSharePage: React.FC = () => {
               const registeredGames = JSON.parse(registeredGamesStr);
               if (registeredGames.includes(gameId)) {
                 setHasRegistered(true);
+                
+                // Get player name from localStorage
+                const playerDataStr = localStorage.getItem(`player_${gameId}`);
+                if (playerDataStr) {
+                  const playerData = JSON.parse(playerDataStr);
+                  setCurrentPlayerName(playerData.name || 'Người chơi');
+                }
               } else {
                 setShowNameDialog(true);
               }
@@ -121,20 +130,32 @@ const GameSharePage: React.FC = () => {
   
   // Handler for submitting quiz score - only called once per game completion
   const handleQuizScoreSubmit = async (score: number, totalQuestions: number) => {
-    if (!gameId || !hasRegistered) return;
+    if (!gameId || !hasRegistered || !currentPlayerName) return;
     
     try {
-      console.log(`Submitting quiz score: ${score}/${totalQuestions} for game ${gameId}`);
+      console.log(`Submitting quiz score: ${score}/${totalQuestions} for game ${gameId} by ${currentPlayerName}`);
       
-      // Here you could add actual score saving logic to Supabase if needed
-      // For now, just show a toast to confirm score was recorded
+      await submitGameScore({
+        gameId: gameId,
+        playerName: currentPlayerName,
+        score: score,
+        totalQuestions: totalQuestions,
+        ipAddress: getFakeIpAddress(),
+        gameType: 'quiz'
+      });
+      
       toast({
-        title: "Điểm số đã được ghi nhận",
-        description: `Bạn đạt ${score}/${totalQuestions} điểm.`,
+        title: "Điểm số đã được ghi nhận! 🎉",
+        description: `Bạn đạt ${score}/${totalQuestions} điểm và đã được lưu vào bảng xếp hạng.`,
         variant: "default",
       });
     } catch (error) {
       console.error("Error submitting quiz score:", error);
+      toast({
+        title: "Điểm số đã được ghi nhận cục bộ",
+        description: `Bạn đạt ${score}/${totalQuestions} điểm (lưu trữ cục bộ).`,
+        variant: "default",
+      });
     }
   };
   
@@ -142,10 +163,11 @@ const GameSharePage: React.FC = () => {
     if (!gameId || !game || isSubmitting) return;
     
     setIsSubmitting(true);
+    const playerDisplayName = `${values.playerName} (${values.playerAge} tuổi)`;
     
     try {
       const fakeIp = getFakeIpAddress();
-      const result = await addParticipant(gameId, `${values.playerName} (${values.playerAge} tuổi)`, fakeIp);
+      const result = await addParticipant(gameId, playerDisplayName, fakeIp);
       
       if (result.success) {
         if (result.participant) {
@@ -157,6 +179,12 @@ const GameSharePage: React.FC = () => {
             return prev;
           });
         }
+        
+        setCurrentPlayerName(playerDisplayName);
+        localStorage.setItem(`player_${gameId}`, JSON.stringify({
+          name: playerDisplayName,
+          age: values.playerAge
+        }));
         
         setShowNameDialog(false);
         setHasRegistered(true);
@@ -208,6 +236,12 @@ const GameSharePage: React.FC = () => {
         
         localStorage.setItem('game_sessions', JSON.stringify(sessions));
         setParticipants(prev => [...prev, newParticipant]);
+        
+        setCurrentPlayerName(playerDisplayName);
+        localStorage.setItem(`player_${gameId}`, JSON.stringify({
+          name: playerDisplayName,
+          age: values.playerAge
+        }));
         
         setShowNameDialog(false);
         setHasRegistered(true);

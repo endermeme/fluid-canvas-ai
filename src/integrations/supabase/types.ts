@@ -138,32 +138,85 @@ export type Database = {
       }
       game_participants: {
         Row: {
+          completion_time: number | null
           game_id: string | null
           id: string
           ip_address: string | null
           name: string
           retry_count: number | null
+          score: number | null
           timestamp: string
+          total_questions: number | null
         }
         Insert: {
+          completion_time?: number | null
           game_id?: string | null
           id?: string
           ip_address?: string | null
           name: string
           retry_count?: number | null
+          score?: number | null
           timestamp?: string
+          total_questions?: number | null
         }
         Update: {
+          completion_time?: number | null
           game_id?: string | null
           id?: string
           ip_address?: string | null
           name?: string
           retry_count?: number | null
+          score?: number | null
           timestamp?: string
+          total_questions?: number | null
         }
         Relationships: [
           {
             foreignKeyName: "game_participants_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_scores: {
+        Row: {
+          completed_at: string
+          completion_time: number | null
+          game_id: string | null
+          game_type: string
+          id: string
+          ip_address: string | null
+          player_name: string
+          score: number
+          total_questions: number
+        }
+        Insert: {
+          completed_at?: string
+          completion_time?: number | null
+          game_id?: string | null
+          game_type?: string
+          id?: string
+          ip_address?: string | null
+          player_name: string
+          score?: number
+          total_questions?: number
+        }
+        Update: {
+          completed_at?: string
+          completion_time?: number | null
+          game_id?: string | null
+          game_type?: string
+          id?: string
+          ip_address?: string | null
+          player_name?: string
+          score?: number
+          total_questions?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_scores_game_id_fkey"
             columns: ["game_id"]
             isOneToOne: false
             referencedRelation: "games"
@@ -542,6 +595,16 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_game_leaderboard: {
+        Args: { target_game_id: string; limit_count?: number }
+        Returns: {
+          player_name: string
+          score: number
+          total_questions: number
+          completion_time: number
+          completed_at: string
+        }[]
       }
       increment_share_count: {
         Args: { game_id: string }

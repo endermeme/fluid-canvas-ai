@@ -32,6 +32,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
 }) => {
   const { toast } = useToast();
   const { isSharing, handleShare } = useGameShareManager(miniGame, toast);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   
   const handleShareGame = async () => {
     try {
@@ -47,6 +48,51 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       console.error("Error sharing game:", error);
     }
   };
+
+  useEffect(() => {
+    if (iframeRef.current && miniGame.content) {
+      const iframe = iframeRef.current;
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      
+      if (doc) {
+        doc.open();
+        
+        // Inject score submission functionality for shared mode
+        let enhancedContent = miniGame.content;
+        
+        if (isSharedMode && onQuizScoreSubmit) {
+          enhancedContent = miniGame.content.replace(
+            '</head>',
+            `<script>
+              window.submitQuizScore = function(score, totalQuestions) {
+                window.parent.postMessage({
+                  type: 'QUIZ_SCORE_SUBMIT',
+                  score: score,
+                  totalQuestions: totalQuestions
+                }, '*');
+              };
+            </script></head>`
+          );
+        }
+        
+        doc.write(enhancedContent);
+        doc.close();
+      }
+    }
+  }, [miniGame.content, isSharedMode, onQuizScoreSubmit]);
+
+  useEffect(() => {
+    if (isSharedMode && onQuizScoreSubmit) {
+      const handleMessage = (event: MessageEvent) => {
+        if (event.data.type === 'QUIZ_SCORE_SUBMIT') {
+          onQuizScoreSubmit(event.data.score, event.data.totalQuestions);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+      return () => window.removeEventListener('message', handleMessage);
+    }
+  }, [isSharedMode, onQuizScoreSubmit]);
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-50">
@@ -87,10 +133,9 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       
       <div className="flex-1 overflow-hidden">
         <GameIframeRenderer 
-          content={miniGame.content}
+          ref={iframeRef}
           title={miniGame.title || 'Game Tương Tác'}
-          isSharedMode={isSharedMode}
-          onQuizScoreSubmit={onQuizScoreSubmit}
+          isLoaded={true}
         />
       </div>
     </div>
