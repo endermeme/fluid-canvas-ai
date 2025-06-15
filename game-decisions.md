@@ -2,16 +2,15 @@
 
 ## Lịch sử thay đổi và quyết định phát triển
 
-### 2025-06-15 - Cải thiện giao diện Preset Game Header
-- **Files changed**: PresetGameHeader.tsx, GameSettings.tsx
+### 2025-06-15 - Cải thiện giao diện Preset Games Page
+- **Files changed**: PresetGamesPage.tsx
 - **Type**: UI Enhancement
 - **Changes**:
-  - Thiết kế lại header với gradient background tinh tế
-  - Thêm nút "Thẻ Game" để quay về trang chủ
-  - Cải thiện nút "Quay lại" với hiệu ứng hover
-  - Thêm header navigation cho GameSettings
-  - Sử dụng backdrop-blur và glass effect
-  - Responsive design cho mobile
+  - Xóa phần hỗ trợ AI không cần thiết
+  - Tăng spacing giữa header và content (py-8)
+  - Cải thiện margin và padding cho các section
+  - Thêm container và max-width cho layout đẹp hơn
+  - Responsive design tốt hơn
 
 ### 2025-06-15 - Fix score re-submission on replay
 - **Files changed**: QuizTemplate.tsx, GameSharePage.tsx, EnhancedGameView.tsx
