@@ -1,4 +1,3 @@
-
 # Game Template Enhancement Decisions
 
 ## Ngày: 2025-01-15
@@ -93,12 +92,12 @@
   - Thêm extensive logging và debugging information
   - Fixed game initialization với proper error handling
   - Enhanced completion detection và score submission
-  - Better responsive design với improved card layouts
+  - Better responsive design with improved card layouts
   - Added comprehensive fallback data khi không có sample data
-  - Improved timer handling và game state management
-  - Better visual feedback cho game progress và completion
+  - Improved timer handling and game state management
+  - Better visual feedback cho game progress and completion
 - **EnhancedGameView.tsx**: 
-  - Complete rewrite của shared game handling
+  - Complete rewrite of shared game handling
   - Enhanced error handling with retry mechanism
   - Improved iframe content loading with comprehensive message passing
   - Added auto-detection for game completion in iframe
@@ -121,29 +120,29 @@
 - **MemoryTemplate.tsx**: 
   - Enhanced data handling để support cả old và new format
   - Thêm extensive console.log để debug data flow
-  - Improved error handling và fallback cho missing data
+  - Improved error handling and fallback for missing data
   - Fixed game restart mechanism
-  - Added proper completion message để support score submission
-  - Better responsive layout và visual feedback
+  - Added proper completion message to support score submission
+  - Better responsive layout and visual feedback
 - **EnhancedGameView.tsx**: 
-  - Complete rewrite với proper error handling
-  - Enhanced loading states và error display
-  - Improved shared mode support với proper message handling
+  - Complete rewrite with proper error handling
+  - Enhanced loading states and error display
+  - Improved shared mode support with proper message handling
   - Added refresh, fullscreen functionality
-  - Better integration với Supabase score submission
-  - Enhanced iframe content loading với retry mechanism
+  - Better integration with Supabase score submission
+  - Enhanced iframe content loading with retry mechanism
 - **Cải thiện chính**:
   - Memory game giờ handle được mọi format data (pairs, cards, old structure)
   - Shared games giờ hoạt động đúng với proper score tracking
-  - Better error messages và debug information
-  - Enhanced user experience với loading states
-  - Proper message communication between iframe và parent
-  - Better handling cho expired games và missing content
+  - Better error messages and debug information
+  - Enhanced user experience with loading states
+  - Proper message communication between iframe and parent
+  - Better handling for expired games and missing content
 - **Debug Features**:
-  - Console logging trong mọi critical functions
-  - Error display với meaningful messages
-  - Data structure validation và fallbacks
-  - Better user feedback cho loading và error states
+  - Console logging in every critical function
+  - Error display with meaningful messages
+  - Data structure validation and fallbacks
+  - Better user feedback for loading and error states
 
 ### Phase 13 - Memory Game Data Fix & Supabase Integration Enhancement - 2025-01-15:
 - **Thay đổi**: Sửa lỗi dữ liệu Memory game và cải thiện tích hợp Supabase
@@ -163,12 +162,12 @@
 - **useIframeManager.ts**: Thêm message listener cho quiz completion
   - Listen cho QUIZ_COMPLETED messages từ iframe
   - Auto submit score khi quiz hoàn thành trong shared mode
-  - Improved error handling và debugging
+  - Improved error handling and debugging
 - **Loại cải tiến**:
   - Data Structure: Sửa cấu trúc dữ liệu Memory game từ cards sang pairs
   - Game Logic: Cải thiện logic matching và pair identification
-  - Supabase Integration: Enhance score submission và participant tracking
-  - Shared Mode: Better support cho shared games với score tracking
+  - Supabase Integration: Enhance score submission and participant tracking
+  - Shared Mode: Better support for shared games with score tracking
   - Debugging: Thêm console.log statements để debug issues
 
 ### Phase 12 - All Templates Center Layout & No Scroll Fix - 2025-01-15:
@@ -226,7 +225,7 @@
 - Safe type handling với proper assertions
 - Maintain exact functionality while fixing TypeScript errors  
 - Comprehensive error checking trước khi gọi functions
-- Consistent coding patterns với existing codebase
+- Consistent coding patterns with existing codebase
 
 ### Trạng thái: ✅ Hoàn thành - TypeScript errors fixed, game functionality preserved
 
@@ -235,10 +234,42 @@
 - [ ] Verify completion messages vẫn hoạt động đúng
 - [ ] Test shared game score submission
 - [ ] Monitor console for any remaining issues
-- [ ] Test game performance với TypeScript compiled code
+- [ ] Test game performance with TypeScript compiled code
 
 ### Debug Notes:
 - TypeScript errors về window.onGameComplete đã được sửa
 - Game functionality được giữ nguyên 100%
 - Safe type checking implemented
-- No runtime errors expected với current implementation
+- No runtime errors expected with current implementation
+
+### Phase 20 - 7-Planet Solar System with Clear Orbital Motion - 2025-01-15:
+- **Thay đổi**: Cải thiện vòng xoay với 7 hành tinh rõ nét và quay theo quỹ đạo vòng tròn hoàn chỉnh
+- **GameLoading.tsx**: 
+  - 7 Distinct Planets: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Neptune
+  - Clear Planet Design: Gradient colors, different sizes, shadows, borders for definition
+  - Complete Orbital Motion: Planets rotate in full circles using transformOrigin
+  - Varied Animation Speeds: 2s to 8s với alternating directions (normal/reverse)
+  - Planet Characteristics:
+    - Mercury: Gray gradient, smallest, fastest (2s)
+    - Venus: Orange-yellow gradient, medium size (3s reverse)
+    - Earth: Blue-green gradient, medium size (4s)
+    - Mars: Red gradient, smaller size (5s reverse)
+    - Jupiter: Yellow-orange gradient, largest planet (6s)
+    - Saturn: Yellow gradient với ring effect (7s reverse)
+    - Neptune: Blue gradient, distant planet (8s)
+  - Enhanced Visual Clarity: White borders, shadows, gradient backgrounds
+  - Saturn's Ring: Additional ring element for realism
+  - Increased Spinner Size: 40x40 (160px) cho better planet visibility
+  - 7 Orbit Rings: Different opacity levels for each planet's path
+- **Animation Improvements**:
+  - Full 360° Rotation: Planets complete full orbits around brain center
+  - Realistic Speeds: Inner planets faster, outer planets slower
+  - Direction Variety: Alternating clockwise/counterclockwise rotations
+  - Smooth Transforms: Linear animations with proper transformOrigin calculations
+- **Cải thiện chính**:
+  - Planet Clarity: Rõ nét hơn với borders, shadows, và gradient colors
+  - Complete Orbits: Planets quay 1 vòng tròn hoàn chỉnh thay vì giữ nguyên vị trí
+  - Solar System Realism: 7 planets với characteristics tương tự hệ mặt trời thật
+  - Visual Hierarchy: Brain "sun" ở center với planets orbiting around
+  - Enhanced Definition: Better contrast và visibility cho all planetary elements
+  - Improved Scale: Larger spinner size để accommodate 7 planets clearly

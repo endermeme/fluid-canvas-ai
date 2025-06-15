@@ -127,91 +127,117 @@ const GameLoading: React.FC<GameLoadingProps> = ({ topic, progress: externalProg
       <div className="w-full max-w-lg relative z-10">
         {/* Main content card */}
         <div className="bg-card/90 backdrop-blur-lg rounded-2xl p-8 border border-border/50 shadow-2xl animate-scale-in">
-          {/* Header with solar system spinner */}
+          {/* Header with 7-planet solar system */}
           <div className="text-center mb-8">
             <div className="relative mb-6 flex items-center justify-center">
-              {/* Solar System Spinner */}
-              <div className="relative w-32 h-32">
-                {/* Outer orbit ring */}
-                <div className="absolute inset-0 border-2 border-primary/20 rounded-full"></div>
+              {/* 7-Planet Solar System Spinner */}
+              <div className="relative w-40 h-40">
+                {/* Orbit rings - 7 different sizes */}
+                <div className="absolute inset-0 border border-primary/15 rounded-full"></div>
+                <div className="absolute inset-2 border border-secondary/20 rounded-full"></div>
+                <div className="absolute inset-4 border border-accent/25 rounded-full"></div>
+                <div className="absolute inset-6 border border-yellow-400/20 rounded-full"></div>
+                <div className="absolute inset-8 border border-green-400/25 rounded-full"></div>
+                <div className="absolute inset-10 border border-red-400/20 rounded-full"></div>
+                <div className="absolute inset-12 border border-purple-400/25 rounded-full"></div>
                 
-                {/* Middle orbit ring */}
-                <div className="absolute inset-4 border-2 border-secondary/30 rounded-full"></div>
-                
-                {/* Inner orbit ring */}
-                <div className="absolute inset-8 border border-accent/40 rounded-full"></div>
-                
-                {/* Center brain icon */}
-                <div className="absolute inset-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center animate-pulse-soft shadow-lg">
-                  <Brain className="h-6 w-6 text-white animate-pulse" />
+                {/* Center brain "sun" */}
+                <div className="absolute inset-14 bg-gradient-to-r from-primary via-secondary to-primary rounded-full flex items-center justify-center animate-pulse shadow-2xl">
+                  <Brain className="h-8 w-8 text-white animate-pulse" />
                 </div>
                 
-                {/* Outer orbital dot */}
+                {/* Planet 1 - Mercury (closest, fastest) */}
                 <div 
-                  className="absolute w-3 h-3 bg-primary rounded-full animate-spin shadow-md"
+                  className="absolute w-2 h-2 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full shadow-lg border border-white/30"
+                  style={{ 
+                    top: '-4px', 
+                    left: '50%', 
+                    transform: 'translateX(-50%)',
+                    animation: 'spin 2s linear infinite',
+                    transformOrigin: '4px 84px'
+                  }}
+                ></div>
+                
+                {/* Planet 2 - Venus */}
+                <div 
+                  className="absolute w-2.5 h-2.5 bg-gradient-to-r from-orange-300 to-yellow-400 rounded-full shadow-lg border border-white/30"
+                  style={{ 
+                    top: '-5px', 
+                    left: '50%', 
+                    transform: 'translateX(-50%)',
+                    animation: 'spin 3s linear infinite reverse',
+                    transformOrigin: '5px 85px'
+                  }}
+                ></div>
+                
+                {/* Planet 3 - Earth */}
+                <div 
+                  className="absolute w-3 h-3 bg-gradient-to-r from-blue-400 to-green-400 rounded-full shadow-lg border border-white/30"
                   style={{ 
                     top: '-6px', 
                     left: '50%', 
                     transform: 'translateX(-50%)',
-                    animationDuration: '4s',
-                    transformOrigin: '6px 70px'
+                    animation: 'spin 4s linear infinite',
+                    transformOrigin: '6px 86px'
                   }}
                 ></div>
                 
-                {/* Middle orbital dot */}
+                {/* Planet 4 - Mars */}
                 <div 
-                  className="absolute w-2.5 h-2.5 bg-secondary rounded-full animate-spin shadow-md"
+                  className="absolute w-2.5 h-2.5 bg-gradient-to-r from-red-400 to-red-600 rounded-full shadow-lg border border-white/30"
                   style={{ 
-                    top: '6px', 
+                    top: '-5px', 
                     left: '50%', 
                     transform: 'translateX(-50%)',
-                    animationDuration: '3s',
-                    animationDirection: 'reverse',
-                    transformOrigin: '5px 54px'
+                    animation: 'spin 5s linear infinite reverse',
+                    transformOrigin: '5px 87px'
                   }}
                 ></div>
                 
-                {/* Inner orbital dot */}
+                {/* Planet 5 - Jupiter */}
                 <div 
-                  className="absolute w-2 h-2 bg-accent rounded-full animate-spin shadow-md"
+                  className="absolute w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-lg border border-white/30"
                   style={{ 
-                    top: '22px', 
+                    top: '-8px', 
                     left: '50%', 
                     transform: 'translateX(-50%)',
-                    animationDuration: '2s',
-                    transformOrigin: '4px 38px'
+                    animation: 'spin 6s linear infinite',
+                    transformOrigin: '8px 88px'
                   }}
                 ></div>
                 
-                {/* Additional orbital elements */}
+                {/* Planet 6 - Saturn */}
                 <div 
-                  className="absolute w-1.5 h-1.5 bg-yellow-400 rounded-full animate-spin shadow-sm"
+                  className="absolute w-3.5 h-3.5 bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-full shadow-lg border border-white/30"
                   style={{ 
-                    bottom: '-3px', 
+                    top: '-7px', 
                     left: '50%', 
                     transform: 'translateX(-50%)',
-                    animationDuration: '5s',
-                    animationDirection: 'reverse',
-                    transformOrigin: '3px -67px'
+                    animation: 'spin 7s linear infinite reverse',
+                    transformOrigin: '7px 87px'
+                  }}
+                >
+                  {/* Saturn's ring */}
+                  <div className="absolute inset-0 border border-yellow-200/50 rounded-full scale-150"></div>
+                </div>
+                
+                {/* Planet 7 - Neptune */}
+                <div 
+                  className="absolute w-3 h-3 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full shadow-lg border border-white/30"
+                  style={{ 
+                    top: '-6px', 
+                    left: '50%', 
+                    transform: 'translateX(-50%)',
+                    animation: 'spin 8s linear infinite',
+                    transformOrigin: '6px 86px'
                   }}
                 ></div>
                 
-                <div 
-                  className="absolute w-1.5 h-1.5 bg-green-400 rounded-full animate-spin shadow-sm"
-                  style={{ 
-                    right: '-3px', 
-                    top: '50%', 
-                    transform: 'translateY(-50%)',
-                    animationDuration: '3.5s',
-                    transformOrigin: '-67px 3px'
-                  }}
-                ></div>
+                {/* Outer glow rings */}
+                <div className="absolute inset-0 rounded-full border border-primary/5 animate-ping" style={{ animationDuration: '4s' }} />
+                <div className="absolute inset-2 rounded-full border border-secondary/5 animate-ping" style={{ animationDuration: '5s', animationDelay: '1s' }} />
+                <div className="absolute inset-4 rounded-full border border-accent/5 animate-ping" style={{ animationDuration: '6s', animationDelay: '2s' }} />
               </div>
-              
-              {/* Outer glow rings */}
-              <div className="absolute inset-0 rounded-full border-2 border-primary/10 animate-ping" style={{ animationDuration: '3s' }} />
-              <div className="absolute inset-4 rounded-full border border-secondary/10 animate-ping" style={{ animationDuration: '4s', animationDelay: '1s' }} />
-              <div className="absolute inset-8 rounded-full border border-accent/10 animate-ping" style={{ animationDuration: '5s', animationDelay: '2s' }} />
             </div>
             
             <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-2">
