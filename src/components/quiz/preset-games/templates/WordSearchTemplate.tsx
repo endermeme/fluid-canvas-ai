@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -145,12 +146,11 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
         const steps = Math.abs(rowDiff);
         
         for (let i = 0; i <= steps; i++) {
-          const checkRow = selectedStart.row + (i * rowDir);
-          const checkCol = selectedStart.col + (i * colDir);
-          if (checkRow === row && checkCol === col) {
-            return true;
-          }
+          const checkRow = startRow + (i * rowDir);
+          const checkCol = startCol + (i * colDir);
+          extractedLetters += grid[checkRow][checkCol];
         }
+        isValidSelection = true;
       }
     }
     
@@ -192,6 +192,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
     if (!selectedStart || (!selectedEnd && !hoveredCell)) return false;
     
     const endPos = selectedEnd || hoveredCell;
+    if (!endPos) return false;
     
     if (selectedStart.row === endPos.row && row === selectedStart.row) {
       const startCol = Math.min(selectedStart.col, endPos.col);
@@ -364,8 +365,6 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
         <Progress 
           value={progressPercentage} 
           className="h-3 shadow-lg animate-progress-glow" 
-          indicatorColor="bg-gradient-to-r from-primary via-primary/90 to-primary/80"
-          showPercentage={false}
         />
       </div>
 

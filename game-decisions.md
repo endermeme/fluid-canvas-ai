@@ -29,6 +29,12 @@
 - WordSearchTemplate.tsx: Selection line drawing, found word celebrations
 - CSS Animation utilities: Tạo animation helper classes
 
+### Bug Fixes - 2025-01-15:
+- WordSearchTemplate.tsx: Sửa lỗi TypeScript undefined variables `row` và `col`
+- WordSearchTemplate.tsx: Sửa lỗi type assignment boolean -> string
+- WordSearchTemplate.tsx: Cải thiện null checking cho endPos trong isInSelectedPath
+- WordSearchTemplate.tsx: Refactor diagonal word logic để tránh scope issues
+
 ### Files đã sửa:
 - src/components/quiz/preset-games/templates/FlashcardsTemplate.tsx
 - src/components/quiz/preset-games/templates/MatchingTemplate.tsx  
@@ -36,7 +42,7 @@
 - src/components/quiz/preset-games/templates/TrueFalseTemplate.tsx
 - src/components/quiz/preset-games/templates/MemoryTemplate.tsx
 - src/components/quiz/preset-games/templates/OrderingTemplate.tsx
-- src/components/quiz/preset-games/templates/WordSearchTemplate.tsx
+- src/components/quiz/preset-games/templates/WordSearchTemplate.tsx (Fixed TypeScript errors)
 - src/components/ui/progress.tsx
 - src/components/quiz/custom-games/game-components/LoadingSpinner.tsx
 - src/styles/animations.css (New)
@@ -50,3 +56,4 @@
 6. **Performance**: Animation không ảnh hưởng đến hiệu suất
 7. **3D Effects**: Card flips, button depths, perspective animations
 8. **Micro-interactions**: Hover states, click feedback, loading states
+9. **Bug Fixes**: Sửa lỗi TypeScript trong WordSearchTemplate
