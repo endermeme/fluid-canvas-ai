@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -305,20 +304,20 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
 
   if (gameWon) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-br from-background via-background/95 to-green-500/10">
-        <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 via-card/95 to-green-500/10 backdrop-blur-sm border-primary/20 shadow-2xl animate-scale-in">
-          <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br from-green-500/20 to-green-400/10 animate-glow">
-            <Trophy className="h-12 w-12 text-green-500 animate-celebration" />
+      <div className="flex items-center justify-center h-full p-4 bg-gradient-to-br from-background via-background/95 to-green-500/10">
+        <Card className="max-w-sm w-full p-6 text-center bg-gradient-to-br from-primary/5 via-card/95 to-green-500/10 backdrop-blur-sm border-primary/20 shadow-2xl animate-scale-in">
+          <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-green-500/20 to-green-400/10 animate-glow">
+            <Trophy className="h-10 w-10 text-green-500 animate-celebration" />
           </div>
-          <h2 className="text-3xl font-bold mb-4 text-primary animate-fade-in">Xuất sắc! 🎉</h2>
-          <p className="text-lg mb-4">Bạn đã tìm thấy tất cả <span className="font-bold text-green-600">{totalWords}</span> từ!</p>
-          <div className="mb-6 p-4 bg-gradient-to-r from-green-50/80 to-emerald-50/80 rounded-lg border border-green-200/50">
-            <p className="text-green-700 font-medium flex items-center justify-center">
-              <Clock className="h-5 w-5 mr-2" />
-              Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+          <h2 className="text-2xl font-bold mb-3 text-primary animate-fade-in">Xuất sắc! 🎉</h2>
+          <p className="text-sm mb-3">Bạn đã tìm thấy tất cả <span className="font-bold text-green-600">{totalWords}</span> từ!</p>
+          <div className="mb-4 p-3 bg-gradient-to-r from-green-50/80 to-emerald-50/80 rounded-lg border border-green-200/50">
+            <p className="text-green-700 text-sm font-medium flex items-center justify-center">
+              <Clock className="h-4 w-4 mr-2" />
+              Còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
             </p>
           </div>
-          <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg transition-all duration-300 hover:scale-105 btn-enhanced">
+          <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg transition-all duration-300 hover:scale-105 btn-enhanced" size="sm">
             <RefreshCw className="mr-2 h-4 w-4" />
             Chơi lại
           </Button>
@@ -329,14 +328,14 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
 
   if (gameOver) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-br from-background via-background/95 to-red-500/5">
-        <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-card via-card/95 to-red-500/5 border-red-200/30 shadow-2xl animate-scale-in">
-          <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br from-red-500/20 to-red-400/10">
-            <Clock className="h-12 w-12 text-red-500 animate-pulse" />
+      <div className="flex items-center justify-center h-full p-4 bg-gradient-to-br from-background via-background/95 to-red-500/5">
+        <Card className="max-w-sm w-full p-6 text-center bg-gradient-to-br from-card via-card/95 to-red-500/5 border-red-200/30 shadow-2xl animate-scale-in">
+          <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-red-500/20 to-red-400/10">
+            <Clock className="h-10 w-10 text-red-500 animate-pulse" />
           </div>
-          <h2 className="text-3xl font-bold mb-4 text-red-600 animate-fade-in">Hết thời gian! ⏰</h2>
-          <p className="text-lg mb-4">Bạn đã tìm được <span className="font-bold text-primary">{foundWords.length}</span> trong tổng số <span className="font-bold">{totalWords}</span> từ.</p>
-          <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg transition-all duration-300 hover:scale-105 btn-enhanced">
+          <h2 className="text-2xl font-bold mb-3 text-red-600 animate-fade-in">Hết thời gian! ⏰</h2>
+          <p className="text-sm mb-3">Bạn đã tìm được <span className="font-bold text-primary">{foundWords.length}</span> trong tổng số <span className="font-bold">{totalWords}</span> từ.</p>
+          <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg transition-all duration-300 hover:scale-105 btn-enhanced" size="sm">
             <RefreshCw className="mr-2 h-4 w-4" />
             Thử lại
           </Button>
@@ -348,66 +347,70 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
   const progressPercentage = (foundWords.length / totalWords) * 100;
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <div className="mb-4 mt-12">
-        <div className="flex justify-between items-center mb-3">
-          <div className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20 backdrop-blur-sm">
-            <Search className="inline h-4 w-4 mr-1 text-primary" />
-            Đã tìm: {foundWords.length}/{totalWords}
+    <div className="flex flex-col h-full p-3 bg-gradient-to-br from-background via-background/95 to-primary/5 overflow-hidden">
+      {/* Compact Header */}
+      <div className="mb-3 pt-8">
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-xs font-medium px-3 py-1.5 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20 backdrop-blur-sm">
+            <Search className="inline h-3 w-3 mr-1 text-primary" />
+            {foundWords.length}/{totalWords}
           </div>
-          <div className="flex items-center gap-3">
-            <div className="text-sm font-medium flex items-center px-3 py-2 bg-gradient-to-r from-blue-500/15 to-blue-400/10 rounded-full border border-blue-300/30 backdrop-blur-sm">
-              <Clock className="h-4 w-4 mr-1 text-blue-600 animate-pulse" />
-              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-            </div>
+          <div className="text-xs font-medium flex items-center px-2 py-1.5 bg-gradient-to-r from-blue-500/15 to-blue-400/10 rounded-full border border-blue-300/30 backdrop-blur-sm">
+            <Clock className="h-3 w-3 mr-1 text-blue-600 animate-pulse" />
+            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
           </div>
         </div>
         <Progress 
           value={progressPercentage} 
-          className="h-3 shadow-lg animate-progress-glow" 
+          className="h-2 shadow-lg animate-progress-glow" 
         />
       </div>
 
-      <div className="flex-grow grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-3">
-          <Card className={`p-4 bg-gradient-to-br from-card/80 to-card/60 border-2 border-primary/10 shadow-lg backdrop-blur-sm ${
+      {/* Main Game Area - Optimized Layout */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-3 min-h-0">
+        {/* Game Grid - More compact */}
+        <div className="lg:col-span-3 min-h-0">
+          <Card className={`p-3 h-full bg-gradient-to-br from-card/80 to-card/60 border-2 border-primary/10 shadow-lg backdrop-blur-sm overflow-hidden ${
             showHint ? 'animate-glow' : ''
           }`}>
-            <h3 className="text-lg font-semibold mb-3 text-center text-primary">Lưới từ</h3>
-            <div className="grid gap-1 justify-center" style={{ gridTemplateColumns: `repeat(${grid[0]?.length || 0}, 1fr)` }}>
-              {grid.map((row: string[], rowIndex: number) =>
-                row.map((letter: string, colIndex: number) => (
-                  <button
-                    key={`${rowIndex}-${colIndex}`}
-                    onClick={() => handleCellClick(rowIndex, colIndex)}
-                    onMouseEnter={() => handleCellHover(rowIndex, colIndex)}
-                    onMouseLeave={() => setHoveredCell(null)}
-                    className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg font-bold text-sm transition-all duration-200 transform relative overflow-hidden ${
-                      isInFoundWord(rowIndex, colIndex)
-                        ? 'bg-gradient-to-r from-green-500/30 to-green-400/20 border-green-500/40 text-green-800 scale-105 shadow-lg animate-glow'
-                        : isInSelectedPath(rowIndex, colIndex)
-                          ? 'bg-gradient-to-r from-primary/30 to-primary/20 border-primary/40 text-primary scale-105 shadow-md'
-                          : 'bg-gradient-to-r from-secondary/80 to-secondary/60 hover:from-primary/20 hover:to-primary/10 border-transparent hover:border-primary/30 hover:scale-110 hover:shadow-md interactive-scale'
-                    } border-2`}
-                  >
-                    {letter.toUpperCase()}
-                    {celebratingWord && isInFoundWord(rowIndex, colIndex) && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-green-400/50 to-emerald-400/50 animate-pulse rounded-lg"></div>
-                    )}
-                  </button>
-                ))
-              )}
+            <h3 className="text-sm font-semibold mb-2 text-center text-primary">Lưới từ</h3>
+            <div className="flex items-center justify-center h-full">
+              <div className="grid gap-0.5" style={{ gridTemplateColumns: `repeat(${grid[0]?.length || 0}, 1fr)` }}>
+                {grid.map((row: string[], rowIndex: number) =>
+                  row.map((letter: string, colIndex: number) => (
+                    <button
+                      key={`${rowIndex}-${colIndex}`}
+                      onClick={() => handleCellClick(rowIndex, colIndex)}
+                      onMouseEnter={() => handleCellHover(rowIndex, colIndex)}
+                      onMouseLeave={() => setHoveredCell(null)}
+                      className={`w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-md font-bold text-xs transition-all duration-200 transform relative overflow-hidden ${
+                        isInFoundWord(rowIndex, colIndex)
+                          ? 'bg-gradient-to-r from-green-500/30 to-green-400/20 border-green-500/40 text-green-800 scale-105 shadow-lg animate-glow'
+                          : isInSelectedPath(rowIndex, colIndex)
+                            ? 'bg-gradient-to-r from-primary/30 to-primary/20 border-primary/40 text-primary scale-105 shadow-md'
+                            : 'bg-gradient-to-r from-secondary/80 to-secondary/60 hover:from-primary/20 hover:to-primary/10 border-transparent hover:border-primary/30 hover:scale-110 hover:shadow-md interactive-scale'
+                      } border`}
+                    >
+                      {letter.toUpperCase()}
+                      {celebratingWord && isInFoundWord(rowIndex, colIndex) && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-green-400/50 to-emerald-400/50 animate-pulse rounded-md"></div>
+                      )}
+                    </button>
+                  ))
+                )}
+              </div>
             </div>
           </Card>
         </div>
         
-        <div className="lg:col-span-1">
-          <Card className="p-4 bg-gradient-to-br from-card/80 to-card/60 border-2 border-primary/10 shadow-lg backdrop-blur-sm">
-            <h3 className="text-lg font-semibold mb-3 text-center text-primary flex items-center justify-center">
-              <Target className="h-5 w-5 mr-2" />
+        {/* Word List - More compact */}
+        <div className="lg:col-span-1 min-h-0">
+          <Card className="p-3 h-full bg-gradient-to-br from-card/80 to-card/60 border-2 border-primary/10 shadow-lg backdrop-blur-sm overflow-hidden">
+            <h3 className="text-sm font-semibold mb-2 text-center text-primary flex items-center justify-center">
+              <Target className="h-4 w-4 mr-1" />
               Danh sách từ
             </h3>
-            <div className="space-y-2">
+            <div className="space-y-1 overflow-y-auto h-full">
               {words.map((word: any, index: number) => {
                 const isFound = foundWords.some(fw => fw.word === word.word);
                 const isCelebrating = celebratingWord === word.word;
@@ -415,7 +418,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
                 return (
                   <div
                     key={index}
-                    className={`p-3 rounded-lg transition-all duration-300 transform ${
+                    className={`p-2 rounded-md transition-all duration-300 transform text-xs ${
                       isFound
                         ? 'bg-gradient-to-r from-green-100/80 to-green-50/80 border border-green-300/50 text-green-800 line-through scale-95'
                         : 'bg-gradient-to-r from-secondary/50 to-secondary/30 border border-secondary/20'
@@ -426,7 +429,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
                         {word.word.toUpperCase()}
                       </span>
                       {isFound && (
-                        <Check className="h-4 w-4 text-green-600 animate-fade-in" />
+                        <Check className="h-3 w-3 text-green-600 animate-fade-in" />
                       )}
                     </div>
                   </div>
@@ -437,29 +440,30 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
         </div>
       </div>
 
-      <div className="mt-4 flex gap-3">
+      {/* Compact Footer */}
+      <div className="mt-2 flex gap-2">
         <Button
           variant="outline"
           onClick={handleHint}
           disabled={showHint}
-          className={`transition-all duration-300 hover:scale-105 ${
+          className={`text-xs transition-all duration-300 hover:scale-105 ${
             showHint 
               ? 'opacity-50 bg-card/50 border-primary/10' 
               : 'bg-gradient-to-r from-yellow-500/15 to-yellow-400/10 border-yellow-300/30 text-yellow-700 hover:bg-yellow-50 hover:border-yellow-400 btn-enhanced'
           }`}
           size="sm"
         >
-          <Sparkles className="h-4 w-4 mr-1 text-yellow-500" />
-          {showHint ? 'Đã dùng gợi ý' : 'Gợi ý (-30s)'}
+          <Sparkles className="h-3 w-3 mr-1 text-yellow-500" />
+          {showHint ? 'Đã dùng' : 'Gợi ý'}
         </Button>
         
         <Button
           variant="outline"
           onClick={handleRestart}
-          className="flex-1 bg-card/70 border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300 hover:scale-105 btn-enhanced"
+          className="flex-1 text-xs bg-card/70 border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300 hover:scale-105 btn-enhanced"
           size="sm"
         >
-          <RefreshCw className="h-4 w-4 mr-1" />
+          <RefreshCw className="h-3 w-3 mr-1" />
           Làm lại
         </Button>
       </div>
