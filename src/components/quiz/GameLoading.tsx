@@ -127,67 +127,91 @@ const GameLoading: React.FC<GameLoadingProps> = ({ topic, progress: externalProg
       <div className="w-full max-w-lg relative z-10">
         {/* Main content card */}
         <div className="bg-card/90 backdrop-blur-lg rounded-2xl p-8 border border-border/50 shadow-2xl animate-scale-in">
-          {/* Header with enhanced spinner */}
+          {/* Header with solar system spinner */}
           <div className="text-center mb-8">
             <div className="relative mb-6 flex items-center justify-center">
-              {/* Multi-layered spinner design */}
-              <div className="relative w-20 h-20">
-                {/* Outer ring */}
-                <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
+              {/* Solar System Spinner */}
+              <div className="relative w-32 h-32">
+                {/* Outer orbit ring */}
+                <div className="absolute inset-0 border-2 border-primary/20 rounded-full"></div>
                 
-                {/* Spinning outer ring */}
-                <div className="absolute inset-0 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+                {/* Middle orbit ring */}
+                <div className="absolute inset-4 border-2 border-secondary/30 rounded-full"></div>
                 
-                {/* Middle ring */}
-                <div className="absolute inset-2 border-3 border-secondary/30 rounded-full"></div>
+                {/* Inner orbit ring */}
+                <div className="absolute inset-8 border border-accent/40 rounded-full"></div>
                 
-                {/* Spinning middle ring (reverse direction) */}
-                <div 
-                  className="absolute inset-2 border-3 border-transparent border-r-secondary rounded-full animate-spin"
-                  style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}
-                ></div>
-                
-                {/* Inner ring */}
-                <div className="absolute inset-4 border-2 border-accent/40 rounded-full"></div>
-                
-                {/* Spinning inner ring */}
-                <div 
-                  className="absolute inset-4 border-2 border-transparent border-b-accent rounded-full animate-spin"
-                  style={{ animationDuration: '0.8s' }}
-                ></div>
-                
-                {/* Center core with pulsing effect */}
-                <div className="absolute inset-6 bg-gradient-to-r from-primary to-secondary rounded-full animate-pulse-soft flex items-center justify-center">
-                  <div className="w-2 h-2 bg-background rounded-full animate-pulse"></div>
+                {/* Center brain icon */}
+                <div className="absolute inset-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center animate-pulse-soft shadow-lg">
+                  <Brain className="h-6 w-6 text-white animate-pulse" />
                 </div>
                 
-                {/* Orbital dots */}
-                <div className="absolute inset-0">
-                  <div 
-                    className="absolute w-2 h-2 bg-primary rounded-full animate-spin"
-                    style={{ 
-                      top: '-4px', 
-                      left: '50%', 
-                      transform: 'translateX(-50%)',
-                      animationDuration: '2s'
-                    }}
-                  ></div>
-                  <div 
-                    className="absolute w-2 h-2 bg-secondary rounded-full animate-spin"
-                    style={{ 
-                      bottom: '-4px', 
-                      left: '50%', 
-                      transform: 'translateX(-50%)',
-                      animationDuration: '2s',
-                      animationDirection: 'reverse'
-                    }}
-                  ></div>
-                </div>
+                {/* Outer orbital dot */}
+                <div 
+                  className="absolute w-3 h-3 bg-primary rounded-full animate-spin shadow-md"
+                  style={{ 
+                    top: '-6px', 
+                    left: '50%', 
+                    transform: 'translateX(-50%)',
+                    animationDuration: '4s',
+                    transformOrigin: '6px 70px'
+                  }}
+                ></div>
+                
+                {/* Middle orbital dot */}
+                <div 
+                  className="absolute w-2.5 h-2.5 bg-secondary rounded-full animate-spin shadow-md"
+                  style={{ 
+                    top: '6px', 
+                    left: '50%', 
+                    transform: 'translateX(-50%)',
+                    animationDuration: '3s',
+                    animationDirection: 'reverse',
+                    transformOrigin: '5px 54px'
+                  }}
+                ></div>
+                
+                {/* Inner orbital dot */}
+                <div 
+                  className="absolute w-2 h-2 bg-accent rounded-full animate-spin shadow-md"
+                  style={{ 
+                    top: '22px', 
+                    left: '50%', 
+                    transform: 'translateX(-50%)',
+                    animationDuration: '2s',
+                    transformOrigin: '4px 38px'
+                  }}
+                ></div>
+                
+                {/* Additional orbital elements */}
+                <div 
+                  className="absolute w-1.5 h-1.5 bg-yellow-400 rounded-full animate-spin shadow-sm"
+                  style={{ 
+                    bottom: '-3px', 
+                    left: '50%', 
+                    transform: 'translateX(-50%)',
+                    animationDuration: '5s',
+                    animationDirection: 'reverse',
+                    transformOrigin: '3px -67px'
+                  }}
+                ></div>
+                
+                <div 
+                  className="absolute w-1.5 h-1.5 bg-green-400 rounded-full animate-spin shadow-sm"
+                  style={{ 
+                    right: '-3px', 
+                    top: '50%', 
+                    transform: 'translateY(-50%)',
+                    animationDuration: '3.5s',
+                    transformOrigin: '-67px 3px'
+                  }}
+                ></div>
               </div>
               
-              {/* Pulsing rings around spinner */}
-              <div className="absolute inset-0 rounded-full border-2 border-primary/10 animate-ping" style={{ animationDuration: '2s' }} />
-              <div className="absolute inset-2 rounded-full border border-secondary/10 animate-ping" style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
+              {/* Outer glow rings */}
+              <div className="absolute inset-0 rounded-full border-2 border-primary/10 animate-ping" style={{ animationDuration: '3s' }} />
+              <div className="absolute inset-4 rounded-full border border-secondary/10 animate-ping" style={{ animationDuration: '4s', animationDelay: '1s' }} />
+              <div className="absolute inset-8 rounded-full border border-accent/10 animate-ping" style={{ animationDuration: '5s', animationDelay: '2s' }} />
             </div>
             
             <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-2">
