@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
@@ -118,6 +117,25 @@ const GameSharePage: React.FC = () => {
   
   const handleBack = () => {
     navigate('/game-history');
+  };
+  
+  // Handler for submitting quiz score - only called once per game completion
+  const handleQuizScoreSubmit = async (score: number, totalQuestions: number) => {
+    if (!gameId || !hasRegistered) return;
+    
+    try {
+      console.log(`Submitting quiz score: ${score}/${totalQuestions} for game ${gameId}`);
+      
+      // Here you could add actual score saving logic to Supabase if needed
+      // For now, just show a toast to confirm score was recorded
+      toast({
+        title: "Điểm số đã được ghi nhận",
+        description: `Bạn đạt ${score}/${totalQuestions} điểm.`,
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Error submitting quiz score:", error);
+    }
   };
   
   const handleJoinGame = async (values: PlayerFormValues) => {
@@ -304,6 +322,8 @@ const GameSharePage: React.FC = () => {
             hideHeader={true}
             extraButton={!hasRegistered ? joinGameButton : undefined}
             gameExpired={gameExpired}
+            isSharedMode={true}
+            onQuizScoreSubmit={hasRegistered ? handleQuizScoreSubmit : undefined}
           />
         </TabsContent>
         

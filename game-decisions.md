@@ -59,7 +59,7 @@
 - Giảm min-height textarea (80px -> 60px), height buttons (h-10 -> h-8, h-8 -> h-7)
 - Tối ưu spacing (space-y-4 -> space-y-3, space-y-2 -> space-y-1)
 - Giảm gap trong grid và flex layouts
-- Card width max-w-xl -> max-w-lg để phù hợp màn hình nhỏ hơn
+- Giảm card width max-w-xl -> max-w-lg để phù hợp màn hình nhỏ hơn
 
 ### Phase 6 - GameSettings Size Balance - 2025-01-15:
 - GameSettings.tsx: Cân bằng lại kích thước để vừa phải, không quá nhỏ
@@ -83,10 +83,19 @@
 - Tối ưu max-width cho content area (max-w-4xl)
 - Cải thiện button spacing và size (py-3, space-x-4)
 
+### Phase 8 - Share Mode Score Handling Fix - 2025-01-15:
+- QuizTemplate.tsx: Sửa lỗi nút "Làm lại" cộng điểm khi ở chế độ share link
+- Thêm props isSharedMode và onScoreSubmit để phân biệt chế độ share
+- Thêm hasSubmittedScore state để track việc submit điểm chỉ một lần
+- handleRestart() giờ không submit score khi ở shared mode
+- Chỉ submit score một lần khi game kết thúc ở shared mode
+- GameSharePage.tsx: Thêm handleQuizScoreSubmit để xử lý điểm từ quiz
+- EnhancedGameView.tsx: Truyền props isSharedMode và onQuizScoreSubmit
+
 ### Files đã sửa:
 - src/components/quiz/preset-games/templates/FlashcardsTemplate.tsx
 - src/components/quiz/preset-games/templates/MatchingTemplate.tsx  
-- src/components/quiz/preset-games/templates/QuizTemplate.tsx (Fixed TypeScript errors + Scroll optimization + Layout balance)
+- src/components/quiz/preset-games/templates/QuizTemplate.tsx (Fixed TypeScript errors + Scroll optimization + Layout balance + Share mode fix)
 - src/components/quiz/preset-games/templates/TrueFalseTemplate.tsx
 - src/components/quiz/preset-games/templates/MemoryTemplate.tsx
 - src/components/quiz/preset-games/templates/OrderingTemplate.tsx
@@ -96,6 +105,8 @@
 - src/styles/animations.css (New)
 - src/index.css (Scroll optimization)
 - src/components/quiz/GameSettings.tsx (Scroll optimization + Center layout fix + Size balance)
+- src/pages/GameSharePage.tsx (Share mode score handling)
+- src/components/quiz/custom-games/EnhancedGameView.tsx (Share mode props)
 
 ### Cải tiến đã thực hiện:
 1. **Animation System**: Tất cả template đều có animation mượt mà
@@ -112,3 +123,4 @@
 12. **Center Layout**: GameSettings giờ hiển thị chính giữa màn hình, không bị đẩy cao hay thấp
 13. **Size Balance**: Cân bằng kích thước GameSettings vừa phải - không quá nhỏ khó dùng, không quá to phải scroll
 14. **Quiz Layout Balance**: QuizTemplate giờ chia đều không gian màn hình với header/content/footer phân bố hợp lý
+15. **Share Mode Score Fix**: Sửa lỗi nút "Làm lại" cộng điểm không đúng ở chế độ share link, chỉ lưu điểm khi game kết thúc

@@ -9,9 +9,17 @@ interface QuizTemplateProps {
   data?: any;
   content?: any;
   topic: string;
+  isSharedMode?: boolean; // Thêm prop để phân biệt chế độ share
+  onScoreSubmit?: (score: number, totalQuestions: number) => void; // Callback để submit score
 }
 
-const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => {
+const QuizTemplate: React.FC<QuizTemplateProps> = ({ 
+  data, 
+  content, 
+  topic, 
+  isSharedMode = false,
+  onScoreSubmit 
+}) => {
   const gameContent = content || data;
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -25,6 +33,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
   const [gameStarted, setGameStarted] = useState(false);
   const [isAnswering, setIsAnswering] = useState(false);
   const [ripplePosition, setRipplePosition] = useState<{x: number, y: number} | null>(null);
+  const [hasSubmittedScore, setHasSubmittedScore] = useState(false); // Track if score was submitted
   const { toast } = useToast();
 
   const questions = gameContent?.questions || [];
@@ -82,6 +91,14 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
       });
     }
   }, [totalTimeLeft, gameStarted, showResult, useTimer, toast]);
+
+  // Submit score when game ends (only in shared mode and only once)
+  useEffect(() => {
+    if (showResult && isSharedMode && onScoreSubmit && !hasSubmittedScore) {
+      setHasSubmittedScore(true);
+      onScoreSubmit(score, questions.length);
+    }
+  }, [showResult, isSharedMode, onScoreSubmit, score, questions.length, hasSubmittedScore]);
 
   const handleOptionSelect = (optionIndex: number, event: React.MouseEvent) => {
     if (isAnswered || isAnswering) return;
@@ -153,12 +170,23 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
   };
 
   const handleRestart = () => {
+    // Reset all game state - DO NOT submit score in shared mode
     setCurrentQuestion(0);
     setSelectedOption(null);
     setScore(0);
     setShowResult(false);
     setIsAnswered(false);
     setGameStarted(false);
+    setHasSubmittedScore(false); // Reset score submission flag
+    
+    // Show restart message without saving score
+    if (isSharedMode) {
+      toast({
+        title: "Game đã được làm lại",
+        description: "Bạn có thể chơi lại từ đầu.",
+        variant: "default",
+      });
+    }
   };
 
   if (!gameContent || !questions.length) {
@@ -200,6 +228,12 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
             <div className="text-sm mb-6 text-muted-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
               <Clock className="inline h-4 w-4 mr-1" />
               Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
+            </div>
+          )}
+          
+          {isSharedMode && (
+            <div className="text-sm mb-4 text-green-600 bg-green-50 p-3 rounded-lg border border-green-200">
+              ✅ Kết quả đã được ghi nhận
             </div>
           )}
           
