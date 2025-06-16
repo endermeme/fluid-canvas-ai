@@ -1,4 +1,3 @@
-
 # Game Template Enhancement Decisions
 
 ## Ngày: 2025-01-15
@@ -405,3 +404,44 @@
 - Game functionality được giữ nguyên 100%
 - Safe type checking implemented
 - No runtime errors expected with current implementation
+
+### Phase 24 - Solar System Axis-Based Rotation Fix - 2025-01-15:
+- **Thay đổi**: Sửa hoàn toàn cơ chế quay hành tinh từ orbital motion sang axis-based rotation
+- **SolarSystemSpinner.tsx**: 
+  - **Simple Axis Rotation**: Mỗi hành tinh quay trên trục riêng của container
+  - **Fixed Positioning**: Planets positioned at top of their rotation axis với transform -translate-x-1/2
+  - **Varied Speeds**: 2s, 3s, 4s, 5s, 6s, 7s, 8s với alternating directions
+  - **Distance from Center**: 16px, 32px, 48px, 64px, 80px, 96px, 112px
+  - **Planet Characteristics**:
+    - Mercury: 3x3px, gray gradient, 2s rotation, 16px from center
+    - Venus: 4x4px, orange-yellow gradient, 3s reverse, 32px from center
+    - Earth: 5x5px, blue-green gradient, 4s rotation, 48px from center
+    - Mars: 4x4px, red gradient, 5s reverse, 64px from center
+    - Jupiter: 6x6px, yellow-orange gradient, 6s rotation, 80px from center (largest)
+    - Saturn: 5x5px, yellow gradient với ring effect, 7s reverse, 96px from center
+    - Neptune: 4x4px, blue gradient, 8s rotation, 112px from center (outermost)
+  - **Animation Method**: 
+    - Mỗi planet wrapped trong container có full w-full h-full
+    - Container quay với CSS spin animation
+    - Planet positioned at top của container (top: Xpx)
+    - Simple left-1/2 transform để center horizontally
+  - **Visual Improvements**:
+    - Brain center với z-10 để đảm bảo luôn ở trên
+    - Orbit rings như visual guides
+    - Gradient backgrounds và white borders cho clarity
+    - Saturn ring effect với scale transform
+    - Proper shadow effects cho depth
+- **Technical Implementation**:
+  - Container Method: Mỗi planet trong spinning container riêng
+  - Rotation: CSS spin animation trên container, không phải planet
+  - Positioning: Planet positioned at top edge của rotating container
+  - Simple Transform: Chỉ dùng translate-x-1/2 để center horizontally
+- **Cải thiện chính**:
+  - Simple và reliable rotation mechanism
+  - Planets quay theo perfect circles around brain center
+  - No complex transform calculations needed
+  - Consistent và smooth animations
+  - Realistic solar system với 7 distinct planets
+  - Clean separation between rotation logic và planet positioning
+  - Much easier to maintain và debug
+  - Performance optimized với simple CSS animations
