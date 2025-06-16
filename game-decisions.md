@@ -1,6 +1,26 @@
 
 # Game Development Decisions
 
+## 2025-01-16: Chuyển đổi thành AI Solar System thực tế
+- **Thay đổi**: Tạo mô phỏng hệ mặt trời thực tế với biểu tượng AI Brain làm trung tâm
+- **Files**: src/components/quiz/components/SolarSystemSpinner.tsx
+- **Chi tiết**:
+  - Giữ biểu tượng Brain ở trung tâm với hào quang AI (vàng cam + hiệu ứng ping)
+  - Quỹ đạo không đều như hệ mặt trời thật: Mercury gần nhất → Neptune xa nhất
+  - Khoảng cách realistic: từ 80px (Mercury) đến 320px (Neptune)
+  - Kích thước hành tinh đúng tỷ lệ: Jupiter lớn nhất (24px), Mercury nhỏ nhất (6px)
+  - Màu sắc chính xác:
+    * Mercury: xám bạc
+    * Venus: vàng nhạt + quay ngược
+    * Earth: xanh lam + xanh lục với đám mây
+    * Mars: đỏ
+    * Jupiter: nâu vàng với dải sọc
+    * Saturn: vàng với 3 vành đai
+    * Uranus: xanh nhạt
+    * Neptune: xanh đậm + mờ hơn
+  - Tốc độ quay realistic: Mercury nhanh nhất (2s) → Neptune chậm nhất (20s)
+  - Thêm hiệu ứng không gian với các vòng sáng ping
+
 ## 2025-01-16: Fixed Solar System Accuracy
 - **Thay đổi**: Sửa lại SolarSystemSpinner theo đúng thứ tự và tỷ lệ hành tinh thật
 - **Files**: src/components/quiz/components/SolarSystemSpinner.tsx
