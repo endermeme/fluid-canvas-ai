@@ -1,89 +1,151 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
-interface UseLoadingProgressOptions {
-  stages?: string[];
+interface LoadingProgressProps {
+  stages: string[];
   stageDuration?: number;
   finalStageDelay?: number;
+  predictiveMode?: boolean; // Cho phép progress tự động chạy
 }
 
-export const useLoadingProgress = (options: UseLoadingProgressOptions = {}) => {
-  const {
-    stages = [
-      'Đang phân tích chủ đề...',
-      'Đang thiết kế câu hỏi và nội dung...',
-      'Đang tạo giao diện trò chơi...',
-      'Đang tối ưu hóa trải nghiệm người chơi...',
-      'Hoàn thiện trò chơi...'
-    ],
-    stageDuration = 800,
-    finalStageDelay = 400
-  } = options;
-
+export const useLoadingProgress = ({
+  stages,
+  stageDuration = 1000,
+  finalStageDelay = 500,
+  predictiveMode = false
+}: LoadingProgressProps) => {
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState(0);
-  const [statusText, setStatusText] = useState(stages[0]);
-
-  const startProgress = useCallback(() => {
-    setProgress(0);
-    setCurrentStage(0);
-    setStatusText(stages[0]);
-
-    const stageProgress = 100 / stages.length;
-    let currentProgress = 0;
-    let stageIndex = 0;
-
-    const updateProgress = () => {
-      if (stageIndex < stages.length) {
-        setStatusText(stages[stageIndex]);
-        setCurrentStage(stageIndex);
-
-        // Animate progress for current stage
-        const targetProgress = Math.min((stageIndex + 1) * stageProgress, 95);
-        const progressStep = (targetProgress - currentProgress) / 10;
-
-        const progressInterval = setInterval(() => {
-          currentProgress += progressStep;
-          if (currentProgress >= targetProgress) {
-            currentProgress = targetProgress;
-            clearInterval(progressInterval);
-            
-            stageIndex++;
-            if (stageIndex < stages.length) {
-              setTimeout(updateProgress, stageDuration);
-            } else {
-              // Final stage - reach 100%
-              setTimeout(() => {
-                const finalInterval = setInterval(() => {
-                  currentProgress += 1;
-                  if (currentProgress >= 100) {
-                    currentProgress = 100;
-                    clearInterval(finalInterval);
-                  }
-                  setProgress(Math.min(currentProgress, 100));
-                }, 50);
-              }, finalStageDelay);
-            }
-          }
-          setProgress(Math.min(currentProgress, 100));
-        }, 100);
-      }
-    };
-
-    updateProgress();
-  }, [stages, stageDuration, finalStageDelay]);
+  const [statusText, setStatusText] = useState(stages[0] || '');
+  const [isRunning, setIsRunning] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const stageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const resetProgress = useCallback(() => {
     setProgress(0);
     setCurrentStage(0);
-    setStatusText(stages[0]);
+    setStatusText(stages[0] || '');
+    setIsRunning(false);
+    
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (stageTimeoutRef.current) {
+      clearTimeout(stageTimeoutRef.current);
+      stageTimeoutRef.current = null;
+    }
   }, [stages]);
 
+  const startProgress = useCallback(() => {
+    if (isRunning) return;
+    
+    setIsRunning(true);
+    setProgress(0);
+    setCurrentStage(0);
+    setStatusText(stages[0] || '');
+
+    if (predictiveMode) {
+      // Chế độ dự đoán: tự động chạy qua các giai đoạn
+      let currentStageIndex = 0;
+      const totalStages = stages.length;
+      
+      const advanceStage = () => {
+        if (currentStageIndex < totalStages - 1) {
+          currentStageIndex++;
+          setCurrentStage(currentStageIndex);
+          setStatusText(stages[currentStageIndex]);
+          
+          // Tính progress dựa trên stage hiện tại
+          const newProgress = Math.min((currentStageIndex / (totalStages - 1)) * 100, 95);
+          setProgress(newProgress);
+          
+          // Lên lịch cho stage tiếp theo
+          stageTimeoutRef.current = setTimeout(advanceStage, stageDuration);
+        } else {
+          // Giai đoạn cuối - giữ ở 95% cho đến khi được hoàn thành từ bên ngoài
+          setProgress(95);
+        }
+      };
+      
+      // Bắt đầu từ stage đầu tiên
+      stageTimeoutRef.current = setTimeout(advanceStage, stageDuration);
+    } else {
+      // Chế độ thông thường: từng bước một
+      const progressPerStage = 100 / stages.length;
+      let completedStages = 0;
+
+      const updateProgress = () => {
+        if (completedStages < stages.length) {
+          const newProgress = Math.min((completedStages + 1) * progressPerStage, 100);
+          setProgress(newProgress);
+          setCurrentStage(completedStages);
+          setStatusText(stages[completedStages]);
+          
+          completedStages++;
+          
+          if (completedStages < stages.length) {
+            stageTimeoutRef.current = setTimeout(updateProgress, stageDuration);
+          }
+        }
+      };
+
+      updateProgress();
+    }
+  }, [stages, stageDuration, isRunning, predictiveMode]);
+
+  const completeProgress = useCallback(() => {
+    // Hoàn thành progress - chuyển về 100%
+    setProgress(100);
+    setCurrentStage(stages.length - 1);
+    setStatusText(stages[stages.length - 1] || '');
+    
+    // Dọn dẹp timers
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (stageTimeoutRef.current) {
+      clearTimeout(stageTimeoutRef.current);
+      stageTimeoutRef.current = null;
+    }
+    
+    setTimeout(() => {
+      setIsRunning(false);
+    }, finalStageDelay);
+  }, [stages, finalStageDelay]);
+
+  const forceProgress = useCallback((targetProgress: number, stage?: number) => {
+    // Ép progress về một giá trị cụ thể (cho external control)
+    const clampedProgress = Math.min(Math.max(targetProgress, 0), 100);
+    setProgress(clampedProgress);
+    
+    if (stage !== undefined && stage >= 0 && stage < stages.length) {
+      setCurrentStage(stage);
+      setStatusText(stages[stage]);
+    }
+  }, [stages]);
+
+  // Cleanup khi component unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      if (stageTimeoutRef.current) {
+        clearTimeout(stageTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return {
-    progress: Math.min(Math.max(progress, 0), 100), // Ensure progress is between 0-100
+    progress,
     statusText,
     currentStage,
+    isRunning,
     startProgress,
-    resetProgress
+    resetProgress,
+    completeProgress,
+    forceProgress
   };
 };

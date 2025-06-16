@@ -8,10 +8,23 @@ import GameStageProgress from './game-components/GameStageProgress';
 interface GameLoadingProps {
   topic: string;
   progress?: number;
+  onProgressComplete?: () => void;
 }
 
-const GameLoading: React.FC<GameLoadingProps> = ({ topic, progress: externalProgress }) => {
-  const { progress, statusText, currentStage, startProgress, resetProgress } = useLoadingProgress({
+const GameLoading: React.FC<GameLoadingProps> = ({ 
+  topic, 
+  progress: externalProgress,
+  onProgressComplete 
+}) => {
+  const { 
+    progress, 
+    statusText, 
+    currentStage, 
+    startProgress, 
+    resetProgress, 
+    completeProgress,
+    forceProgress 
+  } = useLoadingProgress({
     stages: [
       'Đang phân tích chủ đề...',
       'Đang thiết kế câu hỏi và nội dung...',
@@ -20,7 +33,8 @@ const GameLoading: React.FC<GameLoadingProps> = ({ topic, progress: externalProg
       'Hoàn thiện trò chơi...'
     ],
     stageDuration: 1200,
-    finalStageDelay: 600
+    finalStageDelay: 600,
+    predictiveMode: true // Bật chế độ dự đoán
   });
 
   const currentProgress = externalProgress !== undefined ? Math.min(Math.max(externalProgress, 0), 100) : progress;
@@ -29,11 +43,28 @@ const GameLoading: React.FC<GameLoadingProps> = ({ topic, progress: externalProg
 
   useEffect(() => {
     if (externalProgress === undefined) {
+      // Chế độ tự động - bắt đầu progress dự đoán
       startProgress();
     } else {
+      // Chế độ external control
       resetProgress();
+      forceProgress(externalProgress, getStageForProgress(externalProgress));
+      
+      // Nếu external progress đạt 100%, gọi callback completion
+      if (externalProgress >= 100 && onProgressComplete) {
+        setTimeout(() => {
+          onProgressComplete();
+        }, 500);
+      }
     }
-  }, [externalProgress, startProgress, resetProgress]);
+  }, [externalProgress, startProgress, resetProgress, forceProgress, onProgressComplete]);
+
+  // Callback khi API hoàn thành - sync với progress thực tế
+  useEffect(() => {
+    // Nếu không có external progress và đang ở chế độ predictive
+    // Có thể thêm logic để detect khi API hoàn thành và gọi completeProgress()
+    // Ví dụ: listen cho events từ parent component
+  }, [completeProgress]);
 
   function getStatusForProgress(prog: number): string {
     if (prog < 20) return 'Đang phân tích chủ đề...';

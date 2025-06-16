@@ -1,6 +1,18 @@
+
 # Quyết định thiết kế và sửa đổi
 
 ## Ngày 2025-01-16
+
+### Cải thiện Loading Progress - Chế độ dự đoán
+- **File đã sửa**: `src/hooks/useLoadingProgress.ts`, `src/components/quiz/GameLoading.tsx`
+- **Loại thay đổi**: Enhancement - Predictive loading progress
+- **Mô tả**: 
+  - Thêm chế độ `predictiveMode` vào useLoadingProgress hook
+  - Cho phép progress bar tự động chạy qua các giai đoạn ngay cả khi API vẫn đang xử lý
+  - Progress tự động tiến đến 95% và chờ signal hoàn thành từ API
+  - Thêm methods `completeProgress()` và `forceProgress()` để kiểm soát từ bên ngoài
+  - Khắc phục vấn đề progress bị kẹt ở giai đoạn đầu tiên khi API chỉ gọi được một lần
+- **Lý do**: Cải thiện trải nghiệm người dùng bằng cách hiển thị progress mượt mà ngay cả khi backend chậm
 
 ### Khắc phục lỗi React Hooks trong CustomGameForm
 - **File đã sửa**: `src/components/quiz/custom-games/CustomGameForm.tsx`
