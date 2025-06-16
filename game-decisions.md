@@ -1,6 +1,22 @@
 
 # Game Development Decisions
 
+## 2025-01-16: Cải thiện template Flashcards với hiệu ứng 3D và giao diện đẹp hơn
+- **Thay đổi**: Nâng cấp toàn bộ giao diện Flashcards với hiệu ứng lật thẻ 3D thực tế
+- **Files**: 
+  - src/components/quiz/preset-games/templates/FlashcardsTemplate.tsx
+  - src/styles/animations.css
+- **Chi tiết**:
+  - **Hiệu ứng lật thẻ 3D**: Sử dụng CSS 3D transforms với perspective, backface-visibility và transform-style
+  - **Thẻ to hơn và đẹp hơn**: Tăng kích thước lên h-80, thêm gradient backgrounds và shadow-2xl
+  - **Giao diện sống động**: Background gradient từ violet-blue-cyan, glass morphism effects
+  - **Layout tối ưu**: Di chuyển tất cả controls xuống bottom với fixed positioning
+  - **Animation smooth**: Thêm transition-transform duration-700 cho flip effect
+  - **Màu sắc tương tác**: Mặt trước dùng blue gradient, mặt sau dùng cyan gradient
+  - **Typography cải thiện**: Text-3xl font-bold cho nội dung thẻ
+  - **Button styling**: Gradient buttons với shadow và hover effects
+  - **Responsive design**: Duy trì responsive cho mobile và desktop
+
 ## 2025-01-16: Sửa lỗi UI/UX toàn bộ templates
 - **Thay đổi**: Fix tất cả vấn đề giao diện game templates
 - **Files**: 

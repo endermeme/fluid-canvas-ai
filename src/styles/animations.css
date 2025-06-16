@@ -83,6 +83,29 @@
   }
 }
 
+/* 3D Flip Animation for Flashcards */
+@keyframes flipIn {
+  from {
+    transform: rotateY(-180deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes flipOut {
+  from {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: rotateY(180deg);
+    opacity: 0;
+  }
+}
+
 /* Utility Classes */
 .animate-shimmer {
   animation: shimmer 2s infinite;
@@ -129,9 +152,29 @@
   animation: planet-orbit linear infinite;
 }
 
-/* Perspective for 3D effects */
+/* 3D Flip utilities */
 .perspective-1000 {
   perspective: 1000px;
+}
+
+.transform-style-preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.animate-flip-in {
+  animation: flipIn 0.6s ease-out;
+}
+
+.animate-flip-out {
+  animation: flipOut 0.6s ease-out;
 }
 
 /* Gradient overlays */
