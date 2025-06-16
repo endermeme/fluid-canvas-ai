@@ -1,6 +1,16 @@
 
 # Game Development Decisions
 
+## 2025-01-16: Sửa lỗi animation orbital - Hành tinh quay tròn đúng cách
+- **Thay đổi**: Fix lỗi animation khiến hành tinh di chuyển theo đường thẳng thay vì quay tròn
+- **Files**: src/components/quiz/components/SolarSystemSpinner.tsx
+- **Chi tiết**:
+  - Thay đổi cách positioning hành tinh từ `top: '0'` thành `top: '-Xrem'` (âm để đặt hành tinh ở phía trên quỹ đạo)
+  - Sử dụng `transform: 'translate(-50%, -50%)'` cho container quỹ đạo
+  - Đặt `origin-center` cho các container hành tinh để quay quanh tâm
+  - Mỗi hành tinh được định vị chính xác trên rìa quỹ đạo của nó
+  - Bảo đảm animation `animate-spin` hoạt động đúng với orbital motion thay vì linear motion
+
 ## 2025-01-16: Chuyển đổi thành AI Solar System thực tế
 - **Thay đổi**: Tạo mô phỏng hệ mặt trời thực tế với biểu tượng AI Brain làm trung tâm
 - **Files**: src/components/quiz/components/SolarSystemSpinner.tsx

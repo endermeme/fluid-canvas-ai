@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { Brain, Sun } from 'lucide-react';
+import { Brain } from 'lucide-react';
 
 const SolarSystemSpinner: React.FC = () => {
   return (
     <div className="relative mb-6 flex items-center justify-center">
-      {/* Realistic Solar System với AI Brain làm trung tâm */}
+      {/* AI Solar System với Brain làm trung tâm */}
       <div className="relative w-80 h-80">
         {/* Realistic orbit rings - khoảng cách không đều như hệ mặt trời thật */}
         {/* Mercury orbit */}
@@ -106,21 +106,18 @@ const SolarSystemSpinner: React.FC = () => {
         
         {/* Mercury - Nhỏ, xám, gần, nhanh nhất (88 ngày) */}
         <div 
-          className="absolute animate-spin" 
+          className="absolute w-20 h-20 animate-spin origin-center" 
           style={{ 
-            width: '80px',
-            height: '80px',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            animationDuration: '2s',
-            transformOrigin: '50% 50%'
+            animationDuration: '2s'
           }}
         >
           <div 
             className="absolute w-1.5 h-1.5 bg-gradient-to-r from-gray-300 to-gray-500 rounded-full shadow-sm" 
             style={{ 
-              top: '0',
+              top: '-0.375rem',
               left: '50%',
               transform: 'translateX(-50%)'
             }}
@@ -129,22 +126,21 @@ const SolarSystemSpinner: React.FC = () => {
         
         {/* Venus - Vàng nhạt, gần giống Earth (225 ngày) */}
         <div 
-          className="absolute animate-spin" 
+          className="absolute w-25 h-25 animate-spin origin-center" 
           style={{ 
-            width: '100px',
-            height: '100px',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
             animationDuration: '3.2s',
-            animationDirection: 'reverse', // Venus quay ngược
-            transformOrigin: '50% 50%'
+            animationDirection: 'reverse',
+            width: '100px',
+            height: '100px'
           }}
         >
           <div 
             className="absolute w-2.5 h-2.5 bg-gradient-to-r from-yellow-200 to-yellow-400 rounded-full shadow-md" 
             style={{ 
-              top: '0',
+              top: '-0.625rem',
               left: '50%',
               transform: 'translateX(-50%)'
             }}
@@ -153,21 +149,20 @@ const SolarSystemSpinner: React.FC = () => {
         
         {/* Earth - Xanh lam với đám mây (365 ngày) */}
         <div 
-          className="absolute animate-spin" 
+          className="absolute w-30 h-30 animate-spin origin-center" 
           style={{ 
-            width: '120px',
-            height: '120px',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
             animationDuration: '4s',
-            transformOrigin: '50% 50%'
+            width: '120px',
+            height: '120px'
           }}
         >
           <div 
             className="absolute w-3 h-3 bg-gradient-to-r from-blue-400 to-green-500 rounded-full shadow-lg relative" 
             style={{ 
-              top: '0',
+              top: '-0.75rem',
               left: '50%',
               transform: 'translateX(-50%)'
             }}
@@ -179,21 +174,20 @@ const SolarSystemSpinner: React.FC = () => {
         
         {/* Mars - Đỏ, nhỏ hơn Earth (687 ngày) */}
         <div 
-          className="absolute animate-spin" 
+          className="absolute w-37.5 h-37.5 animate-spin origin-center" 
           style={{ 
-            width: '150px',
-            height: '150px',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
             animationDuration: '5.5s',
-            transformOrigin: '50% 50%'
+            width: '150px',
+            height: '150px'
           }}
         >
           <div 
             className="absolute w-2 h-2 bg-gradient-to-r from-red-500 to-red-700 rounded-full shadow-md" 
             style={{ 
-              top: '0',
+              top: '-0.5rem',
               left: '50%',
               transform: 'translateX(-50%)'
             }}
@@ -202,21 +196,20 @@ const SolarSystemSpinner: React.FC = () => {
         
         {/* Jupiter - To nhất, nâu vàng (12 năm) */}
         <div 
-          className="absolute animate-spin" 
+          className="absolute w-50 h-50 animate-spin origin-center" 
           style={{ 
-            width: '200px',
-            height: '200px',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
             animationDuration: '8s',
-            transformOrigin: '50% 50%'
+            width: '200px',
+            height: '200px'
           }}
         >
           <div 
             className="absolute w-6 h-6 bg-gradient-to-r from-orange-300 via-yellow-500 to-orange-400 rounded-full shadow-xl" 
             style={{ 
-              top: '0',
+              top: '-1.5rem',
               left: '50%',
               transform: 'translateX(-50%)'
             }}
@@ -228,21 +221,20 @@ const SolarSystemSpinner: React.FC = () => {
         
         {/* Saturn - Vàng với vành đai (29 năm) */}
         <div 
-          className="absolute animate-spin" 
+          className="absolute w-60 h-60 animate-spin origin-center" 
           style={{ 
-            width: '240px',
-            height: '240px',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
             animationDuration: '12s',
-            transformOrigin: '50% 50%'
+            width: '240px',
+            height: '240px'
           }}
         >
           <div 
             className="absolute w-5 h-5 bg-gradient-to-r from-yellow-200 to-yellow-500 rounded-full shadow-lg relative" 
             style={{ 
-              top: '0',
+              top: '-1.25rem',
               left: '50%',
               transform: 'translateX(-50%)'
             }}
@@ -256,21 +248,20 @@ const SolarSystemSpinner: React.FC = () => {
         
         {/* Uranus - Xanh nhạt (84 năm) */}
         <div 
-          className="absolute animate-spin" 
+          className="absolute w-70 h-70 animate-spin origin-center" 
           style={{ 
-            width: '280px',
-            height: '280px',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
             animationDuration: '16s',
-            transformOrigin: '50% 50%'
+            width: '280px',
+            height: '280px'
           }}
         >
           <div 
             className="absolute w-3.5 h-3.5 bg-gradient-to-r from-cyan-300 to-cyan-500 rounded-full shadow-md" 
             style={{ 
-              top: '0',
+              top: '-0.875rem',
               left: '50%',
               transform: 'translateX(-50%)'
             }}
@@ -279,21 +270,20 @@ const SolarSystemSpinner: React.FC = () => {
         
         {/* Neptune - Xanh đậm, xa nhất (165 năm) */}
         <div 
-          className="absolute animate-spin" 
+          className="absolute w-80 h-80 animate-spin origin-center" 
           style={{ 
-            width: '320px',
-            height: '320px',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
             animationDuration: '20s',
-            transformOrigin: '50% 50%'
+            width: '320px',
+            height: '320px'
           }}
         >
           <div 
             className="absolute w-3 h-3 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full shadow-md opacity-90" 
             style={{ 
-              top: '0',
+              top: '-0.75rem',
               left: '50%',
               transform: 'translateX(-50%)'
             }}
