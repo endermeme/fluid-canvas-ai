@@ -12,6 +12,6 @@
 ### Đồng nhất background cho HomePage và PresetGamesPage
 - **File đã sửa**: `src/pages/HomePage.tsx`, `src/components/quiz/preset-games/PresetGamesPage.tsx`
 - **Loại thay đổi**: UI/UX - Đồng nhất thiết kế
-- **Mô tả**: Xóa background animation phức tạp, sử dụng background đơn giản y hệt CustomGameForm
-- **Lý do**: Tạo sự nhất quán trong thiết kế và giảm complexity
+- **Mô tả**: Copy background animation từ CustomGameForm sang HomePage và PresetGamesPage
+- **Lý do**: Tạo sự nhất quán với background khoa học có quantum particles và science icons
 
