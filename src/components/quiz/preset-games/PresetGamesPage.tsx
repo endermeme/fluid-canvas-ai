@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { BarChart3, History, Atom, FlaskConical, Microscope, TestTube, Telescope, Radiation, Calculator, Beaker, Dna } from 'lucide-react';
 import { motion } from 'framer-motion';
+import BackgroundParticles from '@/components/ui/background-particles';
 
 const PresetGamesPage: React.FC = () => {
   const [selectedGameType, setSelectedGameType] = useState<string | null>(null);
@@ -60,18 +61,8 @@ const PresetGamesPage: React.FC = () => {
     navigate('/game-history');
   };
 
-  // Quantum particles animation
-  const quantumParticles = Array.from({ length: 15 }, (_, i) => ({
-    id: i,
-    size: Math.random() * 10 + 3,
-    delay: Math.random() * 10,
-    duration: Math.random() * 20 + 10,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-  }));
-
-  // Science icons for background
-  const scienceIcons = [
+  // Science icons for background (stable positions)
+  const scienceIcons = React.useMemo(() => [
     { Icon: Atom, position: { top: '10%', left: '8%' }, rotation: 360, duration: 25 },
     { Icon: FlaskConical, position: { top: '20%', right: '10%' }, rotation: -180, duration: 30 },
     { Icon: Microscope, position: { bottom: '25%', left: '5%' }, rotation: 180, duration: 35 },
@@ -81,7 +72,7 @@ const PresetGamesPage: React.FC = () => {
     { Icon: Calculator, position: { bottom: '50%', right: '8%' }, rotation: 180, duration: 24 },
     { Icon: Beaker, position: { top: '75%', left: '25%' }, rotation: -360, duration: 29 },
     { Icon: Dna, position: { top: '30%', left: '88%' }, rotation: 360, duration: 31 },
-  ];
+  ], []);
 
   // Show loading screen initially to prevent flash
   if (isLoading) {
@@ -99,7 +90,7 @@ const PresetGamesPage: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col overflow-auto relative bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950">
-      {/* Quantum Background Animation */}
+      {/* Optimized Background Animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Neural Network Grid */}
         <div className="absolute inset-0 opacity-10">
@@ -116,30 +107,7 @@ const PresetGamesPage: React.FC = () => {
         </div>
 
         {/* Floating Quantum Particles */}
-        {quantumParticles.map((particle) => (
-          <motion.div
-            key={particle.id}
-            className="absolute rounded-full bg-gradient-to-r from-blue-400 to-sky-500 opacity-20"
-            style={{
-              width: particle.size,
-              height: particle.size,
-              left: `${particle.x}%`,
-              top: `${particle.y}%`,
-            }}
-            animate={{
-              x: [0, 100, -50, 80, 0],
-              y: [0, -80, 60, -40, 0],
-              scale: [1, 1.5, 0.8, 1.2, 1],
-              opacity: [0.2, 0.6, 0.3, 0.8, 0.2],
-            }}
-            transition={{
-              duration: particle.duration,
-              repeat: Infinity,
-              delay: particle.delay,
-              ease: "easeInOut"
-            }}
-          />
-        ))}
+        <BackgroundParticles particleCount={15} />
 
         {/* Science Icons Animation */}
         {scienceIcons.map((item, index) => (

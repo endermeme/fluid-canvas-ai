@@ -1,6 +1,19 @@
+
 # Quyết định thiết kế và sửa đổi
 
 ## Ngày 2025-01-16
+
+### Tối ưu hóa Animation Background và Loading Progress System
+- **File đã sửa**: `src/hooks/useLoadingProgress.ts`, `src/components/ui/background-particles.tsx`, `src/components/quiz/GameLoading.tsx`, `src/components/quiz/custom-games/CustomGameForm.tsx`, `src/pages/HomePage.tsx`, `src/components/quiz/preset-games/PresetGamesPage.tsx`
+- **Loại thay đổi**: UI/UX optimization - Background animation và loading system
+- **Mô tả**: 
+  - Tạo component `BackgroundParticles` tối ưu để tránh particles di chuyển loạn khi gõ phím
+  - Tạo hook `useLoadingProgress` để quản lý progress bar thông minh với các giai đoạn rõ ràng
+  - Cải thiện progress bar để không bị kẹt ở 98% và tránh hiển thị 101%
+  - Sử dụng `React.useMemo` để stable positions cho science icons và particles
+  - Progress bar hiện có animation mượt mà từng giai đoạn với thanh đếm phần trăm hiển thị chính xác
+  - Áp dụng tối ưu hóa cho cả 3 màn hình: HomePage, CustomGameForm, và PresetGamesPage
+- **Lý do**: Khắc phục vấn đề animation bị loạn khi user interaction và cải thiện trải nghiệm loading
 
 ### Khắc phục lỗi JavaScript trong Custom Game - Cải thiện phát hiện hàm thiếu
 - **File đã sửa**: `src/components/quiz/utils/iframe-enhancer.ts`, `src/components/quiz/utils/iframe-utils.ts`
