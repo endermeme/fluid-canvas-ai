@@ -27,6 +27,19 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
   
   const gameGenerator = AIGameGenerator.getInstance();
 
+  // Science icons for background (stable positions)
+  const scienceIcons = React.useMemo(() => [
+    { Icon: Atom, position: { top: '10%', left: '8%' }, rotation: 360, duration: 25 },
+    { Icon: FlaskConical, position: { top: '20%', right: '10%' }, rotation: -180, duration: 30 },
+    { Icon: Microscope, position: { bottom: '25%', left: '5%' }, rotation: 180, duration: 35 },
+    { Icon: TestTube, position: { top: '60%', right: '15%' }, rotation: -360, duration: 28 },
+    { Icon: Telescope, position: { bottom: '15%', right: '25%' }, rotation: 270, duration: 32 },
+    { Icon: Radiation, position: { top: '40%', left: '3%' }, rotation: -270, duration: 26 },
+    { Icon: Calculator, position: { bottom: '50%', right: '8%' }, rotation: 180, duration: 24 },
+    { Icon: Beaker, position: { top: '75%', left: '25%' }, rotation: -360, duration: 29 },
+    { Icon: Dna, position: { top: '30%', left: '88%' }, rotation: 360, duration: 31 },
+  ], []);
+
   const getPlaceholderText = () => {
     return 'Mô tả chi tiết game bạn muốn tạo. Hãy bao gồm thể loại game, giao diện, cách chơi và bất kỳ yêu cầu đặc biệt nào.\n\nVí dụ: "Tạo một trò chơi xếp hình với 9 mảnh ghép hình ảnh về vũ trụ, có âm thanh khi hoàn thành và hiệu ứng ngôi sao khi người chơi thắng."';
   };
@@ -82,22 +95,10 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({ onGenerate, onCancel })
     }
   };
 
+  // Check loading state after all hooks are called
   if (isGenerating) {
     return <GameLoading topic={content} />;
   }
-
-  // Science icons for background (stable positions)
-  const scienceIcons = React.useMemo(() => [
-    { Icon: Atom, position: { top: '10%', left: '8%' }, rotation: 360, duration: 25 },
-    { Icon: FlaskConical, position: { top: '20%', right: '10%' }, rotation: -180, duration: 30 },
-    { Icon: Microscope, position: { bottom: '25%', left: '5%' }, rotation: 180, duration: 35 },
-    { Icon: TestTube, position: { top: '60%', right: '15%' }, rotation: -360, duration: 28 },
-    { Icon: Telescope, position: { bottom: '15%', right: '25%' }, rotation: 270, duration: 32 },
-    { Icon: Radiation, position: { top: '40%', left: '3%' }, rotation: -270, duration: 26 },
-    { Icon: Calculator, position: { bottom: '50%', right: '8%' }, rotation: 180, duration: 24 },
-    { Icon: Beaker, position: { top: '75%', left: '25%' }, rotation: -360, duration: 29 },
-    { Icon: Dna, position: { top: '30%', left: '88%' }, rotation: 360, duration: 31 },
-  ], []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950 relative overflow-hidden">

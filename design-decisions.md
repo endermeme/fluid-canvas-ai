@@ -3,6 +3,15 @@
 
 ## Ngày 2025-01-16
 
+### Khắc phục lỗi React Hooks trong CustomGameForm
+- **File đã sửa**: `src/components/quiz/custom-games/CustomGameForm.tsx`
+- **Loại thay đổi**: Bug fix - React hooks order
+- **Mô tả**: 
+  - Di chuyển conditional return check của `isGenerating` xuống cuối component sau khi tất cả hooks đã được gọi
+  - Đảm bảo tất cả hooks (`useState`, `useToast`, `useNavigate`, `React.useMemo`) được gọi theo cùng thứ tự mỗi lần render
+  - Sửa lỗi "Rendered fewer hooks than expected" khi có early return statement
+- **Lý do**: React yêu cầu hooks phải được gọi theo cùng thứ tự trong mỗi lần render để tránh lỗi
+
 ### Tối ưu hóa Animation Background và Loading Progress System
 - **File đã sửa**: `src/hooks/useLoadingProgress.ts`, `src/components/ui/background-particles.tsx`, `src/components/quiz/GameLoading.tsx`, `src/components/quiz/custom-games/CustomGameForm.tsx`, `src/pages/HomePage.tsx`, `src/components/quiz/preset-games/PresetGamesPage.tsx`
 - **Loại thay đổi**: UI/UX optimization - Background animation và loading system
