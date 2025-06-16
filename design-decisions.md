@@ -1,8 +1,18 @@
 
-
 # Quyết định thiết kế và sửa đổi
 
 ## Ngày 2025-01-16
+
+### Cải thiện cơ chế xử lý lỗi JavaScript trong Custom Game
+- **File đã sửa**: `src/components/quiz/utils/iframe-enhancer.ts`, `src/components/quiz/utils/iframe-utils.ts`
+- **Loại thay đổi**: Bug fix - Error handling
+- **Mô tả**: 
+  - Thêm hàm `fixJavaScriptErrors()` để tự động phát hiện và sửa các hàm JavaScript thiếu
+  - Tự động tạo stub functions cho các hàm được gọi nhưng chưa được định nghĩa (như drawObstacles, drawCars)
+  - Cải thiện error handling trong iframe với window.addEventListener('error')
+  - Thêm xử lý unhandled promise rejections
+  - Tăng cường logging để debug dễ dàng hơn
+- **Lý do**: Khắc phục lỗi "drawObstacles is not defined" và các lỗi JavaScript tương tự khi AI tạo game không hoàn chỉnh
 
 ### Cải thiện cấu trúc Database Supabase
 - **File đã sửa**: Database constraints và relationships
@@ -51,4 +61,3 @@
 - **Loại thay đổi**: Cải thiện game logic
 - **Mô tả**: Chỉ tìm kiếm từ theo hướng thuận (trái sang phải, trên xuống dưới), loại bỏ tìm kiếm từ ngược
 - **Lý do**: Đơn giản hóa trò chơi và giảm nhầm lẫn cho người chơi
-
