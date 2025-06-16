@@ -106,3 +106,21 @@
 - Game tìm từ có độ khó đa dạng phù hợp mọi lứa tuổi
 - Từ được đặt ở nhiều vị trí và hướng khác nhau
 - Trải nghiệm chơi thú vị và thách thức hơn
+
+## PresetGamesPage - Sửa lỗi màn hình đen khi reload
+
+### Thay đổi thực hiện:
+- **File sửa đổi**: `src/components/quiz/preset-games/PresetGamesPage.tsx`
+- **Loại thay đổi**: Bug Fix - Animation Loading
+
+### Chi tiết:
+1. **Thêm loading state**: Ngăn render animation trước khi component mount
+2. **Loading screen**: Hiển thị spinner khi đang tải trang
+3. **Animation timing**: Thêm delay cho các animation để tránh flash
+4. **SVG optimization**: Thêm preserveAspectRatio cho neural grid
+5. **Initial states**: Đặt opacity ban đầu cho các element animation
+
+### Kết quả:
+- Không còn xuất hiện vùng đen khi reload trang
+- Animation khởi động mượt mà hơn
+- Trải nghiệm người dùng tốt hơn khi tải trang
