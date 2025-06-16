@@ -30,3 +30,27 @@
 - Giao diện có tông màu xanh da trời tươi sáng, dễ nhìn
 - Background science có nhiều biểu tượng khoa học hơn
 - Animation mượt mà với theme giáo dục khoa học
+
+## CustomGameForm - Cập nhật giao diện đồng nhất
+
+### Thay đổi thực hiện:
+- **File sửa đổi**: `src/components/quiz/custom-games/CustomGameForm.tsx`
+- **Loại thay đổi**: UI/UX - Đồng nhất thiết kế
+
+### Chi tiết:
+1. **Background animation**: Thêm quantum particles và science icons giống HomePage
+2. **Tông màu**: Áp dụng theme xanh da trời đồng nhất
+3. **Card design**: Cải thiện với backdrop blur và gradient
+4. **Animation**: Thêm floating particles và rotating science icons
+
+## EnhancedGameView - Cập nhật giao diện
+
+### Thay đổi thực hiện:
+- **File sửa đổi**: `src/components/quiz/custom-games/EnhancedGameView.tsx`
+- **Loại thay đổi**: UI/UX - Đồng nhất thiết kế
+
+### Chi tiết:
+1. **Background**: Thêm gradient xanh da trời
+2. **Card styling**: Cải thiện với border và shadow
+3. **Layout**: Padding và spacing đồng nhất
+

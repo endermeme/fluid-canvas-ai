@@ -49,7 +49,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   } = useIframeManager(miniGame, onReload, gameExpired);
 
   return (
-    <div className={`w-full h-full flex flex-col bg-gradient-to-b from-background to-background/95 ${className || ''}`}>
+    <div className={`w-full h-full flex flex-col bg-gradient-to-br from-blue-50/80 via-sky-50/80 to-blue-100/80 dark:from-blue-950/80 dark:via-sky-950/80 dark:to-blue-950/80 ${className || ''}`}>
       {!hideHeader && (
         <CustomGameHeader
           onBack={onBack}
@@ -71,7 +71,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
             onRetry={refreshGame} 
           />
         ) : (
-          <Card className="relative w-full h-full overflow-hidden shadow-lg border-primary/10">
+          <Card className="relative w-full h-full overflow-hidden shadow-xl border-2 border-blue-200/40 dark:border-blue-700/40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
             {!isIframeLoaded && (
               <GameLoadingIndicator 
                 progress={loadingProgress}
