@@ -3,6 +3,17 @@
 
 ## Ngày 2025-01-16
 
+### Cải thiện Header Layout và UI - Loại bỏ nút quay lại thừa
+- **File đã sửa**: `src/components/quiz/preset-games/PresetGameHeader.tsx`, `src/components/quiz/components/GameHeader.tsx`, `src/components/quiz/custom-games/ui/CustomGameHeader.tsx`, `src/components/quiz/QuizHeader.tsx`
+- **Loại thay đổi**: UI/UX optimization - Header layout
+- **Mô tả**: 
+  - Thêm prop `showBackButton` cho tất cả header components để kiểm soát hiển thị nút quay lại
+  - Tăng padding và size của header elements để giao diện to hơn và căn giữa tốt hơn
+  - Cải thiện spacing và layout để tránh giao diện thiên lên trên
+  - Tăng size của buttons và icons trong header để dễ tương tác hơn
+  - Thêm placeholder div trong PresetGameHeader để giữ layout justify-between khi ẩn nút quay lại
+- **Lý do**: Cải thiện UX bằng cách loại bỏ nút quay lại thừa trong các template và làm giao diện cân đối hơn
+
 ### Cải thiện Loading Progress - Chế độ dự đoán
 - **File đã sửa**: `src/hooks/useLoadingProgress.ts`, `src/components/quiz/GameLoading.tsx`
 - **Loại thay đổi**: Enhancement - Predictive loading progress
