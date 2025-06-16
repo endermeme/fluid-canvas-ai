@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Gamepad, SparklesIcon, History, Share2, Zap, Atom, FlaskConical, Microscope, TestTube, Telescope, Radiation, Calculator, Beaker, Dna } from 'lucide-react';
+import { Gamepad, SparklesIcon, History, Share2, Zap, Atom } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const HomePage: React.FC = () => {
@@ -58,154 +58,8 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const quantumParticles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    size: Math.random() * 12 + 4,
-    delay: Math.random() * 15,
-    duration: Math.random() * 25 + 15,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-  }));
-
-  // Tăng visibility và số lượng science icons
-  const scienceIcons = [
-    { Icon: Atom, position: { top: '8%', left: '12%' }, rotation: 360, duration: 28, size: 'w-20 h-20' },
-    { Icon: FlaskConical, position: { top: '15%', right: '8%' }, rotation: -180, duration: 32, size: 'w-18 h-18' },
-    { Icon: Microscope, position: { bottom: '20%', left: '6%' }, rotation: 180, duration: 38, size: 'w-16 h-16' },
-    { Icon: TestTube, position: { top: '55%', right: '12%' }, rotation: -360, duration: 30, size: 'w-14 h-14' },
-    { Icon: Telescope, position: { bottom: '12%', right: '20%' }, rotation: 270, duration: 35, size: 'w-22 h-22' },
-    { Icon: Radiation, position: { top: '35%', left: '4%' }, rotation: -270, duration: 29, size: 'w-16 h-16' },
-    { Icon: Calculator, position: { bottom: '45%', right: '4%' }, rotation: 180, duration: 26, size: 'w-14 h-14' },
-    { Icon: Beaker, position: { top: '70%', left: '20%' }, rotation: -360, duration: 31, size: 'w-18 h-18' },
-    { Icon: Dna, position: { top: '25%', left: '85%' }, rotation: 360, duration: 33, size: 'w-20 h-20' },
-    { Icon: Atom, position: { bottom: '60%', right: '25%' }, rotation: -180, duration: 27, size: 'w-16 h-16' },
-    { Icon: FlaskConical, position: { top: '80%', left: '30%' }, rotation: 270, duration: 34, size: 'w-14 h-14' },
-    { Icon: Microscope, position: { top: '45%', right: '30%' }, rotation: -270, duration: 36, size: 'w-18 h-18' },
-    { Icon: TestTube, position: { bottom: '30%', left: '40%' }, rotation: 180, duration: 25, size: 'w-16 h-16' },
-    { Icon: Telescope, position: { top: '60%', left: '70%' }, rotation: -360, duration: 29, size: 'w-20 h-20' },
-    { Icon: Radiation, position: { bottom: '75%', right: '40%' }, rotation: 360, duration: 32, size: 'w-14 h-14' },
-    // Thêm các icon mới để tăng mật độ
-    { Icon: Calculator, position: { top: '50%', left: '50%' }, rotation: 360, duration: 30, size: 'w-16 h-16' },
-    { Icon: Beaker, position: { top: '30%', right: '50%' }, rotation: -180, duration: 28, size: 'w-18 h-18' },
-    { Icon: Dna, position: { bottom: '40%', left: '80%' }, rotation: 270, duration: 35, size: 'w-20 h-20' },
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950 relative overflow-hidden">
-      {/* Quantum Background Animation */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Neural Network Grid */}
-        <div className="absolute inset-0 opacity-15">
-          <svg className="w-full h-full" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <pattern id="neural-grid" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-                <circle cx="50" cy="50" r="2" fill="currentColor" className="text-blue-500" />
-                <line x1="50" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
-                <line x1="50" y1="50" x2="50" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#neural-grid)" />
-          </svg>
-        </div>
-
-        {/* Floating Quantum Particles */}
-        {quantumParticles.map((particle) => (
-          <motion.div
-            key={particle.id}
-            className="absolute rounded-full bg-gradient-to-r from-blue-400 to-sky-500 opacity-40"
-            style={{
-              width: particle.size,
-              height: particle.size,
-              left: `${particle.x}%`,
-              top: `${particle.y}%`,
-            }}
-            initial={{ opacity: 0 }}
-            animate={{
-              x: [0, 150, -80, 100, 0],
-              y: [0, -120, 100, -80, 0],
-              scale: [1, 2, 0.5, 1.6, 1],
-              opacity: [0.4, 0.9, 0.2, 1, 0.4],
-            }}
-            transition={{
-              duration: particle.duration,
-              repeat: Infinity,
-              delay: particle.delay,
-              ease: "easeInOut"
-            }}
-          />
-        ))}
-
-        {/* Science Icons Animation - Tăng visibility */}
-        {scienceIcons.map((item, index) => (
-          <motion.div
-            key={index}
-            className="absolute opacity-20 z-10"
-            style={item.position}
-            initial={{ opacity: 0, rotate: 0, scale: 0.5 }}
-            animate={{
-              rotate: item.rotation,
-              opacity: 0.25,
-              scale: 1,
-            }}
-            transition={{
-              duration: item.duration,
-              repeat: Infinity,
-              ease: "linear",
-              delay: 0.2 + index * 0.1
-            }}
-          >
-            <item.Icon className={`${item.size} text-blue-500/40 drop-shadow-sm`} />
-          </motion.div>
-        ))}
-
-        {/* Pulsing Energy Waves */}
-        {[...Array(5)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute top-1/2 left-1/2 w-96 h-96 border border-blue-300/40 rounded-full"
-            style={{
-              transform: 'translate(-50%, -50%)',
-            }}
-            initial={{ scale: 1, opacity: 0 }}
-            animate={{
-              scale: [1, 4, 1],
-              opacity: [0.6, 0, 0.6],
-            }}
-            transition={{
-              duration: 12,
-              repeat: Infinity,
-              delay: i * 2.4 + 1,
-              ease: "easeInOut"
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Quantum Learning Text Background */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
-        <motion.h1 
-          className="text-[8rem] md:text-[12rem] lg:text-[16rem] font-bold text-transparent bg-gradient-to-r from-blue-200/30 to-sky-200/30 bg-clip-text whitespace-nowrap"
-          initial={{ opacity: 0 }}
-          animate={{
-            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-            opacity: 1,
-          }}
-          transition={{
-            backgroundPosition: {
-              duration: 20,
-              repeat: Infinity,
-              ease: "linear"
-            },
-            opacity: {
-              duration: 2,
-              delay: 0.5
-            }
-          }}
-        >
-          Học cùng AI
-        </motion.h1>
-      </div>
-
       <motion.div 
         className="relative z-10 min-h-screen flex items-center justify-center p-6"
         variants={containerVariants}
@@ -281,7 +135,6 @@ const HomePage: React.FC = () => {
                   className="h-full"
                 >
                   <Card className="p-10 h-full bg-gradient-to-br from-white/80 to-blue-50/80 dark:from-slate-800/80 dark:to-blue-950/80 border-2 border-blue-200/50 dark:border-blue-700/50 backdrop-blur-sm shadow-xl group relative overflow-hidden">
-                    {/* Card Background Effects */}
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-sky-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <div className="absolute -right-20 -top-20 w-40 h-40 bg-blue-400/10 rounded-full transform group-hover:scale-150 transition-transform duration-700"></div>
                     
@@ -318,7 +171,6 @@ const HomePage: React.FC = () => {
                   className="h-full"
                 >
                   <Card className="p-10 h-full bg-gradient-to-br from-white/80 to-sky-50/80 dark:from-slate-800/80 dark:to-sky-950/80 border-2 border-sky-200/50 dark:border-sky-700/50 backdrop-blur-sm shadow-xl group relative overflow-hidden">
-                    {/* Card Background Effects */}
                     <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <div className="absolute -right-20 -top-20 w-40 h-40 bg-sky-400/10 rounded-full transform group-hover:scale-150 transition-transform duration-700"></div>
                     

@@ -9,9 +9,9 @@
 - **Mô tả**: Thiết kế nút quay lại thành dạng thẻ với biểu tượng cánh cửa thay vì nút ghost đơn giản
 - **Lý do**: Tăng tính nhận diện và thẩm mỹ cho giao diện
 
-### Khắc phục hiển thị icon khoa học trên HomePage
-- **File cần kiểm tra**: `src/pages/HomePage.tsx`
-- **Vấn đề**: User không thấy các icon khoa học hiển thị trên trang chủ
-- **Loại thay đổi**: Bug Fix - UI Animation
-- **Mô tả**: Cần đảm bảo các science icons được render và hiển thị đúng cách
+### Đồng nhất background cho HomePage và PresetGamesPage
+- **File đã sửa**: `src/pages/HomePage.tsx`, `src/components/quiz/preset-games/PresetGamesPage.tsx`
+- **Loại thay đổi**: UI/UX - Đồng nhất thiết kế
+- **Mô tả**: Xóa background animation phức tạp, sử dụng background đơn giản y hệt CustomGameForm
+- **Lý do**: Tạo sự nhất quán trong thiết kế và giảm complexity
 
