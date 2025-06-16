@@ -2,7 +2,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, History, Plus, Share2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { DoorOpen, History, Plus, Share2 } from "lucide-react";
 
 interface PresetGameHeaderProps {
   onShare?: () => void;
@@ -29,14 +30,15 @@ const PresetGameHeader: React.FC<PresetGameHeaderProps> = ({
 
   return (
     <header className="flex justify-between items-center p-3 bg-background/80 backdrop-blur-md border-b sticky top-0 z-20">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="hover:bg-primary/10"
+      <Card 
+        className="p-2 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 hover:from-primary/15 hover:to-primary/10 transition-all duration-200 cursor-pointer hover:shadow-md"
         onClick={handleBack}
       >
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
+        <div className="flex items-center gap-2">
+          <DoorOpen className="h-5 w-5 text-primary" />
+          <span className="text-sm font-medium text-primary">Quay lại</span>
+        </div>
+      </Card>
 
       <div className="flex gap-2">
         <Button
