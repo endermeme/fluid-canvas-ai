@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Gamepad, SparklesIcon, History, Share2 } from 'lucide-react';
+import { Gamepad, SparklesIcon, History, Share2, Brain, Zap, Atom } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const HomePage: React.FC = () => {
@@ -34,7 +34,7 @@ const HomePage: React.FC = () => {
   const cardVariants = {
     hover: {
       scale: 1.03,
-      boxShadow: "0 20px 30px rgba(0,0,0,0.1)",
+      boxShadow: "0 25px 50px rgba(0,0,0,0.15)",
       transition: {
         type: "spring",
         stiffness: 300,
@@ -58,174 +58,329 @@ const HomePage: React.FC = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background p-4 relative overflow-hidden">
-      {/* Background text */}
-      <div className="absolute inset-0 flex items-center justify-center -z-10 select-none pointer-events-none">
-        <h1 className="text-[12rem] md:text-[16rem] font-bold text-primary/5 whitespace-nowrap">
-          Học cùng AI
-        </h1>
-      </div>
+  const quantumParticles = Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    size: Math.random() * 8 + 4,
+    delay: Math.random() * 10,
+    duration: Math.random() * 15 + 10,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+  }));
 
-      {/* Background floating shapes */}
-      <div className="absolute inset-0 -z-20 overflow-hidden">
-        {[...Array(5)].map((_, i) => (
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950 relative overflow-hidden">
+      {/* Quantum Background Animation */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Neural Network Grid */}
+        <div className="absolute inset-0 opacity-10">
+          <svg className="w-full h-full" viewBox="0 0 1000 1000">
+            <defs>
+              <pattern id="neural-grid" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                <circle cx="50" cy="50" r="2" fill="currentColor" className="text-blue-500" />
+                <line x1="50" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
+                <line x1="50" y1="50" x2="50" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#neural-grid)" />
+          </svg>
+        </div>
+
+        {/* Floating Quantum Particles */}
+        {quantumParticles.map((particle) => (
           <motion.div
-            key={i}
-            className="absolute w-64 h-64 bg-primary/5 rounded-full"
+            key={particle.id}
+            className="absolute rounded-full bg-gradient-to-r from-blue-400 to-purple-500 opacity-20"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              width: particle.size,
+              height: particle.size,
+              left: `${particle.x}%`,
+              top: `${particle.y}%`,
             }}
             animate={{
-              y: [0, -30, 0],
-              x: [0, 20, 0],
-              scale: [1, 1.1, 1],
+              x: [0, 100, -50, 50, 0],
+              y: [0, -80, 60, -40, 0],
+              scale: [1, 1.5, 0.8, 1.2, 1],
+              opacity: [0.2, 0.6, 0.3, 0.8, 0.2],
             }}
             transition={{
-              duration: 8,
+              duration: particle.duration,
               repeat: Infinity,
-              delay: i * 1.5,
+              delay: particle.delay,
               ease: "easeInOut"
             }}
           />
         ))}
+
+        {/* Pulsing Energy Waves */}
+        {[...Array(3)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute top-1/2 left-1/2 w-96 h-96 border border-blue-300/20 rounded-full"
+            style={{
+              transform: 'translate(-50%, -50%)',
+            }}
+            animate={{
+              scale: [1, 2.5, 1],
+              opacity: [0.3, 0, 0.3],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              delay: i * 2.5,
+              ease: "easeInOut"
+            }}
+          />
+        ))}
+
+        {/* Brain Synapses Animation */}
+        <motion.div
+          className="absolute top-20 right-20 opacity-10"
+          animate={{
+            rotate: 360,
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        >
+          <Brain className="w-32 h-32 text-purple-500" />
+        </motion.div>
+
+        <motion.div
+          className="absolute bottom-20 left-20 opacity-10"
+          animate={{
+            rotate: -360,
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        >
+          <Atom className="w-28 h-28 text-blue-500" />
+        </motion.div>
+      </div>
+
+      {/* Quantum Learning Text Background */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
+        <motion.h1 
+          className="text-[8rem] md:text-[12rem] lg:text-[16rem] font-bold text-transparent bg-gradient-to-r from-blue-200/20 to-purple-200/20 bg-clip-text whitespace-nowrap"
+          animate={{
+            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        >
+          Học cùng AI
+        </motion.h1>
       </div>
 
       <motion.div 
-        className="w-full max-w-4xl mx-auto"
+        className="relative z-10 min-h-screen flex items-center justify-center p-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <motion.header 
-          className="text-center mb-12"
-          variants={itemVariants}
-        >
-          <motion.h1 
-            className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-4"
-            animate={{
-              backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          >
-            AI Game Creator
-          </motion.h1>
-          <motion.p 
-            className="text-xl text-muted-foreground"
+        <div className="w-full max-w-6xl mx-auto">
+          <motion.header 
+            className="text-center mb-16"
             variants={itemVariants}
           >
-            Tạo trò chơi tương tác bằng trí tuệ nhân tạo
-          </motion.p>
-        </motion.header>
-        
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" 
-          variants={containerVariants}
-        >
-          <motion.div variants={itemVariants}>
-            <Link to="/custom-game" className="block">
-              <motion.div
-                variants={cardVariants}
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <Card className="p-8 h-full bg-gradient-to-br from-background to-primary/5 border-2 border-primary/20 overflow-hidden group relative">
-                  <div className="absolute -right-16 -top-16 w-32 h-32 bg-primary/10 rounded-full transform group-hover:scale-150 transition-transform duration-500"></div>
-                  <div className="relative z-10 flex flex-col items-center text-center gap-6">
-                    <motion.div 
-                      className="p-4 bg-primary/10 rounded-full"
-                      variants={iconVariants}
-                      whileHover="hover"
-                    >
-                      <SparklesIcon className="h-12 w-12 text-primary" />
-                    </motion.div>
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2">Tạo Game HTML</h3>
-                      <p className="text-muted-foreground">
-                        Sử dụng Gemini Flash để tạo game tương tác ngay lập tức
-                      </p>
-                    </div>
-                    <Button variant="default" size="lg" className="w-full mt-4 group-hover:shadow-lg transition-all">
-                      Bắt đầu tạo
-                    </Button>
-                  </div>
-                </Card>
-              </motion.div>
-            </Link>
-          </motion.div>
-
-          <motion.div variants={itemVariants}>
-            <Link to="/preset-games" className="block">
-              <motion.div
-                variants={cardVariants}
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <Card className="p-8 h-full bg-gradient-to-br from-background to-primary/5 border-2 border-primary/20 overflow-hidden group relative">
-                  <div className="absolute -right-16 -top-16 w-32 h-32 bg-primary/10 rounded-full transform group-hover:scale-150 transition-transform duration-500"></div>
-                  <div className="relative z-10 flex flex-col items-center text-center gap-6">
-                    <motion.div 
-                      className="p-4 bg-primary/10 rounded-full"
-                      variants={iconVariants}
-                      whileHover="hover"
-                    >
-                      <Gamepad className="h-12 w-12 text-primary" />
-                    </motion.div>
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2">Trò Chơi Có Sẵn</h3>
-                      <p className="text-muted-foreground">
-                        Sử dụng Gemini Pro để tạo trò chơi theo mẫu có sẵn
-                      </p>
-                    </div>
-                    <Button variant="outline" size="lg" className="w-full mt-4 group-hover:shadow-lg transition-all">
-                      Xem trò chơi
-                    </Button>
-                  </div>
-                </Card>
-              </motion.div>
-            </Link>
-          </motion.div>
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <Link to="/game-history">
             <motion.div
-              variants={cardVariants}
-              whileHover="hover"
-              whileTap="tap"
+              className="flex items-center justify-center mb-6"
+              whileHover={{ scale: 1.05 }}
             >
-              <Card className="p-6 border border-primary/20 overflow-hidden relative bg-gradient-to-r hover:from-primary/5">
-                <div className="flex items-center gap-4">
-                  <motion.div 
-                    className="p-3 bg-primary/10 rounded-full"
-                    variants={iconVariants}
-                    whileHover="hover"
-                  >
-                    <History className="h-6 w-6 text-primary" />
-                  </motion.div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg">Lịch Sử Game</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Xem và quản lý các trò chơi đã tạo
-                    </p>
-                  </div>
-                </div>
-              </Card>
+              <motion.div
+                animate={{
+                  rotate: [0, 10, -10, 0],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <Zap className="h-16 w-16 text-blue-500 mr-4" />
+              </motion.div>
+              <motion.h1 
+                className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent"
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              >
+                AI Game Creator
+              </motion.h1>
+              <motion.div
+                animate={{
+                  rotate: [0, -10, 10, 0],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 2
+                }}
+              >
+                <Brain className="h-16 w-16 text-purple-500 ml-4" />
+              </motion.div>
             </motion.div>
-          </Link>
-        </motion.div>
-        
-        <motion.footer 
-          className="mt-12 text-center text-muted-foreground text-sm"
-          variants={itemVariants}
-        >
-          <p>© {new Date().getFullYear()} AI Game Creator | Powered by Gemini AI</p>
-        </motion.footer>
+            <motion.p 
+              className="text-2xl text-slate-600 dark:text-slate-300 font-medium"
+              variants={itemVariants}
+            >
+              Khám phá học tập tương tác với sức mạnh trí tuệ nhân tạo
+            </motion.p>
+          </motion.header>
+          
+          <motion.div 
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12" 
+            variants={containerVariants}
+          >
+            <motion.div variants={itemVariants}>
+              <Link to="/custom-game" className="block h-full">
+                <motion.div
+                  variants={cardVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                  className="h-full"
+                >
+                  <Card className="p-10 h-full bg-gradient-to-br from-white/80 to-blue-50/80 dark:from-slate-800/80 dark:to-blue-950/80 border-2 border-blue-200/50 dark:border-blue-700/50 backdrop-blur-sm shadow-xl group relative overflow-hidden">
+                    {/* Card Background Effects */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div className="absolute -right-20 -top-20 w-40 h-40 bg-blue-400/10 rounded-full transform group-hover:scale-150 transition-transform duration-700"></div>
+                    
+                    <div className="relative z-10 flex flex-col items-center text-center gap-8 h-full">
+                      <motion.div 
+                        className="p-6 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 rounded-full shadow-lg"
+                        variants={iconVariants}
+                        whileHover="hover"
+                      >
+                        <SparklesIcon className="h-16 w-16 text-blue-600 dark:text-blue-400" />
+                      </motion.div>
+                      <div className="flex-1">
+                        <h3 className="text-3xl font-bold mb-4 text-slate-800 dark:text-slate-100">Tạo Game HTML</h3>
+                        <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
+                          Sử dụng Gemini Flash để tạo game tương tác ngay lập tức với công nghệ AI tiên tiến
+                        </p>
+                      </div>
+                      <Button variant="default" size="lg" className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg group-hover:shadow-xl transition-all">
+                        <Zap className="h-5 w-5 mr-2" />
+                        Bắt đầu tạo
+                      </Button>
+                    </div>
+                  </Card>
+                </motion.div>
+              </Link>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <Link to="/preset-games" className="block h-full">
+                <motion.div
+                  variants={cardVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                  className="h-full"
+                >
+                  <Card className="p-10 h-full bg-gradient-to-br from-white/80 to-purple-50/80 dark:from-slate-800/80 dark:to-purple-950/80 border-2 border-purple-200/50 dark:border-purple-700/50 backdrop-blur-sm shadow-xl group relative overflow-hidden">
+                    {/* Card Background Effects */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div className="absolute -right-20 -top-20 w-40 h-40 bg-purple-400/10 rounded-full transform group-hover:scale-150 transition-transform duration-700"></div>
+                    
+                    <div className="relative z-10 flex flex-col items-center text-center gap-8 h-full">
+                      <motion.div 
+                        className="p-6 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 rounded-full shadow-lg"
+                        variants={iconVariants}
+                        whileHover="hover"
+                      >
+                        <Gamepad className="h-16 w-16 text-purple-600 dark:text-purple-400" />
+                      </motion.div>
+                      <div className="flex-1">
+                        <h3 className="text-3xl font-bold mb-4 text-slate-800 dark:text-slate-100">Trò Chơi Có Sẵn</h3>
+                        <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
+                          Sử dụng Gemini Pro để tạo trò chơi theo mẫu có sẵn với nhiều thể loại phong phú
+                        </p>
+                      </div>
+                      <Button variant="outline" size="lg" className="w-full py-4 text-lg font-semibold border-2 border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300 dark:hover:bg-purple-950/50 shadow-lg group-hover:shadow-xl transition-all">
+                        <Brain className="h-5 w-5 mr-2" />
+                        Xem trò chơi
+                      </Button>
+                    </div>
+                  </Card>
+                </motion.div>
+              </Link>
+            </motion.div>
+          </motion.div>
+
+          <motion.div variants={itemVariants} className="flex justify-center">
+            <Link to="/game-history" className="w-full max-w-2xl">
+              <motion.div
+                variants={cardVariants}
+                whileHover="hover"
+                whileTap="tap"
+              >
+                <Card className="p-8 border-2 border-indigo-200/50 dark:border-indigo-700/50 bg-gradient-to-r from-white/80 to-indigo-50/80 dark:from-slate-800/80 dark:to-indigo-950/80 backdrop-blur-sm shadow-xl group relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  <div className="relative z-10 flex items-center gap-6">
+                    <motion.div 
+                      className="p-4 bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900/50 dark:to-blue-900/50 rounded-full shadow-lg"
+                      variants={iconVariants}
+                      whileHover="hover"
+                    >
+                      <History className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+                    </motion.div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-2xl mb-2 text-slate-800 dark:text-slate-100">Lịch Sử Game</h3>
+                      <p className="text-slate-600 dark:text-slate-300 text-lg">
+                        Xem và quản lý các trò chơi đã tạo, theo dõi tiến trình học tập
+                      </p>
+                    </div>
+                    <motion.div
+                      animate={{
+                        x: [0, 5, 0],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <Share2 className="h-6 w-6 text-indigo-500 dark:text-indigo-400" />
+                    </motion.div>
+                  </div>
+                </Card>
+              </motion.div>
+            </Link>
+          </motion.div>
+          
+          <motion.footer 
+            className="mt-16 text-center text-slate-500 dark:text-slate-400"
+            variants={itemVariants}
+          >
+            <motion.p 
+              className="text-lg font-medium"
+              animate={{
+                opacity: [0.7, 1, 0.7],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              © {new Date().getFullYear()} AI Game Creator | Powered by Quantum Learning & Gemini AI
+            </motion.p>
+          </motion.footer>
+        </div>
       </motion.div>
     </div>
   );
