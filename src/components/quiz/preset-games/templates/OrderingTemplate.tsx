@@ -1,361 +1,351 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Check, RotateCcw, Eye, EyeOff, Timer, Trophy, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, ArrowUp, ArrowDown, Check, Clock, Shuffle, Lightbulb, ArrowLeft } from 'lucide-react';
+import { orderingSampleData } from '../data/orderingSampleData';
 
 interface OrderingTemplateProps {
-  content: any;
-  topic: string;
-  onBack?: () => void;
+  data?: any;
+  onComplete?: (score: number) => void;
 }
 
-const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onBack }) => {
-  const [currentSentence, setCurrentSentence] = useState(0);
-  const [shuffledWords, setShuffledWords] = useState<string[]>([]);
-  const [orderedWords, setOrderedWords] = useState<string[]>([]);
+interface DraggedWord {
+  word: string;
+  originalIndex: number;
+}
+
+const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ 
+  data = orderingSampleData, 
+  onComplete 
+}) => {
+  const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
+  const [arrangedWords, setArrangedWords] = useState<string[]>([]);
+  const [availableWords, setAvailableWords] = useState<string[]>([]);
   const [score, setScore] = useState(0);
-  const [showResult, setShowResult] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(content?.settings?.timeLimit || 180);
-  const [timerRunning, setTimerRunning] = useState(true);
-  const [isChecking, setIsChecking] = useState(false);
-  const [hasShownHint, setHasShownHint] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [gameCompleted, setGameCompleted] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const [draggedWord, setDraggedWord] = useState<DraggedWord | null>(null);
+  const [timeLeft, setTimeLeft] = useState(data.settings?.timeLimit || 180);
+  const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
-  const sentences = content?.sentences || [];
-  const isLastSentence = currentSentence === sentences.length - 1;
+  const currentSentence = useMemo(() => 
+    data.sentences[currentSentenceIndex], 
+    [data.sentences, currentSentenceIndex]
+  );
 
-  useEffect(() => {
-    if (sentences[currentSentence]) {
-      const currentWords = [...sentences[currentSentence].words];
-      const shuffled = [...currentWords].sort(() => Math.random() - 0.5);
-      setShuffledWords(shuffled);
-      setOrderedWords([]);
-      setIsChecking(false);
-      setHasShownHint(false);
-    }
-  }, [currentSentence, sentences]);
+  const progress = useMemo(() => 
+    ((currentSentenceIndex + (arrangedWords.length === currentSentence?.words.length ? 1 : 0)) / data.sentences.length) * 100,
+    [currentSentenceIndex, arrangedWords.length, currentSentence?.words.length, data.sentences.length]
+  );
 
-  useEffect(() => {
-    if (timeLeft > 0 && timerRunning) {
-      const timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1);
-      }, 1000);
-      
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && timerRunning) {
-      setTimerRunning(false);
-      setShowResult(true);
-      toast({
-        title: "Hết thời gian!",
-        description: "Bạn đã hết thời gian làm bài.",
-        variant: "destructive",
+  // Timer effect
+  React.useEffect(() => {
+    if (!gameStarted || gameCompleted || timeLeft <= 0) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          setGameCompleted(true);
+          onComplete?.(score);
+          return 0;
+        }
+        return prev - 1;
       });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [gameStarted, gameCompleted, timeLeft, score, onComplete]);
+
+  // Initialize current sentence
+  React.useEffect(() => {
+    if (currentSentence) {
+      const shuffled = [...currentSentence.words].sort(() => Math.random() - 0.5);
+      setAvailableWords(shuffled);
+      setArrangedWords([]);
+      setShowHint(false);
     }
-  }, [timeLeft, timerRunning, toast]);
+  }, [currentSentence]);
 
-  const handleWordSelect = (word: string, index: number) => {
-    if (isChecking) return;
-    
-    const newShuffled = [...shuffledWords];
-    newShuffled.splice(index, 1);
-    setShuffledWords(newShuffled);
-    
-    setOrderedWords([...orderedWords, word]);
-  };
+  const startGame = useCallback(() => {
+    setGameStarted(true);
+  }, []);
 
-  const handleWordRemove = (word: string, index: number) => {
-    if (isChecking) return;
-    
-    const newOrdered = [...orderedWords];
-    newOrdered.splice(index, 1);
-    setOrderedWords(newOrdered);
-    
-    setShuffledWords([...shuffledWords, word]);
-  };
+  const handleWordDragStart = useCallback((word: string, originalIndex: number) => {
+    setDraggedWord({ word, originalIndex });
+  }, []);
 
-  const handleShuffleWords = () => {
-    if (isChecking || shuffledWords.length === 0) return;
-    
-    setShuffledWords([...shuffledWords].sort(() => Math.random() - 0.5));
-  };
+  const handleWordDrop = useCallback((targetIndex: number, isArrangedArea: boolean) => {
+    if (!draggedWord) return;
 
-  const handleCheck = () => {
-    if (orderedWords.length !== sentences[currentSentence].words.length) {
+    if (isArrangedArea) {
+      // Drop into arranged area
+      const newArranged = [...arrangedWords];
+      newArranged.splice(targetIndex, 0, draggedWord.word);
+      setArrangedWords(newArranged);
+      
+      const newAvailable = availableWords.filter((_, index) => index !== draggedWord.originalIndex);
+      setAvailableWords(newAvailable);
+    } else {
+      // Drop back to available area
+      const newAvailable = [...availableWords];
+      newAvailable.splice(targetIndex, 0, draggedWord.word);
+      setAvailableWords(newAvailable);
+      
+      const newArranged = arrangedWords.filter((_, index) => index !== draggedWord.originalIndex);
+      setArrangedWords(newArranged);
+    }
+    
+    setDraggedWord(null);
+  }, [draggedWord, arrangedWords, availableWords]);
+
+  const checkAnswer = useCallback(() => {
+    if (!currentSentence || arrangedWords.length !== currentSentence.words.length) {
       toast({
-        title: "Chưa đủ từ",
-        description: "Hãy sắp xếp tất cả các từ trước khi kiểm tra.",
-        variant: "destructive",
+        title: "Chưa hoàn thành",
+        description: "Vui lòng sắp xếp tất cả các từ.",
+        variant: "destructive"
       });
       return;
     }
+
+    setAttempts(prev => prev + 1);
     
-    setIsChecking(true);
-    
-    const correctOrder = sentences[currentSentence].correctOrder;
-    const originalWords = sentences[currentSentence].words;
-    
-    let isCorrect = true;
-    for (let i = 0; i < correctOrder.length; i++) {
-      if (orderedWords[i] !== originalWords[correctOrder[i]]) {
-        isCorrect = false;
-        break;
-      }
-    }
-    
+    const isCorrect = arrangedWords.every((word, index) => 
+      word === currentSentence.words[currentSentence.correctOrder[index]]
+    );
+
     if (isCorrect) {
-      setScore(score + 1);
+      const points = Math.max(10 - attempts, 1);
+      setScore(prev => prev + points);
+      
       toast({
         title: "Chính xác!",
-        description: "Bạn đã sắp xếp đúng thứ tự các từ.",
-        variant: "default",
+        description: `Bạn được ${points} điểm`,
       });
+
+      // Move to next sentence or complete game
+      if (currentSentenceIndex < data.sentences.length - 1) {
+        setTimeout(() => {
+          setCurrentSentenceIndex(prev => prev + 1);
+          setAttempts(0);
+        }, 1500);
+      } else {
+        setGameCompleted(true);
+        onComplete?.(score + points);
+      }
     } else {
       toast({
-        title: "Chưa chính xác!",
-        description: "Thứ tự các từ chưa đúng.",
-        variant: "destructive",
+        title: "Chưa đúng",
+        description: "Hãy thử sắp xếp lại.",
+        variant: "destructive"
       });
     }
-    
-    setTimeout(() => {
-      if (isLastSentence) {
-        setShowResult(true);
-      } else {
-        setCurrentSentence(currentSentence + 1);
-      }
-    }, 2000);
-  };
+  }, [arrangedWords, currentSentence, attempts, score, currentSentenceIndex, data.sentences.length, onComplete, toast]);
 
-  const handleHint = () => {
-    if (isChecking || hasShownHint) return;
-    
-    const correctOrder = sentences[currentSentence].correctOrder;
-    const originalWords = sentences[currentSentence].words;
-    
-    const firstCorrectWordIndex = correctOrder[0];
-    const firstCorrectWord = originalWords[firstCorrectWordIndex];
-    
-    if (orderedWords[0] === firstCorrectWord) {
-      for (let i = 1; i < correctOrder.length; i++) {
-        const correctWordIndex = correctOrder[i];
-        const correctWord = originalWords[correctWordIndex];
-        
-        if (orderedWords[i] !== correctWord) {
-          const shuffledIndex = shuffledWords.indexOf(correctWord);
-          if (shuffledIndex !== -1) {
-            const newShuffled = [...shuffledWords];
-            newShuffled.splice(shuffledIndex, 1);
-            
-            const newOrdered = [...orderedWords];
-            if (i < newOrdered.length) {
-              newShuffled.push(newOrdered[i]);
-            }
-            newOrdered[i] = correctWord;
-            
-            setShuffledWords(newShuffled);
-            setOrderedWords(newOrdered);
-            break;
-          }
-        }
-      }
-    } else {
-      const shuffledIndex = shuffledWords.indexOf(firstCorrectWord);
-      if (shuffledIndex !== -1) {
-        const newShuffled = [...shuffledWords];
-        newShuffled.splice(shuffledIndex, 1);
-        
-        const newOrdered = [...orderedWords];
-        if (newOrdered.length > 0) {
-          newShuffled.push(newOrdered[0]);
-        }
-        newOrdered[0] = firstCorrectWord;
-        
-        setShuffledWords(newShuffled);
-        setOrderedWords(newOrdered);
-      }
+  const resetSentence = useCallback(() => {
+    if (currentSentence) {
+      const shuffled = [...currentSentence.words].sort(() => Math.random() - 0.5);
+      setAvailableWords(shuffled);
+      setArrangedWords([]);
+      setShowHint(false);
     }
-    
-    setHasShownHint(true);
-    setTimeLeft(Math.max(10, timeLeft - 30));
-    
-    toast({
-      title: "Đã dùng gợi ý",
-      description: "Thời gian bị trừ 30 giây.",
-      variant: "default",
-    });
-  };
+  }, [currentSentence]);
 
-  const handleRestart = () => {
-    setCurrentSentence(0);
-    setScore(0);
-    setShowResult(false);
-    setTimeLeft(content?.settings?.timeLimit || 180);
-    setTimerRunning(true);
-    setIsChecking(false);
-    
-    if (sentences[0]) {
-      const currentWords = [...sentences[0].words];
-      const shuffled = [...currentWords].sort(() => Math.random() - 0.5);
-      setShuffledWords(shuffled);
-      setOrderedWords([]);
-    }
-  };
+  const toggleHint = useCallback(() => {
+    setShowHint(prev => !prev);
+  }, []);
 
-  if (!content || !sentences.length) {
-    return <div className="p-4">Không có dữ liệu câu</div>;
-  }
+  const formatTime = useCallback((seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }, []);
 
-  if (showResult) {
-    const percentage = Math.round((score / sentences.length) * 100);
-    
+  if (!gameStarted) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6">
-        <Card className="max-w-md w-full p-6 text-center">
-          <h2 className="text-2xl font-bold mb-4">Kết quả</h2>
-          <p className="text-lg mb-4">
-            Chủ đề: <span className="font-semibold">{content.title || topic}</span>
-          </p>
-          
-          <div className="mb-6">
-            <div className="flex justify-between mb-2">
-              <span>Điểm số của bạn</span>
-              <span className="font-bold">{percentage}%</span>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <Card className="w-full max-w-2xl mx-auto shadow-xl">
+          <CardHeader className="text-center space-y-4">
+            <CardTitle className="text-3xl font-bold text-gray-800">{data.title}</CardTitle>
+            <p className="text-gray-600 text-lg">{data.description}</p>
+            <div className="flex justify-center gap-6 text-sm text-gray-500">
+              <span>📝 {data.sentences.length} câu</span>
+              <span>⏱️ {formatTime(timeLeft)}</span>
+              <span>💡 Có gợi ý</span>
             </div>
-            <Progress value={percentage} className="h-3" />
-          </div>
-          
-          <div className="text-2xl font-bold mb-6">
-            {score} / {sentences.length}
-          </div>
-          
-          <Button onClick={handleRestart} className="w-full">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Làm lại
-          </Button>
+          </CardHeader>
+          <CardContent className="text-center">
+            <Button onClick={startGame} size="lg" className="px-8 py-4 text-lg">
+              Bắt đầu chơi
+            </Button>
+          </CardContent>
         </Card>
       </div>
     );
   }
 
-  const progress = ((currentSentence + 1) / sentences.length) * 100;
+  if (gameCompleted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+        <Card className="w-full max-w-2xl mx-auto shadow-xl">
+          <CardHeader className="text-center space-y-6">
+            <div className="text-6xl">🎉</div>
+            <CardTitle className="text-3xl font-bold text-gray-800">Hoàn thành!</CardTitle>
+            <div className="space-y-4">
+              <div className="text-4xl font-bold text-green-600">{score} điểm</div>
+              <div className="flex justify-center gap-4">
+                <Badge variant="outline" className="text-lg px-4 py-2">
+                  <Trophy className="h-5 w-5 mr-2" />
+                  {Math.round((score / (data.sentences.length * 10)) * 100)}%
+                </Badge>
+                <Badge variant="outline" className="text-lg px-4 py-2">
+                  <Timer className="h-5 w-5 mr-2" />
+                  {formatTime(data.settings?.timeLimit - timeLeft)}
+                </Badge>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="text-center">
+            <Button onClick={() => window.location.reload()} size="lg" className="px-8 py-4 text-lg">
+              Chơi lại
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col p-4 h-full">
-      <div className="mb-4 relative">
-        {onBack && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onBack} 
-            className="absolute top-0 left-0 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Quay lại</span>
-          </Button>
-        )}
-        
-        <div className="flex justify-between items-center mb-2 mt-12">
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
-            Câu {currentSentence + 1}/{sentences.length}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* Header Stats */}
+        <div className="flex justify-between items-center bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-4">
+            <Badge variant="outline" className="text-lg px-3 py-1">
+              Câu {currentSentenceIndex + 1}/{data.sentences.length}
+            </Badge>
+            <Badge variant="outline" className="text-lg px-3 py-1">
+              <Star className="h-4 w-4 mr-1" />
+              {score} điểm
+            </Badge>
           </div>
-          <div className="text-sm font-medium flex items-center px-3 py-1 bg-primary/10 rounded-full">
-            <Clock className="h-4 w-4 mr-1" />
-            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+          <div className="flex items-center gap-4">
+            <Badge variant={timeLeft < 30 ? "destructive" : "outline"} className="text-lg px-3 py-1">
+              <Timer className="h-4 w-4 mr-1" />
+              {formatTime(timeLeft)}
+            </Badge>
           </div>
         </div>
-        <Progress value={progress} className="h-2" />
-      </div>
 
-      <div className="flex-grow">
-        <div className="mb-4 text-center">
-          <h3 className="text-lg font-medium mb-1">Sắp xếp lại từng từ để tạo thành câu hoàn chỉnh</h3>
-          <p className="text-muted-foreground text-sm">Chọn từ theo đúng thứ tự</p>
+        {/* Progress */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <Progress value={progress} className="h-3" />
+          <p className="text-sm text-gray-600 mt-2 text-center">
+            Tiến độ: {Math.round(progress)}%
+          </p>
         </div>
-        
-        <Card className="p-4 mb-4 min-h-[100px] flex flex-wrap gap-2 items-start content-start border border-primary/30 bg-background/80">
-          {orderedWords.map((word, index) => (
-            <button
-              key={`ordered-${index}`}
-              onClick={() => handleWordRemove(word, index)}
-              disabled={isChecking}
-              className={`py-2 px-3 rounded-lg ${
-                isChecking 
-                  ? sentences[currentSentence].correctOrder[index] === sentences[currentSentence].words.indexOf(word)
-                    ? 'bg-green-100 border border-green-500'
-                    : 'bg-red-100 border border-red-500'
-                  : 'bg-primary/20 hover:bg-primary/30'
-              }`}
-            >
-              {word}
-            </button>
-          ))}
-          {orderedWords.length === 0 && (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground p-4">
-              <p>Chọn từ bên dưới để bắt đầu sắp xếp</p>
-            </div>
-          )}
-        </Card>
-        
-        <div className="p-4 bg-secondary/20 rounded-lg mb-4 flex flex-wrap gap-2 border border-primary/10">
-          {shuffledWords.map((word, index) => (
-            <button
-              key={`shuffled-${index}`}
-              onClick={() => handleWordSelect(word, index)}
-              disabled={isChecking}
-              className="py-2 px-3 bg-secondary hover:bg-secondary/80 rounded-lg"
-            >
-              {word}
-            </button>
-          ))}
-        </div>
-        
-        <div className="grid grid-cols-3 gap-2">
-          <Button
-            variant="outline"
-            onClick={handleShuffleWords}
-            disabled={isChecking || shuffledWords.length === 0}
-            size="sm"
-          >
-            <Shuffle className="h-4 w-4 mr-1" />
-            Xáo trộn
-          </Button>
-          
-          {content?.settings?.showHints && (
-            <Button
-              variant="outline"
-              onClick={handleHint}
-              disabled={isChecking || hasShownHint}
-              className={hasShownHint ? 'opacity-50' : ''}
-              size="sm"
-            >
-              <Lightbulb className="h-4 w-4 mr-1" />
-              Gợi ý
-            </Button>
-          )}
-          
-          <Button
-            onClick={handleCheck}
-            disabled={orderedWords.length !== sentences[currentSentence].words.length || isChecking}
-            className={orderedWords.length !== sentences[currentSentence].words.length ? 'opacity-50' : ''}
-            size="sm"
-          >
-            <Check className="h-4 w-4 mr-1" />
-            Kiểm tra
-          </Button>
+
+        {/* Main Game Area */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Available Words */}
+          <Card className="shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl text-gray-800">Từ cần sắp xếp</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3 min-h-[200px]">
+                {availableWords.map((word, index) => (
+                  <div
+                    key={`available-${index}`}
+                    draggable
+                    onDragStart={() => handleWordDragStart(word, index)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => handleWordDrop(index, false)}
+                    className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-3 rounded-lg text-center cursor-move transition-all duration-200 hover:shadow-md text-lg font-medium"
+                  >
+                    {word}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Arranged Sentence */}
+          <Card className="shadow-lg">
+            <CardHeader className="pb-4">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-xl text-gray-800">Câu đã sắp xếp</CardTitle>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={toggleHint}
+                    className="text-sm"
+                  >
+                    {showHint ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={resetSentence}
+                    className="text-sm"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div
+                className="min-h-[120px] bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-wrap gap-3 items-start"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => handleWordDrop(arrangedWords.length, true)}
+              >
+                {arrangedWords.length === 0 ? (
+                  <div className="text-gray-400 text-center w-full mt-8 text-lg">
+                    Kéo thả các từ vào đây để tạo câu
+                  </div>
+                ) : (
+                  arrangedWords.map((word, index) => (
+                    <div
+                      key={`arranged-${index}`}
+                      draggable
+                      onDragStart={() => handleWordDragStart(word, index)}
+                      className="bg-green-100 hover:bg-green-200 text-green-800 px-4 py-3 rounded-lg cursor-move transition-all duration-200 hover:shadow-md text-lg font-medium"
+                    >
+                      {word}
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {showHint && currentSentence && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-amber-800 text-lg">
+                    💡 <strong>Gợi ý:</strong> {currentSentence.words.join(' ')}
+                  </p>
+                </div>
+              )}
+
+              <Button
+                onClick={checkAnswer}
+                disabled={arrangedWords.length !== currentSentence?.words.length}
+                className="w-full py-3 text-lg font-medium"
+                size="lg"
+              >
+                <Check className="h-5 w-5 mr-2" />
+                Kiểm tra câu trả lời
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
-      
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleRestart}
-        className="mt-3 w-full bg-background/70 border-primary/20"
-      >
-        <RefreshCw className="h-4 w-4 mr-1" />
-        Làm lại
-      </Button>
     </div>
   );
 };

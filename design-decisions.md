@@ -3,6 +3,18 @@
 
 ## Ngày 2025-01-16
 
+### Cải thiện giao diện OrderingTemplate
+- **File đã sửa**: `src/components/quiz/preset-games/templates/OrderingTemplate.tsx`
+- **Loại thay đổi**: UI/UX improvement
+- **Mô tả**: 
+  - Xóa nút quay lại thừa trong template
+  - Cải thiện layout căn giữa với flexbox và max-width containers
+  - Tăng kích thước giao diện từ max-w-4xl lên max-w-5xl
+  - Tăng kích thước text và padding cho các elements
+  - Cải thiện responsive layout với grid system
+  - Tăng min-height cho các khu vực drag-drop
+- **Lý do**: Khắc phục vấn đề giao diện bị lệch lên trên và tăng khả năng sử dụng
+
 ### Cải thiện Loading Progress - Chế độ dự đoán
 - **File đã sửa**: `src/hooks/useLoadingProgress.ts`, `src/components/quiz/GameLoading.tsx`
 - **Loại thay đổi**: Enhancement - Predictive loading progress
