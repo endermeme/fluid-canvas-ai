@@ -36,6 +36,19 @@ window.addEventListener('load', function() {
     console.log('Game loaded');
   }
 });
+
+// Kiểm tra và sửa các lỗi cú pháp cơ bản
+document.addEventListener('DOMContentLoaded', function() {
+  // Đảm bảo canvas được khởi tạo đúng cách
+  const canvas = document.querySelector('canvas');
+  if (canvas && !window.context) {
+    try {
+      window.context = canvas.getContext('2d');
+    } catch (e) {
+      console.warn('Không thể khởi tạo canvas context:', e);
+    }
+  }
+});
 </script>
 `;
     

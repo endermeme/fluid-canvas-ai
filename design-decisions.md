@@ -1,18 +1,17 @@
-
 # Quyết định thiết kế và sửa đổi
 
 ## Ngày 2025-01-16
 
-### Cải thiện cơ chế xử lý lỗi JavaScript trong Custom Game
+### Khắc phục lỗi JavaScript trong Custom Game - Cải thiện phát hiện hàm thiếu
 - **File đã sửa**: `src/components/quiz/utils/iframe-enhancer.ts`, `src/components/quiz/utils/iframe-utils.ts`
-- **Loại thay đổi**: Bug fix - Error handling
+- **Loại thay đổi**: Bug fix - JavaScript error handling
 - **Mô tả**: 
-  - Thêm hàm `fixJavaScriptErrors()` để tự động phát hiện và sửa các hàm JavaScript thiếu
-  - Tự động tạo stub functions cho các hàm được gọi nhưng chưa được định nghĩa (như drawObstacles, drawCars)
-  - Cải thiện error handling trong iframe với window.addEventListener('error')
-  - Thêm xử lý unhandled promise rejections
-  - Tăng cường logging để debug dễ dàng hơn
-- **Lý do**: Khắc phục lỗi "drawObstacles is not defined" và các lỗi JavaScript tương tự khi AI tạo game không hoàn chỉnh
+  - Cải thiện logic phát hiện hàm thiếu trong `fixJavaScriptErrors()` để tránh tạo stub cho các phương thức built-in
+  - Thêm danh sách đầy đủ các phương thức JavaScript, DOM API, Canvas API built-in
+  - Kiểm tra tên hàm hợp lệ với regex để tránh lỗi cú pháp "function statement requires a name"
+  - Chỉ tạo stub functions cho các hàm thực sự cần thiết như drawObstacles, drawCars, updateGame, resetGame
+  - Thêm kiểm tra an toàn cho canvas context trong error handling script
+- **Lý do**: Khắc phục lỗi "function statement requires a name" và tránh tạo functions không cần thiết cho built-in methods
 
 ### Cải thiện cấu trúc Database Supabase
 - **File đã sửa**: Database constraints và relationships
