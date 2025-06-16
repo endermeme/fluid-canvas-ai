@@ -1,6 +1,21 @@
 
 # Game Development Decisions
 
+## 2025-01-16: Sửa lỗi UI/UX toàn bộ templates
+- **Thay đổi**: Fix tất cả vấn đề giao diện game templates
+- **Files**: 
+  - src/components/quiz/preset-games/templates/FlashcardsTemplate.tsx
+  - src/components/quiz/preset-games/templates/MatchingTemplate.tsx
+- **Chi tiết**:
+  - **Fixed điểm số**: Di chuyển điểm số lên ngay dưới header với position cố định
+  - **Fixed kích thước game**: Scale to hơn giao diện game, đặc biệt flashcards và matching
+  - **Fixed contrast**: Sử dụng text-foreground thay vì màu trắng trên nền sáng
+  - **Fixed scroll**: Xóa bỏ scroll không cần thiết bằng cách dùng overflow-hidden và flex layout
+  - **Layout cải thiện**: Sử dụng h-full flex flex-col để control layout chính xác
+  - **Header cố định**: Thêm flex-shrink-0 cho header để không bị co lại
+  - **Game area**: Flex-1 để chiếm hết không gian còn lại
+  - **Responsive**: Cải thiện responsive design cho mobile và desktop
+
 ## 2025-01-16: Sửa lỗi animation orbital - Hành tinh quay tròn đúng cách
 - **Thay đổi**: Fix lỗi animation khiến hành tinh di chuyển theo đường thẳng thay vì quay tròn
 - **Files**: src/components/quiz/components/SolarSystemSpinner.tsx

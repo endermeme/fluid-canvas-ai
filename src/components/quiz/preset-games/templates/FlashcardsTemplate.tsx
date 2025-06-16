@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -113,9 +114,9 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
 
   if (!gameContent || !cards.length) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="h-full flex items-center justify-center p-4">
         <div className="text-center">
-          <p className="text-lg">Không có dữ liệu thẻ ghi nhớ</p>
+          <p className="text-lg text-foreground">Không có dữ liệu thẻ ghi nhớ</p>
         </div>
       </div>
     );
@@ -127,39 +128,39 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
     const percentage = Math.round((knownCount / cards.length) * 100);
     
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background/95 to-primary/5">
-        <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 via-card/95 to-primary/10 backdrop-blur-sm border-primary/20 shadow-2xl">
-          <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/10">
+      <div className="h-full flex items-center justify-center p-4 bg-gradient-to-br from-background to-background/95 overflow-hidden">
+        <Card className="max-w-md w-full p-8 text-center bg-card shadow-2xl border">
+          <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-primary/10">
             <BookOpen className="h-10 w-10 text-primary" />
           </div>
           
-          <h2 className="text-3xl font-bold mb-4 text-primary">Kết Quả Ôn Tập</h2>
+          <h2 className="text-3xl font-bold mb-4 text-foreground">Kết Quả Ôn Tập</h2>
           <p className="text-lg mb-4 text-muted-foreground">
-            Chủ đề: <span className="font-semibold text-primary">{gameContent.title || topic}</span>
+            Chủ đề: <span className="font-semibold text-foreground">{gameContent.title || topic}</span>
           </p>
           
           <div className="mb-6">
             <div className="flex justify-between mb-3">
               <span className="text-muted-foreground">Đã biết</span>
-              <span className="font-bold text-primary text-lg">{percentage}%</span>
+              <span className="font-bold text-foreground text-lg">{percentage}%</span>
             </div>
-            <Progress value={percentage} className="h-4 shadow-lg" />
+            <Progress value={percentage} className="h-4" />
           </div>
           
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4">
               <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-green-700">{knownCount}</div>
-              <div className="text-sm text-green-600">Đã biết</div>
+              <div className="text-2xl font-bold text-green-700 dark:text-green-400">{knownCount}</div>
+              <div className="text-sm text-green-600 dark:text-green-400">Đã biết</div>
             </div>
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg p-4">
               <XCircle className="h-8 w-8 text-red-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-red-700">{unknownCount}</div>
-              <div className="text-sm text-red-600">Cần ôn</div>
+              <div className="text-2xl font-bold text-red-700 dark:text-red-400">{unknownCount}</div>
+              <div className="text-sm text-red-600 dark:text-red-400">Cần ôn</div>
             </div>
           </div>
           
-          <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg">
+          <Button onClick={handleRestart} className="w-full">
             <RefreshCw className="mr-2 h-4 w-4" />
             Ôn Lại
           </Button>
@@ -172,100 +173,104 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
   const progress = ((currentCardIndex + 1) / cards.length) * 100;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <div className="max-w-2xl w-full">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-3">
-            <div className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20">
-              Thẻ {currentCardIndex + 1}/{cards.length}
+    <div className="h-full flex flex-col bg-gradient-to-br from-background to-background/95 overflow-hidden">
+      {/* Fixed Header với điểm số */}
+      <div className="flex-shrink-0 p-4 bg-background/95 backdrop-blur-sm border-b">
+        <div className="flex justify-between items-center mb-3">
+          <div className="text-sm font-medium px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
+            Thẻ {currentCardIndex + 1}/{cards.length}
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="px-3 py-2 bg-green-500/10 text-green-700 dark:text-green-400 rounded-full border border-green-300/30">
+              Biết: <span className="font-bold">{knownCards.size}</span>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="px-3 py-2 bg-gradient-to-r from-green-500/15 to-green-400/10 text-green-700 rounded-full border border-green-300/30">
-                Biết: <span className="font-bold">{knownCards.size}</span>
-              </div>
-              <div className="px-3 py-2 bg-gradient-to-r from-red-500/15 to-red-400/10 text-red-700 rounded-full border border-red-300/30">
-                Cần ôn: <span className="font-bold">{unknownCards.size}</span>
-              </div>
+            <div className="px-3 py-2 bg-red-500/10 text-red-700 dark:text-red-400 rounded-full border border-red-300/30">
+              Cần ôn: <span className="font-bold">{unknownCards.size}</span>
             </div>
           </div>
-          <Progress value={progress} className="h-3 shadow-lg" />
         </div>
+        <Progress value={progress} className="h-3" />
+      </div>
 
-        {/* Flashcard */}
-        <div className="mb-8">
-          <Card 
-            className={`relative h-80 cursor-pointer bg-gradient-to-br from-primary/5 via-card/95 to-primary/10 backdrop-blur-sm border-primary/20 shadow-xl transition-all duration-500 hover:shadow-2xl ${
-              isFlipped ? 'transform rotateY-180' : ''
-            }`}
-            onClick={handleFlip}
-          >
-            <div className="absolute inset-0 p-8 flex flex-col items-center justify-center text-center">
-              <div className="mb-4">
-                <div className="text-sm text-muted-foreground mb-2">
-                  {isFlipped ? 'Mặt sau' : 'Mặt trước'}
-                </div>
-                <RotateCcw className="h-6 w-6 text-primary mx-auto animate-spin-slow" />
-              </div>
-              <div className="text-xl font-semibold text-primary">
-                {isFlipped ? currentCard.back : currentCard.front}
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Controls */}
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-center gap-4">
-            <Button
-              onClick={handlePrevious}
-              disabled={currentCardIndex === 0}
-              variant="outline"
-              className="bg-card/70 border-primary/20 hover:bg-primary/10"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Trước
-            </Button>
-            
-            <Button
+      {/* Main Game Area - Scaled up */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-4xl">
+          {/* Flashcard - Scaled larger */}
+          <div className="mb-8">
+            <Card 
+              className={`relative h-96 cursor-pointer bg-card shadow-xl transition-all duration-500 hover:shadow-2xl border ${
+                isFlipped ? 'transform rotateY-180' : ''
+              }`}
               onClick={handleFlip}
-              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary"
             >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Lật thẻ
-            </Button>
-            
-            <Button
-              onClick={handleNext}
-              disabled={currentCardIndex === cards.length - 1}
-              variant="outline"
-              className="bg-card/70 border-primary/20 hover:bg-primary/10"
-            >
-              Sau
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
+              <div className="absolute inset-0 p-8 flex flex-col items-center justify-center text-center">
+                <div className="mb-4">
+                  <div className="text-sm text-muted-foreground mb-2">
+                    {isFlipped ? 'Mặt sau' : 'Mặt trước'}
+                  </div>
+                  <RotateCcw className="h-6 w-6 text-primary mx-auto animate-spin-slow" />
+                </div>
+                <div className="text-2xl font-semibold text-foreground leading-relaxed">
+                  {isFlipped ? currentCard.back : currentCard.front}
+                </div>
+              </div>
+            </Card>
           </div>
 
-          {isFlipped && (
+          {/* Controls */}
+          <div className="flex flex-col gap-4">
             <div className="flex justify-center gap-4">
               <Button
-                onClick={handleMarkUnknown}
-                variant="destructive"
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                onClick={handlePrevious}
+                disabled={currentCardIndex === 0}
+                variant="outline"
+                size="lg"
               >
-                <XCircle className="h-4 w-4 mr-2" />
-                Cần ôn lại
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Trước
               </Button>
               
               <Button
-                onClick={handleMarkKnown}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                onClick={handleFlip}
+                size="lg"
               >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Đã biết
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Lật thẻ
+              </Button>
+              
+              <Button
+                onClick={handleNext}
+                disabled={currentCardIndex === cards.length - 1}
+                variant="outline"
+                size="lg"
+              >
+                Sau
+                <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
-          )}
+
+            {isFlipped && (
+              <div className="flex justify-center gap-4">
+                <Button
+                  onClick={handleMarkUnknown}
+                  variant="destructive"
+                  size="lg"
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Cần ôn lại
+                </Button>
+                
+                <Button
+                  onClick={handleMarkKnown}
+                  className="bg-green-600 hover:bg-green-700"
+                  size="lg"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Đã biết
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
