@@ -1,7 +1,19 @@
 
+
 # Quyết định thiết kế và sửa đổi
 
 ## Ngày 2025-01-16
+
+### Cải thiện cấu trúc Database Supabase
+- **File đã sửa**: Database constraints và relationships
+- **Loại thay đổi**: Database optimization - Foreign key constraints
+- **Mô tả**: 
+  - Thêm foreign key constraints cho tất cả các bảng để đảm bảo tính toàn vẹn dữ liệu
+  - Thêm unique constraint cho share_code trong bảng shared_games
+  - Tạo các index để tăng hiệu suất truy vấn (game_type, expires_at, is_published, etc.)
+  - Thêm triggers để tự động cập nhật updated_at cho các bảng chính
+  - Sử dụng CASCADE DELETE để tự động xóa dữ liệu liên quan khi xóa parent record
+- **Lý do**: Đảm bảo tính toàn vẹn dữ liệu và cải thiện hiệu suất database
 
 ### Cập nhật HomePage - Đơn giản hóa giao diện
 - **File đã sửa**: `src/pages/HomePage.tsx`
@@ -39,3 +51,4 @@
 - **Loại thay đổi**: Cải thiện game logic
 - **Mô tả**: Chỉ tìm kiếm từ theo hướng thuận (trái sang phải, trên xuống dưới), loại bỏ tìm kiếm từ ngược
 - **Lý do**: Đơn giản hóa trò chơi và giảm nhầm lẫn cho người chơi
+
