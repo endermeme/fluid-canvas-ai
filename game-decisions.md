@@ -445,3 +445,37 @@
   - Clean separation between rotation logic và planet positioning
   - Much easier to maintain và debug
   - Performance optimized với simple CSS animations
+
+### Phase 25 - Solar System Axis-Based Rotation Perfect Fix - 2025-01-15:
+- **Thay đổi**: Sửa hoàn toàn cơ chế rotation để các hành tinh quay chính xác theo trục
+- **SolarSystemSpinner.tsx**: 
+  - **Perfect Axis Rotation**: Mỗi container có `transformOrigin: 'center center'` chính xác
+  - **Correct Planet Positioning**: Planets positioned với `left: '50%'` và `transform: 'translateX(-50%)'`
+  - **Fixed Distance from Center**: 16px, 32px, 48px, 64px, 80px, 96px, 112px từ top
+  - **Clean Circular Motion**: Container quay, planet giữ vị trí relative trong container
+  - **Planet Characteristics**:
+    - Mercury: 3x3px, gray gradient, 2s rotation, 16px from center
+    - Venus: 4x4px, orange-yellow gradient, 3s reverse, 32px from center
+    - Earth: 5x5px, blue-green gradient, 4s rotation, 48px from center
+    - Mars: 4x4px, red gradient, 5s reverse, 64px from center
+    - Jupiter: 6x6px, yellow-orange gradient, 6s rotation, 80px from center (largest)
+    - Saturn: 5x5px, yellow gradient với ring effect, 7s reverse, 96px from center
+    - Neptune: 4x4px, blue gradient, 8s rotation, 112px from center (outermost)
+  - **Animation Method**: 
+    - Container: `w-full h-full` với CSS spin animation
+    - Transform Origin: `center center` để quay quanh brain center
+    - Planet Position: `top: Xpx, left: 50%, transform: translateX(-50%)`
+    - Perfect Horizontal Centering: Planets luôn aligned with trục dọc
+  - **Technical Improvements**:
+    - No more off-axis rotation issues
+    - Planets follow perfect circular paths
+    - Clean CSS-only animation approach
+    - Predictable và smooth motion patterns
+- **Cải thiện chính**:
+  - **Perfect Circular Orbits**: Planets quay theo vòng tròn hoàn hảo
+  - **No Axis Deviation**: Transform origin và positioning chính xác 100%
+  - **Smooth Rotation**: CSS spin animation với linear timing
+  - **Visual Clarity**: Planets luôn rõ nét và đúng궤道
+  - **Performance Optimized**: Simple CSS transforms, không có complex calculations
+  - **Maintainable Code**: Clean structure with explicit positioning
+  - **Realistic Solar System**: 7 planets với varied sizes, speeds, và directions

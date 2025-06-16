@@ -5,7 +5,7 @@ import { Brain } from 'lucide-react';
 const SolarSystemSpinner: React.FC = () => {
   return (
     <div className="relative mb-6 flex items-center justify-center">
-      {/* Solar System Spinner with axis-based rotation */}
+      {/* Solar System Spinner với axis-based rotation */}
       <div className="relative w-64 h-64">
         {/* Orbit rings - 7 different sizes for visual guidance */}
         <div className="absolute inset-0 border border-primary/15 rounded-full"></div>
@@ -22,41 +22,103 @@ const SolarSystemSpinner: React.FC = () => {
         </div>
         
         {/* Planet 1 - Mercury (innermost, fastest) */}
-        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ animation: 'spin 2s linear infinite' }}>
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full shadow-lg border border-white/50" style={{ top: '16px' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ 
+          animation: 'spin 2s linear infinite',
+          transformOrigin: 'center center'
+        }}>
+          <div className="absolute w-3 h-3 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full shadow-lg border border-white/50" 
+               style={{ 
+                 top: '16px', 
+                 left: '50%', 
+                 transform: 'translateX(-50%)' 
+               }}>
+          </div>
         </div>
         
         {/* Planet 2 - Venus */}
-        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ animation: 'spin 3s linear infinite reverse' }}>
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-gradient-to-r from-orange-300 to-yellow-400 rounded-full shadow-lg border border-white/50" style={{ top: '32px' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ 
+          animation: 'spin 3s linear infinite reverse',
+          transformOrigin: 'center center'
+        }}>
+          <div className="absolute w-4 h-4 bg-gradient-to-r from-orange-300 to-yellow-400 rounded-full shadow-lg border border-white/50" 
+               style={{ 
+                 top: '32px', 
+                 left: '50%', 
+                 transform: 'translateX(-50%)' 
+               }}>
+          </div>
         </div>
         
         {/* Planet 3 - Earth */}
-        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ animation: 'spin 4s linear infinite' }}>
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-5 h-5 bg-gradient-to-r from-blue-400 to-green-400 rounded-full shadow-lg border border-white/50" style={{ top: '48px' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ 
+          animation: 'spin 4s linear infinite',
+          transformOrigin: 'center center'
+        }}>
+          <div className="absolute w-5 h-5 bg-gradient-to-r from-blue-400 to-green-400 rounded-full shadow-lg border border-white/50" 
+               style={{ 
+                 top: '48px', 
+                 left: '50%', 
+                 transform: 'translateX(-50%)' 
+               }}>
+          </div>
         </div>
         
         {/* Planet 4 - Mars */}
-        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ animation: 'spin 5s linear infinite reverse' }}>
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-gradient-to-r from-red-400 to-red-600 rounded-full shadow-lg border border-white/50" style={{ top: '64px' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ 
+          animation: 'spin 5s linear infinite reverse',
+          transformOrigin: 'center center'
+        }}>
+          <div className="absolute w-4 h-4 bg-gradient-to-r from-red-400 to-red-600 rounded-full shadow-lg border border-white/50" 
+               style={{ 
+                 top: '64px', 
+                 left: '50%', 
+                 transform: 'translateX(-50%)' 
+               }}>
+          </div>
         </div>
         
         {/* Planet 5 - Jupiter (largest) */}
-        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ animation: 'spin 6s linear infinite' }}>
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-lg border border-white/50" style={{ top: '80px' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ 
+          animation: 'spin 6s linear infinite',
+          transformOrigin: 'center center'
+        }}>
+          <div className="absolute w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-lg border border-white/50" 
+               style={{ 
+                 top: '80px', 
+                 left: '50%', 
+                 transform: 'translateX(-50%)' 
+               }}>
+          </div>
         </div>
         
         {/* Planet 6 - Saturn (with rings) */}
-        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ animation: 'spin 7s linear infinite reverse' }}>
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-5 h-5 bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-full shadow-lg border border-white/50 relative" style={{ top: '96px' }}>
+        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ 
+          animation: 'spin 7s linear infinite reverse',
+          transformOrigin: 'center center'
+        }}>
+          <div className="absolute w-5 h-5 bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-full shadow-lg border border-white/50 relative" 
+               style={{ 
+                 top: '96px', 
+                 left: '50%', 
+                 transform: 'translateX(-50%)' 
+               }}>
             {/* Saturn's ring */}
             <div className="absolute inset-0 border border-yellow-200/70 rounded-full scale-150"></div>
           </div>
         </div>
         
         {/* Planet 7 - Neptune (outermost) */}
-        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ animation: 'spin 8s linear infinite' }}>
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full shadow-lg border border-white/50" style={{ top: '112px' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-full h-full animate-spin" style={{ 
+          animation: 'spin 8s linear infinite',
+          transformOrigin: 'center center'
+        }}>
+          <div className="absolute w-4 h-4 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full shadow-lg border border-white/50" 
+               style={{ 
+                 top: '112px', 
+                 left: '50%', 
+                 transform: 'translateX(-50%)' 
+               }}>
+          </div>
         </div>
         
         {/* Outer glow rings */}
