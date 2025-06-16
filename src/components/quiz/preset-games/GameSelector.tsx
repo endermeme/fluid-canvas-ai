@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input';
 import { 
   Brain, BookOpen, Puzzle, Dices, 
   CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
-  ArrowRight
+  ArrowRight, DoorOpen
 } from 'lucide-react';
 import { GameSettingsData } from '../types';
+import { useNavigate } from 'react-router-dom';
 
 interface GameSelectorProps {
   onSelectGame: (gameType: string) => void;
@@ -18,6 +19,7 @@ interface GameSelectorProps {
 const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
   const [selectedGameType, setSelectedGameType] = useState<string>('');
   const [topic, setTopic] = useState<string>('');
+  const navigate = useNavigate();
   
   const handleSelectGame = (gameType: string) => {
     setSelectedGameType(gameType);
@@ -30,7 +32,18 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
     }
   };
 
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
   const gameTypes = [
+    { 
+      id: 'back', 
+      name: 'Quay Lại', 
+      description: 'Trở về trang chủ để chọn loại trò chơi khác',
+      icon: <DoorOpen className="h-12 w-12 text-primary" />,
+      isBackButton: true
+    },
     { 
       id: 'quiz', 
       name: 'Trắc Nghiệm', 
@@ -93,8 +106,8 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
               key={game.id}
               className={`p-8 hover:shadow-xl transition-all duration-300 hover:border-primary hover:bg-primary/5 cursor-pointer transform hover:scale-105 ${
                 selectedGameType === game.id ? 'border-primary bg-primary/10 shadow-lg' : 'border-border'
-              }`}
-              onClick={() => handleSelectGame(game.id)}
+              } ${game.isBackButton ? 'bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30' : ''}`}
+              onClick={() => game.isBackButton ? handleBackToHome() : handleSelectGame(game.id)}
             >
               <div className="flex flex-col items-center text-center gap-6 h-full">
                 <div className="p-4 bg-primary/10 rounded-full">
@@ -107,9 +120,22 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                   </p>
                 </div>
                 <div className="mt-auto w-full">
-                  <div className="flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r from-primary/20 to-primary/10 text-primary text-sm font-medium">
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Tạo với AI
+                  <div className={`flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium ${
+                    game.isBackButton 
+                      ? 'bg-gradient-to-r from-primary/30 to-primary/20 text-primary' 
+                      : 'bg-gradient-to-r from-primary/20 to-primary/10 text-primary'
+                  }`}>
+                    {game.isBackButton ? (
+                      <>
+                        <DoorOpen className="h-4 w-4 mr-2" />
+                        Về trang chủ
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Tạo với AI
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
