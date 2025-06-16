@@ -63,8 +63,10 @@ const GameController: React.FC<GameControllerProps> = ({
     setShowForm(true);
   };
   
-  const handleShareGame = async (): Promise<string | void> => {
-    if (!currentGame || isSharing) return;
+  const handleShareGame = async (): Promise<string> => {
+    if (!currentGame || isSharing) {
+      return '';
+    }
     
     try {
       setIsSharing(true);
@@ -102,6 +104,7 @@ const GameController: React.FC<GameControllerProps> = ({
         description: error instanceof Error ? error.message : "Không thể tạo liên kết chia sẻ. Vui lòng thử lại.",
         variant: "destructive"
       });
+      return '';
     } finally {
       setIsSharing(false);
     }
