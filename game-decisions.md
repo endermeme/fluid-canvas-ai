@@ -5,10 +5,10 @@
 - **Thay đổi**: Fix tất cả vấn đề giao diện game templates
 - **Files**: 
   - src/components/quiz/preset-games/templates/FlashcardsTemplate.tsx
-  - src/components/quiz/preset-games/templates/MatchingTemplate.tsx
+  - src/components/quiz/preset-games/templates/QuizTemplate.tsx
 - **Chi tiết**:
   - **Fixed điểm số**: Di chuyển điểm số lên ngay dưới header với position cố định
-  - **Fixed kích thước game**: Scale to hơn giao diện game, đặc biệt flashcards và matching
+  - **Fixed kích thước game**: Scale to hơn giao diện game, đặc biệt flashcards và quiz
   - **Fixed contrast**: Sử dụng text-foreground thay vì màu trắng trên nền sáng
   - **Fixed scroll**: Xóa bỏ scroll không cần thiết bằng cách dùng overflow-hidden và flex layout
   - **Layout cải thiện**: Sử dụng h-full flex flex-col để control layout chính xác
