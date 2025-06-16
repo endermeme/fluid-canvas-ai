@@ -3,423 +3,272 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Clock, Trophy, Eye, Zap } from 'lucide-react';
-
-interface MemoryCard {
-  id: number;
-  content: string;
-  pairId: number;
-  isFlipped: boolean;
-  isMatched: boolean;
-}
+import { RefreshCw, Clock, Trophy, Lightbulb, ArrowLeft } from 'lucide-react';
 
 interface MemoryTemplateProps {
-  data?: any;
-  content?: any;
+  content: any;
   topic: string;
 }
 
-const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic }) => {
-  const gameContent = content || data;
-  const [cards, setCards] = useState<MemoryCard[]>([]);
+const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
+  const [cards, setCards] = useState<Array<{id: number, content: string, matched: boolean, flipped: boolean}>>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
-  const [matchedPairs, setMatchedPairs] = useState(0);
-  const [moves, setMoves] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [showResult, setShowResult] = useState(false);
-  const [isChecking, setIsChecking] = useState(false);
+  const [matchedPairs, setMatchedPairs] = useState<number>(0);
+  const [moves, setMoves] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<number>(content?.settings?.timeLimit || 120);
+  const [gameOver, setGameOver] = useState<boolean>(false);
+  const [gameWon, setGameWon] = useState<boolean>(false);
+  const [canFlip, setCanFlip] = useState<boolean>(true);
   const { toast } = useToast();
 
-  console.log("MemoryTemplate received props:", { data, content, topic, gameContent });
-
-  // Cải thiện logic truy xuất dữ liệu - hỗ trợ nhiều format
-  let pairs: any[] = [];
-  let useTimer = false;
-  let timeLimit = 180;
-
-  if (gameContent) {
-    // Format mới với pairs
-    if (gameContent.pairs && Array.isArray(gameContent.pairs)) {
-      pairs = gameContent.pairs;
-      console.log("Using pairs format:", pairs);
-    }
-    // Format cũ với cards
-    else if (gameContent.cards && Array.isArray(gameContent.cards)) {
-      pairs = gameContent.cards;
-      console.log("Using cards format:", pairs);
-    }
-    // Format khác có thể có trong data
-    else if (Array.isArray(gameContent)) {
-      pairs = gameContent;
-      console.log("Using direct array format:", pairs);
-    }
-    // Import từ sample data
-    else {
-      try {
-        console.log("Trying to load sample data...");
-        import('../data/memorySampleData').then(module => {
-          const sampleData = module.memorySampleData;
-          if (sampleData && sampleData.pairs) {
-            console.log("Loaded sample data:", sampleData);
-            // Trigger re-initialization with sample data
-            window.location.reload();
-          }
-        });
-      } catch (error) {
-        console.error("Error loading sample data:", error);
-      }
-    }
-
-    // Lấy settings
-    if (gameContent.settings) {
-      useTimer = gameContent.settings.useTimer || false;
-      timeLimit = gameContent.settings.timeLimit || 180;
-    }
-  }
-
-  // Fallback nếu không có dữ liệu
-  if (!pairs.length) {
-    console.log("No pairs found, using fallback data");
-    pairs = [
-      { term: "Apple", definition: "🍎" },
-      { term: "Banana", definition: "🍌" },
-      { term: "Orange", definition: "🍊" },
-      { term: "Grape", definition: "🍇" },
-      { term: "Strawberry", definition: "🍓" }
-    ];
-  }
-
-  const totalPairs = pairs.length;
-
-  console.log("Final game configuration:", { pairs, useTimer, timeLimit, totalPairs });
+  const memoryCards = content?.cards || [];
+  const totalPairs = memoryCards.length / 2;
 
   useEffect(() => {
-    if (pairs.length > 0 && !gameStarted) {
-      console.log("Initializing game with pairs:", pairs);
-      initializeGame();
+    if (memoryCards.length > 0) {
+      const shuffledCards = [...memoryCards].sort(() => Math.random() - 0.5).map(card => ({
+        ...card,
+        flipped: false
+      }));
+      
+      setCards(shuffledCards);
+      setTimeLeft(content?.settings?.timeLimit || 120);
+      setMoves(0);
+      setMatchedPairs(0);
+      setFlippedCards([]);
+      setGameOver(false);
+      setGameWon(false);
     }
-  }, [pairs, gameStarted]);
+  }, [memoryCards, content?.settings?.timeLimit]);
 
   useEffect(() => {
-    if (useTimer && timeLeft > 0 && gameStarted && !showResult) {
+    if (timeLeft > 0 && !gameOver && !gameWon) {
       const timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
       
       return () => clearTimeout(timer);
-    } else if (useTimer && timeLeft === 0 && gameStarted && !showResult) {
-      endGame();
-    }
-  }, [timeLeft, gameStarted, showResult, useTimer]);
-
-  const initializeGame = () => {
-    console.log("Starting game initialization...");
-    const gameCards: MemoryCard[] = [];
-    
-    pairs.forEach((pair: any, index: number) => {
-      // Hỗ trợ multiple formats
-      let term = pair.term || pair.front || pair.content || pair.question || `Item ${index + 1}`;
-      let definition = pair.definition || pair.back || pair.match || pair.answer || `Match ${index + 1}`;
-      
-      // Ensure content is string
-      term = String(term);
-      definition = String(definition);
-      
-      console.log(`Creating pair ${index}:`, { term, definition });
-      
-      gameCards.push({
-        id: index * 2,
-        content: term,
-        pairId: index,
-        isFlipped: false,
-        isMatched: false,
-      });
-      gameCards.push({
-        id: index * 2 + 1,
-        content: definition,
-        pairId: index,
-        isFlipped: false,
-        isMatched: false,
-      });
-    });
-
-    console.log("Generated cards:", gameCards);
-
-    // Shuffle cards using Fisher-Yates algorithm
-    const shuffledCards = [...gameCards];
-    for (let i = shuffledCards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffledCards[i], shuffledCards[j]] = [shuffledCards[j], shuffledCards[i]];
-    }
-
-    setCards(shuffledCards);
-    setMatchedPairs(0);
-    setMoves(0);
-    setFlippedCards([]);
-    setShowResult(false);
-    setGameStarted(true);
-    setIsChecking(false);
-    
-    if (useTimer) {
-      setTimeLeft(timeLimit);
-    }
-    
-    console.log("Game initialized successfully with", shuffledCards.length, "cards");
-  };
-
-  const handleCardClick = (cardIndex: number) => {
-    console.log(`Card clicked: ${cardIndex}`);
-    
-    if (isChecking || cards[cardIndex].isFlipped || cards[cardIndex].isMatched || flippedCards.length >= 2) {
-      console.log("Card click ignored - invalid state");
-      return;
-    }
-
-    const newCards = [...cards];
-    newCards[cardIndex].isFlipped = true;
-    setCards(newCards);
-
-    const newFlippedCards = [...flippedCards, cardIndex];
-    setFlippedCards(newFlippedCards);
-
-    console.log("Updated flipped cards:", newFlippedCards);
-
-    if (newFlippedCards.length === 2) {
-      setIsChecking(true);
-      setMoves(prev => prev + 1);
-      
-      setTimeout(() => {
-        checkForMatch(newFlippedCards);
-      }, 1000);
-    }
-  };
-
-  const checkForMatch = (flippedIndexes: number[]) => {
-    const [firstIndex, secondIndex] = flippedIndexes;
-    const firstCard = cards[firstIndex];
-    const secondCard = cards[secondIndex];
-    
-    console.log("Checking match:", {
-      first: { pairId: firstCard.pairId, content: firstCard.content },
-      second: { pairId: secondCard.pairId, content: secondCard.content }
-    });
-    
-    const newCards = [...cards];
-    
-    if (firstCard.pairId === secondCard.pairId) {
-      // Match found
-      console.log("Match found!");
-      newCards[firstIndex].isMatched = true;
-      newCards[secondIndex].isMatched = true;
-      
-      const newMatchedPairs = matchedPairs + 1;
-      setMatchedPairs(newMatchedPairs);
-      
+    } else if (timeLeft === 0 && !gameOver && !gameWon) {
+      setGameOver(true);
       toast({
-        title: "Tìm được cặp! 🎉",
-        description: "Tuyệt vời! Bạn đã ghép đúng một cặp.",
-      });
-      
-      if (newMatchedPairs === totalPairs) {
-        console.log("Game completed!");
-        setTimeout(() => {
-          endGame();
-        }, 500);
-      }
-    } else {
-      // No match
-      console.log("No match found");
-      newCards[firstIndex].isFlipped = false;
-      newCards[secondIndex].isFlipped = false;
-      
-      toast({
-        title: "Chưa đúng! 🤔",
-        description: "Hai thẻ này không khớp với nhau.",
+        title: "Hết thời gian!",
+        description: "Bạn đã hết thời gian chơi.",
         variant: "destructive",
       });
     }
-    
-    setCards(newCards);
-    setFlippedCards([]);
-    setIsChecking(false);
-  };
+  }, [timeLeft, gameOver, gameWon, toast]);
 
-  const endGame = () => {
-    setShowResult(true);
-    
-    // Send completion message for score tracking
-    const completionData = {
-      type: 'QUIZ_COMPLETED',
-      score: matchedPairs,
-      totalQuestions: totalPairs,
-      gameType: 'memory',
-      completionTime: useTimer ? timeLimit - timeLeft : undefined
-    };
-    
-    console.log("Game ended, sending completion data:", completionData);
-    
-    // Send to parent window for shared games
-    if (window.parent && window.parent !== window) {
-      window.parent.postMessage(completionData, '*');
+  useEffect(() => {
+    if (matchedPairs === totalPairs && totalPairs > 0) {
+      setGameWon(true);
+      toast({
+        title: "Chúc mừng!",
+        description: "Bạn đã hoàn thành trò chơi.",
+        variant: "default",
+      });
+    }
+  }, [matchedPairs, totalPairs, toast]);
+
+  useEffect(() => {
+    if (flippedCards.length === 2) {
+      setCanFlip(false);
+      
+      const [firstIndex, secondIndex] = flippedCards;
+      
+      if (cards[firstIndex].content === cards[secondIndex].content) {
+        setCards(cards.map((card, idx) => 
+          idx === firstIndex || idx === secondIndex 
+            ? {...card, matched: true} 
+            : card
+        ));
+        setMatchedPairs(matchedPairs + 1);
+        setFlippedCards([]);
+        setCanFlip(true);
+        
+        toast({
+          title: "Tuyệt vời!",
+          description: "Bạn đã tìm thấy một cặp khớp.",
+          variant: "default",
+        });
+      } else {
+        setTimeout(() => {
+          setCards(cards.map((card, idx) => 
+            idx === firstIndex || idx === secondIndex 
+              ? {...card, flipped: false} 
+              : card
+          ));
+          setFlippedCards([]);
+          setCanFlip(true);
+        }, 1000);
+      }
+      
+      setMoves(moves + 1);
+    }
+  }, [flippedCards, cards, matchedPairs, moves, toast]);
+
+  const handleCardClick = (index: number) => {
+    if (gameOver || gameWon || !canFlip || flippedCards.length >= 2 || cards[index].flipped || cards[index].matched) {
+      return;
     }
     
-    // Also trigger any global completion handlers - with safe check
-    if (typeof (window as any).onGameComplete === 'function') {
-      (window as any).onGameComplete(completionData);
+    setCards(cards.map((card, idx) => 
+      idx === index ? {...card, flipped: true} : card
+    ));
+    
+    setFlippedCards([...flippedCards, index]);
+  };
+
+  const handleHint = () => {
+    const unmatchedCards = cards.filter(card => !card.matched && !card.flipped);
+    
+    if (unmatchedCards.length > 0) {
+      const randomCard = unmatchedCards[Math.floor(Math.random() * unmatchedCards.length)];
+      const randomCardIndex = cards.findIndex(card => card.id === randomCard.id);
+      
+      const matchingCardIndex = cards.findIndex((card, idx) => 
+        card.content === randomCard.content && idx !== randomCardIndex
+      );
+      
+      setCards(cards.map((card, idx) => 
+        idx === randomCardIndex || idx === matchingCardIndex 
+          ? {...card, flipped: true} 
+          : card
+      ));
+      
+      setTimeout(() => {
+        setCards(cards.map((card, idx) => 
+          (idx === randomCardIndex || idx === matchingCardIndex) && !card.matched 
+            ? {...card, flipped: false} 
+            : card
+        ));
+      }, 1000);
+      
+      setTimeLeft(Math.max(0, timeLeft - 10));
+      
+      toast({
+        title: "Đã dùng gợi ý",
+        description: "Thời gian bị trừ 10 giây.",
+        variant: "default",
+      });
     }
   };
 
   const handleRestart = () => {
-    console.log("Restarting game");
-    setGameStarted(false);
-    setShowResult(false);
-    setTimeout(() => {
-      initializeGame();
-    }, 100);
+    if (memoryCards.length > 0) {
+      const shuffledCards = [...memoryCards].sort(() => Math.random() - 0.5).map(card => ({
+        ...card,
+        flipped: false,
+        matched: false
+      }));
+      
+      setCards(shuffledCards);
+      setTimeLeft(content?.settings?.timeLimit || 120);
+      setMoves(0);
+      setMatchedPairs(0);
+      setFlippedCards([]);
+      setGameOver(false);
+      setGameWon(false);
+    }
   };
 
-  if (!pairs.length) {
-    console.log("No pairs available for rendering");
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="max-w-md w-full p-8 text-center">
-          <h3 className="text-xl font-semibold mb-4">Đang tải trò chơi ghi nhớ...</h3>
-          <p className="text-muted-foreground mb-4">
-            Chủ đề: {topic}
-          </p>
-          <Button onClick={() => window.location.reload()}>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Tải lại
-          </Button>
-        </Card>
-      </div>
-    );
+  if (!content || !memoryCards.length) {
+    return <div className="p-4">Không có dữ liệu trò chơi ghi nhớ</div>;
   }
 
-  if (showResult) {
-    const percentage = Math.round((matchedPairs / totalPairs) * 100);
-    
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background/95 to-primary/5">
-        <Card className="max-w-md w-full p-8 text-center bg-gradient-to-br from-primary/5 via-card/95 to-primary/10 backdrop-blur-sm border-primary/20 shadow-2xl">
-          <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/10">
-            <Trophy className="h-10 w-10 text-primary" />
-          </div>
-          
-          <h2 className="text-3xl font-bold mb-4 text-primary">Hoàn Thành!</h2>
-          <p className="text-lg mb-4 text-muted-foreground">
-            Chủ đề: <span className="font-semibold text-primary">{topic}</span>
-          </p>
-          
-          <div className="mb-6">
-            <div className="flex justify-between mb-3">
-              <span className="text-muted-foreground">Hoàn thành</span>
-              <span className="font-bold text-primary text-lg">{percentage}%</span>
-            </div>
-            <Progress value={percentage} className="h-4 shadow-lg" />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-              <div className="text-2xl font-bold text-primary">{matchedPairs}</div>
-              <div className="text-sm text-muted-foreground">Cặp đã tìm</div>
-            </div>
-            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-              <div className="text-2xl font-bold text-primary">{moves}</div>
-              <div className="text-sm text-muted-foreground">Số nước đi</div>
-            </div>
-          </div>
-          
-          {useTimer && (
-            <div className="text-sm mb-6 text-muted-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
-              <Clock className="inline h-4 w-4 mr-1" />
-              Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-            </div>
-          )}
-          
-          <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Chơi Lại
-          </Button>
-        </Card>
-      </div>
-    );
-  }
-
-  const progress = (matchedPairs / totalPairs) * 100;
+  const progressPercentage = (matchedPairs / totalPairs) * 100;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <div className="max-w-4xl w-full">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-3">
-            <div className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20">
-              <Zap className="inline h-4 w-4 mr-1" />
-              Trò chơi ghi nhớ - {topic}
-            </div>
-            <div className="flex items-center gap-3">
-              {useTimer && (
-                <div className="flex items-center px-3 py-2 bg-gradient-to-r from-primary/15 to-primary/10 rounded-full border border-primary/20">
-                  <Clock className="h-4 w-4 mr-1 text-primary" />
-                  {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-                </div>
-              )}
-              <div className="px-3 py-2 bg-gradient-to-r from-green-500/15 to-green-400/10 text-green-700 rounded-full border border-green-300/30">
-                Cặp: <span className="font-bold">{matchedPairs}/{totalPairs}</span>
-              </div>
-              <div className="px-3 py-2 bg-gradient-to-r from-blue-500/15 to-blue-400/10 text-blue-700 rounded-full border border-blue-300/30">
-                Nước đi: <span className="font-bold">{moves}</span>
-              </div>
-            </div>
+    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
+      <div className="mb-4 mt-12">
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+            Cặp đã ghép: {matchedPairs}/{totalPairs}
           </div>
-          <Progress value={progress} className="h-3 shadow-lg" />
+          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full flex items-center">
+            <Clock className="h-4 w-4 mr-1 text-primary" />
+            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+          </div>
         </div>
+        <Progress value={progressPercentage} className="h-2 bg-secondary" />
+      </div>
 
-        {/* Game Grid */}
-        <div className="mb-6">
-          <div className={`grid gap-3 ${
-            cards.length <= 12 ? 'grid-cols-4' : 
-            cards.length <= 20 ? 'grid-cols-5' : 
-            'grid-cols-6'
-          }`}>
+      {gameWon ? (
+        <div className="flex-grow flex items-center justify-center">
+          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-primary/5 to-secondary/20 backdrop-blur-sm border-primary/20">
+            <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
+            <p className="mb-2 text-lg">Bạn đã hoàn thành trò chơi với {moves} lượt.</p>
+            <p className="mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
+            <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Chơi lại
+            </Button>
+          </Card>
+        </div>
+      ) : gameOver ? (
+        <div className="flex-grow flex items-center justify-center">
+          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-destructive/5 to-background backdrop-blur-sm border-destructive/20">
+            <h2 className="text-3xl font-bold mb-4 text-destructive">Hết thời gian!</h2>
+            <p className="mb-4 text-lg">Bạn đã tìm được {matchedPairs} trong tổng số {totalPairs} cặp thẻ.</p>
+            <Button onClick={handleRestart} className="w-full">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Chơi lại
+            </Button>
+          </Card>
+        </div>
+      ) : (
+        <div className="flex-grow">
+          <div className="grid grid-cols-3 md:grid-cols-4 gap-3 mb-4">
             {cards.map((card, index) => (
-              <Card
+              <div 
                 key={index}
-                className={`aspect-square p-4 flex items-center justify-center cursor-pointer transition-all duration-300 text-center ${
-                  card.isFlipped || card.isMatched
-                    ? card.isMatched
-                      ? 'bg-gradient-to-br from-green-500/20 to-green-400/10 border-green-300/50 shadow-lg'
-                      : 'bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20'
-                    : 'bg-gradient-to-br from-card to-card/80 border-primary/10 hover:border-primary/30 hover:shadow-lg hover:scale-105'
-                } ${isChecking ? 'pointer-events-none' : ''}`}
+                className={`aspect-square flex items-center justify-center rounded-xl cursor-pointer transition-all duration-300 transform ${
+                  card.flipped || card.matched 
+                    ? 'bg-gradient-to-br from-primary/20 to-primary/5 border-primary/30 border-2 scale-105 shadow-lg hover:shadow-xl' 
+                    : 'bg-gradient-to-br from-secondary/80 to-secondary/20 border-transparent border-2 hover:scale-105'
+                } ${!canFlip ? 'pointer-events-none' : ''}`}
                 onClick={() => handleCardClick(index)}
               >
-                {card.isFlipped || card.isMatched ? (
-                  <span className="text-sm font-medium text-primary break-words">
-                    {card.content}
-                  </span>
+                {(card.flipped || card.matched) ? (
+                  <div className="text-2xl font-bold text-primary/90">{card.content}</div>
                 ) : (
-                  <Eye className="h-8 w-8 text-primary/40" />
+                  <div className="text-2xl font-bold text-secondary/80">?</div>
                 )}
-              </Card>
+              </div>
             ))}
           </div>
+          
+          <div className="flex items-center justify-between mt-3">
+            <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+              Lượt đã chơi: {moves}
+            </div>
+            
+            <div className="flex gap-2">
+              {content?.settings?.allowHints && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleHint}
+                  className="bg-gradient-to-r from-primary/10 to-background border-primary/20"
+                >
+                  <Lightbulb className="h-4 w-4 mr-1 text-yellow-500" />
+                  Gợi ý (-10s)
+                </Button>
+              )}
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRestart}
+                className="bg-gradient-to-r from-secondary/50 to-background border-primary/20"
+              >
+                <RefreshCw className="h-4 w-4 mr-1" />
+                Làm lại
+              </Button>
+            </div>
+          </div>
         </div>
-
-        {/* Footer */}
-        <div className="flex justify-center">
-          <Button
-            onClick={handleRestart}
-            variant="outline"
-            className="bg-card/70 border-primary/20 hover:bg-primary/10 hover:border-primary/40"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Chơi lại
-          </Button>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

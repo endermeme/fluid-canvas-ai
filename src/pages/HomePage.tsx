@@ -59,13 +59,13 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background p-4 relative overflow-hidden">
       {/* Background floating shapes */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         {[...Array(5)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-64 h-64 bg-sky-200/20 rounded-full blur-xl"
+            className="absolute w-64 h-64 bg-primary/5 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -96,7 +96,7 @@ const HomePage: React.FC = () => {
           variants={itemVariants}
         >
           <motion.h1 
-            className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-6"
+            className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-4"
             animate={{
               backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
             }}
@@ -109,51 +109,41 @@ const HomePage: React.FC = () => {
             AI Game Creator
           </motion.h1>
           <motion.p 
-            className="text-xl md:text-2xl text-gray-600 font-medium"
+            className="text-xl text-muted-foreground"
             variants={itemVariants}
           >
             Tạo trò chơi tương tác bằng trí tuệ nhân tạo
           </motion.p>
-          <motion.div 
-            className="mt-4 w-24 h-1 bg-gradient-to-r from-sky-400 to-blue-500 mx-auto rounded-full"
-            variants={itemVariants}
-          />
         </motion.header>
         
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12" 
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" 
           variants={containerVariants}
         >
           <motion.div variants={itemVariants}>
-            <Link to="/custom-game" className="block h-full">
+            <Link to="/custom-game" className="block">
               <motion.div
                 variants={cardVariants}
                 whileHover="hover"
                 whileTap="tap"
-                className="h-full"
               >
-                <Card className="p-8 h-full bg-white/70 backdrop-blur-md border-0 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-sky-400/10 via-blue-400/10 to-indigo-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="absolute -right-20 -top-20 w-40 h-40 bg-gradient-to-br from-sky-200 to-blue-300 rounded-full opacity-20 transform group-hover:scale-150 transition-transform duration-500"></div>
-                  
-                  <div className="relative z-10 flex flex-col items-center text-center gap-6 h-full justify-center">
+                <Card className="p-8 h-full bg-gradient-to-br from-background to-primary/5 border-2 border-primary/20 overflow-hidden group relative">
+                  <div className="absolute -right-16 -top-16 w-32 h-32 bg-primary/10 rounded-full transform group-hover:scale-150 transition-transform duration-500"></div>
+                  <div className="relative z-10 flex flex-col items-center text-center gap-6">
                     <motion.div 
-                      className="p-6 bg-gradient-to-br from-sky-100 to-blue-100 rounded-2xl shadow-lg"
+                      className="p-4 bg-primary/10 rounded-full"
                       variants={iconVariants}
                       whileHover="hover"
                     >
-                      <SparklesIcon className="h-12 w-12 text-sky-600" />
+                      <SparklesIcon className="h-12 w-12 text-primary" />
                     </motion.div>
                     <div>
-                      <h3 className="text-2xl font-bold mb-3 text-gray-800">Tạo Game HTML</h3>
-                      <p className="text-gray-600 leading-relaxed">
-                        Sử dụng Gemini Flash để tạo game tương tác ngay lập tức với HTML, CSS và JavaScript
+                      <h3 className="text-2xl font-bold mb-2">Tạo Game HTML</h3>
+                      <p className="text-muted-foreground">
+                        Sử dụng Gemini Flash để tạo game tương tác ngay lập tức
                       </p>
                     </div>
-                    <Button 
-                      className="w-full mt-4 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 py-3 text-lg font-semibold" 
-                      size="lg"
-                    >
+                    <Button variant="default" size="lg" className="w-full mt-4 group-hover:shadow-lg transition-all">
                       Bắt đầu tạo
                     </Button>
                   </div>
@@ -163,36 +153,29 @@ const HomePage: React.FC = () => {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Link to="/preset-games" className="block h-full">
+            <Link to="/preset-games" className="block">
               <motion.div
                 variants={cardVariants}
                 whileHover="hover"
                 whileTap="tap"
-                className="h-full"
               >
-                <Card className="p-8 h-full bg-white/70 backdrop-blur-md border-0 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-400/10 via-purple-400/10 to-pink-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="absolute -right-20 -top-20 w-40 h-40 bg-gradient-to-br from-indigo-200 to-purple-300 rounded-full opacity-20 transform group-hover:scale-150 transition-transform duration-500"></div>
-                  
-                  <div className="relative z-10 flex flex-col items-center text-center gap-6 h-full justify-center">
+                <Card className="p-8 h-full bg-gradient-to-br from-background to-primary/5 border-2 border-primary/20 overflow-hidden group relative">
+                  <div className="absolute -right-16 -top-16 w-32 h-32 bg-primary/10 rounded-full transform group-hover:scale-150 transition-transform duration-500"></div>
+                  <div className="relative z-10 flex flex-col items-center text-center gap-6">
                     <motion.div 
-                      className="p-6 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl shadow-lg"
+                      className="p-4 bg-primary/10 rounded-full"
                       variants={iconVariants}
                       whileHover="hover"
                     >
-                      <Gamepad className="h-12 w-12 text-indigo-600" />
+                      <Gamepad className="h-12 w-12 text-primary" />
                     </motion.div>
                     <div>
-                      <h3 className="text-2xl font-bold mb-3 text-gray-800">Trò Chơi Có Sẵn</h3>
-                      <p className="text-gray-600 leading-relaxed">
-                        Sử dụng Gemini Pro để tạo trò chơi theo mẫu có sẵn với nội dung tùy chỉnh
+                      <h3 className="text-2xl font-bold mb-2">Trò Chơi Có Sẵn</h3>
+                      <p className="text-muted-foreground">
+                        Sử dụng Gemini Pro để tạo trò chơi theo mẫu có sẵn
                       </p>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      className="w-full mt-4 border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-300 py-3 text-lg font-semibold bg-white/50" 
-                      size="lg"
-                    >
+                    <Button variant="outline" size="lg" className="w-full mt-4 group-hover:shadow-lg transition-all">
                       Xem trò chơi
                     </Button>
                   </div>
@@ -202,27 +185,26 @@ const HomePage: React.FC = () => {
           </motion.div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="flex justify-center">
-          <Link to="/game-history" className="w-full max-w-2xl">
+        <motion.div variants={itemVariants}>
+          <Link to="/game-history">
             <motion.div
               variants={cardVariants}
               whileHover="hover"
               whileTap="tap"
             >
-              <Card className="p-6 bg-white/60 backdrop-blur-md border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/10 to-teal-400/10 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative z-10 flex items-center gap-6">
+              <Card className="p-6 border border-primary/20 overflow-hidden relative bg-gradient-to-r hover:from-primary/5">
+                <div className="flex items-center gap-4">
                   <motion.div 
-                    className="p-4 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl shadow-md"
+                    className="p-3 bg-primary/10 rounded-full"
                     variants={iconVariants}
                     whileHover="hover"
                   >
-                    <History className="h-8 w-8 text-emerald-600" />
+                    <History className="h-6 w-6 text-primary" />
                   </motion.div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-xl text-gray-800 mb-1">Lịch Sử Game</h3>
-                    <p className="text-gray-600">
-                      Xem và quản lý các trò chơi đã tạo trước đây
+                    <h3 className="font-bold text-lg">Lịch Sử Game</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Xem và quản lý các trò chơi đã tạo
                     </p>
                   </div>
                 </div>
@@ -232,15 +214,10 @@ const HomePage: React.FC = () => {
         </motion.div>
         
         <motion.footer 
-          className="mt-16 text-center text-gray-500 text-sm"
+          className="mt-12 text-center text-muted-foreground text-sm"
           variants={itemVariants}
         >
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="w-8 h-0.5 bg-gradient-to-r from-transparent to-gray-300"></div>
-            <span>© {new Date().getFullYear()} AI Game Creator</span>
-            <div className="w-8 h-0.5 bg-gradient-to-l from-transparent to-gray-300"></div>
-          </div>
-          <p className="text-xs">Powered by Gemini AI</p>
+          <p>© {new Date().getFullYear()} AI Game Creator | Powered by Gemini AI</p>
         </motion.footer>
       </motion.div>
     </div>

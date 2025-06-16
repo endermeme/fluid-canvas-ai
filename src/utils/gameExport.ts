@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface StoredGame {
@@ -9,8 +10,6 @@ export interface StoredGame {
   description?: string;
   expiresAt: Date | number;
   createdAt: Date | number;
-  shareCount?: number;
-  lastAccessedAt?: Date | number;
 }
 
 export const formatHtmlContent = (content: string): string => {
@@ -91,8 +90,6 @@ export const saveGameForSharing = async (
             description: description || `Shared game: ${title}`,
             html_content: processedHtmlContent,
             expires_at: expiresAt.toISOString(),
-            is_published: true, // Đánh dấu game được publish để có thể share
-            share_count: 0
           }
         ])
         .select()
@@ -128,17 +125,6 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
 
   try {
     console.log("Fetching game with ID:", id);
-    
-    // Cập nhật last_accessed_at và tăng share_count khi game được truy cập
-    // Sử dụng RPC function increment_share_count
-    const { error: updateError } = await supabase.rpc('increment_share_count', {
-      game_id: id
-    });
-
-    if (updateError) {
-      console.warn("Could not update access stats:", updateError);
-    }
-
     const { data: game, error } = await supabase
       .from('games')
       .select('*')
@@ -177,9 +163,7 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
       htmlContent: game.html_content,
       description: game.description || `Shared game: ${game.title}`,
       expiresAt: new Date(game.expires_at).getTime(),
-      createdAt: new Date(game.created_at).getTime(),
-      shareCount: game.share_count || 0,
-      lastAccessedAt: game.last_accessed_at ? new Date(game.last_accessed_at).getTime() : undefined
+      createdAt: new Date(game.created_at).getTime()
     };
   } catch (error) {
     console.error("Unhandled error in getSharedGame:", error);
@@ -194,11 +178,8 @@ export const getRemainingTime = (expiresAt: Date | number): string => {
   
   if (diff <= 0) return 'Đã hết hạn';
   
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const hours = Math.floor(diff / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   
-  if (days > 0) return `${days} ngày ${hours}h`;
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
+  return `${hours}h ${minutes}m`;
 };

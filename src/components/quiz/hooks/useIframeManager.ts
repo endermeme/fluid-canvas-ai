@@ -10,29 +10,12 @@ interface MiniGame {
 export const useIframeManager = (
   miniGame: MiniGame, 
   onReload?: () => void, 
-  gameExpired?: boolean,
-  onQuizScoreSubmit?: (score: number, totalQuestions: number) => Promise<void>
+  gameExpired?: boolean
 ) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeError, setIframeError] = useState<string | null>(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState<boolean>(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
-
-  // Listen for messages from iframe (for quiz score submission)
-  useEffect(() => {
-    const handleMessage = async (event: MessageEvent) => {
-      if (event.data?.type === 'QUIZ_COMPLETED' && onQuizScoreSubmit) {
-        try {
-          await onQuizScoreSubmit(event.data.score, event.data.totalQuestions);
-        } catch (error) {
-          console.error('Error submitting quiz score:', error);
-        }
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [onQuizScoreSubmit]);
 
   const loadIframeContent = async () => {
     if (!iframeRef.current || !miniGame?.content) {

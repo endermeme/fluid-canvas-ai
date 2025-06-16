@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Clock, Trophy, Sparkles, Zap } from 'lucide-react';
+import { RefreshCw, Clock, Trophy } from 'lucide-react';
 
 interface MatchingTemplateProps {
   content: any;
@@ -26,8 +26,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [gameWon, setGameWon] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
-  const [isMatching, setIsMatching] = useState<boolean>(false);
-  const [showCelebration, setShowCelebration] = useState<boolean>(false);
   const { toast } = useToast();
 
   const pairs = content?.pairs || [];
@@ -57,8 +55,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
       setGameWon(false);
       setSelectedLeft(null);
       setSelectedRight(null);
-      setIsMatching(false);
-      setShowCelebration(false);
     }
   }, [pairs, content?.settings?.timeLimit]);
 
@@ -72,7 +68,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
     } else if (timeLeft === 0 && !gameOver && !gameWon) {
       setGameOver(true);
       toast({
-        title: "Hết thời gian! ⏰",
+        title: "Hết thời gian!",
         description: "Bạn đã hết thời gian làm bài.",
         variant: "destructive",
       });
@@ -82,17 +78,14 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   useEffect(() => {
     if (matchedPairs === totalPairs && totalPairs > 0 && !gameWon) {
       setGameWon(true);
-      setShowCelebration(true);
       const finalScore = calculateFinalScore();
       setScore(finalScore);
       
       toast({
-        title: "Chúc mừng! 🎉🏆",
-        description: `Bạn đã hoàn thành với ${totalPairs} cặp từ và đạt ${finalScore} điểm!`,
+        title: "Chúc mừng!",
+        description: `Bạn đã hoàn thành trò chơi với ${totalPairs} cặp từ và đạt ${finalScore} điểm.`,
         variant: "default",
       });
-
-      setTimeout(() => setShowCelebration(false), 3000);
     }
   }, [matchedPairs, totalPairs, gameWon, toast]);
 
@@ -111,7 +104,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   };
 
   const handleLeftItemClick = (id: number) => {
-    if (gameOver || gameWon || isMatching) return;
+    if (gameOver || gameWon) return;
     
     if (leftItems.find(item => item.id === id)?.matched) return;
     
@@ -119,7 +112,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   };
 
   const handleRightItemClick = (id: number) => {
-    if (gameOver || gameWon || isMatching) return;
+    if (gameOver || gameWon) return;
     
     if (rightItems.find(item => item.id === id)?.matched) return;
     
@@ -128,8 +121,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
 
   useEffect(() => {
     if (selectedLeft !== null && selectedRight !== null) {
-      setIsMatching(true);
-      
       const checkMatch = () => {
         if (selectedLeft === selectedRight) {
           setLeftItems(prevLeftItems => 
@@ -145,32 +136,33 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
           );
           
           setMatchedPairs(prev => prev + 1);
+          
           setScore(prev => prev + 10);
           
           toast({
-            title: "Tuyệt vời! ✨",
-            description: "Bạn đã ghép đúng một cặp! +10 điểm",
+            title: "Tuyệt vời!",
+            description: "Bạn đã ghép đúng một cặp.",
             variant: "default",
           });
         } else {
           setScore(prev => Math.max(0, prev - 2));
           
           toast({
-            title: "Không khớp 😅",
-            description: "Hãy thử lại với cặp khác. -2 điểm",
+            title: "Không khớp",
+            description: "Hãy thử lại với cặp khác.",
             variant: "destructive",
           });
         }
       };
       
-      setTimeout(() => {
-        checkMatch();
-        setTimeout(() => {
-          setSelectedLeft(null);
-          setSelectedRight(null);
-          setIsMatching(false);
-        }, 800);
-      }, 500);
+      checkMatch();
+      
+      const timer = setTimeout(() => {
+        setSelectedLeft(null);
+        setSelectedRight(null);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
     }
   }, [selectedLeft, selectedRight, toast]);
 
@@ -197,19 +189,11 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
       setTimeLeft(content?.settings?.timeLimit || 60);
       setGameOver(false);
       setGameWon(false);
-      setIsMatching(false);
-      setShowCelebration(false);
     }
   };
 
   if (!content || !pairs.length) {
-    return (
-      <div className="h-full flex items-center justify-center p-4">
-        <div className="text-center">
-          <p className="text-lg text-foreground">Không có dữ liệu trò chơi nối từ</p>
-        </div>
-      </div>
-    );
+    return <div className="p-4">Không có dữ liệu trò chơi nối từ</div>;
   }
 
   const progressPercentage = (matchedPairs / totalPairs) * 100;
@@ -225,142 +209,111 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
         : "min-h-12 text-lg";
   };
 
-  const getItemClassName = (item: MatchingItem, isSelected: boolean, side: 'left' | 'right') => {
-    let baseClass = `w-full p-4 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center transition-all duration-300 border-2 relative overflow-hidden`;
-    
-    if (item.matched) {
-      return `${baseClass} bg-green-100 dark:bg-green-950 border-green-400 text-green-800 dark:text-green-200 cursor-not-allowed transform scale-95 shadow-lg`;
-    }
-    
-    if (isSelected) {
-      return `${baseClass} bg-primary/20 border-primary text-foreground transform scale-105 shadow-xl`;
-    }
-    
-    if (isMatching) {
-      return `${baseClass} bg-secondary/30 border-transparent cursor-not-allowed`;
-    }
-    
-    return `${baseClass} bg-card hover:bg-primary/5 border-border hover:border-primary/50 hover:shadow-lg hover:scale-105 cursor-pointer text-foreground`;
-  };
-
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-background to-background/95 overflow-hidden">
-      {/* Fixed Header với điểm số */}
-      <div className="flex-shrink-0 p-4 bg-background/95 backdrop-blur-sm border-b">
-        <div className="flex justify-between items-center mb-3">
-          <div className="text-sm font-medium px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
-            <Sparkles className="inline h-4 w-4 mr-1 text-primary" />
+    <div className="flex flex-col p-4 h-full">
+      <div className="relative mb-4">
+        <div className="flex justify-between items-center mb-2 mt-12">
+          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
             Đã ghép: {matchedPairs}/{totalPairs}
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center text-sm font-medium px-4 py-2 bg-yellow-500/10 rounded-full border border-yellow-300/30">
-              <Trophy className="h-4 w-4 mr-2 text-yellow-600" />
-              <span className="font-bold text-foreground">{score}</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+              <Trophy className="h-4 w-4 mr-1 text-yellow-500" />
+              Điểm: {score}
             </div>
-            <div className="text-sm font-medium flex items-center px-4 py-2 bg-blue-500/10 rounded-full border border-blue-300/30">
-              <Clock className="h-4 w-4 mr-2 text-blue-600" />
-              <span className="text-foreground">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
+            <div className="text-sm font-medium flex items-center px-3 py-1 bg-primary/10 rounded-full">
+              <Clock className="h-4 w-4 mr-1" />
+              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
             </div>
           </div>
         </div>
-        <Progress value={progressPercentage} className="h-3" />
+        <Progress value={progressPercentage} className="h-2" />
       </div>
 
       {gameWon ? (
-        <div className="flex-1 flex items-center justify-center p-6">
-          <Card className="p-8 text-center max-w-md bg-card border shadow-2xl">
-            <div className="mb-4 flex justify-center">
-              <Trophy className="h-16 w-16 text-yellow-500 animate-bounce" />
-            </div>
-            <h2 className="text-3xl font-bold mb-4 text-foreground">
-              Chúc mừng!
-            </h2>
-            <p className="mb-3 text-lg text-muted-foreground">Bạn đã hoàn thành với {totalPairs} cặp từ.</p>
-            <div className="mb-3 p-4 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
-              <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-400 flex items-center justify-center">
-                <Zap className="h-6 w-6 mr-2" />
-                {score} điểm
-              </p>
-            </div>
-            <p className="mb-6 text-muted-foreground">
-              Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-            </p>
-            <Button onClick={handleRestart} className="w-full" size="lg">
+        <div className="flex-grow flex items-center justify-center">
+          <Card className="p-6 text-center max-w-md">
+            <h2 className="text-2xl font-bold mb-4">Chúc mừng!</h2>
+            <p className="mb-2">Bạn đã hoàn thành trò chơi với {totalPairs} cặp từ.</p>
+            <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
+            <p className="mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
+            <Button onClick={handleRestart}>
               <RefreshCw className="mr-2 h-4 w-4" />
               Chơi lại
             </Button>
           </Card>
         </div>
       ) : gameOver ? (
-        <div className="flex-1 flex items-center justify-center p-6">
-          <Card className="p-8 text-center max-w-md bg-card border shadow-2xl">
-            <h2 className="text-2xl font-bold mb-4 text-red-600">Hết thời gian! ⏰</h2>
-            <p className="mb-3 text-muted-foreground">Bạn đã ghép được {matchedPairs} trong tổng số {totalPairs} cặp từ.</p>
-            <div className="mb-3 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
-              <p className="text-xl font-bold text-blue-700 dark:text-blue-400 flex items-center justify-center">
-                <Trophy className="h-5 w-5 mr-2" />
-                {score} điểm
-              </p>
-            </div>
-            <Button onClick={handleRestart} className="w-full" size="lg">
+        <div className="flex-grow flex items-center justify-center">
+          <Card className="p-6 text-center max-w-md">
+            <h2 className="text-2xl font-bold mb-4">Hết thời gian!</h2>
+            <p className="mb-2">Bạn đã ghép được {matchedPairs} trong tổng số {totalPairs} cặp từ.</p>
+            <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
+            <Button onClick={handleRestart}>
               <RefreshCw className="mr-2 h-4 w-4" />
               Chơi lại
             </Button>
           </Card>
         </div>
       ) : (
-        <div className="flex-1 p-6 overflow-hidden">
-          <div className="h-full grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="p-4 bg-card border shadow-lg overflow-hidden">
-              <h3 className="text-lg font-semibold mb-3 text-center bg-primary/10 py-2 px-4 rounded-lg border border-primary/20">
-                <span className="text-foreground">Cột A</span>
-              </h3>
-              <div className="space-y-3 overflow-y-auto max-h-[calc(100%-4rem)]">
-                {leftItems.map((item) => (
-                  <button
-                    key={`left-${item.id}`}
-                    className={getItemClassName(item, selectedLeft === item.id, 'left')}
-                    onClick={() => handleLeftItemClick(item.id)}
-                    disabled={item.matched || isMatching}
-                  >
-                    <span className="line-clamp-2 relative z-10">{item.text}</span>
-                  </button>
-                ))}
-              </div>
-            </Card>
-            
-            <Card className="p-4 bg-card border shadow-lg overflow-hidden">
-              <h3 className="text-lg font-semibold mb-3 text-center bg-primary/10 py-2 px-4 rounded-lg border border-primary/20">
-                <span className="text-foreground">Cột B</span>
-              </h3>
-              <div className="space-y-3 overflow-y-auto max-h-[calc(100%-4rem)]">
-                {rightItems.map((item) => (
-                  <button
-                    key={`right-${item.id}`}
-                    className={getItemClassName(item, selectedRight === item.id, 'right')}
-                    onClick={() => handleRightItemClick(item.id)}
-                    disabled={item.matched || isMatching}
-                  >
-                    <span className="line-clamp-2 relative z-10">{item.text}</span>
-                  </button>
-                ))}
-              </div>
-            </Card>
-          </div>
-
-          <div className="mt-4 flex-shrink-0">
-            <Button 
-              variant="outline" 
-              onClick={handleRestart}
-              className="w-full bg-card border-primary/20 hover:bg-primary/10"
-              size="sm"
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Làm lại
-            </Button>
-          </div>
+        <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="p-3 bg-background/50 border border-primary/10">
+            <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột A</h3>
+            <div className="space-y-2">
+              {leftItems.map((item) => (
+                <button
+                  key={`left-${item.id}`}
+                  className={`w-full p-3 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
+                    item.matched 
+                      ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
+                      : selectedLeft === item.id
+                        ? 'bg-primary/20 border-primary border'
+                        : 'bg-secondary hover:bg-secondary/80 border-transparent border'
+                  }`}
+                  onClick={() => handleLeftItemClick(item.id)}
+                  disabled={item.matched}
+                >
+                  <span className="line-clamp-2">{item.text}</span>
+                </button>
+              ))}
+            </div>
+          </Card>
+          
+          <Card className="p-3 bg-background/50 border border-primary/10">
+            <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột B</h3>
+            <div className="space-y-2">
+              {rightItems.map((item) => (
+                <button
+                  key={`right-${item.id}`}
+                  className={`w-full p-3 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
+                    item.matched 
+                      ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
+                      : selectedRight === item.id
+                        ? 'bg-primary/20 border-primary border'
+                        : 'bg-secondary hover:bg-secondary/80 border-transparent border'
+                  }`}
+                  onClick={() => handleRightItemClick(item.id)}
+                  disabled={item.matched}
+                >
+                  <span className="line-clamp-2">{item.text}</span>
+                </button>
+              ))}
+            </div>
+          </Card>
         </div>
       )}
+
+      <div className="mt-4">
+        <Button 
+          variant="outline" 
+          onClick={handleRestart}
+          className="w-full bg-gradient-to-r from-secondary/30 to-background/90 border-primary/20"
+          size="sm"
+        >
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Làm lại
+        </Button>
+      </div>
     </div>
   );
 };

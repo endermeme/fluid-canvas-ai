@@ -1,22 +1,24 @@
 
 export const memorySampleData = {
   title: "Trò chơi ghi nhớ",
-  description: "Tìm các cặp thẻ khớp nhau",
-  pairs: [
-    { term: "Apple", definition: "🍎" },
-    { term: "Banana", definition: "🍌" },
-    { term: "Orange", definition: "🍊" },
-    { term: "Grape", definition: "🍇" },
-    { term: "Strawberry", definition: "🍓" },
-    { term: "Mango", definition: "🥭" },
-    { term: "Pineapple", definition: "🍍" },
-    { term: "Watermelon", definition: "🍉" },
-    { term: "Cherry", definition: "🍒" },
-    { term: "Peach", definition: "🍑" }
+  description: "Tìm các cặp thẻ giống nhau",
+  cards: [
+    { id: 1, content: "🍎", matched: false },
+    { id: 2, content: "🍎", matched: false },
+    { id: 3, content: "🍌", matched: false },
+    { id: 4, content: "🍌", matched: false },
+    { id: 5, content: "🍊", matched: false },
+    { id: 6, content: "🍊", matched: false },
+    { id: 7, content: "🍇", matched: false },
+    { id: 8, content: "🍇", matched: false },
+    { id: 9, content: "🍓", matched: false },
+    { id: 10, content: "🍓", matched: false },
+    { id: 11, content: "🥭", matched: false },
+    { id: 12, content: "🥭", matched: false },
   ],
   settings: {
-    useTimer: true,
-    timeLimit: 180,
+    timeLimit: 120,
+    showTimeLimit: true,
     allowHints: true
   }
 };

@@ -44,131 +44,30 @@ export type Database = {
           },
         ]
       }
-      educational_games: {
-        Row: {
-          category: string
-          created_at: string
-          created_by: string | null
-          description: string | null
-          difficulty: string
-          duration: number
-          game_content: Json
-          id: string
-          image_url: string | null
-          instructions: string | null
-          is_published: boolean | null
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          difficulty: string
-          duration?: number
-          game_content?: Json
-          id?: string
-          image_url?: string | null
-          instructions?: string | null
-          is_published?: boolean | null
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          difficulty?: string
-          duration?: number
-          game_content?: Json
-          id?: string
-          image_url?: string | null
-          instructions?: string | null
-          is_published?: boolean | null
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      game_attempts: {
-        Row: {
-          completed_at: string
-          correct_answers: number
-          game_id: string
-          id: string
-          score: number
-          time_taken: number | null
-          total_questions: number
-          user_id: string | null
-          user_name: string | null
-        }
-        Insert: {
-          completed_at?: string
-          correct_answers?: number
-          game_id: string
-          id?: string
-          score: number
-          time_taken?: number | null
-          total_questions: number
-          user_id?: string | null
-          user_name?: string | null
-        }
-        Update: {
-          completed_at?: string
-          correct_answers?: number
-          game_id?: string
-          id?: string
-          score?: number
-          time_taken?: number | null
-          total_questions?: number
-          user_id?: string | null
-          user_name?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "game_attempts_game_id_fkey"
-            columns: ["game_id"]
-            isOneToOne: false
-            referencedRelation: "educational_games"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       game_participants: {
         Row: {
-          completion_time: number | null
           game_id: string | null
           id: string
           ip_address: string | null
           name: string
           retry_count: number | null
-          score: number | null
           timestamp: string
-          total_questions: number | null
         }
         Insert: {
-          completion_time?: number | null
           game_id?: string | null
           id?: string
           ip_address?: string | null
           name: string
           retry_count?: number | null
-          score?: number | null
           timestamp?: string
-          total_questions?: number | null
         }
         Update: {
-          completion_time?: number | null
           game_id?: string | null
           id?: string
           ip_address?: string | null
           name?: string
           retry_count?: number | null
-          score?: number | null
           timestamp?: string
-          total_questions?: number | null
         }
         Relationships: [
           {
@@ -179,77 +78,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      game_scores: {
-        Row: {
-          completed_at: string
-          completion_time: number | null
-          game_id: string | null
-          game_type: string
-          id: string
-          ip_address: string | null
-          player_name: string
-          score: number
-          total_questions: number
-        }
-        Insert: {
-          completed_at?: string
-          completion_time?: number | null
-          game_id?: string | null
-          game_type?: string
-          id?: string
-          ip_address?: string | null
-          player_name: string
-          score?: number
-          total_questions?: number
-        }
-        Update: {
-          completed_at?: string
-          completion_time?: number | null
-          game_id?: string | null
-          game_type?: string
-          id?: string
-          ip_address?: string | null
-          player_name?: string
-          score?: number
-          total_questions?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "game_scores_game_id_fkey"
-            columns: ["game_id"]
-            isOneToOne: false
-            referencedRelation: "games"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      game_templates: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          is_active: boolean | null
-          name: string
-          template_data: Json
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_active?: boolean | null
-          name: string
-          template_data?: Json
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_active?: boolean | null
-          name?: string
-          template_data?: Json
-        }
-        Relationships: []
       }
       games: {
         Row: {
@@ -263,8 +91,6 @@ export type Database = {
           id: string
           is_preset: boolean | null
           is_published: boolean | null
-          last_accessed_at: string | null
-          share_count: number | null
           title: string
         }
         Insert: {
@@ -278,8 +104,6 @@ export type Database = {
           id?: string
           is_preset?: boolean | null
           is_published?: boolean | null
-          last_accessed_at?: string | null
-          share_count?: number | null
           title: string
         }
         Update: {
@@ -293,8 +117,6 @@ export type Database = {
           id?: string
           is_preset?: boolean | null
           is_published?: boolean | null
-          last_accessed_at?: string | null
-          share_count?: number | null
           title?: string
         }
         Relationships: []
@@ -441,7 +263,7 @@ export type Database = {
         Row: {
           category: string
           created_at: string
-          created_by: string
+          created_by: string | null
           description: string | null
           difficulty: string
           duration: number
@@ -453,7 +275,7 @@ export type Database = {
         Insert: {
           category: string
           created_at?: string
-          created_by: string
+          created_by?: string | null
           description?: string | null
           difficulty: string
           duration?: number
@@ -465,7 +287,7 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           description?: string | null
           difficulty?: string
           duration?: number
@@ -592,28 +414,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_game_leaderboard: {
-        Args: { target_game_id: string; limit_count?: number }
-        Returns: {
-          player_name: string
-          score: number
-          total_questions: number
-          completion_time: number
-          completed_at: string
-        }[]
-      }
-      increment_share_count: {
-        Args: { game_id: string }
-        Returns: undefined
-      }
-      update_user_role: {
-        Args: { target_user_id: string; new_role: string }
-        Returns: undefined
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
