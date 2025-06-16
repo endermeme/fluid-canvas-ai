@@ -1,4 +1,3 @@
-
 # Quyết định thiết kế và sửa đổi
 
 ## Ngày 2025-01-16
@@ -34,17 +33,6 @@
   - Chỉ tạo stub functions cho các hàm thực sự cần thiết như drawObstacles, drawCars, updateGame, resetGame
   - Thêm kiểm tra an toàn cho canvas context trong error handling script
 - **Lý do**: Khắc phục lỗi "function statement requires a name" và tránh tạo functions không cần thiết cho built-in methods
-
-### Cải thiện cấu trúc Database Supabase
-- **File đã sửa**: Database constraints và relationships
-- **Loại thay đổi**: Database optimization - Foreign key constraints
-- **Mô tả**: 
-  - Thêm foreign key constraints cho tất cả các bảng để đảm bảo tính toàn vẹn dữ liệu
-  - Thêm unique constraint cho share_code trong bảng shared_games
-  - Tạo các index để tăng hiệu suất truy vấn (game_type, expires_at, is_published, etc.)
-  - Thêm triggers để tự động cập nhật updated_at cho các bảng chính
-  - Sử dụng CASCADE DELETE để tự động xóa dữ liệu liên quan khi xóa parent record
-- **Lý do**: Đảm bảo tính toàn vẹn dữ liệu và cải thiện hiệu suất database
 
 ### Cập nhật HomePage - Đơn giản hóa giao diện
 - **File đã sửa**: `src/pages/HomePage.tsx`
@@ -82,3 +70,14 @@
 - **Loại thay đổi**: Cải thiện game logic
 - **Mô tả**: Chỉ tìm kiếm từ theo hướng thuận (trái sang phải, trên xuống dưới), loại bỏ tìm kiếm từ ngược
 - **Lý do**: Đơn giản hóa trò chơi và giảm nhầm lẫn cho người chơi
+
+### Cập nhật GameLoading với Stage Progress và loại bỏ stub functions
+- **File đã sửa**: `src/components/quiz/GameLoading.tsx`, `src/components/quiz/utils/iframe-enhancer.ts`
+- **File đã tạo**: `src/components/quiz/game-components/GameStageProgress.tsx`
+- **Loại thay đổi**: UI/UX improvement + Bug fix
+- **Mô tả**: 
+  - Thay đổi progress bar thành dạng stages với science icons (Atom, FlaskConical, Microscope, TestTube, Code)
+  - Mỗi giai đoạn có icon khoa học riêng, animation xoay khi active
+  - Bỏ hoàn toàn việc tạo stub functions trong iframe-enhancer để tránh lỗi "function statement requires a name"
+  - Stage progress có animation mượt mà và hiển thị giai đoạn hiện tại rõ ràng
+- **Lý do**: Cải thiện trải nghiệm người dùng với progress visual tốt hơn và khắc phục lỗi JavaScript
