@@ -58,7 +58,7 @@
     - Earth: 4x4px, blue-green gradient, 4s rotation, orbit radius 88px
     - Mars: 3.5x3.5px, red gradient, 5s reverse, orbit radius 92px
     - Jupiter: 5x5px, yellow-orange gradient, 6s rotation, orbit radius 96px
-    - Saturn: 4.5x4.5px, yellow gradient với ring, 7s reverse, orbit radius 100px
+    - Saturn: 4.5x4.5px, yellow gradient với ring effect, 7s reverse, orbit radius 100px
     - Neptune: 4x4px, blue gradient, 8s rotation, orbit radius 104px
   - **Animation Improvements**: 
     - Proper container wrapping để tránh planets bị tụm lại
@@ -178,11 +178,11 @@
   - Enhanced typography với gradient text effects
 - **Cải thiện chính**:
   - Visual Appeal: Gradient backgrounds, floating elements, better colors
-  - Progress Clarity: Step-by-step breakdown với detailed descriptions
-  - User Engagement: Fun facts và animated elements
-  - Professional Look: Better spacing, typography, và visual effects
+  - Progress Clarity: Step-by-step breakdown with detailed descriptions
+  - User Engagement: Fun facts and animated elements
+  - Professional Look: Better spacing, typography, and visual effects
   - Responsive Design: Maintains quality across different screen sizes
-  - Animation Quality: Smooth transitions và meaningful animations
+  - Animation Quality: Smooth transitions and meaningful animations
 
 ### Phase 16 - TypeScript Error Fix for Memory Game - 2025-01-15:
 - **Thay đổi**: Sửa lỗi TypeScript về window.onGameComplete
@@ -195,19 +195,19 @@
   - Game giờ compile thành công không có TypeScript errors
   - Vẫn giữ nguyên chức năng completion message handling
   - Safe type checking cho window properties
-  - Proper error handling và fallbacks
+  - Proper error handling and fallbacks
 
 ### Phase 15 - Complete Memory Game & Shared Game System Fix - 2025-01-15:
 - **Thay đổi**: Sửa hoàn toàn Memory game và shared game system
 - **MemoryTemplate.tsx**: 
   - Cải thiện radical data handling với fallback cho mọi format
   - Thêm extensive logging và debugging information
-  - Fixed game initialization với proper error handling
-  - Enhanced completion detection và score submission
+  - Fixed game initialization with proper error handling
+  - Enhanced completion detection and score submission
   - Better responsive design with improved card layouts
-  - Added comprehensive fallback data khi không có sample data
+  - Added comprehensive fallback data when no sample data
   - Improved timer handling and game state management
-  - Better visual feedback cho game progress and completion
+  - Better visual feedback for game progress and completion
 - **EnhancedGameView.tsx**: 
   - Complete rewrite of shared game handling
   - Enhanced error handling with retry mechanism
@@ -230,8 +230,8 @@
 ### Phase 14 - Complete Fix for Memory Game & Enhanced Shared Game Support - 2025-01-15:
 - **Thay đổi**: Sửa hoàn toàn Memory game và cải thiện hệ thống shared games
 - **MemoryTemplate.tsx**: 
-  - Enhanced data handling để support cả old và new format
-  - Thêm extensive console.log để debug data flow
+  - Enhanced data handling to support both old and new format
+  - Thêm extensive console.log to debug data flow
   - Improved error handling and fallback for missing data
   - Fixed game restart mechanism
   - Added proper completion message to support score submission
@@ -273,7 +273,7 @@
   - Cải thiện handling cho shared games
 - **useIframeManager.ts**: Thêm message listener cho quiz completion
   - Listen cho QUIZ_COMPLETED messages từ iframe
-  - Auto submit score khi quiz hoàn thành trong shared mode
+  - Auto submit score when quiz is completed in shared mode
   - Improved error handling and debugging
 - **Loại cải tiến**:
   - Data Structure: Sửa cấu trúc dữ liệu Memory game từ cards sang pairs
