@@ -71,3 +71,38 @@
 - Giao diện preset games giờ đã đồng nhất với custom games và homepage
 - Background có đầy đủ hiệu ứng khoa học và quantum
 - Tông màu xanh da trời nhất quán trên toàn bộ ứng dụng
+
+## WordSearch - Cải thiện dữ liệu mẫu
+
+### Thay đổi thực hiện:
+- **File sửa đổi**: `src/components/quiz/preset-games/data/wordSearchSampleData.ts`
+- **Loại thay đổi**: Game Content - Cải thiện chất lượng
+
+### Chi tiết:
+1. **Đa dạng hóa vị trí từ**:
+   - Từ ngang: đặt ở nhiều dòng khác nhau
+   - Từ dọc: đặt ở nhiều cột khác nhau  
+   - Từ chéo: hỗ trợ đường chéo (nếu bật)
+
+2. **Cấp độ Easy**:
+   - Grid 8x8 nhỏ gọn
+   - 7 từ ngắn dễ tìm
+   - Chỉ từ ngang và dọc, không chéo
+   - Thời gian 3 phút
+
+3. **Cấp độ Hard**:
+   - Grid 15x15 lớn
+   - 12 từ với độ dài đa dạng
+   - Hỗ trợ từ chéo
+   - Thời gian 8 phút
+
+4. **Cấp độ Medium (mặc định)**:
+   - Grid 13x13 vừa phải
+   - 9 từ về chủ đề hoa
+   - Từ ngang, dọc và chéo
+   - Thời gian 5 phút
+
+### Kết quả:
+- Game tìm từ có độ khó đa dạng phù hợp mọi lứa tuổi
+- Từ được đặt ở nhiều vị trí và hướng khác nhau
+- Trải nghiệm chơi thú vị và thách thức hơn
