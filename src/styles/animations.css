@@ -73,6 +73,16 @@
   50% { filter: drop-shadow(0 0 16px rgba(59, 130, 246, 0.8)); }
 }
 
+/* Planet orbital animations - Custom keyframes for each planet */
+@keyframes planet-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Utility Classes */
 .animate-shimmer {
   animation: shimmer 2s infinite;
@@ -112,6 +122,11 @@
 
 .animate-progress-glow {
   animation: progress-glow 1.5s ease-in-out infinite;
+}
+
+/* Planet animations */
+.animate-planet-orbit {
+  animation: planet-orbit linear infinite;
 }
 
 /* Perspective for 3D effects */

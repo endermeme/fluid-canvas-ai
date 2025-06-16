@@ -2,6 +2,118 @@
 
 ## Ngày: 2025-01-15
 
+### Phase 22 - Fixed Planet Orbital Motion with Transform Origin - 2025-01-15:
+- **Thay đổi**: Sửa hoàn toàn cách các hành tinh quay để quay theo vòng tròn thay vì bị tụm lại
+- **GameLoading.tsx**: 
+  - **Fixed Transform Method**: Sử dụng `transform: translate(-px, -px) translate(0, -distance)` thay vì transformOrigin
+  - **Proper Planet Positioning**: Mỗi planet positioned absolute từ center và translated ra khoảng cách orbit
+  - **Complete Circular Motion**: Planets giờ quay theo vòng tròn hoàn chỉnh 360 degrees
+  - **Enhanced Planet Visibility**: Tăng size planets (4-8px) và rõ nét borders để dễ nhìn
+  - **Planet Characteristics**:
+    - Mercury: 4x4px, gray gradient, 2s rotation, orbit 32px từ center
+    - Venus: 5x5px, orange-yellow gradient, 3s reverse, orbit 48px từ center
+    - Earth: 6x6px, blue-green gradient, 4s rotation, orbit 64px từ center
+    - Mars: 5x5px, red gradient, 5s reverse, orbit 80px từ center
+    - Jupiter: 8x8px, yellow-orange gradient, 6s rotation, orbit 96px từ center
+    - Saturn: 7x7px, yellow gradient với ring, 7s reverse, orbit 112px từ center
+    - Neptune: 6x6px, blue gradient, 8s rotation, orbit 128px từ center
+  - **Animation Method**: 
+    - Positioned từ center với absolute positioning
+    - Transform translate để move ra orbit distance
+    - CSS spin animation cho rotation movement
+    - Different speeds và directions cho realism
+  - **Visual Improvements**:
+    - Larger spinner container (64x64 = 256px) để accommodate all orbits
+    - Better contrast với white borders và shadows
+    - Gradient backgrounds cho realistic planet colors
+    - Saturn's ring effect với border scale
+    - Enhanced orbit rings với different opacity levels
+- **animations.css**: 
+  - Thêm planet-orbit keyframes cho smooth rotation
+  - Enhanced animation utilities cho planet motion
+  - Better orbital animation classes
+- **Technical Implementation**:
+  - Transform Method: `translate(-half-width, -half-height) translate(0, -orbit-distance)`
+  - Animation: CSS spin animation với linear timing
+  - Positioning: Absolute từ center container
+  - Rotation Origin: Default rotation around planet's own center
+- **Cải thiện chính**:
+  - Planets giờ quay theo vòng tròn hoàn chỉnh thay vì giữ nguyên vị trí
+  - Không còn bị tụm lại một chỗ do proper transform method
+  - Realistic orbital motion với varied speeds và directions
+  - Enhanced visibility với larger sizes và better contrast
+  - Smooth circular motion với proper CSS animations
+  - Professional solar system appearance với 7 distinct planets
+
+### Phase 21 - Fixed 7-Planet Orbital Animation - 2025-01-15:
+- **Thay đổi**: Sửa lỗi các hành tinh bị tụm lại một chỗ, thiết lập quỹ đạo quay vòng tròn hoàn chỉnh
+- **GameLoading.tsx**: 
+  - **Fixed Planet Positioning**: Mỗi planet được wrap trong container riêng với absolute positioning
+  - **Correct Transform Origin**: Sử dụng transform origin chính xác cho mỗi planet (6px, 7px, 8px, etc.)
+  - **Enhanced Planet Visibility**: Tăng size planets và thêm white borders để rõ nét hơn
+  - **Complete Orbital Motion**: Planets giờ quay theo vòng tròn hoàn chỉnh thay vì giữ nguyên vị trí
+  - **Planet Characteristics**:
+    - Mercury: 3x3px, gray gradient, 2s rotation, orbit radius 80px
+    - Venus: 3.5x3.5px, orange-yellow gradient, 3s reverse, orbit radius 84px
+    - Earth: 4x4px, blue-green gradient, 4s rotation, orbit radius 88px
+    - Mars: 3.5x3.5px, red gradient, 5s reverse, orbit radius 92px
+    - Jupiter: 5x5px, yellow-orange gradient, 6s rotation, orbit radius 96px
+    - Saturn: 4.5x4.5px, yellow gradient với ring, 7s reverse, orbit radius 100px
+    - Neptune: 4x4px, blue gradient, 8s rotation, orbit radius 104px
+  - **Animation Improvements**: 
+    - Proper container wrapping để tránh planets bị tụm lại
+    - Transform origin được tính chính xác cho mỗi orbit
+    - Planets bắt đầu từ top position và quay theo clockwise/counterclockwise
+    - Smooth linear animations với varied speeds
+  - **Visual Enhancements**:
+    - White borders với opacity 50% cho better definition
+    - Gradient backgrounds cho realistic planet colors
+    - Shadow effects cho depth
+    - Saturn's ring effect với scale transform
+- **Technical Fixes**:
+  - Container Structure: Mỗi planet trong riêng biệt absolute container
+  - Transform Origin: Calculated chính xác based on orbit radius
+  - Animation Timing: Linear animation để smooth rotation
+  - Positioning: Consistent top: 0px, left: 50% starting positions
+- **Cải thiện chính**:
+  - Planets không còn bị tụm lại một chỗ
+  - Quay theo vòng tròn hoàn chỉnh với realistic orbital motion
+  - Rõ nét và dễ nhìn hơn với enhanced borders và colors
+  - Realistic solar system với 7 planets có characteristics riêng biệt
+  - Smooth animations với proper physics-like timing
+
+### Phase 20 - 7-Planet Solar System with Clear Orbital Motion - 2025-01-15:
+- **Thay đổi**: Cải thiện vòng xoay với 7 hành tinh rõ nét và quay theo quỹ đạo vòng tròn hoàn chỉnh
+- **GameLoading.tsx**: 
+  - 7 Distinct Planets: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Neptune
+  - Clear Planet Design: Gradient colors, different sizes, shadows, borders for definition
+  - Complete Orbital Motion: Planets rotate in full circles using transformOrigin
+  - Varied Animation Speeds: 2s to 8s với alternating directions (normal/reverse)
+  - Planet Characteristics:
+    - Mercury: Gray gradient, smallest, fastest (2s)
+    - Venus: Orange-yellow gradient, medium size (3s reverse)
+    - Earth: Blue-green gradient, medium size (4s)
+    - Mars: Red gradient, smaller size (5s reverse)
+    - Jupiter: Yellow-orange gradient, largest planet (6s)
+    - Saturn: Yellow gradient với ring effect (7s reverse)
+    - Neptune: Blue gradient, distant planet (8s)
+  - Enhanced Visual Clarity: White borders, shadows, gradient backgrounds
+  - Saturn's Ring: Additional ring element for realism
+  - Increased Spinner Size: 40x40 (160px) cho better planet visibility
+  - 7 Orbit Rings: Different opacity levels for each planet's path
+- **Animation Improvements**:
+  - Full 360° Rotation: Planets complete full orbits around brain center
+  - Realistic Speeds: Inner planets faster, outer planets slower
+  - Direction Variety: Alternating clockwise/counterclockwise rotations
+  - Smooth Transforms: Linear animations with proper transformOrigin calculations
+- **Cải thiện chính**:
+  - Planet Clarity: Rõ nét hơn với borders, shadows, và gradient colors
+  - Complete Orbits: Planets quay 1 vòng tròn hoàn chỉnh thay vì giữ nguyên vị trí
+  - Solar System Realism: 7 planets với characteristics tương tự hệ mặt trời thật
+  - Visual Hierarchy: Brain "sun" ở center với planets orbiting around
+  - Enhanced Definition: Better contrast và visibility cho all planetary elements
+  - Improved Scale: Larger spinner size để accommodate 7 planets clearly
+
 ### Phase 19 - Solar System Brain Spinner Design - 2025-01-15:
 - **Thay đổi**: Thiết kế lại vòng xoay với hình não ở trung tâm và các vòng quỹ đạo như hệ mặt trời
 - **GameLoading.tsx**: 
@@ -241,72 +353,3 @@
 - Game functionality được giữ nguyên 100%
 - Safe type checking implemented
 - No runtime errors expected with current implementation
-
-### Phase 20 - 7-Planet Solar System with Clear Orbital Motion - 2025-01-15:
-- **Thay đổi**: Cải thiện vòng xoay với 7 hành tinh rõ nét và quay theo quỹ đạo vòng tròn hoàn chỉnh
-- **GameLoading.tsx**: 
-  - 7 Distinct Planets: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Neptune
-  - Clear Planet Design: Gradient colors, different sizes, shadows, borders for definition
-  - Complete Orbital Motion: Planets rotate in full circles using transformOrigin
-  - Varied Animation Speeds: 2s to 8s với alternating directions (normal/reverse)
-  - Planet Characteristics:
-    - Mercury: Gray gradient, smallest, fastest (2s)
-    - Venus: Orange-yellow gradient, medium size (3s reverse)
-    - Earth: Blue-green gradient, medium size (4s)
-    - Mars: Red gradient, smaller size (5s reverse)
-    - Jupiter: Yellow-orange gradient, largest planet (6s)
-    - Saturn: Yellow gradient với ring effect (7s reverse)
-    - Neptune: Blue gradient, distant planet (8s)
-  - Enhanced Visual Clarity: White borders, shadows, gradient backgrounds
-  - Saturn's Ring: Additional ring element for realism
-  - Increased Spinner Size: 40x40 (160px) cho better planet visibility
-  - 7 Orbit Rings: Different opacity levels for each planet's path
-- **Animation Improvements**:
-  - Full 360° Rotation: Planets complete full orbits around brain center
-  - Realistic Speeds: Inner planets faster, outer planets slower
-  - Direction Variety: Alternating clockwise/counterclockwise rotations
-  - Smooth Transforms: Linear animations with proper transformOrigin calculations
-- **Cải thiện chính**:
-  - Planet Clarity: Rõ nét hơn với borders, shadows, và gradient colors
-  - Complete Orbits: Planets quay 1 vòng tròn hoàn chỉnh thay vì giữ nguyên vị trí
-  - Solar System Realism: 7 planets với characteristics tương tự hệ mặt trời thật
-  - Visual Hierarchy: Brain "sun" ở center với planets orbiting around
-  - Enhanced Definition: Better contrast và visibility cho all planetary elements
-  - Improved Scale: Larger spinner size để accommodate 7 planets clearly
-
-### Phase 21 - Fixed 7-Planet Orbital Animation - 2025-01-15:
-- **Thay đổi**: Sửa lỗi các hành tinh bị tụm lại một chỗ, thiết lập quỹ đạo quay vòng tròn hoàn chỉnh
-- **GameLoading.tsx**: 
-  - **Fixed Planet Positioning**: Mỗi planet được wrap trong container riêng với absolute positioning
-  - **Correct Transform Origin**: Sử dụng transform origin chính xác cho mỗi planet (6px, 7px, 8px, etc.)
-  - **Enhanced Planet Visibility**: Tăng size planets và thêm white borders để rõ nét hơn
-  - **Complete Orbital Motion**: Planets giờ quay theo vòng tròn hoàn chỉnh thay vì giữ nguyên vị trí
-  - **Planet Characteristics**:
-    - Mercury: 3x3px, gray gradient, 2s rotation, orbit radius 80px
-    - Venus: 3.5x3.5px, orange-yellow gradient, 3s reverse, orbit radius 84px
-    - Earth: 4x4px, blue-green gradient, 4s rotation, orbit radius 88px
-    - Mars: 3.5x3.5px, red gradient, 5s reverse, orbit radius 92px
-    - Jupiter: 5x5px, yellow-orange gradient, 6s rotation, orbit radius 96px
-    - Saturn: 4.5x4.5px, yellow gradient với ring, 7s reverse, orbit radius 100px
-    - Neptune: 4x4px, blue gradient, 8s rotation, orbit radius 104px
-  - **Animation Improvements**: 
-    - Proper container wrapping để tránh planets bị tụm lại
-    - Transform origin được tính chính xác cho mỗi orbit
-    - Planets bắt đầu từ top position và quay theo clockwise/counterclockwise
-    - Smooth linear animations với varied speeds
-  - **Visual Enhancements**:
-    - White borders với opacity 50% cho better definition
-    - Gradient backgrounds cho realistic planet colors
-    - Shadow effects cho depth
-    - Saturn's ring effect với scale transform
-- **Technical Fixes**:
-  - Container Structure: Mỗi planet trong riêng biệt absolute container
-  - Transform Origin: Calculated chính xác based on orbit radius
-  - Animation Timing: Linear animation để smooth rotation
-  - Positioning: Consistent top: 0px, left: 50% starting positions
-- **Cải thiện chính**:
-  - Planets không còn bị tụm lại một chỗ
-  - Quay theo vòng tròn hoàn chỉnh với realistic orbital motion
-  - Rõ nét và dễ nhìn hơn với enhanced borders và colors
-  - Realistic solar system với 7 planets có characteristics riêng biệt
-  - Smooth animations với proper physics-like timing
