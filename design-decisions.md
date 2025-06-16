@@ -20,3 +20,10 @@
 - **Loại thay đổi**: Cập nhật cấu hình AI
 - **Mô tả**: Thay đổi mô hình từ `gemini-2.5-pro-preview-05-06` sang `gemini-2.5-flash-preview-05-20`
 - **Lý do**: Sử dụng mô hình mới hơn và nhanh hơn cho cả custom game và preset game
+
+### Cải thiện logic tìm từ trong WordSearchTemplate
+- **File đã sửa**: `src/components/quiz/preset-games/templates/WordSearchTemplate.tsx`
+- **Loại thay đổi**: Cải thiện game logic
+- **Mô tả**: Chỉ tìm kiếm từ theo hướng thuận (trái sang phải, trên xuống dưới), loại bỏ tìm kiếm từ ngược
+- **Lý do**: Đơn giản hóa trò chơi và giảm nhầm lẫn cho người chơi
+
