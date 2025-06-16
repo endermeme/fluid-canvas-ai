@@ -9,16 +9,14 @@ interface PresetGameHeaderProps {
   onShare?: () => void;
   showShare?: boolean;
   isGameCreated?: boolean;
-  onBack?: () => void;
-  showBackButton?: boolean; // Thêm prop để kiểm soát hiển thị nút quay lại
+  onBack?: () => void; // Thêm prop cho custom back handler
 }
 
 const PresetGameHeader: React.FC<PresetGameHeaderProps> = ({ 
   onShare, 
   showShare = true,
   isGameCreated = false,
-  onBack,
-  showBackButton = true // Mặc định hiển thị nút quay lại
+  onBack
 }) => {
   const navigate = useNavigate();
 
@@ -31,20 +29,16 @@ const PresetGameHeader: React.FC<PresetGameHeaderProps> = ({
   };
 
   return (
-    <header className="flex justify-between items-center p-4 bg-background/80 backdrop-blur-md border-b sticky top-0 z-20">
-      {showBackButton ? (
-        <Card 
-          className="p-3 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 hover:from-primary/15 hover:to-primary/10 transition-all duration-200 cursor-pointer hover:shadow-md"
-          onClick={handleBack}
-        >
-          <div className="flex items-center gap-2">
-            <DoorOpen className="h-5 w-5 text-primary" />
-            <span className="text-sm font-medium text-primary">Quay lại</span>
-          </div>
-        </Card>
-      ) : (
-        <div></div> // Placeholder để giữ layout justify-between
-      )}
+    <header className="flex justify-between items-center p-3 bg-background/80 backdrop-blur-md border-b sticky top-0 z-20">
+      <Card 
+        className="p-2 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 hover:from-primary/15 hover:to-primary/10 transition-all duration-200 cursor-pointer hover:shadow-md"
+        onClick={handleBack}
+      >
+        <div className="flex items-center gap-2">
+          <DoorOpen className="h-5 w-5 text-primary" />
+          <span className="text-sm font-medium text-primary">Quay lại</span>
+        </div>
+      </Card>
 
       <div className="flex gap-2">
         <Button
