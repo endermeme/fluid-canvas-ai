@@ -114,9 +114,9 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
 
   if (!gameContent || !cards.length) {
     return (
-      <div className="h-full flex items-center justify-center p-4">
+      <div className="h-screen flex items-center justify-center p-4">
         <div className="text-center">
-          <p className="text-lg text-foreground">Không có dữ liệu thẻ ghi nhớ</p>
+          <p className="text-lg text-gray-800 dark:text-gray-200">Không có dữ liệu thẻ ghi nhớ</p>
         </div>
       </div>
     );
@@ -128,32 +128,32 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
     const percentage = Math.round((knownCount / cards.length) * 100);
     
     return (
-      <div className="h-full flex items-center justify-center p-4 bg-gradient-to-br from-violet-50 via-blue-50 to-cyan-50 dark:from-violet-950/30 dark:via-blue-950/30 dark:to-cyan-950/30 overflow-hidden">
-        <Card className="max-w-md w-full p-8 text-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-2xl border border-white/50 dark:border-gray-700/50">
+      <div className="h-screen flex items-center justify-center p-4 bg-gradient-to-br from-violet-100 via-blue-50 to-cyan-100 dark:from-violet-900/50 dark:via-blue-900/50 dark:to-cyan-900/50">
+        <Card className="max-w-md w-full p-8 text-center bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg shadow-2xl border border-white/50 dark:border-gray-700/50">
           <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br from-violet-500/20 to-blue-500/20">
             <BookOpen className="h-10 w-10 text-violet-600 dark:text-violet-400" />
           </div>
           
           <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">Kết Quả Ôn Tập</h2>
-          <p className="text-lg mb-4 text-gray-600 dark:text-gray-400">
-            Chủ đề: <span className="font-semibold text-foreground">{gameContent.title || topic}</span>
+          <p className="text-lg mb-4 text-gray-700 dark:text-gray-300">
+            Chủ đề: <span className="font-semibold text-gray-900 dark:text-gray-100">{gameContent.title || topic}</span>
           </p>
           
           <div className="mb-6">
             <div className="flex justify-between mb-3">
               <span className="text-gray-600 dark:text-gray-400">Đã biết</span>
-              <span className="font-bold text-foreground text-lg">{percentage}%</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100 text-lg">{percentage}%</span>
             </div>
             <Progress value={percentage} className="h-4" />
           </div>
           
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800/50 rounded-lg p-4">
+            <div className="bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-700/50 rounded-lg p-4">
               <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-green-700 dark:text-green-400">{knownCount}</div>
               <div className="text-sm text-green-600 dark:text-green-400">Đã biết</div>
             </div>
-            <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50 rounded-lg p-4">
+            <div className="bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-700/50 rounded-lg p-4">
               <XCircle className="h-8 w-8 text-red-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-red-700 dark:text-red-400">{unknownCount}</div>
               <div className="text-sm text-red-600 dark:text-red-400">Cần ôn</div>
@@ -173,9 +173,9 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
   const progress = ((currentCardIndex + 1) / cards.length) * 100;
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-violet-50 via-blue-50 to-cyan-50 dark:from-violet-950/30 dark:via-blue-950/30 dark:to-cyan-950/30 overflow-hidden">
-      {/* Fixed Header với điểm số */}
-      <div className="flex-shrink-0 p-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm border-b border-white/50 dark:border-gray-700/50">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-violet-100 via-blue-50 to-cyan-100 dark:from-violet-900/50 dark:via-blue-900/50 dark:to-cyan-900/50 overflow-hidden">
+      {/* Header với điểm số */}
+      <div className="flex-shrink-0 p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-white/50 dark:border-gray-700/50 shadow-sm">
         <div className="flex justify-between items-center mb-3">
           <div className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-violet-500/20 to-blue-500/20 rounded-full border border-violet-300/50 dark:border-violet-700/50">
             <Sparkles className="inline h-4 w-4 mr-1 text-violet-600 dark:text-violet-400" />
@@ -193,60 +193,65 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
         <Progress value={progress} className="h-3" />
       </div>
 
-      {/* Main Game Area - Scaled up */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-4xl">
-          {/* Flashcard - 3D Flip Animation */}
-          <div className="mb-8 perspective-1000">
+      {/* Main Game Area */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-6xl">
+          {/* Flashcard với hiệu ứng 3D flip */}
+          <div className="mb-8" style={{ perspective: '1000px' }}>
             <div 
-              className={`relative w-full h-80 cursor-pointer transition-transform duration-700 transform-style-preserve-3d ${
-                isFlipped ? 'rotate-y-180' : ''
+              className={`relative w-full h-96 cursor-pointer transition-transform duration-700 ${
+                isFlipped ? 'animate-flip-out' : 'animate-flip-in'
               }`}
               onClick={handleFlip}
-              style={{ transformStyle: 'preserve-3d' }}
+              style={{ 
+                transformStyle: 'preserve-3d',
+                transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+              }}
             >
-              {/* Front Side */}
+              {/* Mặt trước */}
               <Card 
-                className={`absolute inset-0 backface-hidden bg-gradient-to-br from-white/90 to-blue-50/90 dark:from-gray-800/90 dark:to-blue-950/90 
-                  shadow-2xl border border-white/50 dark:border-gray-700/50 backdrop-blur-sm
-                  hover:shadow-3xl transition-all duration-300 hover:scale-[1.02]`}
-                style={{ backfaceVisibility: 'hidden' }}
+                className="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-2xl border-0 backdrop-blur-sm hover:shadow-3xl transition-all duration-300"
+                style={{ 
+                  backfaceVisibility: 'hidden',
+                  transform: 'rotateY(0deg)'
+                }}
               >
-                <div className="absolute inset-0 p-8 flex flex-col items-center justify-center text-center">
-                  <div className="mb-6">
-                    <div className="text-sm text-violet-600 dark:text-violet-400 mb-3 font-medium">
-                      Mặt trước
+                <div className="absolute inset-0 p-12 flex flex-col items-center justify-center text-center">
+                  <div className="mb-8">
+                    <div className="text-sm text-blue-100 mb-4 font-medium uppercase tracking-wider">
+                      Câu hỏi
                     </div>
-                    <RotateCcw className="h-8 w-8 text-violet-500 mx-auto animate-spin-slow" />
+                    <RotateCcw className="h-12 w-12 text-blue-200 mx-auto animate-pulse" />
                   </div>
-                  <div className="text-3xl font-bold text-gray-800 dark:text-gray-200 leading-relaxed">
+                  <div className="text-4xl font-bold text-white leading-relaxed max-w-4xl">
                     {currentCard.front}
                   </div>
-                  <div className="mt-6 text-sm text-gray-500 dark:text-gray-400">
-                    Nhấp để lật thẻ
+                  <div className="mt-8 text-sm text-blue-200">
+                    Nhấp để xem đáp án
                   </div>
                 </div>
               </Card>
 
-              {/* Back Side */}
+              {/* Mặt sau */}
               <Card 
-                className={`absolute inset-0 backface-hidden rotate-y-180 bg-gradient-to-br from-cyan-50/90 to-blue-100/90 dark:from-cyan-950/90 dark:to-blue-900/90 
-                  shadow-2xl border border-white/50 dark:border-gray-700/50 backdrop-blur-sm
-                  hover:shadow-3xl transition-all duration-300 hover:scale-[1.02]`}
-                style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+                className="absolute inset-0 w-full h-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-2xl border-0 backdrop-blur-sm hover:shadow-3xl transition-all duration-300"
+                style={{ 
+                  backfaceVisibility: 'hidden',
+                  transform: 'rotateY(180deg)'
+                }}
               >
-                <div className="absolute inset-0 p-8 flex flex-col items-center justify-center text-center">
-                  <div className="mb-6">
-                    <div className="text-sm text-cyan-600 dark:text-cyan-400 mb-3 font-medium">
-                      Mặt sau
+                <div className="absolute inset-0 p-12 flex flex-col items-center justify-center text-center">
+                  <div className="mb-8">
+                    <div className="text-sm text-emerald-100 mb-4 font-medium uppercase tracking-wider">
+                      Đáp án
                     </div>
-                    <CheckCircle className="h-8 w-8 text-cyan-500 mx-auto" />
+                    <CheckCircle className="h-12 w-12 text-emerald-200 mx-auto" />
                   </div>
-                  <div className="text-3xl font-bold text-gray-800 dark:text-gray-200 leading-relaxed">
+                  <div className="text-4xl font-bold text-white leading-relaxed max-w-4xl">
                     {currentCard.back}
                   </div>
-                  <div className="mt-6 text-sm text-gray-500 dark:text-gray-400">
-                    Bạn đã biết chưa?
+                  <div className="mt-8 text-sm text-emerald-200">
+                    Bạn đã biết câu trả lời chưa?
                   </div>
                 </div>
               </Card>
@@ -255,9 +260,9 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
         </div>
       </div>
 
-      {/* Fixed Bottom Controls */}
-      <div className="flex-shrink-0 p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm border-t border-white/50 dark:border-gray-700/50">
-        <div className="max-w-4xl mx-auto">
+      {/* Bottom Controls */}
+      <div className="flex-shrink-0 p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-t border-white/50 dark:border-gray-700/50 shadow-lg">
+        <div className="max-w-6xl mx-auto">
           <div className="flex flex-col gap-4">
             {/* Navigation Controls */}
             <div className="flex justify-center gap-4">
@@ -266,18 +271,18 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
                 disabled={currentCardIndex === 0}
                 variant="outline"
                 size="lg"
-                className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/50 dark:border-gray-700/50 hover:bg-white/90 dark:hover:bg-gray-800/90"
+                className="bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm border-white/50 dark:border-gray-600/50 hover:bg-white dark:hover:bg-gray-700"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="h-5 w-5 mr-2" />
                 Trước
               </Button>
               
               <Button
                 onClick={handleFlip}
                 size="lg"
-                className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 shadow-lg"
+                className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 shadow-lg px-8"
               >
-                <RotateCcw className="h-4 w-4 mr-2" />
+                <RotateCcw className="h-5 w-5 mr-2" />
                 Lật thẻ
               </Button>
               
@@ -286,10 +291,10 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
                 disabled={currentCardIndex === cards.length - 1}
                 variant="outline"
                 size="lg"
-                className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/50 dark:border-gray-700/50 hover:bg-white/90 dark:hover:bg-gray-800/90"
+                className="bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm border-white/50 dark:border-gray-600/50 hover:bg-white dark:hover:bg-gray-700"
               >
                 Sau
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </div>
 
@@ -300,18 +305,18 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
                   onClick={handleMarkUnknown}
                   variant="destructive"
                   size="lg"
-                  className="shadow-lg"
+                  className="shadow-lg px-8"
                 >
-                  <XCircle className="h-4 w-4 mr-2" />
+                  <XCircle className="h-5 w-5 mr-2" />
                   Cần ôn lại
                 </Button>
                 
                 <Button
                   onClick={handleMarkKnown}
-                  className="bg-green-600 hover:bg-green-700 shadow-lg"
+                  className="bg-green-600 hover:bg-green-700 shadow-lg px-8"
                   size="lg"
                 >
-                  <CheckCircle className="h-4 w-4 mr-2" />
+                  <CheckCircle className="h-5 w-5 mr-2" />
                   Đã biết
                 </Button>
               </div>
