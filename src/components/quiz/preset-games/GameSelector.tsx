@@ -3,13 +3,11 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { 
   Brain, BookOpen, Puzzle, Dices, 
   CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
-  ArrowRight, SlidersHorizontal
+  ArrowRight
 } from 'lucide-react';
-import GameSettings from '../GameSettings';
 import { GameSettingsData } from '../types';
 
 interface GameSelectorProps {
@@ -17,27 +15,16 @@ interface GameSelectorProps {
   onQuickStart?: (gameType: string, prompt: string, settings: GameSettingsData) => void;
 }
 
-const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart }) => {
+const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
   const [selectedGameType, setSelectedGameType] = useState<string>('');
-  const [quickPrompt, setQuickPrompt] = useState<string>('');
-  const [showSettings, setShowSettings] = useState(false);
-  
-  const defaultSettings: GameSettingsData = {
-    difficulty: 'medium',
-    questionCount: 10,
-    timePerQuestion: 30,
-    category: 'general',
-    useTimer: true
-  };
-  
-  const handleQuickStart = () => {
-    if (onQuickStart && selectedGameType && quickPrompt.trim()) {
-      onQuickStart(selectedGameType, quickPrompt, defaultSettings);
-    }
-  };
+  const [topic, setTopic] = useState<string>('');
   
   const handleSelectGame = (gameType: string) => {
     setSelectedGameType(gameType);
+    
+    // Tự động điền "Học cùng AI" nếu topic trống
+    const finalTopic = topic.trim() || 'Học cùng AI';
+    
     if (gameType) {
       onSelectGame(gameType);
     }
@@ -47,128 +34,89 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart 
     { 
       id: 'quiz', 
       name: 'Trắc Nghiệm', 
-      description: 'Trả lời câu hỏi nhiều lựa chọn',
-      icon: <Brain className="h-8 w-8 text-primary" />
+      description: 'Trả lời câu hỏi nhiều lựa chọn với các chủ đề đa dạng',
+      icon: <Brain className="h-12 w-12 text-primary" />
     },
     { 
       id: 'flashcards', 
       name: 'Thẻ Ghi Nhớ', 
-      description: 'Học với thẻ hai mặt',
-      icon: <BookOpen className="h-8 w-8 text-primary" />
+      description: 'Học với thẻ hai mặt để ghi nhớ kiến thức hiệu quả',
+      icon: <BookOpen className="h-12 w-12 text-primary" />
     },
     { 
       id: 'matching', 
       name: 'Nối Từ', 
-      description: 'Nối các cặp từ tương ứng với nhau',
-      icon: <ArrowRightLeft className="h-8 w-8 text-primary" />
+      description: 'Nối các cặp từ tương ứng để kiểm tra hiểu biết',
+      icon: <ArrowRightLeft className="h-12 w-12 text-primary" />
     },
     { 
       id: 'memory', 
       name: 'Trò Chơi Ghi Nhớ', 
-      description: 'Tìm các cặp thẻ giống nhau',
-      icon: <Dices className="h-8 w-8 text-primary" />
+      description: 'Tìm các cặp thẻ giống nhau để rèn luyện trí nhớ',
+      icon: <Dices className="h-12 w-12 text-primary" />
     },
     { 
       id: 'ordering', 
       name: 'Sắp Xếp Câu', 
       description: 'Sắp xếp các từ để tạo thành câu hoàn chỉnh',
-      icon: <Layers className="h-8 w-8 text-primary" />
+      icon: <Layers className="h-12 w-12 text-primary" />
     },
     { 
       id: 'wordsearch', 
       name: 'Tìm Từ Ẩn', 
-      description: 'Tìm các từ ẩn trong bảng chữ cái',
-      icon: <Search className="h-8 w-8 text-primary" />
+      description: 'Tìm các từ ẩn trong bảng chữ cái thú vị',
+      icon: <Search className="h-12 w-12 text-primary" />
     },
     { 
       id: 'truefalse', 
       name: 'Đúng hay Sai', 
-      description: 'Xác định nội dung là đúng hay sai',
-      icon: <CheckSquare className="h-8 w-8 text-primary" />
+      description: 'Xác định nội dung là đúng hay sai một cách nhanh chóng',
+      icon: <CheckSquare className="h-12 w-12 text-primary" />
     }
   ];
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4 text-center">Chọn loại trò chơi để tạo với AI</h2>
-      
-      {/* Quick Start Panel */}
-      <div className="bg-primary/5 p-4 rounded-lg mb-6 border border-primary/20">
-        <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
-          Tạo nhanh với chủ đề
-        </h3>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Input
-            placeholder="Nhập chủ đề của bạn (ví dụ: Lịch sử Việt Nam)..."
-            value={quickPrompt}
-            onChange={(e) => setQuickPrompt(e.target.value)}
-            className="flex-1"
-          />
-          <Button 
-            onClick={handleQuickStart}
-            disabled={!quickPrompt.trim() || !selectedGameType}
-            className="group whitespace-nowrap"
-          >
-            Tạo Ngay
-            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-b from-primary/5 to-background">
+      <div className="w-full max-w-6xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-4">
+            Chọn Loại Trò Chơi
+          </h1>
+          <p className="text-xl text-muted-foreground mb-8">
+            Tạo trò chơi học tập tương tác với AI
+          </p>
         </div>
-        <div className="mt-3 flex flex-wrap gap-2">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {gameTypes.map((game) => (
-            <Button
+            <Card 
               key={game.id}
-              size="sm"
-              variant={selectedGameType === game.id ? "default" : "outline"}
-              className={`${selectedGameType === game.id ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-primary/10'}`}
-              onClick={() => setSelectedGameType(game.id)}
+              className={`p-8 hover:shadow-xl transition-all duration-300 hover:border-primary hover:bg-primary/5 cursor-pointer transform hover:scale-105 ${
+                selectedGameType === game.id ? 'border-primary bg-primary/10 shadow-lg' : 'border-border'
+              }`}
+              onClick={() => handleSelectGame(game.id)}
             >
-              {game.name}
-            </Button>
+              <div className="flex flex-col items-center text-center gap-6 h-full">
+                <div className="p-4 bg-primary/10 rounded-full">
+                  {game.icon}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold mb-3">{game.name}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {game.description}
+                  </p>
+                </div>
+                <div className="mt-auto w-full">
+                  <div className="flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r from-primary/20 to-primary/10 text-primary text-sm font-medium">
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Tạo với AI
+                  </div>
+                </div>
+              </div>
+            </Card>
           ))}
         </div>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {gameTypes.map((game) => (
-          <Card 
-            key={game.id}
-            className={`p-4 hover:shadow-md transition-all hover:border-primary hover:bg-primary/5 cursor-pointer ${selectedGameType === game.id ? 'border-primary bg-primary/10' : ''}`}
-            onClick={() => handleSelectGame(game.id)}
-          >
-            <div className="flex flex-col items-center text-center gap-3">
-              <div className="p-3 bg-primary/10 rounded-full">
-                {game.icon}
-              </div>
-              <div>
-                <h3 className="font-bold">{game.name}</h3>
-                <p className="text-sm text-muted-foreground">{game.description}</p>
-              </div>
-              <div className="mt-2 flex items-center justify-center w-full px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm font-medium">
-                <Sparkles className="h-4 w-4 mr-1" />
-                Tạo với AI
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-      
-      <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="sm:max-w-md">
-          <DialogTitle>Cài đặt cho {gameTypes.find(g => g.id === selectedGameType)?.name || "trò chơi"}</DialogTitle>
-          <GameSettings 
-            topic={quickPrompt}
-            onStart={(settings) => {
-              if (onQuickStart && selectedGameType) {
-                onQuickStart(selectedGameType, quickPrompt, settings);
-              }
-            }}
-            initialSettings={defaultSettings}
-            onCancel={() => setShowSettings(false)}
-            inModal={true}
-          />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

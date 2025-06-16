@@ -60,8 +60,15 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background p-4 relative overflow-hidden">
+      {/* Background text */}
+      <div className="absolute inset-0 flex items-center justify-center -z-10 select-none pointer-events-none">
+        <h1 className="text-[12rem] md:text-[16rem] font-bold text-primary/5 whitespace-nowrap">
+          Học cùng AI
+        </h1>
+      </div>
+
       {/* Background floating shapes */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
+      <div className="absolute inset-0 -z-20 overflow-hidden">
         {[...Array(5)].map((_, i) => (
           <motion.div
             key={i}
