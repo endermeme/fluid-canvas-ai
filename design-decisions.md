@@ -3,6 +3,19 @@
 
 ## Ngày 2025-01-16
 
+### Cập nhật HomePage - Đơn giản hóa giao diện
+- **File đã sửa**: `src/pages/HomePage.tsx`
+- **Loại thay đổi**: UI/UX - Tối ưu hóa nội dung
+- **Mô tả**: 
+  - Thay đổi tên "Tạo Game HTML" thành "Custom Game"
+  - Thay đổi tên "Trò Chơi Có Sẵn" thành "Preset Game"
+  - Xóa mô tả chi tiết của các nút chính
+  - Đồng bộ màu chữ tiêu đề thành xanh (blue-600)
+  - Đồng bộ màu nút thành gradient xanh (blue-600 to sky-600)
+  - Cập nhật footer thành "Created by CES GLOBAL {year}" bằng tiếng Anh
+  - Xóa mô tả "Xem và quản lý các trò chơi..." trong phần Lịch Sử Game
+- **Lý do**: Tạo giao diện sạch sẽ, tập trung vào chức năng chính
+
 ### Thay đổi giao diện nút quay lại trong PresetGameHeader
 - **File đã sửa**: `src/components/quiz/preset-games/PresetGameHeader.tsx`
 - **Loại thay đổi**: Cải thiện UI/UX
@@ -26,4 +39,3 @@
 - **Loại thay đổi**: Cải thiện game logic
 - **Mô tả**: Chỉ tìm kiếm từ theo hướng thuận (trái sang phải, trên xuống dưới), loại bỏ tìm kiếm từ ngược
 - **Lý do**: Đơn giản hóa trò chơi và giảm nhầm lẫn cho người chơi
-

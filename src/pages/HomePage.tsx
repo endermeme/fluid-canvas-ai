@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -253,10 +252,7 @@ const HomePage: React.FC = () => {
                         <SparklesIcon className="h-16 w-16 text-blue-600 dark:text-blue-400" />
                       </motion.div>
                       <div className="flex-1">
-                        <h3 className="text-3xl font-bold mb-4 text-slate-800 dark:text-slate-100">Tạo Game HTML</h3>
-                        <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
-                          Sử dụng Gemini Flash để tạo game tương tác ngay lập tức với công nghệ AI tiên tiến
-                        </p>
+                        <h3 className="text-3xl font-bold mb-4 text-blue-600 dark:text-blue-400">Custom Game</h3>
                       </div>
                       <Button variant="default" size="lg" className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 shadow-lg group-hover:shadow-xl transition-all">
                         <Zap className="h-5 w-5 mr-2" />
@@ -276,25 +272,22 @@ const HomePage: React.FC = () => {
                   whileTap="tap"
                   className="h-full"
                 >
-                  <Card className="p-10 h-full bg-gradient-to-br from-white/80 to-sky-50/80 dark:from-slate-800/80 dark:to-sky-950/80 border-2 border-sky-200/50 dark:border-sky-700/50 backdrop-blur-sm shadow-xl group relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div className="absolute -right-20 -top-20 w-40 h-40 bg-sky-400/10 rounded-full transform group-hover:scale-150 transition-transform duration-700"></div>
+                  <Card className="p-10 h-full bg-gradient-to-br from-white/80 to-sky-50/80 dark:from-slate-800/80 dark:to-sky-950/80 border-2 border-blue-200/50 dark:border-blue-700/50 backdrop-blur-sm shadow-xl group relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-sky-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div className="absolute -right-20 -top-20 w-40 h-40 bg-blue-400/10 rounded-full transform group-hover:scale-150 transition-transform duration-700"></div>
                     
                     <div className="relative z-10 flex flex-col items-center text-center gap-8 h-full">
                       <motion.div 
-                        className="p-6 bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/50 dark:to-blue-900/50 rounded-full shadow-lg"
+                        className="p-6 bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900/50 dark:to-sky-900/50 rounded-full shadow-lg"
                         variants={iconVariants}
                         whileHover="hover"
                       >
-                        <Gamepad className="h-16 w-16 text-sky-600 dark:text-sky-400" />
+                        <Gamepad className="h-16 w-16 text-blue-600 dark:text-blue-400" />
                       </motion.div>
                       <div className="flex-1">
-                        <h3 className="text-3xl font-bold mb-4 text-slate-800 dark:text-slate-100">Trò Chơi Có Sẵn</h3>
-                        <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
-                          Sử dụng Gemini Pro để tạo trò chơi theo mẫu có sẵn với nhiều thể loại phong phú
-                        </p>
+                        <h3 className="text-3xl font-bold mb-4 text-blue-600 dark:text-blue-400">Preset Game</h3>
                       </div>
-                      <Button variant="outline" size="lg" className="w-full py-4 text-lg font-semibold border-2 border-sky-300 text-sky-700 hover:bg-sky-50 dark:border-sky-600 dark:text-sky-300 dark:hover:bg-sky-950/50 shadow-lg group-hover:shadow-xl transition-all">
+                      <Button variant="default" size="lg" className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 shadow-lg group-hover:shadow-xl transition-all">
                         <Atom className="h-5 w-5 mr-2" />
                         Xem trò chơi
                       </Button>
@@ -325,9 +318,6 @@ const HomePage: React.FC = () => {
                     </motion.div>
                     <div className="flex-1">
                       <h3 className="font-bold text-2xl mb-2 text-slate-800 dark:text-slate-100">Lịch Sử Game</h3>
-                      <p className="text-slate-600 dark:text-slate-300 text-lg">
-                        Xem và quản lý các trò chơi đã tạo, theo dõi tiến trình học tập
-                      </p>
                     </div>
                     <motion.div
                       animate={{
@@ -362,7 +352,7 @@ const HomePage: React.FC = () => {
                 ease: "easeInOut"
               }}
             >
-              © {new Date().getFullYear()} AI Game Creator | Powered by Quantum Learning & Gemini AI
+              Created by CES GLOBAL {new Date().getFullYear()}
             </motion.p>
           </motion.footer>
         </div>
