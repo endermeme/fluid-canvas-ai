@@ -199,44 +199,45 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   const progressPercentage = (matchedPairs / totalPairs) * 100;
 
   const getItemSize = (text: string) => {
-    if (difficulty === "hard") return "min-h-10 sm:min-h-12 text-xs sm:text-sm";
-    if (difficulty === "easy") return "min-h-12 sm:min-h-16 text-sm sm:text-lg";
+    if (difficulty === "hard") return "min-h-8 sm:min-h-10 text-xs";
+    if (difficulty === "easy") return "min-h-10 sm:min-h-12 text-sm";
     
     return text.length > 15 
-      ? "min-h-12 sm:min-h-16 text-xs sm:text-sm" 
+      ? "min-h-8 sm:min-h-10 text-xs" 
       : text.length > 8 
-        ? "min-h-10 sm:min-h-14 text-xs sm:text-base" 
-        : "min-h-8 sm:min-h-12 text-sm sm:text-lg";
+        ? "min-h-9 sm:min-h-11 text-xs" 
+        : "min-h-8 sm:min-h-10 text-sm";
   };
 
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-hidden">
-      <div className="flex-shrink-0 p-3 sm:p-4 pt-16 sm:pt-20">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
-          <div className="text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 bg-primary/10 rounded-full">
-            Đã ghép: {matchedPairs}/{totalPairs}
+      {/* Compact header */}
+      <div className="flex-shrink-0 p-2 pt-16 sm:pt-18">
+        <div className="flex justify-between items-center mb-1">
+          <div className="text-xs font-medium px-2 py-1 bg-primary/10 rounded-full">
+            {matchedPairs}/{totalPairs}
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 bg-primary/10 rounded-full">
-              <Trophy className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-yellow-500" />
-              Điểm: {score}
+          <div className="flex items-center gap-1 text-xs">
+            <div className="flex items-center px-2 py-1 bg-primary/10 rounded-full">
+              <Trophy className="h-3 w-3 mr-1 text-yellow-500" />
+              {score}
             </div>
-            <div className="text-xs sm:text-sm font-medium flex items-center px-2 sm:px-3 py-1 bg-primary/10 rounded-full">
-              <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+            <div className="flex items-center px-2 py-1 bg-primary/10 rounded-full">
+              <Clock className="h-3 w-3 mr-1" />
               {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
             </div>
           </div>
         </div>
-        <Progress value={progressPercentage} className="h-2" />
+        <Progress value={progressPercentage} className="h-1.5" />
       </div>
 
       {gameWon ? (
-        <div className="flex-1 flex items-center justify-center p-3 sm:p-4 overflow-auto">
-          <Card className="p-4 sm:p-6 text-center max-w-md w-full">
-            <h2 className="text-xl sm:text-2xl font-bold mb-4">Chúc mừng!</h2>
-            <p className="mb-2 text-sm sm:text-base">Bạn đã hoàn thành trò chơi với {totalPairs} cặp từ.</p>
-            <p className="mb-2 text-lg sm:text-xl font-bold text-primary">Điểm số: {score}</p>
-            <p className="mb-4 sm:mb-6 text-sm sm:text-base">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
+        <div className="flex-1 flex items-center justify-center p-3 overflow-auto">
+          <Card className="p-4 text-center max-w-sm w-full">
+            <h2 className="text-xl font-bold mb-3">Chúc mừng!</h2>
+            <p className="mb-2 text-sm">Hoàn thành với {totalPairs} cặp từ.</p>
+            <p className="mb-2 text-lg font-bold text-primary">Điểm: {score}</p>
+            <p className="mb-4 text-sm">Thời gian: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
             <Button onClick={handleRestart} className="w-full">
               <RefreshCw className="mr-2 h-4 w-4" />
               Chơi lại
@@ -244,11 +245,11 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
           </Card>
         </div>
       ) : gameOver ? (
-        <div className="flex-1 flex items-center justify-center p-3 sm:p-4 overflow-auto">
-          <Card className="p-4 sm:p-6 text-center max-w-md w-full">
-            <h2 className="text-xl sm:text-2xl font-bold mb-4">Hết thời gian!</h2>
-            <p className="mb-2 text-sm sm:text-base">Bạn đã ghép được {matchedPairs} trong tổng số {totalPairs} cặp từ.</p>
-            <p className="mb-2 text-lg sm:text-xl font-bold text-primary">Điểm số: {score}</p>
+        <div className="flex-1 flex items-center justify-center p-3 overflow-auto">
+          <Card className="p-4 text-center max-w-sm w-full">
+            <h2 className="text-xl font-bold mb-3">Hết thời gian!</h2>
+            <p className="mb-2 text-sm">Ghép được {matchedPairs}/{totalPairs} cặp từ.</p>
+            <p className="mb-2 text-lg font-bold text-primary">Điểm: {score}</p>
             <Button onClick={handleRestart} className="w-full">
               <RefreshCw className="mr-2 h-4 w-4" />
               Chơi lại
@@ -256,64 +257,68 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
           </Card>
         </div>
       ) : (
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4 p-3 sm:p-4 min-h-0 overflow-hidden">
-          <Card className="p-2 sm:p-3 bg-background/50 border border-primary/10 overflow-hidden flex flex-col">
-            <h3 className="text-sm sm:text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột A</h3>
-            <div className="space-y-1 sm:space-y-2 overflow-auto flex-1">
-              {leftItems.map((item) => (
-                <button
-                  key={`left-${item.id}`}
-                  className={`w-full p-2 sm:p-3 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
-                    item.matched 
-                      ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
-                      : selectedLeft === item.id
-                        ? 'bg-primary/20 border-primary border'
-                        : 'bg-secondary hover:bg-secondary/80 border-transparent border'
-                  }`}
-                  onClick={() => handleLeftItemClick(item.id)}
-                  disabled={item.matched}
-                >
-                  <span className="line-clamp-3 text-xs sm:text-sm">{item.text}</span>
-                </button>
-              ))}
-            </div>
-          </Card>
-          
-          <Card className="p-2 sm:p-3 bg-background/50 border border-primary/10 overflow-hidden flex flex-col">
-            <h3 className="text-sm sm:text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột B</h3>
-            <div className="space-y-1 sm:space-y-2 overflow-auto flex-1">
-              {rightItems.map((item) => (
-                <button
-                  key={`right-${item.id}`}
-                  className={`w-full p-2 sm:p-3 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
-                    item.matched 
-                      ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
-                      : selectedRight === item.id
-                        ? 'bg-primary/20 border-primary border'
-                        : 'bg-secondary hover:bg-secondary/80 border-transparent border'
-                  }`}
-                  onClick={() => handleRightItemClick(item.id)}
-                  disabled={item.matched}
-                >
-                  <span className="line-clamp-3 text-xs sm:text-sm">{item.text}</span>
-                </button>
-              ))}
-            </div>
-          </Card>
-        </div>
-      )}
+        <>
+          {/* Game area with proper height */}
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-2 p-2 min-h-0 overflow-hidden">
+            <Card className="p-2 bg-background/50 border border-primary/10 overflow-hidden flex flex-col">
+              <h3 className="text-sm font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột A</h3>
+              <div className="space-y-1 overflow-auto flex-1">
+                {leftItems.map((item) => (
+                  <button
+                    key={`left-${item.id}`}
+                    className={`w-full p-2 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
+                      item.matched 
+                        ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
+                        : selectedLeft === item.id
+                          ? 'bg-primary/20 border-primary border'
+                          : 'bg-secondary hover:bg-secondary/80 border-transparent border'
+                    }`}
+                    onClick={() => handleLeftItemClick(item.id)}
+                    disabled={item.matched}
+                  >
+                    <span className="line-clamp-2 text-xs">{item.text}</span>
+                  </button>
+                ))}
+              </div>
+            </Card>
+            
+            <Card className="p-2 bg-background/50 border border-primary/10 overflow-hidden flex flex-col">
+              <h3 className="text-sm font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột B</h3>
+              <div className="space-y-1 overflow-auto flex-1">
+                {rightItems.map((item) => (
+                  <button
+                    key={`right-${item.id}`}
+                    className={`w-full p-2 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
+                      item.matched 
+                        ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
+                        : selectedRight === item.id
+                          ? 'bg-primary/20 border-primary border'
+                          : 'bg-secondary hover:bg-secondary/80 border-transparent border'
+                    }`}
+                    onClick={() => handleRightItemClick(item.id)}
+                    disabled={item.matched}
+                  >
+                    <span className="line-clamp-2 text-xs">{item.text}</span>
+                  </button>
+                ))}
+              </div>
+            </Card>
+          </div>
 
-      <div className="flex-shrink-0 p-3 sm:p-4">
-        <Button 
-          variant="outline" 
-          onClick={handleRestart}
-          className="w-full bg-gradient-to-r from-secondary/30 to-background/90 border-primary/20 text-sm"
-          size="sm"
-        >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Làm lại
-        </Button>
-      </div>
+          {/* Compact footer */}
+          <div className="flex-shrink-0 p-2 border-t border-primary/10">
+            <Button 
+              variant="outline" 
+              onClick={handleRestart}
+              className="w-full bg-gradient-to-r from-secondary/30 to-background/90 border-primary/20 text-sm h-8"
+              size="sm"
+            >
+              <RefreshCw className="mr-2 h-3 w-3" />
+              Làm lại
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
