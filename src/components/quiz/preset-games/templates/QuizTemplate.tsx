@@ -115,8 +115,6 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         variant: "destructive",
       });
     }
-
-    // Đã xóa tự động chuyển câu - người dùng phải bấm nút thủ công
   };
 
   const handleNextQuestion = () => {
