@@ -77,7 +77,7 @@ const PresetGamesPage: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col overflow-hidden relative bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950">
-      {/* Background Animation - copied from custom game */}
+      {/* Background Animation - copied exactly from custom game */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Floating Particles */}
         <BackgroundParticles particleCount={15} />
