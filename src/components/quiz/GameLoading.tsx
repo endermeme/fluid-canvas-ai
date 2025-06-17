@@ -5,17 +5,19 @@ import { Sparkles, Brain, Zap, Target, Trophy, Star } from 'lucide-react';
 import BackgroundParticles from '@/components/ui/background-particles';
 
 interface GameLoadingProps {
-  isVisible: boolean;
-  progress: number;
-  message: string;
+  isVisible?: boolean;
+  progress?: number;
+  message?: string;
   gameType?: string;
+  topic?: string;
 }
 
 const GameLoading: React.FC<GameLoadingProps> = ({ 
-  isVisible, 
-  progress, 
-  message, 
-  gameType = 'quiz' 
+  isVisible = true, 
+  progress = 0, 
+  message = "", 
+  gameType = 'quiz',
+  topic = ""
 }) => {
   const [displayProgress, setDisplayProgress] = useState(0);
   const [currentTip, setCurrentTip] = useState(0);
@@ -105,6 +107,11 @@ const GameLoading: React.FC<GameLoadingProps> = ({
                 <p className="text-sm text-slate-600 dark:text-slate-400">
                   AI đang xử lý yêu cầu của bạn
                 </p>
+                {topic && (
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                    Chủ đề: {topic}
+                  </p>
+                )}
               </div>
 
               {/* Progress Bar */}
