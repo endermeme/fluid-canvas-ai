@@ -104,36 +104,41 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
           {gameTypes.map((game) => (
             <Card 
               key={game.id}
-              className={`p-8 hover:shadow-xl transition-all duration-300 hover:border-primary hover:bg-primary/5 cursor-pointer transform hover:scale-105 ${
-                selectedGameType === game.id ? 'border-primary bg-primary/10 shadow-lg' : 'border-border'
+              className={`p-8 cursor-pointer transform transition-all duration-300 ease-out will-change-transform ${
+                selectedGameType === game.id ? 'border-primary bg-primary/10 shadow-lg scale-105' : 'border-border hover:border-primary hover:bg-primary/5 hover:shadow-xl hover:scale-105 hover:-translate-y-1'
               } ${game.isBackButton ? 'bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30' : ''}`}
+              style={{
+                backfaceVisibility: 'hidden',
+                perspective: '1000px',
+                transform: 'translate3d(0, 0, 0)'
+              }}
               onClick={() => game.isBackButton ? handleBackToHome() : handleSelectGame(game.id)}
             >
               <div className="flex flex-col items-center text-center gap-6 h-full">
-                <div className="p-4 bg-primary/10 rounded-full">
+                <div className="p-4 bg-primary/10 rounded-full transition-transform duration-300 ease-out will-change-transform">
                   {game.icon}
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold mb-3">{game.name}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  <h3 className="text-xl font-bold mb-3 transition-colors duration-300">{game.name}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed transition-colors duration-300">
                     {game.description}
                   </p>
                 </div>
                 <div className="mt-auto w-full">
-                  <div className={`flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium ${
+                  <div className={`flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-out ${
                     game.isBackButton 
                       ? 'bg-gradient-to-r from-primary/30 to-primary/20 text-primary' 
                       : 'bg-gradient-to-r from-primary/20 to-primary/10 text-primary'
                   }`}>
                     {game.isBackButton ? (
                       <>
-                        <DoorOpen className="h-4 w-4 mr-2" />
-                        Về trang chủ
+                        <DoorOpen className="h-4 w-4 mr-2 transition-transform duration-300" />
+                        <span className="transition-all duration-300">Về trang chủ</span>
                       </>
                     ) : (
                       <>
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        Tạo với AI
+                        <Sparkles className="h-4 w-4 mr-2 transition-transform duration-300" />
+                        <span className="transition-all duration-300">Tạo với AI</span>
                       </>
                     )}
                   </div>

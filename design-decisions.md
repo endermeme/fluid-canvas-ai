@@ -1,5 +1,3 @@
-
-
 # Design Decisions Log
 
 ## 2024-01-01: Game Templates Responsive Design
@@ -93,3 +91,15 @@
   - Đảm bảo không có thẻ mở thừa hoặc thiếu thẻ đóng
 - **Files thay đổi**: QuizTemplate.tsx
 - **Lý do**: Sửa lỗi build nghiêm trọng để component có thể hoạt động bình thường và tránh crash ứng dụng
+
+## 2024-12-17: GameSelector Animation Optimization
+- **Vấn đề**: Giao diện preset game bị giật giật ở các phần chữ khi hover và transition
+- **Giải pháp**: 
+  - Thêm `will-change-transform` để tối ưu GPU rendering
+  - Sử dụng `transform: translate3d(0, 0, 0)` để kích hoạt hardware acceleration
+  - Thêm `backfaceVisibility: hidden` và `perspective: 1000px` cho smooth animation
+  - Cải thiện transition timing với `ease-out` thay vì default
+  - Tối ưu transform thay vì thay đổi layout properties
+  - Thêm transition riêng cho từng element (text, icons, backgrounds)
+- **Files thay đổi**: GameSelector.tsx
+- **Lý do**: Loại bỏ hiện tượng giật lag khi hover và tạo animation mượt mà hơn cho UX tốt hơn
