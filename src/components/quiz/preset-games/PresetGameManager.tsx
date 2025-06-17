@@ -256,7 +256,10 @@ Output must be valid JSON. `;
       return;
     }
 
-    import(`./data/${type}SampleData.ts`).then(module => {
+    // Fix the dynamic import path for truefalse
+    const importPath = type === 'truefalse' ? './data/trueFalseSampleData.ts' : `./data/${type}SampleData.ts`;
+
+    import(importPath).then(module => {
       let data = null;
 
       if (type === 'wordsearch' && initialTopic) {
@@ -268,6 +271,8 @@ Output must be valid JSON. `;
         } else {
           data = module.default || module[`${type}SampleData`];
         }
+      } else if (type === 'truefalse') {
+        data = module.trueFalseSampleData || module.default;
       } else {
         data = module.default || module[`${type}SampleData`];
       }
