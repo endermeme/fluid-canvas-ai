@@ -17,11 +17,11 @@ const QuizFooter: React.FC<QuizFooterProps> = ({
 }) => {
   return (
     <motion.div 
-      initial={{ y: 20, opacity: 0 }}
+      initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="flex-shrink-0 p-4 sm:p-6 bg-white/50 backdrop-blur-sm border-t border-primary/10"
+      className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-primary/10 shadow-lg"
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto p-4">
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <Button
             variant="outline"

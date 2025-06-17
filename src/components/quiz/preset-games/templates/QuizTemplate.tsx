@@ -159,27 +159,29 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
 
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-gradient-to-br from-blue-50/80 via-sky-50/80 to-blue-100/80 dark:from-blue-950/80 dark:via-sky-950/80 dark:to-blue-950/80">
-      <QuizHeader
-        currentQuestion={currentQuestion}
-        totalQuestions={questions.length}
-        timeLeft={timeLeft}
-        totalTimeLeft={totalTimeLeft}
-        score={score}
-      />
-
-      <QuizQuestion
-        question={question}
-        currentQuestion={currentQuestion}
-        selectedOption={selectedOption}
-        isAnswered={isAnswered}
-        onOptionSelect={handleOptionSelect}
-      />
-
       <QuizFooter
         isLastQuestion={isLastQuestion}
         onRestart={handleRestart}
         onNextQuestion={handleNextQuestion}
       />
+
+      <div className="pt-24 flex-1 flex flex-col min-h-0 overflow-hidden">
+        <QuizHeader
+          currentQuestion={currentQuestion}
+          totalQuestions={questions.length}
+          timeLeft={timeLeft}
+          totalTimeLeft={totalTimeLeft}
+          score={score}
+        />
+
+        <QuizQuestion
+          question={question}
+          currentQuestion={currentQuestion}
+          selectedOption={selectedOption}
+          isAnswered={isAnswered}
+          onOptionSelect={handleOptionSelect}
+        />
+      </div>
     </div>
   );
 };
