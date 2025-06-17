@@ -89,7 +89,7 @@ const PresetGamesPage: React.FC = () => {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden relative bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950">
+    <div className="h-full w-full overflow-auto relative bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950">
       {/* Optimized Background Animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Neural Network Grid */}
@@ -164,7 +164,7 @@ const PresetGamesPage: React.FC = () => {
         </div>
       )}
       
-      <div className="relative z-10 h-full">
+      <div className="relative z-10 min-h-full">
         {selectedGameType ? (
           <PresetGameManager 
             gameType={selectedGameType} 
