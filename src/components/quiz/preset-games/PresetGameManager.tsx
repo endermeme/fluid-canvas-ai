@@ -487,35 +487,38 @@ Output must be valid JSON. `;
     <div className="h-full w-full flex flex-col overflow-hidden">
       {showSettings ? (
         <div className="h-full flex flex-col overflow-hidden">
-          <div className="flex-shrink-0 p-4">
+          <div className="flex-shrink-0 border-b border-primary/10">
             <PresetGameHeader 
               showShare={false} 
               isGameCreated={false}
               onBack={onBack}
             />
           </div>
-          <div className="flex-1 overflow-auto p-4 pt-0">
+          <div className="flex-1 overflow-hidden">
             <GameSettings 
               initialSettings={settings}
               onStart={handleStartGame}
               onCancel={onBack}
               topic={initialTopic || ""}
+              inModal={false}
             />
           </div>
         </div>
       ) : generating ? (
-        <GameLoading topic={initialTopic || ""} progress={generationProgress} />
+        <div className="h-full">
+          <GameLoading topic={initialTopic || ""} progress={generationProgress} />
+        </div>
       ) : loading ? (
         <div className="h-full flex items-center justify-center">
           <div className="text-center">
-            <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-lg font-medium">Đang tạo trò chơi {getGameTypeName()}...</p>
-            <p className="text-sm text-muted-foreground mt-2">Quá trình này có thể mất vài giây</p>
+            <div className="h-8 w-8 sm:h-12 sm:w-12 border-3 sm:border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-base sm:text-lg font-medium">Đang tạo trò chơi {getGameTypeName()}...</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2">Quá trình này có thể mất vài giây</p>
           </div>
         </div>
       ) : error ? (
-        <div className="h-full flex flex-col">
-          <div className="flex-shrink-0">
+        <div className="h-full flex flex-col overflow-hidden">
+          <div className="flex-shrink-0 border-b border-primary/10">
             <PresetGameHeader 
               showShare={false} 
               isGameCreated={false}
@@ -523,14 +526,17 @@ Output must be valid JSON. `;
             />
           </div>
           <div className="flex-1 flex items-center justify-center p-4">
-            <Card className="p-6 max-w-md">
+            <Card className="p-4 sm:p-6 max-w-sm sm:max-w-md w-full border-destructive/20">
               <div className="text-center">
-                <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
-                <p className="text-gray-500 mb-4">{error}</p>
-                <div className="flex gap-2">
-                  <Button onClick={onBack}>Quay lại</Button>
-                  <Button onClick={handleRetry} variant="outline">
-                    <RefreshCw className="h-4 w-4 mr-2" />
+                <div className="text-4xl sm:text-6xl mb-4">⚠️</div>
+                <h3 className="text-lg sm:text-xl font-bold mb-2 text-destructive">Đã xảy ra lỗi</h3>
+                <p className="text-muted-foreground mb-4 text-sm sm:text-base">{error}</p>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                  <Button onClick={onBack} variant="outline" className="w-full sm:flex-1">
+                    Quay lại
+                  </Button>
+                  <Button onClick={handleRetry} className="w-full sm:flex-1">
+                    <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                     Thử lại
                   </Button>
                 </div>
@@ -540,7 +546,7 @@ Output must be valid JSON. `;
         </div>
       ) : (
         <div className="h-full flex flex-col overflow-hidden">
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 border-b border-primary/10">
             <PresetGameHeader 
               onShare={handleShare}
               showShare={true}
@@ -548,7 +554,7 @@ Output must be valid JSON. `;
               onBack={onBack}
             />
           </div>
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden" id="game-container">
             {renderGameTemplate()}
           </div>
           

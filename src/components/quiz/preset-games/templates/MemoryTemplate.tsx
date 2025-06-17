@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Clock, Trophy, Lightbulb, ArrowLeft } from 'lucide-react';
+import { RefreshCw, Clock, Trophy, Lightbulb } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface MemoryTemplateProps {
   content: any;
@@ -172,103 +173,175 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   };
 
   if (!content || !memoryCards.length) {
-    return <div className="p-4">Không có dữ liệu trò chơi ghi nhớ</div>;
+    return (
+      <div className="h-full flex items-center justify-center p-4">
+        <div className="text-center">
+          <p className="text-lg font-medium text-muted-foreground">Không có dữ liệu trò chơi ghi nhớ</p>
+        </div>
+      </div>
+    );
   }
 
   const progressPercentage = (matchedPairs / totalPairs) * 100;
 
+  // Game over screen
+  if (gameOver) {
+    return (
+      <div className="h-full flex items-center justify-center p-4 bg-gradient-to-b from-background to-background/80">
+        <Card className="w-full max-w-md p-6 sm:p-8 text-center bg-gradient-to-br from-red-50/50 to-background backdrop-blur-sm border-red-200/50">
+          <div className="text-6xl sm:text-7xl mb-4">😔</div>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-red-600">Hết thời gian!</h2>
+          <p className="mb-4 text-base sm:text-lg">
+            Bạn đã ghép được <span className="font-bold text-primary">{matchedPairs}/{totalPairs}</span> cặp
+          </p>
+          <p className="mb-6 text-sm text-muted-foreground">Với {moves} lượt di chuyển</p>
+          <Button 
+            onClick={handleRestart} 
+            className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Thử Lại
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  // Win screen
+  if (gameWon) {
+    return (
+      <div className="h-full flex items-center justify-center p-4 bg-gradient-to-b from-background to-background/80">
+        <Card className="w-full max-w-md p-6 sm:p-8 text-center bg-gradient-to-br from-primary/5 to-secondary/20 backdrop-blur-sm border-primary/20">
+          <Trophy className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
+          <p className="mb-2 text-base sm:text-lg">
+            Bạn đã hoàn thành trò chơi với <span className="font-bold text-primary">{moves}</span> lượt.
+          </p>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+          </p>
+          <div className="mb-6">
+            <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">
+              {matchedPairs}/{totalPairs}
+            </div>
+            <Progress value={100} className="h-2 sm:h-3 bg-secondary" />
+          </div>
+          <Button 
+            onClick={handleRestart} 
+            className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Chơi Lại
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  // Calculate grid columns based on number of cards and screen size
+  const getGridCols = () => {
+    if (cards.length <= 8) return 'grid-cols-4';
+    if (cards.length <= 12) return 'grid-cols-4 sm:grid-cols-6';
+    if (cards.length <= 16) return 'grid-cols-4 sm:grid-cols-6 lg:grid-cols-8';
+    return 'grid-cols-4 sm:grid-cols-6 lg:grid-cols-8';
+  };
+
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
-      <div className="mb-4 mt-12">
+    <div className="h-full flex flex-col bg-gradient-to-b from-background to-background/80">
+      {/* Header với thông tin trạng thái */}
+      <div className="flex-shrink-0 p-3 sm:p-4 border-b border-primary/10">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+          <div className="text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 bg-primary/10 rounded-full">
             Cặp đã ghép: {matchedPairs}/{totalPairs}
           </div>
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full flex items-center">
-            <Clock className="h-4 w-4 mr-1 text-primary" />
-            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+          <div className="flex items-center gap-2">
+            <div className="text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 bg-primary/10 rounded-full flex items-center">
+              <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
+              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+            </div>
+            <div className="text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 bg-secondary/20 rounded-full">
+              Lượt: {moves}
+            </div>
           </div>
         </div>
-        <Progress value={progressPercentage} className="h-2 bg-secondary" />
+        <Progress value={progressPercentage} className="h-1.5 sm:h-2 bg-secondary" />
       </div>
 
-      {gameWon ? (
-        <div className="flex-grow flex items-center justify-center">
-          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-primary/5 to-secondary/20 backdrop-blur-sm border-primary/20">
-            <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
-            <p className="mb-2 text-lg">Bạn đã hoàn thành trò chơi với {moves} lượt.</p>
-            <p className="mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
-            <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
-          </Card>
-        </div>
-      ) : gameOver ? (
-        <div className="flex-grow flex items-center justify-center">
-          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-destructive/5 to-background backdrop-blur-sm border-destructive/20">
-            <h2 className="text-3xl font-bold mb-4 text-destructive">Hết thời gian!</h2>
-            <p className="mb-4 text-lg">Bạn đã tìm được {matchedPairs} trong tổng số {totalPairs} cặp thẻ.</p>
-            <Button onClick={handleRestart} className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
-          </Card>
-        </div>
-      ) : (
-        <div className="flex-grow">
-          <div className="grid grid-cols-3 md:grid-cols-4 gap-3 mb-4">
+      {/* Game area - scrollable */}
+      <ScrollArea className="flex-1">
+        <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+          <div className={`grid ${getGridCols()} gap-2 sm:gap-3 auto-rows-fr`}>
             {cards.map((card, index) => (
               <div 
                 key={index}
-                className={`aspect-square flex items-center justify-center rounded-xl cursor-pointer transition-all duration-300 transform ${
-                  card.flipped || card.matched 
-                    ? 'bg-gradient-to-br from-primary/20 to-primary/5 border-primary/30 border-2 scale-105 shadow-lg hover:shadow-xl' 
-                    : 'bg-gradient-to-br from-secondary/80 to-secondary/20 border-transparent border-2 hover:scale-105'
-                } ${!canFlip ? 'pointer-events-none' : ''}`}
+                className="aspect-square cursor-pointer perspective-1000"
                 onClick={() => handleCardClick(index)}
+                style={{
+                  transformStyle: 'preserve-3d',
+                  transition: 'transform 0.6s',
+                  transform: card.flipped || card.matched ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                }}
               >
-                {(card.flipped || card.matched) ? (
-                  <div className="text-2xl font-bold text-primary/90">{card.content}</div>
-                ) : (
-                  <div className="text-2xl font-bold text-secondary/80">?</div>
-                )}
+                {/* Card back */}
+                <Card 
+                  className={`
+                    absolute inset-0 flex items-center justify-center 
+                    bg-gradient-to-br from-primary/20 to-primary/10 border-2 border-primary/30
+                    transition-all duration-300 hover:shadow-lg hover:scale-105
+                    ${card.matched ? 'opacity-50' : 'opacity-100'}
+                  `}
+                  style={{ backfaceVisibility: 'hidden' }}
+                >
+                  <div className="text-primary/60 text-lg sm:text-xl font-bold">?</div>
+                </Card>
+                
+                {/* Card front */}
+                <Card 
+                  className={`
+                    absolute inset-0 flex items-center justify-center p-2
+                    bg-gradient-to-br from-background to-primary/5 border-2
+                    ${card.matched 
+                      ? 'border-green-400 bg-green-50 text-green-800' 
+                      : 'border-primary/40 text-primary'
+                    }
+                  `}
+                  style={{
+                    backfaceVisibility: 'hidden',
+                    transform: 'rotateY(180deg)'
+                  }}
+                >
+                  <div className="text-center text-xs sm:text-sm font-medium break-words overflow-hidden">
+                    {card.content}
+                  </div>
+                </Card>
               </div>
             ))}
           </div>
-          
-          <div className="flex items-center justify-between mt-3">
-            <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
-              Lượt đã chơi: {moves}
-            </div>
-            
-            <div className="flex gap-2">
-              {content?.settings?.allowHints && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleHint}
-                  className="bg-gradient-to-r from-primary/10 to-background border-primary/20"
-                >
-                  <Lightbulb className="h-4 w-4 mr-1 text-yellow-500" />
-                  Gợi ý (-10s)
-                </Button>
-              )}
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRestart}
-                className="bg-gradient-to-r from-secondary/50 to-background border-primary/20"
-              >
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Làm lại
-              </Button>
-            </div>
-          </div>
         </div>
-      )}
+      </ScrollArea>
+
+      {/* Footer với actions */}
+      <div className="flex-shrink-0 p-3 sm:p-4 border-t border-primary/10 bg-background/80 backdrop-blur-sm">
+        <div className="flex gap-2 sm:gap-3 max-w-6xl mx-auto">
+          <Button
+            variant="outline"
+            onClick={handleHint}
+            disabled={gameOver || gameWon || cards.filter(card => !card.matched && !card.flipped).length === 0}
+            className="flex-1 border-primary/20 hover:border-primary/30 hover:bg-primary/5 text-xs sm:text-sm"
+          >
+            <Lightbulb className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+            Gợi ý (-10s)
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleRestart}
+            className="flex-1 border-primary/20 hover:border-primary/30 hover:bg-primary/5 text-xs sm:text-sm"
+          >
+            <RefreshCw className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+            Làm lại
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

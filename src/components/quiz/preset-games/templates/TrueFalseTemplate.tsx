@@ -11,7 +11,6 @@ interface TrueFalseTemplateProps {
   data?: any;
   content?: any;
   topic: string;
-  onBack?: () => void;
   onShare?: () => void;
 }
 

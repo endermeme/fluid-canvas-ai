@@ -77,7 +77,7 @@ const PresetGamesPage: React.FC = () => {
   // Show loading screen initially to prevent flash
   if (isLoading) {
     return (
-      <div className="h-full flex flex-col overflow-hidden relative bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950">
+      <div className="h-full flex flex-col overflow-hidden relative">
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
@@ -89,7 +89,7 @@ const PresetGamesPage: React.FC = () => {
   }
 
   return (
-    <div className="h-full w-full overflow-auto relative bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950">
+    <div className="h-full w-full overflow-auto relative">
       {/* Optimized Background Animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Neural Network Grid */}

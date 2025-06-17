@@ -116,7 +116,7 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
 
   return (
     <>
-      <div className="flex justify-between items-center bg-background/90 backdrop-blur-md px-4 py-3 border-b border-primary/10 shadow-sm">
+      <div className="flex justify-between items-center px-3 sm:px-4 py-2 sm:py-3 border-b border-primary/10">
         {showBackButton && (
           <Button variant="ghost" size="sm" onClick={onBack} className="flex items-center gap-2" title="Quay lại">
             <ArrowLeft className="h-4 w-4" />
