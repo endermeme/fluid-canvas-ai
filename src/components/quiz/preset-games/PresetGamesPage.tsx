@@ -62,11 +62,11 @@ const PresetGamesPage: React.FC = () => {
   // Show loading screen initially to prevent flash
   if (isLoading) {
     return (
-      <div className="h-full flex flex-col overflow-auto relative bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950">
+      <div className="h-full flex flex-col overflow-hidden relative bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950">
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-            <p className="text-base font-medium">Đang tải...</p>
+            <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-sm font-medium">Đang tải...</p>
           </div>
         </div>
       </div>
@@ -74,23 +74,7 @@ const PresetGamesPage: React.FC = () => {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-auto relative bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950" style={{ transform: 'scale(0.9)', transformOrigin: 'top center' }}>
-      {/* Simplified Background - just the neural grid */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 opacity-20">
-          <svg className="w-full h-full" viewBox="0 0 900 900">
-            <defs>
-              <pattern id="neural-grid-preset" x="0" y="0" width="90" height="90" patternUnits="userSpaceOnUse">
-                <circle cx="45" cy="45" r="1.5" fill="currentColor" className="text-blue-400" />
-                <line x1="45" y1="45" x2="90" y2="45" stroke="currentColor" strokeWidth="0.3" className="text-blue-300" />
-                <line x1="45" y1="45" x2="45" y2="90" stroke="currentColor" strokeWidth="0.3" className="text-blue-300" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#neural-grid-preset)" />
-          </svg>
-        </div>
-      </div>
-
+    <div className="h-full flex flex-col overflow-hidden relative bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950">
       {!selectedGameType && (
         <div className="absolute top-2 right-2 z-10">
           <Button 
@@ -99,7 +83,7 @@ const PresetGamesPage: React.FC = () => {
             size="sm"
             className="flex items-center gap-1 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-sm border-blue-200/45 dark:border-blue-700/45 text-xs px-2 py-1"
           >
-            <History size={12} />
+            <History size={10} />
             <span>Lịch sử game</span>
           </Button>
         </div>
