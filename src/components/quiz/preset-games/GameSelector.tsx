@@ -89,7 +89,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
   ];
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-b from-primary/5 to-background">
+    <div className="h-full flex flex-col bg-white dark:bg-slate-900">
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-4xl mx-auto">
           <div className="text-center mb-8">
