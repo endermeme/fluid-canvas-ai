@@ -5,6 +5,7 @@ import MatchingHeader from './matching/MatchingHeader';
 import MatchingGameArea from './matching/MatchingGameArea';
 import MatchingFooter from './matching/MatchingFooter';
 import MatchingGameEnd from './matching/MatchingGameEnd';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MatchingTemplateProps {
   content: any;
@@ -15,6 +16,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   const pairs = content?.pairs || [];
   const difficulty = content?.settings?.difficulty || "medium";
   const timeLimit = content?.settings?.timeLimit || 60;
+  const isMobile = useIsMobile();
 
   const {
     leftItems,
@@ -37,7 +39,13 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   }
 
   return (
-    <div className="flex flex-col h-screen max-h-screen overflow-hidden">
+    <div 
+      className="flex flex-col overflow-hidden"
+      style={{ 
+        height: isMobile ? '100dvh' : '100vh',
+        maxHeight: isMobile ? '100dvh' : '100vh'
+      }}
+    >
       <MatchingHeader
         matchedPairs={matchedPairs}
         totalPairs={totalPairs}

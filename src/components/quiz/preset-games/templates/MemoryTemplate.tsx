@@ -5,6 +5,7 @@ import MemoryGameArea from './memory/MemoryGameArea';
 import MemoryFooter from './memory/MemoryFooter';
 import MemoryGameEnd from './memory/MemoryGameEnd';
 import { useMemoryGame } from './memory/useMemoryGame';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MemoryTemplateProps {
   content: any;
@@ -15,6 +16,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   const memoryCards = content?.cards || [];
   const timeLimit = content?.settings?.timeLimit || 120;
   const allowHints = content?.settings?.allowHints;
+  const isMobile = useIsMobile();
 
   const {
     cards,
@@ -35,7 +37,13 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   }
 
   return (
-    <div className="flex flex-col h-screen max-h-screen overflow-hidden">
+    <div 
+      className="flex flex-col overflow-hidden"
+      style={{ 
+        height: isMobile ? '100dvh' : '100vh',
+        maxHeight: isMobile ? '100dvh' : '100vh'
+      }}
+    >
       <MemoryHeader
         matchedPairs={matchedPairs}
         totalPairs={totalPairs}

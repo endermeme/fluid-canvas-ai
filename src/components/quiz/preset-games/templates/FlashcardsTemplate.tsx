@@ -4,6 +4,7 @@ import FlashcardsHeader from './flashcards/FlashcardsHeader';
 import FlashcardsCard from './flashcards/FlashcardsCard';
 import FlashcardsFooter from './flashcards/FlashcardsFooter';
 import { useFlashcards } from './flashcards/useFlashcards';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface FlashcardsTemplateProps {
   content: any;
@@ -15,6 +16,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({
   topic
 }) => {
   const cards = content?.cards || [];
+  const isMobile = useIsMobile();
   
   const {
     currentCard,
@@ -35,7 +37,13 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-screen max-h-screen overflow-hidden">
+    <div 
+      className="flex flex-col overflow-hidden"
+      style={{ 
+        height: isMobile ? '100dvh' : '100vh',
+        maxHeight: isMobile ? '100dvh' : '100vh'
+      }}
+    >
       <FlashcardsHeader
         currentCard={currentCard}
         totalCards={cards.length}
