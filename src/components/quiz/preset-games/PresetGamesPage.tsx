@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import GameSelector from './GameSelector';
@@ -5,7 +6,7 @@ import PresetGameManager from './PresetGameManager';
 import { GameSettingsData } from '../types';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { History } from 'lucide-react';
+import { History, Atom, FlaskConical, Microscope, TestTube, Telescope, Radiation, Calculator, Beaker, Dna } from 'lucide-react';
 import BackgroundParticles from '@/components/ui/background-particles';
 import { motion } from 'framer-motion';
 
@@ -20,6 +21,19 @@ const PresetGamesPage: React.FC = () => {
   // Extract topic from URL if provided
   const searchParams = new URLSearchParams(location.search);
   const topicFromUrl = searchParams.get('topic');
+  
+  // Science icons for background (stable positions)
+  const scienceIcons = React.useMemo(() => [
+    { Icon: Atom, position: { top: '10%', left: '8%' }, rotation: 360, duration: 25 },
+    { Icon: FlaskConical, position: { top: '20%', right: '10%' }, rotation: -180, duration: 30 },
+    { Icon: Microscope, position: { bottom: '25%', left: '5%' }, rotation: 180, duration: 35 },
+    { Icon: TestTube, position: { top: '60%', right: '15%' }, rotation: -360, duration: 28 },
+    { Icon: Telescope, position: { bottom: '15%', right: '25%' }, rotation: 270, duration: 32 },
+    { Icon: Radiation, position: { top: '40%', left: '3%' }, rotation: -270, duration: 26 },
+    { Icon: Calculator, position: { bottom: '50%', right: '8%' }, rotation: 180, duration: 24 },
+    { Icon: Beaker, position: { top: '75%', left: '25%' }, rotation: -360, duration: 29 },
+    { Icon: Dna, position: { top: '30%', left: '88%' }, rotation: 360, duration: 31 },
+  ], []);
   
   // Use URL topic if present and no game topic is set yet
   React.useEffect(() => {
@@ -76,62 +90,61 @@ const PresetGamesPage: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col overflow-hidden relative bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950">
-      {/* Background Animation - copied exactly from custom game */}
+      {/* Optimized Background Animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Floating Particles */}
-        <BackgroundParticles particleCount={15} />
-        
-        {/* Animated Background Gradient */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 via-purple-400/10 to-pink-400/10 animate-pulse-soft"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-300/5 to-transparent animate-breathe"></div>
+        {/* Neural Network Grid */}
+        <div className="absolute inset-0 opacity-10">
+          <svg className="w-full h-full" viewBox="0 0 1000 1000">
+            <defs>
+              <pattern id="neural-grid-preset" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                <circle cx="50" cy="50" r="2" fill="currentColor" className="text-blue-500" />
+                <line x1="50" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
+                <line x1="50" y1="50" x2="50" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#neural-grid-preset)" />
+          </svg>
         </div>
-        
-        {/* Floating Geometric Shapes */}
-        {[...Array(8)].map((_, i) => (
+
+        {/* Floating Quantum Particles */}
+        <BackgroundParticles particleCount={15} />
+
+        {/* Science Icons Animation */}
+        {scienceIcons.map((item, index) => (
           <motion.div
-            key={i}
-            className="absolute opacity-30"
-            style={{
-              left: `${20 + (i * 10)}%`,
-              top: `${15 + (i * 8)}%`,
-            }}
+            key={index}
+            className="absolute opacity-8"
+            style={item.position}
             animate={{
-              y: [0, -20, 0],
-              rotate: [0, 180, 360],
-              scale: [1, 1.2, 1],
+              rotate: item.rotation,
             }}
             transition={{
-              duration: 6 + i,
+              duration: item.duration,
               repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 0.5,
+              ease: "linear"
             }}
           >
-            <div className="w-6 h-6 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg transform rotate-45"></div>
+            <item.Icon className="w-12 h-12 text-blue-400/20" />
           </motion.div>
         ))}
-        
-        {/* Pulsing Circles */}
-        {[...Array(5)].map((_, i) => (
+
+        {/* Pulsing Energy Waves */}
+        {[...Array(3)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute rounded-full border-2 border-blue-400/20"
+            className="absolute top-1/2 left-1/2 w-80 h-80 border border-blue-300/20 rounded-full"
             style={{
-              width: 100 + i * 50,
-              height: 100 + i * 50,
-              left: `${10 + i * 15}%`,
-              top: `${20 + i * 10}%`,
+              transform: 'translate(-50%, -50%)',
             }}
             animate={{
-              scale: [1, 1.3, 1],
-              opacity: [0.3, 0.1, 0.3],
+              scale: [1, 3, 1],
+              opacity: [0.3, 0, 0.3],
             }}
             transition={{
-              duration: 4 + i,
+              duration: 10,
               repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 1.2,
+              delay: i * 3.3,
+              ease: "easeInOut"
             }}
           />
         ))}
