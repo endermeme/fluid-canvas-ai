@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -116,10 +117,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
       });
     }
 
-    // Tự động chuyển câu sau 2.5 giây
-    setTimeout(() => {
-      handleNextQuestion();
-    }, 2500);
+    // Đã xóa tự động chuyển câu - người dùng phải bấm nút thủ công
   };
 
   const handleNextQuestion = () => {
@@ -409,21 +407,14 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
           
           <Button 
             onClick={handleNextQuestion} 
-            disabled={!isAnswered}
             size="lg"
-            className={`
-              flex-2 min-w-0 text-lg py-6
-              ${isAnswered 
-                ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary shadow-xl' 
-                : 'bg-primary/50 cursor-not-allowed'
-              }
-            `}
+            className="flex-2 min-w-0 text-lg py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary shadow-xl"
           >
             {isLastQuestion ? 'Xem Kết Quả' : 'Câu Tiếp Theo'}
             <ChevronRight className="h-5 w-5 ml-3" />
           </Button>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

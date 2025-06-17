@@ -1,3 +1,4 @@
+
 # Design Decisions Log
 
 ## 2024-01-01: Game Templates Responsive Design
@@ -103,3 +104,13 @@
   - Thêm transition riêng cho từng element (text, icons, backgrounds)
 - **Files thay đổi**: GameSelector.tsx
 - **Lý do**: Loại bỏ hiện tượng giật lag khi hover và tạo animation mượt mà hơn cho UX tốt hơn
+
+## 2024-12-17: QuizTemplate Manual Navigation Control
+- **Vấn đề**: Nút "Câu Tiếp Theo" bị disabled khi chưa chọn đáp án và tự động chuyển câu sau khi trả lời không cho phép người dùng kiểm soát
+- **Giải pháp**: 
+  - Loại bỏ disabled state của nút "Câu Tiếp Theo" - luôn cho phép nhấn
+  - Xóa tự động chuyển câu sau 2.5 giây
+  - Người dùng phải chủ động nhấn nút để chuyển câu hỏi tiếp theo
+  - Giữ nguyên tất cả logic scoring và timer
+- **Files thay đổi**: QuizTemplate.tsx
+- **Lý do**: Cho phép người dùng kiểm soát hoàn toàn việc chuyển câu hỏi và có thời gian suy nghĩ sau khi trả lời
