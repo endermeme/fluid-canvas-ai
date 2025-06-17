@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -116,6 +115,11 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         variant: "destructive",
       });
     }
+
+    // Tự động chuyển câu sau 2.5 giây
+    setTimeout(() => {
+      handleNextQuestion();
+    }, 2500);
   };
 
   const handleNextQuestion = () => {
@@ -143,7 +147,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
   };
 
   if (!gameContent || !questions.length) {
-    return <div className="p-3.8">Không có dữ liệu câu hỏi</div>;
+    return <div className="p-4">Không có dữ liệu câu hỏi</div>;
   }
 
   if (showResult) {
@@ -151,17 +155,17 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
     
     return (
       <motion.div 
-        initial={{ opacity: 0, scale: 0.85 }}
+        initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.47, ease: "easeOut" }}
-        className="flex flex-col items-center justify-center h-screen max-h-screen overflow-hidden p-5.7 sm:p-7.6 bg-gradient-to-br from-blue-50/76 via-sky-50/76 to-blue-100/76 dark:from-blue-950/76 dark:via-sky-950/76 dark:to-blue-950/76"
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="flex flex-col items-center justify-center h-screen max-h-screen overflow-hidden p-6 sm:p-8 bg-gradient-to-br from-blue-50/80 via-sky-50/80 to-blue-100/80 dark:from-blue-950/80 dark:via-sky-950/80 dark:to-blue-950/80"
       >
-        <Card className="max-w-lg w-full p-7.6 sm:p-9.5 text-center bg-gradient-to-br from-primary/4.7 to-background backdrop-blur-sm border-primary/19 shadow-lg">
+        <Card className="max-w-lg w-full p-8 sm:p-10 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20 shadow-xl">
           <motion.h2 
-            initial={{ y: -19, opacity: 0 }}
+            initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.19 }}
-            className="text-2xl sm:text-3xl font-bold mb-5.7 text-primary"
+            transition={{ delay: 0.2 }}
+            className="text-3xl sm:text-4xl font-bold mb-6 text-primary"
           >
             Kết Quả
           </motion.h2>
@@ -169,8 +173,8 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.28 }}
-            className="text-lg sm:text-xl mb-5.7"
+            transition={{ delay: 0.3 }}
+            className="text-lg sm:text-xl mb-6"
           >
             Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
           </motion.p>
@@ -178,21 +182,21 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.38 }}
-            className="mb-7.6"
+            transition={{ delay: 0.4 }}
+            className="mb-8"
           >
-            <div className="flex justify-between mb-2.85">
+            <div className="flex justify-between mb-3">
               <span className="text-lg">Điểm của bạn</span>
               <span className="font-bold text-xl">{percentage}%</span>
             </div>
-            <Progress value={percentage} className="h-3.8 bg-secondary" />
+            <Progress value={percentage} className="h-4 bg-secondary" />
           </motion.div>
           
           <motion.div 
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.47, type: "spring", stiffness: 190 }}
-            className="text-3xl sm:text-4xl font-bold mb-7.6 text-primary"
+            transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+            className="text-4xl sm:text-5xl font-bold mb-8 text-primary"
           >
             {score} / {questions.length}
           </motion.div>
@@ -200,19 +204,19 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.57 }}
-            className="text-base mb-5.7 text-muted-foreground"
+            transition={{ delay: 0.6 }}
+            className="text-base mb-6 text-muted-foreground"
           >
             Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
           </motion.div>
           
           <motion.div
-            initial={{ y: 19, opacity: 0 }}
+            initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.66 }}
+            transition={{ delay: 0.7 }}
           >
-            <Button onClick={handleRestart} size="lg" className="w-full bg-gradient-to-r from-primary to-primary/76 hover:from-primary/85 hover:to-primary text-lg py-5.7">
-              <RefreshCw className="mr-2.85 h-4.7 w-4.7" />
+            <Button onClick={handleRestart} size="lg" className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-lg py-6">
+              <RefreshCw className="mr-3 h-5 w-5" />
               Chơi Lại
             </Button>
           </motion.div>
@@ -229,47 +233,47 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
   const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
 
   return (
-    <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-gradient-to-br from-blue-50/76 via-sky-50/76 to-blue-100/76 dark:from-blue-950/76 dark:via-sky-950/76 dark:to-blue-950/76">
-      {/* Header với thông tin - Giảm kích thước */}
+    <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-gradient-to-br from-blue-50/80 via-sky-50/80 to-blue-100/80 dark:from-blue-950/80 dark:via-sky-950/80 dark:to-blue-950/80">
+      {/* Header với thông tin */}
       <motion.div 
-        initial={{ y: -19, opacity: 0 }}
+        initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="flex-shrink-0 p-4.7 sm:p-5.7"
+        className="flex-shrink-0 p-6 sm:p-8"
       >
-        <div className="flex justify-between items-center mb-3.8">
+        <div className="flex justify-between items-center mb-4">
           <motion.div 
-            initial={{ x: -19, opacity: 0 }}
+            initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className="text-sm font-semibold px-3.8 py-2.3 bg-primary/14 backdrop-blur-sm rounded-full border border-primary/19"
+            className="text-base font-semibold px-4 py-2.5 bg-primary/15 backdrop-blur-sm rounded-full border border-primary/20"
           >
             Câu hỏi {currentQuestion + 1}/{questions.length}
           </motion.div>
           
-          <div className="flex items-center gap-3.8">
+          <div className="flex items-center gap-4">
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="flex items-center px-3.8 py-2.3 bg-primary/14 backdrop-blur-sm rounded-full border border-primary/19"
+              className="flex items-center px-4 py-2.5 bg-primary/15 backdrop-blur-sm rounded-full border border-primary/20"
             >
-              <Clock className="h-4.7 w-4.7 mr-1.9 text-primary" />
+              <Clock className="h-5 w-5 mr-2 text-primary" />
               <span className="font-semibold text-lg">{timeLeft}s</span>
             </motion.div>
             
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.095 }}
-              className="flex items-center px-3.8 py-2.3 bg-primary/9.5 backdrop-blur-sm rounded-full border border-primary/14"
+              transition={{ delay: 0.1 }}
+              className="flex items-center px-4 py-2.5 bg-primary/10 backdrop-blur-sm rounded-full border border-primary/15"
             >
-              <Clock className="h-4.7 w-4.7 mr-1.9" />
+              <Clock className="h-5 w-5 mr-2" />
               <span className="text-base">{formattedTotalTime}</span>
             </motion.div>
             
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.19 }}
-              className="px-3.8 py-2.3 bg-primary/14 backdrop-blur-sm rounded-full border border-primary/19"
+              transition={{ delay: 0.2 }}
+              className="px-4 py-2.5 bg-primary/15 backdrop-blur-sm rounded-full border border-primary/20"
             >
               <span className="text-base">Điểm: <span className="font-bold text-lg">{score}</span></span>
             </motion.div>
@@ -279,30 +283,30 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         <motion.div
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
-          transition={{ duration: 0.47 }}
+          transition={{ duration: 0.5 }}
         >
-          <Progress value={progress} className="h-2.85 bg-secondary/47 backdrop-blur-sm" />
+          <Progress value={progress} className="h-3 bg-secondary/50 backdrop-blur-sm" />
         </motion.div>
       </motion.div>
 
-      {/* Nội dung chính - Giảm kích thước */}
-      <div className="flex-1 min-h-0 overflow-auto p-4.7 sm:p-5.7">
-        <div className="max-w-3xl mx-auto space-y-6.6">
+      {/* Nội dung chính */}
+      <div className="flex-1 min-h-0 overflow-auto p-6 sm:p-8">
+        <div className="max-w-4xl mx-auto space-y-8">
           {/* Câu hỏi */}
           <motion.div
             key={currentQuestion}
-            initial={{ opacity: 0, y: 28 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -28 }}
-            transition={{ duration: 0.47 }}
+            exit={{ opacity: 0, y: -30 }}
+            transition={{ duration: 0.5 }}
           >
-            <Card className="p-6.6 sm:p-7.6 bg-gradient-to-br from-white/85 to-white/76 backdrop-blur-sm border-primary/19 shadow-lg">
-              <h2 className="text-xl sm:text-2xl font-bold mb-7.6 text-primary leading-relaxed text-center">
+            <Card className="p-8 sm:p-10 bg-gradient-to-br from-white/90 to-white/80 backdrop-blur-sm border-primary/20 shadow-xl">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-10 text-primary leading-relaxed text-center">
                 {question.question}
               </h2>
               
-              {/* Các lựa chọn - Giảm kích thước */}
-              <div className="space-y-3.8">
+              {/* Các lựa chọn - Bố cục dọc với kích thước lớn hơn */}
+              <div className="space-y-5">
                 <AnimatePresence>
                   {question.options.map((option: string, index: number) => {
                     const isSelected = selectedOption === index;
@@ -313,50 +317,50 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
                     return (
                       <motion.button
                         key={index}
-                        initial={{ opacity: 0, x: -28 }}
+                        initial={{ opacity: 0, x: -30 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.14, duration: 0.38 }}
-                        whileHover={!isAnswered ? { scale: 1.015, y: -2.85 } : {}}
-                        whileTap={!isAnswered ? { scale: 0.975 } : {}}
+                        transition={{ delay: index * 0.15, duration: 0.4 }}
+                        whileHover={!isAnswered ? { scale: 1.02, y: -3 } : {}}
+                        whileTap={!isAnswered ? { scale: 0.98 } : {}}
                         onClick={() => handleOptionSelect(index)}
                         disabled={isAnswered}
                         className={`
-                          w-full p-4.7 sm:p-5.7 text-left rounded-xl transition-all duration-285 border-2 
+                          w-full p-6 sm:p-8 text-left rounded-2xl transition-all duration-300 border-2 
                           ${showCorrect
-                            ? 'bg-gradient-to-r from-green-100/85 to-green-50/85 border-green-380 shadow-lg shadow-green-200/47 dark:from-green-900/38 dark:to-green-800/28 dark:border-green-475' 
+                            ? 'bg-gradient-to-r from-green-100/90 to-green-50/90 border-green-400 shadow-xl shadow-green-200/50 dark:from-green-900/40 dark:to-green-800/30 dark:border-green-500' 
                             : showIncorrect
-                              ? 'bg-gradient-to-r from-red-100/85 to-red-50/85 border-red-380 shadow-lg shadow-red-200/47 dark:from-red-900/38 dark:to-red-800/28 dark:border-red-475'
+                              ? 'bg-gradient-to-r from-red-100/90 to-red-50/90 border-red-400 shadow-xl shadow-red-200/50 dark:from-red-900/40 dark:to-red-800/30 dark:border-red-500'
                               : isAnswered && isCorrect
-                                ? 'bg-gradient-to-r from-green-100/85 to-green-50/85 border-green-380 shadow-lg shadow-green-200/47 dark:from-green-900/38 dark:to-green-800/28 dark:border-green-475'
-                                : 'bg-gradient-to-r from-white/85 to-gray-50/85 border-gray-190 hover:border-primary/47 hover:shadow-lg hover:shadow-primary/19 dark:from-slate-800/85 dark:to-slate-700/85 dark:border-slate-570'
+                                ? 'bg-gradient-to-r from-green-100/90 to-green-50/90 border-green-400 shadow-xl shadow-green-200/50 dark:from-green-900/40 dark:to-green-800/30 dark:border-green-500'
+                                : 'bg-gradient-to-r from-white/90 to-gray-50/90 border-gray-200 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20 dark:from-slate-800/90 dark:to-slate-700/90 dark:border-slate-600'
                           }
-                          ${!isAnswered ? 'hover:bg-gradient-to-r hover:from-primary/9.5 hover:to-primary/14 cursor-pointer' : 'cursor-default'}
+                          ${!isAnswered ? 'hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/15 cursor-pointer' : 'cursor-default'}
                         `}
                       >
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 mr-4.7">
+                          <div className="flex-shrink-0 mr-6">
                             {showCorrect ? (
                               <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
-                                transition={{ type: "spring", stiffness: 475, damping: 14 }}
+                                transition={{ type: "spring", stiffness: 500, damping: 15 }}
                               >
-                                <CheckCircle className="h-6.6 w-6.6 text-green-570 dark:text-green-380" />
+                                <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
                               </motion.div>
                             ) : showIncorrect ? (
                               <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
-                                transition={{ type: "spring", stiffness: 475, damping: 14 }}
+                                transition={{ type: "spring", stiffness: 500, damping: 15 }}
                               >
-                                <XCircle className="h-6.6 w-6.6 text-red-570 dark:text-red-380" />
+                                <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
                               </motion.div>
                             ) : (
                               <div className={`
-                                h-6.6 w-6.6 rounded-full border-2 flex items-center justify-center text-sm font-bold
+                                h-8 w-8 rounded-full border-2 flex items-center justify-center text-base font-bold
                                 ${isAnswered && isCorrect 
-                                  ? 'bg-green-475 border-green-475 text-white' 
-                                  : 'bg-primary/9.5 border-primary/28 text-primary/66'
+                                  ? 'bg-green-500 border-green-500 text-white' 
+                                  : 'bg-primary/10 border-primary/30 text-primary/70'
                                 }
                               `}>
                                 {String.fromCharCode(65 + index)}
@@ -365,11 +369,11 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
                           </div>
                           
                           <span className={`
-                            text-base sm:text-lg leading-relaxed
+                            text-lg sm:text-xl leading-relaxed
                             ${showCorrect 
-                              ? 'text-green-760 dark:text-green-190 font-semibold' 
+                              ? 'text-green-800 dark:text-green-200 font-semibold' 
                               : showIncorrect 
-                                ? 'text-red-760 dark:text-red-190 font-medium' 
+                                ? 'text-red-800 dark:text-red-200 font-medium' 
                                 : 'text-foreground'
                             }
                           `}>
@@ -386,30 +390,37 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         </div>
       </div>
 
-      {/* Footer với các nút điều khiển - Giảm kích thước */}
+      {/* Footer với các nút điều khiển */}
       <motion.div 
-        initial={{ y: 19, opacity: 0 }}
+        initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="flex-shrink-0 p-4.7 sm:p-5.7"
+        className="flex-shrink-0 p-6 sm:p-8"
       >
-        <div className="max-w-3xl mx-auto flex gap-3.8">
+        <div className="max-w-4xl mx-auto flex gap-4">
           <Button
             variant="outline"
             size="lg"
             onClick={handleRestart}
-            className="bg-white/66 backdrop-blur-sm border-primary/19 hover:bg-white/85 flex-1 text-base py-4.7"
+            className="bg-white/70 backdrop-blur-sm border-primary/20 hover:bg-white/90 flex-1 text-lg py-6"
           >
-            <RefreshCw className="h-4.7 w-4.7 mr-2.85" />
+            <RefreshCw className="h-5 w-5 mr-3" />
             Làm lại
           </Button>
           
           <Button 
             onClick={handleNextQuestion} 
+            disabled={!isAnswered}
             size="lg"
-            className="flex-2 min-w-0 text-base py-4.7 bg-gradient-to-r from-primary to-primary/76 hover:from-primary/85 hover:to-primary shadow-lg"
+            className={`
+              flex-2 min-w-0 text-lg py-6
+              ${isAnswered 
+                ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary shadow-xl' 
+                : 'bg-primary/50 cursor-not-allowed'
+              }
+            `}
           >
             {isLastQuestion ? 'Xem Kết Quả' : 'Câu Tiếp Theo'}
-            <ChevronRight className="h-4.7 w-4.7 ml-2.85" />
+            <ChevronRight className="h-5 w-5 ml-3" />
           </Button>
         </div>
       </motion.div>
