@@ -118,34 +118,34 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
     let isValidSelection = false;
     
     if (startRow === endRow) {
-      // Horizontal word - chỉ tìm từ trái sang phải
-      if (startCol <= endCol) {
-        const row = startRow;
-        
-        for (let col = startCol; col <= endCol; col++) {
-          extractedLetters += grid[row][col];
-        }
-        isValidSelection = true;
+      // Horizontal word
+      const row = startRow;
+      const start = Math.min(startCol, endCol);
+      const end = Math.max(startCol, endCol);
+      
+      for (let col = start; col <= end; col++) {
+        extractedLetters += grid[row][col];
       }
+      isValidSelection = true;
     } else if (startCol === endCol) {
-      // Vertical word - chỉ tìm từ trên xuống dưới
-      if (startRow <= endRow) {
-        const col = startCol;
-        
-        for (let row = startRow; row <= endRow; row++) {
-          extractedLetters += grid[row][col];
-        }
-        isValidSelection = true;
+      // Vertical word
+      const col = startCol;
+      const start = Math.min(startRow, endRow);
+      const end = Math.max(startRow, endRow);
+      
+      for (let row = start; row <= end; row++) {
+        extractedLetters += grid[row][col];
       }
+      isValidSelection = true;
     } else if (allowDiagonalWords) {
-      // Diagonal word - chỉ tìm theo hướng thuận (từ trên trái xuống dưới phải hoặc từ trên phải xuống dưới trái)
+      // Diagonal word (if allowed)
       const rowDiff = endRow - startRow;
       const colDiff = endCol - startCol;
       
-      // Chỉ cho phép diagonal nếu cả hai hướng đều thuận hoặc một thuận một nghịch (nhưng không cả hai nghịch)
-      if (Math.abs(rowDiff) === Math.abs(colDiff) && rowDiff > 0) {
-        const rowStep = 1; // Luôn từ trên xuống dưới
-        const colStep = colDiff > 0 ? 1 : -1; // Có thể từ trái sang phải hoặc phải sang trái
+      // Check if it's a proper diagonal (same number of steps in both directions)
+      if (Math.abs(rowDiff) === Math.abs(colDiff)) {
+        const rowStep = rowDiff > 0 ? 1 : -1;
+        const colStep = colDiff > 0 ? 1 : -1;
         const steps = Math.abs(rowDiff);
         
         for (let i = 0; i <= steps; i++) {
@@ -159,7 +159,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
     
     if (!isValidSelection) return null;
     
-    // Chỉ kiểm tra từ thuận, không kiểm tra từ ngược
+    // Check if this matches any word in our list
     const foundWord = words.find((w: any) => !w.found && w.word === extractedLetters);
     
     if (foundWord) {
@@ -176,6 +176,24 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
       return foundWord.word;
     }
     
+    // Check reverse word too
+    const reversedLetters = extractedLetters.split('').reverse().join('');
+    const foundReversedWord = words.find((w: any) => !w.found && w.word === reversedLetters);
+    
+    if (foundReversedWord) {
+      // Mark this word as found
+      const updatedWords = words.map((w: any) => 
+        w.word === foundReversedWord.word ? { ...w, found: true } : w
+      );
+      
+      // Update the content object with found words
+      if (content) {
+        content.words = updatedWords;
+      }
+      
+      return foundReversedWord.word;
+    }
+    
     return null;
   };
 
@@ -184,23 +202,27 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
     
     const endPos = selectedEnd || hoveredCell;
     
-    // Check if in same row (horizontal) - chỉ từ trái sang phải
-    if (selectedStart.row === endPos.row && row === selectedStart.row && selectedStart.col <= endPos.col) {
-      return col >= selectedStart.col && col <= endPos.col;
+    // Check if in same row (horizontal)
+    if (selectedStart.row === endPos.row && row === selectedStart.row) {
+      const startCol = Math.min(selectedStart.col, endPos.col);
+      const endCol = Math.max(selectedStart.col, endPos.col);
+      return col >= startCol && col <= endCol;
     }
     
-    // Check if in same column (vertical) - chỉ từ trên xuống dưới
-    if (selectedStart.col === endPos.col && col === selectedStart.col && selectedStart.row <= endPos.row) {
-      return row >= selectedStart.row && row <= endPos.row;
+    // Check if in same column (vertical)
+    if (selectedStart.col === endPos.col && col === selectedStart.col) {
+      const startRow = Math.min(selectedStart.row, endPos.row);
+      const endRow = Math.max(selectedStart.row, endPos.row);
+      return row >= startRow && row <= endRow;
     }
     
-    // Check if in diagonal path (if allowed) - chỉ theo hướng thuận
+    // Check if in diagonal path (if allowed)
     if (allowDiagonalWords) {
       const rowDiff = endPos.row - selectedStart.row;
       const colDiff = endPos.col - selectedStart.col;
       
-      if (Math.abs(rowDiff) === Math.abs(colDiff) && rowDiff > 0) {
-        const rowDir = 1; // Luôn từ trên xuống dưới
+      if (Math.abs(rowDiff) === Math.abs(colDiff)) {
+        const rowDir = rowDiff > 0 ? 1 : -1;
         const colDir = colDiff > 0 ? 1 : -1;
         
         let checkRow = selectedStart.row;
@@ -278,14 +300,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
   };
 
   if (!content || !grid.length || !words.length) {
-    return (
-      <div className="h-full flex items-center justify-center p-4">
-        <div className="text-center">
-          <p className="text-lg">Không có dữ liệu trò chơi tìm từ</p>
-          <p className="text-sm text-muted-foreground mt-2">Vui lòng thử lại hoặc chọn game khác</p>
-        </div>
-      </div>
-    );
+    return <div className="p-4">Không có dữ liệu trò chơi tìm từ</div>;
   }
 
   const progressPercentage = (foundWords.length / totalWords) * 100;
@@ -320,12 +335,12 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex flex-col p-4 h-full">
       {/* Header with progress and timer */}
-      <div className="flex-shrink-0 p-4">
+      <div className="mb-4">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium">
-            {gameWon ? "Hoàn thành!" : `Đã tìm: ${foundWords.length}/${totalWords}`}
+            {progressBarText()}
           </div>
           <div className="text-sm font-medium flex items-center">
             <Clock className="h-4 w-4 mr-1" />
@@ -336,127 +351,117 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
       </div>
 
       {/* Game content */}
-      <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-4 p-4 pt-0">
+      <div className="flex flex-col md:flex-row gap-4 flex-grow">
         {/* Word grid */}
-        <Card className="flex-grow min-h-0 bg-gradient-to-br from-white to-blue-50 flex flex-col">
-          <div className="flex-shrink-0 p-4">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-medium">Tìm từ ẩn (chỉ theo hướng thuận)</h3>
-              <div className="flex items-center space-x-1">
-                <Button
-                  variant={gridSize === 'small' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleChangeGridSize('small')}
-                  className="px-2 py-1 h-8"
-                >
-                  <LayoutGrid className="h-3 w-3 mr-1" />
-                  Nhỏ
-                </Button>
-                <Button
-                  variant={gridSize === 'medium' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleChangeGridSize('medium')}
-                  className="px-2 py-1 h-8"
-                >
-                  <LayoutGrid className="h-4 w-4 mr-1" />
-                  Vừa
-                </Button>
-                <Button
-                  variant={gridSize === 'large' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleChangeGridSize('large')}
-                  className="px-2 py-1 h-8"
-                >
-                  <LayoutGrid className="h-5 w-5 mr-1" />
-                  Lớn
-                </Button>
-              </div>
+        <Card className="p-4 flex-grow h-full bg-gradient-to-br from-white to-blue-50">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-medium">Tìm từ ẩn</h3>
+            <div className="flex items-center space-x-1">
+              <Button
+                variant={gridSize === 'small' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleChangeGridSize('small')}
+                className="px-2 py-1 h-8"
+              >
+                <LayoutGrid className="h-3 w-3 mr-1" />
+                Nhỏ
+              </Button>
+              <Button
+                variant={gridSize === 'medium' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleChangeGridSize('medium')}
+                className="px-2 py-1 h-8"
+              >
+                <LayoutGrid className="h-4 w-4 mr-1" />
+                Vừa
+              </Button>
+              <Button
+                variant={gridSize === 'large' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleChangeGridSize('large')}
+                className="px-2 py-1 h-8"
+              >
+                <LayoutGrid className="h-5 w-5 mr-1" />
+                Lớn
+              </Button>
             </div>
           </div>
           
-          <div className="flex-1 min-h-0 overflow-auto p-4 pt-0">
-            <div className="grid grid-cols-1 gap-1 place-content-center">
-              {grid.map((row: string[], rowIndex: number) => (
-                <div key={`row-${rowIndex}`} className="flex justify-center gap-1">
-                  {row.map((cell: string, colIndex: number) => {
-                    const isSelected = selectedStart?.row === rowIndex && selectedStart?.col === colIndex;
-                    const isInPath = isInSelectedPath(rowIndex, colIndex);
-                    const foundWord = isInFoundWord(rowIndex, colIndex);
-                    
-                    return (
-                      <button
-                        key={`cell-${rowIndex}-${colIndex}`}
-                        className={`${getCellSize()} flex items-center justify-center rounded-md font-medium transition-all
-                          ${isSelected ? 'bg-primary text-white' : ''}
-                          ${isInPath && !isSelected ? 'bg-primary/30' : ''}
-                          ${foundWord ? 'bg-green-500/20 text-green-800' : (!isSelected && !isInPath ? 'bg-white border border-blue-100 hover:bg-blue-50' : '')}
-                          ${!foundWord && !isInPath && !isSelected ? 'shadow-sm' : ''}
-                        `}
-                        onClick={() => handleCellClick(rowIndex, colIndex)}
-                        onMouseEnter={() => handleCellHover(rowIndex, colIndex)}
-                        disabled={gameOver || gameWon || Boolean(foundWord)}
-                      >
-                        {cell}
-                      </button>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
+          <div className="grid grid-cols-1 gap-1 h-full place-content-center">
+            {grid.map((row: string[], rowIndex: number) => (
+              <div key={`row-${rowIndex}`} className="flex justify-center gap-1">
+                {row.map((cell: string, colIndex: number) => {
+                  const isSelected = selectedStart?.row === rowIndex && selectedStart?.col === colIndex;
+                  const isInPath = isInSelectedPath(rowIndex, colIndex);
+                  const foundWord = isInFoundWord(rowIndex, colIndex);
+                  
+                  return (
+                    <button
+                      key={`cell-${rowIndex}-${colIndex}`}
+                      className={`${getCellSize()} flex items-center justify-center rounded-md font-medium transition-all
+                        ${isSelected ? 'bg-primary text-white' : ''}
+                        ${isInPath && !isSelected ? 'bg-primary/30' : ''}
+                        ${foundWord ? 'bg-green-500/20 text-green-800' : (!isSelected && !isInPath ? 'bg-white border border-blue-100 hover:bg-blue-50' : '')}
+                        ${!foundWord && !isInPath && !isSelected ? 'shadow-sm' : ''}
+                      `}
+                      onClick={() => handleCellClick(rowIndex, colIndex)}
+                      onMouseEnter={() => handleCellHover(rowIndex, colIndex)}
+                      disabled={gameOver || gameWon || Boolean(foundWord)}
+                    >
+                      {cell}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </Card>
         
         {/* Word list */}
         {content?.settings?.showWordList && (
-          <Card className="w-full md:w-56 flex-shrink-0 bg-gradient-to-br from-white to-blue-50 flex flex-col">
-            <div className="flex-shrink-0 p-4">
-              <h3 className="text-lg font-medium mb-2 flex items-center text-blue-900">
-                <Search className="h-4 w-4 mr-1" />
-                Danh sách từ
-              </h3>
-            </div>
-            <div className="flex-1 min-h-0 overflow-auto p-4 pt-0">
-              <ul className="space-y-1">
-                {words.map((word: any, index: number) => (
-                  <li 
-                    key={index}
-                    className={`py-2 px-3 rounded ${
-                      word.found || foundWords.some(fw => fw.word === word.word)
-                        ? 'line-through opacity-70 bg-green-100 text-green-800'
-                        : 'bg-white border border-blue-100'
-                    }`}
-                  >
-                    {word.word}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <Card className="p-4 w-full md:w-56 flex-shrink-0 overflow-y-auto bg-gradient-to-br from-white to-blue-50">
+            <h3 className="text-lg font-medium mb-2 flex items-center text-blue-900">
+              <Search className="h-4 w-4 mr-1" />
+              Danh sách từ
+            </h3>
+            <ul className="space-y-1">
+              {words.map((word: any, index: number) => (
+                <li 
+                  key={index}
+                  className={`py-2 px-3 rounded ${
+                    word.found || foundWords.some(fw => fw.word === word.word)
+                      ? 'line-through opacity-70 bg-green-100 text-green-800'
+                      : 'bg-white border border-blue-100'
+                  }`}
+                >
+                  {word.word}
+                </li>
+              ))}
+            </ul>
           </Card>
         )}
       </div>
 
       {/* Controls */}
-      <div className="flex-shrink-0 p-4 pt-0">
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant="outline"
-            onClick={handleResetSelection}
-            disabled={!selectedStart}
-            className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
-          >
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Hủy chọn
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            onClick={handleRestart}
-            className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Chơi lại
-          </Button>
-        </div>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Button
+          variant="outline"
+          onClick={handleResetSelection}
+          disabled={!selectedStart}
+          className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
+        >
+          <RotateCcw className="h-4 w-4 mr-2" />
+          Hủy chọn
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          onClick={handleRestart}
+          className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
+        >
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Chơi lại
+        </Button>
       </div>
       
       {/* Game over or win state */}

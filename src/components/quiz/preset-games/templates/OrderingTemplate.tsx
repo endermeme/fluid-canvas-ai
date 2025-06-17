@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -205,21 +204,14 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
   };
 
   if (!content || !sentences.length) {
-    return (
-      <div className="h-full flex items-center justify-center p-4">
-        <div className="text-center">
-          <p className="text-lg">Không có dữ liệu câu</p>
-          <p className="text-sm text-muted-foreground mt-2">Vui lòng thử lại hoặc chọn game khác</p>
-        </div>
-      </div>
-    );
+    return <div className="p-4">Không có dữ liệu câu</div>;
   }
 
   if (showResult) {
     const percentage = Math.round((score / sentences.length) * 100);
     
     return (
-      <div className="h-full flex items-center justify-center p-6">
+      <div className="flex flex-col items-center justify-center h-full p-6">
         <Card className="max-w-md w-full p-6 text-center">
           <h2 className="text-2xl font-bold mb-4">Kết quả</h2>
           <p className="text-lg mb-4">
@@ -250,22 +242,21 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
   const progress = ((currentSentence + 1) / sentences.length) * 100;
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="flex-shrink-0 p-4">
+    <div className="flex flex-col p-4 h-full">
+      <div className="mb-4 relative">
         {onBack && (
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={onBack} 
-            className="mb-4 flex items-center gap-1"
+            className="absolute top-0 left-0 z-10 flex items-center gap-1 bg-background/80 hover:bg-background/90 backdrop-blur-sm shadow-sm"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Quay lại</span>
           </Button>
         )}
         
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center mb-2 mt-12">
           <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
             Câu {currentSentence + 1}/{sentences.length}
           </div>
@@ -277,8 +268,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
         <Progress value={progress} className="h-2" />
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 min-h-0 overflow-auto p-4 pt-0">
+      <div className="flex-grow">
         <div className="mb-4 text-center">
           <h3 className="text-lg font-medium mb-1">Sắp xếp lại từng từ để tạo thành câu hoàn chỉnh</h3>
           <p className="text-muted-foreground text-sm">Chọn từ theo đúng thứ tự</p>
@@ -320,11 +310,8 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
             </button>
           ))}
         </div>
-      </div>
-      
-      {/* Footer */}
-      <div className="flex-shrink-0 p-4 pt-0">
-        <div className="grid grid-cols-3 gap-2 mb-3">
+        
+        <div className="grid grid-cols-3 gap-2">
           <Button
             variant="outline"
             onClick={handleShuffleWords}
@@ -358,17 +345,17 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, onB
             Kiểm tra
           </Button>
         </div>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRestart}
-          className="w-full"
-        >
-          <RefreshCw className="h-4 w-4 mr-1" />
-          Làm lại
-        </Button>
       </div>
+      
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleRestart}
+        className="mt-3 w-full bg-background/70 border-primary/20"
+      >
+        <RefreshCw className="h-4 w-4 mr-1" />
+        Làm lại
+      </Button>
     </div>
   );
 };
