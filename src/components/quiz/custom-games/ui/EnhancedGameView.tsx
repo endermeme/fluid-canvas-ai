@@ -1,3 +1,4 @@
+
 import React from 'react';
 import GameErrorDisplay from '../game-components/GameErrorDisplay';
 import GameLoadingIndicator from '../game-components/GameLoadingIndicator';
@@ -47,7 +48,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   } = useIframeManager(miniGame, onReload, gameExpired);
 
   return (
-    <div className={`w-full h-full flex flex-col ${className || ''}`}>
+    <div className={`w-full h-full flex flex-col ${className || ''}`} style={{ transform: 'scale(0.9)', transformOrigin: 'top center' }}>
       {!hideHeader && (
         <CustomGameHeader
           onBack={onBack}
@@ -84,7 +85,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         )}
         
         {extraButton && (
-          <div className="absolute bottom-4 right-4 z-10">
+          <div className="absolute bottom-3 right-3 z-10">
             {extraButton}
           </div>
         )}

@@ -15,6 +15,7 @@ interface CustomGameHeaderProps {
   onShare?: () => Promise<string | void>;
   onNewGame?: () => void;
   showGameControls?: boolean;
+  showBackButton?: boolean; // Thêm prop để kiểm soát nút quay lại
   isSharing?: boolean;
   isTeacher?: boolean;
   gameType?: string;
@@ -27,6 +28,7 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
   onShare,
   onNewGame,
   showGameControls = false,
+  showBackButton = true, // Mặc định hiển thị
   isSharing = false,
   isTeacher = false,
 }) => {
@@ -82,19 +84,21 @@ const CustomGameHeader: React.FC<CustomGameHeaderProps> = ({
 
   return (
     <>
-      <header className="bg-background/80 backdrop-blur-md border-b px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-        <div className="flex items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onBack}
-            className="hover:bg-primary/10"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+      <header className="bg-background/80 backdrop-blur-md border-b px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <div className="flex items-center gap-4">
+          {showBackButton && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleBack}
+              className="hover:bg-primary/10"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {showGameControls && (
             <>
               <Button 

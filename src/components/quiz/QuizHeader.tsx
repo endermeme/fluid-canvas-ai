@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, PlusCircle, Share2 } from 'lucide-react';
@@ -58,7 +57,6 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
         description: "Đang lưu game và tạo liên kết chia sẻ...",
       });
 
-      // Đảm bảo content là chuỗi
       let gameContent = gameData.content || '';
       
       const url = await saveGameForSharing(
@@ -118,20 +116,21 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
 
   return (
     <>
-      <div className="flex justify-between items-center bg-background/90 backdrop-blur-md px-2 py-1.5 border-b border-primary/10 shadow-sm">
+      <div className="flex justify-between items-center bg-background/90 backdrop-blur-md px-4 py-3 border-b border-primary/10 shadow-sm">
         {showBackButton && (
-          <Button variant="ghost" size="sm" onClick={onBack} className="w-7 h-7 p-0" title="Quay lại">
-            <ArrowLeft className="h-3.5 w-3.5" />
+          <Button variant="ghost" size="sm" onClick={onBack} className="flex items-center gap-2" title="Quay lại">
+            <ArrowLeft className="h-4 w-4" />
+            <span>Quay lại</span>
           </Button>
         )}
         
         {headerRight}
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {showCreateButton && (
-            <Button variant="outline" size="sm" onClick={onCreate} className="h-7 px-2 text-xs" title="Tạo mới">
-              <PlusCircle className="h-3 w-3 mr-1" />
-              Tạo
+            <Button variant="outline" size="sm" onClick={onCreate} className="flex items-center gap-2" title="Tạo mới">
+              <PlusCircle className="h-4 w-4" />
+              <span>Tạo</span>
             </Button>
           )}
 
@@ -141,11 +140,11 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
               size="sm" 
               onClick={handleShare}
               disabled={isSharing} 
-              className="h-7 px-3 bg-primary text-primary-foreground hover:bg-primary/90" 
+              className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2" 
               title="Chia sẻ game"
             >
-              <Share2 className="h-3 w-3 mr-1" />
-              {isSharing ? 'Đang xử lý...' : 'Chia sẻ'}
+              <Share2 className="h-4 w-4" />
+              <span>{isSharing ? 'Đang xử lý...' : 'Chia sẻ'}</span>
             </Button>
           )}
         </div>
