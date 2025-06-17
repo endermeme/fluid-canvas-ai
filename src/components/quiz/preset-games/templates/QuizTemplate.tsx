@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -143,7 +142,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
 
   if (!gameContent || !questions.length) {
     return (
-      <div className="h-full flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center">
           <p className="text-lg font-medium text-muted-foreground">Không có dữ liệu câu hỏi</p>
         </div>
@@ -155,7 +154,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
     const percentage = Math.round((score / questions.length) * 100);
     
     return (
-      <div className="h-full flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50">
         <Card className="w-full max-w-lg p-8 text-center shadow-xl border-0 bg-white/90 backdrop-blur-sm">
           <div className="mb-6">
             <div className="text-6xl mb-4">
@@ -203,9 +202,9 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
   const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50 pb-28">
       {/* Fixed Header */}
-      <div className="flex-shrink-0 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
+      <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
         <div className="p-4">
           <div className="flex justify-between items-center mb-3">
             <div className="text-sm font-semibold px-4 py-2 bg-primary/10 text-primary rounded-full">
@@ -226,21 +225,21 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
       </div>
 
       {/* Centered Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4 pb-24">
-        <div className="w-full max-w-3xl space-y-6">
+      <div className="flex-1 flex flex-col justify-center px-4 py-8 max-w-4xl mx-auto w-full">
+        <div className="space-y-8">
           {/* Question Card */}
           <Card className="p-6 lg:p-8 text-center shadow-lg border-0 bg-white/90 backdrop-blur-sm">
-            <h2 className="text-xl lg:text-2xl font-bold text-gray-800 leading-relaxed">
+            <h2 className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-800 leading-relaxed">
               {question.question}
             </h2>
           </Card>
 
           {/* Options Grid */}
-          <div className="grid gap-3 lg:gap-4">
+          <div className="grid gap-4 lg:gap-5">
             {question.options.map((option: string, index: number) => {
               const isSelected = selectedOption === index;
               const isCorrect = option === question.correctAnswer;
-              let buttonClass = "w-full p-4 lg:p-5 text-left rounded-xl border-2 transition-all duration-300 shadow-sm ";
+              let buttonClass = "w-full p-5 lg:p-6 text-left rounded-xl border-2 transition-all duration-300 shadow-sm ";
               
               if (isAnswered) {
                 if (isCorrect) {
@@ -265,10 +264,10 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
                   className={buttonClass}
                 >
                   <div className="flex items-center w-full">
-                    <span className="flex-shrink-0 w-8 h-8 mr-4 rounded-full bg-gray-100 flex items-center justify-center text-sm font-bold text-gray-600">
+                    <span className="flex-shrink-0 w-9 h-9 mr-4 rounded-full bg-gray-100 flex items-center justify-center text-base font-bold text-gray-600">
                       {String.fromCharCode(65 + index)}
                     </span>
-                    <span className="text-base lg:text-lg font-medium flex-1 text-left">
+                    <span className="text-base lg:text-lg xl:text-xl font-medium flex-1 text-left">
                       {option}
                     </span>
                     {isAnswered && isCorrect && (
@@ -285,9 +284,9 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
 
           {/* Explanation */}
           {isAnswered && question.explanation && (
-            <Card className="p-4 lg:p-5 bg-blue-50 border-blue-200 shadow-sm">
+            <Card className="p-5 lg:p-6 bg-blue-50 border-blue-200 shadow-sm">
               <div className="flex items-start">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-200 flex items-center justify-center mr-3 mt-0.5">
+                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-200 flex items-center justify-center mr-3 mt-0.5">
                   <span className="text-blue-700 text-sm font-bold">!</span>
                 </div>
                 <div>
@@ -301,37 +300,39 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
       </div>
 
       {/* Fixed Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg">
-        <div className="p-4 max-w-3xl mx-auto">
-          <div className="flex gap-3">
-            {isAnswered ? (
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg z-10">
+        <div className="p-5 safe-area-padding-bottom">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex gap-4">
+              {isAnswered ? (
+                <Button
+                  onClick={handleNextQuestion}
+                  className="flex-1 py-4 text-lg font-semibold rounded-xl shadow-md"
+                  size="lg"
+                >
+                  {isLastQuestion ? "Xem kết quả" : "Câu tiếp theo"}
+                  <ChevronRight className="ml-2 h-5 w-5" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => selectedOption !== null && handleOptionSelect(selectedOption)}
+                  disabled={selectedOption === null}
+                  className="flex-1 py-4 text-lg font-semibold rounded-xl shadow-md"
+                  size="lg"
+                >
+                  Xác nhận
+                </Button>
+              )}
+              
               <Button
-                onClick={handleNextQuestion}
-                className="flex-1 py-3 text-lg font-semibold rounded-xl"
+                variant="outline"
+                onClick={handleRestart}
+                className="px-8 py-4 rounded-xl border-2 shadow-md"
                 size="lg"
               >
-                {isLastQuestion ? "Xem kết quả" : "Câu tiếp theo"}
-                <ChevronRight className="ml-2 h-5 w-5" />
+                <RefreshCw className="h-5 w-5" />
               </Button>
-            ) : (
-              <Button
-                onClick={() => selectedOption !== null && handleOptionSelect(selectedOption)}
-                disabled={selectedOption === null}
-                className="flex-1 py-3 text-lg font-semibold rounded-xl"
-                size="lg"
-              >
-                Xác nhận
-              </Button>
-            )}
-            
-            <Button
-              variant="outline"
-              onClick={handleRestart}
-              className="px-6 py-3 rounded-xl border-2"
-              size="lg"
-            >
-              <RefreshCw className="h-5 w-5" />
-            </Button>
+            </div>
           </div>
         </div>
       </div>
