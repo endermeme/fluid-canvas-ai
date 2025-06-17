@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -197,7 +198,6 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                     onClick={() => game.isBackButton ? handleBackToHome() : handleSelectGame(game.id)}
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="absolute -right-6 -top-6 w-12 h-12 bg-blue-500/20 rounded-full transform group-hover:scale-150 transition-transform duration-500"></div>
                     
                     <div className="relative z-10 flex flex-col items-center text-center gap-3 h-full">
                       <motion.div 
@@ -208,8 +208,8 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                         {game.icon}
                       </motion.div>
                       <div className="flex-1">
-                        <h3 className="text-lg font-medium mb-2 transition-colors duration-300 group-hover:text-blue-700 text-blue-600 dark:text-blue-400">{game.name}</h3>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed transition-colors duration-300 group-hover:text-slate-700 dark:group-hover:text-slate-300">
+                        <h3 className="text-lg font-bold mb-2 transition-colors duration-300 text-blue-600 dark:text-blue-400">{game.name}</h3>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed transition-colors duration-300">
                           {game.description}
                         </p>
                       </div>
@@ -217,8 +217,8 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                         <motion.div 
                           className={`flex items-center justify-center px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 ${
                             game.isBackButton 
-                              ? 'bg-gradient-to-r from-blue-500/40 to-blue-500/30 text-white shadow-lg' 
-                              : 'bg-gradient-to-r from-blue-500/30 to-blue-500/20 text-blue-600 dark:text-blue-400 shadow-lg'
+                              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' 
+                              : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
                           }`}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
