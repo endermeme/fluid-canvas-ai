@@ -19,7 +19,6 @@ const GameLoading: React.FC<GameLoadingProps> = ({
   gameType = 'quiz',
   topic = ""
 }) => {
-  const [displayProgress, setDisplayProgress] = useState(0);
   const [currentTip, setCurrentTip] = useState(0);
 
   const loadingTips = [
@@ -41,19 +40,6 @@ const GameLoading: React.FC<GameLoadingProps> = ({
   };
 
   const GameIcon = gameIcons[gameType as keyof typeof gameIcons] || Brain;
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDisplayProgress(prev => {
-        if (prev < progress) {
-          return Math.min(prev + 2, progress);
-        }
-        return prev;
-      });
-    }, 50);
-
-    return () => clearInterval(interval);
-  }, [progress]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -114,19 +100,27 @@ const GameLoading: React.FC<GameLoadingProps> = ({
                 )}
               </div>
 
-              {/* Progress Bar */}
-              <div className="space-y-3">
-                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+              {/* Loading Icons instead of progress bar */}
+              <div className="flex justify-center items-center space-x-3">
+                {[Brain, Target, Zap, Star].map((Icon, index) => (
                   <motion.div
-                    className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${displayProgress}%` }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                  />
-                </div>
-                <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {displayProgress}%
-                </div>
+                    key={index}
+                    animate={{
+                      scale: [1, 1.3, 1],
+                      rotate: [0, 180, 360],
+                      opacity: [0.3, 1, 0.3]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      delay: index * 0.2,
+                      ease: "easeInOut"
+                    }}
+                    className="p-2 bg-blue-500/20 rounded-full"
+                  >
+                    <Icon className="w-4 h-4 text-blue-600" />
+                  </motion.div>
+                ))}
               </div>
 
               {/* Loading Tips */}
