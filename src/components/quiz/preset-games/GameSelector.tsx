@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,50 +41,50 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
       id: 'back', 
       name: 'Quay Lại', 
       description: 'Trở về trang chủ để chọn loại trò chơi khác',
-      icon: <ArrowLeft className="h-10 w-10 text-primary" />,
+      icon: <ArrowLeft className="h-10 w-10 text-blue-600" />,
       isBackButton: true
     },
     { 
       id: 'quiz', 
       name: 'Trắc Nghiệm', 
       description: 'Trả lời câu hỏi nhiều lựa chọn với các chủ đề đa dạng',
-      icon: <Brain className="h-10 w-10 text-primary" />
+      icon: <Brain className="h-10 w-10 text-blue-600" />
     },
     { 
       id: 'flashcards', 
       name: 'Thẻ Ghi Nhớ', 
       description: 'Học với thẻ hai mặt để ghi nhớ kiến thức hiệu quả',
-      icon: <BookOpen className="h-10 w-10 text-primary" />
+      icon: <BookOpen className="h-10 w-10 text-blue-600" />
     },
     { 
       id: 'matching', 
       name: 'Nối Từ', 
       description: 'Nối các cặp từ tương ứng để kiểm tra hiểu biết',
-      icon: <ArrowRightLeft className="h-10 w-10 text-primary" />
+      icon: <ArrowRightLeft className="h-10 w-10 text-blue-600" />
     },
     { 
       id: 'memory', 
       name: 'Trò Chơi Ghi Nhớ', 
       description: 'Tìm các cặp thẻ giống nhau để rèn luyện trí nhớ',
-      icon: <Dices className="h-10 w-10 text-primary" />
+      icon: <Dices className="h-10 w-10 text-blue-600" />
     },
     { 
       id: 'ordering', 
       name: 'Sắp Xếp Câu', 
       description: 'Sắp xếp các từ để tạo thành câu hoàn chỉnh',
-      icon: <Layers className="h-10 w-10 text-primary" />
+      icon: <Layers className="h-10 w-10 text-blue-600" />
     },
     { 
       id: 'wordsearch', 
       name: 'Tìm Từ Ẩn', 
       description: 'Tìm các từ ẩn trong bảng chữ cái thú vị',
-      icon: <Search className="h-10 w-10 text-primary" />
+      icon: <Search className="h-10 w-10 text-blue-600" />
     },
     { 
       id: 'truefalse', 
       name: 'Đúng hay Sai', 
       description: 'Xác định nội dung là đúng hay sai một cách nhanh chóng',
-      icon: <CheckSquare className="h-10 w-10 text-primary" />
+      icon: <CheckSquare className="h-10 w-10 text-blue-600" />
     }
   ];
 
@@ -155,7 +154,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
             variants={itemVariants}
           >
             <motion.h1 
-              className="text-4xl md:text-5xl font-bold text-primary mb-4"
+              className="text-4xl md:text-5xl font-semibold bg-gradient-to-r from-blue-600 via-sky-600 to-blue-700 bg-clip-text text-transparent mb-4"
               animate={{
                 backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
               }}
@@ -168,7 +167,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
               Chọn Loại Trò Chơi
             </motion.h1>
             <motion.p 
-              className="text-lg text-primary/80 mb-8 drop-shadow-lg"
+              className="text-lg text-slate-600 dark:text-slate-300 mb-8"
               variants={itemVariants}
             >
               Tạo trò chơi học tập tương tác với AI
@@ -176,7 +175,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
           </motion.div>
           
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto pb-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-7xl mx-auto pb-6"
             variants={containerVariants}
           >
             {gameTypes.map((game, index) => (
@@ -192,34 +191,34 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                   className="h-full"
                 >
                   <Card 
-                    className={`p-5 cursor-pointer h-full group relative overflow-hidden backdrop-blur-lg bg-white/20 dark:bg-black/20 border-white/30 dark:border-white/20 shadow-xl ${
-                      selectedGameType === game.id ? 'border-primary bg-primary/20 shadow-2xl' : 'hover:border-primary/50'
-                    } ${game.isBackButton ? 'bg-gradient-to-br from-primary/20 to-primary/10 border-primary/40' : ''}`}
+                    className={`p-4 cursor-pointer h-full group relative overflow-hidden backdrop-blur-lg bg-white/20 dark:bg-black/20 border-white/30 dark:border-white/20 shadow-xl ${
+                      selectedGameType === game.id ? 'border-blue-500 bg-blue-500/20 shadow-2xl' : 'hover:border-blue-500/50'
+                    } ${game.isBackButton ? 'bg-gradient-to-br from-blue-500/20 to-blue-500/10 border-blue-500/40' : ''}`}
                     onClick={() => game.isBackButton ? handleBackToHome() : handleSelectGame(game.id)}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="absolute -right-6 -top-6 w-12 h-12 bg-primary/20 rounded-full transform group-hover:scale-150 transition-transform duration-500"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute -right-6 -top-6 w-12 h-12 bg-blue-500/20 rounded-full transform group-hover:scale-150 transition-transform duration-500"></div>
                     
-                    <div className="relative z-10 flex flex-col items-center text-center gap-4 h-full">
+                    <div className="relative z-10 flex flex-col items-center text-center gap-3 h-full">
                       <motion.div 
-                        className="p-3 bg-primary/20 rounded-full transition-all duration-300"
+                        className="p-3 bg-blue-500/20 rounded-full transition-all duration-300"
                         variants={iconVariants}
                         whileHover="hover"
                       >
                         {game.icon}
                       </motion.div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold mb-3 transition-colors duration-300 group-hover:text-primary text-primary drop-shadow-md">{game.name}</h3>
-                        <p className="text-xs text-primary/70 leading-relaxed transition-colors duration-300 group-hover:text-primary/90 drop-shadow">
+                        <h3 className="text-lg font-medium mb-2 transition-colors duration-300 group-hover:text-blue-700 text-blue-600 dark:text-blue-400">{game.name}</h3>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed transition-colors duration-300 group-hover:text-slate-700 dark:group-hover:text-slate-300">
                           {game.description}
                         </p>
                       </div>
                       <div className="mt-auto w-full">
                         <motion.div 
-                          className={`flex items-center justify-center px-4 py-3 rounded-lg text-xs font-medium transition-all duration-300 ${
+                          className={`flex items-center justify-center px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 ${
                             game.isBackButton 
-                              ? 'bg-gradient-to-r from-primary/40 to-primary/30 text-white shadow-lg' 
-                              : 'bg-gradient-to-r from-primary/30 to-primary/20 text-primary shadow-lg'
+                              ? 'bg-gradient-to-r from-blue-500/40 to-blue-500/30 text-white shadow-lg' 
+                              : 'bg-gradient-to-r from-blue-500/30 to-blue-500/20 text-blue-600 dark:text-blue-400 shadow-lg'
                           }`}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
