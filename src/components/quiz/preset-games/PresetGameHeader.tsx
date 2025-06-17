@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { DoorOpen, History, Plus, Share2 } from "lucide-react";
+import { ArrowLeft, History, Plus, Share2 } from "lucide-react";
 
 interface PresetGameHeaderProps {
   onShare?: () => void;
@@ -31,15 +31,15 @@ const PresetGameHeader: React.FC<PresetGameHeaderProps> = ({
   };
 
   return (
-    <header className="flex justify-between items-center p-4 bg-background/80 backdrop-blur-md border-b sticky top-0 z-20">
+    <header className="flex justify-between items-center p-2 bg-background/80 backdrop-blur-md border-b sticky top-0 z-20">
       {showBackButton ? (
         <Card 
-          className="p-3 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 hover:from-primary/15 hover:to-primary/10 transition-all duration-200 cursor-pointer hover:shadow-md"
+          className="p-2 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 hover:from-primary/15 hover:to-primary/10 transition-all duration-200 cursor-pointer hover:shadow-md"
           onClick={handleBack}
         >
           <div className="flex items-center gap-2">
-            <DoorOpen className="h-5 w-5 text-primary" />
-            <span className="text-sm font-medium text-primary">Quay lại</span>
+            <ArrowLeft className="h-4 w-4 text-primary" />
+            <span className="text-xs font-medium text-primary">Quay lại</span>
           </div>
         </Card>
       ) : (
@@ -50,29 +50,29 @@ const PresetGameHeader: React.FC<PresetGameHeaderProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          className="hover:bg-primary/10"
+          className="hover:bg-primary/10 h-8 w-8"
           onClick={() => navigate("/preset-games")}
         >
-          <Plus className="h-5 w-5" />
+          <Plus className="h-4 w-4" />
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
-          className="hover:bg-primary/10"
+          className="hover:bg-primary/10 h-8 w-8"
           onClick={() => navigate("/game-history")}
         >
-          <History className="h-5 w-5" />
+          <History className="h-4 w-4" />
         </Button>
         
         {showShare && onShare && isGameCreated && (
           <Button
             variant="default"
             size="sm"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1 h-8 px-3 text-xs"
             onClick={onShare}
           >
-            <Share2 className="h-4 w-4" />
+            <Share2 className="h-3 w-3" />
             Chia sẻ
           </Button>
         )}
