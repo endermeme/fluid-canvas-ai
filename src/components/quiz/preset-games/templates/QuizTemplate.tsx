@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, RefreshCw, Clock, ArrowLeft, ChevronRight } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { CheckCircle, XCircle, RefreshCw, Clock, ChevronRight } from 'lucide-react';
 
 interface QuizTemplateProps {
   data?: any;
@@ -155,34 +155,39 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
     const percentage = Math.round((score / questions.length) * 100);
     
     return (
-      <div className="h-full flex items-center justify-center p-4 bg-white">
-        <Card className="w-full max-w-md p-6 sm:p-8 text-center bg-white border">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground">Kết Quả</h2>
-          <p className="text-base sm:text-lg mb-4">
-            Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
-          </p>
-          
-          <div className="mb-4 sm:mb-6">
-            <div className="flex justify-between mb-2">
-              <span>Điểm của bạn</span>
-              <span className="font-bold">{percentage}%</span>
+      <div className="h-full flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <Card className="w-full max-w-lg p-8 text-center shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+          <div className="mb-6">
+            <div className="text-6xl mb-4">
+              {percentage >= 80 ? '🎉' : percentage >= 60 ? '👏' : '💪'}
             </div>
-            <Progress value={percentage} className="h-2 sm:h-3" />
+            <h2 className="text-3xl font-bold mb-2 text-gray-800">Kết Quả</h2>
+            <p className="text-lg text-gray-600">
+              Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
+            </p>
           </div>
           
-          <div className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6 text-foreground">
-            {score} / {questions.length}
+          <div className="mb-8">
+            <div className="text-5xl font-bold mb-4 text-primary">
+              {score} / {questions.length}
+            </div>
+            <div className="flex justify-between mb-3">
+              <span className="text-gray-600">Điểm của bạn</span>
+              <span className="font-bold text-gray-800">{percentage}%</span>
+            </div>
+            <Progress value={percentage} className="h-3" />
           </div>
           
-          <div className="text-xs sm:text-sm mb-4 text-muted-foreground">
+          <div className="text-sm mb-6 text-gray-500">
             Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
           </div>
           
           <Button 
             onClick={handleRestart} 
-            className="w-full"
+            className="w-full py-3 text-lg font-semibold"
+            size="lg"
           >
-            <RefreshCw className="mr-2 h-4 w-4" />
+            <RefreshCw className="mr-2 h-5 w-5" />
             Chơi Lại
           </Button>
         </Card>
@@ -198,134 +203,136 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
   const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      {/* Header với thông tin trạng thái */}
-      <div className="flex-shrink-0 p-3 sm:p-4 border-b border-border">
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 bg-muted rounded-full">
-            Câu hỏi {currentQuestion + 1}/{questions.length}
-          </div>
-          <div className="text-xs sm:text-sm font-medium flex items-center gap-2">
-            <div className="flex items-center px-2 sm:px-3 py-1 bg-muted rounded-full">
-              <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-foreground" />
-              {timeLeft}s
+    <div className="h-full flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
+        <div className="p-4">
+          <div className="flex justify-between items-center mb-3">
+            <div className="text-sm font-semibold px-4 py-2 bg-primary/10 text-primary rounded-full">
+              Câu {currentQuestion + 1}/{questions.length}
             </div>
-            <div className="hidden sm:flex items-center px-2 sm:px-3 py-1 bg-muted rounded-full">
-              Tổng: {formattedTotalTime}
-            </div>
-          </div>
-        </div>
-        <Progress value={progress} className="h-1.5 sm:h-2" />
-      </div>
-
-      {/* Main content */}
-      <div className="flex-1 overflow-auto">
-        <ScrollArea className="h-full">
-          <div className="p-3 sm:p-4 lg:p-6 max-w-2xl xl:max-w-3xl mx-auto">
-            <div className="space-y-4 sm:space-y-6">
-              {/* Question */}
-              <Card className="p-3 sm:p-4 lg:p-6 bg-white border">
-                <h2 className="text-base sm:text-lg lg:text-xl font-semibold mb-3 sm:mb-4 text-center leading-relaxed">
-                  {question.question}
-                </h2>
-              </Card>
-
-              {/* Options */}
-              <div className="grid gap-2 sm:gap-3">
-                {question.options.map((option: string, index: number) => {
-                  const isSelected = selectedOption === index;
-                  const isCorrect = option === question.correctAnswer;
-                  let buttonClass = "w-full p-3 sm:p-4 text-left rounded-lg border-2 transition-all duration-300 ";
-                  
-                  if (isAnswered) {
-                    if (isCorrect) {
-                      buttonClass += "bg-green-50 border-green-300 text-green-800 shadow-lg transform scale-[1.02]";
-                    } else if (isSelected && !isCorrect) {
-                      buttonClass += "bg-red-50 border-red-300 text-red-800";
-                    } else {
-                      buttonClass += "bg-muted/50 border-muted text-muted-foreground";
-                    }
-                  } else {
-                    buttonClass += isSelected 
-                      ? "bg-primary/10 border-primary text-primary shadow-md transform scale-[1.01]" 
-                      : "bg-white border-border hover:bg-muted/50 hover:border-primary/50 hover:shadow-md hover:transform hover:scale-[1.01]";
-                  }
-
-                  return (
-                    <Button
-                      key={index}
-                      onClick={() => handleOptionSelect(index)}
-                      disabled={isAnswered}
-                      variant="outline"
-                      className={buttonClass}
-                    >
-                      <div className="flex items-center">
-                        <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 rounded-full bg-muted flex items-center justify-center text-xs sm:text-sm font-semibold">
-                          {String.fromCharCode(65 + index)}
-                        </span>
-                        <span className="text-sm sm:text-base font-medium break-words">
-                          {option}
-                        </span>
-                        {isAnswered && isCorrect && (
-                          <CheckCircle className="ml-auto text-green-600 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                        )}
-                        {isAnswered && isSelected && !isCorrect && (
-                          <XCircle className="ml-auto text-red-600 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                        )}
-                      </div>
-                    </Button>
-                  );
-                })}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center px-3 py-2 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
+                <Clock className="h-4 w-4 mr-1" />
+                {timeLeft}s
               </div>
-
-              {/* Show explanation if available */}
-              {isAnswered && question.explanation && (
-                <Card className="p-3 sm:p-4 bg-blue-50 border-blue-200">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-blue-100 flex items-center justify-center mr-2 sm:mr-3 mt-0.5">
-                      <span className="text-blue-600 text-xs font-semibold">!</span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-blue-800 mb-1 text-sm sm:text-base">Giải thích:</h4>
-                      <p className="text-blue-700 text-sm leading-relaxed">{question.explanation}</p>
-                    </div>
-                  </div>
-                </Card>
-              )}
+              <div className="hidden sm:flex items-center px-3 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                Tổng: {formattedTotalTime}
+              </div>
             </div>
           </div>
-        </ScrollArea>
+          <Progress value={progress} className="h-2" />
+        </div>
       </div>
 
-      {/* Footer với controls */}
-      <div className="flex-shrink-0 p-3 sm:p-4 border-t border-border bg-white">
-        <div className="max-w-2xl xl:max-w-3xl mx-auto flex gap-2 sm:gap-3">
-          {isAnswered ? (
-            <Button
-              onClick={handleNextQuestion}
-              className="flex-1 text-sm sm:text-base font-medium"
-            >
-              {isLastQuestion ? "Xem kết quả" : "Câu tiếp theo"}
-              <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          ) : (
-            <Button
-              onClick={() => selectedOption && handleOptionSelect(selectedOption)}
-              disabled={!selectedOption}
-              className="flex-1 text-sm sm:text-base font-medium"
-            >
-              Xác nhận
-            </Button>
+      {/* Centered Main Content */}
+      <div className="flex-1 flex items-center justify-center p-4 pb-24">
+        <div className="w-full max-w-3xl space-y-6">
+          {/* Question Card */}
+          <Card className="p-6 lg:p-8 text-center shadow-lg border-0 bg-white/90 backdrop-blur-sm">
+            <h2 className="text-xl lg:text-2xl font-bold text-gray-800 leading-relaxed">
+              {question.question}
+            </h2>
+          </Card>
+
+          {/* Options Grid */}
+          <div className="grid gap-3 lg:gap-4">
+            {question.options.map((option: string, index: number) => {
+              const isSelected = selectedOption === index;
+              const isCorrect = option === question.correctAnswer;
+              let buttonClass = "w-full p-4 lg:p-5 text-left rounded-xl border-2 transition-all duration-300 shadow-sm ";
+              
+              if (isAnswered) {
+                if (isCorrect) {
+                  buttonClass += "bg-green-50 border-green-400 text-green-800 shadow-lg transform scale-[1.02]";
+                } else if (isSelected && !isCorrect) {
+                  buttonClass += "bg-red-50 border-red-400 text-red-800 shadow-lg";
+                } else {
+                  buttonClass += "bg-gray-50 border-gray-200 text-gray-500";
+                }
+              } else {
+                buttonClass += isSelected 
+                  ? "bg-primary/10 border-primary text-primary shadow-lg transform scale-[1.01] ring-2 ring-primary/20" 
+                  : "bg-white border-gray-200 hover:bg-primary/5 hover:border-primary/30 hover:shadow-md hover:transform hover:scale-[1.01]";
+              }
+
+              return (
+                <Button
+                  key={index}
+                  onClick={() => handleOptionSelect(index)}
+                  disabled={isAnswered}
+                  variant="outline"
+                  className={buttonClass}
+                >
+                  <div className="flex items-center w-full">
+                    <span className="flex-shrink-0 w-8 h-8 mr-4 rounded-full bg-gray-100 flex items-center justify-center text-sm font-bold text-gray-600">
+                      {String.fromCharCode(65 + index)}
+                    </span>
+                    <span className="text-base lg:text-lg font-medium flex-1 text-left">
+                      {option}
+                    </span>
+                    {isAnswered && isCorrect && (
+                      <CheckCircle className="ml-4 text-green-600 h-6 w-6 flex-shrink-0" />
+                    )}
+                    {isAnswered && isSelected && !isCorrect && (
+                      <XCircle className="ml-4 text-red-600 h-6 w-6 flex-shrink-0" />
+                    )}
+                  </div>
+                </Button>
+              );
+            })}
+          </div>
+
+          {/* Explanation */}
+          {isAnswered && question.explanation && (
+            <Card className="p-4 lg:p-5 bg-blue-50 border-blue-200 shadow-sm">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-200 flex items-center justify-center mr-3 mt-0.5">
+                  <span className="text-blue-700 text-sm font-bold">!</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-blue-800 mb-2">Giải thích:</h4>
+                  <p className="text-blue-700 leading-relaxed">{question.explanation}</p>
+                </div>
+              </div>
+            </Card>
           )}
-          
-          <Button
-            variant="outline"
-            onClick={handleRestart}
-            className="text-sm sm:text-base"
-          >
-            <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            Làm lại
-          </Button>
+        </div>
+      </div>
+
+      {/* Fixed Footer */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg">
+        <div className="p-4 max-w-3xl mx-auto">
+          <div className="flex gap-3">
+            {isAnswered ? (
+              <Button
+                onClick={handleNextQuestion}
+                className="flex-1 py-3 text-lg font-semibold rounded-xl"
+                size="lg"
+              >
+                {isLastQuestion ? "Xem kết quả" : "Câu tiếp theo"}
+                <ChevronRight className="ml-2 h-5 w-5" />
+              </Button>
+            ) : (
+              <Button
+                onClick={() => selectedOption !== null && handleOptionSelect(selectedOption)}
+                disabled={selectedOption === null}
+                className="flex-1 py-3 text-lg font-semibold rounded-xl"
+                size="lg"
+              >
+                Xác nhận
+              </Button>
+            )}
+            
+            <Button
+              variant="outline"
+              onClick={handleRestart}
+              className="px-6 py-3 rounded-xl border-2"
+              size="lg"
+            >
+              <RefreshCw className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
