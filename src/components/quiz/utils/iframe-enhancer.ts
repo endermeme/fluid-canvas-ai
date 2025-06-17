@@ -11,7 +11,7 @@ export const processImages = async (content: string): Promise<string> => {
 };
 
 /**
- * Kiểm tra tính hợp lệ của mã HTML và JavaScript
+ * Kiểm tra tính hợp lệ của mã HTML
  * @param html Mã HTML cần kiểm tra
  * @returns Có lỗi hay không và thông báo lỗi nếu có
  */
@@ -38,24 +38,5 @@ export const validateHtml = (html: string): { isValid: boolean, errorMessage?: s
     return { isValid: false, errorMessage: 'HTML không hợp lệ' };
   } catch (error) {
     return { isValid: false, errorMessage: `Validation error: ${error.message}` };
-  }
-};
-
-/**
- * Kiểm tra và sửa các lỗi JavaScript phổ biến trong HTML
- * @param html Nội dung HTML chứa JavaScript
- * @returns HTML đã được sửa lỗi
- */
-export const fixJavaScriptErrors = (content: string): string => {
-  try {
-    console.log('Đang sửa lỗi JavaScript...');
-    
-    // Không tạo stub functions nữa - chỉ log để debug
-    console.log('Bỏ qua việc tạo stub functions để tránh lỗi cú pháp');
-    
-    return content;
-  } catch (error) {
-    console.error('Lỗi khi sửa JavaScript:', error);
-    return content;
   }
 };

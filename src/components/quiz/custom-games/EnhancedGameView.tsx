@@ -3,7 +3,7 @@ import React from 'react';
 import GameErrorDisplay from './game-components/GameErrorDisplay';
 import GameLoadingIndicator from './game-components/GameLoadingIndicator';
 import GameIframeRenderer from './game-components/GameIframeRenderer';
-import CustomGameHeader from './ui/CustomGameHeader';
+import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { useGameShareManager } from '../hooks/useGameShareManager';
 import { useIframeManager } from '../hooks/useIframeManager';
@@ -49,7 +49,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
   } = useIframeManager(miniGame, onReload, gameExpired);
 
   return (
-    <div className={`w-full h-screen max-h-screen overflow-hidden flex flex-col bg-gradient-to-br from-blue-50/80 via-sky-50/80 to-blue-100/80 dark:from-blue-950/80 dark:via-sky-950/80 dark:to-blue-950/80 ${className || ''}`}>
+    <div className={`w-full h-full flex flex-col bg-gradient-to-b from-background to-background/95 ${className || ''}`}>
       {!hideHeader && (
         <CustomGameHeader
           onBack={onBack}
@@ -64,14 +64,14 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         />
       )}
       
-      <div className="flex-1 relative overflow-hidden p-2 sm:p-4">
+      <div className="flex-1 relative overflow-hidden p-4">
         {iframeError ? (
           <GameErrorDisplay 
             error={iframeError} 
             onRetry={refreshGame} 
           />
         ) : (
-          <Card className="relative w-full h-full overflow-hidden shadow-xl border-2 border-blue-200/40 dark:border-blue-700/40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
+          <Card className="relative w-full h-full overflow-hidden shadow-lg border-primary/10">
             {!isIframeLoaded && (
               <GameLoadingIndicator 
                 progress={loadingProgress}
@@ -86,7 +86,7 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         )}
         
         {extraButton && (
-          <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 z-10">
+          <div className="absolute bottom-4 right-4 z-10">
             {extraButton}
           </div>
         )}

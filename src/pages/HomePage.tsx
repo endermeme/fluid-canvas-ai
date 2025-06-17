@@ -3,24 +3,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Gamepad, SparklesIcon, History, Share2, Zap, Atom, FlaskConical, Microscope, TestTube, Telescope, Radiation, Calculator, Beaker, Dna } from 'lucide-react';
+import { Gamepad, SparklesIcon, History, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import BackgroundParticles from '@/components/ui/background-particles';
 
 const HomePage: React.FC = () => {
-  // Science icons for background (stable positions)
-  const scienceIcons = React.useMemo(() => [
-    { Icon: Atom, position: { top: '10%', left: '8%' }, rotation: 360, duration: 25 },
-    { Icon: FlaskConical, position: { top: '20%', right: '10%' }, rotation: -180, duration: 30 },
-    { Icon: Microscope, position: { bottom: '25%', left: '5%' }, rotation: 180, duration: 35 },
-    { Icon: TestTube, position: { top: '60%', right: '15%' }, rotation: -360, duration: 28 },
-    { Icon: Telescope, position: { bottom: '15%', right: '25%' }, rotation: 270, duration: 32 },
-    { Icon: Radiation, position: { top: '40%', left: '3%' }, rotation: -270, duration: 26 },
-    { Icon: Calculator, position: { bottom: '50%', right: '8%' }, rotation: 180, duration: 24 },
-    { Icon: Beaker, position: { top: '75%', left: '25%' }, rotation: -360, duration: 29 },
-    { Icon: Dna, position: { top: '30%', left: '88%' }, rotation: 360, duration: 31 },
-  ], []);
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -33,101 +19,66 @@ const HomePage: React.FC = () => {
   };
 
   const itemVariants = {
-    hidden: { y: 27, opacity: 0 },
+    hidden: { y: 30, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
       transition: {
         type: "spring",
-        stiffness: 90,
-        damping: 9
+        stiffness: 100,
+        damping: 10
       }
     }
   };
 
   const cardVariants = {
     hover: {
-      scale: 1.027,
-      boxShadow: "0 23px 45px rgba(0,0,0,0.135)",
+      scale: 1.03,
+      boxShadow: "0 20px 30px rgba(0,0,0,0.1)",
       transition: {
         type: "spring",
-        stiffness: 270,
-        damping: 13.5
+        stiffness: 300,
+        damping: 15
       }
     },
     tap: {
-      scale: 0.982
+      scale: 0.98
     }
   };
 
   const iconVariants = {
     hover: {
-      rotate: 9,
-      scale: 1.09,
+      rotate: 10,
+      scale: 1.1,
       transition: {
         type: "spring",
-        stiffness: 270,
-        damping: 9
+        stiffness: 300,
+        damping: 10
       }
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950 relative overflow-hidden">
-      {/* Optimized Background Animation */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Neural Network Grid */}
-        <div className="absolute inset-0 opacity-10">
-          <svg className="w-full h-full" viewBox="0 0 1000 1000">
-            <defs>
-              <pattern id="neural-grid" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-                <circle cx="50" cy="50" r="2" fill="currentColor" className="text-blue-500" />
-                <line x1="50" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
-                <line x1="50" y1="50" x2="50" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#neural-grid)" />
-          </svg>
-        </div>
-
-        {/* Floating Quantum Particles */}
-        <BackgroundParticles particleCount={15} />
-
-        {/* Science Icons Animation */}
-        {scienceIcons.map((item, index) => (
-          <motion.div
-            key={index}
-            className="absolute opacity-8"
-            style={item.position}
-            animate={{
-              rotate: item.rotation,
-            }}
-            transition={{
-              duration: item.duration,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          >
-            <item.Icon className="w-12 h-12 text-blue-400/20" />
-          </motion.div>
-        ))}
-
-        {/* Pulsing Energy Waves */}
-        {[...Array(3)].map((_, i) => (
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background p-4 relative overflow-hidden">
+      {/* Background floating shapes */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        {[...Array(5)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute top-1/2 left-1/2 w-80 h-80 border border-blue-300/20 rounded-full"
+            className="absolute w-64 h-64 bg-primary/5 rounded-full"
             style={{
-              transform: 'translate(-50%, -50%)',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
             }}
             animate={{
-              scale: [1, 3, 1],
-              opacity: [0.3, 0, 0.3],
+              y: [0, -30, 0],
+              x: [0, 20, 0],
+              scale: [1, 1.1, 1],
             }}
             transition={{
-              duration: 10,
+              duration: 8,
               repeat: Infinity,
-              delay: i * 3.3,
+              delay: i * 1.5,
               ease: "easeInOut"
             }}
           />
@@ -135,196 +86,139 @@ const HomePage: React.FC = () => {
       </div>
 
       <motion.div 
-        className="relative z-10 min-h-screen flex items-center justify-center p-5"
+        className="w-full max-w-4xl mx-auto"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <div className="w-full max-w-5xl mx-auto">
-          <motion.header 
-            className="text-center mb-14"
+        <motion.header 
+          className="text-center mb-12"
+          variants={itemVariants}
+        >
+          <motion.h1 
+            className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-4"
+            animate={{
+              backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+          >
+            AI Game Creator
+          </motion.h1>
+          <motion.p 
+            className="text-xl text-muted-foreground"
             variants={itemVariants}
           >
-            <motion.div
-              className="flex items-center justify-center mb-5"
-              whileHover={{ scale: 1.045 }}
-            >
-              <motion.div
-                animate={{
-                  rotate: [0, 9, -9, 0],
-                }}
-                transition={{
-                  duration: 3.6,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                <Zap className="h-14 w-14 text-blue-500 mr-3" />
-              </motion.div>
-              <motion.h1 
-                className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-sky-600 to-blue-700 bg-clip-text text-transparent"
-                animate={{
-                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                }}
-                transition={{
-                  duration: 7.2,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-              >
-                AI Game Creator
-              </motion.h1>
-              <motion.div
-                animate={{
-                  rotate: [0, -9, 9, 0],
-                }}
-                transition={{
-                  duration: 3.6,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 1.8
-                }}
-              >
-                <Atom className="h-14 w-14 text-sky-500 ml-3" />
-              </motion.div>
-            </motion.div>
-            <motion.p 
-              className="text-xl text-slate-600 dark:text-slate-300 font-medium"
-              variants={itemVariants}
-            >
-              Khám phá học tập tương tác với sức mạnh trí tuệ nhân tạo
-            </motion.p>
-          </motion.header>
-          
-          <motion.div 
-            className="grid grid-cols-1 lg:grid-cols-2 gap-7 mb-10" 
-            variants={containerVariants}
-          >
-            <motion.div variants={itemVariants}>
-              <Link to="/custom-game" className="block h-full">
-                <motion.div
-                  variants={cardVariants}
-                  whileHover="hover"
-                  whileTap="tap"
-                  className="h-full"
-                >
-                  <Card className="p-9 h-full bg-gradient-to-br from-white/80 to-blue-50/80 dark:from-slate-800/80 dark:to-blue-950/80 border-2 border-blue-200/45 dark:border-blue-700/45 backdrop-blur-sm shadow-xl group relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-sky-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-450"></div>
-                    <div className="absolute -right-18 -top-18 w-36 h-36 bg-blue-400/9 rounded-full transform group-hover:scale-135 transition-transform duration-630"></div>
-                    
-                    <div className="relative z-10 flex flex-col items-center text-center gap-7 h-full">
-                      <motion.div 
-                        className="p-5 bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900/45 dark:to-sky-900/45 rounded-full shadow-lg"
-                        variants={iconVariants}
-                        whileHover="hover"
-                      >
-                        <SparklesIcon className="h-14 w-14 text-blue-600 dark:text-blue-400" />
-                      </motion.div>
-                      <div className="flex-1">
-                        <h3 className="text-2xl font-bold mb-3 text-blue-600 dark:text-blue-400">Custom Game</h3>
-                      </div>
-                      <Button variant="default" size="lg" className="w-full py-3 text-lg font-semibold bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 shadow-lg group-hover:shadow-xl transition-all">
-                        <Zap className="h-4 w-4 mr-2" />
-                        Bắt đầu tạo
-                      </Button>
-                    </div>
-                  </Card>
-                </motion.div>
-              </Link>
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-              <Link to="/preset-games" className="block h-full">
-                <motion.div
-                  variants={cardVariants}
-                  whileHover="hover"
-                  whileTap="tap"
-                  className="h-full"
-                >
-                  <Card className="p-9 h-full bg-gradient-to-br from-white/80 to-sky-50/80 dark:from-slate-800/80 dark:to-sky-950/80 border-2 border-blue-200/45 dark:border-blue-700/45 backdrop-blur-sm shadow-xl group relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-sky-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-450"></div>
-                    <div className="absolute -right-18 -top-18 w-36 h-36 bg-blue-400/9 rounded-full transform group-hover:scale-135 transition-transform duration-630"></div>
-                    
-                    <div className="relative z-10 flex flex-col items-center text-center gap-7 h-full">
-                      <motion.div 
-                        className="p-5 bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900/45 dark:to-sky-900/45 rounded-full shadow-lg"
-                        variants={iconVariants}
-                        whileHover="hover"
-                      >
-                        <Gamepad className="h-14 w-14 text-blue-600 dark:text-blue-400" />
-                      </motion.div>
-                      <div className="flex-1">
-                        <h3 className="text-2xl font-bold mb-3 text-blue-600 dark:text-blue-400">Preset Game</h3>
-                      </div>
-                      <Button variant="default" size="lg" className="w-full py-3 text-lg font-semibold bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 shadow-lg group-hover:shadow-xl transition-all">
-                        <Atom className="h-4 w-4 mr-2" />
-                        Xem trò chơi
-                      </Button>
-                    </div>
-                  </Card>
-                </motion.div>
-              </Link>
-            </motion.div>
-          </motion.div>
-
-          <motion.div variants={itemVariants} className="flex justify-center">
-            <Link to="/game-history" className="w-full max-w-xl">
+            Tạo trò chơi tương tác bằng trí tuệ nhân tạo
+          </motion.p>
+        </motion.header>
+        
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" 
+          variants={containerVariants}
+        >
+          <motion.div variants={itemVariants}>
+            <Link to="/custom-game" className="block">
               <motion.div
                 variants={cardVariants}
                 whileHover="hover"
                 whileTap="tap"
               >
-                <Card className="p-7 border-2 border-blue-200/45 dark:border-blue-700/45 bg-gradient-to-r from-white/80 to-blue-50/80 dark:from-slate-800/80 dark:to-blue-950/80 backdrop-blur-sm shadow-xl group relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-sky-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-450"></div>
-                  
-                  <div className="relative z-10 flex items-center gap-5">
+                <Card className="p-8 h-full bg-gradient-to-br from-background to-primary/5 border-2 border-primary/20 overflow-hidden group relative">
+                  <div className="absolute -right-16 -top-16 w-32 h-32 bg-primary/10 rounded-full transform group-hover:scale-150 transition-transform duration-500"></div>
+                  <div className="relative z-10 flex flex-col items-center text-center gap-6">
                     <motion.div 
-                      className="p-3 bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900/45 dark:to-sky-900/45 rounded-full shadow-lg"
+                      className="p-4 bg-primary/10 rounded-full"
                       variants={iconVariants}
                       whileHover="hover"
                     >
-                      <History className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+                      <SparklesIcon className="h-12 w-12 text-primary" />
                     </motion.div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-xl mb-2 text-slate-800 dark:text-slate-100">Lịch Sử Game</h3>
+                    <div>
+                      <h3 className="text-2xl font-bold mb-2">Tạo Game HTML</h3>
+                      <p className="text-muted-foreground">
+                        Sử dụng Gemini Flash để tạo game tương tác ngay lập tức
+                      </p>
                     </div>
-                    <motion.div
-                      animate={{
-                        x: [0, 4.5, 0],
-                      }}
-                      transition={{
-                        duration: 1.8,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    >
-                      <Share2 className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-                    </motion.div>
+                    <Button variant="default" size="lg" className="w-full mt-4 group-hover:shadow-lg transition-all">
+                      Bắt đầu tạo
+                    </Button>
                   </div>
                 </Card>
               </motion.div>
             </Link>
           </motion.div>
-          
-          <motion.footer 
-            className="mt-14 text-center text-slate-500 dark:text-slate-400"
-            variants={itemVariants}
-          >
-            <motion.p 
-              className="text-lg font-medium"
-              animate={{
-                opacity: [0.63, 0.9, 0.63],
-              }}
-              transition={{
-                duration: 2.7,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
+
+          <motion.div variants={itemVariants}>
+            <Link to="/preset-games" className="block">
+              <motion.div
+                variants={cardVariants}
+                whileHover="hover"
+                whileTap="tap"
+              >
+                <Card className="p-8 h-full bg-gradient-to-br from-background to-primary/5 border-2 border-primary/20 overflow-hidden group relative">
+                  <div className="absolute -right-16 -top-16 w-32 h-32 bg-primary/10 rounded-full transform group-hover:scale-150 transition-transform duration-500"></div>
+                  <div className="relative z-10 flex flex-col items-center text-center gap-6">
+                    <motion.div 
+                      className="p-4 bg-primary/10 rounded-full"
+                      variants={iconVariants}
+                      whileHover="hover"
+                    >
+                      <Gamepad className="h-12 w-12 text-primary" />
+                    </motion.div>
+                    <div>
+                      <h3 className="text-2xl font-bold mb-2">Trò Chơi Có Sẵn</h3>
+                      <p className="text-muted-foreground">
+                        Sử dụng Gemini Pro để tạo trò chơi theo mẫu có sẵn
+                      </p>
+                    </div>
+                    <Button variant="outline" size="lg" className="w-full mt-4 group-hover:shadow-lg transition-all">
+                      Xem trò chơi
+                    </Button>
+                  </div>
+                </Card>
+              </motion.div>
+            </Link>
+          </motion.div>
+        </motion.div>
+
+        <motion.div variants={itemVariants}>
+          <Link to="/game-history">
+            <motion.div
+              variants={cardVariants}
+              whileHover="hover"
+              whileTap="tap"
             >
-              Created by CES GLOBAL {new Date().getFullYear()}
-            </motion.p>
-          </motion.footer>
-        </div>
+              <Card className="p-6 border border-primary/20 overflow-hidden relative bg-gradient-to-r hover:from-primary/5">
+                <div className="flex items-center gap-4">
+                  <motion.div 
+                    className="p-3 bg-primary/10 rounded-full"
+                    variants={iconVariants}
+                    whileHover="hover"
+                  >
+                    <History className="h-6 w-6 text-primary" />
+                  </motion.div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg">Lịch Sử Game</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Xem và quản lý các trò chơi đã tạo
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          </Link>
+        </motion.div>
+        
+        <motion.footer 
+          className="mt-12 text-center text-muted-foreground text-sm"
+          variants={itemVariants}
+        >
+          <p>© {new Date().getFullYear()} AI Game Creator | Powered by Gemini AI</p>
+        </motion.footer>
       </motion.div>
     </div>
   );

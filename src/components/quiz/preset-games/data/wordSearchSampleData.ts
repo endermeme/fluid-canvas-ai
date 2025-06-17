@@ -18,15 +18,18 @@ export const wordSearchSampleData = {
     ["T", "Ư", "Ờ", "N", "G", "V", "I", "G", "H", "U", "I", "O", "K"]
   ],
   words: [
-    { word: "HỒNG", found: false }, // Ngang ở dòng 1 và 12
-    { word: "LAN", found: false }, // Ngang ở dòng 2
-    { word: "CÚC", found: false }, // Dọc từ (1,6) xuống (3,6)
-    { word: "SEN", found: false }, // Ngang ở dòng 6
-    { word: "HOA", found: false }, // Ngang ở dòng 1 và 9
-    { word: "MAI", found: false }, // Ngang ở dòng 9
-    { word: "HƯỚNG", found: false }, // Dọc từ (7,6) xuống (12,6)
-    { word: "THIÊN", found: false }, // Ngang ở dòng 10
-    { word: "CAM", found: false }, // Ngang ở dòng 4
+    { word: "HỒNG", found: false },
+    { word: "LAN", found: false },
+    { word: "CÚC", found: false },
+    { word: "ĐÀO", found: false },
+    { word: "MAI", found: false },
+    { word: "SEN", found: false },
+    { word: "HƯỚNG", found: false },
+    { word: "CAMTÚCẦU", found: false },
+    { word: "HOASEN", found: false },
+    { word: "HOACÚC", found: false },
+    { word: "THIÊNLÝ", found: false },
+    { word: "LYLI", found: false }
   ],
   settings: {
     timeLimit: 300,
@@ -35,28 +38,26 @@ export const wordSearchSampleData = {
   }
 };
 
-// Cấp độ dễ với từ đơn giản và vị trí rõ ràng
+// Cấp độ dễ (Grid nhỏ hơn)
 export const easyWordSearchData = {
   title: "Tìm từ - Trái cây (Dễ)",
   description: "Tìm tên các loại trái cây được giấu trong bảng chữ cái",
   grid: [
-    ["C", "A", "M", "S", "Ấ", "U", "X", "Y"],
-    ["H", "X", "O", "À", "I", "T", "K", "L"],
-    ["U", "Ổ", "I", "D", "Ứ", "A", "M", "O"],
-    ["Ố", "M", "T", "C", "H", "O", "N", "I"],
-    ["I", "Đ", "À", "O", "B", "M", "G", "P"],
-    ["T", "H", "O", "M", "B", "Ơ", "V", "A"],
-    ["K", "L", "Y", "N", "H", "Q", "R", "S"],
-    ["B", "N", "M", "K", "L", "O", "P", "T"]
+    ["C", "A", "M", "S", "Ấ", "U"],
+    ["H", "X", "O", "À", "I", "T"],
+    ["U", "Ổ", "I", "D", "Ứ", "A"],
+    ["Ố", "M", "T", "C", "H", "O"],
+    ["I", "Đ", "À", "O", "B", "L"],
+    ["T", "H", "O", "M", "B", "I"]
   ],
   words: [
-    { word: "CAM", found: false }, // Ngang dòng 1
-    { word: "XOÀI", found: false }, // Dọc cột 2
-    { word: "DỨA", found: false }, // Ngang dòng 3
-    { word: "ỔI", found: false }, // Dọc cột 2
-    { word: "SẦU", found: false }, // Ngang dòng 1
-    { word: "THƠM", found: false }, // Ngang dòng 6
-    { word: "BƠ", found: false }, // Dọc cột 5
+    { word: "CAM", found: false },
+    { word: "XOÀI", found: false },
+    { word: "DỨA", found: false },
+    { word: "ỔI", found: false },
+    { word: "SẦU", found: false },
+    { word: "THƠM", found: false },
+    { word: "BƠ", found: false }
   ],
   settings: {
     timeLimit: 180,
@@ -65,7 +66,7 @@ export const easyWordSearchData = {
   }
 };
 
-// Cấp độ khó với từ dài và vị trí phức tạp
+// Cấp độ khó (Grid lớn hơn)
 export const hardWordSearchData = {
   title: "Tìm từ - Động vật (Khó)",
   description: "Tìm tên các loại động vật được giấu trong bảng chữ cái",
@@ -87,18 +88,19 @@ export const hardWordSearchData = {
     ["M", "U", "C", "Ọ", "P", "H", "U", "Ơ", "U", "Y", "O", "R", "Ư", "I", "V"]
   ],
   words: [
-    { word: "VOI", found: false }, // Ngang dòng 1
-    { word: "CHÓ", found: false }, // Ngang dòng 2
-    { word: "MÈO", found: false }, // Dọc cột 8
-    { word: "GÀ", found: false }, // Dọc cột 2
-    { word: "LỢN", found: false }, // Dọc cột 6
-    { word: "CÁ", found: false }, // Dọc cột 12
-    { word: "HEO", found: false }, // Dọc cột 9
-    { word: "NGỰA", found: false }, // Dọc cột 11
-    { word: "BÒ", found: false }, // Dọc cột 14
-    { word: "DÊ", found: false }, // Dọc cột 14
-    { word: "CHUỘT", found: false }, // Ngang dòng 13
-    { word: "KIẾN", found: false }, // Dọc cột 7
+    { word: "VOI", found: false },
+    { word: "CHÓ", found: false },
+    { word: "MÈO", found: false },
+    { word: "GÀ", found: false },
+    { word: "LỢN", found: false },
+    { word: "HOẴNG", found: false },
+    { word: "CÁ", found: false },
+    { word: "CỌPHU", found: false },
+    { word: "CHIMSẺ", found: false },
+    { word: "KHỈNHỌ", found: false },
+    { word: "SƯTỬ", found: false },
+    { word: "GẤUTRÚC", found: false },
+    { word: "HƯƠU", found: false }
   ],
   settings: {
     timeLimit: 480,

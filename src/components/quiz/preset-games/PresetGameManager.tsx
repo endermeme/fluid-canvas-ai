@@ -364,12 +364,14 @@ Output must be valid JSON. `;
     }
 
     return (
-      <GameTemplate 
-        data={gameContent} 
-        onBack={onBack}
-        topic={initialTopic || ""}
-        content={gameContent}
-      />
+      <div className="flex flex-col h-full">
+        <GameTemplate 
+          data={gameContent} 
+          onBack={onBack}
+          topic={initialTopic || ""}
+          content={gameContent}
+        />
+      </div>
     );
   };
 
@@ -483,29 +485,25 @@ Output must be valid JSON. `;
   };
 
   return (
-    <div className="h-full w-full flex flex-col overflow-hidden">
+    <div className="flex flex-col h-full">
       {showSettings ? (
-        <div className="h-full flex flex-col overflow-hidden">
-          <div className="flex-shrink-0 p-4">
-            <PresetGameHeader 
-              showShare={false} 
-              isGameCreated={false}
-              onBack={onBack}
-            />
-          </div>
-          <div className="flex-1 overflow-auto p-4 pt-0">
-            <GameSettings 
-              initialSettings={settings}
-              onStart={handleStartGame}
-              onCancel={onBack}
-              topic={initialTopic || ""}
-            />
-          </div>
+        <div className="p-4">
+          <PresetGameHeader 
+            showShare={false} 
+            isGameCreated={false}
+            onBack={onBack}
+          />
+          <GameSettings 
+            initialSettings={settings}
+            onStart={handleStartGame}
+            onCancel={onBack}
+            topic={initialTopic || ""}
+          />
         </div>
       ) : generating ? (
         <GameLoading topic={initialTopic || ""} progress={generationProgress} />
       ) : loading ? (
-        <div className="h-full flex items-center justify-center">
+        <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-lg font-medium">Đang tạo trò chơi {getGameTypeName()}...</p>
@@ -513,48 +511,35 @@ Output must be valid JSON. `;
           </div>
         </div>
       ) : error ? (
-        <div className="h-full flex flex-col">
-          <div className="flex-shrink-0">
-            <PresetGameHeader 
-              showShare={false} 
-              isGameCreated={false}
-              onBack={onBack}
-            />
-          </div>
-          <div className="flex-1 flex items-center justify-center p-4">
-            <Card className="p-6 max-w-md">
-              <div className="text-center">
-                <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
-                <p className="text-gray-500 mb-4">{error}</p>
-                <div className="flex gap-2">
-                  <Button onClick={onBack}>Quay lại</Button>
-                  <Button onClick={handleRetry} variant="outline">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Thử lại
-                  </Button>
-                </div>
+        <div className="flex flex-col items-center justify-center h-full">
+          <PresetGameHeader 
+            showShare={false} 
+            isGameCreated={false}
+            onBack={onBack}
+          />
+          <Card className="p-6 max-w-md mt-4">
+            <div className="text-center">
+              <h3 className="text-xl font-bold mb-2">Đã xảy ra lỗi</h3>
+              <p className="text-gray-500 mb-4">{error}</p>
+              <div className="flex gap-2">
+                <Button onClick={onBack}>Quay lại</Button>
+                <Button onClick={handleRetry} variant="outline">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Thử lại
+                </Button>
               </div>
-            </Card>
-          </div>
+            </div>
+          </Card>
         </div>
       ) : (
-        <div className="h-full flex flex-col overflow-hidden">
-          <div className="flex-shrink-0">
-            <PresetGameHeader 
-              onShare={handleShare}
-              showShare={true}
-              isGameCreated={!!gameContent}
-              onBack={onBack}
-            />
-          </div>
-          
-          {/* Centered Game Content */}
-          <div className="flex-1 overflow-hidden flex items-center justify-center p-2">
-            <div className="w-full max-w-4xl h-full flex items-center justify-center">
-              {renderGameTemplate()}
-            </div>
-          </div>
-          
+        <>
+          <PresetGameHeader 
+            onShare={handleShare}
+            showShare={true}
+            isGameCreated={!!gameContent}
+            onBack={onBack}
+          />
+          {renderGameTemplate()}
           <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
@@ -592,7 +577,7 @@ Output must be valid JSON. `;
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </div>
+        </>
       )}
     </div>
   );

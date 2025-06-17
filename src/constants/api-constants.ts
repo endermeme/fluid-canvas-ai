@@ -1,4 +1,3 @@
-
 /**
  * API Constants for the application
  * Centralized location for all API keys and model configurations
@@ -7,10 +6,10 @@
 // Google Gemini API Key (public API key)
 export const GEMINI_API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
-// Gemini Model configurations - cập nhật sang flash model
+// Gemini Model configurations - đơn giản hóa
 export const GEMINI_MODELS = {
-  CUSTOM_GAME: "gemini-2.5-flash-preview-05-20",
-  PRESET_GAME: "gemini-2.5-flash-preview-05-20"
+  CUSTOM_GAME: "gemini-2.5-pro-preview-05-06",
+  PRESET_GAME: "gemini-2.5-pro-preview-05-06"
 };
 
 // API Version

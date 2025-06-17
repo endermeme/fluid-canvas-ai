@@ -7,9 +7,9 @@ import EnhancedGameView from './EnhancedGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle, Share2 } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { saveGameForSharing } from '@/utils/gameExport';
+import { createGameSession } from '@/utils/gameParticipation';
 import QuizContainer from '../QuizContainer';
 
 interface GameControllerProps {
@@ -63,48 +63,31 @@ const GameController: React.FC<GameControllerProps> = ({
     setShowForm(true);
   };
   
-  const handleShareGame = async (): Promise<string> => {
-    if (!currentGame || isSharing) {
-      return '';
-    }
+  const handleShareGame = async () => {
+    if (!currentGame || isSharing) return;
     
     try {
       setIsSharing(true);
       
-      toast({
-        title: "Đang xử lý",
-        description: "Đang tạo liên kết chia sẻ...",
-      });
-      
-      const url = await saveGameForSharing(
+      // Tạo session game (sẽ được gọi sau khi game đã được lưu vào Supabase từ EnhancedGameView)
+      const gameSession = await createGameSession(
         currentGame.title || "Minigame tương tác",
-        'custom',
-        currentGame,
         currentGame.content
       );
       
-      if (url) {
-        // Chuyển đến trang chia sẻ
-        const gameId = url.split('/game/')[1];
-        navigate(`/game/${gameId}`);
-        
-        toast({
-          title: "Game đã được chia sẻ! 🎉",
-          description: "Bạn có thể gửi link cho người khác để họ tham gia.",
-        });
-        
-        return url;
-      } else {
-        throw new Error("Không thể tạo URL chia sẻ");
-      }
+      navigate(`/game/${gameSession.id}`);
+      
+      toast({
+        title: "Game đã được chia sẻ",
+        description: "Bạn có thể gửi link cho người khác để họ tham gia.",
+      });
     } catch (error) {
       console.error("Error sharing game:", error);
       toast({
         title: "Lỗi chia sẻ",
-        description: error instanceof Error ? error.message : "Không thể tạo liên kết chia sẻ. Vui lòng thử lại.",
+        description: "Không thể tạo liên kết chia sẻ. Vui lòng thử lại.",
         variant: "destructive"
       });
-      return '';
     } finally {
       setIsSharing(false);
     }
@@ -135,7 +118,6 @@ const GameController: React.FC<GameControllerProps> = ({
             }} 
             onBack={handleBack}
             onNewGame={handleNewGame}
-            onShare={handleShareGame}
             hideHeader={false}
           />
         </div>
