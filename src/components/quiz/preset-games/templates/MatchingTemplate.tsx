@@ -5,7 +5,6 @@ import MatchingHeader from './matching/MatchingHeader';
 import MatchingGameArea from './matching/MatchingGameArea';
 import MatchingFooter from './matching/MatchingFooter';
 import MatchingGameEnd from './matching/MatchingGameEnd';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MatchingTemplateProps {
   content: any;
@@ -16,7 +15,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   const pairs = content?.pairs || [];
   const difficulty = content?.settings?.difficulty || "medium";
   const timeLimit = content?.settings?.timeLimit || 60;
-  const isMobile = useIsMobile();
 
   const {
     leftItems,
@@ -35,17 +33,18 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   } = useMatchingGame({ pairs, timeLimit, difficulty });
 
   if (!content || !pairs.length) {
-    return <div className="p-4">Không có dữ liệu trò chơi nối từ</div>;
+    return (
+      <div className="h-full flex items-center justify-center p-4">
+        <div className="text-center">
+          <p className="text-lg">Không có dữ liệu trò chơi nối từ</p>
+          <p className="text-sm text-muted-foreground mt-2">Vui lòng thử lại hoặc chọn game khác</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div 
-      className="flex flex-col overflow-hidden"
-      style={{ 
-        height: isMobile ? '100dvh' : '100vh',
-        maxHeight: isMobile ? '100dvh' : '100vh'
-      }}
-    >
+    <div className="h-full flex flex-col">
       <MatchingHeader
         matchedPairs={matchedPairs}
         totalPairs={totalPairs}
@@ -53,18 +52,18 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
         timeLeft={timeLeft}
       />
 
-      <MatchingGameEnd
-        gameWon={gameWon}
-        gameOver={gameOver}
-        totalPairs={totalPairs}
-        matchedPairs={matchedPairs}
-        score={score}
-        timeLeft={timeLeft}
-        onRestart={handleRestart}
-      />
+      <div className="flex-1 min-h-0 flex items-center justify-center">
+        <MatchingGameEnd
+          gameWon={gameWon}
+          gameOver={gameOver}
+          totalPairs={totalPairs}
+          matchedPairs={matchedPairs}
+          score={score}
+          timeLeft={timeLeft}
+          onRestart={handleRestart}
+        />
 
-      {!gameWon && !gameOver && (
-        <>
+        {!gameWon && !gameOver && (
           <MatchingGameArea
             leftItems={leftItems}
             rightItems={rightItems}
@@ -76,9 +75,11 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
             gameOver={gameOver}
             gameWon={gameWon}
           />
+        )}
+      </div>
 
-          <MatchingFooter onRestart={handleRestart} />
-        </>
+      {!gameWon && !gameOver && (
+        <MatchingFooter onRestart={handleRestart} />
       )}
     </div>
   );

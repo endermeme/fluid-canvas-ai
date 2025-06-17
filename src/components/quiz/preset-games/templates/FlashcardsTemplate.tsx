@@ -4,7 +4,6 @@ import FlashcardsHeader from './flashcards/FlashcardsHeader';
 import FlashcardsCard from './flashcards/FlashcardsCard';
 import FlashcardsFooter from './flashcards/FlashcardsFooter';
 import { useFlashcards } from './flashcards/useFlashcards';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface FlashcardsTemplateProps {
   content: any;
@@ -16,7 +15,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({
   topic
 }) => {
   const cards = content?.cards || [];
-  const isMobile = useIsMobile();
   
   const {
     currentCard,
@@ -33,30 +31,33 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({
   } = useFlashcards({ cards, settings: content?.settings });
 
   if (!content || !cards.length) {
-    return <div className="p-4">Không có dữ liệu thẻ ghi nhớ</div>;
+    return (
+      <div className="h-full flex items-center justify-center p-4">
+        <div className="text-center">
+          <p className="text-lg">Không có dữ liệu thẻ ghi nhớ</p>
+          <p className="text-sm text-muted-foreground mt-2">Vui lòng thử lại hoặc chọn game khác</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div 
-      className="flex flex-col overflow-hidden"
-      style={{ 
-        height: isMobile ? '100dvh' : '100vh',
-        maxHeight: isMobile ? '100dvh' : '100vh'
-      }}
-    >
+    <div className="h-full flex flex-col">
       <FlashcardsHeader
         currentCard={currentCard}
         totalCards={cards.length}
         stats={stats}
       />
 
-      <FlashcardsCard
-        card={cards[currentCard]}
-        isFlipped={isFlipped}
-        autoFlip={autoFlip}
-        timeRemaining={timeRemaining}
-        onFlip={handleFlip}
-      />
+      <div className="flex-1 min-h-0">
+        <FlashcardsCard
+          card={cards[currentCard]}
+          isFlipped={isFlipped}
+          autoFlip={autoFlip}
+          timeRemaining={timeRemaining}
+          onFlip={handleFlip}
+        />
+      </div>
 
       <FlashcardsFooter
         currentCard={currentCard}

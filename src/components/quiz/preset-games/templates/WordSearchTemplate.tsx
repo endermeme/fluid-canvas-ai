@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -277,7 +278,14 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
   };
 
   if (!content || !grid.length || !words.length) {
-    return <div className="p-4">Không có dữ liệu trò chơi tìm từ</div>;
+    return (
+      <div className="h-full flex items-center justify-center p-4">
+        <div className="text-center">
+          <p className="text-lg">Không có dữ liệu trò chơi tìm từ</p>
+          <p className="text-sm text-muted-foreground mt-2">Vui lòng thử lại hoặc chọn game khác</p>
+        </div>
+      </div>
+    );
   }
 
   const progressPercentage = (foundWords.length / totalWords) * 100;
@@ -312,12 +320,12 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
   };
 
   return (
-    <div className="flex flex-col p-4 h-full">
+    <div className="h-full flex flex-col">
       {/* Header with progress and timer */}
-      <div className="mb-4">
+      <div className="flex-shrink-0 p-4">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium">
-            {progressBarText()}
+            {gameWon ? "Hoàn thành!" : `Đã tìm: ${foundWords.length}/${totalWords}`}
           </div>
           <div className="text-sm font-medium flex items-center">
             <Clock className="h-4 w-4 mr-1" />
@@ -328,117 +336,127 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
       </div>
 
       {/* Game content */}
-      <div className="flex flex-col md:flex-row gap-4 flex-grow">
+      <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-4 p-4 pt-0">
         {/* Word grid */}
-        <Card className="p-4 flex-grow h-full bg-gradient-to-br from-white to-blue-50">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-medium">Tìm từ ẩn (chỉ theo hướng thuận)</h3>
-            <div className="flex items-center space-x-1">
-              <Button
-                variant={gridSize === 'small' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleChangeGridSize('small')}
-                className="px-2 py-1 h-8"
-              >
-                <LayoutGrid className="h-3 w-3 mr-1" />
-                Nhỏ
-              </Button>
-              <Button
-                variant={gridSize === 'medium' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleChangeGridSize('medium')}
-                className="px-2 py-1 h-8"
-              >
-                <LayoutGrid className="h-4 w-4 mr-1" />
-                Vừa
-              </Button>
-              <Button
-                variant={gridSize === 'large' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleChangeGridSize('large')}
-                className="px-2 py-1 h-8"
-              >
-                <LayoutGrid className="h-5 w-5 mr-1" />
-                Lớn
-              </Button>
+        <Card className="flex-grow min-h-0 bg-gradient-to-br from-white to-blue-50 flex flex-col">
+          <div className="flex-shrink-0 p-4">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-lg font-medium">Tìm từ ẩn (chỉ theo hướng thuận)</h3>
+              <div className="flex items-center space-x-1">
+                <Button
+                  variant={gridSize === 'small' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleChangeGridSize('small')}
+                  className="px-2 py-1 h-8"
+                >
+                  <LayoutGrid className="h-3 w-3 mr-1" />
+                  Nhỏ
+                </Button>
+                <Button
+                  variant={gridSize === 'medium' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleChangeGridSize('medium')}
+                  className="px-2 py-1 h-8"
+                >
+                  <LayoutGrid className="h-4 w-4 mr-1" />
+                  Vừa
+                </Button>
+                <Button
+                  variant={gridSize === 'large' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleChangeGridSize('large')}
+                  className="px-2 py-1 h-8"
+                >
+                  <LayoutGrid className="h-5 w-5 mr-1" />
+                  Lớn
+                </Button>
+              </div>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 gap-1 h-full place-content-center">
-            {grid.map((row: string[], rowIndex: number) => (
-              <div key={`row-${rowIndex}`} className="flex justify-center gap-1">
-                {row.map((cell: string, colIndex: number) => {
-                  const isSelected = selectedStart?.row === rowIndex && selectedStart?.col === colIndex;
-                  const isInPath = isInSelectedPath(rowIndex, colIndex);
-                  const foundWord = isInFoundWord(rowIndex, colIndex);
-                  
-                  return (
-                    <button
-                      key={`cell-${rowIndex}-${colIndex}`}
-                      className={`${getCellSize()} flex items-center justify-center rounded-md font-medium transition-all
-                        ${isSelected ? 'bg-primary text-white' : ''}
-                        ${isInPath && !isSelected ? 'bg-primary/30' : ''}
-                        ${foundWord ? 'bg-green-500/20 text-green-800' : (!isSelected && !isInPath ? 'bg-white border border-blue-100 hover:bg-blue-50' : '')}
-                        ${!foundWord && !isInPath && !isSelected ? 'shadow-sm' : ''}
-                      `}
-                      onClick={() => handleCellClick(rowIndex, colIndex)}
-                      onMouseEnter={() => handleCellHover(rowIndex, colIndex)}
-                      disabled={gameOver || gameWon || Boolean(foundWord)}
-                    >
-                      {cell}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
+          <div className="flex-1 min-h-0 overflow-auto p-4 pt-0">
+            <div className="grid grid-cols-1 gap-1 place-content-center">
+              {grid.map((row: string[], rowIndex: number) => (
+                <div key={`row-${rowIndex}`} className="flex justify-center gap-1">
+                  {row.map((cell: string, colIndex: number) => {
+                    const isSelected = selectedStart?.row === rowIndex && selectedStart?.col === colIndex;
+                    const isInPath = isInSelectedPath(rowIndex, colIndex);
+                    const foundWord = isInFoundWord(rowIndex, colIndex);
+                    
+                    return (
+                      <button
+                        key={`cell-${rowIndex}-${colIndex}`}
+                        className={`${getCellSize()} flex items-center justify-center rounded-md font-medium transition-all
+                          ${isSelected ? 'bg-primary text-white' : ''}
+                          ${isInPath && !isSelected ? 'bg-primary/30' : ''}
+                          ${foundWord ? 'bg-green-500/20 text-green-800' : (!isSelected && !isInPath ? 'bg-white border border-blue-100 hover:bg-blue-50' : '')}
+                          ${!foundWord && !isInPath && !isSelected ? 'shadow-sm' : ''}
+                        `}
+                        onClick={() => handleCellClick(rowIndex, colIndex)}
+                        onMouseEnter={() => handleCellHover(rowIndex, colIndex)}
+                        disabled={gameOver || gameWon || Boolean(foundWord)}
+                      >
+                        {cell}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
           </div>
         </Card>
         
         {/* Word list */}
         {content?.settings?.showWordList && (
-          <Card className="p-4 w-full md:w-56 flex-shrink-0 overflow-y-auto bg-gradient-to-br from-white to-blue-50">
-            <h3 className="text-lg font-medium mb-2 flex items-center text-blue-900">
-              <Search className="h-4 w-4 mr-1" />
-              Danh sách từ
-            </h3>
-            <ul className="space-y-1">
-              {words.map((word: any, index: number) => (
-                <li 
-                  key={index}
-                  className={`py-2 px-3 rounded ${
-                    word.found || foundWords.some(fw => fw.word === word.word)
-                      ? 'line-through opacity-70 bg-green-100 text-green-800'
-                      : 'bg-white border border-blue-100'
-                  }`}
-                >
-                  {word.word}
-                </li>
-              ))}
-            </ul>
+          <Card className="w-full md:w-56 flex-shrink-0 bg-gradient-to-br from-white to-blue-50 flex flex-col">
+            <div className="flex-shrink-0 p-4">
+              <h3 className="text-lg font-medium mb-2 flex items-center text-blue-900">
+                <Search className="h-4 w-4 mr-1" />
+                Danh sách từ
+              </h3>
+            </div>
+            <div className="flex-1 min-h-0 overflow-auto p-4 pt-0">
+              <ul className="space-y-1">
+                {words.map((word: any, index: number) => (
+                  <li 
+                    key={index}
+                    className={`py-2 px-3 rounded ${
+                      word.found || foundWords.some(fw => fw.word === word.word)
+                        ? 'line-through opacity-70 bg-green-100 text-green-800'
+                        : 'bg-white border border-blue-100'
+                    }`}
+                  >
+                    {word.word}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </Card>
         )}
       </div>
 
       {/* Controls */}
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <Button
-          variant="outline"
-          onClick={handleResetSelection}
-          disabled={!selectedStart}
-          className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
-        >
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Hủy chọn
-        </Button>
-        
-        <Button 
-          variant="outline" 
-          onClick={handleRestart}
-          className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
-        >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Chơi lại
-        </Button>
+      <div className="flex-shrink-0 p-4 pt-0">
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            variant="outline"
+            onClick={handleResetSelection}
+            disabled={!selectedStart}
+            className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Hủy chọn
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={handleRestart}
+            className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Chơi lại
+          </Button>
+        </div>
       </div>
       
       {/* Game over or win state */}

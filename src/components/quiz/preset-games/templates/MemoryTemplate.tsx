@@ -5,7 +5,6 @@ import MemoryGameArea from './memory/MemoryGameArea';
 import MemoryFooter from './memory/MemoryFooter';
 import MemoryGameEnd from './memory/MemoryGameEnd';
 import { useMemoryGame } from './memory/useMemoryGame';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MemoryTemplateProps {
   content: any;
@@ -16,7 +15,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   const memoryCards = content?.cards || [];
   const timeLimit = content?.settings?.timeLimit || 120;
   const allowHints = content?.settings?.allowHints;
-  const isMobile = useIsMobile();
 
   const {
     cards,
@@ -33,17 +31,18 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   } = useMemoryGame({ memoryCards, timeLimit });
 
   if (!content || !memoryCards.length) {
-    return <div className="p-4">Không có dữ liệu trò chơi ghi nhớ</div>;
+    return (
+      <div className="h-full flex items-center justify-center p-4">
+        <div className="text-center">
+          <p className="text-lg">Không có dữ liệu trò chơi ghi nhớ</p>
+          <p className="text-sm text-muted-foreground mt-2">Vui lòng thử lại hoặc chọn game khác</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div 
-      className="flex flex-col overflow-hidden"
-      style={{ 
-        height: isMobile ? '100dvh' : '100vh',
-        maxHeight: isMobile ? '100dvh' : '100vh'
-      }}
-    >
+    <div className="h-full flex flex-col">
       <MemoryHeader
         matchedPairs={matchedPairs}
         totalPairs={totalPairs}
@@ -51,30 +50,32 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
         timeLeft={timeLeft}
       />
 
-      <MemoryGameEnd
-        gameWon={gameWon}
-        gameOver={gameOver}
-        moves={moves}
-        timeLeft={timeLeft}
-        matchedPairs={matchedPairs}
-        totalPairs={totalPairs}
-        onRestart={handleRestart}
-      />
+      <div className="flex-1 min-h-0 flex items-center justify-center">
+        <MemoryGameEnd
+          gameWon={gameWon}
+          gameOver={gameOver}
+          moves={moves}
+          timeLeft={timeLeft}
+          matchedPairs={matchedPairs}
+          totalPairs={totalPairs}
+          onRestart={handleRestart}
+        />
 
-      {!gameWon && !gameOver && (
-        <>
+        {!gameWon && !gameOver && (
           <MemoryGameArea
             cards={cards}
             canFlip={canFlip}
             onCardClick={handleCardClick}
           />
-          
-          <MemoryFooter
-            allowHints={allowHints}
-            onHint={handleHint}
-            onRestart={handleRestart}
-          />
-        </>
+        )}
+      </div>
+
+      {!gameWon && !gameOver && (
+        <MemoryFooter
+          allowHints={allowHints}
+          onHint={handleHint}
+          onRestart={handleRestart}
+        />
       )}
     </div>
   );
