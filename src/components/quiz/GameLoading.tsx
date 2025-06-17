@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Brain, Zap, Target, Trophy, Star, Code, Lightbulb, Settings } from 'lucide-react';
+import { Sparkles, Brain, Zap, Target, Trophy, Star, Code, Lightbulb, Settings, FlaskConical } from 'lucide-react';
 import BackgroundParticles from '@/components/ui/background-particles';
 
 interface GameLoadingProps {
@@ -23,21 +23,21 @@ const GameLoading: React.FC<GameLoadingProps> = ({
   const [currentStage, setCurrentStage] = useState(0);
 
   const developmentStages = [
-    { icon: Lightbulb, name: "Phân tích chủ đề", color: "text-yellow-500", bgColor: "bg-yellow-500/20" },
-    { icon: Code, name: "Tạo nội dung", color: "text-blue-500", bgColor: "bg-blue-500/20" },
-    { icon: Settings, name: "Tối ưu hóa", color: "text-purple-500", bgColor: "bg-purple-500/20" },
+    { icon: FlaskConical, name: "Phân tích chủ đề", color: "text-blue-500", bgColor: "bg-blue-500/20" },
+    { icon: Settings, name: "Tạo nội dung", color: "text-yellow-500", bgColor: "bg-yellow-500/20" },
+    { icon: Code, name: "Tối ưu hóa", color: "text-purple-500", bgColor: "bg-purple-500/20" },
     { icon: Trophy, name: "Hoàn thành", color: "text-green-500", bgColor: "bg-green-500/20" }
   ];
 
   const loadingTips = [
-    "💡 AI sử dụng thuật toán học máy để tạo câu hỏi phù hợp",
-    "🎯 Độ khó được điều chỉnh dựa trên cấp độ người học",
-    "⚡ Nội dung được tối ưu hóa cho trải nghiệm tương tác tốt nhất",
-    "🎨 Giao diện được thiết kế để tăng cường sự tập trung",
-    "🚀 Mỗi trò chơi được tạo riêng biệt cho chủ đề của bạn",
-    "🧠 AI phân tích ngữ cảnh để tạo câu hỏi chính xác",
-    "✨ Hệ thống tự động kiểm tra chất lượng nội dung",
-    "🎪 Trò chơi được tối ưu cho cả máy tính và điện thoại"
+    "💡 Mẹo: Bạn có thể tạo minigame theo nhiều chủ đề và độ khó khác nhau, từ trò chơi giáo dục đến giải trí.",
+    "🎯 Mẹo: AI sử dụng thuật toán học máy để tạo câu hỏi phù hợp với cấp độ người học.",
+    "⚡ Mẹo: Nội dung được tối ưu hóa cho trải nghiệm tương tác tốt nhất trên mọi thiết bị.",
+    "🎨 Mẹo: Giao diện được thiết kế để tăng cường sự tập trung và khuyến khích tham gia.",
+    "🚀 Mẹo: Mỗi trò chơi được tạo riêng biệt và có thể tùy chỉnh theo yêu cầu cụ thể.",
+    "🧠 Mẹo: AI phân tích ngữ cảnh để tạo câu hỏi chính xác và phù hợp với chủ đề.",
+    "✨ Mẹo: Hệ thống tự động kiểm tra chất lượng nội dung trước khi xuất bản.",
+    "🎪 Mẹo: Trò chơi được tối ưu cho cả máy tính và điện thoại để trải nghiệm tốt nhất."
   ];
 
   const gameIcons = {
@@ -55,7 +55,7 @@ const GameLoading: React.FC<GameLoadingProps> = ({
   useEffect(() => {
     const tipInterval = setInterval(() => {
       setCurrentTip(prev => (prev + 1) % loadingTips.length);
-    }, 3000);
+    }, 4000);
 
     return () => clearInterval(tipInterval);
   }, []);
@@ -63,7 +63,7 @@ const GameLoading: React.FC<GameLoadingProps> = ({
   useEffect(() => {
     const stageInterval = setInterval(() => {
       setCurrentStage(prev => (prev + 1) % developmentStages.length);
-    }, 2500);
+    }, 2000);
 
     return () => clearInterval(stageInterval);
   }, []);
@@ -75,52 +75,83 @@ const GameLoading: React.FC<GameLoadingProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-50/80 backdrop-blur-sm"
         >
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg rounded-3xl p-10 mx-4 max-w-lg w-full border border-white/30 dark:border-slate-700/30 shadow-2xl"
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="relative bg-white rounded-3xl p-12 mx-4 max-w-xl w-full shadow-2xl border border-gray-200/50"
           >
             {/* Background particles */}
             <div className="absolute inset-0 overflow-hidden rounded-3xl">
-              <BackgroundParticles particleCount={12} />
+              <BackgroundParticles particleCount={8} />
             </div>
 
-            <div className="relative z-10 text-center space-y-8">
-              {/* Main Brain Icon */}
-              <motion.div
-                animate={{ 
-                  rotate: [0, 360],
-                  scale: [1, 1.1, 1]
-                }}
-                transition={{ 
-                  rotate: { duration: 4, repeat: Infinity, ease: "linear" },
-                  scale: { duration: 3, repeat: Infinity }
-                }}
-                className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-xl"
-              >
-                <GameIcon className="w-10 h-10 text-white" />
-              </motion.div>
+            <div className="relative z-10 text-center space-y-10">
+              {/* Main rotating brain icon with circular progress */}
+              <div className="relative mx-auto w-24 h-24">
+                {/* Circular progress ring */}
+                <svg className="absolute inset-0 w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    fill="none"
+                    className="text-gray-200"
+                  />
+                  <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    fill="none"
+                    strokeLinecap="round"
+                    className="text-blue-500"
+                    initial={{ strokeDasharray: "283", strokeDashoffset: "283" }}
+                    animate={{ 
+                      strokeDashoffset: `${283 - (283 * (currentStage + 1)) / developmentStages.length}`
+                    }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                  />
+                </svg>
+                
+                {/* Brain icon in center */}
+                <motion.div
+                  animate={{ 
+                    rotate: [0, 360]
+                  }}
+                  transition={{ 
+                    rotate: { duration: 3, repeat: Infinity, ease: "linear" }
+                  }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <GameIcon className="w-8 h-8 text-white" />
+                  </div>
+                </motion.div>
+              </div>
 
               {/* Title */}
               <div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent mb-3">
-                  Đang tạo trò chơi
+                <h2 className="text-2xl font-bold text-blue-600 mb-2">
+                  Đang tạo minigame...
                 </h2>
-                <p className="text-slate-600 dark:text-slate-400">
-                  AI đang xử lý yêu cầu của bạn
+                <p className="text-gray-600 text-sm">
+                  Đang tạo minigame cho chủ đề. Quá trình này có thể mất một chút thời gian.
                 </p>
                 {topic && (
-                  <p className="text-sm text-blue-600 dark:text-blue-400 mt-2 font-medium">
-                    Chủ đề: {topic}
+                  <p className="text-sm text-blue-600 mt-2 font-medium">
+                    {topic}
                   </p>
                 )}
               </div>
 
-              {/* Development Process Circles */}
-              <div className="flex justify-center items-center space-x-4">
+              {/* Development stages with icons */}
+              <div className="flex justify-center items-center space-x-6">
                 {developmentStages.map((stage, index) => {
                   const StageIcon = stage.icon;
                   const isActive = index === currentStage;
@@ -129,63 +160,97 @@ const GameLoading: React.FC<GameLoadingProps> = ({
                   return (
                     <motion.div
                       key={index}
-                      className={`relative p-4 rounded-full border-2 transition-all duration-500 ${
-                        isCompleted 
-                          ? 'bg-green-500/20 border-green-500' 
-                          : isActive 
-                            ? `${stage.bgColor} border-blue-500` 
-                            : 'bg-slate-200/50 dark:bg-slate-700/50 border-slate-300 dark:border-slate-600'
-                      }`}
+                      className="flex flex-col items-center space-y-2"
                     >
                       <motion.div
-                        animate={isActive ? {
-                          rotate: [0, 360],
-                          scale: [1, 1.2, 1]
-                        } : {}}
-                        transition={isActive ? {
-                          rotate: { duration: 2, repeat: Infinity, ease: "linear" },
-                          scale: { duration: 1.5, repeat: Infinity }
-                        } : {}}
+                        className={`relative p-3 rounded-full border-2 transition-all duration-500 ${
+                          isCompleted 
+                            ? 'bg-green-500/20 border-green-500' 
+                            : isActive 
+                              ? `${stage.bgColor} border-blue-500` 
+                              : 'bg-gray-100 border-gray-300'
+                        }`}
                       >
-                        <StageIcon 
-                          className={`w-6 h-6 ${
-                            isCompleted 
-                              ? 'text-green-500' 
-                              : isActive 
-                                ? stage.color 
-                                : 'text-slate-400 dark:text-slate-500'
-                          }`} 
-                        />
+                        <motion.div
+                          animate={isActive ? {
+                            rotate: [0, 360]
+                          } : isCompleted ? {
+                            rotate: 0
+                          } : {}}
+                          transition={isActive ? {
+                            rotate: { duration: 2, repeat: Infinity, ease: "linear" }
+                          } : isCompleted ? {
+                            rotate: { duration: 0.5, ease: "easeOut" }
+                          } : {}}
+                        >
+                          <StageIcon 
+                            className={`w-5 h-5 ${
+                              isCompleted 
+                                ? 'text-green-500' 
+                                : isActive 
+                                  ? stage.color 
+                                  : 'text-gray-400'
+                            }`} 
+                          />
+                        </motion.div>
+                        
+                        {/* Checkmark for completed stages */}
+                        {isCompleted && (
+                          <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.3, delay: 0.2 }}
+                            className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center"
+                          >
+                            <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </motion.div>
+                        )}
                       </motion.div>
                       
                       {/* Stage name */}
-                      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                        <span className={`text-xs font-medium ${
-                          isCompleted 
-                            ? 'text-green-600 dark:text-green-400' 
-                            : isActive 
-                              ? 'text-blue-600 dark:text-blue-400' 
-                              : 'text-slate-500 dark:text-slate-400'
-                        }`}>
-                          {stage.name}
-                        </span>
-                      </div>
+                      <span className={`text-xs font-medium ${
+                        isCompleted 
+                          ? 'text-green-600' 
+                          : isActive 
+                            ? 'text-blue-600' 
+                            : 'text-gray-500'
+                      }`}>
+                        {stage.name}
+                      </span>
                     </motion.div>
                   );
                 })}
               </div>
 
+              {/* Current stage indicator */}
+              <motion.div 
+                className="text-center"
+                key={currentStage}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <p className="text-sm text-blue-600 font-medium">
+                  {developmentStages[currentStage]?.name}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Giai đoạn {currentStage + 1} / {developmentStages.length}
+                </p>
+              </motion.div>
+
               {/* Loading Tips */}
-              <div className="mt-12">
+              <div className="mt-8">
                 <motion.div
                   key={currentTip}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.5 }}
-                  className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800/50"
+                  className="bg-blue-50 p-4 rounded-xl border border-blue-100"
                 >
-                  <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
+                  <p className="text-sm text-blue-800 leading-relaxed">
                     {loadingTips[currentTip]}
                   </p>
                 </motion.div>
@@ -196,42 +261,42 @@ const GameLoading: React.FC<GameLoadingProps> = ({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-xs text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50 px-4 py-2 rounded-lg"
+                  className="text-xs text-gray-500 bg-gray-50 px-4 py-2 rounded-lg"
                 >
                   {message}
                 </motion.div>
               )}
 
-              {/* Floating Elements */}
-              <div className="absolute -top-3 -right-3">
+              {/* Floating decorative elements */}
+              <div className="absolute -top-2 -right-2">
                 <motion.div
                   animate={{ 
                     rotate: [0, 360],
-                    scale: [1, 1.3, 1]
+                    scale: [1, 1.2, 1]
                   }}
                   transition={{ 
-                    duration: 5, 
+                    duration: 6, 
                     repeat: Infinity,
                     delay: 1
                   }}
                 >
-                  <Sparkles className="w-7 h-7 text-yellow-400" />
+                  <Sparkles className="w-6 h-6 text-yellow-400" />
                 </motion.div>
               </div>
 
-              <div className="absolute -bottom-3 -left-3">
+              <div className="absolute -bottom-2 -left-2">
                 <motion.div
                   animate={{ 
                     rotate: [360, 0],
-                    scale: [1, 1.2, 1]
+                    scale: [1, 1.1, 1]
                   }}
                   transition={{ 
-                    duration: 4, 
+                    duration: 5, 
                     repeat: Infinity,
                     delay: 0.5
                   }}
                 >
-                  <Star className="w-6 h-6 text-blue-400" />
+                  <Star className="w-5 h-5 text-blue-400" />
                 </motion.div>
               </div>
             </div>
