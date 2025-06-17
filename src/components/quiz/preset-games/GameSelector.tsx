@@ -155,7 +155,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
             variants={itemVariants}
           >
             <motion.h1 
-              className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-6"
+              className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-200 bg-clip-text text-transparent mb-6"
               animate={{
                 backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
               }}
@@ -168,7 +168,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
               Chọn Loại Trò Chơi
             </motion.h1>
             <motion.p 
-              className="text-xl text-white/90 mb-10 drop-shadow-lg"
+              className="text-xl text-slate-700 dark:text-slate-300 mb-10 drop-shadow-lg"
               variants={itemVariants}
             >
               Tạo trò chơi học tập tương tác với AI
@@ -209,8 +209,8 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                         {game.icon}
                       </motion.div>
                       <div className="flex-1">
-                        <h3 className="text-2xl font-bold mb-4 transition-colors duration-300 group-hover:text-primary text-white drop-shadow-md">{game.name}</h3>
-                        <p className="text-sm text-white/80 leading-relaxed transition-colors duration-300 group-hover:text-white/90 drop-shadow">
+                        <h3 className="text-2xl font-bold mb-4 transition-colors duration-300 group-hover:text-primary text-slate-800 dark:text-slate-100 drop-shadow-md">{game.name}</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed transition-colors duration-300 group-hover:text-slate-700 dark:group-hover:text-slate-200 drop-shadow">
                           {game.description}
                         </p>
                       </div>
@@ -219,7 +219,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                           className={`flex items-center justify-center px-5 py-4 rounded-lg text-sm font-medium transition-all duration-300 ${
                             game.isBackButton 
                               ? 'bg-gradient-to-r from-primary/40 to-primary/30 text-white shadow-lg' 
-                              : 'bg-gradient-to-r from-primary/30 to-primary/20 text-white shadow-lg'
+                              : 'bg-gradient-to-r from-primary/30 to-primary/20 text-slate-700 dark:text-slate-200 shadow-lg'
                           }`}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
