@@ -178,14 +178,14 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   const progressPercentage = (matchedPairs / totalPairs) * 100;
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative">
-      <div className="mb-4 mt-12">
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+    <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-gradient-to-b from-background to-background/80">
+      <div className="flex-shrink-0 p-3 sm:p-4 pt-16 sm:pt-20">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
+          <div className="text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 bg-primary/10 rounded-full">
             Cặp đã ghép: {matchedPairs}/{totalPairs}
           </div>
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full flex items-center">
-            <Clock className="h-4 w-4 mr-1 text-primary" />
+          <div className="text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 bg-primary/10 rounded-full flex items-center">
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
             {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
           </div>
         </div>
@@ -193,12 +193,12 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
       </div>
 
       {gameWon ? (
-        <div className="flex-grow flex items-center justify-center">
-          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-primary/5 to-secondary/20 backdrop-blur-sm border-primary/20">
-            <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
-            <p className="mb-2 text-lg">Bạn đã hoàn thành trò chơi với {moves} lượt.</p>
-            <p className="mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
+        <div className="flex-1 flex items-center justify-center p-3 sm:p-4 overflow-auto">
+          <Card className="p-4 sm:p-8 text-center max-w-md w-full bg-gradient-to-br from-primary/5 to-secondary/20 backdrop-blur-sm border-primary/20">
+            <Trophy className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
+            <p className="mb-2 text-base sm:text-lg">Bạn đã hoàn thành trò chơi với {moves} lượt.</p>
+            <p className="mb-4 sm:mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
             <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary">
               <RefreshCw className="mr-2 h-4 w-4" />
               Chơi lại
@@ -206,10 +206,10 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
           </Card>
         </div>
       ) : gameOver ? (
-        <div className="flex-grow flex items-center justify-center">
-          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-destructive/5 to-background backdrop-blur-sm border-destructive/20">
-            <h2 className="text-3xl font-bold mb-4 text-destructive">Hết thời gian!</h2>
-            <p className="mb-4 text-lg">Bạn đã tìm được {matchedPairs} trong tổng số {totalPairs} cặp thẻ.</p>
+        <div className="flex-1 flex items-center justify-center p-3 sm:p-4 overflow-auto">
+          <Card className="p-4 sm:p-8 text-center max-w-md w-full bg-gradient-to-br from-destructive/5 to-background backdrop-blur-sm border-destructive/20">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-destructive">Hết thời gian!</h2>
+            <p className="mb-4 text-base sm:text-lg">Bạn đã tìm được {matchedPairs} trong tổng số {totalPairs} cặp thẻ.</p>
             <Button onClick={handleRestart} className="w-full">
               <RefreshCw className="mr-2 h-4 w-4" />
               Chơi lại
@@ -217,8 +217,8 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
           </Card>
         </div>
       ) : (
-        <div className="flex-grow">
-          <div className="grid grid-cols-3 md:grid-cols-4 gap-3 mb-4">
+        <div className="flex-1 flex flex-col p-3 sm:p-4 min-h-0 overflow-hidden">
+          <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 mb-3 sm:mb-4 overflow-auto">
             {cards.map((card, index) => (
               <div 
                 key={index}
@@ -230,29 +230,30 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
                 onClick={() => handleCardClick(index)}
               >
                 {(card.flipped || card.matched) ? (
-                  <div className="text-2xl font-bold text-primary/90">{card.content}</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-primary/90 text-center break-words overflow-hidden">{card.content}</div>
                 ) : (
-                  <div className="text-2xl font-bold text-secondary/80">?</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-secondary/80">?</div>
                 )}
               </div>
             ))}
           </div>
           
-          <div className="flex items-center justify-between mt-3">
-            <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+          <div className="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div className="text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 bg-primary/10 rounded-full">
               Lượt đã chơi: {moves}
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {content?.settings?.allowHints && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleHint}
-                  className="bg-gradient-to-r from-primary/10 to-background border-primary/20"
+                  className="bg-gradient-to-r from-primary/10 to-background border-primary/20 text-xs sm:text-sm"
                 >
-                  <Lightbulb className="h-4 w-4 mr-1 text-yellow-500" />
-                  Gợi ý (-10s)
+                  <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-yellow-500" />
+                  <span className="hidden sm:inline">Gợi ý (-10s)</span>
+                  <span className="sm:hidden">Gợi ý</span>
                 </Button>
               )}
               
@@ -260,10 +261,11 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
                 variant="outline"
                 size="sm"
                 onClick={handleRestart}
-                className="bg-gradient-to-r from-secondary/50 to-background border-primary/20"
+                className="bg-gradient-to-r from-secondary/50 to-background border-primary/20 text-xs sm:text-sm"
               >
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Làm lại
+                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <span className="hidden sm:inline">Làm lại</span>
+                <span className="sm:hidden">Reset</span>
               </Button>
             </div>
           </div>
