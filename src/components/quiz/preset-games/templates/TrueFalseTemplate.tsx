@@ -123,12 +123,10 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
 
   if (!gameContent || !questions.length) {
     return (
-      <div className="h-full flex flex-col">
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="text-center">
-            <p className="text-lg">Không có dữ liệu câu hỏi</p>
-            <p className="text-sm text-muted-foreground mt-2">Vui lòng thử lại hoặc chọn game khác</p>
-          </div>
+      <div className="h-full w-full flex items-center justify-center p-4">
+        <div className="text-center">
+          <p className="text-lg">Không có dữ liệu câu hỏi</p>
+          <p className="text-sm text-muted-foreground mt-2">Vui lòng thử lại hoặc chọn game khác</p>
         </div>
       </div>
     );
@@ -136,7 +134,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
 
   if (showResult) {
     return (
-      <div className="h-full flex items-center justify-center p-4">
+      <div className="h-full w-full flex items-center justify-center p-4">
         <Card className="max-w-sm w-full p-4 text-center">
           <h2 className="text-xl font-bold mb-3">Kết Quả</h2>
           <p className="text-sm mb-3">
@@ -171,7 +169,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full w-full flex flex-col max-w-2xl mx-auto">
       {/* Compact header */}
       <div className="flex-shrink-0 p-2">
         <div className="flex justify-between items-center mb-1">
@@ -195,12 +193,12 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
         <Progress value={progress} className="h-1.5" />
       </div>
       
-      {/* Question area */}
-      <div className="flex-1 min-h-0 overflow-auto p-2">
-        <Card className="p-4 mb-4 bg-gradient-to-br from-primary/5 to-background border-primary/20">
+      {/* Question area - Centered */}
+      <div className="flex-1 min-h-0 overflow-auto p-2 flex items-center justify-center">
+        <Card className="p-4 mb-4 bg-gradient-to-br from-primary/5 to-background border-primary/20 w-full max-w-lg">
           <h2 className="text-lg font-semibold mb-4 text-center">{question.statement}</h2>
           
-          <div className="grid grid-cols-1 gap-3 mb-4 max-w-sm mx-auto">
+          <div className="grid grid-cols-1 gap-3 mb-4">
             <Button 
               className={`p-4 flex items-center justify-center text-base font-medium min-h-[60px] ${
                 currentAnswer === true 

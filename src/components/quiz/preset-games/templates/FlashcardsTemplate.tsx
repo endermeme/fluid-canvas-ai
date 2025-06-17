@@ -42,14 +42,14 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({
   }
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full w-full flex flex-col bg-background max-w-4xl mx-auto">
       <FlashcardsHeader
         currentCard={currentCard}
         totalCards={cards.length}
         stats={stats}
       />
 
-      <div className="flex-1 min-h-0 pb-20 sm:pb-16">
+      <div className="flex-1 min-h-0 flex items-center justify-center pb-20 sm:pb-16">
         <FlashcardsCard
           card={cards[currentCard]}
           isFlipped={isFlipped}

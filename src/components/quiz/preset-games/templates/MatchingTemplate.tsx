@@ -44,7 +44,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full w-full flex flex-col max-w-4xl mx-auto">
       <MatchingHeader
         matchedPairs={matchedPairs}
         totalPairs={totalPairs}
@@ -52,7 +52,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
         timeLeft={timeLeft}
       />
 
-      <div className="flex-1 min-h-0 flex items-center justify-center">
+      <div className="flex-1 min-h-0 flex items-center justify-center p-4">
         <MatchingGameEnd
           gameWon={gameWon}
           gameOver={gameOver}

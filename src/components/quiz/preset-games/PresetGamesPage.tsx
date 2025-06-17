@@ -90,65 +90,67 @@ const PresetGamesPage: React.FC = () => {
 
   return (
     <div className="h-full w-full overflow-auto relative bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950">
-      {/* Optimized Background Animation */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Neural Network Grid */}
-        <div className="absolute inset-0 opacity-10">
-          <svg className="w-full h-full" viewBox="0 0 1000 1000">
-            <defs>
-              <pattern id="neural-grid-preset" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-                <circle cx="50" cy="50" r="2" fill="currentColor" className="text-blue-500" />
-                <line x1="50" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
-                <line x1="50" y1="50" x2="50" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#neural-grid-preset)" />
-          </svg>
+      {/* Background Animation - Only show when NOT in game */}
+      {!selectedGameType && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Neural Network Grid */}
+          <div className="absolute inset-0 opacity-10">
+            <svg className="w-full h-full" viewBox="0 0 1000 1000">
+              <defs>
+                <pattern id="neural-grid-preset" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                  <circle cx="50" cy="50" r="2" fill="currentColor" className="text-blue-500" />
+                  <line x1="50" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
+                  <line x1="50" y1="50" x2="50" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#neural-grid-preset)" />
+            </svg>
+          </div>
+
+          {/* Floating Quantum Particles */}
+          <BackgroundParticles particleCount={15} />
+
+          {/* Science Icons Animation */}
+          {scienceIcons.map((item, index) => (
+            <motion.div
+              key={index}
+              className="absolute opacity-8"
+              style={item.position}
+              animate={{
+                rotate: item.rotation,
+              }}
+              transition={{
+                duration: item.duration,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            >
+              <item.Icon className="w-12 h-12 text-blue-400/20" />
+            </motion.div>
+          ))}
+
+          {/* Pulsing Energy Waves */}
+          {[...Array(3)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute top-1/2 left-1/2 w-80 h-80 border border-blue-300/20 rounded-full"
+              style={{
+                transform: 'translate(-50%, -50%)',
+              }}
+              animate={{
+                scale: [1, 3, 1],
+                opacity: [0.3, 0, 0.3],
+              }}
+              transition={{
+                duration: 10,
+                repeat: Infinity,
+                delay: i * 3.3,
+                ease: "easeInOut"
+              }}
+            />
+          ))}
         </div>
-
-        {/* Floating Quantum Particles */}
-        <BackgroundParticles particleCount={15} />
-
-        {/* Science Icons Animation */}
-        {scienceIcons.map((item, index) => (
-          <motion.div
-            key={index}
-            className="absolute opacity-8"
-            style={item.position}
-            animate={{
-              rotate: item.rotation,
-            }}
-            transition={{
-              duration: item.duration,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          >
-            <item.Icon className="w-12 h-12 text-blue-400/20" />
-          </motion.div>
-        ))}
-
-        {/* Pulsing Energy Waves */}
-        {[...Array(3)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute top-1/2 left-1/2 w-80 h-80 border border-blue-300/20 rounded-full"
-            style={{
-              transform: 'translate(-50%, -50%)',
-            }}
-            animate={{
-              scale: [1, 3, 1],
-              opacity: [0.3, 0, 0.3],
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              delay: i * 3.3,
-              ease: "easeInOut"
-            }}
-          />
-        ))}
-      </div>
+      )}
 
       {!selectedGameType && (
         <div className="absolute top-2 right-2 z-10">

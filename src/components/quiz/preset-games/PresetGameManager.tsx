@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -548,8 +547,12 @@ Output must be valid JSON. `;
               onBack={onBack}
             />
           </div>
-          <div className="flex-1 overflow-hidden">
-            {renderGameTemplate()}
+          
+          {/* Centered Game Content */}
+          <div className="flex-1 overflow-hidden flex items-center justify-center p-2">
+            <div className="w-full max-w-4xl h-full flex items-center justify-center">
+              {renderGameTemplate()}
+            </div>
           </div>
           
           <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
