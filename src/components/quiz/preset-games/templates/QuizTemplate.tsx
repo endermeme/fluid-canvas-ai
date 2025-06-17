@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -424,7 +423,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
             <ChevronRight className="h-5 w-5 ml-3" />
           </Button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
