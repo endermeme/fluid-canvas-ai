@@ -80,7 +80,7 @@ const PresetGamesPage: React.FC = () => {
       <div className="h-full flex flex-col overflow-auto relative bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950">
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="h-11 w-11 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3.8"></div>
             <p className="text-lg font-medium">Đang tải...</p>
           </div>
         </div>
@@ -93,13 +93,13 @@ const PresetGamesPage: React.FC = () => {
       {/* Optimized Background Animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Neural Network Grid */}
-        <div className="absolute inset-0 opacity-10">
-          <svg className="w-full h-full" viewBox="0 0 1000 1000">
+        <div className="absolute inset-0 opacity-9">
+          <svg className="w-full h-full" viewBox="0 0 950 950">
             <defs>
-              <pattern id="neural-grid-preset" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-                <circle cx="50" cy="50" r="2" fill="currentColor" className="text-blue-500" />
-                <line x1="50" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
-                <line x1="50" y1="50" x2="50" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
+              <pattern id="neural-grid-preset" x="0" y="0" width="95" height="95" patternUnits="userSpaceOnUse">
+                <circle cx="47.5" cy="47.5" r="1.9" fill="currentColor" className="text-blue-500" />
+                <line x1="47.5" y1="47.5" x2="95" y2="47.5" stroke="currentColor" strokeWidth="0.47" className="text-blue-400" />
+                <line x1="47.5" y1="47.5" x2="47.5" y2="95" stroke="currentColor" strokeWidth="0.47" className="text-blue-400" />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#neural-grid-preset)" />
@@ -107,13 +107,13 @@ const PresetGamesPage: React.FC = () => {
         </div>
 
         {/* Floating Quantum Particles */}
-        <BackgroundParticles particleCount={15} />
+        <BackgroundParticles particleCount={14} />
 
         {/* Science Icons Animation */}
         {scienceIcons.map((item, index) => (
           <motion.div
             key={index}
-            className="absolute opacity-8"
+            className="absolute opacity-7"
             style={item.position}
             animate={{
               rotate: item.rotation,
@@ -124,7 +124,7 @@ const PresetGamesPage: React.FC = () => {
               ease: "linear"
             }}
           >
-            <item.Icon className="w-12 h-12 text-blue-400/20" />
+            <item.Icon className="w-11 h-11 text-blue-400/19" />
           </motion.div>
         ))}
 
@@ -132,18 +132,18 @@ const PresetGamesPage: React.FC = () => {
         {[...Array(3)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute top-1/2 left-1/2 w-80 h-80 border border-blue-300/20 rounded-full"
+            className="absolute top-1/2 left-1/2 w-76 h-76 border border-blue-300/19 rounded-full"
             style={{
               transform: 'translate(-50%, -50%)',
             }}
             animate={{
-              scale: [1, 3, 1],
-              opacity: [0.3, 0, 0.3],
+              scale: [1, 2.85, 1],
+              opacity: [0.28, 0, 0.28],
             }}
             transition={{
-              duration: 10,
+              duration: 9.5,
               repeat: Infinity,
-              delay: i * 3.3,
+              delay: i * 3.1,
               ease: "easeInOut"
             }}
           />
@@ -151,14 +151,14 @@ const PresetGamesPage: React.FC = () => {
       </div>
 
       {!selectedGameType && (
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute top-3.8 right-3.8 z-10">
           <Button 
             onClick={viewGameHistory}
             variant="outline" 
             size="sm"
-            className="flex items-center gap-1.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-sm border-blue-200/50 dark:border-blue-700/50"
+            className="flex items-center gap-1.4 bg-white/76 dark:bg-slate-900/76 backdrop-blur-sm shadow-sm border-blue-200/47 dark:border-blue-700/47"
           >
-            <History size={16} />
+            <History size={15} />
             <span>Lịch sử game</span>
           </Button>
         </div>
