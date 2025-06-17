@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -154,14 +153,14 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="flex flex-col items-center justify-center h-screen max-h-screen overflow-hidden p-4 bg-gradient-to-br from-blue-50/80 via-sky-50/80 to-blue-100/80 dark:from-blue-950/80 dark:via-sky-950/80 dark:to-blue-950/80"
+        className="flex flex-col items-center justify-center h-screen max-h-screen overflow-hidden p-6 sm:p-8 bg-gradient-to-br from-blue-50/80 via-sky-50/80 to-blue-100/80 dark:from-blue-950/80 dark:via-sky-950/80 dark:to-blue-950/80"
       >
-        <Card className="max-w-md w-full p-6 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20 shadow-xl">
+        <Card className="max-w-lg w-full p-8 sm:p-10 text-center bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20 shadow-xl">
           <motion.h2 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-2xl font-bold mb-4 text-primary"
+            className="text-3xl sm:text-4xl font-bold mb-6 text-primary"
           >
             Kết Quả
           </motion.h2>
@@ -170,7 +169,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-sm mb-4"
+            className="text-lg sm:text-xl mb-6"
           >
             Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
           </motion.p>
@@ -179,20 +178,20 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="mb-6"
+            className="mb-8"
           >
-            <div className="flex justify-between mb-2">
-              <span className="text-sm">Điểm của bạn</span>
-              <span className="font-bold text-lg">{percentage}%</span>
+            <div className="flex justify-between mb-3">
+              <span className="text-lg">Điểm của bạn</span>
+              <span className="font-bold text-xl">{percentage}%</span>
             </div>
-            <Progress value={percentage} className="h-3 bg-secondary" />
+            <Progress value={percentage} className="h-4 bg-secondary" />
           </motion.div>
           
           <motion.div 
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
-            className="text-2xl font-bold mb-6 text-primary"
+            className="text-4xl sm:text-5xl font-bold mb-8 text-primary"
           >
             {score} / {questions.length}
           </motion.div>
@@ -201,7 +200,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="text-sm mb-4 text-muted-foreground"
+            className="text-base mb-6 text-muted-foreground"
           >
             Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
           </motion.div>
@@ -211,8 +210,8 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.7 }}
           >
-            <Button onClick={handleRestart} size="lg" className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-sm py-4">
-              <RefreshCw className="mr-2 h-4 w-4" />
+            <Button onClick={handleRestart} size="lg" className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-lg py-6">
+              <RefreshCw className="mr-3 h-5 w-5" />
               Chơi Lại
             </Button>
           </motion.div>
@@ -230,49 +229,48 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
 
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-gradient-to-br from-blue-50/80 via-sky-50/80 to-blue-100/80 dark:from-blue-950/80 dark:via-sky-950/80 dark:to-blue-950/80">
-      {/* Fixed Header - 15% chiều cao */}
+      {/* Header với thông tin */}
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="flex-shrink-0 p-3 bg-background/90 backdrop-blur-md border-b"
-        style={{ height: '15vh' }}
+        className="flex-shrink-0 p-6 sm:p-8"
       >
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center mb-4">
           <motion.div 
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className="text-sm font-semibold px-3 py-1.5 bg-primary/15 backdrop-blur-sm rounded-full border border-primary/20"
+            className="text-base font-semibold px-4 py-2.5 bg-primary/15 backdrop-blur-sm rounded-full border border-primary/20"
           >
-            Câu {currentQuestion + 1}/{questions.length}
+            Câu hỏi {currentQuestion + 1}/{questions.length}
           </motion.div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="flex items-center px-3 py-1.5 bg-primary/15 backdrop-blur-sm rounded-full border border-primary/20"
+              className="flex items-center px-4 py-2.5 bg-primary/15 backdrop-blur-sm rounded-full border border-primary/20"
             >
-              <Clock className="h-4 w-4 mr-1 text-primary" />
-              <span className="font-semibold text-sm">{timeLeft}s</span>
+              <Clock className="h-5 w-5 mr-2 text-primary" />
+              <span className="font-semibold text-lg">{timeLeft}s</span>
             </motion.div>
             
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.1 }}
-              className="flex items-center px-3 py-1.5 bg-primary/10 backdrop-blur-sm rounded-full border border-primary/15"
+              className="flex items-center px-4 py-2.5 bg-primary/10 backdrop-blur-sm rounded-full border border-primary/15"
             >
-              <Clock className="h-4 w-4 mr-1" />
-              <span className="text-sm">{formattedTotalTime}</span>
+              <Clock className="h-5 w-5 mr-2" />
+              <span className="text-base">{formattedTotalTime}</span>
             </motion.div>
             
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="px-3 py-1.5 bg-primary/15 backdrop-blur-sm rounded-full border border-primary/20"
+              className="px-4 py-2.5 bg-primary/15 backdrop-blur-sm rounded-full border border-primary/20"
             >
-              <span className="text-sm">Điểm: <span className="font-bold">{score}</span></span>
+              <span className="text-base">Điểm: <span className="font-bold text-lg">{score}</span></span>
             </motion.div>
           </div>
         </div>
@@ -282,28 +280,28 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
           animate={{ scaleX: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <Progress value={progress} className="h-2 bg-secondary/50 backdrop-blur-sm" />
+          <Progress value={progress} className="h-3 bg-secondary/50 backdrop-blur-sm" />
         </motion.div>
       </motion.div>
 
-      {/* Game Content - 70% chiều cao */}
-      <div className="flex-1 overflow-auto px-3 py-2" style={{ height: '70vh' }}>
-        <div className="max-w-3xl mx-auto">
+      {/* Nội dung chính */}
+      <div className="flex-1 min-h-0 overflow-auto p-6 sm:p-8">
+        <div className="max-w-4xl mx-auto space-y-8">
           {/* Câu hỏi */}
           <motion.div
             key={currentQuestion}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
+            exit={{ opacity: 0, y: -30 }}
+            transition={{ duration: 0.5 }}
           >
-            <Card className="p-4 mb-4 bg-gradient-to-br from-white/90 to-white/80 backdrop-blur-sm border-primary/20 shadow-lg">
-              <h2 className="text-lg font-bold mb-4 text-primary leading-relaxed text-center">
+            <Card className="p-8 sm:p-10 bg-gradient-to-br from-white/90 to-white/80 backdrop-blur-sm border-primary/20 shadow-xl">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-10 text-primary leading-relaxed text-center">
                 {question.question}
               </h2>
               
-              {/* Các lựa chọn - Thu nhỏ kích thước */}
-              <div className="space-y-2">
+              {/* Các lựa chọn - Bố cục dọc với kích thước lớn hơn */}
+              <div className="space-y-5">
                 <AnimatePresence>
                   {question.options.map((option: string, index: number) => {
                     const isSelected = selectedOption === index;
@@ -314,35 +312,35 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
                     return (
                       <motion.button
                         key={index}
-                        initial={{ opacity: 0, x: -20 }}
+                        initial={{ opacity: 0, x: -30 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1, duration: 0.3 }}
-                        whileHover={!isAnswered ? { scale: 1.01 } : {}}
-                        whileTap={!isAnswered ? { scale: 0.99 } : {}}
+                        transition={{ delay: index * 0.15, duration: 0.4 }}
+                        whileHover={!isAnswered ? { scale: 1.02, y: -3 } : {}}
+                        whileTap={!isAnswered ? { scale: 0.98 } : {}}
                         onClick={() => handleOptionSelect(index)}
                         disabled={isAnswered}
                         className={`
-                          w-full p-3 text-left rounded-lg transition-all duration-300 border
+                          w-full p-6 sm:p-8 text-left rounded-2xl transition-all duration-300 border-2 
                           ${showCorrect
-                            ? 'bg-gradient-to-r from-green-100/90 to-green-50/90 border-green-400 shadow-lg shadow-green-200/50 dark:from-green-900/40 dark:to-green-800/30 dark:border-green-500' 
+                            ? 'bg-gradient-to-r from-green-100/90 to-green-50/90 border-green-400 shadow-xl shadow-green-200/50 dark:from-green-900/40 dark:to-green-800/30 dark:border-green-500' 
                             : showIncorrect
-                              ? 'bg-gradient-to-r from-red-100/90 to-red-50/90 border-red-400 shadow-lg shadow-red-200/50 dark:from-red-900/40 dark:to-red-800/30 dark:border-red-500'
+                              ? 'bg-gradient-to-r from-red-100/90 to-red-50/90 border-red-400 shadow-xl shadow-red-200/50 dark:from-red-900/40 dark:to-red-800/30 dark:border-red-500'
                               : isAnswered && isCorrect
-                                ? 'bg-gradient-to-r from-green-100/90 to-green-50/90 border-green-400 shadow-lg shadow-green-200/50 dark:from-green-900/40 dark:to-green-800/30 dark:border-green-500'
-                                : 'bg-gradient-to-r from-white/90 to-gray-50/90 border-gray-200 hover:border-primary/50 hover:shadow-md dark:from-slate-800/90 dark:to-slate-700/90 dark:border-slate-600'
+                                ? 'bg-gradient-to-r from-green-100/90 to-green-50/90 border-green-400 shadow-xl shadow-green-200/50 dark:from-green-900/40 dark:to-green-800/30 dark:border-green-500'
+                                : 'bg-gradient-to-r from-white/90 to-gray-50/90 border-gray-200 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20 dark:from-slate-800/90 dark:to-slate-700/90 dark:border-slate-600'
                           }
                           ${!isAnswered ? 'hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/15 cursor-pointer' : 'cursor-default'}
                         `}
                       >
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 mr-3">
+                          <div className="flex-shrink-0 mr-6">
                             {showCorrect ? (
                               <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{ type: "spring", stiffness: 500, damping: 15 }}
                               >
-                                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
                               </motion.div>
                             ) : showIncorrect ? (
                               <motion.div
@@ -350,11 +348,11 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
                                 animate={{ scale: 1 }}
                                 transition={{ type: "spring", stiffness: 500, damping: 15 }}
                               >
-                                <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                                <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
                               </motion.div>
                             ) : (
                               <div className={`
-                                h-5 w-5 rounded-full border flex items-center justify-center text-xs font-bold
+                                h-8 w-8 rounded-full border-2 flex items-center justify-center text-base font-bold
                                 ${isAnswered && isCorrect 
                                   ? 'bg-green-500 border-green-500 text-white' 
                                   : 'bg-primary/10 border-primary/30 text-primary/70'
@@ -366,7 +364,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
                           </div>
                           
                           <span className={`
-                            text-sm leading-relaxed
+                            text-lg sm:text-xl leading-relaxed
                             ${showCorrect 
                               ? 'text-green-800 dark:text-green-200 font-semibold' 
                               : showIncorrect 
@@ -387,31 +385,30 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         </div>
       </div>
 
-      {/* Fixed Footer - 15% chiều cao */}
+      {/* Footer với các nút điều khiển - NÚT LUÔN HOẠT ĐỘNG */}
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="flex-shrink-0 p-3 bg-background/90 backdrop-blur-md border-t"
-        style={{ height: '15vh' }}
+        className="flex-shrink-0 p-6 sm:p-8"
       >
-        <div className="max-w-3xl mx-auto flex gap-2 h-full items-center">
+        <div className="max-w-4xl mx-auto flex gap-4">
           <Button
             variant="outline"
-            size="sm"
+            size="lg"
             onClick={handleRestart}
-            className="bg-white/70 backdrop-blur-sm border-primary/20 hover:bg-white/90 flex-1 text-sm py-3"
+            className="bg-white/70 backdrop-blur-sm border-primary/20 hover:bg-white/90 flex-1 text-lg py-6"
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-5 w-5 mr-3" />
             Làm lại
           </Button>
           
           <Button 
             onClick={handleNextQuestion} 
-            size="sm"
-            className="flex-2 min-w-0 text-sm py-3 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg"
+            size="lg"
+            className="flex-2 min-w-0 text-lg py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary shadow-xl"
           >
             {isLastQuestion ? 'Xem Kết Quả' : 'Câu Tiếp Theo'}
-            <ChevronRight className="h-4 w-4 ml-2" />
+            <ChevronRight className="h-5 w-5 ml-3" />
           </Button>
         </div>
       </motion.div>
