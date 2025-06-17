@@ -385,7 +385,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         </div>
       </div>
 
-      {/* Footer với các nút điều khiển - NÚT LUÔN HOẠT ĐỘNG */}
+      {/* Footer với các nút điều khiển */}
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
