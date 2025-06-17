@@ -94,6 +94,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
     visible: {
       opacity: 1,
       transition: {
+        duration: 0.5,
         staggerChildren: 0.1,
         delayChildren: 0.2
       }
@@ -101,14 +102,19 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
   };
 
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
+    hidden: { 
+      y: 30, 
+      opacity: 0,
+      scale: 0.9
+    },
     visible: {
       y: 0,
       opacity: 1,
+      scale: 1,
       transition: {
         type: "spring",
         stiffness: 100,
-        damping: 10
+        damping: 12
       }
     }
   };
@@ -117,26 +123,27 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
     hover: {
       scale: 1.05,
       y: -5,
+      rotateY: 2,
       boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
       transition: {
         type: "spring",
         stiffness: 300,
-        damping: 15
+        damping: 20
       }
     },
     tap: {
-      scale: 0.98
+      scale: 0.95,
+      transition: { duration: 0.1 }
     }
   };
 
   const iconVariants = {
     hover: {
-      rotate: 10,
-      scale: 1.1,
+      rotate: [0, -10, 10, 0],
+      scale: 1.2,
       transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 10
+        duration: 0.6,
+        ease: "easeInOut"
       }
     }
   };
@@ -160,7 +167,7 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                 backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
               }}
               transition={{
-                duration: 5,
+                duration: 3,
                 repeat: Infinity,
                 ease: "linear"
               }}
@@ -197,8 +204,15 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                     } ${game.isBackButton ? 'bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30' : ''}`}
                     onClick={() => game.isBackButton ? handleBackToHome() : handleSelectGame(game.id)}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="absolute -right-8 -top-8 w-16 h-16 bg-primary/10 rounded-full transform group-hover:scale-150 transition-transform duration-500"></div>
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100"
+                      transition={{ duration: 0.3 }}
+                    />
+                    <motion.div 
+                      className="absolute -right-8 -top-8 w-16 h-16 bg-primary/10 rounded-full"
+                      whileHover={{ scale: 2, rotate: 45 }}
+                      transition={{ duration: 0.4 }}
+                    />
                     
                     <div className="relative z-10 flex flex-col items-center text-center gap-3 h-full">
                       <motion.div 
@@ -209,7 +223,12 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                         {game.icon}
                       </motion.div>
                       <div className="flex-1">
-                        <h3 className="text-base font-bold mb-1 transition-colors duration-300 group-hover:text-primary">{game.name}</h3>
+                        <motion.h3 
+                          className="text-base font-bold mb-1 transition-colors duration-300 group-hover:text-primary"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          {game.name}
+                        </motion.h3>
                         <p className="text-xs text-muted-foreground leading-relaxed transition-colors duration-300 group-hover:text-muted-foreground/80">
                           {game.description}
                         </p>
@@ -221,7 +240,10 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                               ? 'bg-gradient-to-r from-primary/30 to-primary/20 text-primary' 
                               : 'bg-gradient-to-r from-primary/20 to-primary/10 text-primary'
                           }`}
-                          whileHover={{ scale: 1.05 }}
+                          whileHover={{ 
+                            scale: 1.05,
+                            backgroundPosition: ["0% 50%", "100% 50%"]
+                          }}
                           whileTap={{ scale: 0.95 }}
                         >
                           {game.isBackButton ? (
@@ -237,7 +259,10 @@ const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
                           ) : (
                             <>
                               <motion.div
-                                animate={{ rotate: [0, 10, -10, 0] }}
+                                animate={{ 
+                                  rotate: [0, 10, -10, 0],
+                                  scale: [1, 1.1, 1]
+                                }}
                                 transition={{ duration: 2, repeat: Infinity }}
                               >
                                 <Sparkles className="h-2 w-2 mr-1" />
