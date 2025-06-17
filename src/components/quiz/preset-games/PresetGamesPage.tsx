@@ -11,6 +11,7 @@ import { History } from 'lucide-react';
 const PresetGamesPage: React.FC = () => {
   const [selectedGameType, setSelectedGameType] = useState<string | null>(null);
   const [gameTopic, setGameTopic] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -24,6 +25,8 @@ const PresetGamesPage: React.FC = () => {
     if (topicFromUrl && !gameTopic) {
       setGameTopic(topicFromUrl);
     }
+    // Set loading to false after component mounts
+    setIsLoading(false);
   }, [topicFromUrl, gameTopic]);
 
   const handleSelectGame = (gameType: string) => {
@@ -37,6 +40,7 @@ const PresetGamesPage: React.FC = () => {
   };
   
   const handleQuickStart = (gameType: string, prompt: string, settings: GameSettingsData) => {
+    // Update settings to include the prompt
     const updatedSettings = {
       ...settings,
       prompt: prompt
@@ -55,34 +59,50 @@ const PresetGamesPage: React.FC = () => {
     navigate('/game-history');
   };
 
+  // Show loading screen initially to prevent flash
+  if (isLoading) {
+    return (
+      <div className="h-full flex flex-col overflow-hidden bg-white dark:bg-slate-900">
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-sm font-medium">Đang tải...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="h-full flex flex-col overflow-hidden bg-white dark:bg-slate-900">
       {!selectedGameType && (
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute top-2 right-2 z-10">
           <Button 
             onClick={viewGameHistory}
             variant="outline" 
             size="sm"
-            className="flex items-center gap-2 shadow-sm"
+            className="flex items-center gap-1 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-sm border-blue-200/45 dark:border-blue-700/45 text-xs px-2 py-1"
           >
-            <History size={14} />
+            <History size={10} />
             <span>Lịch sử game</span>
           </Button>
         </div>
       )}
       
-      {selectedGameType ? (
-        <PresetGameManager 
-          gameType={selectedGameType} 
-          onBack={handleBackToSelector}
-          initialTopic={gameTopic}
-        />
-      ) : (
-        <GameSelector 
-          onSelectGame={handleSelectGame} 
-          onQuickStart={handleQuickStart}
-        />
-      )}
+      <div className="relative z-10 h-full">
+        {selectedGameType ? (
+          <PresetGameManager 
+            gameType={selectedGameType} 
+            onBack={handleBackToSelector}
+            initialTopic={gameTopic}
+          />
+        ) : (
+          <GameSelector 
+            onSelectGame={handleSelectGame} 
+            onQuickStart={handleQuickStart}
+          />
+        )}
+      </div>
     </div>
   );
 };
