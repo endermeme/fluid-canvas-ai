@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -259,6 +258,7 @@ Output must be valid JSON. `;
     // Fix the dynamic import path for truefalse
     const importPath = type === 'truefalse' ? './data/trueFalseSampleData.ts' : `./data/${type}SampleData.ts`;
 
+    /* @vite-ignore */
     import(importPath).then(module => {
       let data = null;
 
@@ -333,6 +333,18 @@ Output must be valid JSON. `;
     setSettings(gameSettings);
     setShowSettings(false);
     setLoading(true);
+
+    // Check if debug mode is enabled
+    if (gameSettings.debugMode) {
+      console.log(`Debug mode enabled - Loading sample data for ${gameType} game`);
+      toast({
+        title: "Debug Mode",
+        description: `Đang tải dữ liệu mẫu cho ${getGameTypeName()} (Debug Mode)`,
+        variant: "default"
+      });
+      loadSampleData(gameType);
+      return;
+    }
 
     const aiPrompt = gameSettings.prompt || initialTopic;
 

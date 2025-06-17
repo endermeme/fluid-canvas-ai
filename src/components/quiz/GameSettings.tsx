@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { 
   Gamepad, BrainCircuit, Puzzle, Lightbulb, Clock4, Dices, 
-  HeartHandshake, PenTool, Timer, Trophy, Clock, Medal, Type
+  HeartHandshake, PenTool, Timer, Trophy, Clock, Medal, Type, Bug
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { animateToolbarAppear } from '@/lib/animations';
@@ -44,7 +44,8 @@ const GameSettings = ({
     totalTime: 0,
     bonusTime: 0,
     useTimer: true,
-    prompt: topic || ''
+    prompt: topic || '',
+    debugMode: false
   });
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -314,6 +315,27 @@ const GameSettings = ({
                   </div>
                 </>
               )}
+
+              {/* Debug Mode Toggle */}
+              <div className="border-t border-border/50 pt-4">
+                <div className="flex items-center space-x-2 pb-2">
+                  <Switch 
+                    id="debugMode" 
+                    checked={settings.debugMode || false}
+                    onCheckedChange={(checked) => handleSwitchChange('debugMode', checked)} 
+                  />
+                  <Label htmlFor="debugMode" className="text-sm sm:text-base font-medium flex items-center gap-2">
+                    <Bug className="h-3 w-3 sm:h-4 sm:w-4 text-orange-500" /> 
+                    <span>Debug Mode</span>
+                    <span className="text-xs text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">DEV</span>
+                  </Label>
+                </div>
+                {settings.debugMode && (
+                  <p className="text-xs text-muted-foreground mt-1 ml-6">
+                    Sử dụng dữ liệu mẫu để test giao diện ngay lập tức (không qua AI)
+                  </p>
+                )}
+              </div>
 
               <div className={`pt-3 sm:pt-4 flex gap-2 sm:gap-3 ${isMobile || inModal ? 'flex-col' : ''}`}>
                 {onCancel && (

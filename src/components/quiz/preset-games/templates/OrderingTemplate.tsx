@@ -184,8 +184,8 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
     const percentage = Math.round((score / sentences.length) * 100);
     
     return (
-      <div className="h-full flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-6 text-center">
+      <div className="h-full flex items-center justify-center p-4 bg-white">
+        <Card className="w-full max-w-md p-6 text-center bg-white border">
           <h2 className="text-2xl font-bold mb-4">Kết quả</h2>
           <p className="text-lg mb-4">
             Chủ đề: <span className="font-semibold">{content.title || topic}</span>
@@ -215,72 +215,74 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
   const progress = ((currentSentence + 1) / sentences.length) * 100;
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-b from-background to-background/80">
+    <div className="h-full flex flex-col bg-white">
       {/* Header với progress */}
-      <div className="flex-shrink-0 p-3 sm:p-4 border-b border-primary/10">
+      <div className="flex-shrink-0 p-2 sm:p-3 border-b border-border">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 bg-primary/10 rounded-full">
+          <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full">
             Câu {currentSentence + 1}/{sentences.length}
           </div>
-          <div className="text-xs sm:text-sm font-medium flex items-center px-2 sm:px-3 py-1 bg-primary/10 rounded-full">
+          <div className="text-xs sm:text-sm font-medium flex items-center px-2 py-1 bg-muted rounded-full">
             <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
             {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
           </div>
         </div>
-        <Progress value={progress} className="h-1.5 sm:h-2 bg-secondary" />
+        <Progress value={progress} className="h-1.5 sm:h-2" />
       </div>
 
       {/* Main content */}
-      <div className="flex-1 p-4 sm:p-6 overflow-auto">
-        <div className="max-w-4xl mx-auto space-y-4">
-          <div className="text-center">
-            <h3 className="text-lg font-medium mb-1">Sắp xếp lại từng từ để tạo thành câu hoàn chỉnh</h3>
-            <p className="text-muted-foreground text-sm">Chọn từ theo đúng thứ tự</p>
-          </div>
-          
-          <Card className="p-4 min-h-[100px] flex flex-wrap gap-2 items-start content-start border border-primary/30 bg-background/80">
-            {orderedWords.map((word, index) => (
-              <button
-                key={`ordered-${index}`}
-                onClick={() => handleWordRemove(word, index)}
-                disabled={isChecking}
-                className={`py-2 px-3 rounded-lg transition-colors ${
-                  isChecking 
-                    ? sentences[currentSentence].correctOrder[index] === sentences[currentSentence].words.indexOf(word)
-                      ? 'bg-green-100 border border-green-500'
-                      : 'bg-red-100 border border-red-500'
-                    : 'bg-primary/20 hover:bg-primary/30'
-                }`}
-              >
-                {word}
-              </button>
-            ))}
-            {orderedWords.length === 0 && (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground p-4">
-                <p>Chọn từ bên dưới để bắt đầu sắp xếp</p>
-              </div>
-            )}
-          </Card>
-          
-          <div className="p-4 bg-secondary/20 rounded-lg flex flex-wrap gap-2 border border-primary/10">
-            {shuffledWords.map((word, index) => (
-              <button
-                key={`shuffled-${index}`}
-                onClick={() => handleWordSelect(word, index)}
-                disabled={isChecking}
-                className="py-2 px-3 bg-secondary hover:bg-secondary/80 rounded-lg transition-colors"
-              >
-                {word}
-              </button>
-            ))}
+      <div className="flex-1 overflow-auto">
+        <div className="p-3 sm:p-4 h-full max-w-3xl mx-auto">
+          <div className="space-y-3 sm:space-y-4 h-full flex flex-col">
+            <div className="text-center">
+              <h3 className="text-base sm:text-lg font-medium mb-1">Sắp xếp lại từng từ để tạo thành câu hoàn chỉnh</h3>
+              <p className="text-muted-foreground text-sm">Chọn từ theo đúng thứ tự</p>
+            </div>
+            
+            <Card className="p-3 sm:p-4 min-h-[80px] sm:min-h-[100px] flex flex-wrap gap-2 items-start content-start border border-border bg-white">
+              {orderedWords.map((word, index) => (
+                <button
+                  key={`ordered-${index}`}
+                  onClick={() => handleWordRemove(word, index)}
+                  disabled={isChecking}
+                  className={`py-2 px-3 rounded-lg transition-colors text-sm ${
+                    isChecking 
+                      ? sentences[currentSentence].correctOrder[index] === sentences[currentSentence].words.indexOf(word)
+                        ? 'bg-green-100 border border-green-500'
+                        : 'bg-red-100 border border-red-500'
+                      : 'bg-muted hover:bg-muted/80'
+                  }`}
+                >
+                  {word}
+                </button>
+              ))}
+              {orderedWords.length === 0 && (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground p-3">
+                  <p className="text-sm">Chọn từ bên dưới để bắt đầu sắp xếp</p>
+                </div>
+              )}
+            </Card>
+            
+            <div className="p-3 sm:p-4 bg-muted rounded-lg flex flex-wrap gap-2 border border-border">
+              {shuffledWords.map((word, index) => (
+                <button
+                  key={`shuffled-${index}`}
+                  onClick={() => handleWordSelect(word, index)}
+                  disabled={isChecking}
+                  className="py-2 px-3 bg-white hover:bg-white/80 rounded-lg transition-colors text-sm border border-border"
+                >
+                  {word}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
       
       {/* Footer với controls */}
-      <div className="flex-shrink-0 p-3 sm:p-4 border-t border-primary/10 bg-background/80 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+      <div className="flex-shrink-0 p-2 sm:p-3 border-t border-border bg-white">
+        <div className="max-w-3xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <Button
               variant="outline"
               onClick={handleShuffleWords}

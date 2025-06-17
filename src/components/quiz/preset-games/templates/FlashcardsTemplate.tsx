@@ -158,30 +158,30 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
   };
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-b from-background to-background/80">
+    <div className="h-full flex flex-col bg-white">
       {/* Header */}
-      <div className="flex-shrink-0 p-3 sm:p-4 border-b border-primary/10">
+      <div className="flex-shrink-0 p-2 sm:p-3 border-b border-border">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 bg-primary/10 rounded-full">
+          <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full">
             Thẻ {currentCard + 1}/{cards.length}
           </div>
           <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
-            <span className="px-2 py-1 bg-green-100/30 text-green-600 rounded-full">
+            <span className="px-2 py-1 bg-green-100 text-green-600 rounded-full">
               Thuộc: {stats.known}
             </span>
-            <span className="px-2 py-1 bg-red-100/30 text-red-600 rounded-full">
+            <span className="px-2 py-1 bg-red-100 text-red-600 rounded-full">
               Chưa: {stats.unknown}
             </span>
           </div>
         </div>
-        <Progress value={progress} className="h-1.5 sm:h-2 bg-secondary" />
+        <Progress value={progress} className="h-1.5 sm:h-2" />
       </div>
 
       {/* Card area - main content */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
-        <div className="w-full max-w-4xl">
+      <div className="flex-1 flex items-center justify-center p-3 sm:p-4">
+        <div className="w-full max-w-2xl lg:max-w-3xl">
           <div 
-            className="relative w-full aspect-[3/2] cursor-pointer group"
+            className="relative w-full aspect-[4/3] sm:aspect-[3/2] cursor-pointer group"
             onClick={handleFlip}
             style={{
               transformStyle: 'preserve-3d',
@@ -191,21 +191,21 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
           >
             {/* Front of card */}
             <Card 
-              className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-2 border-primary/20 shadow-lg group-hover:shadow-xl transition-all duration-300"
+              className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 lg:p-6 bg-white border-2 border-border shadow-lg group-hover:shadow-xl transition-all duration-300"
               style={{ backfaceVisibility: 'hidden' }}
             >
               <div className="text-center w-full">
-                <div className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground mb-2 sm:mb-4">
+                <div className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground mb-2 sm:mb-3">
                   Nhấn để lật thẻ
                   {autoFlip && !isFlipped && (
-                    <div className="mt-1 sm:mt-2 flex items-center justify-center">
-                      <Clock className="h-3 w-3 mr-1 text-primary/60" />
+                    <div className="mt-1 flex items-center justify-center">
+                      <Clock className="h-3 w-3 mr-1 text-foreground/60" />
                       <span>Tự động lật sau {timeRemaining}s</span>
                     </div>
                   )}
                 </div>
-                <ScrollArea className="max-h-60 sm:max-h-80 lg:max-h-96">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary/90 break-words whitespace-pre-wrap px-2">
+                <ScrollArea className="max-h-40 sm:max-h-60 lg:max-h-80">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground break-words whitespace-pre-wrap px-2">
                     {cards[currentCard].front}
                   </div>
                 </ScrollArea>
@@ -214,18 +214,18 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
             
             {/* Back of card */}
             <Card 
-              className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm border-2 border-primary/30 shadow-lg"
+              className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 lg:p-6 bg-muted border-2 border-border shadow-lg"
               style={{
                 backfaceVisibility: 'hidden',
                 transform: 'rotateY(180deg)'
               }}
             >
               <div className="text-center w-full">
-                <div className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground mb-2 sm:mb-4">
+                <div className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground mb-2 sm:mb-3">
                   Mặt sau
                 </div>
-                <ScrollArea className="max-h-60 sm:max-h-80 lg:max-h-96">
-                  <div className="text-lg sm:text-xl lg:text-2xl text-primary/90 break-words whitespace-pre-wrap px-2">
+                <ScrollArea className="max-h-40 sm:max-h-60 lg:max-h-80">
+                  <div className="text-base sm:text-lg lg:text-xl text-foreground break-words whitespace-pre-wrap px-2">
                     {cards[currentCard].back}
                   </div>
                 </ScrollArea>
@@ -236,11 +236,11 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
       </div>
 
       {/* Controls */}
-      <div className="flex-shrink-0 p-3 sm:p-4 border-t border-primary/10 bg-background/80 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4">
+      <div className="flex-shrink-0 p-2 sm:p-3 border-t border-border bg-white">
+        <div className="max-w-2xl lg:max-w-3xl mx-auto space-y-2 sm:space-y-3">
           {/* Auto-flip toggle */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2">
               <Toggle
                 pressed={autoFlip}
                 onPressedChange={toggleAutoFlip}
@@ -280,7 +280,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
                 variant="outline"
                 className="flex-1 border-red-200 hover:bg-red-50 hover:border-red-300 text-red-600 text-xs sm:text-sm"
               >
-                <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 Chưa thuộc
               </Button>
               <Button
@@ -288,7 +288,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
                 variant="outline"
                 className="flex-1 border-green-200 hover:bg-green-50 hover:border-green-300 text-green-600 text-xs sm:text-sm"
               >
-                <Check className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <Check className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 Đã thuộc
               </Button>
             </div>
@@ -302,7 +302,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
               variant="outline"
               className="flex-1 text-xs sm:text-sm"
             >
-              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
               Trước
             </Button>
             <Button
@@ -312,7 +312,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
               className="flex-1 text-xs sm:text-sm"
             >
               Sau
-              <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
+              <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
             </Button>
           </div>
         </div>
