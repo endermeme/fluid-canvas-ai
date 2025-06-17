@@ -1,4 +1,3 @@
-
 # Design Decisions Log
 
 ## 2024-01-01: Game Templates Responsive Design
@@ -68,3 +67,16 @@
   - useLoadingProgress.ts: Thêm logic dự đoán tiến trình
   - GameLoading.tsx: Cập nhật hiển thị với chế độ dự đoán
 - **Lý do**: Cải thiện trải nghiệm người dùng khi tải game, tránh trường hợp kẹt
+
+## 2024-12-17: QuizTemplate Giao Diện To Hơn và Tự Động Chuyển Câu
+- **Vấn đề**: Giao diện quiz còn nhỏ, chưa đầy đặn và không tự động chuyển câu sau khi trả lời
+- **Giải pháp**: 
+  - Tăng kích thước tổng thể: padding từ p-4 lên p-6/p-8, font từ text-lg lên text-2xl/text-3xl
+  - Tăng kích thước nút: padding từ p-5 lên p-6/p-8, chiều cao nút lên py-6
+  - Tăng kích thước icon: từ h-4 w-4 lên h-5 w-5 và h-8 w-8 cho option icons
+  - Thêm tự động chuyển câu: setTimeout 2.5 giây sau khi trả lời
+  - Cải thiện spacing: gap từ 3 lên 4-5, margin bottom tăng
+  - Tăng max-width container từ max-w-2xl lên max-w-4xl
+  - Cải thiện card result: tăng padding và font size
+- **Files thay đổi**: QuizTemplate.tsx
+- **Lý do**: Tạo trải nghiệm người dùng tốt hơn với giao diện lớn, rõ ràng và flow tự động mượt mà
