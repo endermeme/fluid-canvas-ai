@@ -16,6 +16,16 @@
   - EnhancedGameView.tsx: Sử dụng h-screen thay vì h-full
 - **Lý do**: Đảm bảo game templates hoạt động tốt trên mọi kích thước màn hình và mức zoom
 
+## 2024-12-17: Loading Animation Enhancement
+- **Vấn đề**: Animation loading không tự nhiên, các icon dừng đột ngột sau khi hoàn thành giai đoạn
+- **Giải pháp**: 
+  - Icon đang hoạt động: quay liên tục với animation mượt mà
+  - Icon đã hoàn thành: quay về vị trí dọc (0 độ) với animation easeOut
+  - Thêm checkmark cho các giai đoạn đã hoàn thành
+  - Thay đổi màu sắc để phân biệt trạng thái (xanh lá cho hoàn thành)
+- **Files thay đổi**: GameStageProgress.tsx
+- **Lý do**: Tạo trải nghiệm loading tự nhiên và trực quan hơn
+
 ## 2024-12-17: PresetGameHeader Layout Fix
 - **Vấn đề**: Nút quay lại thừa trong template, giao diện bị thiên lên trên không vào giữa
 - **Giải pháp**: 

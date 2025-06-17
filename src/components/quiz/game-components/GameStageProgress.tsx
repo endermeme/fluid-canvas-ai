@@ -35,6 +35,7 @@ const GameStageProgress: React.FC<GameStageProgressProps> = ({ currentStage, sta
           const Icon = stageIcons[index] || Atom;
           const isActive = index <= currentStage;
           const isCurrent = index === currentStage;
+          const isCompleted = index < currentStage;
           
           return (
             <motion.div
@@ -54,20 +55,51 @@ const GameStageProgress: React.FC<GameStageProgressProps> = ({ currentStage, sta
                   : 'bg-muted/20 border-muted/30'
                 }
                 ${isCurrent ? 'shadow-lg shadow-blue-500/25' : ''}
+                ${isCompleted ? 'shadow-md shadow-green-500/20' : ''}
               `}>
                 <motion.div
                   animate={{ 
-                    rotate: isCurrent ? [0, 360] : 0,
+                    rotate: isCurrent 
+                      ? [0, 360] // Đang hoạt động: quay liên tục
+                      : isCompleted 
+                        ? [360, 0] // Đã hoàn thành: quay về vị trí dọc (0 độ)
+                        : 0, // Chưa hoạt động: giữ nguyên
                     scale: isCurrent ? [1, 1.1, 1] : 1
                   }}
                   transition={{ 
-                    rotate: { duration: 2, repeat: Infinity, ease: "linear" },
-                    scale: { duration: 1, repeat: Infinity, ease: "easeInOut" }
+                    rotate: isCurrent 
+                      ? { duration: 2, repeat: Infinity, ease: "linear" }
+                      : isCompleted
+                        ? { duration: 0.8, ease: "easeOut" }
+                        : { duration: 0 },
+                    scale: isCurrent 
+                      ? { duration: 1, repeat: Infinity, ease: "easeInOut" }
+                      : { duration: 0.3 }
                   }}
                 >
-                  <Icon className={`w-7 h-7 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`} />
+                  <Icon className={`w-7 h-7 ${
+                    isCompleted 
+                      ? 'text-green-600 dark:text-green-400' // Màu xanh lá cho hoàn thành
+                      : isActive 
+                        ? 'text-blue-600 dark:text-blue-400' 
+                        : 'text-muted-foreground'
+                  }`} />
                 </motion.div>
               </div>
+              
+              {/* Checkmark cho các giai đoạn đã hoàn thành */}
+              {isCompleted && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.3, delay: 0.5 }}
+                  className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center"
+                >
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </motion.div>
+              )}
             </motion.div>
           );
         })}
