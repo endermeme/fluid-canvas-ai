@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { QuizResultsView, QuizHeader, QuizQuestion, QuizFooter } from './components';
@@ -157,7 +158,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
   const question = questions[currentQuestion];
 
   return (
-    <div className="h-screen max-h-screen overflow-hidden bg-gradient-to-br from-blue-50/80 via-sky-50/80 to-blue-100/80 dark:from-blue-950/80 dark:via-sky-950/80 dark:to-blue-950/80">
+    <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-gradient-to-br from-blue-50/80 via-sky-50/80 to-blue-100/80 dark:from-blue-950/80 dark:via-sky-950/80 dark:to-blue-950/80">
       <QuizHeader
         currentQuestion={currentQuestion}
         totalQuestions={questions.length}
@@ -172,9 +173,12 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         selectedOption={selectedOption}
         isAnswered={isAnswered}
         onOptionSelect={handleOptionSelect}
-        onNextQuestion={handleNextQuestion}
-        onRestart={handleRestart}
+      />
+
+      <QuizFooter
         isLastQuestion={isLastQuestion}
+        onRestart={handleRestart}
+        onNextQuestion={handleNextQuestion}
       />
     </div>
   );
