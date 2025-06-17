@@ -1,131 +1,186 @@
 
-import React, { useEffect } from 'react';
-import { Sparkles, Crown, Brain } from 'lucide-react';
-import { useLoadingProgress } from '@/hooks/useLoadingProgress';
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Brain, Zap, Target, Trophy, Star } from 'lucide-react';
 import BackgroundParticles from '@/components/ui/background-particles';
-import GameStageProgress from './game-components/GameStageProgress';
 
 interface GameLoadingProps {
-  topic: string;
-  progress?: number;
-  onProgressComplete?: () => void;
+  isVisible: boolean;
+  progress: number;
+  message: string;
+  gameType?: string;
 }
 
 const GameLoading: React.FC<GameLoadingProps> = ({ 
-  topic, 
-  progress: externalProgress,
-  onProgressComplete 
+  isVisible, 
+  progress, 
+  message, 
+  gameType = 'quiz' 
 }) => {
-  const { 
-    progress, 
-    statusText, 
-    currentStage, 
-    startProgress, 
-    resetProgress, 
-    completeProgress,
-    forceProgress 
-  } = useLoadingProgress({
-    stages: [
-      'Đang phân tích chủ đề...',
-      'Đang thiết kế câu hỏi và nội dung...',
-      'Đang tạo giao diện trò chơi...',
-      'Đang tối ưu hóa trải nghiệm người chơi...',
-      'Hoàn thiện trò chơi...'
-    ],
-    stageDuration: 1200,
-    finalStageDelay: 600,
-    predictiveMode: true // Bật chế độ dự đoán
-  });
+  const [displayProgress, setDisplayProgress] = useState(0);
+  const [currentTip, setCurrentTip] = useState(0);
 
-  const currentProgress = externalProgress !== undefined ? Math.min(Math.max(externalProgress, 0), 100) : progress;
-  const currentStatus = externalProgress !== undefined ? getStatusForProgress(externalProgress) : statusText;
-  const stageIndex = externalProgress !== undefined ? getStageForProgress(externalProgress) : currentStage;
-
-  useEffect(() => {
-    if (externalProgress === undefined) {
-      // Chế độ tự động - bắt đầu progress dự đoán
-      startProgress();
-    } else {
-      // Chế độ external control
-      resetProgress();
-      forceProgress(externalProgress, getStageForProgress(externalProgress));
-      
-      // Nếu external progress đạt 100%, gọi callback completion
-      if (externalProgress >= 100 && onProgressComplete) {
-        setTimeout(() => {
-          onProgressComplete();
-        }, 500);
-      }
-    }
-  }, [externalProgress, startProgress, resetProgress, forceProgress, onProgressComplete]);
-
-  // Callback khi API hoàn thành - sync với progress thực tế
-  useEffect(() => {
-    // Nếu không có external progress và đang ở chế độ predictive
-    // Có thể thêm logic để detect khi API hoàn thành và gọi completeProgress()
-    // Ví dụ: listen cho events từ parent component
-  }, [completeProgress]);
-
-  function getStatusForProgress(prog: number): string {
-    if (prog < 20) return 'Đang phân tích chủ đề...';
-    if (prog < 40) return 'Đang thiết kế câu hỏi và nội dung...';
-    if (prog < 60) return 'Đang tạo giao diện trò chơi...';
-    if (prog < 80) return 'Đang tối ưu hóa trải nghiệm người chơi...';
-    return 'Hoàn thiện trò chơi...';
-  }
-
-  function getStageForProgress(prog: number): number {
-    if (prog < 20) return 0;
-    if (prog < 40) return 1;
-    if (prog < 60) return 2;
-    if (prog < 80) return 3;
-    return 4;
-  }
-
-  const stages = [
-    'Đang phân tích chủ đề...',
-    'Đang thiết kế câu hỏi và nội dung...',
-    'Đang tạo giao diện trò chơi...',
-    'Đang tối ưu hóa trải nghiệm người chơi...',
-    'Hoàn thiện trò chơi...'
+  const loadingTips = [
+    "💡 AI đang phân tích chủ đề của bạn...",
+    "🎯 Đang tạo ra những câu hỏi thú vị...", 
+    "⚡ Tối ưu hóa độ khó phù hợp...",
+    "🎨 Thiết kế giao diện tương tác...",
+    "🚀 Chuẩn bị trải nghiệm tuyệt vời..."
   ];
 
+  const gameIcons = {
+    quiz: Brain,
+    flashcards: Target, 
+    matching: Zap,
+    memory: Star,
+    ordering: Trophy,
+    wordsearch: Sparkles,
+    truefalse: Brain
+  };
+
+  const GameIcon = gameIcons[gameType as keyof typeof gameIcons] || Brain;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDisplayProgress(prev => {
+        if (prev < progress) {
+          return Math.min(prev + 2, progress);
+        }
+        return prev;
+      });
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [progress]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTip(prev => (prev + 1) % loadingTips.length);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="flex flex-col items-center justify-center h-full bg-gradient-to-b from-background to-background/90 p-6 relative overflow-hidden">
-      <BackgroundParticles particleCount={12} />
-      
-      <div className="relative z-10 w-full max-w-2xl">
-        <div className="mb-8 relative flex justify-center">
-          <div className="h-16 w-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="relative">
-              <Brain className="h-8 w-8 text-primary/50" />
-              <Sparkles className="h-4 w-4 text-primary absolute top-0 right-0 animate-pulse" />
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="relative bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg rounded-2xl p-8 mx-4 max-w-md w-full border border-white/20 dark:border-slate-700/20 shadow-2xl"
+          >
+            {/* Background particles */}
+            <div className="absolute inset-0 overflow-hidden rounded-2xl">
+              <BackgroundParticles particleCount={8} />
             </div>
-          </div>
-        </div>
-        
-        <h2 className="text-2xl font-bold text-center mb-2 text-primary">
-          Đang tạo minigame...
-        </h2>
-        
-        <p className="text-center text-muted-foreground max-w-md mb-8 mx-auto">
-          Đang tạo minigame cho chủ đề <span className="font-medium text-primary/80">{topic}</span>.
-          Quá trình này có thể mất một chút thời gian.
-        </p>
-        
-        <div className="w-full space-y-8">
-          <GameStageProgress currentStage={stageIndex} stages={stages} />
-          
-          <div className="mt-6 bg-primary/5 p-4 rounded-lg border border-primary/10 text-sm">
-            <p className="text-center text-muted-foreground">
-              <Crown className="w-4 h-4 inline mr-2 text-primary" />
-              Mẹo: Bạn có thể tạo minigame theo nhiều chủ đề và độ khó khác nhau, từ trò chơi giáo dục đến giải trí.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+
+            <div className="relative z-10 text-center space-y-6">
+              {/* Icon Animation */}
+              <motion.div
+                animate={{ 
+                  rotate: [0, 360],
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ 
+                  rotate: { duration: 3, repeat: Infinity, ease: "linear" },
+                  scale: { duration: 2, repeat: Infinity }
+                }}
+                className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg"
+              >
+                <GameIcon className="w-8 h-8 text-white" />
+              </motion.div>
+
+              {/* Title */}
+              <div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent mb-2">
+                  Đang tạo trò chơi
+                </h2>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  AI đang xử lý yêu cầu của bạn
+                </p>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="space-y-3">
+                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${displayProgress}%` }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                  />
+                </div>
+                <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  {displayProgress}%
+                </div>
+              </div>
+
+              {/* Loading Tips */}
+              <motion.div
+                key={currentTip}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="text-sm text-slate-600 dark:text-slate-400 min-h-[20px]"
+              >
+                {loadingTips[currentTip]}
+              </motion.div>
+
+              {/* Current Message */}
+              {message && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-lg"
+                >
+                  {message}
+                </motion.div>
+              )}
+
+              {/* Floating Elements */}
+              <div className="absolute -top-2 -right-2">
+                <motion.div
+                  animate={{ 
+                    rotate: [0, 360],
+                    scale: [1, 1.2, 1]
+                  }}
+                  transition={{ 
+                    duration: 4, 
+                    repeat: Infinity,
+                    delay: 1
+                  }}
+                >
+                  <Sparkles className="w-6 h-6 text-yellow-400" />
+                </motion.div>
+              </div>
+
+              <div className="absolute -bottom-2 -left-2">
+                <motion.div
+                  animate={{ 
+                    rotate: [360, 0],
+                    scale: [1, 1.1, 1]
+                  }}
+                  transition={{ 
+                    duration: 3, 
+                    repeat: Infinity,
+                    delay: 0.5
+                  }}
+                >
+                  <Star className="w-5 h-5 text-blue-400" />
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
