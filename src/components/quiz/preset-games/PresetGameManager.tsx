@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -254,14 +253,13 @@ Output must be valid JSON. `;
     if (type === 'quiz') {
       let data = { ...quizSampleData };
       
-      // Ensure settings object exists with correct structure
+      // Create new settings object with all required properties
       data.settings = {
-        ...data.settings,
         timePerQuestion: settings.timePerQuestion,
         totalTime: settings.totalTime || settings.questionCount * settings.timePerQuestion,
         bonusTimePerCorrect: settings.bonusTime || 5,
-        shuffleQuestions: data.settings?.shuffleQuestions || true,
-        shuffleOptions: data.settings?.shuffleOptions || true
+        shuffleQuestions: quizSampleData.settings?.shuffleQuestions || true,
+        shuffleOptions: quizSampleData.settings?.shuffleOptions || true
       };
 
       setLoading(false);
