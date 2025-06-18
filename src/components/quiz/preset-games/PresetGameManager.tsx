@@ -31,8 +31,14 @@ import {
   DEFAULT_GENERATION_SETTINGS 
 } from '@/constants/api-constants';
 
-// Import static data for quiz
+// Import static data for all games
 import { quizSampleData } from './data/quizSampleData';
+import { flashcardsSampleData } from './data/flashcardsSampleData';
+import { matchingSampleData } from './data/matchingSampleData';
+import { memorySampleData } from './data/memorySampleData';
+import { orderingSampleData } from './data/orderingSampleData';
+import { wordSearchSampleData, easyWordSearchData, hardWordSearchData } from './data/wordSearchSampleData';
+import { trueFalseSampleData } from './data/trueFalseSampleData';
 
 interface PresetGameManagerProps {
   gameType: string;
@@ -249,91 +255,99 @@ Output must be valid JSON. `;
   };
 
   const loadSampleData = (type) => {
-    // For quiz, use the imported data directly
-    if (type === 'quiz') {
-      let data = { ...quizSampleData };
+    let data = null;
+
+    // Get sample data based on game type
+    switch (type) {
+      case 'quiz':
+        data = { ...quizSampleData };
+        data.settings = {
+          ...data.settings,
+          timePerQuestion: settings.timePerQuestion,
+          totalTime: settings.totalTime || settings.questionCount * settings.timePerQuestion
+        };
+        break;
       
-      // Create completely new settings object with all required properties
-      data.settings = {
-        timePerQuestion: settings.timePerQuestion,
-        shuffleQuestions: true,
-        shuffleOptions: true,
-        totalTime: settings.totalTime || settings.questionCount * settings.timePerQuestion
-      };
-
-      setLoading(false);
-      setGameContent(data);
-      return;
-    }
-
-    // For other games, use dynamic import
-    const supportedGames = ['flashcards', 'matching', 'memory', 'ordering', 'wordsearch', 'truefalse'];
-    
-    if (!supportedGames.includes(type)) {
-      setError(`Không có dữ liệu mẫu cho game ${getGameTypeName()}. Vui lòng sử dụng AI để tạo nội dung.`);
-      setLoading(false);
-      return;
-    }
-
-    // Fix the dynamic import path for truefalse
-    const importPath = type === 'truefalse' ? './data/trueFalseSampleData.ts' : `./data/${type}SampleData.ts`;
-
-    /* @vite-ignore */
-    import(importPath).then(module => {
-      let data = null;
-
-      if (type === 'wordsearch' && initialTopic) {
-        const lowerTopic = initialTopic.toLowerCase();
-        if (lowerTopic.includes('easy') || lowerTopic.includes('simple')) {
-          data = module.easyWordSearchData || module.default || module[`${type}SampleData`];
-        } else if (lowerTopic.includes('hard') || lowerTopic.includes('difficult')) {
-          data = module.hardWordSearchData || module.default || module[`${type}SampleData`];
+      case 'flashcards':
+        data = { ...flashcardsSampleData };
+        data.settings = {
+          ...data.settings,
+          flipTime: settings.timePerQuestion,
+          totalTime: settings.totalTime || 180
+        };
+        break;
+      
+      case 'matching':
+        data = { ...matchingSampleData };
+        data.settings = {
+          ...data.settings,
+          timeLimit: settings.totalTime || 120,
+          bonusTimePerMatch: settings.bonusTime || 5
+        };
+        break;
+      
+      case 'memory':
+        data = { ...memorySampleData };
+        data.settings = {
+          ...data.settings,
+          timeLimit: settings.totalTime || 120,
+          allowHints: true,
+          hintPenalty: settings.bonusTime || 5
+        };
+        break;
+      
+      case 'ordering':
+        data = { ...orderingSampleData };
+        data.settings = {
+          ...data.settings,
+          timeLimit: settings.totalTime || 180,
+          bonusTimePerCorrect: settings.bonusTime || 10
+        };
+        break;
+      
+      case 'wordsearch':
+        if (initialTopic) {
+          const lowerTopic = initialTopic.toLowerCase();
+          if (lowerTopic.includes('easy') || lowerTopic.includes('simple')) {
+            data = { ...easyWordSearchData };
+          } else if (lowerTopic.includes('hard') || lowerTopic.includes('difficult')) {
+            data = { ...hardWordSearchData };
+          } else {
+            data = { ...wordSearchSampleData };
+          }
         } else {
-          data = module.default || module[`${type}SampleData`];
+          data = { ...wordSearchSampleData };
         }
-      } else if (type === 'truefalse') {
-        data = module.trueFalseSampleData || module.default;
-      } else {
-        data = module.default || module[`${type}SampleData`];
-      }
+        data.settings = {
+          ...data.settings,
+          timeLimit: settings.totalTime || 300,
+          bonusTimePerWord: settings.bonusTime || 15
+        };
+        break;
+      
+      case 'truefalse':
+        data = { ...trueFalseSampleData };
+        data.settings = {
+          ...data.settings,
+          timePerQuestion: settings.timePerQuestion,
+          totalTime: settings.totalTime || settings.questionCount * settings.timePerQuestion,
+          bonusTimePerCorrect: settings.bonusTime || 3
+        };
+        break;
+      
+      default:
+        setError(`Không có dữ liệu mẫu cho game ${getGameTypeName()}. Vui lòng sử dụng AI để tạo nội dung.`);
+        setLoading(false);
+        return;
+    }
 
-      if (data) {
-        if (!data.settings) {
-          data.settings = {};
-        }
-
-        switch(type) {
-          case 'flashcards':
-            data.settings.flipTime = settings.timePerQuestion;
-            data.settings.totalTime = settings.totalTime || 180;
-            break;
-          case 'matching':
-          case 'memory':
-            data.settings.timeLimit = settings.totalTime || 120;
-            break;
-          case 'ordering':
-            data.settings.timeLimit = settings.totalTime || 180;
-            data.settings.bonusTimePerCorrect = settings.bonusTime || 10;
-            break;
-          case 'wordsearch':
-            data.settings.timeLimit = settings.totalTime || 300;
-            data.settings.bonusTimePerWord = settings.bonusTime || 15;
-            break;
-          case 'truefalse':
-            data.settings.timePerQuestion = settings.timePerQuestion;
-            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
-            data.settings.bonusTimePerCorrect = settings.bonusTime || 3;
-            break;
-        }
-      }
-
+    if (data) {
       setLoading(false);
       setGameContent(data);
-    }).catch(err => {
-      console.error(`Error loading sample data for ${type}:`, err);
-      setError(`Không thể tải dữ liệu mẫu cho ${type}. Vui lòng thử lại.`);
+    } else {
+      setError(`Không thể tải dữ liệu mẫu cho ${getGameTypeName()}. Vui lòng thử lại.`);
       setLoading(false);
-    });
+    }
   };
 
   const handleRetry = () => {
