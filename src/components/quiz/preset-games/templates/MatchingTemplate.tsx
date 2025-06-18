@@ -193,7 +193,11 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   };
 
   if (!content || !pairs.length) {
-    return <div className="p-4">Không có dữ liệu trò chơi nối từ</div>;
+    return (
+      <div className="p-4">
+        <p className="text-primary">Không có dữ liệu trò chơi nối từ</p>
+      </div>
+    );
   }
 
   const progressPercentage = (matchedPairs / totalPairs) * 100;
@@ -213,17 +217,17 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
     <div className="flex flex-col p-4 h-full">
       <div className="relative mb-4">
         <div className="flex justify-between items-center mb-2 mt-12">
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full text-primary">
             Đã ghép: {matchedPairs}/{totalPairs}
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
               <Trophy className="h-4 w-4 mr-1 text-yellow-500" />
-              Điểm: {score}
+              <span className="text-primary">Điểm: {score}</span>
             </div>
             <div className="text-sm font-medium flex items-center px-3 py-1 bg-primary/10 rounded-full">
-              <Clock className="h-4 w-4 mr-1" />
-              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+              <Clock className="h-4 w-4 mr-1 text-primary" />
+              <span className="text-primary">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
             </div>
           </div>
         </div>
@@ -233,10 +237,10 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
       {gameWon ? (
         <div className="flex-grow flex items-center justify-center">
           <Card className="p-6 text-center max-w-md">
-            <h2 className="text-2xl font-bold mb-4">Chúc mừng!</h2>
-            <p className="mb-2">Bạn đã hoàn thành trò chơi với {totalPairs} cặp từ.</p>
+            <h2 className="text-2xl font-bold mb-4 text-primary">Chúc mừng!</h2>
+            <p className="mb-2 text-primary">Bạn đã hoàn thành trò chơi với {totalPairs} cặp từ.</p>
             <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
-            <p className="mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
+            <p className="mb-6 text-primary">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
             <Button onClick={handleRestart}>
               <RefreshCw className="mr-2 h-4 w-4" />
               Chơi lại
@@ -246,8 +250,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
       ) : gameOver ? (
         <div className="flex-grow flex items-center justify-center">
           <Card className="p-6 text-center max-w-md">
-            <h2 className="text-2xl font-bold mb-4">Hết thời gian!</h2>
-            <p className="mb-2">Bạn đã ghép được {matchedPairs} trong tổng số {totalPairs} cặp từ.</p>
+            <h2 className="text-2xl font-bold mb-4 text-primary">Hết thời gian!</h2>
+            <p className="mb-2 text-primary">Bạn đã ghép được {matchedPairs} trong tổng số {totalPairs} cặp từ.</p>
             <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
             <Button onClick={handleRestart}>
               <RefreshCw className="mr-2 h-4 w-4" />
@@ -258,7 +262,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
       ) : (
         <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="p-3 bg-background/50 border border-primary/10">
-            <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột A</h3>
+            <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md text-primary">Cột A</h3>
             <div className="space-y-2">
               {leftItems.map((item) => (
                 <button
@@ -267,8 +271,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
                     item.matched 
                       ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
                       : selectedLeft === item.id
-                        ? 'bg-primary/20 border-primary border'
-                        : 'bg-secondary hover:bg-secondary/80 border-transparent border'
+                        ? 'bg-primary/20 border-primary border text-primary'
+                        : 'bg-secondary hover:bg-secondary/80 border-transparent border text-primary'
                   }`}
                   onClick={() => handleLeftItemClick(item.id)}
                   disabled={item.matched}
@@ -280,7 +284,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
           </Card>
           
           <Card className="p-3 bg-background/50 border border-primary/10">
-            <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột B</h3>
+            <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md text-primary">Cột B</h3>
             <div className="space-y-2">
               {rightItems.map((item) => (
                 <button
@@ -289,8 +293,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
                     item.matched 
                       ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
                       : selectedRight === item.id
-                        ? 'bg-primary/20 border-primary border'
-                        : 'bg-secondary hover:bg-secondary/80 border-transparent border'
+                        ? 'bg-primary/20 border-primary border text-primary'
+                        : 'bg-secondary hover:bg-secondary/80 border-transparent border text-primary'
                   }`}
                   onClick={() => handleRightItemClick(item.id)}
                   disabled={item.matched}

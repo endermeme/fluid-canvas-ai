@@ -145,7 +145,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
     return (
       <div className="h-full flex items-center justify-center p-4">
         <div className="text-center">
-          <p className="text-lg font-medium text-muted-foreground">Không có dữ liệu thẻ ghi nhớ</p>
+          <p className="text-lg font-medium text-primary">Không có dữ liệu thẻ ghi nhớ</p>
         </div>
       </div>
     );
@@ -162,7 +162,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
       {/* Header */}
       <div className="flex-shrink-0 p-2 sm:p-3 border-b border-border">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full">
+          <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
             Thẻ {currentCard + 1}/{cards.length}
           </div>
           <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
@@ -195,17 +195,17 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
               style={{ backfaceVisibility: 'hidden' }}
             >
               <div className="text-center w-full">
-                <div className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground mb-2 sm:mb-3">
+                <div className="text-xs sm:text-sm uppercase tracking-wider text-primary/70 mb-2 sm:mb-3">
                   Nhấn để lật thẻ
                   {autoFlip && !isFlipped && (
                     <div className="mt-1 flex items-center justify-center">
-                      <Clock className="h-3 w-3 mr-1 text-foreground/60" />
-                      <span>Tự động lật sau {timeRemaining}s</span>
+                      <Clock className="h-3 w-3 mr-1 text-primary/60" />
+                      <span className="text-primary/60">Tự động lật sau {timeRemaining}s</span>
                     </div>
                   )}
                 </div>
                 <ScrollArea className="max-h-40 sm:max-h-60 lg:max-h-80">
-                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground break-words whitespace-pre-wrap px-2">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-primary break-words whitespace-pre-wrap px-2">
                     {cards[currentCard].front}
                   </div>
                 </ScrollArea>
@@ -221,11 +221,11 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
               }}
             >
               <div className="text-center w-full">
-                <div className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground mb-2 sm:mb-3">
+                <div className="text-xs sm:text-sm uppercase tracking-wider text-primary/70 mb-2 sm:mb-3">
                   Mặt sau
                 </div>
                 <ScrollArea className="max-h-40 sm:max-h-60 lg:max-h-80">
-                  <div className="text-base sm:text-lg lg:text-xl text-foreground break-words whitespace-pre-wrap px-2">
+                  <div className="text-base sm:text-lg lg:text-xl text-primary break-words whitespace-pre-wrap px-2">
                     {cards[currentCard].back}
                   </div>
                 </ScrollArea>

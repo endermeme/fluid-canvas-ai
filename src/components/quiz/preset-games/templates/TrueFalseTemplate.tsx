@@ -121,13 +121,17 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     setGameStarted(true);
   };
 
+  const questions = gameContent?.questions || [];
+  const isLastQuestion = currentQuestion === questions.length - 1;
+  const currentAnswer = userAnswers[currentQuestion];
+
   if (!gameContent || !questions.length) {
     return (
       <div className="p-4">
         <PresetGameHeader />
         <div className="text-center mt-8">
-          <p className="text-lg">Không có dữ liệu câu hỏi</p>
-          <p className="text-sm text-muted-foreground mt-2">Vui lòng thử lại hoặc chọn game khác</p>
+          <p className="text-lg text-primary">Không có dữ liệu câu hỏi</p>
+          <p className="text-sm text-primary/70 mt-2">Vui lòng thử lại hoặc chọn game khác</p>
         </div>
       </div>
     );
@@ -138,21 +142,21 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
       <div className="flex flex-col items-center justify-center h-full p-6">
         <PresetGameHeader onShare={onShare} />
         <Card className="max-w-md w-full p-6 text-center mt-6">
-          <h2 className="text-2xl font-bold mb-4">Kết Quả</h2>
-          <p className="text-lg mb-4">
-            Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
+          <h2 className="text-2xl font-bold mb-4 text-primary">Kết Quả</h2>
+          <p className="text-lg mb-4 text-primary">
+            Chủ đề: <span className="font-semibold text-primary">{gameContent.title || topic}</span>
           </p>
           <div className="mb-6">
             <div className="flex justify-between mb-2">
-              <span>Điểm của bạn</span>
-              <span className="font-bold">{Math.round((userAnswers.filter((answer, index) => answer === questions[index].isTrue).length / questions.length) * 100)}%</span>
+              <span className="text-primary">Điểm của bạn</span>
+              <span className="font-bold text-primary">{Math.round((userAnswers.filter((answer, index) => answer === questions[index].isTrue).length / questions.length) * 100)}%</span>
             </div>
             <Progress value={Math.round((userAnswers.filter((answer, index) => answer === questions[index].isTrue).length / questions.length) * 100)} className="h-3" />
           </div>
-          <div className="text-2xl font-bold mb-6">
+          <div className="text-2xl font-bold mb-6 text-primary">
             {userAnswers.filter((answer, index) => answer === questions[index].isTrue).length} / {questions.length}
           </div>
-          <div className="text-sm mb-4 text-muted-foreground">
+          <div className="text-sm mb-4 text-primary/70">
             Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
           </div>
           <Button onClick={handleRestart} className="w-full">
@@ -175,19 +179,19 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
       <PresetGameHeader onShare={onShare} />
       <div className="mb-4 mt-6 px-4">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium">
+          <div className="text-sm font-medium text-primary">
             Câu hỏi {currentQuestion + 1}/{questions.length}
           </div>
           <div className="text-sm font-medium flex items-center gap-2">
             <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full">
-              <Clock className="h-4 w-4 mr-1" />
-              {timeLeft}s
+              <Clock className="h-4 w-4 mr-1 text-primary" />
+              <span className="text-primary">{timeLeft}s</span>
             </div>
-            <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full text-primary/80">
+            <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full text-primary">
               <Clock className="h-4 w-4 mr-1" />
-              {formattedTotalTime}
+              <span>{formattedTotalTime}</span>
             </div>
-            <div className="px-3 py-1 bg-primary/10 rounded-full">
+            <div className="px-3 py-1 bg-primary/10 rounded-full text-primary">
               Điểm: <span className="font-bold">{score}</span>
             </div>
           </div>
@@ -196,7 +200,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
       </div>
       
       <Card className="p-6 mb-4 mx-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
-        <h2 className="text-xl font-semibold mb-6 text-center">{question.statement}</h2>
+        <h2 className="text-xl font-semibold mb-6 text-center text-primary">{question.statement}</h2>
         
         <div className="grid grid-cols-1 gap-4 mb-6 max-w-md mx-auto">
           <Button 
@@ -237,8 +241,8 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
             <div className="flex items-start">
               <AlertCircle className={`h-5 w-5 mr-2 mt-0.5 ${question.isTrue ? 'text-green-600' : 'text-red-600'}`} />
               <div>
-                <p className="font-medium mb-1">Giải thích:</p>
-                <p className="text-sm">{question.explanation}</p>
+                <p className="font-medium mb-1 text-primary">Giải thích:</p>
+                <p className="text-sm text-primary/80">{question.explanation}</p>
               </div>
             </div>
           </div>

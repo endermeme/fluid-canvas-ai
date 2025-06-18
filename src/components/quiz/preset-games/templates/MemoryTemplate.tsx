@@ -176,7 +176,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
     return (
       <div className="h-full flex items-center justify-center p-4">
         <div className="text-center">
-          <p className="text-lg font-medium text-muted-foreground">Không có dữ liệu trò chơi ghi nhớ</p>
+          <p className="text-lg font-medium text-primary">Không có dữ liệu trò chơi ghi nhớ</p>
         </div>
       </div>
     );
@@ -191,10 +191,10 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
         <Card className="w-full max-w-md p-6 sm:p-8 text-center bg-white border">
           <div className="text-6xl sm:text-7xl mb-4">😔</div>
           <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-red-600">Hết thời gian!</h2>
-          <p className="mb-4 text-base sm:text-lg">
-            Bạn đã ghép được <span className="font-bold text-foreground">{matchedPairs}/{totalPairs}</span> cặp
+          <p className="mb-4 text-base sm:text-lg text-primary">
+            Bạn đã ghép được <span className="font-bold text-primary">{matchedPairs}/{totalPairs}</span> cặp
           </p>
-          <p className="mb-6 text-sm text-muted-foreground">Với {moves} lượt di chuyển</p>
+          <p className="mb-6 text-sm text-primary/70">Với {moves} lượt di chuyển</p>
           <Button 
             onClick={handleRestart} 
             className="w-full"
@@ -213,15 +213,15 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
       <div className="h-full flex items-center justify-center p-4 bg-white">
         <Card className="w-full max-w-md p-6 sm:p-8 text-center bg-white border">
           <Trophy className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-500 mx-auto mb-4" />
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground">Chúc mừng!</h2>
-          <p className="mb-2 text-base sm:text-lg">
-            Bạn đã hoàn thành trò chơi với <span className="font-bold text-foreground">{moves}</span> lượt.
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
+          <p className="mb-2 text-base sm:text-lg text-primary">
+            Bạn đã hoàn thành trò chơi với <span className="font-bold text-primary">{moves}</span> lượt.
           </p>
-          <p className="mb-4 text-sm text-muted-foreground">
+          <p className="mb-4 text-sm text-primary/70">
             Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
           </p>
           <div className="mb-6">
-            <div className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
+            <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">
               {matchedPairs}/{totalPairs}
             </div>
             <Progress value={100} className="h-2 sm:h-3" />
@@ -251,15 +251,15 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
       {/* Header với thông tin trạng thái */}
       <div className="flex-shrink-0 p-2 sm:p-3 border-b border-border">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full">
+          <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
             Cặp: {matchedPairs}/{totalPairs}
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
             <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full flex items-center">
-              <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-foreground" />
-              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+              <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
+              <span className="text-primary">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
             </div>
-            <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full">
+            <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
               Lượt: {moves}
             </div>
           </div>
@@ -293,7 +293,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
                     `}
                     style={{ backfaceVisibility: 'hidden' }}
                   >
-                    <div className="text-foreground/60 text-sm sm:text-base lg:text-lg font-bold">?</div>
+                    <div className="text-primary/60 text-sm sm:text-base lg:text-lg font-bold">?</div>
                   </Card>
                   
                   {/* Card front */}
@@ -303,7 +303,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
                       bg-white border
                       ${card.matched 
                         ? 'border-green-400 bg-green-50 text-green-800' 
-                        : 'border-border text-foreground'
+                        : 'border-border text-primary'
                       }
                     `}
                     style={{

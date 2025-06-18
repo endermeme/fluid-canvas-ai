@@ -174,7 +174,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
     return (
       <div className="h-full flex items-center justify-center p-4">
         <div className="text-center">
-          <p className="text-lg font-medium text-muted-foreground">Không có dữ liệu câu</p>
+          <p className="text-lg font-medium text-primary">Không có dữ liệu câu</p>
         </div>
       </div>
     );
@@ -186,20 +186,20 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
     return (
       <div className="h-full flex items-center justify-center p-4 bg-white">
         <Card className="w-full max-w-md p-6 text-center bg-white border">
-          <h2 className="text-2xl font-bold mb-4">Kết quả</h2>
-          <p className="text-lg mb-4">
-            Chủ đề: <span className="font-semibold">{content.title || topic}</span>
+          <h2 className="text-2xl font-bold mb-4 text-primary">Kết quả</h2>
+          <p className="text-lg mb-4 text-primary">
+            Chủ đề: <span className="font-semibold text-primary">{content.title || topic}</span>
           </p>
           
           <div className="mb-6">
             <div className="flex justify-between mb-2">
-              <span>Điểm số của bạn</span>
-              <span className="font-bold">{percentage}%</span>
+              <span className="text-primary">Điểm số của bạn</span>
+              <span className="font-bold text-primary">{percentage}%</span>
             </div>
             <Progress value={percentage} className="h-3" />
           </div>
           
-          <div className="text-2xl font-bold mb-6">
+          <div className="text-2xl font-bold mb-6 text-primary">
             {score} / {sentences.length}
           </div>
           
@@ -219,12 +219,12 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
       {/* Header với progress */}
       <div className="flex-shrink-0 p-2 sm:p-3 border-b border-border">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full">
+          <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
             Câu {currentSentence + 1}/{sentences.length}
           </div>
           <div className="text-xs sm:text-sm font-medium flex items-center px-2 py-1 bg-muted rounded-full">
-            <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
+            <span className="text-primary">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
           </div>
         </div>
         <Progress value={progress} className="h-1.5 sm:h-2" />
@@ -235,8 +235,8 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
         <div className="p-3 sm:p-4 h-full max-w-3xl mx-auto">
           <div className="space-y-3 sm:space-y-4 h-full flex flex-col">
             <div className="text-center">
-              <h3 className="text-base sm:text-lg font-medium mb-1">Sắp xếp lại từng từ để tạo thành câu hoàn chỉnh</h3>
-              <p className="text-muted-foreground text-sm">Chọn từ theo đúng thứ tự</p>
+              <h3 className="text-base sm:text-lg font-medium mb-1 text-primary">Sắp xếp lại từng từ để tạo thành câu hoàn chỉnh</h3>
+              <p className="text-primary/70 text-sm">Chọn từ theo đúng thứ tự</p>
             </div>
             
             <Card className="p-3 sm:p-4 min-h-[80px] sm:min-h-[100px] flex flex-wrap gap-2 items-start content-start border border-border bg-white">
@@ -250,14 +250,14 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
                       ? sentences[currentSentence].correctOrder[index] === sentences[currentSentence].words.indexOf(word)
                         ? 'bg-green-100 border border-green-500'
                         : 'bg-red-100 border border-red-500'
-                      : 'bg-muted hover:bg-muted/80'
+                      : 'bg-muted hover:bg-muted/80 text-primary'
                   }`}
                 >
                   {word}
                 </button>
               ))}
               {orderedWords.length === 0 && (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground p-3">
+                <div className="w-full h-full flex items-center justify-center text-primary/70 p-3">
                   <p className="text-sm">Chọn từ bên dưới để bắt đầu sắp xếp</p>
                 </div>
               )}
@@ -269,7 +269,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
                   key={`shuffled-${index}`}
                   onClick={() => handleWordSelect(word, index)}
                   disabled={isChecking}
-                  className="py-2 px-3 bg-white hover:bg-white/80 rounded-lg transition-colors text-sm border border-border"
+                  className="py-2 px-3 bg-white hover:bg-white/80 rounded-lg transition-colors text-sm border border-border text-primary"
                 >
                   {word}
                 </button>

@@ -256,7 +256,6 @@ Output must be valid JSON. `;
       // Create new settings object with all required properties
       data.settings = {
         timePerQuestion: settings.timePerQuestion,
-        totalTime: settings.totalTime || settings.questionCount * settings.timePerQuestion,
         bonusTimePerCorrect: settings.bonusTime || 5,
         shuffleQuestions: quizSampleData.settings?.shuffleQuestions || true,
         shuffleOptions: quizSampleData.settings?.shuffleOptions || true
@@ -545,8 +544,8 @@ Output must be valid JSON. `;
         <div className="h-full flex items-center justify-center">
           <div className="text-center">
             <div className="h-8 w-8 sm:h-12 sm:w-12 border-3 sm:border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-base sm:text-lg font-medium">Đang tạo trò chơi {getGameTypeName()}...</p>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2">Quá trình này có thể mất vài giây</p>
+            <p className="text-base sm:text-lg font-medium text-primary">Đang tạo trò chơi {getGameTypeName()}...</p>
+            <p className="text-xs sm:text-sm text-primary/70 mt-2">Quá trình này có thể mất vài giây</p>
           </div>
         </div>
       ) : error ? (
@@ -563,7 +562,7 @@ Output must be valid JSON. `;
               <div className="text-center">
                 <div className="text-4xl sm:text-6xl mb-4">⚠️</div>
                 <h3 className="text-lg sm:text-xl font-bold mb-2 text-destructive">Đã xảy ra lỗi</h3>
-                <p className="text-muted-foreground mb-4 text-sm sm:text-base">{error}</p>
+                <p className="text-primary/70 mb-4 text-sm sm:text-base">{error}</p>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <Button onClick={onBack} variant="outline" className="w-full sm:flex-1">
                     Quay lại
@@ -594,8 +593,8 @@ Output must be valid JSON. `;
           <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Chia sẻ game</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-primary">Chia sẻ game</DialogTitle>
+                <DialogDescription className="text-primary/70">
                   Chia sẻ game này với bạn bè để họ có thể tham gia chơi
                 </DialogDescription>
               </DialogHeader>
@@ -605,7 +604,7 @@ Output must be valid JSON. `;
                 </div>
                 
                 <div className="w-full space-y-2">
-                  <Label htmlFor="share-link">Liên kết chia sẻ</Label>
+                  <Label htmlFor="share-link" className="text-primary">Liên kết chia sẻ</Label>
                   <div className="flex">
                     <Input 
                       id="share-link" 
