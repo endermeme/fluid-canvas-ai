@@ -158,7 +158,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-gradient-to-br from-primary/5 to-background">
       {/* Header */}
       <div className="flex-shrink-0 p-2 sm:p-3 border-b border-border">
         <div className="flex justify-between items-center mb-2">
@@ -191,7 +191,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
           >
             {/* Front of card */}
             <Card 
-              className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 lg:p-6 bg-white border-2 border-border shadow-lg group-hover:shadow-xl transition-all duration-300"
+              className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 lg:p-6 bg-card border-2 border-border shadow-lg group-hover:shadow-xl transition-all duration-300"
               style={{ backfaceVisibility: 'hidden' }}
             >
               <div className="text-center w-full">
@@ -236,7 +236,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
       </div>
 
       {/* Controls */}
-      <div className="flex-shrink-0 p-2 sm:p-3 border-t border-border bg-white">
+      <div className="flex-shrink-0 p-2 sm:p-3 border-t border-border bg-muted/30">
         <div className="max-w-2xl lg:max-w-3xl mx-auto space-y-2 sm:space-y-3">
           {/* Auto-flip toggle */}
           <div className="flex items-center justify-between">

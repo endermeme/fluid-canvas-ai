@@ -214,7 +214,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   };
 
   return (
-    <div className="flex flex-col p-4 h-full">
+    <div className="flex flex-col p-4 h-full bg-gradient-to-br from-primary/5 to-background">
       <div className="relative mb-4">
         <div className="flex justify-between items-center mb-2 mt-12">
           <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full text-primary">
@@ -236,7 +236,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
 
       {gameWon ? (
         <div className="flex-grow flex items-center justify-center">
-          <Card className="p-6 text-center max-w-md">
+          <Card className="p-6 text-center max-w-md bg-card">
             <h2 className="text-2xl font-bold mb-4 text-primary">Chúc mừng!</h2>
             <p className="mb-2 text-primary">Bạn đã hoàn thành trò chơi với {totalPairs} cặp từ.</p>
             <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
@@ -249,7 +249,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
         </div>
       ) : gameOver ? (
         <div className="flex-grow flex items-center justify-center">
-          <Card className="p-6 text-center max-w-md">
+          <Card className="p-6 text-center max-w-md bg-card">
             <h2 className="text-2xl font-bold mb-4 text-primary">Hết thời gian!</h2>
             <p className="mb-2 text-primary">Bạn đã ghép được {matchedPairs} trong tổng số {totalPairs} cặp từ.</p>
             <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
@@ -261,7 +261,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
         </div>
       ) : (
         <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="p-3 bg-background/50 border border-primary/10">
+          <Card className="p-3 bg-card/50 border border-primary/10">
             <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md text-primary">Cột A</h3>
             <div className="space-y-2">
               {leftItems.map((item) => (
@@ -283,7 +283,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
             </div>
           </Card>
           
-          <Card className="p-3 bg-background/50 border border-primary/10">
+          <Card className="p-3 bg-card/50 border border-primary/10">
             <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md text-primary">Cột B</h3>
             <div className="space-y-2">
               {rightItems.map((item) => (

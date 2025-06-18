@@ -134,9 +134,9 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
 
   if (showResult) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6">
+      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-br from-primary/5 to-background">
         <PresetGameHeader onShare={onShare} />
-        <Card className="max-w-md w-full p-6 text-center mt-6">
+        <Card className="max-w-md w-full p-6 text-center mt-6 bg-card">
           <h2 className="text-2xl font-bold mb-4 text-primary">Kết Quả</h2>
           <p className="text-lg mb-4 text-primary">
             Chủ đề: <span className="font-semibold text-primary">{gameContent.title || topic}</span>
@@ -170,7 +170,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
 
   return (
-    <div className="flex flex-col p-0 h-full relative">
+    <div className="flex flex-col p-0 h-full relative bg-gradient-to-br from-primary/5 to-background">
       <PresetGameHeader onShare={onShare} />
       <div className="mb-4 mt-6 px-4">
         <div className="flex justify-between items-center mb-2">
@@ -194,7 +194,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
         <Progress value={progress} className="h-2" />
       </div>
       
-      <Card className="p-6 mb-4 mx-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
+      <Card className="p-6 mb-4 mx-4 bg-gradient-to-br from-primary/5 to-background/50 backdrop-blur-sm border-primary/20">
         <h2 className="text-xl font-semibold mb-6 text-center text-primary">{question.statement}</h2>
         
         <div className="grid grid-cols-1 gap-4 mb-6 max-w-md mx-auto">

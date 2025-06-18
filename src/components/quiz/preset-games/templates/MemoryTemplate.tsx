@@ -187,8 +187,8 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   // Game over screen
   if (gameOver) {
     return (
-      <div className="h-full flex items-center justify-center p-4 bg-white">
-        <Card className="w-full max-w-md p-6 sm:p-8 text-center bg-white border">
+      <div className="h-full flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 to-background">
+        <Card className="w-full max-w-md p-6 sm:p-8 text-center bg-card border">
           <div className="text-6xl sm:text-7xl mb-4">😔</div>
           <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-red-600">Hết thời gian!</h2>
           <p className="mb-4 text-base sm:text-lg text-primary">
@@ -210,8 +210,8 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   // Win screen
   if (gameWon) {
     return (
-      <div className="h-full flex items-center justify-center p-4 bg-white">
-        <Card className="w-full max-w-md p-6 sm:p-8 text-center bg-white border">
+      <div className="h-full flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 to-background">
+        <Card className="w-full max-w-md p-6 sm:p-8 text-center bg-card border">
           <Trophy className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-500 mx-auto mb-4" />
           <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
           <p className="mb-2 text-base sm:text-lg text-primary">
@@ -247,7 +247,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-gradient-to-br from-primary/5 to-background">
       {/* Header với thông tin trạng thái */}
       <div className="flex-shrink-0 p-2 sm:p-3 border-b border-border">
         <div className="flex justify-between items-center mb-2">
@@ -300,7 +300,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
                   <Card 
                     className={`
                       absolute inset-0 flex items-center justify-center p-1 sm:p-2
-                      bg-white border
+                      bg-card border
                       ${card.matched 
                         ? 'border-green-400 bg-green-50 text-green-800' 
                         : 'border-border text-primary'
@@ -323,7 +323,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
       </div>
 
       {/* Footer với actions */}
-      <div className="flex-shrink-0 p-2 sm:p-3 border-t border-border bg-white">
+      <div className="flex-shrink-0 p-2 sm:p-3 border-t border-border bg-muted/30">
         <div className="flex gap-2 max-w-4xl mx-auto">
           <Button
             variant="outline"
