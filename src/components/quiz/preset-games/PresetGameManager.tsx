@@ -253,11 +253,11 @@ Output must be valid JSON. `;
     if (type === 'quiz') {
       let data = { ...quizSampleData };
       
-      // Create new settings object with all required properties
+      // Create completely new settings object with all required properties
       data.settings = {
         timePerQuestion: settings.timePerQuestion,
-        shuffleQuestions: quizSampleData.settings?.shuffleQuestions || true,
-        shuffleOptions: quizSampleData.settings?.shuffleOptions || true,
+        shuffleQuestions: true,
+        shuffleOptions: true,
         totalTime: settings.totalTime || settings.questionCount * settings.timePerQuestion
       };
 
