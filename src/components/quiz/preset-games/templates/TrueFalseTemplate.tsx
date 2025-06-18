@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import PresetGameHeader from '../PresetGameHeader';
 import { Button } from '@/components/ui/button';
@@ -120,10 +119,6 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     setTimerRunning(true);
     setGameStarted(true);
   };
-
-  const questions = gameContent?.questions || [];
-  const isLastQuestion = currentQuestion === questions.length - 1;
-  const currentAnswer = userAnswers[currentQuestion];
 
   if (!gameContent || !questions.length) {
     return (

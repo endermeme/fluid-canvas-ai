@@ -256,9 +256,9 @@ Output must be valid JSON. `;
       // Create new settings object with all required properties
       data.settings = {
         timePerQuestion: settings.timePerQuestion,
-        bonusTimePerCorrect: settings.bonusTime || 5,
         shuffleQuestions: quizSampleData.settings?.shuffleQuestions || true,
-        shuffleOptions: quizSampleData.settings?.shuffleOptions || true
+        shuffleOptions: quizSampleData.settings?.shuffleOptions || true,
+        totalTime: settings.totalTime || settings.questionCount * settings.timePerQuestion
       };
 
       setLoading(false);
