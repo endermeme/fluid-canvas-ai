@@ -252,15 +252,17 @@ Output must be valid JSON. `;
   const loadSampleData = (type) => {
     // For quiz, use the imported data directly
     if (type === 'quiz') {
-      let data = quizSampleData;
+      let data = { ...quizSampleData };
       
-      if (!data.settings) {
-        data.settings = {};
-      }
-
-      data.settings.timePerQuestion = settings.timePerQuestion;
-      data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
-      data.settings.bonusTimePerCorrect = settings.bonusTime || 5;
+      // Ensure settings object exists with correct structure
+      data.settings = {
+        ...data.settings,
+        timePerQuestion: settings.timePerQuestion,
+        totalTime: settings.totalTime || settings.questionCount * settings.timePerQuestion,
+        bonusTimePerCorrect: settings.bonusTime || 5,
+        shuffleQuestions: data.settings?.shuffleQuestions || true,
+        shuffleOptions: data.settings?.shuffleOptions || true
+      };
 
       setLoading(false);
       setGameContent(data);
