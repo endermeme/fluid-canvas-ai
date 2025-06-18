@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,9 @@ import {
   getApiEndpoint, 
   DEFAULT_GENERATION_SETTINGS 
 } from '@/constants/api-constants';
+
+// Import static data for quiz
+import { quizSampleData } from './data/quizSampleData';
 
 interface PresetGameManagerProps {
   gameType: string;
@@ -246,8 +250,25 @@ Output must be valid JSON. `;
   };
 
   const loadSampleData = (type) => {
-    // Chỉ support dữ liệu mẫu cho các game còn lại
-    const supportedGames = ['quiz', 'flashcards', 'matching', 'memory', 'ordering', 'wordsearch', 'truefalse'];
+    // For quiz, use the imported data directly
+    if (type === 'quiz') {
+      let data = quizSampleData;
+      
+      if (!data.settings) {
+        data.settings = {};
+      }
+
+      data.settings.timePerQuestion = settings.timePerQuestion;
+      data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
+      data.settings.bonusTimePerCorrect = settings.bonusTime || 5;
+
+      setLoading(false);
+      setGameContent(data);
+      return;
+    }
+
+    // For other games, use dynamic import
+    const supportedGames = ['flashcards', 'matching', 'memory', 'ordering', 'wordsearch', 'truefalse'];
     
     if (!supportedGames.includes(type)) {
       setError(`Không có dữ liệu mẫu cho game ${getGameTypeName()}. Vui lòng sử dụng AI để tạo nội dung.`);
@@ -283,11 +304,6 @@ Output must be valid JSON. `;
         }
 
         switch(type) {
-          case 'quiz':
-            data.settings.timePerQuestion = settings.timePerQuestion;
-            data.settings.totalTime = settings.totalTime || settings.questionCount * settings.timePerQuestion;
-            data.settings.bonusTimePerCorrect = settings.bonusTime || 5;
-            break;
           case 'flashcards':
             data.settings.flipTime = settings.timePerQuestion;
             data.settings.totalTime = settings.totalTime || 180;
