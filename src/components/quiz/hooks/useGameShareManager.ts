@@ -38,9 +38,19 @@ export const useGameShareManager = (
         setIsSharing(false);
         return result;
       } else {
+        // Xác định game type dựa trên content
+        let gameType = 'custom';
+        if (miniGame.content.includes('answerQuestion(true)') || miniGame.content.includes('true/false')) {
+          gameType = 'true-false';
+        } else if (miniGame.content.includes('flashcard') || miniGame.content.includes('flip')) {
+          gameType = 'flashcards';
+        } else if (miniGame.content.includes('memory') || miniGame.content.includes('matching')) {
+          gameType = 'memory';
+        }
+        
         const url = await saveGameForSharing(
           miniGame.title || 'Game tương tác',
-          'custom',
+          gameType,
           miniGame,
           miniGame.content
         );

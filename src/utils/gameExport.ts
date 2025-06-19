@@ -52,24 +52,40 @@ export const saveGameForSharing = async (
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
     
-    // Nhúng dữ liệu game vào HTML content
+    // Xử lý HTML content cho template games
     let processedHtmlContent = htmlContent;
     
-    // Nếu content là object, encode nó và nhúng vào HTML
+    // Kiểm tra xem có phải là template game không
     if (typeof content === 'object' && content !== null) {
       try {
-        const encodedContent = encodeURIComponent(JSON.stringify(content));
-        
-        // Thêm data attribute vào thẻ body
-        if (!processedHtmlContent.includes('data-game-content')) {
-          processedHtmlContent = processedHtmlContent.replace(
-            /<body([^>]*)>/i,
-            `<body$1 data-game-content="${encodedContent}">`
-          );
+        // Nếu content có cấu trúc template (questions, settings, etc.)
+        if (content.questions || content.cards || content.items) {
+          // Nhúng dữ liệu vào HTML content nếu chưa có
+          if (!processedHtmlContent.includes('data-game-content')) {
+            const encodedContent = encodeURIComponent(JSON.stringify(content));
+            processedHtmlContent = processedHtmlContent.replace(
+              /<body([^>]*)>/i,
+              `<body$1 data-game-content="${encodedContent}">`
+            );
+          }
+        } else {
+          // Nếu là custom game, encode toàn bộ content
+          const encodedContent = encodeURIComponent(JSON.stringify(content));
+          if (!processedHtmlContent.includes('data-game-content')) {
+            processedHtmlContent = processedHtmlContent.replace(
+              /<body([^>]*)>/i,
+              `<body$1 data-game-content="${encodedContent}">`
+            );
+          }
         }
       } catch (encodeError) {
         console.error("Error encoding game content:", encodeError);
       }
+    }
+    
+    // Đảm bảo HTML content có cấu trúc đầy đủ
+    if (!processedHtmlContent.includes('<!DOCTYPE html')) {
+      processedHtmlContent = `<!DOCTYPE html>\n<html lang="vi">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>${title}</title>\n</head>\n<body>\n${processedHtmlContent}\n</body>\n</html>`;
     }
     
     // Giới hạn kích thước nội dung HTML

@@ -267,6 +267,12 @@ const GameSharePage: React.FC = () => {
       {hasRegistered ? "Cập nhật thông tin" : "Tham gia"}
     </Button>
   );
+
+  // Tạo miniGame object để truyền vào EnhancedGameView
+  const miniGame = {
+    title: game.title,
+    content: game.htmlContent || ''
+  };
   
   return (
     <QuizContainer
@@ -296,10 +302,7 @@ const GameSharePage: React.FC = () => {
         
         <TabsContent value="game" className="h-[calc(100%-48px)] m-0">
           <EnhancedGameView 
-            miniGame={{
-              title: game.title,
-              content: game.htmlContent
-            }}
+            miniGame={miniGame}
             onBack={handleBack}
             hideHeader={true}
             extraButton={!hasRegistered ? joinGameButton : undefined}
