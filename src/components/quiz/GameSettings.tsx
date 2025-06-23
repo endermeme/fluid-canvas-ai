@@ -161,12 +161,12 @@ const GameSettings = ({
   };
 
   return (
-    <div className="min-h-full flex items-center justify-center p-4">
+    <div className="flex items-center justify-center p-4 min-h-screen">
       <div 
         ref={containerRef} 
-        className="w-full max-w-4xl"
+        className="w-full max-w-2xl mx-auto"
       >
-        <Card className="border-primary/20 shadow-lg p-6">
+        <Card className="border-primary/20 shadow-lg p-6 max-h-[85vh] overflow-y-auto">
           {/* Header - Compact */}
           <div className="flex items-center gap-3 mb-6">
             <div className="flex items-center justify-center p-2 rounded-full bg-primary/10">
@@ -177,7 +177,7 @@ const GameSettings = ({
             </h2>
           </div>
 
-          {/* Settings Grid - 2 columns for larger screens */}
+          {/* Settings Grid - Single column on mobile, 2 columns on larger screens */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             {/* Left Column */}
@@ -192,7 +192,7 @@ const GameSettings = ({
                   value={settings.prompt || ''}
                   onChange={(e) => handleInputChange('prompt', e.target.value)}
                   placeholder="Nhập nội dung chi tiết cho trò chơi"
-                  className="border-primary/20 bg-white/50 min-h-[80px]"
+                  className="border-primary/20 bg-white/50 min-h-[80px] max-h-[120px]"
                 />
               </div>
               
