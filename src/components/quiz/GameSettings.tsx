@@ -131,17 +131,17 @@ const GameSettings = ({
   }, [gameType]);
 
   const getGameIcon = () => {
-    if (!gameType) return <Gamepad className="h-8 w-8 text-primary" />;
+    if (!gameType) return <Gamepad className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />;
     
     switch (gameType.icon) {
-      case 'brain-circuit': return <BrainCircuit className="h-8 w-8 text-primary" />;
-      case 'puzzle-piece': return <Puzzle className="h-8 w-8 text-primary" />;
-      case 'light-bulb': return <Lightbulb className="h-8 w-8 text-primary" />;
-      case 'clock': return <Clock4 className="h-8 w-8 text-primary" />;
-      case 'dices': return <Dices className="h-8 w-8 text-primary" />;
-      case 'heart-handshake': return <HeartHandshake className="h-8 w-8 text-primary" />;
-      case 'pen-tool': return <PenTool className="h-8 w-8 text-primary" />;
-      default: return <Gamepad className="h-8 w-8 text-primary" />;
+      case 'brain-circuit': return <BrainCircuit className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />;
+      case 'puzzle-piece': return <Puzzle className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />;
+      case 'light-bulb': return <Lightbulb className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />;
+      case 'clock': return <Clock4 className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />;
+      case 'dices': return <Dices className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />;
+      case 'heart-handshake': return <HeartHandshake className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />;
+      case 'pen-tool': return <PenTool className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />;
+      default: return <Gamepad className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />;
     }
   };
 
@@ -173,195 +173,192 @@ const GameSettings = ({
         <div className="flex items-center justify-center min-h-full">
           <Card className={`
             w-full border-primary/20 shadow-lg
-            ${isMobile || inModal ? 'max-w-sm p-4' : 'max-w-md p-6'}
+            ${isMobile || inModal ? 'max-w-full p-3' : 'max-w-4xl p-4 lg:p-6'}
           `}>
-            <div className="flex flex-col items-center mb-4 sm:mb-6 relative">
-              <div className="absolute inset-0 blur-2xl bg-primary/10 rounded-full opacity-70"></div>
-              <div className="z-10 flex flex-col items-center">
-                <div className="flex items-center justify-center p-2 sm:p-3 mb-2 sm:mb-4 rounded-full bg-primary/10 backdrop-blur-sm">
+            {/* Header - Compact cho màn hình ngang */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 relative">
+              <div className="flex items-center gap-3 mb-3 sm:mb-0">
+                <div className="flex items-center justify-center p-1.5 sm:p-2 rounded-full bg-primary/10 backdrop-blur-sm">
                   {getGameIcon()}
                 </div>
                 <h2 className={`
-                  font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent text-center
-                  ${isMobile || inModal ? 'text-lg' : 'text-2xl'}
+                  font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent
+                  ${isMobile || inModal ? 'text-lg' : 'text-xl lg:text-2xl'}
                 `}>
                   Cài Đặt Minigame
                 </h2>
               </div>
             </div>
 
-            <div className="space-y-4 sm:space-y-6">
-              <div className="space-y-2 sm:space-y-3">
-                <Label htmlFor="prompt" className="flex items-center gap-2 text-sm sm:text-base font-medium">
-                  <Type className="h-3 w-3 sm:h-4 sm:w-4 text-primary" /> Nội dung trò chơi
-                </Label>
-                <Textarea
-                  id="prompt"
-                  value={settings.prompt || ''}
-                  onChange={(e) => handleInputChange('prompt', e.target.value)}
-                  placeholder="Nhập nội dung chi tiết cho trò chơi (ví dụ: Từ vựng tiếng Anh về động vật)"
-                  className={`
-                    border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm 
-                    hover:border-primary/30 focus:ring-2 focus:ring-primary/20
-                    ${isMobile || inModal ? 'min-h-[80px] text-sm' : 'min-h-[100px]'}
-                  `}
-                />
-              </div>
+            {/* Main Settings Grid - Responsive layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
               
-              <div className="space-y-2 sm:space-y-3">
-                <Label htmlFor="difficulty" className="flex items-center gap-2 text-sm sm:text-base font-medium">
-                  <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-primary" /> Độ Khó
-                </Label>
-                <Select 
-                  value={settings.difficulty} 
-                  onValueChange={(value) => handleSelectChange('difficulty', value)}
-                >
-                  <SelectTrigger className="rounded-lg border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20">
-                    <SelectValue placeholder="Chọn độ khó" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-lg border-primary/20 bg-white/95 backdrop-blur-lg shadow-lg">
-                    <SelectItem value="easy" className="cursor-pointer focus:bg-primary/10">Dễ</SelectItem>
-                    <SelectItem value="medium" className="cursor-pointer focus:bg-primary/10">Trung bình</SelectItem>
-                    <SelectItem value="hard" className="cursor-pointer focus:bg-primary/10">Khó</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2 sm:space-y-3">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="questionCount" className="text-sm sm:text-base font-medium flex items-center gap-2">
-                    <Medal className="h-3 w-3 sm:h-4 sm:w-4 text-primary" /> {getCountLabel()}
+              {/* Left Column */}
+              <div className="space-y-4">
+                {/* Content Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="prompt" className="flex items-center gap-2 text-sm font-medium">
+                    <Type className="h-3 w-3 sm:h-4 sm:w-4 text-primary" /> Nội dung trò chơi
                   </Label>
-                  <span className="px-2 sm:px-3 py-1 bg-primary/10 rounded-full text-xs sm:text-sm font-medium">{settings.questionCount}</span>
-                </div>
-                <Slider 
-                  id="questionCount"
-                  min={gameType?.id === 'drawing' ? 1 : (gameType?.id === 'puzzle' ? 2 : 3)} 
-                  max={gameType?.id === 'memory' ? 12 : (gameType?.id === 'puzzle' ? 6 : 20)} 
-                  step={1} 
-                  value={[settings.questionCount]} 
-                  onValueChange={(value) => handleSliderChange('questionCount', value)}
-                  className="cursor-pointer"
-                />
-              </div>
-
-              <div className="flex items-center space-x-2 pb-2">
-                <Switch 
-                  id="useTimer" 
-                  checked={settings.useTimer !== false}
-                  onCheckedChange={(checked) => handleSwitchChange('useTimer', checked)} 
-                />
-                <Label htmlFor="useTimer" className="text-sm sm:text-base font-medium flex items-center gap-2">
-                  <Timer className="h-3 w-3 sm:h-4 sm:w-4 text-primary" /> Sử dụng bộ đếm thời gian
-                </Label>
-              </div>
-
-              {settings.useTimer !== false && (
-                <>
-                  <div className="space-y-2 sm:space-y-3">
-                    <div className="flex justify-between items-center">
-                      <Label htmlFor="timePerQuestion" className="text-sm sm:text-base font-medium flex items-center gap-2">
-                        <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-primary" /> {getTimeLabel()}
-                      </Label>
-                      <span className="px-2 sm:px-3 py-1 bg-primary/10 rounded-full text-xs sm:text-sm font-medium">{settings.timePerQuestion} giây</span>
-                    </div>
-                    <Slider 
-                      id="timePerQuestion"
-                      min={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 10} 
-                      max={gameType?.id === 'reflex' ? 10 : (gameType?.id === 'drawing' ? 120 : 60)} 
-                      step={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 5} 
-                      value={[settings.timePerQuestion]} 
-                      onValueChange={(value) => handleSliderChange('timePerQuestion', value)}
-                      className="cursor-pointer"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="totalTime" className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
-                        <Clock4 className="h-3 w-3 sm:h-4 sm:w-4 text-primary" /> Tổng thời gian (giây)
-                      </Label>
-                      <Input
-                        id="totalTime"
-                        type="number"
-                        min="0"
-                        placeholder="0 = không giới hạn"
-                        value={settings.totalTime || 0}
-                        onChange={(e) => handleInputChange('totalTime', e.target.value)}
-                        className={`
-                          border-primary/20 bg-white/50 focus-visible:ring-primary/30
-                          ${isMobile || inModal ? 'text-sm' : ''}
-                        `}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="bonusTime" className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
-                        <Timer className="h-3 w-3 sm:h-4 sm:w-4 text-primary" /> Thời gian thưởng (giây)
-                      </Label>
-                      <Input
-                        id="bonusTime"
-                        type="number"
-                        min="0"
-                        placeholder="Thời gian thưởng mỗi câu"
-                        value={settings.bonusTime || 0}
-                        onChange={(e) => handleInputChange('bonusTime', e.target.value)}
-                        className={`
-                          border-primary/20 bg-white/50 focus-visible:ring-primary/30
-                          ${isMobile || inModal ? 'text-sm' : ''}
-                        `}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Debug Mode Toggle */}
-              <div className="border-t border-border/50 pt-4">
-                <div className="flex items-center space-x-2 pb-2">
-                  <Switch 
-                    id="debugMode" 
-                    checked={settings.debugMode || false}
-                    onCheckedChange={(checked) => handleSwitchChange('debugMode', checked)} 
+                  <Textarea
+                    id="prompt"
+                    value={settings.prompt || ''}
+                    onChange={(e) => handleInputChange('prompt', e.target.value)}
+                    placeholder="Nhập nội dung chi tiết cho trò chơi"
+                    className="border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20 min-h-[80px]"
                   />
-                  <Label htmlFor="debugMode" className="text-sm sm:text-base font-medium flex items-center gap-2">
-                    <Bug className="h-3 w-3 sm:h-4 sm:w-4 text-orange-500" /> 
-                    <span>Debug Mode</span>
-                    <span className="text-xs text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">DEV</span>
-                  </Label>
                 </div>
-                {settings.debugMode && (
-                  <p className="text-xs text-muted-foreground mt-1 ml-6">
-                    Sử dụng dữ liệu mẫu để test giao diện ngay lập tức (không qua AI)
-                  </p>
-                )}
+                
+                {/* Difficulty */}
+                <div className="space-y-2">
+                  <Label htmlFor="difficulty" className="flex items-center gap-2 text-sm font-medium">
+                    <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-primary" /> Độ Khó
+                  </Label>
+                  <Select 
+                    value={settings.difficulty} 
+                    onValueChange={(value) => handleSelectChange('difficulty', value)}
+                  >
+                    <SelectTrigger className="rounded-lg border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20">
+                      <SelectValue placeholder="Chọn độ khó" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-lg border-primary/20 bg-white/95 backdrop-blur-lg shadow-lg">
+                      <SelectItem value="easy" className="cursor-pointer focus:bg-primary/10">Dễ</SelectItem>
+                      <SelectItem value="medium" className="cursor-pointer focus:bg-primary/10">Trung bình</SelectItem>
+                      <SelectItem value="hard" className="cursor-pointer focus:bg-primary/10">Khó</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Question Count */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="questionCount" className="text-sm font-medium flex items-center gap-2">
+                      <Medal className="h-3 w-3 sm:h-4 sm:w-4 text-primary" /> {getCountLabel()}
+                    </Label>
+                    <span className="px-2 py-1 bg-primary/10 rounded-full text-xs font-medium">{settings.questionCount}</span>
+                  </div>
+                  <Slider 
+                    id="questionCount"
+                    min={gameType?.id === 'drawing' ? 1 : (gameType?.id === 'puzzle' ? 2 : 3)} 
+                    max={gameType?.id === 'memory' ? 12 : (gameType?.id === 'puzzle' ? 6 : 20)} 
+                    step={1} 
+                    value={[settings.questionCount]} 
+                    onValueChange={(value) => handleSliderChange('questionCount', value)}
+                    className="cursor-pointer"
+                  />
+                </div>
               </div>
 
-              <div className={`pt-3 sm:pt-4 flex gap-2 sm:gap-3 ${isMobile || inModal ? 'flex-col' : ''}`}>
-                {onCancel && (
-                  <Button 
-                    variant="outline"
-                    className={`
-                      transition-all border-primary/20 hover:border-primary/30 hover:bg-primary/5 
-                      active:scale-95 rounded-lg
-                      ${isMobile || inModal ? 'w-full text-sm' : 'w-full'}
-                    `}
-                    onClick={onCancel}
-                  >
-                    Hủy
-                  </Button>
+              {/* Right Column */}
+              <div className="space-y-4">
+                {/* Timer Toggle */}
+                <div className="flex items-center space-x-2 p-3 bg-primary/5 rounded-lg">
+                  <Switch 
+                    id="useTimer" 
+                    checked={settings.useTimer !== false}
+                    onCheckedChange={(checked) => handleSwitchChange('useTimer', checked)} 
+                  />
+                  <Label htmlFor="useTimer" className="text-sm font-medium flex items-center gap-2">
+                    <Timer className="h-3 w-3 sm:h-4 sm:w-4 text-primary" /> Sử dụng bộ đếm thời gian
+                  </Label>
+                </div>
+
+                {settings.useTimer !== false && (
+                  <>
+                    {/* Time Per Question */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <Label htmlFor="timePerQuestion" className="text-sm font-medium flex items-center gap-2">
+                          <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-primary" /> {getTimeLabel()}
+                        </Label>
+                        <span className="px-2 py-1 bg-primary/10 rounded-full text-xs font-medium">{settings.timePerQuestion} giây</span>
+                      </div>
+                      <Slider 
+                        id="timePerQuestion"
+                        min={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 10} 
+                        max={gameType?.id === 'reflex' ? 10 : (gameType?.id === 'drawing' ? 120 : 60)} 
+                        step={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 5} 
+                        value={[settings.timePerQuestion]} 
+                        onValueChange={(value) => handleSliderChange('timePerQuestion', value)}
+                        className="cursor-pointer"
+                      />
+                    </div>
+
+                    {/* Time Settings Row */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="totalTime" className="text-xs font-medium flex items-center gap-1">
+                          <Clock4 className="h-3 w-3 text-primary" /> Tổng thời gian
+                        </Label>
+                        <Input
+                          id="totalTime"
+                          type="number"
+                          min="0"
+                          placeholder="0 = không giới hạn"
+                          value={settings.totalTime || 0}
+                          onChange={(e) => handleInputChange('totalTime', e.target.value)}
+                          className="border-primary/20 bg-white/50 focus-visible:ring-primary/30 text-sm"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="bonusTime" className="text-xs font-medium flex items-center gap-1">
+                          <Timer className="h-3 w-3 text-primary" /> Thời gian thưởng
+                        </Label>
+                        <Input
+                          id="bonusTime"
+                          type="number"
+                          min="0"
+                          placeholder="Thưởng mỗi câu"
+                          value={settings.bonusTime || 0}
+                          onChange={(e) => handleInputChange('bonusTime', e.target.value)}
+                          className="border-primary/20 bg-white/50 focus-visible:ring-primary/30 text-sm"
+                        />
+                      </div>
+                    </div>
+                  </>
                 )}
-                <Button 
-                  className={`
-                    transition-all active:scale-95 bg-gradient-to-r from-primary to-primary/80 
-                    hover:opacity-90 rounded-lg shadow-md shadow-primary/20
-                    ${isMobile || inModal ? 'w-full text-sm' : 'w-full'}
-                  `}
-                  onClick={handleStart}
-                >
-                  Bắt Đầu Trò Chơi
-                </Button>
+
+                {/* Debug Mode */}
+                <div className="border-t border-border/50 pt-3">
+                  <div className="flex items-center space-x-2 p-2 bg-orange-50 rounded-lg">
+                    <Switch 
+                      id="debugMode" 
+                      checked={settings.debugMode || false}
+                      onCheckedChange={(checked) => handleSwitchChange('debugMode', checked)} 
+                    />
+                    <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2">
+                      <Bug className="h-3 w-3 text-orange-500" /> 
+                      <span>Debug Mode</span>
+                      <span className="text-xs text-orange-600 bg-orange-200 px-1.5 py-0.5 rounded-full">DEV</span>
+                    </Label>
+                  </div>
+                  {settings.debugMode && (
+                    <p className="text-xs text-muted-foreground mt-1 ml-6">
+                      Sử dụng dữ liệu mẫu để test giao diện ngay lập tức
+                    </p>
+                  )}
+                </div>
               </div>
+            </div>
+
+            {/* Action Buttons - Full width bottom */}
+            <div className="pt-4 mt-6 border-t border-border/20 flex gap-3">
+              {onCancel && (
+                <Button 
+                  variant="outline"
+                  className="flex-1 transition-all border-primary/20 hover:border-primary/30 hover:bg-primary/5 active:scale-95 rounded-lg"
+                  onClick={onCancel}
+                >
+                  Hủy
+                </Button>
+              )}
+              <Button 
+                className="flex-1 transition-all active:scale-95 bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 rounded-lg shadow-md shadow-primary/20"
+                onClick={handleStart}
+              >
+                Bắt Đầu Trò Chơi
+              </Button>
             </div>
           </Card>
         </div>
