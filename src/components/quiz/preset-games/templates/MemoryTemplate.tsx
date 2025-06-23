@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -174,9 +175,11 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
 
   if (!content || !memoryCards.length) {
     return (
-      <div className="h-full flex items-center justify-center p-4">
-        <div className="text-center">
-          <p className="text-lg font-medium text-primary">Không có dữ liệu trò chơi ghi nhớ</p>
+      <div className="game-container">
+        <div className="game-content flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-lg font-medium text-primary">Không có dữ liệu trò chơi ghi nhớ</p>
+          </div>
         </div>
       </div>
     );
@@ -187,22 +190,24 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   // Game over screen
   if (gameOver) {
     return (
-      <div className="h-full flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 to-background">
-        <Card className="w-full max-w-md p-6 sm:p-8 text-center bg-card border">
-          <div className="text-6xl sm:text-7xl mb-4">😔</div>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-red-600">Hết thời gian!</h2>
-          <p className="mb-4 text-base sm:text-lg text-primary">
-            Bạn đã ghép được <span className="font-bold text-primary">{matchedPairs}/{totalPairs}</span> cặp
-          </p>
-          <p className="mb-6 text-sm text-primary/70">Với {moves} lượt di chuyển</p>
-          <Button 
-            onClick={handleRestart} 
-            className="w-full"
-          >
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Thử Lại
-          </Button>
-        </Card>
+      <div className="game-container bg-gradient-to-br from-primary/5 to-background">
+        <div className="game-content flex items-center justify-center">
+          <Card className="compact-card p-6 sm:p-8 text-center bg-card border">
+            <div className="text-6xl sm:text-7xl mb-4">😔</div>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-red-600">Hết thời gian!</h2>
+            <p className="mb-4 text-base sm:text-lg text-primary">
+              Bạn đã ghép được <span className="font-bold text-primary">{matchedPairs}/{totalPairs}</span> cặp
+            </p>
+            <p className="mb-6 text-sm text-primary/70">Với {moves} lượt di chuyển</p>
+            <Button 
+              onClick={handleRestart} 
+              className="w-full"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Thử Lại
+            </Button>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -210,30 +215,32 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   // Win screen
   if (gameWon) {
     return (
-      <div className="h-full flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 to-background">
-        <Card className="w-full max-w-md p-6 sm:p-8 text-center bg-card border">
-          <Trophy className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-500 mx-auto mb-4" />
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
-          <p className="mb-2 text-base sm:text-lg text-primary">
-            Bạn đã hoàn thành trò chơi với <span className="font-bold text-primary">{moves}</span> lượt.
-          </p>
-          <p className="mb-4 text-sm text-primary/70">
-            Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-          </p>
-          <div className="mb-6">
-            <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">
-              {matchedPairs}/{totalPairs}
+      <div className="game-container bg-gradient-to-br from-primary/5 to-background">
+        <div className="game-content flex items-center justify-center">
+          <Card className="compact-card p-6 sm:p-8 text-center bg-card border">
+            <Trophy className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
+            <p className="mb-2 text-base sm:text-lg text-primary">
+              Bạn đã hoàn thành trò chơi với <span className="font-bold text-primary">{moves}</span> lượt.
+            </p>
+            <p className="mb-4 text-sm text-primary/70">
+              Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+            </p>
+            <div className="mb-6">
+              <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">
+                {matchedPairs}/{totalPairs}
+              </div>
+              <Progress value={100} className="h-2 sm:h-3" />
             </div>
-            <Progress value={100} className="h-2 sm:h-3" />
-          </div>
-          <Button 
-            onClick={handleRestart} 
-            className="w-full"
-          >
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Chơi Lại
-          </Button>
-        </Card>
+            <Button 
+              onClick={handleRestart} 
+              className="w-full"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Chơi Lại
+            </Button>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -247,9 +254,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-primary/5 to-background">
+    <div className="game-container bg-gradient-to-br from-primary/5 to-background">
       {/* Header với thông tin trạng thái */}
-      <div className="flex-shrink-0 p-2 sm:p-3 border-b border-border">
+      <div className="game-header">
         <div className="flex justify-between items-center mb-2">
           <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
             Cặp: {matchedPairs}/{totalPairs}
@@ -268,63 +275,61 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
       </div>
 
       {/* Game area - main content */}
-      <div className="flex-1 overflow-auto">
-        <div className="p-2 sm:p-3 lg:p-4 h-full">
-          <div className="max-w-4xl mx-auto h-full flex items-center justify-center">
-            <div className={`grid ${getGridCols()} gap-1.5 sm:gap-2 lg:gap-3 w-full max-h-full`}>
-              {cards.map((card, index) => (
-                <div 
-                  key={index}
-                  className="aspect-square cursor-pointer perspective-1000 min-w-0"
-                  onClick={() => handleCardClick(index)}
+      <div className="game-content">
+        <div className="responsive-card mx-auto h-full flex items-center justify-center">
+          <div className={`grid ${getGridCols()} gap-1.5 sm:gap-2 lg:gap-3 w-full max-h-full`}>
+            {cards.map((card, index) => (
+              <div 
+                key={index}
+                className="aspect-square cursor-pointer perspective-1000 min-w-0"
+                onClick={() => handleCardClick(index)}
+                style={{
+                  transformStyle: 'preserve-3d',
+                  transition: 'transform 0.6s',
+                  transform: card.flipped || card.matched ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                }}
+              >
+                {/* Card back */}
+                <Card 
+                  className={`
+                    absolute inset-0 flex items-center justify-center 
+                    bg-muted border border-border
+                    transition-all duration-300 hover:shadow-lg hover:scale-105
+                    ${card.matched ? 'opacity-50' : 'opacity-100'}
+                  `}
+                  style={{ backfaceVisibility: 'hidden' }}
+                >
+                  <div className="text-primary/60 text-xs sm:text-sm lg:text-base font-bold">?</div>
+                </Card>
+                
+                {/* Card front */}
+                <Card 
+                  className={`
+                    absolute inset-0 flex items-center justify-center p-1 sm:p-2
+                    bg-card border
+                    ${card.matched 
+                      ? 'border-green-400 bg-green-50 text-green-800' 
+                      : 'border-border text-primary'
+                    }
+                  `}
                   style={{
-                    transformStyle: 'preserve-3d',
-                    transition: 'transform 0.6s',
-                    transform: card.flipped || card.matched ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                    backfaceVisibility: 'hidden',
+                    transform: 'rotateY(180deg)'
                   }}
                 >
-                  {/* Card back */}
-                  <Card 
-                    className={`
-                      absolute inset-0 flex items-center justify-center 
-                      bg-muted border border-border
-                      transition-all duration-300 hover:shadow-lg hover:scale-105
-                      ${card.matched ? 'opacity-50' : 'opacity-100'}
-                    `}
-                    style={{ backfaceVisibility: 'hidden' }}
-                  >
-                    <div className="text-primary/60 text-sm sm:text-base lg:text-lg font-bold">?</div>
-                  </Card>
-                  
-                  {/* Card front */}
-                  <Card 
-                    className={`
-                      absolute inset-0 flex items-center justify-center p-1 sm:p-2
-                      bg-card border
-                      ${card.matched 
-                        ? 'border-green-400 bg-green-50 text-green-800' 
-                        : 'border-border text-primary'
-                      }
-                    `}
-                    style={{
-                      backfaceVisibility: 'hidden',
-                      transform: 'rotateY(180deg)'
-                    }}
-                  >
-                    <div className="text-center text-xs sm:text-sm font-medium break-words overflow-hidden leading-tight">
-                      {card.content}
-                    </div>
-                  </Card>
-                </div>
-              ))}
-            </div>
+                  <div className="text-center text-xs sm:text-sm font-medium break-words overflow-hidden leading-tight">
+                    {card.content}
+                  </div>
+                </Card>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Footer với actions */}
-      <div className="flex-shrink-0 p-2 sm:p-3 border-t border-border bg-muted/30">
-        <div className="flex gap-2 max-w-4xl mx-auto">
+      <div className="game-controls">
+        <div className="responsive-card mx-auto flex gap-2">
           <Button
             variant="outline"
             onClick={handleHint}

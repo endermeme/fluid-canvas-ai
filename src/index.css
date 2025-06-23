@@ -137,6 +137,40 @@
 }
 
 @layer components {
+  /* Game Layout Utilities */
+  .game-container {
+    @apply w-full h-full max-w-none mx-auto flex flex-col;
+    max-height: calc(100vh - 2rem);
+  }
+  
+  .game-content {
+    @apply flex-1 overflow-hidden p-3 sm:p-4;
+    min-height: 0;
+  }
+  
+  .game-controls {
+    @apply flex-shrink-0 p-2 sm:p-3 border-t border-border bg-white/80 backdrop-blur-sm;
+    position: sticky;
+    bottom: 0;
+  }
+  
+  .game-header {
+    @apply flex-shrink-0 p-2 sm:p-3 border-b border-border;
+  }
+  
+  /* Responsive Card Containers */
+  .responsive-card {
+    @apply w-full max-w-2xl lg:max-w-3xl mx-auto;
+    max-height: clamp(400px, 85vh, 700px);
+  }
+  
+  .compact-card {
+    @apply w-full;
+    max-width: clamp(320px, 95vw, 600px);
+    max-height: clamp(300px, 80vh, 600px);
+  }
+  
+  /* Canvas and Grid */
   .canvas-grid {
     background-image: linear-gradient(to right, theme('colors.canvas.grid') 1px, transparent 1px),
                       linear-gradient(to bottom, theme('colors.canvas.grid') 1px, transparent 1px);
@@ -204,18 +238,6 @@
     @apply animate-breathe;
   }
   
-  /* Hiệu ứng responsive centering */
-  .responsive-center {
-    @apply flex items-center justify-center;
-    min-height: clamp(400px, 100vh, 900px);
-  }
-  
-  /* Tối ưu container sizing */
-  .constrained-container {
-    width: clamp(320px, 90vw, 800px);
-    max-height: clamp(400px, 85vh, 700px);
-  }
-  
   /* Touch feedback tối ưu */
   .touch-effect {
     @apply relative overflow-hidden;
@@ -237,9 +259,32 @@
          hover:bg-primary/10 hover:border-primary/30 transition-all duration-200
          shadow-sm active:scale-95;
   }
+  
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .game-container {
+      max-height: 100vh;
+    }
+    
+    .game-content {
+      @apply p-2;
+    }
+    
+    .game-controls {
+      @apply p-2;
+    }
+    
+    .responsive-card {
+      @apply max-w-none;
+      max-height: 95vh;
+    }
+    
+    .compact-card {
+      max-width: 98vw;
+      max-height: 90vh;
+    }
+  }
 }
-
-/* ... keep existing code (CSS animations and other styles) */
 
 .ai-suggestion {
   @apply bg-canvas-ai-suggestion border-l-2 border-primary/50 pl-2 py-1 text-sm text-foreground/80 italic;
@@ -332,11 +377,6 @@
   
   .mobile-font {
     font-size: 16px;
-  }
-  
-  .constrained-container {
-    width: 95vw;
-    max-height: 90vh;
   }
 }
 

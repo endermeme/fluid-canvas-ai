@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -143,9 +144,11 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
 
   if (!content || !cards.length) {
     return (
-      <div className="h-full flex items-center justify-center p-4">
-        <div className="text-center">
-          <p className="text-lg font-medium text-primary">Không có dữ liệu thẻ ghi nhớ</p>
+      <div className="game-container">
+        <div className="game-content flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-lg font-medium text-primary">Không có dữ liệu thẻ ghi nhớ</p>
+          </div>
         </div>
       </div>
     );
@@ -158,9 +161,9 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
   };
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-primary/5 to-background">
+    <div className="game-container bg-gradient-to-br from-primary/5 to-background">
       {/* Header */}
-      <div className="flex-shrink-0 p-2 sm:p-3 border-b border-border">
+      <div className="game-header">
         <div className="flex justify-between items-center mb-2">
           <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
             Thẻ {currentCard + 1}/{cards.length}
@@ -178,8 +181,8 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
       </div>
 
       {/* Card area - main content */}
-      <div className="flex-1 flex items-center justify-center p-3 sm:p-4">
-        <div className="w-full max-w-2xl lg:max-w-3xl">
+      <div className="game-content flex items-center justify-center">
+        <div className="compact-card">
           <div 
             className="relative w-full aspect-[4/3] sm:aspect-[3/2] cursor-pointer group"
             onClick={handleFlip}
@@ -204,8 +207,8 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
                     </div>
                   )}
                 </div>
-                <ScrollArea className="max-h-40 sm:max-h-60 lg:max-h-80">
-                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-primary break-words whitespace-pre-wrap px-2">
+                <ScrollArea className="max-h-32 sm:max-h-48">
+                  <div className="text-base sm:text-lg lg:text-xl font-bold text-primary break-words whitespace-pre-wrap px-2">
                     {cards[currentCard].front}
                   </div>
                 </ScrollArea>
@@ -224,8 +227,8 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
                 <div className="text-xs sm:text-sm uppercase tracking-wider text-primary/70 mb-2 sm:mb-3">
                   Mặt sau
                 </div>
-                <ScrollArea className="max-h-40 sm:max-h-60 lg:max-h-80">
-                  <div className="text-base sm:text-lg lg:text-xl text-primary break-words whitespace-pre-wrap px-2">
+                <ScrollArea className="max-h-32 sm:max-h-48">
+                  <div className="text-sm sm:text-base lg:text-lg text-primary break-words whitespace-pre-wrap px-2">
                     {cards[currentCard].back}
                   </div>
                 </ScrollArea>
@@ -236,8 +239,8 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
       </div>
 
       {/* Controls */}
-      <div className="flex-shrink-0 p-2 sm:p-3 border-t border-border bg-muted/30">
-        <div className="max-w-2xl lg:max-w-3xl mx-auto space-y-2 sm:space-y-3">
+      <div className="game-controls">
+        <div className="compact-card mx-auto space-y-2 sm:space-y-3">
           {/* Auto-flip toggle */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

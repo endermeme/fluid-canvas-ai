@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -172,9 +173,11 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
 
   if (!content || !sentences.length) {
     return (
-      <div className="h-full flex items-center justify-center p-4">
-        <div className="text-center">
-          <p className="text-lg font-medium text-primary">Không có dữ liệu câu</p>
+      <div className="game-container">
+        <div className="game-content flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-lg font-medium text-primary">Không có dữ liệu câu</p>
+          </div>
         </div>
       </div>
     );
@@ -184,30 +187,32 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
     const percentage = Math.round((score / sentences.length) * 100);
     
     return (
-      <div className="h-full flex items-center justify-center p-4 bg-white">
-        <Card className="w-full max-w-md p-6 text-center bg-white border">
-          <h2 className="text-2xl font-bold mb-4 text-primary">Kết quả</h2>
-          <p className="text-lg mb-4 text-primary">
-            Chủ đề: <span className="font-semibold text-primary">{content.title || topic}</span>
-          </p>
-          
-          <div className="mb-6">
-            <div className="flex justify-between mb-2">
-              <span className="text-primary">Điểm số của bạn</span>
-              <span className="font-bold text-primary">{percentage}%</span>
+      <div className="game-container bg-white">
+        <div className="game-content flex items-center justify-center">
+          <Card className="compact-card p-6 text-center bg-white border">
+            <h2 className="text-2xl font-bold mb-4 text-primary">Kết quả</h2>
+            <p className="text-lg mb-4 text-primary">
+              Chủ đề: <span className="font-semibold text-primary">{content.title || topic}</span>
+            </p>
+            
+            <div className="mb-6">
+              <div className="flex justify-between mb-2">
+                <span className="text-primary">Điểm số của bạn</span>
+                <span className="font-bold text-primary">{percentage}%</span>
+              </div>
+              <Progress value={percentage} className="h-3" />
             </div>
-            <Progress value={percentage} className="h-3" />
-          </div>
-          
-          <div className="text-2xl font-bold mb-6 text-primary">
-            {score} / {sentences.length}
-          </div>
-          
-          <Button onClick={handleRestart} className="w-full">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Làm lại
-          </Button>
-        </Card>
+            
+            <div className="text-2xl font-bold mb-6 text-primary">
+              {score} / {sentences.length}
+            </div>
+            
+            <Button onClick={handleRestart} className="w-full">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Làm lại
+            </Button>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -215,9 +220,9 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
   const progress = ((currentSentence + 1) / sentences.length) * 100;
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="game-container bg-white">
       {/* Header với progress */}
-      <div className="flex-shrink-0 p-2 sm:p-3 border-b border-border">
+      <div className="game-header">
         <div className="flex justify-between items-center mb-2">
           <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
             Câu {currentSentence + 1}/{sentences.length}
@@ -231,57 +236,55 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
       </div>
 
       {/* Main content */}
-      <div className="flex-1 overflow-auto">
-        <div className="p-3 sm:p-4 h-full max-w-3xl mx-auto">
-          <div className="space-y-3 sm:space-y-4 h-full flex flex-col">
-            <div className="text-center">
-              <h3 className="text-base sm:text-lg font-medium mb-1 text-primary">Sắp xếp lại từng từ để tạo thành câu hoàn chỉnh</h3>
-              <p className="text-primary/70 text-sm">Chọn từ theo đúng thứ tự</p>
-            </div>
-            
-            <Card className="p-3 sm:p-4 min-h-[80px] sm:min-h-[100px] flex flex-wrap gap-2 items-start content-start border border-border bg-white">
-              {orderedWords.map((word, index) => (
-                <button
-                  key={`ordered-${index}`}
-                  onClick={() => handleWordRemove(word, index)}
-                  disabled={isChecking}
-                  className={`py-2 px-3 rounded-lg transition-colors text-sm ${
-                    isChecking 
-                      ? sentences[currentSentence].correctOrder[index] === sentences[currentSentence].words.indexOf(word)
-                        ? 'bg-green-100 border border-green-500'
-                        : 'bg-red-100 border border-red-500'
-                      : 'bg-muted hover:bg-muted/80 text-primary'
-                  }`}
-                >
-                  {word}
-                </button>
-              ))}
-              {orderedWords.length === 0 && (
-                <div className="w-full h-full flex items-center justify-center text-primary/70 p-3">
-                  <p className="text-sm">Chọn từ bên dưới để bắt đầu sắp xếp</p>
-                </div>
-              )}
-            </Card>
-            
-            <div className="p-3 sm:p-4 bg-muted rounded-lg flex flex-wrap gap-2 border border-border">
-              {shuffledWords.map((word, index) => (
-                <button
-                  key={`shuffled-${index}`}
-                  onClick={() => handleWordSelect(word, index)}
-                  disabled={isChecking}
-                  className="py-2 px-3 bg-white hover:bg-white/80 rounded-lg transition-colors text-sm border border-border text-primary"
-                >
-                  {word}
-                </button>
-              ))}
-            </div>
+      <div className="game-content">
+        <div className="responsive-card mx-auto h-full flex flex-col space-y-3 sm:space-y-4">
+          <div className="text-center">
+            <h3 className="text-base sm:text-lg font-medium mb-1 text-primary">Sắp xếp lại từng từ để tạo thành câu hoàn chỉnh</h3>
+            <p className="text-primary/70 text-sm">Chọn từ theo đúng thứ tự</p>
+          </div>
+          
+          <Card className="p-3 sm:p-4 min-h-[80px] sm:min-h-[100px] flex flex-wrap gap-2 items-start content-start border border-border bg-white">
+            {orderedWords.map((word, index) => (
+              <button
+                key={`ordered-${index}`}
+                onClick={() => handleWordRemove(word, index)}
+                disabled={isChecking}
+                className={`py-2 px-3 rounded-lg transition-colors text-sm ${
+                  isChecking 
+                    ? sentences[currentSentence].correctOrder[index] === sentences[currentSentence].words.indexOf(word)
+                      ? 'bg-green-100 border border-green-500'
+                      : 'bg-red-100 border border-red-500'
+                    : 'bg-muted hover:bg-muted/80 text-primary'
+                }`}
+              >
+                {word}
+              </button>
+            ))}
+            {orderedWords.length === 0 && (
+              <div className="w-full h-full flex items-center justify-center text-primary/70 p-3">
+                <p className="text-sm">Chọn từ bên dưới để bắt đầu sắp xếp</p>
+              </div>
+            )}
+          </Card>
+          
+          <div className="p-3 sm:p-4 bg-muted rounded-lg flex flex-wrap gap-2 border border-border">
+            {shuffledWords.map((word, index) => (
+              <button
+                key={`shuffled-${index}`}
+                onClick={() => handleWordSelect(word, index)}
+                disabled={isChecking}
+                className="py-2 px-3 bg-white hover:bg-white/80 rounded-lg transition-colors text-sm border border-border text-primary"
+              >
+                {word}
+              </button>
+            ))}
           </div>
         </div>
       </div>
       
       {/* Footer với controls */}
-      <div className="flex-shrink-0 p-2 sm:p-3 border-t border-border bg-white">
-        <div className="max-w-3xl mx-auto">
+      <div className="game-controls">
+        <div className="responsive-card mx-auto">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <Button
               variant="outline"
