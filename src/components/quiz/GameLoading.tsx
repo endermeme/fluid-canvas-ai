@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Brain, Zap, Target, Trophy, Star, Code, Lightbulb, Settings, FlaskConical } from 'lucide-react';
-import BackgroundParticles from '@/components/ui/background-particles';
+
 
 interface GameLoadingProps {
   isVisible?: boolean;
@@ -83,10 +83,6 @@ const GameLoading: React.FC<GameLoadingProps> = ({
             exit={{ scale: 0.9, opacity: 0 }}
             className="relative bg-white rounded-3xl p-12 mx-4 max-w-xl w-full shadow-2xl border border-gray-200/50"
           >
-            {/* Background particles */}
-            <div className="absolute inset-0 overflow-hidden rounded-3xl">
-              <BackgroundParticles particleCount={8} />
-            </div>
 
             <div className="relative z-10 text-center space-y-10">
               {/* Main rotating brain icon with circular progress */}

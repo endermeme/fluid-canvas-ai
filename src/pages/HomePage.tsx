@@ -5,21 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Gamepad, SparklesIcon, History, Share2, Zap, Atom, FlaskConical, Microscope, TestTube, Telescope, Radiation, Calculator, Beaker, Dna } from 'lucide-react';
 import { motion } from 'framer-motion';
-import BackgroundParticles from '@/components/ui/background-particles';
-
 const HomePage: React.FC = () => {
-  // Science icons for background (stable positions)
-  const scienceIcons = React.useMemo(() => [
-    { Icon: Atom, position: { top: '10%', left: '8%' }, rotation: 360, duration: 25 },
-    { Icon: FlaskConical, position: { top: '20%', right: '10%' }, rotation: -180, duration: 30 },
-    { Icon: Microscope, position: { bottom: '25%', left: '5%' }, rotation: 180, duration: 35 },
-    { Icon: TestTube, position: { top: '60%', right: '15%' }, rotation: -360, duration: 28 },
-    { Icon: Telescope, position: { bottom: '15%', right: '25%' }, rotation: 270, duration: 32 },
-    { Icon: Radiation, position: { top: '40%', left: '3%' }, rotation: -270, duration: 26 },
-    { Icon: Calculator, position: { bottom: '50%', right: '8%' }, rotation: 180, duration: 24 },
-    { Icon: Beaker, position: { top: '75%', left: '25%' }, rotation: -360, duration: 29 },
-    { Icon: Dna, position: { top: '30%', left: '88%' }, rotation: 360, duration: 31 },
-  ], []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -73,66 +59,7 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950 relative overflow-hidden">
-      {/* Optimized Background Animation */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Neural Network Grid */}
-        <div className="absolute inset-0 opacity-10">
-          <svg className="w-full h-full" viewBox="0 0 1000 1000">
-            <defs>
-              <pattern id="neural-grid" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-                <circle cx="50" cy="50" r="2" fill="currentColor" className="text-blue-500" />
-                <line x1="50" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
-                <line x1="50" y1="50" x2="50" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-blue-400" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#neural-grid)" />
-          </svg>
-        </div>
-
-        {/* Floating Quantum Particles */}
-        <BackgroundParticles particleCount={15} />
-
-        {/* Science Icons Animation */}
-        {scienceIcons.map((item, index) => (
-          <motion.div
-            key={index}
-            className="absolute opacity-8"
-            style={item.position}
-            animate={{
-              rotate: item.rotation,
-            }}
-            transition={{
-              duration: item.duration,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          >
-            <item.Icon className="w-12 h-12 text-blue-400/20" />
-          </motion.div>
-        ))}
-
-        {/* Pulsing Energy Waves */}
-        {[...Array(3)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute top-1/2 left-1/2 w-80 h-80 border border-blue-300/20 rounded-full"
-            style={{
-              transform: 'translate(-50%, -50%)',
-            }}
-            animate={{
-              scale: [1, 3, 1],
-              opacity: [0.3, 0, 0.3],
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              delay: i * 3.3,
-              ease: "easeInOut"
-            }}
-          />
-        ))}
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950 relative">
 
       <motion.div 
         className="relative z-10 min-h-screen flex items-center justify-center p-5"
