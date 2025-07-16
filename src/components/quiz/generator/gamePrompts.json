@@ -1,19 +1,18 @@
 
 {
   "customGamePrompt": {
-    "base": "Tạo một game HTML5 tràn màn hình về chủ đề \"{topic}\".",
+    "base": "Tạo một game HTML5 toàn màn hình thú vị về chủ đề \"{topic}\".",
     "designPrinciples": [
-      "Tạo HTML5 hoàn chỉnh với game PHẢI tràn TOÀN BỘ màn hình",
-      "Thêm reset CSS đầy đủ: margin/padding 0, box-sizing: border-box",
-      "Cài đặt body/html với width/height 100%, overflow hidden",
-      "Game PHẢI đẹp với UI hiện đại, màu sắc tương phản rõ ràng",
-      "Toàn bộ text trong game bằng tiếng Việt",
-      "PHẢI có nút \"BẮT ĐẦU\" cỡ lớn (>50px) và hướng dẫn ngắn gọn",
-      "Tối thiểu hóa chữ, dùng hình ảnh và biểu tượng trực quan",
-      "Tất cả UI phần tử ít nhất 44px, font chữ lớn (>18px)",
-      "Game phải responsive và đẹp ở mọi kích thước màn hình",
-      "KHÔNG PHÂN CHIA màn hình thành các phần nhỏ, chiếm toàn bộ không gian"
+      "Game PHẢI chiếm TOÀN BỘ màn hình với kích thước lớn, tỷ lệ 16:9 hoặc toàn màn hình",
+      "Thiết kế game với graphics đẹp, animation mượt, hiệu ứng hấp dẫn",
+      "Ít text, nhiều visual - sử dụng icons, hình ảnh, màu sắc để truyền tải thông tin",
+      "Game phải FUN và engaging với mechanics thú vị, không chỉ là quiz đơn giản",
+      "HTML5 Canvas hoặc CSS animations cho trải nghiệm mượt mà",
+      "Responsive design cho mọi thiết bị, controls lớn và dễ touch",
+      "Nút bắt đầu to và bắt mắt, gameplay ngay lập tức",
+      "Âm thanh (nếu có) phải đơn giản và không gây phiền nhiễu",
+      "Game phải complete trong 1 file HTML với CSS và JS inline"
     ],
-    "instruction": "QUAN TRỌNG: Trả về HTML đầy đủ, không giải thích, không markdown. Game PHẢI tràn đầy màn hình trên mọi thiết bị."
+    "instruction": "Tạo game hoàn chỉnh, vui nhộn với visual đẹp. Trả về ONLY HTML, không markdown, không giải thích."
   }
 }
