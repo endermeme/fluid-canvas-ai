@@ -161,7 +161,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
   };
 
   return (
-    <div className="game-container bg-gradient-to-br from-primary/5 to-background">
+    <div className="unified-game-container">
       {/* Header */}
       <div className="game-header">
         <div className="flex justify-between items-center mb-2">
@@ -182,7 +182,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
 
       {/* Card area - main content */}
       <div className="game-content flex items-center justify-center">
-        <div className="compact-card">
+        <div className="responsive-card max-w-2xl mx-auto">
           <div 
             className="relative w-full aspect-[4/3] sm:aspect-[3/2] cursor-pointer group"
             onClick={handleFlip}
@@ -240,7 +240,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
 
       {/* Controls */}
       <div className="game-controls">
-        <div className="compact-card mx-auto space-y-2 sm:space-y-3">
+        <div className="responsive-card mx-auto space-y-2 sm:space-y-3">
           {/* Auto-flip toggle */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

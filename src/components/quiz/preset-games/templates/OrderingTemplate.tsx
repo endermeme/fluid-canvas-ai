@@ -187,9 +187,9 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
     const percentage = Math.round((score / sentences.length) * 100);
     
     return (
-      <div className="game-container bg-white">
+      <div className="unified-game-container">
         <div className="game-content flex items-center justify-center">
-          <Card className="compact-card p-6 text-center bg-white border">
+          <Card className="compact-card p-6 text-center bg-card border">
             <h2 className="text-2xl font-bold mb-4 text-primary">Kết quả</h2>
             <p className="text-lg mb-4 text-primary">
               Chủ đề: <span className="font-semibold text-primary">{content.title || topic}</span>
@@ -219,7 +219,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
   const progress = ((currentSentence + 1) / sentences.length) * 100;
 
   return (
-    <div className="game-container bg-white">
+    <div className="unified-game-container">
       {/* Header với progress */}
       <div className="game-header">
         <div className="flex justify-between items-center mb-2">
@@ -242,7 +242,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
             <p className="text-primary/70 text-sm">Chọn từ theo đúng thứ tự</p>
           </div>
           
-          <Card className="p-3 sm:p-4 min-h-[80px] sm:min-h-[100px] flex flex-wrap gap-2 items-start content-start border border-border bg-white">
+          <Card className="p-3 sm:p-4 min-h-[80px] sm:min-h-[100px] flex flex-wrap gap-2 items-start content-start border border-border bg-card">
             {orderedWords.map((word, index) => (
               <button
                 key={`ordered-${index}`}
@@ -272,7 +272,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
                 key={`shuffled-${index}`}
                 onClick={() => handleWordSelect(word, index)}
                 disabled={isChecking}
-                className="py-2 px-3 bg-white hover:bg-white/80 rounded-lg transition-colors text-sm border border-border text-primary"
+                className="py-2 px-3 bg-card hover:bg-card/80 rounded-lg transition-colors text-sm border border-border text-primary"
               >
                 {word}
               </button>

@@ -459,7 +459,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
 
   return (
-    <div className="game-container">
+    <div className="unified-game-container">
       <div className="game-header">
         <div className="flex justify-between items-center mb-2">
           <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">

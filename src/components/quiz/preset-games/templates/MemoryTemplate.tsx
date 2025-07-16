@@ -190,7 +190,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   // Game over screen
   if (gameOver) {
     return (
-      <div className="game-container bg-gradient-to-br from-primary/5 to-background">
+      <div className="unified-game-container">
         <div className="game-content flex items-center justify-center">
           <Card className="compact-card p-6 sm:p-8 text-center bg-card border">
             <div className="text-6xl sm:text-7xl mb-4">😔</div>
@@ -211,7 +211,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   // Win screen
   if (gameWon) {
     return (
-      <div className="game-container bg-gradient-to-br from-primary/5 to-background">
+      <div className="unified-game-container">
         <div className="game-content flex items-center justify-center">
           <Card className="compact-card p-6 sm:p-8 text-center bg-card border">
             <Trophy className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-500 mx-auto mb-4" />
@@ -246,7 +246,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
   };
 
   return (
-    <div className="game-container bg-gradient-to-br from-primary/5 to-background">
+    <div className="unified-game-container">
       {/* Header với thông tin trạng thái */}
       <div className="game-header">
         <div className="flex justify-between items-center mb-2">

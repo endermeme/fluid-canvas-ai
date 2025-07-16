@@ -335,7 +335,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
   };
 
   return (
-    <div className="game-container">
+    <div className="unified-game-container">
       {/* Header with progress and timer */}
       <div className="game-header">
         <div className="flex justify-between items-center mb-2">
@@ -355,7 +355,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
         <div className="responsive-card mx-auto grid grid-cols-1 lg:grid-cols-4 gap-2 sm:gap-4">
           {/* Word grid */}
           <div className="lg:col-span-3">
-            <Card className="p-2 sm:p-4 bg-white border">
+            <Card className="p-2 sm:p-4 bg-card border">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-sm sm:text-lg font-medium text-primary">Tìm từ ẩn</h3>
                 <div className="flex items-center space-x-1">
@@ -424,7 +424,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
           {/* Word list */}
           {content?.settings?.showWordList && (
             <div className="lg:col-span-1">
-              <Card className="p-2 sm:p-4 bg-white border">
+              <Card className="p-2 sm:p-4 bg-card border">
                 <h3 className="text-sm sm:text-lg font-medium mb-2 flex items-center text-primary">
                   <Search className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                   Danh sách từ
@@ -470,10 +470,10 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
         </div>
       </div>
       
-      {/* Game over or win state */}
+      {/* Game over or win state overlay */}
       {(gameOver || gameWon) && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <Card className="compact-card p-4 sm:p-6 text-center bg-white border">
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <Card className="compact-card p-4 sm:p-6 text-center bg-card border">
             <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-muted">
               {gameWon ? (
                 <div className="text-green-500 text-2xl sm:text-3xl">🎉</div>
