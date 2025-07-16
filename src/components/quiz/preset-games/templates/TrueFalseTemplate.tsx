@@ -365,7 +365,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   }, [totalTimeLeft, gameStarted, showResult, toast]);
 
   const handleAnswer = (answer: boolean) => {
-    if (currentAnswer !== null) return;
+    if (userAnswers[currentQuestion] !== undefined) return;
     const newAnswers = [...userAnswers];
     newAnswers[currentQuestion] = answer;
     setUserAnswers(newAnswers);

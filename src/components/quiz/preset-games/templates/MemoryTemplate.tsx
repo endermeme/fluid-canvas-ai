@@ -237,12 +237,21 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
     );
   }
 
-  // Calculate grid columns based on number of cards and screen size
+  // Calculate grid columns for square layout
   const getGridCols = () => {
-    if (cards.length <= 8) return 'grid-cols-4 sm:grid-cols-4';
-    if (cards.length <= 12) return 'grid-cols-4 sm:grid-cols-6';
-    if (cards.length <= 16) return 'grid-cols-4 sm:grid-cols-6 lg:grid-cols-8';
-    return 'grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10';
+    const totalCards = cards.length;
+    const sqrtCards = Math.sqrt(totalCards);
+    const cols = Math.ceil(sqrtCards);
+    
+    // Create square grids based on total cards
+    if (totalCards <= 16) {
+      if (totalCards <= 4) return 'grid-cols-2';
+      if (totalCards <= 9) return 'grid-cols-3';
+      return 'grid-cols-4';
+    }
+    if (totalCards <= 25) return 'grid-cols-5';
+    if (totalCards <= 36) return 'grid-cols-6';
+    return `grid-cols-${cols}`;
   };
 
   return (
