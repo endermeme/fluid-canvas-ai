@@ -21,7 +21,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
   const [isAnswered, setIsAnswered] = useState(false);
   const [timeLeft, setTimeLeft] = useState(gameContent?.settings?.timePerQuestion || 30);
   const [totalTimeLeft, setTotalTimeLeft] = useState(gameContent?.settings?.totalTime || 300);
-  const [timerRunning, setTimerRunning] = useState(true);
+  const [timerRunning, setTimerRunning] = useState(gameContent?.settings?.useTimer !== false);
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
@@ -45,6 +45,8 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
   }, [gameContent, questions, gameStarted]);
 
   useEffect(() => {
+    if (gameContent?.settings?.useTimer === false) return;
+    
     if (timeLeft > 0 && timerRunning && !isAnswered) {
       const timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
@@ -61,9 +63,12 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         variant: "destructive",
       });
     }
-  }, [timeLeft, timerRunning, isAnswered, toast]);
+  }, [timeLeft, timerRunning, isAnswered, toast, gameContent?.settings?.useTimer]);
 
   useEffect(() => {
+    if (gameContent?.settings?.useTimer === false) return;
+    if (gameContent?.settings?.totalTime === 0) return;
+    
     if (totalTimeLeft > 0 && gameStarted && !showResult) {
       const timer = setTimeout(() => {
         setTotalTimeLeft(totalTimeLeft - 1);
@@ -79,7 +84,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
         variant: "destructive",
       });
     }
-  }, [totalTimeLeft, gameStarted, showResult, toast]);
+  }, [totalTimeLeft, gameStarted, showResult, toast, gameContent?.settings?.useTimer, gameContent?.settings?.totalTime]);
 
   const handleOptionSelect = (optionIndex: number) => {
     if (isAnswered) return;
@@ -180,9 +185,11 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
               <Progress value={percentage} className="h-3" />
             </div>
             
-            <div className="text-sm mb-6 text-primary/70">
-              Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
-            </div>
+            {gameContent?.settings?.useTimer !== false && gameContent?.settings?.totalTime > 0 && (
+              <div className="text-sm mb-6 text-primary/70">
+                Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
+              </div>
+            )}
             
             <div className="text-center text-sm text-primary/70">
               Sử dụng nút làm mới ở header để chơi lại
@@ -208,15 +215,19 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
           <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
             Câu {currentQuestion + 1}/{questions.length}
           </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <div className="flex items-center px-2 py-1 bg-muted rounded-full text-xs sm:text-sm font-medium">
-              <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
-              <span className="text-primary">{timeLeft}s</span>
+          {gameContent?.settings?.useTimer !== false && (
+            <div className="flex items-center gap-1 sm:gap-2">
+              <div className="flex items-center px-2 py-1 bg-muted rounded-full text-xs sm:text-sm font-medium">
+                <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
+                <span className="text-primary">{timeLeft}s</span>
+              </div>
+              {gameContent?.settings?.totalTime > 0 && (
+                <div className="hidden sm:flex items-center px-2 py-1 bg-muted rounded-full text-xs sm:text-sm font-medium">
+                  <span className="text-primary">Tổng: {formattedTotalTime}</span>
+                </div>
+              )}
             </div>
-            <div className="hidden sm:flex items-center px-2 py-1 bg-muted rounded-full text-xs sm:text-sm font-medium">
-              <span className="text-primary">Tổng: {formattedTotalTime}</span>
-            </div>
-          </div>
+          )}
         </div>
         <Progress value={progress} className="h-1.5 sm:h-2" />
       </div>
@@ -280,7 +291,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
           </div>
 
           {/* Explanation */}
-          {isAnswered && question.explanation && (
+          {isAnswered && question.explanation && gameContent?.settings?.showExplanation !== false && (
             <Card className="p-3 sm:p-4 bg-primary/5 border-primary/20">
               <div className="flex items-start">
                 <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 sm:mr-3 mt-0.5">
