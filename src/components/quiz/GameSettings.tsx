@@ -19,6 +19,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { TimerModeSelector } from './components/TimerModeSelector';
 import { GameSpecificSettings } from './components/GameSpecificSettings';
 import { QuickPresets } from './components/QuickPresets';
+import { AdvancedSettingsPanel } from './components/AdvancedSettingsPanel';
+import { SettingsTemplateManager } from './components/SettingsTemplateManager';
 
 interface GameSettingsProps {
   onStart: (settings: GameSettingsData) => void;
@@ -400,6 +402,24 @@ const GameSettings = ({
               />
             </div>
           )}
+
+          {/* Advanced Settings Panel */}
+          <div className="mt-6">
+            <AdvancedSettingsPanel
+              settings={settings}
+              gameType={gameType?.id || 'quiz'}
+              onChange={(newSettings) => setSettings(prev => ({ ...prev, ...newSettings }))}
+            />
+          </div>
+
+          {/* Settings Template Manager */}
+          <div className="mt-6">
+            <SettingsTemplateManager
+              currentSettings={settings}
+              gameType={gameType?.id || 'quiz'}
+              onLoadTemplate={(templateSettings) => setSettings(templateSettings)}
+            />
+          </div>
 
           {/* Action Buttons */}
           <div className="pt-4 mt-6 border-t border-border/20 flex gap-3">

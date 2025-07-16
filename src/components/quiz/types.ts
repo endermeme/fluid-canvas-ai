@@ -107,3 +107,13 @@ export interface Game {
   score?: number;
   isPublic?: boolean;
 }
+
+export interface SettingsTemplate {
+  id: string;
+  name: string;
+  description: string;
+  settings: GameSettingsData;
+  isDefault?: boolean;
+  gameType?: string;
+  createdAt?: Date;
+}
