@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -162,7 +161,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
   };
 
   return (
-    <div className={cn("relative h-full w-full flex flex-col bg-gradient-to-b from-background to-background/95 shadow-lg rounded-lg overflow-hidden", className)}>
+    <div className={cn("relative h-full w-full flex flex-col overflow-hidden", className)}>
       {/* Sử dụng component QuizHeader mới */}
       {!isCreatingGame && (
         <QuizHeader 
@@ -178,7 +177,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
       )}
       
       {/* Main content */}
-      <div className="flex-1 overflow-hidden p-0 relative">
+      <div className="flex-1 overflow-hidden relative">
         {children}
       </div>
       

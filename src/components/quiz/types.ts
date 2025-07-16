@@ -46,6 +46,7 @@ export interface GameSettingsData {
   allowMultipleCategories?: boolean;
   showCategoryHints?: boolean;
   useCanvas?: boolean;
+  debugMode?: boolean;
 }
 
 export interface GameType {

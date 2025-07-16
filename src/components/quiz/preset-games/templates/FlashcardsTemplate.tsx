@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -5,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, ArrowRight, RefreshCw, Check, X, Clock, Shuffle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Toggle } from '@/components/ui/toggle';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface FlashcardsTemplateProps {
   content: any;
@@ -118,6 +119,20 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
     });
   };
 
+  const handleShuffle = () => {
+    // Shuffle only the remaining cards
+    const shuffledCards = [...cards].sort(() => Math.random() - 0.5);
+    // Reset current card position
+    setCurrentCard(0);
+    setIsFlipped(false);
+    
+    toast({
+      title: "Đã xáo trộn thẻ",
+      description: "Thứ tự các thẻ đã được xáo trộn.",
+      variant: "default",
+    });
+  };
+
   const toggleAutoFlip = () => {
     setAutoFlip(!autoFlip);
     toast({
@@ -128,7 +143,15 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
   };
 
   if (!content || !cards.length) {
-    return <div className="p-4">Không có dữ liệu thẻ ghi nhớ</div>;
+    return (
+      <div className="game-container">
+        <div className="game-content flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-lg font-medium text-primary">Không có dữ liệu thẻ ghi nhớ</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const stats = {
@@ -138,144 +161,153 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
   };
 
   return (
-    <div className="flex flex-col p-4 h-full bg-gradient-to-b from-background to-background/80 relative overflow-hidden">
-      <div className="mb-4 mt-12">
+    <div className="unified-game-container">
+      {/* Header */}
+      <div className="game-header">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+          <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
             Thẻ {currentCard + 1}/{cards.length}
           </div>
-          <div className="text-sm font-medium flex space-x-3">
-            <span className="px-3 py-1 bg-green-100/30 text-green-600 rounded-full">Đã thuộc: {stats.known}</span>
-            <span className="px-3 py-1 bg-red-100/30 text-red-600 rounded-full">Chưa thuộc: {stats.unknown}</span>
+          <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
+            <span className="px-2 py-1 bg-green-100 text-green-600 rounded-full">
+              Thuộc: {stats.known}
+            </span>
+            <span className="px-2 py-1 bg-red-100 text-red-600 rounded-full">
+              Chưa: {stats.unknown}
+            </span>
           </div>
         </div>
-        <Progress value={progress} className="h-2 bg-secondary" />
+        <Progress value={progress} className="h-1.5 sm:h-2" />
       </div>
 
-      <div className="flex-grow flex items-center justify-center mb-4 perspective-1000 overflow-hidden">
-        <div 
-          className="w-full max-w-4xl aspect-[3/2] cursor-pointer relative group px-4"
-          onClick={handleFlip}
-          style={{
-            transformStyle: 'preserve-3d',
-            transition: 'transform 0.6s',
-            transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
-          }}
-        >
-          <Card 
-            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-2 border-primary/20 shadow-lg group-hover:shadow-xl transition-all duration-300 overflow-auto"
-            style={{
-              backfaceVisibility: 'hidden'
-            }}
-          >
-            <div className="text-center max-w-full">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                Nhấn để lật thẻ
-                {autoFlip && !isFlipped && (
-                  <div className="mt-1 flex items-center justify-center">
-                    <Clock className="h-3 w-3 mr-1 text-primary/60" />
-                    <span>Tự động lật sau {timeRemaining}s</span>
-                  </div>
-                )}
-              </div>
-              <div className="text-3xl font-bold text-primary/90 break-words whitespace-pre-wrap">
-                {cards[currentCard].front}
-              </div>
-            </div>
-          </Card>
-          
-          <Card 
-            className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm border-2 border-primary/30 shadow-lg overflow-auto"
-            style={{
-              backfaceVisibility: 'hidden',
-              transform: 'rotateY(180deg)'
-            }}
-          >
-            <div className="text-center max-w-full">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Mặt sau</div>
-              <div className="text-2xl text-primary/90 break-words whitespace-pre-wrap">
-                {cards[currentCard].back}
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-3 bg-background/40 p-3 rounded-lg backdrop-blur-sm border border-primary/10 shadow-sm">
-        <div className="grid grid-cols-4 gap-2">
-          <Button
-            variant="outline"
-            onClick={handlePrevCard}
-            disabled={currentCard === 0}
-            className="bg-background/70 border-primary/20"
-            size="sm"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Trước
-          </Button>
-          
-          <Button
-            variant="outline"
+      {/* Card area - main content */}
+      <div className="game-content flex items-center justify-center">
+        <div className="responsive-card max-w-2xl mx-auto">
+          <div 
+            className="relative w-full aspect-[4/3] sm:aspect-[3/2] cursor-pointer group"
             onClick={handleFlip}
-            className="col-span-2 bg-background/70 border-primary/20"
-            size="sm"
+            style={{
+              transformStyle: 'preserve-3d',
+              transition: 'transform 0.6s',
+              transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+            }}
           >
-            {isFlipped ? "Xem mặt trước" : "Lật thẻ"}
-          </Button>
-          
-          <Button
-            variant="outline"
-            onClick={handleNextCard}
-            disabled={currentCard === cards.length - 1}
-            className="bg-background/70 border-primary/20"
-            size="sm"
-          >
-            Tiếp
-            <ArrowRight className="h-4 w-4 ml-1" />
-          </Button>
+            {/* Front of card */}
+            <Card 
+              className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 lg:p-6 bg-card border-2 border-border shadow-lg group-hover:shadow-xl transition-all duration-300"
+              style={{ backfaceVisibility: 'hidden' }}
+            >
+              <div className="text-center w-full">
+                <div className="text-xs sm:text-sm uppercase tracking-wider text-primary/70 mb-2 sm:mb-3">
+                  Nhấn để lật thẻ
+                  {autoFlip && !isFlipped && (
+                    <div className="mt-1 flex items-center justify-center">
+                      <Clock className="h-3 w-3 mr-1 text-primary/60" />
+                      <span className="text-primary/60">Tự động lật sau {timeRemaining}s</span>
+                    </div>
+                  )}
+                </div>
+                <ScrollArea className="max-h-32 sm:max-h-48">
+                  <div className="text-base sm:text-lg lg:text-xl font-bold text-primary break-words whitespace-pre-wrap px-2">
+                    {cards[currentCard].front}
+                  </div>
+                </ScrollArea>
+              </div>
+            </Card>
+            
+            {/* Back of card */}
+            <Card 
+              className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 lg:p-6 bg-muted border-2 border-border shadow-lg"
+              style={{
+                backfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)'
+              }}
+            >
+              <div className="text-center w-full">
+                <div className="text-xs sm:text-sm uppercase tracking-wider text-primary/70 mb-2 sm:mb-3">
+                  Mặt sau
+                </div>
+                <ScrollArea className="max-h-32 sm:max-h-48">
+                  <div className="text-sm sm:text-base lg:text-lg text-primary break-words whitespace-pre-wrap px-2">
+                    {cards[currentCard].back}
+                  </div>
+                </ScrollArea>
+              </div>
+            </Card>
+          </div>
         </div>
-        
-        <div className="flex gap-2 justify-between">
-          <Button
-            variant={autoFlip ? "default" : "outline"}
-            size="sm"
-            className={`flex-1 ${autoFlip ? 'bg-primary/90' : 'bg-background/70 border-primary/20'}`}
-            onClick={toggleAutoFlip}
-          >
-            <Clock className="h-4 w-4 mr-1" />
-            {autoFlip ? "Tắt lật tự động" : "Bật lật tự động"}
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRestart}
-            className="bg-background/70 border-primary/20 flex-1"
-          >
-            <RefreshCw className="h-4 w-4 mr-1" />
-            Làm lại
-          </Button>
+      </div>
+
+      {/* Controls */}
+      <div className="game-controls">
+        <div className="responsive-card mx-auto space-y-2 sm:space-y-3">
+          {/* Auto-flip toggle */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Toggle
+                pressed={autoFlip}
+                onPressedChange={toggleAutoFlip}
+                variant="outline"
+                size="sm"
+                className="text-xs sm:text-sm"
+              >
+                <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                Tự động lật
+              </Toggle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShuffle}
+                className="text-xs sm:text-sm"
+              >
+                <Shuffle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                Xáo trộn
+              </Button>
+            </div>
+          </div>
+          {isFlipped && (
+            <div className="flex gap-2 sm:gap-3">
+              <Button
+                onClick={() => handleMarkCard('unknown')}
+                variant="outline"
+                className="flex-1 border-red-200 hover:bg-red-50 hover:border-red-300 text-red-600 text-xs sm:text-sm"
+              >
+                <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                Chưa thuộc
+              </Button>
+              <Button
+                onClick={() => handleMarkCard('known')}
+                variant="outline"
+                className="flex-1 border-green-200 hover:bg-green-50 hover:border-green-300 text-green-600 text-xs sm:text-sm"
+              >
+                <Check className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                Đã thuộc
+              </Button>
+            </div>
+          )}
+
+          {/* Navigation buttons */}
+          <div className="flex gap-2 sm:gap-3">
+            <Button
+              onClick={handlePrevCard}
+              disabled={currentCard === 0}
+              variant="outline"
+              className="flex-1 text-xs sm:text-sm"
+            >
+              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+              Trước
+            </Button>
+            <Button
+              onClick={handleNextCard}
+              disabled={currentCard === cards.length - 1}
+              variant="outline"
+              className="flex-1 text-xs sm:text-sm"
+            >
+              Sau
+              <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
+            </Button>
+          </div>
         </div>
-        
-        <ToggleGroup type="single" variant="outline" className="grid grid-cols-2">
-          <ToggleGroupItem
-            value="unknown"
-            onClick={() => handleMarkCard('unknown')}
-            className="border border-red-300 text-red-600 data-[state=on]:bg-red-100 data-[state=on]:text-red-700"
-          >
-            <X className="mr-2 h-4 w-4" />
-            Chưa thuộc
-          </ToggleGroupItem>
-          
-          <ToggleGroupItem
-            value="known"
-            onClick={() => handleMarkCard('known')}
-            className="border border-green-300 text-green-600 data-[state=on]:bg-green-100 data-[state=on]:text-green-700"
-          >
-            <Check className="mr-2 h-4 w-4" />
-            Đã thuộc
-          </ToggleGroupItem>
-        </ToggleGroup>
       </div>
     </div>
   );

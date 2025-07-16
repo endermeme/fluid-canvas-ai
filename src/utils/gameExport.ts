@@ -43,76 +43,96 @@ export const saveGameForSharing = async (
   description?: string
 ): Promise<string> => {
   try {
+    console.log('Saving game for sharing:', { title, gameType });
+    
     // Tạo một ID mới cho game
     const gameId = crypto.randomUUID();
     
-    // Tính thời gian hết hạn (3 ngày từ hiện tại)
+    // Tính thời gian hết hạn (7 ngày từ hiện tại)
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 3);
+    expiresAt.setDate(expiresAt.getDate() + 7);
     
-    // Nhúng dữ liệu game vào HTML content
+    // Xử lý HTML content cho template games
     let processedHtmlContent = htmlContent;
     
-    // Nếu content là object, encode nó và nhúng vào HTML
+    // Kiểm tra xem có phải là template game không
     if (typeof content === 'object' && content !== null) {
       try {
-        const encodedContent = encodeURIComponent(JSON.stringify(content));
-        
-        // Thêm data attribute vào thẻ body
-        if (!processedHtmlContent.includes('data-game-content')) {
-          processedHtmlContent = processedHtmlContent.replace(
-            /<body([^>]*)>/i,
-            `<body$1 data-game-content="${encodedContent}">`
-          );
+        // Nếu content có cấu trúc template (questions, settings, etc.)
+        if (content.questions || content.cards || content.items) {
+          // Nhúng dữ liệu vào HTML content nếu chưa có
+          if (!processedHtmlContent.includes('data-game-content')) {
+            const encodedContent = encodeURIComponent(JSON.stringify(content));
+            processedHtmlContent = processedHtmlContent.replace(
+              /<body([^>]*)>/i,
+              `<body$1 data-game-content="${encodedContent}">`
+            );
+          }
+        } else {
+          // Nếu là custom game, encode toàn bộ content
+          const encodedContent = encodeURIComponent(JSON.stringify(content));
+          if (!processedHtmlContent.includes('data-game-content')) {
+            processedHtmlContent = processedHtmlContent.replace(
+              /<body([^>]*)>/i,
+              `<body$1 data-game-content="${encodedContent}">`
+            );
+          }
         }
       } catch (encodeError) {
         console.error("Error encoding game content:", encodeError);
-        // Tiếp tục với HTML gốc nếu không thể encode
       }
     }
     
-    // Giới hạn kích thước nội dung HTML để tránh lỗi
-    const maxContentLength = 1000000; // ~ 1MB
+    // Đảm bảo HTML content có cấu trúc đầy đủ
+    if (!processedHtmlContent.includes('<!DOCTYPE html')) {
+      processedHtmlContent = `<!DOCTYPE html>\n<html lang="vi">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>${title}</title>\n</head>\n<body>\n${processedHtmlContent}\n</body>\n</html>`;
+    }
+    
+    // Giới hạn kích thước nội dung HTML
+    const maxContentLength = 500000; // ~500KB
     if (processedHtmlContent && processedHtmlContent.length > maxContentLength) {
       processedHtmlContent = processedHtmlContent.substring(0, maxContentLength);
       console.warn("HTML content truncated due to size limitations");
     }
     
-    // Lưu game vào database với xử lý lỗi tốt hơn
-    try {
-      const { data, error } = await supabase
-        .from('games')
-        .insert([
-          {
-            id: gameId,
-            title,
-            game_type: gameType,
-            description: description || `Shared game: ${title}`,
-            html_content: processedHtmlContent,
-            expires_at: expiresAt.toISOString(),
-          }
-        ])
-        .select()
-        .single();
+    // Lưu game vào database
+    const { data, error } = await supabase
+      .from('games')
+      .insert([
+        {
+          id: gameId,
+          title: title || 'Game tương tác',
+          game_type: gameType || 'custom',
+          description: description || `Game chia sẻ: ${title}`,
+          html_content: processedHtmlContent,
+          expires_at: expiresAt.toISOString(),
+          is_published: true,
+          creator_ip: 'localhost'
+        }
+      ])
+      .select()
+      .single();
 
-      if (error) {
-        console.error("Database error when saving game:", error);
-        throw new Error(`Không thể lưu game: ${error.message}`);
-      }
-
-      if (!data) {
-        throw new Error("Không nhận được dữ liệu từ database sau khi lưu");
-      }
-
-      // Trả về URL cho game đã được chia sẻ
-      const baseUrl = window.location.origin;
-      return `${baseUrl}/game/${gameId}`;
-    } catch (dbError) {
-      console.error("Database operation failed:", dbError);
-      throw new Error("Lỗi khi lưu game vào database");
+    if (error) {
+      console.error("Lỗi khi lưu game:", error);
+      throw new Error(`Không thể lưu game: ${error.message}`);
     }
+
+    if (!data) {
+      throw new Error("Không nhận được dữ liệu từ database sau khi lưu");
+    }
+
+    console.log("Game đã được lưu thành công:", data);
+
+    // Trả về URL cho game đã được chia sẻ
+    const baseUrl = window.location.origin;
+    const shareUrl = `${baseUrl}/game/${gameId}`;
+    
+    console.log("Share URL generated:", shareUrl);
+    return shareUrl;
+    
   } catch (error) {
-    console.error("Error in saveGameForSharing:", error);
+    console.error("Lỗi trong saveGameForSharing:", error);
     throw error;
   }
 };
@@ -125,10 +145,13 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
 
   try {
     console.log("Fetching game with ID:", id);
+    
     const { data: game, error } = await supabase
       .from('games')
       .select('*')
       .eq('id', id)
+      .eq('is_published', true)
+      .gt('expires_at', new Date().toISOString())
       .single();
 
     if (error) {
@@ -137,11 +160,14 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
     }
 
     if (!game) {
-      console.error("Game not found with ID:", id);
+      console.error("Game not found or expired with ID:", id);
       return null;
     }
 
     console.log("Game data retrieved:", game);
+
+    // Tăng share count
+    await supabase.rpc('increment_share_count', { game_id: id });
 
     let parsedContent = null;
     if (game.html_content && game.html_content.includes('data-game-content')) {
@@ -161,7 +187,7 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
       gameType: game.game_type,
       content: parsedContent || {},
       htmlContent: game.html_content,
-      description: game.description || `Shared game: ${game.title}`,
+      description: game.description || `Game chia sẻ: ${game.title}`,
       expiresAt: new Date(game.expires_at).getTime(),
       createdAt: new Date(game.created_at).getTime()
     };
@@ -178,8 +204,11 @@ export const getRemainingTime = (expiresAt: Date | number): string => {
   
   if (diff <= 0) return 'Đã hết hạn';
   
-  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   
-  return `${hours}h ${minutes}m`;
+  if (days > 0) return `${days} ngày ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
 };

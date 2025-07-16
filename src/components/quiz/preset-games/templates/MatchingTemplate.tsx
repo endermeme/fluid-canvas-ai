@@ -193,126 +193,128 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
   };
 
   if (!content || !pairs.length) {
-    return <div className="p-4">Không có dữ liệu trò chơi nối từ</div>;
+    return (
+      <div className="game-container">
+        <div className="game-content flex items-center justify-center">
+          <p className="text-primary">Không có dữ liệu trò chơi nối từ</p>
+        </div>
+      </div>
+    );
   }
 
   const progressPercentage = (matchedPairs / totalPairs) * 100;
 
   const getItemSize = (text: string) => {
-    if (difficulty === "hard") return "min-h-14 text-sm";
-    if (difficulty === "easy") return "min-h-16 text-lg";
+    if (difficulty === "hard") return "min-h-12 text-sm";
+    if (difficulty === "easy") return "min-h-14 text-base";
     
     return text.length > 15 
-      ? "min-h-16 text-sm" 
+      ? "min-h-13 text-sm" 
       : text.length > 8 
-        ? "min-h-14 text-base" 
-        : "min-h-12 text-lg";
+        ? "min-h-12 text-sm" 
+        : "min-h-11 text-base";
   };
 
   return (
-    <div className="flex flex-col p-4 h-full">
-      <div className="relative mb-4">
-        <div className="flex justify-between items-center mb-2 mt-12">
-          <div className="text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
+    <div className="unified-game-container">
+      <div className="game-header">
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
             Đã ghép: {matchedPairs}/{totalPairs}
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center text-sm font-medium px-3 py-1 bg-primary/10 rounded-full">
-              <Trophy className="h-4 w-4 mr-1 text-yellow-500" />
-              Điểm: {score}
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full">
+              <Trophy className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-yellow-500" />
+              <span className="text-primary">{score}</span>
             </div>
-            <div className="text-sm font-medium flex items-center px-3 py-1 bg-primary/10 rounded-full">
-              <Clock className="h-4 w-4 mr-1" />
-              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+            <div className="text-xs sm:text-sm font-medium flex items-center px-2 py-1 bg-muted rounded-full">
+              <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
+              <span className="text-primary">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
             </div>
           </div>
         </div>
-        <Progress value={progressPercentage} className="h-2" />
+        <Progress value={progressPercentage} className="h-1.5 sm:h-2" />
       </div>
 
       {gameWon ? (
-        <div className="flex-grow flex items-center justify-center">
-          <Card className="p-6 text-center max-w-md">
-            <h2 className="text-2xl font-bold mb-4">Chúc mừng!</h2>
-            <p className="mb-2">Bạn đã hoàn thành trò chơi với {totalPairs} cặp từ.</p>
-            <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
-            <p className="mb-6">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
-            <Button onClick={handleRestart}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
+        <div className="game-content flex items-center justify-center">
+          <Card className="compact-card p-4 sm:p-6 text-center bg-card border">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-primary">Chúc mừng!</h2>
+            <p className="mb-2 text-sm sm:text-base text-primary">Bạn đã hoàn thành trò chơi với {totalPairs} cặp từ.</p>
+            <p className="mb-2 text-lg sm:text-xl font-bold text-primary">Điểm: {score}</p>
+            <p className="mb-4 sm:mb-6 text-xs sm:text-sm text-primary">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
+            <div className="text-center text-xs sm:text-sm text-primary/70">
+              Sử dụng nút làm mới ở header để chơi lại
+            </div>
           </Card>
         </div>
       ) : gameOver ? (
-        <div className="flex-grow flex items-center justify-center">
-          <Card className="p-6 text-center max-w-md">
-            <h2 className="text-2xl font-bold mb-4">Hết thời gian!</h2>
-            <p className="mb-2">Bạn đã ghép được {matchedPairs} trong tổng số {totalPairs} cặp từ.</p>
-            <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
-            <Button onClick={handleRestart}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
+        <div className="game-content flex items-center justify-center">
+          <Card className="compact-card p-4 sm:p-6 text-center bg-card border">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-primary">Hết thời gian!</h2>
+            <p className="mb-2 text-sm sm:text-base text-primary">Bạn đã ghép được {matchedPairs} trong tổng số {totalPairs} cặp từ.</p>
+            <p className="mb-2 text-lg sm:text-xl font-bold text-primary">Điểm: {score}</p>
+            <div className="text-center text-xs sm:text-sm text-primary/70">
+              Sử dụng nút làm mới ở header để chơi lại
+            </div>
           </Card>
         </div>
       ) : (
-        <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="p-3 bg-background/50 border border-primary/10">
-            <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột A</h3>
-            <div className="space-y-2">
-              {leftItems.map((item) => (
-                <button
-                  key={`left-${item.id}`}
-                  className={`w-full p-3 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
-                    item.matched 
-                      ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
-                      : selectedLeft === item.id
-                        ? 'bg-primary/20 border-primary border'
-                        : 'bg-secondary hover:bg-secondary/80 border-transparent border'
-                  }`}
-                  onClick={() => handleLeftItemClick(item.id)}
-                  disabled={item.matched}
-                >
-                  <span className="line-clamp-2">{item.text}</span>
-                </button>
-              ))}
-            </div>
-          </Card>
-          
-          <Card className="p-3 bg-background/50 border border-primary/10">
-            <h3 className="text-base font-medium mb-2 text-center bg-primary/10 py-1 px-2 rounded-md">Cột B</h3>
-            <div className="space-y-2">
-              {rightItems.map((item) => (
-                <button
-                  key={`right-${item.id}`}
-                  className={`w-full p-3 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
-                    item.matched 
-                      ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
-                      : selectedRight === item.id
-                        ? 'bg-primary/20 border-primary border'
-                        : 'bg-secondary hover:bg-secondary/80 border-transparent border'
-                  }`}
-                  onClick={() => handleRightItemClick(item.id)}
-                  disabled={item.matched}
-                >
-                  <span className="line-clamp-2">{item.text}</span>
-                </button>
-              ))}
-            </div>
-          </Card>
+        <div className="game-content">
+          <div className="responsive-card mx-auto grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
+            <Card className="p-2 sm:p-3 bg-card border">
+              <h3 className="text-sm sm:text-base font-medium mb-2 text-center bg-muted py-1 px-2 rounded-md text-primary">Cột A</h3>
+              <div className="space-y-1 sm:space-y-2">
+                {leftItems.map((item) => (
+                  <button
+                    key={`left-${item.id}`}
+                    className={`w-full p-2 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
+                      item.matched 
+                        ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
+                        : selectedLeft === item.id
+                          ? 'bg-primary/20 border-primary border text-primary'
+                          : 'bg-muted hover:bg-muted/80 border border-border text-primary'
+                    }`}
+                    onClick={() => handleLeftItemClick(item.id)}
+                    disabled={item.matched}
+                  >
+                    <span className="line-clamp-2 text-xs sm:text-sm">{item.text}</span>
+                  </button>
+                ))}
+              </div>
+            </Card>
+            
+            <Card className="p-2 sm:p-3 bg-card border">
+              <h3 className="text-sm sm:text-base font-medium mb-2 text-center bg-muted py-1 px-2 rounded-md text-primary">Cột B</h3>
+              <div className="space-y-1 sm:space-y-2">
+                {rightItems.map((item) => (
+                  <button
+                    key={`right-${item.id}`}
+                    className={`w-full p-2 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
+                      item.matched 
+                        ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
+                        : selectedRight === item.id
+                          ? 'bg-primary/20 border-primary border text-primary'
+                          : 'bg-muted hover:bg-muted/80 border border-border text-primary'
+                    }`}
+                    onClick={() => handleRightItemClick(item.id)}
+                    disabled={item.matched}
+                  >
+                    <span className="line-clamp-2 text-xs sm:text-sm">{item.text}</span>
+                  </button>
+                ))}
+              </div>
+            </Card>
+          </div>
         </div>
       )}
 
-      <div className="mt-4">
-        <Button 
-          variant="outline" 
-          onClick={handleRestart}
-          className="w-full bg-gradient-to-r from-secondary/30 to-background/90 border-primary/20"
-          size="sm"
-        >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Làm lại
-        </Button>
+      <div className="game-controls">
+        <div className="responsive-card mx-auto">
+          <div className="text-center text-sm text-primary/70">
+            Sử dụng nút làm mới ở header để bắt đầu lại
+          </div>
+        </div>
       </div>
     </div>
   );

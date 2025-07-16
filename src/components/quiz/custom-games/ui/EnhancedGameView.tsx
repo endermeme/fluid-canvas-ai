@@ -7,7 +7,6 @@ import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { useGameShareManager } from '../../hooks/useGameShareManager';
 import { useIframeManager } from '../../hooks/useIframeManager';
-import { Card } from "@/components/ui/card";
 
 interface EnhancedGameViewProps {
   miniGame: {
@@ -43,15 +42,13 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
     iframeRef,
     iframeError, 
     isIframeLoaded, 
-    loadingProgress, 
-    loadAttempts, 
-    maxRetryAttempts,
+    loadingProgress,
     refreshGame,
     handleFullscreen 
   } = useIframeManager(miniGame, onReload, gameExpired);
 
   return (
-    <div className={`w-full h-full flex flex-col bg-gradient-to-b from-background to-background/95 ${className || ''}`}>
+    <div className={`w-full h-full flex flex-col ${className || ''}`} style={{ transform: 'scale(0.9)', transformOrigin: 'top center' }}>
       {!hideHeader && (
         <CustomGameHeader
           onBack={onBack}
@@ -66,19 +63,17 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
         />
       )}
       
-      <div className="flex-1 relative overflow-hidden p-4">
+      <div className="flex-1 relative overflow-hidden">
         {iframeError ? (
           <GameErrorDisplay 
             error={iframeError} 
             onRetry={refreshGame} 
           />
         ) : (
-          <Card className="relative w-full h-full overflow-hidden shadow-lg border-primary/10">
+          <div className="absolute inset-0 w-full h-full">
             {!isIframeLoaded && (
               <GameLoadingIndicator 
-                progress={loadingProgress} 
-                loadAttempts={loadAttempts} 
-                maxAttempts={maxRetryAttempts} 
+                progress={loadingProgress}
               />
             )}
             <GameIframeRenderer 
@@ -86,11 +81,11 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
               title={miniGame.title || "Game tương tác"} 
               isLoaded={isIframeLoaded}
             />
-          </Card>
+          </div>
         )}
         
         {extraButton && (
-          <div className="absolute bottom-4 right-4 z-10">
+          <div className="absolute bottom-3 right-3 z-10">
             {extraButton}
           </div>
         )}

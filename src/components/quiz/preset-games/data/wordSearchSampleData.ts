@@ -21,34 +21,33 @@ export const wordSearchSampleData = {
     { word: "HỒNG", found: false },
     { word: "LAN", found: false },
     { word: "CÚC", found: false },
-    { word: "ĐÀO", found: false },
-    { word: "MAI", found: false },
     { word: "SEN", found: false },
+    { word: "HOA", found: false },
+    { word: "MAI", found: false },
     { word: "HƯỚNG", found: false },
-    { word: "CAMTÚCẦU", found: false },
-    { word: "HOASEN", found: false },
-    { word: "HOACÚC", found: false },
-    { word: "THIÊNLÝ", found: false },
-    { word: "LYLI", found: false }
+    { word: "THIÊN", found: false },
+    { word: "CAM", found: false },
   ],
   settings: {
     timeLimit: 300,
     allowDiagonalWords: true,
-    showWordList: true
+    showWordList: true,
+    bonusTimePerWord: 15
   }
 };
 
-// Cấp độ dễ (Grid nhỏ hơn)
 export const easyWordSearchData = {
   title: "Tìm từ - Trái cây (Dễ)",
   description: "Tìm tên các loại trái cây được giấu trong bảng chữ cái",
   grid: [
-    ["C", "A", "M", "S", "Ấ", "U"],
-    ["H", "X", "O", "À", "I", "T"],
-    ["U", "Ổ", "I", "D", "Ứ", "A"],
-    ["Ố", "M", "T", "C", "H", "O"],
-    ["I", "Đ", "À", "O", "B", "L"],
-    ["T", "H", "O", "M", "B", "I"]
+    ["C", "A", "M", "S", "Ấ", "U", "X", "Y"],
+    ["H", "X", "O", "À", "I", "T", "K", "L"],
+    ["U", "Ổ", "I", "D", "Ứ", "A", "M", "O"],
+    ["Ố", "M", "T", "C", "H", "O", "N", "I"],
+    ["I", "Đ", "À", "O", "B", "M", "G", "P"],
+    ["T", "H", "O", "M", "B", "Ơ", "V", "A"],
+    ["K", "L", "Y", "N", "H", "Q", "R", "S"],
+    ["B", "N", "M", "K", "L", "O", "P", "T"]
   ],
   words: [
     { word: "CAM", found: false },
@@ -57,16 +56,16 @@ export const easyWordSearchData = {
     { word: "ỔI", found: false },
     { word: "SẦU", found: false },
     { word: "THƠM", found: false },
-    { word: "BƠ", found: false }
+    { word: "BƠ", found: false },
   ],
   settings: {
     timeLimit: 180,
     allowDiagonalWords: false,
-    showWordList: true
+    showWordList: true,
+    bonusTimePerWord: 15
   }
 };
 
-// Cấp độ khó (Grid lớn hơn)
 export const hardWordSearchData = {
   title: "Tìm từ - Động vật (Khó)",
   description: "Tìm tên các loại động vật được giấu trong bảng chữ cái",
@@ -93,18 +92,20 @@ export const hardWordSearchData = {
     { word: "MÈO", found: false },
     { word: "GÀ", found: false },
     { word: "LỢN", found: false },
-    { word: "HOẴNG", found: false },
     { word: "CÁ", found: false },
-    { word: "CỌPHU", found: false },
-    { word: "CHIMSẺ", found: false },
-    { word: "KHỈNHỌ", found: false },
-    { word: "SƯTỬ", found: false },
-    { word: "GẤUTRÚC", found: false },
-    { word: "HƯƠU", found: false }
+    { word: "HEO", found: false },
+    { word: "NGỰA", found: false },
+    { word: "BÒ", found: false },
+    { word: "DÊ", found: false },
+    { word: "CHUỘT", found: false },
+    { word: "KIẾN", found: false },
   ],
   settings: {
     timeLimit: 480,
     allowDiagonalWords: true,
-    showWordList: true
+    showWordList: true,
+    bonusTimePerWord: 15
   }
 };
+
+export default wordSearchSampleData;
