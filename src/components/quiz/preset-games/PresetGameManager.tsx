@@ -416,7 +416,6 @@ Output must be valid JSON. `;
         onBack={onBack}
         topic={initialTopic || ""}
         content={gameContent}
-        settings={settings}
       />
     );
   };

@@ -3,9 +3,6 @@
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type Category = 'general' | 'history' | 'science' | 'math' | 'geography' | 'arts' | 'custom';
 export type Language = 'en' | 'vi';
-export type TimerMode = 'normal' | 'progressive' | 'rush' | 'relaxed';
-export type GridSize = '3x4' | '4x4' | '4x5' | '5x6';
-export type FlipSpeed = 'slow' | 'normal' | 'fast';
 
 export interface GameSettingsData {
   difficulty?: Difficulty;
@@ -14,58 +11,36 @@ export interface GameSettingsData {
   totalTime?: number;
   bonusTime?: number;
   useTimer?: boolean;
-  
-  // Enhanced Timer System
-  timerMode?: TimerMode;
-  performanceBonus?: boolean;
-  timePenalty?: boolean;
-  speedBonus?: boolean;
-  // Quiz-specific settings
   showExplanation?: boolean;
   shuffleQuestions?: boolean;
   shuffleOptions?: boolean;
-  allowSkip?: boolean;
-  
-  // Memory game settings
-  gridSize?: GridSize;
-  allowHints?: boolean;
-  progressiveHints?: boolean;
-  
-  // Flashcards settings
-  autoFlip?: boolean;
-  shuffleCards?: boolean;
-  flipSpeed?: FlipSpeed;
-  showProgress?: boolean;
-  
-  // Word Search settings
-  allowDiagonalWords?: boolean;
-  showWordList?: boolean;
-  bonusTimePerWord?: number;
-  
-  // Matching game settings
-  allowPartialMatching?: boolean;
-  bonusTimePerMatch?: number;
-  
-  // Ordering game settings
-  allowMultipleAttempts?: boolean;
-  caseSensitive?: boolean;
-  
-  // True/False settings
-  progressiveScoring?: boolean;
-  confidenceMode?: boolean;
   category?: Category;
   language?: Language;
   prompt?: string;
-  
-  // Legacy fields (keeping for compatibility)
+  autoFlip?: boolean;
+  shuffleCards?: boolean;
+  allowHints?: boolean;
+  showProgress?: boolean;
+  showHints?: boolean;
+  progressiveHints?: boolean;
+  caseSensitive?: boolean;
   allowSynonyms?: boolean;
+  progressiveScoring?: boolean;
   allowCalculator?: boolean;
   roundingPrecision?: number;
   showSteps?: boolean;
   hintCount?: number;
   hintPenalty?: number;
+  allowSkip?: boolean;
   shuffleItems?: boolean;
+  allowPartialMatching?: boolean;
+  bonusTimePerMatch?: number;
+  allowMultipleAttempts?: boolean;
   autoAdvance?: boolean;
+  gridSize?: number;
+  allowDiagonalWords?: boolean;
+  showWordList?: boolean;
+  bonusTimePerWord?: number;
   categoryCount?: number;
   itemsPerCategory?: number;
   allowMultipleCategories?: boolean;
@@ -106,14 +81,4 @@ export interface Game {
   playCount?: number;
   score?: number;
   isPublic?: boolean;
-}
-
-export interface SettingsTemplate {
-  id: string;
-  name: string;
-  description: string;
-  settings: GameSettingsData;
-  isDefault?: boolean;
-  gameType?: string;
-  createdAt?: Date;
 }

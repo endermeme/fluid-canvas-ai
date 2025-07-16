@@ -1,5 +1,5 @@
 
-import { GameType, GridSize } from './types';
+import { GameType } from './types';
 
 export const gameTypes: GameType[] = [
   {
@@ -49,7 +49,7 @@ export const gameTypes: GameType[] = [
       category: 'general',
       totalTime: 320,
       bonusTime: 10,
-      allowHints: true,
+      showHints: true,
       progressiveHints: true
     }
   },
@@ -66,7 +66,7 @@ export const gameTypes: GameType[] = [
       totalTime: 300,
       caseSensitive: false,
       allowSynonyms: true,
-      allowHints: true
+      showHints: true
     }
   },
   {
@@ -133,7 +133,7 @@ export const gameTypes: GameType[] = [
       shuffleItems: true,
       allowPartialMatching: false,
       bonusTimePerMatch: 5,
-      allowHints: true
+      showHints: true
     }
   },
   {
@@ -147,7 +147,7 @@ export const gameTypes: GameType[] = [
       timePerQuestion: 30,
       category: 'general',
       totalTime: 240,
-      allowHints: true,
+      showHints: true,
       hintPenalty: 5,
       allowMultipleAttempts: true,
       autoAdvance: false
@@ -164,7 +164,7 @@ export const gameTypes: GameType[] = [
       timePerQuestion: 60,
       category: 'general',
       totalTime: 300,
-      gridSize: '4x4' as GridSize,
+      gridSize: 10,
       allowDiagonalWords: true,
       showWordList: true,
       bonusTimePerWord: 15

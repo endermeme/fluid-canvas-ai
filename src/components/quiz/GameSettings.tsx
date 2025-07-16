@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { GameSettingsData, GameType, TimerMode } from './types';
+import { GameSettingsData, GameType } from './types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { 
   Gamepad, BrainCircuit, Puzzle, Lightbulb, Clock4, Dices, 
-  HeartHandshake, PenTool, Timer, Trophy, Clock, Medal, Type, Bug,
-  Zap, Shield, Award
+  HeartHandshake, PenTool, Timer, Trophy, Clock, Medal, Type, Bug
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { animateToolbarAppear } from '@/lib/animations';
@@ -16,11 +15,6 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { TimerModeSelector } from './components/TimerModeSelector';
-import { GameSpecificSettings } from './components/GameSpecificSettings';
-import { QuickPresets } from './components/QuickPresets';
-import { AdvancedSettingsPanel } from './components/AdvancedSettingsPanel';
-
 
 interface GameSettingsProps {
   onStart: (settings: GameSettingsData) => void;
@@ -51,12 +45,7 @@ const GameSettings = ({
     bonusTime: 0,
     useTimer: true,
     prompt: topic || '',
-    debugMode: false,
-    // Enhanced timer settings
-    timerMode: 'normal',
-    performanceBonus: true,
-    timePenalty: false,
-    speedBonus: true
+    debugMode: false
   });
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -120,10 +109,6 @@ const GameSettings = ({
   const handleStart = () => {
     console.log("Starting game with settings:", settings);
     onStart(settings);
-  };
-
-  const handlePresetSelect = (presetSettings: Partial<GameSettingsData>) => {
-    setSettings(prev => ({ ...prev, ...presetSettings }));
   };
 
   useEffect(() => {
@@ -190,11 +175,6 @@ const GameSettings = ({
             <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
               Cài Đặt Minigame
             </h2>
-          </div>
-
-          {/* Quick Presets */}
-          <div className="mb-6">
-            <QuickPresets onPresetSelect={handlePresetSelect} />
           </div>
 
           {/* Settings Grid - Single column on mobile, 2 columns on larger screens */}
@@ -271,12 +251,6 @@ const GameSettings = ({
 
               {settings.useTimer !== false && (
                 <>
-                  {/* Timer Mode Selector */}
-                  <TimerModeSelector
-                    value={settings.timerMode || 'normal'}
-                    onChange={(mode) => handleSelectChange('timerMode', mode)}
-                  />
-
                   {/* Time Per Question */}
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
@@ -294,45 +268,6 @@ const GameSettings = ({
                       onValueChange={(value) => handleSliderChange('timePerQuestion', value)}
                     />
                   </div>
-
-                  {/* Enhanced Timer Features */}
-                  <Card className="p-3 border-primary/20">
-                    <h4 className="text-sm font-medium mb-2 text-primary">Tính năng thời gian nâng cao</h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label className="flex items-center gap-2 text-sm">
-                          <Award className="h-4 w-4 text-green-600" />
-                          Thưởng hiệu suất
-                        </Label>
-                        <Switch
-                          checked={settings.performanceBonus || false}
-                          onCheckedChange={(checked) => handleSwitchChange('performanceBonus', checked)}
-                        />
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <Label className="flex items-center gap-2 text-sm">
-                          <Shield className="h-4 w-4 text-red-600" />
-                          Phạt thời gian
-                        </Label>
-                        <Switch
-                          checked={settings.timePenalty || false}
-                          onCheckedChange={(checked) => handleSwitchChange('timePenalty', checked)}
-                        />
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <Label className="flex items-center gap-2 text-sm">
-                          <Zap className="h-4 w-4 text-orange-600" />
-                          Thưởng tốc độ
-                        </Label>
-                        <Switch
-                          checked={settings.speedBonus || false}
-                          onCheckedChange={(checked) => handleSwitchChange('speedBonus', checked)}
-                        />
-                      </div>
-                    </div>
-                  </Card>
 
                   {/* Time Settings Row */}
                   <div className="grid grid-cols-2 gap-3">
@@ -391,27 +326,6 @@ const GameSettings = ({
               </div>
             </div>
           </div>
-
-          {/* Game-Specific Settings */}
-          {gameType && (
-            <div className="mt-6">
-              <GameSpecificSettings
-                gameType={gameType}
-                settings={settings}
-                onSettingChange={(key, value) => setSettings(prev => ({ ...prev, [key]: value }))}
-              />
-            </div>
-          )}
-
-          {/* Advanced Settings Panel */}
-          <div className="mt-6">
-            <AdvancedSettingsPanel
-              settings={settings}
-              gameType={gameType?.id || 'quiz'}
-              onChange={(newSettings) => setSettings(prev => ({ ...prev, ...newSettings }))}
-            />
-          </div>
-
 
           {/* Action Buttons */}
           <div className="pt-4 mt-6 border-t border-border/20 flex gap-3">
