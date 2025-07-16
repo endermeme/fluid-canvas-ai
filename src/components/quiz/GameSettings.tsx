@@ -36,39 +36,48 @@ const GameSettings = ({
   gameType
 }: GameSettingsProps) => {
   const isMobile = useIsMobile();
-  const [settings, setSettings] = useState<GameSettingsData>({
-    difficulty: 'medium',
-    questionCount: 10,
-    timePerQuestion: 30,
-    category: 'general',
-    totalTime: 0,
-    bonusTime: 0,
-    useTimer: true,
-    prompt: topic || '',
-    debugMode: false,
-    // Game-specific defaults
-    shuffleQuestions: false,
-    showExplanation: true,
-    allowSkip: false,
-    autoFlip: true,
-    shuffleCards: false,
-    gridSize: gameType?.id === 'memory' ? 4 : 15,
-    allowHints: true,
-    progressiveHints: false,
-    allowPartialMatching: true,
-    allowMultipleAttempts: true,
-    caseSensitive: false,
-    allowDiagonalWords: true,
-    showWordList: true,
-    progressiveScoring: false
-  });
+  
+  // Initialize settings with game-specific defaults
+  const getInitialSettings = (): GameSettingsData => {
+    const base: GameSettingsData = {
+      difficulty: 'medium' as const,
+      questionCount: 10,
+      timePerQuestion: 30,
+      category: 'general' as const,
+      totalTime: 0,
+      bonusTime: 0,
+      useTimer: true,
+      prompt: topic || '',
+      debugMode: false,
+      // Game-specific defaults
+      shuffleQuestions: false,
+      showExplanation: true,
+      allowSkip: false,
+      autoFlip: true,
+      shuffleCards: false,
+      gridSize: gameType?.id === 'memory' ? 4 : 15,
+      allowHints: true,
+      progressiveHints: false,
+      allowPartialMatching: true,
+      allowMultipleAttempts: true,
+      caseSensitive: false,
+      allowDiagonalWords: true,
+      showWordList: true,
+      progressiveScoring: false
+    };
+    
+    // Apply initial settings if provided
+    return initialSettings ? { ...base, ...initialSettings } : base;
+  };
+
+  const [settings, setSettings] = useState<GameSettingsData>(getInitialSettings);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (initialSettings) {
-      setSettings(initialSettings);
+      setSettings(prev => ({ ...getInitialSettings(), ...initialSettings }));
     }
-  }, [initialSettings]);
+  }, [initialSettings, gameType]);
 
   useEffect(() => {
     if (topic && topic !== settings.prompt) {

@@ -600,6 +600,7 @@ Output must be valid JSON. `;
               onCancel={onBack}
               topic={initialTopic || ""}
               inModal={false}
+              gameType={getGameTypeObject()}
             />
           </div>
         </div>
