@@ -45,7 +45,22 @@ const GameSettings = ({
     bonusTime: 0,
     useTimer: true,
     prompt: topic || '',
-    debugMode: false
+    debugMode: false,
+    // Game-specific defaults
+    shuffleQuestions: false,
+    showExplanation: true,
+    allowSkip: false,
+    autoFlip: true,
+    shuffleCards: false,
+    gridSize: gameType?.id === 'memory' ? 4 : 15,
+    allowHints: true,
+    progressiveHints: false,
+    allowPartialMatching: true,
+    allowMultipleAttempts: true,
+    caseSensitive: false,
+    allowDiagonalWords: true,
+    showWordList: true,
+    progressiveScoring: false
   });
   const containerRef = React.useRef<HTMLDivElement>(null);
 
