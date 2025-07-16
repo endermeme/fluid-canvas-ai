@@ -181,14 +181,9 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
             Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
           </div>
           
-          <Button 
-            onClick={handleRestart} 
-            className="w-full py-3 text-lg font-semibold"
-            size="lg"
-          >
-            <RefreshCw className="mr-2 h-5 w-5" />
-            Chơi Lại
-          </Button>
+          <div className="text-center text-sm text-gray-500 mb-6">
+            Sử dụng nút làm mới ở header để chơi lại
+          </div>
         </Card>
       </div>
     );
@@ -320,15 +315,6 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
                 Xác nhận
               </Button>
             )}
-            
-            <Button
-              variant="outline"
-              onClick={handleRestart}
-              className="px-6 py-3 rounded-xl border-2 shadow-md"
-              size="lg"
-            >
-              <RefreshCw className="h-5 w-5" />
-            </Button>
           </div>
         </div>
       </div>

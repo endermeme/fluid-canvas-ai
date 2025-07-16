@@ -264,18 +264,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic 
                 Xáo trộn
               </Button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRestart}
-              className="text-xs sm:text-sm"
-            >
-              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-              Làm lại
-            </Button>
           </div>
-
-          {/* Mark card buttons (only when flipped) */}
           {isFlipped && (
             <div className="flex gap-2 sm:gap-3">
               <Button

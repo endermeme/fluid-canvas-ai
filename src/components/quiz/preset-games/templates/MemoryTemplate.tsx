@@ -199,13 +199,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
               Bạn đã ghép được <span className="font-bold text-primary">{matchedPairs}/{totalPairs}</span> cặp
             </p>
             <p className="mb-6 text-sm text-primary/70">Với {moves} lượt di chuyển</p>
-            <Button 
-              onClick={handleRestart} 
-              className="w-full"
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Thử Lại
-            </Button>
+            <div className="text-center text-sm text-primary/70">
+              Sử dụng nút làm mới ở header để thử lại
+            </div>
           </Card>
         </div>
       </div>
@@ -232,13 +228,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
               </div>
               <Progress value={100} className="h-2 sm:h-3" />
             </div>
-            <Button 
-              onClick={handleRestart} 
-              className="w-full"
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi Lại
-            </Button>
+            <div className="text-center text-sm text-primary/70">
+              Sử dụng nút làm mới ở header để chơi lại
+            </div>
           </Card>
         </div>
       </div>
@@ -340,14 +332,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
             Gợi ý
           </Button>
           
-          <Button
-            variant="outline"
-            onClick={handleRestart}
-            className="flex-1 text-xs sm:text-sm"
-          >
-            <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-            Làm lại
-          </Button>
+          <div className="text-center text-sm text-primary/70">
+            Sử dụng nút làm mới ở header để bắt đầu lại
+          </div>
         </div>
       </div>
     </div>

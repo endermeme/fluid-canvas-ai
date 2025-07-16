@@ -243,10 +243,9 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
             <p className="mb-2 text-primary">Bạn đã hoàn thành trò chơi với {totalPairs} cặp từ.</p>
             <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
             <p className="mb-6 text-primary">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
-            <Button onClick={handleRestart}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
+            <div className="text-center text-sm text-primary/70">
+              Sử dụng nút làm mới ở header để chơi lại
+            </div>
           </Card>
         </div>
       ) : gameOver ? (
@@ -255,10 +254,9 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
             <h2 className="text-2xl font-bold mb-4 text-primary">Hết thời gian!</h2>
             <p className="mb-2 text-primary">Bạn đã ghép được {matchedPairs} trong tổng số {totalPairs} cặp từ.</p>
             <p className="mb-2 text-xl font-bold text-primary">Điểm số: {score}</p>
-            <Button onClick={handleRestart}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
+            <div className="text-center text-sm text-primary/70">
+              Sử dụng nút làm mới ở header để chơi lại
+            </div>
           </Card>
         </div>
       ) : (
@@ -313,15 +311,9 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
 
       <div className="game-controls">
         <div className="responsive-card mx-auto">
-          <Button 
-            variant="outline" 
-            onClick={handleRestart}
-            className="w-full bg-gradient-to-r from-secondary/30 to-background/90 border-primary/20"
-            size="sm"
-          >
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Làm lại
-          </Button>
+          <div className="text-center text-sm text-primary/70">
+            Sử dụng nút làm mới ở header để bắt đầu lại
+          </div>
         </div>
       </div>
     </div>

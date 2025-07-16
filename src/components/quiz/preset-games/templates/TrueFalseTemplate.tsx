@@ -414,10 +414,9 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
 
   if (!gameContent || !questions.length) {
     return (
-      <div className="p-4">
-        <PresetGameHeader />
-        <div className="text-center mt-8">
-          <p className="text-lg text-primary">Không có dữ liệu câu hỏi</p>
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg font-medium text-primary">Không có dữ liệu câu hỏi</p>
           <p className="text-sm text-primary/70 mt-2">Vui lòng thử lại hoặc chọn game khác</p>
         </div>
       </div>
@@ -426,9 +425,8 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
 
   if (showResult) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 bg-gradient-to-br from-primary/5 to-background">
-        <PresetGameHeader onShare={handleShare} />
-        <Card className="max-w-md w-full p-6 text-center mt-6 bg-gradient-to-br from-primary/5 to-background/50">
+      <div className="h-full flex items-center justify-center p-6 bg-gradient-to-br from-primary/5 to-background">
+        <Card className="max-w-md w-full p-6 text-center bg-gradient-to-br from-primary/5 to-background/50">
           <h2 className="text-2xl font-bold mb-4 text-primary">Kết Quả</h2>
           <p className="text-lg mb-4 text-primary">
             Chủ đề: <span className="font-semibold text-primary">{gameContent.title || topic}</span>
@@ -446,15 +444,8 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
           <div className="text-sm mb-4 text-primary/70">
             Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
           </div>
-          <div className="flex gap-2">
-            <Button onClick={handleRestart} className="flex-1">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi Lại
-            </Button>
-            <Button onClick={handleShare} disabled={isSharing} variant="outline" className="flex-1">
-              <Share2 className="mr-2 h-4 w-4" />
-              {isSharing ? 'Đang chia sẻ...' : 'Chia sẻ'}
-            </Button>
+          <div className="text-center text-sm text-primary/70">
+            Sử dụng nút làm mới ở header để chơi lại
           </div>
         </Card>
       </div>
@@ -468,9 +459,8 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
 
   return (
-    <div className="flex flex-col p-0 h-full relative bg-gradient-to-br from-primary/5 to-background">
-      <PresetGameHeader onShare={handleShare} />
-      <div className="mb-4 mt-6 px-4">
+    <div className="h-full flex flex-col overflow-hidden bg-gradient-to-br from-primary/5 to-background">
+      <div className="flex-shrink-0 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm p-4 mt-4">
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium text-primary">
             Câu hỏi {currentQuestion + 1}/{questions.length}

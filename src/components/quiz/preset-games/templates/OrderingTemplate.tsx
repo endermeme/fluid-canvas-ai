@@ -207,10 +207,9 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
               {score} / {sentences.length}
             </div>
             
-            <Button onClick={handleRestart} className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Làm lại
-            </Button>
+            <div className="text-center text-sm text-primary/70">
+              Sử dụng nút làm mới ở header để chơi lại
+            </div>
           </Card>
         </div>
       </div>
@@ -317,14 +316,9 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
               Kiểm tra
             </Button>
             
-            <Button
-              variant="outline"
-              onClick={handleRestart}
-              className="text-xs sm:text-sm"
-            >
-              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-              Làm lại
-            </Button>
+            <div className="text-center text-sm text-primary/70 col-span-2 sm:col-span-4">
+              Sử dụng nút làm mới ở header để bắt đầu lại
+            </div>
           </div>
         </div>
       </div>

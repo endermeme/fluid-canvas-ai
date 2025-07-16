@@ -454,14 +454,9 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
           Hủy chọn
         </Button>
         
-        <Button 
-          variant="outline" 
-          onClick={handleRestart}
-          className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
-        >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Chơi lại
-        </Button>
+        <div className="text-center text-sm text-blue-700">
+          Sử dụng nút làm mới ở header để chơi lại
+        </div>
       </div>
       
       {/* Game over or win state */}
@@ -491,10 +486,9 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
               Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
             </p>
             
-            <Button onClick={handleRestart} className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Chơi lại
-            </Button>
+            <div className="text-center text-blue-700">
+              Sử dụng nút làm mới ở header để chơi lại
+            </div>
           </Card>
         </div>
       )}
