@@ -467,8 +467,6 @@ Output must be valid JSON. `;
         onBack={onBack}
         topic={initialTopic || ""}
         content={gameContent}
-        settings={settings}
-        gameSettings={settings}
       />
     );
   };
@@ -600,7 +598,6 @@ Output must be valid JSON. `;
               onCancel={onBack}
               topic={initialTopic || ""}
               inModal={false}
-              gameType={getGameTypeObject()}
             />
           </div>
         </div>
