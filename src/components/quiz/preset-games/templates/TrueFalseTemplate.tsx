@@ -459,15 +459,15 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-gradient-to-br from-primary/5 to-background">
-      <div className="flex-shrink-0 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm p-4 mt-4">
+    <div className="game-container">
+      <div className="game-header">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium text-primary">
+          <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
             Câu hỏi {currentQuestion + 1}/{questions.length}
           </div>
-          <div className="text-sm font-medium flex items-center gap-2">
-            <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full">
-              <Clock className="h-4 w-4 mr-1 text-primary" />
+          <div className="text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center px-2 py-1 bg-muted rounded-full">
+              <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
               <span className="text-primary">{timeLeft}s</span>
             </div>
             <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full text-primary">
