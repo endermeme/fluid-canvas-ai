@@ -188,61 +188,32 @@ Output must be valid JSON. `;
           parsedContent.settings = {};
         }
 
-        // Merge game settings into content settings
-        parsedContent.settings = {
-          ...parsedContent.settings,
-          useTimer: gameSettings.useTimer,
-          difficulty: gameSettings.difficulty,
-          category: gameSettings.category,
-          language: gameSettings.language || 'vi',
-          debugMode: gameSettings.debugMode,
-        };
-
         switch(type) {
           case 'quiz':
             parsedContent.settings.timePerQuestion = timePerQuestion;
             parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 5;
-            parsedContent.settings.shuffleQuestions = gameSettings.shuffleQuestions || false;
-            parsedContent.settings.showExplanation = gameSettings.showExplanation !== false;
-            parsedContent.settings.allowSkip = gameSettings.allowSkip || false;
             break;
           case 'flashcards':
             parsedContent.settings.flipTime = timePerQuestion;
             parsedContent.settings.totalTime = totalTime || 180;
-            parsedContent.settings.autoFlip = gameSettings.autoFlip !== false;
-            parsedContent.settings.shuffleCards = gameSettings.shuffleCards || false;
             break;
           case 'matching':
-            parsedContent.settings.timeLimit = totalTime || 120;
-            parsedContent.settings.allowPartialMatching = gameSettings.allowPartialMatching !== false;
-            parsedContent.settings.bonusTimePerMatch = bonusTime || 5;
-            break;
           case 'memory':
             parsedContent.settings.timeLimit = totalTime || 120;
-            parsedContent.settings.gridSize = gameSettings.gridSize || 4;
-            parsedContent.settings.allowHints = gameSettings.allowHints !== false;
-            parsedContent.settings.progressiveHints = gameSettings.progressiveHints || false;
             break;
           case 'ordering':
             parsedContent.settings.timeLimit = totalTime || 180;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 10;
-            parsedContent.settings.allowMultipleAttempts = gameSettings.allowMultipleAttempts !== false;
-            parsedContent.settings.caseSensitive = gameSettings.caseSensitive || false;
             break;
           case 'wordsearch':
             parsedContent.settings.timeLimit = totalTime || 300;
             parsedContent.settings.bonusTimePerWord = bonusTime || 15;
-            parsedContent.settings.gridSize = gameSettings.gridSize || 15;
-            parsedContent.settings.allowDiagonalWords = gameSettings.allowDiagonalWords !== false;
-            parsedContent.settings.showWordList = gameSettings.showWordList !== false;
             break;
           case 'truefalse':
             parsedContent.settings.timePerQuestion = timePerQuestion;
             parsedContent.settings.totalTime = totalTime || questionCount * timePerQuestion;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 3;
-            parsedContent.settings.progressiveScoring = gameSettings.progressiveScoring || false;
-            parsedContent.settings.showExplanation = gameSettings.showExplanation !== false;
             break;
         }
 
@@ -293,11 +264,7 @@ Output must be valid JSON. `;
         data.settings = {
           ...data.settings,
           timePerQuestion: settings.timePerQuestion,
-          totalTime: settings.totalTime || settings.questionCount * settings.timePerQuestion,
-          useTimer: settings.useTimer,
-          shuffleQuestions: settings.shuffleQuestions || false,
-          showExplanation: settings.showExplanation !== false,
-          allowSkip: settings.allowSkip || false
+          totalTime: settings.totalTime || settings.questionCount * settings.timePerQuestion
         };
         break;
       
@@ -306,10 +273,7 @@ Output must be valid JSON. `;
         data.settings = {
           ...data.settings,
           flipTime: settings.timePerQuestion,
-          totalTime: settings.totalTime || 180,
-          useTimer: settings.useTimer,
-          autoFlip: settings.autoFlip !== false,
-          shuffleCards: settings.shuffleCards || false
+          totalTime: settings.totalTime || 180
         };
         break;
       
@@ -318,9 +282,7 @@ Output must be valid JSON. `;
         data.settings = {
           ...data.settings,
           timeLimit: settings.totalTime || 120,
-          bonusTimePerMatch: settings.bonusTime || 5,
-          useTimer: settings.useTimer,
-          allowPartialMatching: settings.allowPartialMatching !== false
+          bonusTimePerMatch: settings.bonusTime || 5
         };
         break;
       
@@ -329,11 +291,8 @@ Output must be valid JSON. `;
         data.settings = {
           ...data.settings,
           timeLimit: settings.totalTime || 120,
-          allowHints: settings.allowHints !== false,
-          hintPenalty: settings.bonusTime || 5,
-          useTimer: settings.useTimer,
-          gridSize: settings.gridSize || 4,
-          progressiveHints: settings.progressiveHints || false
+          allowHints: true,
+          hintPenalty: settings.bonusTime || 5
         };
         break;
       
@@ -342,10 +301,7 @@ Output must be valid JSON. `;
         data.settings = {
           ...data.settings,
           timeLimit: settings.totalTime || 180,
-          bonusTimePerCorrect: settings.bonusTime || 10,
-          useTimer: settings.useTimer,
-          allowMultipleAttempts: settings.allowMultipleAttempts !== false,
-          caseSensitive: settings.caseSensitive || false
+          bonusTimePerCorrect: settings.bonusTime || 10
         };
         break;
       
@@ -365,11 +321,7 @@ Output must be valid JSON. `;
         data.settings = {
           ...data.settings,
           timeLimit: settings.totalTime || 300,
-          bonusTimePerWord: settings.bonusTime || 15,
-          useTimer: settings.useTimer,
-          gridSize: settings.gridSize || 15,
-          allowDiagonalWords: settings.allowDiagonalWords !== false,
-          showWordList: settings.showWordList !== false
+          bonusTimePerWord: settings.bonusTime || 15
         };
         break;
       
@@ -379,10 +331,7 @@ Output must be valid JSON. `;
           ...data.settings,
           timePerQuestion: settings.timePerQuestion,
           totalTime: settings.totalTime || settings.questionCount * settings.timePerQuestion,
-          bonusTimePerCorrect: settings.bonusTime || 3,
-          useTimer: settings.useTimer,
-          progressiveScoring: settings.progressiveScoring || false,
-          showExplanation: settings.showExplanation !== false
+          bonusTimePerCorrect: settings.bonusTime || 3
         };
         break;
       
