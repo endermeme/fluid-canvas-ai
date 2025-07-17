@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { 
   Gamepad, BrainCircuit, Puzzle, Lightbulb, Clock4, Dices, 
-  HeartHandshake, PenTool, Timer, Trophy, Clock, Medal, Type, Bug, RotateCcw, Search
+  HeartHandshake, PenTool, Timer, Trophy, Clock, Medal, Type, Bug
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { animateToolbarAppear } from '@/lib/animations';
@@ -146,49 +146,18 @@ const GameSettings = ({
   };
 
   const getTimeLabel = () => {
-    if (gameType?.id === 'flashcards') return 'Thời Gian Lật Thẻ:';
     if (gameType?.id === 'memory') return 'Thời Gian Hiển Thị:';
+    if (gameType?.id === 'reflex') return 'Thời Gian Phản Xạ:';
+    if (gameType?.id === 'drawing') return 'Thời Gian Vẽ:';
     return 'Thời Gian Mỗi Câu:';
   };
 
   const getCountLabel = () => {
     if (gameType?.id === 'memory') return 'Số Cặp Thẻ:';
-    if (gameType?.id === 'flashcards') return 'Số Thẻ:';
-    if (gameType?.id === 'matching') return 'Số Cặp Nối:';
-    if (gameType?.id === 'ordering') return 'Số Câu:';
-    if (gameType?.id === 'wordsearch') return 'Số Từ Tìm:';
+    if (gameType?.id === 'puzzle') return 'Số Mảnh Ghép:';
+    if (gameType?.id === 'reflex') return 'Số Lượt:';
+    if (gameType?.id === 'drawing') return 'Số Bản Vẽ:';
     return 'Số Câu Hỏi:';
-  };
-
-  const getGameSpecificSettings = () => {
-    if (!gameType) return [];
-    
-    const gameId = gameType.id;
-    const baseSettings = ['difficulty', 'questionCount'];
-    
-    switch (gameId) {
-      case 'quiz':
-        return [...baseSettings, 'useTimer', 'timePerQuestion', 'totalTime', 'bonusTime'];
-      case 'flashcards':
-        return [...baseSettings, 'autoFlip', 'timePerQuestion'];
-      case 'matching':
-        return [...baseSettings, 'totalTime'];
-      case 'memory':
-        return ['questionCount', 'totalTime'];
-      case 'ordering':
-        return [...baseSettings, 'useTimer', 'totalTime', 'bonusTime', 'showHints'];
-      case 'wordsearch':
-        return [...baseSettings, 'totalTime', 'allowDiagonalWords'];
-      case 'truefalse':
-        return [...baseSettings, 'useTimer', 'timePerQuestion', 'totalTime'];
-      default:
-        return baseSettings;
-    }
-  };
-
-  const shouldShowSetting = (settingName: string) => {
-    const allowedSettings = getGameSpecificSettings();
-    return allowedSettings.includes(settingName);
   };
 
   return (
@@ -228,65 +197,59 @@ const GameSettings = ({
               </div>
               
               {/* Difficulty */}
-              {shouldShowSetting('difficulty') && (
-                <div className="space-y-2">
-                  <Label htmlFor="difficulty" className="flex items-center gap-2 text-sm font-medium">
-                    <Trophy className="h-4 w-4 text-primary" /> Độ Khó
-                  </Label>
-                  <Select 
-                    value={settings.difficulty} 
-                    onValueChange={(value) => handleSelectChange('difficulty', value)}
-                  >
-                    <SelectTrigger className="border-primary/20 bg-white/50">
-                      <SelectValue placeholder="Chọn độ khó" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="easy">Dễ</SelectItem>
-                      <SelectItem value="medium">Trung bình</SelectItem>
-                      <SelectItem value="hard">Khó</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              <div className="space-y-2">
+                <Label htmlFor="difficulty" className="flex items-center gap-2 text-sm font-medium">
+                  <Trophy className="h-4 w-4 text-primary" /> Độ Khó
+                </Label>
+                <Select 
+                  value={settings.difficulty} 
+                  onValueChange={(value) => handleSelectChange('difficulty', value)}
+                >
+                  <SelectTrigger className="border-primary/20 bg-white/50">
+                    <SelectValue placeholder="Chọn độ khó" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="easy">Dễ</SelectItem>
+                    <SelectItem value="medium">Trung bình</SelectItem>
+                    <SelectItem value="hard">Khó</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               {/* Question Count */}
-              {shouldShowSetting('questionCount') && (
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="questionCount" className="text-sm font-medium flex items-center gap-2">
-                      <Medal className="h-4 w-4 text-primary" /> {getCountLabel()}
-                    </Label>
-                    <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.questionCount}</span>
-                  </div>
-                  <Slider 
-                    id="questionCount"
-                    min={gameType?.id === 'memory' ? 3 : 3} 
-                    max={gameType?.id === 'memory' ? 12 : 20} 
-                    step={1} 
-                    value={[settings.questionCount]} 
-                    onValueChange={(value) => handleSliderChange('questionCount', value)}
-                  />
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="questionCount" className="text-sm font-medium flex items-center gap-2">
+                    <Medal className="h-4 w-4 text-primary" /> {getCountLabel()}
+                  </Label>
+                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.questionCount}</span>
                 </div>
-              )}
+                <Slider 
+                  id="questionCount"
+                  min={gameType?.id === 'drawing' ? 1 : (gameType?.id === 'puzzle' ? 2 : 3)} 
+                  max={gameType?.id === 'memory' ? 12 : (gameType?.id === 'puzzle' ? 6 : 20)} 
+                  step={1} 
+                  value={[settings.questionCount]} 
+                  onValueChange={(value) => handleSliderChange('questionCount', value)}
+                />
+              </div>
             </div>
 
             {/* Right Column */}
             <div className="space-y-4">
               {/* Timer Toggle */}
-              {shouldShowSetting('useTimer') && (
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="useTimer" 
-                    checked={settings.useTimer !== false}
-                    onCheckedChange={(checked) => handleSwitchChange('useTimer', checked)} 
-                  />
-                  <Label htmlFor="useTimer" className="text-sm font-medium flex items-center gap-2">
-                    <Timer className="h-4 w-4 text-primary" /> Sử dụng bộ đếm thời gian
-                  </Label>
-                </div>
-              )}
+              <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                <Switch 
+                  id="useTimer" 
+                  checked={settings.useTimer !== false}
+                  onCheckedChange={(checked) => handleSwitchChange('useTimer', checked)} 
+                />
+                <Label htmlFor="useTimer" className="text-sm font-medium flex items-center gap-2">
+                  <Timer className="h-4 w-4 text-primary" /> Sử dụng bộ đếm thời gian
+                </Label>
+              </div>
 
-              {(settings.useTimer !== false && shouldShowSetting('timePerQuestion')) && (
+              {settings.useTimer !== false && (
                 <>
                   {/* Time Per Question */}
                   <div className="space-y-2">
@@ -298,94 +261,47 @@ const GameSettings = ({
                     </div>
                     <Slider 
                       id="timePerQuestion"
-                      min={gameType?.id === 'flashcards' || gameType?.id === 'memory' ? 1 : 10} 
-                      max={gameType?.id === 'flashcards' ? 30 : 60} 
-                      step={gameType?.id === 'flashcards' || gameType?.id === 'memory' ? 1 : 5} 
+                      min={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 10} 
+                      max={gameType?.id === 'reflex' ? 10 : (gameType?.id === 'drawing' ? 120 : 60)} 
+                      step={gameType?.id === 'reflex' || gameType?.id === 'memory' ? 1 : 5} 
                       value={[settings.timePerQuestion]} 
                       onValueChange={(value) => handleSliderChange('timePerQuestion', value)}
                     />
                   </div>
+
+                  {/* Time Settings Row */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
+                        <Clock4 className="h-4 w-4 text-primary" /> Tổng thời gian
+                      </Label>
+                      <Input
+                        id="totalTime"
+                        type="number"
+                        min="0"
+                        placeholder="0 = vô hạn"
+                        value={settings.totalTime || 0}
+                        onChange={(e) => handleInputChange('totalTime', e.target.value)}
+                        className="border-primary/20 bg-white/50"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="bonusTime" className="text-sm font-medium flex items-center gap-2">
+                        <Timer className="h-4 w-4 text-primary" /> Thời gian thưởng
+                      </Label>
+                      <Input
+                        id="bonusTime"
+                        type="number"
+                        min="0"
+                        placeholder="Thưởng"
+                        value={settings.bonusTime || 0}
+                        onChange={(e) => handleInputChange('bonusTime', e.target.value)}
+                        className="border-primary/20 bg-white/50"
+                      />
+                    </div>
+                  </div>
                 </>
-              )}
-
-              {/* Total Time - for games that don't use timePerQuestion */}
-              {shouldShowSetting('totalTime') && !shouldShowSetting('timePerQuestion') && (
-                <div className="space-y-2">
-                  <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
-                    <Clock4 className="h-4 w-4 text-primary" /> Tổng thời gian (giây)
-                  </Label>
-                  <Input
-                    id="totalTime"
-                    type="number"
-                    min="30"
-                    max="900"
-                    placeholder="300"
-                    value={settings.totalTime || 0}
-                    onChange={(e) => handleInputChange('totalTime', e.target.value)}
-                    className="border-primary/20 bg-white/50"
-                  />
-                </div>
-              )}
-
-              {/* Game-specific settings */}
-              {shouldShowSetting('bonusTime') && (
-                <div className="space-y-2">
-                  <Label htmlFor="bonusTime" className="text-sm font-medium flex items-center gap-2">
-                    <Timer className="h-4 w-4 text-primary" /> Thời gian thưởng (giây)
-                  </Label>
-                  <Input
-                    id="bonusTime"
-                    type="number"
-                    min="0"
-                    max="60"
-                    placeholder="5"
-                    value={settings.bonusTime || 0}
-                    onChange={(e) => handleInputChange('bonusTime', e.target.value)}
-                    className="border-primary/20 bg-white/50"
-                  />
-                </div>
-              )}
-
-              {/* Auto Flip for Flashcards */}
-              {gameType?.id === 'flashcards' && (
-                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-                  <Switch 
-                    id="autoFlip" 
-                    checked={settings.autoFlip || false}
-                    onCheckedChange={(checked) => handleSwitchChange('autoFlip', checked)} 
-                  />
-                  <Label htmlFor="autoFlip" className="text-sm font-medium flex items-center gap-2">
-                    <RotateCcw className="h-4 w-4 text-blue-500" /> Tự động lật thẻ
-                  </Label>
-                </div>
-              )}
-
-              {/* Show Hints for Ordering */}
-              {gameType?.id === 'ordering' && (
-                <div className="flex items-center space-x-3 p-3 bg-amber-50 rounded-lg">
-                  <Switch 
-                    id="showHints" 
-                    checked={settings.showHints !== false}
-                    onCheckedChange={(checked) => handleSwitchChange('showHints', checked)} 
-                  />
-                  <Label htmlFor="showHints" className="text-sm font-medium flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4 text-amber-500" /> Hiển thị gợi ý
-                  </Label>
-                </div>
-              )}
-
-              {/* Allow Diagonal Words for Word Search */}
-              {gameType?.id === 'wordsearch' && (
-                <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-                  <Switch 
-                    id="allowDiagonalWords" 
-                    checked={settings.allowDiagonalWords || false}
-                    onCheckedChange={(checked) => handleSwitchChange('allowDiagonalWords', checked)} 
-                  />
-                  <Label htmlFor="allowDiagonalWords" className="text-sm font-medium flex items-center gap-2">
-                    <Search className="h-4 w-4 text-green-500" /> Cho phép từ chéo
-                  </Label>
-                </div>
               )}
 
               {/* Debug Mode */}
