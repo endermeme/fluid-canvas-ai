@@ -14,16 +14,27 @@ interface QuizTemplateProps {
 
 const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, settings }) => {
   const gameContent = content || data;
-  const gameSettings = settings || gameContent?.settings || {};
+  
+  // Game settings function
+  const getGameSettings = () => ({
+    timePerQuestion: 30,
+    totalTime: 300,
+    useTimer: true,
+    bonusTime: 10,
+    showExplanation: true,
+    difficulty: "medium"
+  });
+  
+  const gameSettings = getGameSettings();
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(gameSettings?.timePerQuestion || 30);
-  const [totalTimeLeft, setTotalTimeLeft] = useState(gameSettings?.totalTime || 300);
-  const [timerRunning, setTimerRunning] = useState(gameSettings?.useTimer !== false);
+  const [timeLeft, setTimeLeft] = useState(gameSettings.timePerQuestion);
+  const [totalTimeLeft, setTotalTimeLeft] = useState(gameSettings.totalTime);
+  const [timerRunning, setTimerRunning] = useState(gameSettings.useTimer);
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
@@ -34,12 +45,12 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
     if (!gameStarted && questions.length > 0) {
       setGameStarted(true);
       
-      const questionTime = gameSettings?.timePerQuestion || 30;
-      const totalTime = gameSettings?.totalTime || (questions.length * questionTime);
+      const questionTime = gameSettings.timePerQuestion;
+      const totalTime = gameSettings.totalTime;
       
       setTimeLeft(questionTime);
       setTotalTimeLeft(totalTime);
-      setTimerRunning(gameSettings?.useTimer !== false);
+      setTimerRunning(gameSettings.useTimer);
       
       console.log(`Game initialized with ${questionTime}s per question and ${totalTime}s total time`);
       console.log("Game settings:", gameSettings);
@@ -94,7 +105,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
     if (optionIndex === questions[currentQuestion].correctAnswer) {
       setScore(score + 1);
       
-      if (gameSettings?.bonusTime && gameSettings.bonusTime > 0) {
+      if (gameSettings.bonusTime > 0) {
         const bonusTime = gameSettings.bonusTime;
         setTotalTimeLeft(prev => prev + bonusTime);
         
@@ -126,7 +137,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
       setCurrentQuestion(currentQuestion + 1);
       setSelectedOption(null);
       setIsAnswered(false);
-      setTimeLeft(gameSettings?.timePerQuestion || 30);
+      setTimeLeft(gameSettings.timePerQuestion);
       setTimerRunning(true);
     }
   };
@@ -137,8 +148,8 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
     setScore(0);
     setShowResult(false);
     setIsAnswered(false);
-    setTimeLeft(gameSettings?.timePerQuestion || 30);
-    setTotalTimeLeft(gameSettings?.totalTime || 300);
+      setTimeLeft(gameSettings.timePerQuestion);
+    setTotalTimeLeft(gameSettings.totalTime);
     setTimerRunning(true);
     setGameStarted(true);
   };
@@ -283,7 +294,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
           </div>
 
           {/* Explanation */}
-          {isAnswered && question.explanation && (
+          {isAnswered && question.explanation && gameSettings.showExplanation && (
             <Card className="p-3 sm:p-4 bg-primary/5 border-primary/20">
               <div className="flex items-start">
                 <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 sm:mr-3 mt-0.5">

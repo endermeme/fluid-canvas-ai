@@ -18,14 +18,24 @@ interface MatchingItem {
 }
 
 const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, settings }) => {
-  const gameSettings = settings || content?.settings || {};
+  // Game settings function
+  const getGameSettings = () => ({
+    totalTime: 180,
+    difficulty: "medium",
+    showScore: true,
+    matchScore: 10,
+    missScore: -2,
+    shuffleItems: true
+  });
+  
+  const gameSettings = getGameSettings();
   
   const [leftItems, setLeftItems] = useState<MatchingItem[]>([]);
   const [rightItems, setRightItems] = useState<MatchingItem[]>([]);
   const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
   const [selectedRight, setSelectedRight] = useState<number | null>(null);
   const [matchedPairs, setMatchedPairs] = useState<number>(0);
-  const [timeLeft, setTimeLeft] = useState<number>(gameSettings?.totalTime || 60);
+  const [timeLeft, setTimeLeft] = useState<number>(gameSettings.totalTime);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [gameWon, setGameWon] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
@@ -33,7 +43,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
 
   const pairs = content?.pairs || [];
   const totalPairs = pairs.length;
-  const difficulty = gameSettings?.difficulty || "medium";
+  const difficulty = gameSettings.difficulty;
 
   useEffect(() => {
     if (pairs.length > 0) {
@@ -51,7 +61,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
       
       setLeftItems(shuffledLeftItems);
       setRightItems(shuffledRightItems);
-      setTimeLeft(gameSettings?.totalTime || 60);
+      setTimeLeft(gameSettings.totalTime);
       setMatchedPairs(0);
       setScore(0);
       setGameOver(false);
@@ -140,7 +150,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
           
           setMatchedPairs(prev => prev + 1);
           
-          setScore(prev => prev + 10);
+          setScore(prev => prev + gameSettings.matchScore);
           
           toast({
             title: "Tuyệt vời!",
@@ -148,7 +158,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
             variant: "default",
           });
         } else {
-          setScore(prev => Math.max(0, prev - 2));
+          setScore(prev => Math.max(0, prev + gameSettings.missScore));
           
           toast({
             title: "Không khớp",
@@ -189,7 +199,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
       setSelectedRight(null);
       setMatchedPairs(0);
       setScore(0);
-      setTimeLeft(gameSettings?.totalTime || 60);
+      setTimeLeft(gameSettings.totalTime);
       setGameOver(false);
       setGameWon(false);
     }

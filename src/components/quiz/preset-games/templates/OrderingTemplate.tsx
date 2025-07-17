@@ -13,15 +13,24 @@ interface OrderingTemplateProps {
 }
 
 const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, settings }) => {
-  const gameSettings = settings || content?.settings || {};
+  // Game settings function
+  const getGameSettings = () => ({
+    totalTime: 180,
+    useTimer: true,
+    bonusTime: 15,
+    showHints: true,
+    hintPenalty: 30 // seconds penalty for using hint
+  });
+  
+  const gameSettings = getGameSettings();
   
   const [currentSentence, setCurrentSentence] = useState(0);
   const [orderedWords, setOrderedWords] = useState<string[]>([]);
   const [shuffledWords, setShuffledWords] = useState<string[]>([]);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(gameSettings?.totalTime || 180);
-  const [timerRunning, setTimerRunning] = useState(gameSettings?.useTimer !== false);
+  const [timeLeft, setTimeLeft] = useState(gameSettings.totalTime);
+  const [timerRunning, setTimerRunning] = useState(gameSettings.useTimer);
   const [isChecking, setIsChecking] = useState(false);
   const [hasShownHint, setHasShownHint] = useState(false);
   const { toast } = useToast();
@@ -93,7 +102,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, set
     if (isCorrect) {
       setScore(score + 1);
       
-      const bonusTime = gameSettings?.bonusTime || 0;
+      const bonusTime = gameSettings.bonusTime;
       if (bonusTime > 0) {
         setTimeLeft(timeLeft + bonusTime);
       }
@@ -149,11 +158,11 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, set
     }
     
     setHasShownHint(true);
-    setTimeLeft(Math.max(10, timeLeft - 30));
+    setTimeLeft(Math.max(10, timeLeft - gameSettings.hintPenalty));
     
     toast({
       title: "Đã dùng gợi ý",
-      description: "Thời gian bị trừ 30 giây.",
+      description: `Thời gian bị trừ ${gameSettings.hintPenalty} giây.`,
       variant: "default",
     });
   };
@@ -162,7 +171,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, set
     setCurrentSentence(0);
     setScore(0);
     setShowResult(false);
-    setTimeLeft(gameSettings?.totalTime || 180);
+    setTimeLeft(gameSettings.totalTime);
     setTimerRunning(true);
     setIsChecking(false);
     
@@ -298,7 +307,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, set
               Xáo trộn
             </Button>
             
-            {gameSettings?.showHints && (
+            {gameSettings.showHints && (
               <Button
                 variant="outline"
                 onClick={handleHint}

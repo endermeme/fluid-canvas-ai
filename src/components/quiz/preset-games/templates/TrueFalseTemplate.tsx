@@ -17,15 +17,25 @@ interface TrueFalseTemplateProps {
 
 const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, topic, settings, onShare }) => {
   const gameContent = content || data;
-  const gameSettings = settings || gameContent?.settings || {};
+  
+  // Game settings function
+  const getGameSettings = () => ({
+    timePerQuestion: 15,
+    totalTime: 150,
+    useTimer: true,
+    showExplanation: true,
+    showShare: true
+  });
+  
+  const gameSettings = getGameSettings();
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Array<boolean | null>>([]);
   const [score, setScore] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(gameSettings?.timePerQuestion || 15);
-  const [totalTimeLeft, setTotalTimeLeft] = useState(gameSettings?.totalTime || 150);
-  const [timerRunning, setTimerRunning] = useState(gameSettings?.useTimer !== false);
+  const [timeLeft, setTimeLeft] = useState(gameSettings.timePerQuestion);
+  const [totalTimeLeft, setTotalTimeLeft] = useState(gameSettings.totalTime);
+  const [timerRunning, setTimerRunning] = useState(gameSettings.useTimer);
   const [showResult, setShowResult] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
@@ -328,8 +338,8 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   useEffect(() => {
     if (!gameStarted && questions.length > 0) {
       setGameStarted(true);
-      const questionTime = gameSettings?.timePerQuestion || 15;
-      const totalTime = gameSettings?.totalTime || (questions.length * questionTime);
+      const questionTime = gameSettings.timePerQuestion;
+      const totalTime = gameSettings.totalTime;
       setTimeLeft(questionTime);
       setTotalTimeLeft(totalTime);
     }
@@ -372,7 +382,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     const newAnswers = [...userAnswers];
     newAnswers[currentQuestion] = answer;
     setUserAnswers(newAnswers);
-    setShowExplanation(gameSettings?.showExplanation ?? true);
+    setShowExplanation(gameSettings.showExplanation);
     setTimerRunning(false);
 
     const isCorrect = answer === questions[currentQuestion].isTrue;
@@ -398,7 +408,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     } else {
       setCurrentQuestion(currentQuestion + 1);
       setShowExplanation(false);
-      setTimeLeft(gameSettings?.timePerQuestion || 15);
+      setTimeLeft(gameSettings.timePerQuestion);
       setTimerRunning(true);
     }
   };
@@ -409,8 +419,8 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     setScore(0);
     setShowExplanation(false);
     setShowResult(false);
-    setTimeLeft(gameSettings?.timePerQuestion || 15);
-    setTotalTimeLeft(gameSettings?.totalTime || 150);
+      setTimeLeft(gameSettings.timePerQuestion);
+    setTotalTimeLeft(gameSettings.totalTime);
     setTimerRunning(true);
     setGameStarted(true);
   };

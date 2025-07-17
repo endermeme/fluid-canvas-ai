@@ -21,22 +21,31 @@ interface WordLocation {
 }
 
 const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic, settings }) => {
-  const gameSettings = settings || content?.settings || {};
+  // Game settings function
+  const getGameSettings = () => ({
+    totalTime: 300,
+    allowDiagonalWords: true,
+    showWordList: true,
+    gridSize: "medium",
+    showTimer: true
+  });
+  
+  const gameSettings = getGameSettings();
   
   const [selectedStart, setSelectedStart] = useState<{row: number, col: number} | null>(null);
   const [selectedEnd, setSelectedEnd] = useState<{row: number, col: number} | null>(null);
   const [hoveredCell, setHoveredCell] = useState<{row: number, col: number} | null>(null);
   const [foundWords, setFoundWords] = useState<WordLocation[]>([]);
-  const [timeLeft, setTimeLeft] = useState(gameSettings?.totalTime || 300);
+  const [timeLeft, setTimeLeft] = useState(gameSettings.totalTime);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
-  const [gridSize, setGridSize] = useState('medium');
+  const [gridSize, setGridSize] = useState(gameSettings.gridSize);
   const { toast } = useToast();
 
   const grid = content?.grid || [];
   const words = content?.words || [];
   const totalWords = words.length;
-  const allowDiagonalWords = gameSettings?.allowDiagonalWords || false;
+  const allowDiagonalWords = gameSettings.allowDiagonalWords;
 
   // Timer countdown
   useEffect(() => {
@@ -292,7 +301,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic,
     setSelectedEnd(null);
     setHoveredCell(null);
     setFoundWords([]);
-    setTimeLeft(gameSettings?.totalTime || 300);
+    setTimeLeft(gameSettings.totalTime);
     setGameOver(false);
     setGameWon(false);
     
@@ -425,7 +434,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic,
           </div>
           
           {/* Word list */}
-          {gameSettings?.showWordList !== false && (
+          {gameSettings.showWordList && (
             <div className="lg:col-span-1">
               <Card className="p-2 sm:p-4 bg-card border">
                 <h3 className="text-sm sm:text-lg font-medium mb-2 flex items-center text-primary">

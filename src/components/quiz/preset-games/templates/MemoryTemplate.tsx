@@ -14,13 +14,22 @@ interface MemoryTemplateProps {
 }
 
 const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, settings }) => {
-  const gameSettings = settings || content?.settings || {};
+  // Game settings function
+  const getGameSettings = () => ({
+    totalTime: 120,
+    showHints: true,
+    hintPenalty: 10, // seconds penalty for using hint
+    shuffleCards: true,
+    showTimer: true
+  });
+  
+  const gameSettings = getGameSettings();
   
   const [cards, setCards] = useState<Array<{id: number, content: string, matched: boolean, flipped: boolean}>>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [matchedPairs, setMatchedPairs] = useState<number>(0);
   const [moves, setMoves] = useState<number>(0);
-  const [timeLeft, setTimeLeft] = useState<number>(gameSettings?.totalTime || 120);
+  const [timeLeft, setTimeLeft] = useState<number>(gameSettings.totalTime);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [gameWon, setGameWon] = useState<boolean>(false);
   const [canFlip, setCanFlip] = useState<boolean>(true);
@@ -37,7 +46,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       }));
       
       setCards(shuffledCards);
-      setTimeLeft(gameSettings?.totalTime || 120);
+      setTimeLeft(gameSettings.totalTime);
       setMoves(0);
       setMatchedPairs(0);
       setFlippedCards([]);
@@ -148,11 +157,11 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
         ));
       }, 1000);
       
-      setTimeLeft(Math.max(0, timeLeft - 10));
+      setTimeLeft(Math.max(0, timeLeft - gameSettings.hintPenalty));
       
       toast({
         title: "Đã dùng gợi ý",
-        description: "Thời gian bị trừ 10 giây.",
+        description: `Thời gian bị trừ ${gameSettings.hintPenalty} giây.`,
         variant: "default",
       });
     }
@@ -167,7 +176,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       }));
       
       setCards(shuffledCards);
-      setTimeLeft(gameSettings?.totalTime || 120);
+      setTimeLeft(gameSettings.totalTime);
       setMoves(0);
       setMatchedPairs(0);
       setFlippedCards([]);
@@ -334,15 +343,17 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       {/* Footer với actions */}
       <div className="game-controls">
         <div className="responsive-card mx-auto flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleHint}
-            disabled={gameOver || gameWon || cards.filter(card => !card.matched && !card.flipped).length === 0}
-            className="flex-1 text-xs sm:text-sm"
-          >
-            <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-            Gợi ý
-          </Button>
+          {gameSettings.showHints && (
+            <Button
+              variant="outline"
+              onClick={handleHint}
+              disabled={gameOver || gameWon || cards.filter(card => !card.matched && !card.flipped).length === 0}
+              className="flex-1 text-xs sm:text-sm"
+            >
+              <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+              Gợi ý (-{gameSettings.hintPenalty}s)
+            </Button>
+          )}
           
           <div className="text-center text-sm text-primary/70">
             Sử dụng nút làm mới ở header để bắt đầu lại

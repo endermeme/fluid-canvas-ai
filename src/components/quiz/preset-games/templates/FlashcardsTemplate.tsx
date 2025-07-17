@@ -15,19 +15,27 @@ interface FlashcardsTemplateProps {
 }
 
 const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic, settings }) => {
-  const gameSettings = settings || content?.settings || {};
+  // Game settings function
+  const getGameSettings = () => ({
+    autoFlip: true,
+    timePerQuestion: 5, // Auto flip time
+    showStats: true,
+    shuffleCards: false
+  });
+  
+  const gameSettings = getGameSettings();
   
   const [currentCard, setCurrentCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [cardsState, setCardsState] = useState<Array<'unreviewed' | 'known' | 'unknown'>>([]);
-  const [autoFlip, setAutoFlip] = useState(gameSettings?.autoFlip || false);
+  const [autoFlip, setAutoFlip] = useState(gameSettings.autoFlip);
   const [flipTimer, setFlipTimer] = useState<NodeJS.Timeout | null>(null);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const { toast } = useToast();
 
   const cards = content?.cards || [];
   const progress = ((currentCard + 1) / cards.length) * 100;
-  const flipTime = gameSettings?.timePerQuestion || 5;
+  const flipTime = gameSettings.timePerQuestion;
 
   useEffect(() => {
     if (cards.length > 0) {
@@ -203,12 +211,12 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
               <div className="text-center w-full">
                 <div className="text-xs sm:text-sm uppercase tracking-wider text-primary/70 mb-2 sm:mb-3">
                   Nhấn để lật thẻ
-                  {autoFlip && !isFlipped && (
-                    <div className="mt-1 flex items-center justify-center">
-                      <Clock className="h-3 w-3 mr-1 text-primary/60" />
-                      <span className="text-primary/60">Tự động lật sau {timeRemaining}s</span>
-                    </div>
-                  )}
+            {autoFlip && !isFlipped && gameSettings.showStats && (
+              <div className="mt-1 flex items-center justify-center">
+                <Clock className="h-3 w-3 mr-1 text-primary/60" />
+                <span className="text-primary/60">Tự động lật sau {timeRemaining}s</span>
+              </div>
+            )}
                 </div>
                 <ScrollArea className="max-h-32 sm:max-h-48">
                   <div className="text-base sm:text-lg lg:text-xl font-bold text-primary break-words whitespace-pre-wrap px-2">
