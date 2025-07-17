@@ -125,15 +125,30 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({
                 <Slider id="questionCount" min={5} max={30} step={1} value={[settings.questionCount]} onValueChange={value => handleSliderChange('questionCount', value)} />
               </div>
 
-              {/* Basic Quiz Options */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch id="showExplanation" checked={settings.showExplanation} onCheckedChange={checked => handleSwitchChange('showExplanation', checked)} />
-                  <Label htmlFor="showExplanation" className="text-sm font-medium">
-                    Hiển thị giải thích
-                  </Label>
-                </div>
-              </div>
+              {/* Advanced Settings */}
+              <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start">
+                    <ChevronDown className={`h-4 w-4 mr-2 transition-transform ${isAdvancedOpen ? 'rotate-180' : ''}`} />
+                    <span>Cài đặt nâng cao</span>
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-3 mt-3">
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch id="shuffleQuestions" checked={settings.shuffleQuestions} onCheckedChange={checked => handleSwitchChange('shuffleQuestions', checked)} />
+                    <Label htmlFor="shuffleQuestions" className="text-sm font-medium">
+                      Xáo trộn câu hỏi
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch id="shuffleOptions" checked={settings.shuffleOptions} onCheckedChange={checked => handleSwitchChange('shuffleOptions', checked)} />
+                    <Label htmlFor="shuffleOptions" className="text-sm font-medium">
+                      Xáo trộn đáp án
+                    </Label>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
 
             {/* Right Column */}
@@ -154,7 +169,7 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({
                     <Input id="totalTime" type="number" min="1" max="60" placeholder="10" value={settings.totalTime} onChange={e => handleInputChange('totalTime', e.target.value)} className="border-primary/20 bg-white/50" />
                   </div>
                   
-                  <div className="space-y-2 py-[9px]">
+                  <div className="space-y-2">
                     <Label htmlFor="bonusTime" className="text-sm font-medium flex items-center gap-2">
                       <Timer className="h-4 w-4 text-primary" /> Thưởng (giây)
                     </Label>
@@ -162,30 +177,15 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({
                   </div>
                 </div>}
 
-              {/* Advanced Settings */}
-              <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
-                    <span>Cài đặt nâng cao</span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${isAdvancedOpen ? 'rotate-180' : ''}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-3 mt-3">
-                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                    <Switch id="shuffleQuestions" checked={settings.shuffleQuestions} onCheckedChange={checked => handleSwitchChange('shuffleQuestions', checked)} />
-                    <Label htmlFor="shuffleQuestions" className="text-sm font-medium">
-                      Xáo trộn câu hỏi
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                    <Switch id="shuffleOptions" checked={settings.shuffleOptions} onCheckedChange={checked => handleSwitchChange('shuffleOptions', checked)} />
-                    <Label htmlFor="shuffleOptions" className="text-sm font-medium">
-                      Xáo trộn đáp án
-                    </Label>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+              {/* Basic Quiz Options */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                  <Switch id="showExplanation" checked={settings.showExplanation} onCheckedChange={checked => handleSwitchChange('showExplanation', checked)} />
+                  <Label htmlFor="showExplanation" className="text-sm font-medium">
+                    Hiển thị giải thích
+                  </Label>
+                </div>
+              </div>
 
               {/* Debug Mode */}
               <div className="border-t border-border/50 pt-3">
