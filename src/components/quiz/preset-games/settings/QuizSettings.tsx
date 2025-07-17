@@ -90,31 +90,31 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
             </h2>
           </div>
 
-          {/* Settings Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column */}
-            <div className="space-y-4">
-              {/* Content Input */}
-              <div className="space-y-2">
-                <Label htmlFor="prompt" className="flex items-center gap-2 text-sm font-medium">
-                  <Type className="h-4 w-4 text-primary" /> Nội dung trò chơi
-                </Label>
-                <Textarea
-                  id="prompt"
-                  value={settings.prompt || ''}
-                  onChange={(e) => handleInputChange('prompt', e.target.value)}
-                  placeholder="Nhập nội dung chi tiết cho trò chơi trắc nghiệm"
-                  className="border-primary/20 bg-white/50 min-h-[80px] max-h-[120px]"
-                />
-              </div>
-              
+          {/* Settings Content */}
+          <div className="space-y-6">
+            {/* Content Input */}
+            <div className="space-y-3">
+              <Label htmlFor="prompt" className="flex items-center gap-2 text-sm font-medium">
+                <Type className="h-4 w-4 text-primary" /> Nội dung trò chơi
+              </Label>
+              <Textarea
+                id="prompt"
+                value={settings.prompt || ''}
+                onChange={(e) => handleInputChange('prompt', e.target.value)}
+                placeholder="Nhập nội dung chi tiết cho trò chơi trắc nghiệm"
+                className="border-primary/20 bg-white/50 min-h-[80px] resize-none"
+              />
+            </div>
+            
+            {/* Main Settings */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Question Count */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <Label htmlFor="questionCount" className="text-sm font-medium flex items-center gap-2">
                     <Medal className="h-4 w-4 text-primary" /> Số Câu Hỏi
                   </Label>
-                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.questionCount}</span>
+                  <span className="px-3 py-1 bg-primary/10 rounded-full text-sm font-medium">{settings.questionCount}</span>
                 </div>
                 <Slider 
                   id="questionCount"
@@ -123,40 +123,38 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
                   step={1} 
                   value={[settings.questionCount]} 
                   onValueChange={(value) => handleSliderChange('questionCount', value)}
+                  className="w-full"
                 />
               </div>
 
-              {/* Basic Quiz Options */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="showExplanation" 
-                    checked={settings.showExplanation}
-                    onCheckedChange={(checked) => handleSwitchChange('showExplanation', checked)} 
-                  />
-                  <Label htmlFor="showExplanation" className="text-sm font-medium">
-                    Hiển thị giải thích
-                  </Label>
-                </div>
+              {/* Show Explanation Toggle */}
+              <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg">
+                <Label htmlFor="showExplanation" className="text-sm font-medium">
+                  Hiển thị giải thích
+                </Label>
+                <Switch 
+                  id="showExplanation" 
+                  checked={settings.showExplanation}
+                  onCheckedChange={(checked) => handleSwitchChange('showExplanation', checked)} 
+                />
               </div>
             </div>
 
-            {/* Right Column */}
+            {/* Timer Settings */}
             <div className="space-y-4">
-              {/* Timer Toggle */}
-              <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg">
+                <Label htmlFor="useTimer" className="text-sm font-medium flex items-center gap-2">
+                  <Timer className="h-4 w-4 text-primary" /> Sử dụng bộ đếm thời gian
+                </Label>
                 <Switch 
                   id="useTimer" 
                   checked={settings.useTimer}
                   onCheckedChange={(checked) => handleSwitchChange('useTimer', checked)} 
                 />
-                <Label htmlFor="useTimer" className="text-sm font-medium flex items-center gap-2">
-                  <Timer className="h-4 w-4 text-primary" /> Sử dụng bộ đếm thời gian
-                </Label>
               </div>
 
               {settings.useTimer && (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4 pl-4">
                   <div className="space-y-2">
                     <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
                       <Clock4 className="h-4 w-4 text-primary" /> Tổng thời gian (phút)
@@ -175,7 +173,7 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
                   
                   <div className="space-y-2">
                     <Label htmlFor="bonusTime" className="text-sm font-medium flex items-center gap-2">
-                      <Timer className="h-4 w-4 text-primary" /> Thưởng (giây)
+                      <Trophy className="h-4 w-4 text-primary" /> Thưởng (giây)
                     </Label>
                     <Input
                       id="bonusTime"
@@ -190,60 +188,62 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
                   </div>
                 </div>
               )}
+            </div>
 
-              {/* Advanced Settings */}
-              <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
-                    <span>Cài đặt nâng cao</span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${isAdvancedOpen ? 'rotate-180' : ''}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-3 mt-3">
-                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+            {/* Advanced Settings */}
+            <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" className="w-full justify-between border-primary/20">
+                  <span>Cài đặt nâng cao</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isAdvancedOpen ? 'rotate-180' : ''}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-3 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg">
+                    <Label htmlFor="shuffleQuestions" className="text-sm font-medium">
+                      Xáo trộn câu hỏi
+                    </Label>
                     <Switch 
                       id="shuffleQuestions" 
                       checked={settings.shuffleQuestions}
                       onCheckedChange={(checked) => handleSwitchChange('shuffleQuestions', checked)} 
                     />
-                    <Label htmlFor="shuffleQuestions" className="text-sm font-medium">
-                      Xáo trộn câu hỏi
-                    </Label>
                   </div>
 
-                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg">
+                    <Label htmlFor="shuffleOptions" className="text-sm font-medium">
+                      Xáo trộn đáp án
+                    </Label>
                     <Switch 
                       id="shuffleOptions" 
                       checked={settings.shuffleOptions}
                       onCheckedChange={(checked) => handleSwitchChange('shuffleOptions', checked)} 
                     />
-                    <Label htmlFor="shuffleOptions" className="text-sm font-medium">
-                      Xáo trộn đáp án
-                    </Label>
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Debug Mode */}
-              <div className="border-t border-border/50 pt-3">
-                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
-                  <Switch 
-                    id="debugMode" 
-                    checked={settings.debugMode}
-                    onCheckedChange={(checked) => handleSwitchChange('debugMode', checked)} 
-                  />
-                  <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2">
-                    <Bug className="h-4 w-4 text-orange-500" /> 
-                    <span>Debug Mode</span>
-                    <span className="text-xs text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">DEV</span>
-                  </Label>
                 </div>
-                {settings.debugMode && (
-                  <p className="text-sm text-muted-foreground mt-2 ml-7">
-                    Sử dụng dữ liệu mẫu để test giao diện ngay lập tức
-                  </p>
-                )}
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* Debug Mode */}
+            <div className="border-t border-border/50 pt-4">
+              <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2">
+                  <Bug className="h-4 w-4 text-orange-500" /> 
+                  <span>Debug Mode</span>
+                  <span className="text-xs text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">DEV</span>
+                </Label>
+                <Switch 
+                  id="debugMode" 
+                  checked={settings.debugMode}
+                  onCheckedChange={(checked) => handleSwitchChange('debugMode', checked)} 
+                />
               </div>
+              {settings.debugMode && (
+                <p className="text-sm text-muted-foreground mt-2 px-3">
+                  Sử dụng dữ liệu mẫu để test giao diện ngay lập tức
+                </p>
+              )}
             </div>
           </div>
 
