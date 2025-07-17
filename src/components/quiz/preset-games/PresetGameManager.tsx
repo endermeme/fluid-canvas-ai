@@ -253,7 +253,7 @@ Output must be valid JSON. `;
     }
   };
 
-  const loadSampleData = (type) => {
+  const loadSampleData = (type, gameSettings) => {
     let data = null;
 
     // Get sample data based on game type
@@ -262,8 +262,8 @@ Output must be valid JSON. `;
         data = { ...quizSampleData };
         data.settings = {
           ...data.settings,
-          timePerQuestion: settings.timePerQuestion,
-          totalTime: settings.totalTime || settings.questionCount * settings.timePerQuestion
+          timePerQuestion: gameSettings.timePerQuestion || 30,
+          totalTime: gameSettings.totalTime || (gameSettings.questionCount || 10) * (gameSettings.timePerQuestion || 30)
         };
         break;
       
@@ -271,8 +271,8 @@ Output must be valid JSON. `;
         data = { ...flashcardsSampleData };
         data.settings = {
           ...data.settings,
-          flipTime: settings.timePerQuestion,
-          totalTime: settings.totalTime || 180
+          flipTime: gameSettings.flipTime || gameSettings.timePerQuestion || 3,
+          totalTime: gameSettings.totalTime || 180
         };
         break;
       
@@ -280,8 +280,8 @@ Output must be valid JSON. `;
         data = { ...matchingSampleData };
         data.settings = {
           ...data.settings,
-          timeLimit: settings.totalTime || 120,
-          bonusTimePerMatch: settings.bonusTime || 5
+          timeLimit: gameSettings.timeLimit || 120,
+          bonusTimePerMatch: gameSettings.bonusTimePerMatch || 5
         };
         break;
       
@@ -289,9 +289,9 @@ Output must be valid JSON. `;
         data = { ...memorySampleData };
         data.settings = {
           ...data.settings,
-          timeLimit: settings.totalTime || 120,
+          timeLimit: gameSettings.timeLimit || 120,
           allowHints: true,
-          hintPenalty: settings.bonusTime || 5
+          hintPenalty: gameSettings.hintPenalty || 5
         };
         break;
       
@@ -299,8 +299,8 @@ Output must be valid JSON. `;
         data = { ...orderingSampleData };
         data.settings = {
           ...data.settings,
-          timeLimit: settings.totalTime || 180,
-          bonusTimePerCorrect: settings.bonusTime || 10
+          timeLimit: gameSettings.timeLimit || 180,
+          bonusTimePerCorrect: gameSettings.bonusTimePerCorrect || 10
         };
         break;
       
@@ -319,8 +319,8 @@ Output must be valid JSON. `;
         }
         data.settings = {
           ...data.settings,
-          timeLimit: settings.totalTime || 300,
-          bonusTimePerWord: settings.bonusTime || 15
+          timeLimit: gameSettings.timeLimit || 300,
+          bonusTimePerWord: gameSettings.bonusTimePerWord || 15
         };
         break;
       
@@ -328,9 +328,9 @@ Output must be valid JSON. `;
         data = { ...trueFalseSampleData };
         data.settings = {
           ...data.settings,
-          timePerQuestion: settings.timePerQuestion,
-          totalTime: settings.totalTime || settings.questionCount * settings.timePerQuestion,
-          bonusTimePerCorrect: settings.bonusTime || 3
+          timePerQuestion: gameSettings.timePerQuestion || 20,
+          totalTime: gameSettings.totalTime || (gameSettings.questionCount || 10) * (gameSettings.timePerQuestion || 20),
+          bonusTimePerCorrect: gameSettings.bonusTimePerCorrect || 3
         };
         break;
       
@@ -351,9 +351,9 @@ Output must be valid JSON. `;
 
   const handleRetry = () => {
     if (initialTopic && initialTopic.trim() !== "") {
-      generateAIContent(initialTopic, gameType, settings);
+      generateAIContent(initialTopic, gameType, settings || {});
     } else {
-      loadSampleData(gameType);
+      loadSampleData(gameType, settings || {});
     }
   };
 
@@ -370,7 +370,7 @@ Output must be valid JSON. `;
         description: `Đang tải dữ liệu mẫu cho ${getGameTypeName()} (Debug Mode)`,
         variant: "default"
       });
-      loadSampleData(gameType);
+      loadSampleData(gameType, gameSettings);
       return;
     }
 
@@ -385,7 +385,7 @@ Output must be valid JSON. `;
       generateAIContent(aiPrompt, gameType, gameSettings);
     } else {
       console.log(`Loading sample data for ${gameType} game with settings:`, gameSettings);
-      loadSampleData(gameType);
+      loadSampleData(gameType, gameSettings);
     }
   };
 
