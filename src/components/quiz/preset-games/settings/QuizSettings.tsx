@@ -9,7 +9,6 @@ import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { BrainCircuit, Type, Trophy, Medal, Timer, Clock4, Bug, ChevronDown } from 'lucide-react';
-
 export interface QuizSettingsData {
   questionCount: number;
   totalTime: number; // in minutes
@@ -21,18 +20,22 @@ export interface QuizSettingsData {
   prompt: string;
   debugMode: boolean;
 }
-
 interface QuizSettingsProps {
   onStart: (settings: QuizSettingsData) => void;
   topic: string;
   onCancel?: () => void;
 }
-
-const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel }) => {
+const QuizSettings: React.FC<QuizSettingsProps> = ({
+  onStart,
+  topic,
+  onCancel
+}) => {
   const [settings, setSettings] = useState<QuizSettingsData>({
     questionCount: 10,
-    totalTime: 10, // 10 minutes default
-    bonusTime: 5, // 5 seconds bonus
+    totalTime: 10,
+    // 10 minutes default
+    bonusTime: 5,
+    // 5 seconds bonus
     useTimer: true,
     showExplanation: true,
     shuffleQuestions: true,
@@ -40,44 +43,53 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
     prompt: topic || '',
     debugMode: false
   });
-
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-
   useEffect(() => {
     if (topic && topic !== settings.prompt) {
-      setSettings(prev => ({ ...prev, prompt: topic }));
+      setSettings(prev => ({
+        ...prev,
+        prompt: topic
+      }));
     }
   }, [topic, settings.prompt]);
-
   const handleSliderChange = (name: keyof QuizSettingsData, value: number[]) => {
-    setSettings(prev => ({ ...prev, [name]: value[0] }));
+    setSettings(prev => ({
+      ...prev,
+      [name]: value[0]
+    }));
   };
-
   const handleSelectChange = (name: keyof QuizSettingsData, value: string) => {
-    setSettings(prev => ({ ...prev, [name]: value }));
+    setSettings(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
-
   const handleSwitchChange = (name: keyof QuizSettingsData, checked: boolean) => {
-    setSettings(prev => ({ ...prev, [name]: checked }));
+    setSettings(prev => ({
+      ...prev,
+      [name]: checked
+    }));
   };
-
   const handleInputChange = (name: keyof QuizSettingsData, value: string) => {
     if (name === 'prompt') {
-      setSettings(prev => ({ ...prev, prompt: value }));
+      setSettings(prev => ({
+        ...prev,
+        prompt: value
+      }));
     } else {
       const numValue = parseInt(value);
       if (!isNaN(numValue)) {
-        setSettings(prev => ({ ...prev, [name]: numValue }));
+        setSettings(prev => ({
+          ...prev,
+          [name]: numValue
+        }));
       }
     }
   };
-
   const handleStart = () => {
     onStart(settings);
   };
-
-  return (
-    <div className="flex items-center justify-center p-4 min-h-screen">
+  return <div className="flex items-center justify-center p-4 min-h-screen">
       <div className="w-full max-w-2xl mx-auto">
         <Card className="border-primary/20 shadow-lg p-6 max-h-[85vh] overflow-y-auto">
           {/* Header */}
@@ -99,13 +111,7 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
                 <Label htmlFor="prompt" className="flex items-center gap-2 text-sm font-medium">
                   <Type className="h-4 w-4 text-primary" /> Nội dung trò chơi
                 </Label>
-                <Textarea
-                  id="prompt"
-                  value={settings.prompt || ''}
-                  onChange={(e) => handleInputChange('prompt', e.target.value)}
-                  placeholder="Nhập nội dung chi tiết cho trò chơi trắc nghiệm"
-                  className="border-primary/20 bg-white/50 min-h-[80px] max-h-[120px]"
-                />
+                <Textarea id="prompt" value={settings.prompt || ''} onChange={e => handleInputChange('prompt', e.target.value)} placeholder="Nhập nội dung chi tiết cho trò chơi trắc nghiệm" className="border-primary/20 bg-white/50 min-h-[80px] max-h-[120px]" />
               </div>
               
               {/* Question Count */}
@@ -116,24 +122,13 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
                   </Label>
                   <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.questionCount}</span>
                 </div>
-                <Slider 
-                  id="questionCount"
-                  min={5} 
-                  max={30} 
-                  step={1} 
-                  value={[settings.questionCount]} 
-                  onValueChange={(value) => handleSliderChange('questionCount', value)}
-                />
+                <Slider id="questionCount" min={5} max={30} step={1} value={[settings.questionCount]} onValueChange={value => handleSliderChange('questionCount', value)} />
               </div>
 
               {/* Basic Quiz Options */}
               <div className="space-y-3">
                 <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="showExplanation" 
-                    checked={settings.showExplanation}
-                    onCheckedChange={(checked) => handleSwitchChange('showExplanation', checked)} 
-                  />
+                  <Switch id="showExplanation" checked={settings.showExplanation} onCheckedChange={checked => handleSwitchChange('showExplanation', checked)} />
                   <Label htmlFor="showExplanation" className="text-sm font-medium">
                     Hiển thị giải thích
                   </Label>
@@ -145,51 +140,27 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
             <div className="space-y-4">
               {/* Timer Toggle */}
               <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                <Switch 
-                  id="useTimer" 
-                  checked={settings.useTimer}
-                  onCheckedChange={(checked) => handleSwitchChange('useTimer', checked)} 
-                />
+                <Switch id="useTimer" checked={settings.useTimer} onCheckedChange={checked => handleSwitchChange('useTimer', checked)} />
                 <Label htmlFor="useTimer" className="text-sm font-medium flex items-center gap-2">
                   <Timer className="h-4 w-4 text-primary" /> Sử dụng bộ đếm thời gian
                 </Label>
               </div>
 
-              {settings.useTimer && (
-                <div className="grid grid-cols-2 gap-3">
+              {settings.useTimer && <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
                       <Clock4 className="h-4 w-4 text-primary" /> Tổng thời gian (phút)
                     </Label>
-                    <Input
-                      id="totalTime"
-                      type="number"
-                      min="1"
-                      max="60"
-                      placeholder="10"
-                      value={settings.totalTime}
-                      onChange={(e) => handleInputChange('totalTime', e.target.value)}
-                      className="border-primary/20 bg-white/50"
-                    />
+                    <Input id="totalTime" type="number" min="1" max="60" placeholder="10" value={settings.totalTime} onChange={e => handleInputChange('totalTime', e.target.value)} className="border-primary/20 bg-white/50" />
                   </div>
                   
-                  <div className="space-y-2">
+                  <div className="space-y-2 py-[9px]">
                     <Label htmlFor="bonusTime" className="text-sm font-medium flex items-center gap-2">
                       <Timer className="h-4 w-4 text-primary" /> Thưởng (giây)
                     </Label>
-                    <Input
-                      id="bonusTime"
-                      type="number"
-                      min="0"
-                      max="30"
-                      placeholder="5"
-                      value={settings.bonusTime}
-                      onChange={(e) => handleInputChange('bonusTime', e.target.value)}
-                      className="border-primary/20 bg-white/50"
-                    />
+                    <Input id="bonusTime" type="number" min="0" max="30" placeholder="5" value={settings.bonusTime} onChange={e => handleInputChange('bonusTime', e.target.value)} className="border-primary/20 bg-white/50" />
                   </div>
-                </div>
-              )}
+                </div>}
 
               {/* Advanced Settings */}
               <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
@@ -201,22 +172,14 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-3 mt-3">
                   <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                    <Switch 
-                      id="shuffleQuestions" 
-                      checked={settings.shuffleQuestions}
-                      onCheckedChange={(checked) => handleSwitchChange('shuffleQuestions', checked)} 
-                    />
+                    <Switch id="shuffleQuestions" checked={settings.shuffleQuestions} onCheckedChange={checked => handleSwitchChange('shuffleQuestions', checked)} />
                     <Label htmlFor="shuffleQuestions" className="text-sm font-medium">
                       Xáo trộn câu hỏi
                     </Label>
                   </div>
 
                   <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                    <Switch 
-                      id="shuffleOptions" 
-                      checked={settings.shuffleOptions}
-                      onCheckedChange={(checked) => handleSwitchChange('shuffleOptions', checked)} 
-                    />
+                    <Switch id="shuffleOptions" checked={settings.shuffleOptions} onCheckedChange={checked => handleSwitchChange('shuffleOptions', checked)} />
                     <Label htmlFor="shuffleOptions" className="text-sm font-medium">
                       Xáo trộn đáp án
                     </Label>
@@ -227,48 +190,31 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
               {/* Debug Mode */}
               <div className="border-t border-border/50 pt-3">
                 <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
-                  <Switch 
-                    id="debugMode" 
-                    checked={settings.debugMode}
-                    onCheckedChange={(checked) => handleSwitchChange('debugMode', checked)} 
-                  />
+                  <Switch id="debugMode" checked={settings.debugMode} onCheckedChange={checked => handleSwitchChange('debugMode', checked)} />
                   <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2">
                     <Bug className="h-4 w-4 text-orange-500" /> 
                     <span>Debug Mode</span>
                     <span className="text-xs text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">DEV</span>
                   </Label>
                 </div>
-                {settings.debugMode && (
-                  <p className="text-sm text-muted-foreground mt-2 ml-7">
+                {settings.debugMode && <p className="text-sm text-muted-foreground mt-2 ml-7">
                     Sử dụng dữ liệu mẫu để test giao diện ngay lập tức
-                  </p>
-                )}
+                  </p>}
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="pt-4 mt-6 border-t border-border/20 flex gap-3">
-            {onCancel && (
-              <Button 
-                variant="outline"
-                className="flex-1 border-primary/20 hover:border-primary/30"
-                onClick={onCancel}
-              >
+            {onCancel && <Button variant="outline" className="flex-1 border-primary/20 hover:border-primary/30" onClick={onCancel}>
                 Hủy
-              </Button>
-            )}
-            <Button 
-              className="flex-1 bg-gradient-to-r from-primary to-primary/80"
-              onClick={handleStart}
-            >
+              </Button>}
+            <Button className="flex-1 bg-gradient-to-r from-primary to-primary/80" onClick={handleStart}>
               Bắt Đầu Trò Chơi
             </Button>
           </div>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default QuizSettings;
