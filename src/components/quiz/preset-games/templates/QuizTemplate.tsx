@@ -15,17 +15,14 @@ interface QuizTemplateProps {
 const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, settings }) => {
   const gameContent = content || data;
   
-  // Game settings function - Quiz settings
-  const getGameSettings = () => ({
+  // Use settings from props or defaults
+  const gameSettings = settings || {
     timePerQuestion: 20,
-    totalTime: 600, // 10 phút
+    totalTime: 600,
     useTimer: true,
     bonusTime: 5,
     showExplanation: true
-    // Loại bỏ difficulty vì không được sử dụng
-  });
-  
-  const gameSettings = getGameSettings();
+  };
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
