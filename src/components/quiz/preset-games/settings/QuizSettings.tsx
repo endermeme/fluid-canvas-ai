@@ -91,7 +91,7 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
           </div>
 
           {/* Settings Content */}
-          <div className="space-y-6">
+          <div className="space-y-4 flex-1 overflow-y-auto min-h-0">
             {/* Content Input */}
             <div className="space-y-3">
               <Label htmlFor="prompt" className="flex items-center gap-2 text-sm font-medium">
