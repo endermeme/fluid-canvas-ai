@@ -16,10 +16,10 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, set
   // Game settings function - Ordering game settings
   const getGameSettings = () => ({
     totalTime: 300, // 5 phút cho ordering
-    useTimer: true,
     bonusTime: 20, // Thời gian thưởng nhiều hơn
     showHints: true,
     hintPenalty: 25 // Penalty ít hơn cho hint
+    // Loại bỏ useTimer vì luôn true
   });
   
   const gameSettings = getGameSettings();
@@ -30,7 +30,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, set
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [timeLeft, setTimeLeft] = useState(gameSettings.totalTime);
-  const [timerRunning, setTimerRunning] = useState(gameSettings.useTimer);
+  const [timerRunning, setTimerRunning] = useState(true);
   const [isChecking, setIsChecking] = useState(false);
   const [hasShownHint, setHasShownHint] = useState(false);
   const { toast } = useToast();

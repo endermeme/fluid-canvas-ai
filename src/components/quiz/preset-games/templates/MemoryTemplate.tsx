@@ -18,9 +18,8 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
   const getGameSettings = () => ({
     totalTime: 180, // 3 phút cho memory game
     showHints: true,
-    hintPenalty: 15, // 15s penalty cho hint
-    shuffleCards: true,
-    showTimer: true
+    hintPenalty: 15 // 15s penalty cho hint
+    // Loại bỏ shuffleCards, showTimer vì không được sử dụng
   });
   
   const gameSettings = getGameSettings();

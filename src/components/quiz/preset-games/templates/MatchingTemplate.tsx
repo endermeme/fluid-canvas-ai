@@ -21,11 +21,10 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
   // Game settings function - Matching game settings
   const getGameSettings = () => ({
     totalTime: 240, // 4 phút cho matching
-    difficulty: "medium",
-    showScore: true,
+    difficulty: "medium", // Để tính điểm
     matchScore: 15, // Điểm cao hơn cho match đúng
-    missScore: -3, // Trừ điểm nhiều hơn cho sai
-    shuffleItems: true
+    missScore: -3 // Trừ điểm nhiều hơn cho sai
+    // Loại bỏ showScore, shuffleItems vì không được sử dụng
   });
   
   const gameSettings = getGameSettings();

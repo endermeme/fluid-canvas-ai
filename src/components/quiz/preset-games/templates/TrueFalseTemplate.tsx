@@ -22,9 +22,8 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   const getGameSettings = () => ({
     timePerQuestion: 12, // Ít thời gian hơn vì đơn giản
     totalTime: 180, // 3 phút tổng
-    useTimer: true,
-    showExplanation: true,
-    showShare: true
+    showExplanation: true
+    // Loại bỏ useTimer (luôn true), showShare (component tự quản lý)
   });
   
   const gameSettings = getGameSettings();
@@ -35,7 +34,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   const [showExplanation, setShowExplanation] = useState(false);
   const [timeLeft, setTimeLeft] = useState(gameSettings.timePerQuestion);
   const [totalTimeLeft, setTotalTimeLeft] = useState(gameSettings.totalTime);
-  const [timerRunning, setTimerRunning] = useState(gameSettings.useTimer);
+  const [timerRunning, setTimerRunning] = useState(true);
   const [showResult, setShowResult] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();

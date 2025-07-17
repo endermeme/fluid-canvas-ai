@@ -18,9 +18,8 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
   // Game settings function - Flashcards settings
   const getGameSettings = () => ({
     autoFlip: false, // Người dùng tự lật
-    timePerQuestion: 8, // Thời gian auto flip nếu bật
-    showStats: true,
-    shuffleCards: true
+    timePerQuestion: 8 // Thời gian auto flip nếu bật
+    // Loại bỏ showStats, shuffleCards vì không được sử dụng
   });
   
   const gameSettings = getGameSettings();
@@ -211,7 +210,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
               <div className="text-center w-full">
                 <div className="text-xs sm:text-sm uppercase tracking-wider text-primary/70 mb-2 sm:mb-3">
                   Nhấn để lật thẻ
-            {autoFlip && !isFlipped && gameSettings.showStats && (
+            {autoFlip && !isFlipped && (
               <div className="mt-1 flex items-center justify-center">
                 <Clock className="h-3 w-3 mr-1 text-primary/60" />
                 <span className="text-primary/60">Tự động lật sau {timeRemaining}s</span>

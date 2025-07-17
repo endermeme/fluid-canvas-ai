@@ -21,8 +21,8 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
     totalTime: 600, // 10 phút
     useTimer: true,
     bonusTime: 5,
-    showExplanation: true,
-    difficulty: "medium"
+    showExplanation: true
+    // Loại bỏ difficulty vì không được sử dụng
   });
   
   const gameSettings = getGameSettings();

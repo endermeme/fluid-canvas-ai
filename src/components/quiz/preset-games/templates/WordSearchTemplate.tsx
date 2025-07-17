@@ -25,9 +25,8 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic,
   const getGameSettings = () => ({
     totalTime: 480, // 8 phút cho word search (khó hơn)
     allowDiagonalWords: true,
-    showWordList: true,
-    gridSize: "medium",
-    showTimer: true
+    showWordList: true
+    // Loại bỏ gridSize, showTimer vì không được sử dụng trong logic
   });
   
   const gameSettings = getGameSettings();
@@ -39,7 +38,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic,
   const [timeLeft, setTimeLeft] = useState(gameSettings.totalTime);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
-  const [gridSize, setGridSize] = useState(gameSettings.gridSize);
+  const [gridSize, setGridSize] = useState("medium");
   const { toast } = useToast();
 
   const grid = content?.grid || [];
