@@ -10,10 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Lightbulb, Type, Trophy, Medal, Timer, Clock, Clock4, Bug, RotateCcw } from 'lucide-react';
 
 export interface FlashcardsSettingsData {
-  difficulty: 'easy' | 'medium' | 'hard';
   cardCount: number;
-  flipTime: number;
-  totalTime: number;
   autoFlip: boolean;
   showHints: boolean;
   allowSkip: boolean;
@@ -29,10 +26,7 @@ interface FlashcardsSettingsProps {
 
 const FlashcardsSettings: React.FC<FlashcardsSettingsProps> = ({ onStart, topic, onCancel }) => {
   const [settings, setSettings] = useState<FlashcardsSettingsData>({
-    difficulty: 'medium',
     cardCount: 10,
-    flipTime: 3,
-    totalTime: 0,
     autoFlip: true,
     showHints: true,
     allowSkip: true,
@@ -105,26 +99,6 @@ const FlashcardsSettings: React.FC<FlashcardsSettingsProps> = ({ onStart, topic,
                 />
               </div>
               
-              {/* Difficulty */}
-              <div className="space-y-2">
-                <Label htmlFor="difficulty" className="flex items-center gap-2 text-sm font-medium">
-                  <Trophy className="h-4 w-4 text-primary" /> Độ Khó
-                </Label>
-                <Select 
-                  value={settings.difficulty} 
-                  onValueChange={(value) => handleSelectChange('difficulty', value)}
-                >
-                  <SelectTrigger className="border-primary/20 bg-white/50">
-                    <SelectValue placeholder="Chọn độ khó" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="easy">Dễ</SelectItem>
-                    <SelectItem value="medium">Trung bình</SelectItem>
-                    <SelectItem value="hard">Khó</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Card Count */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -142,44 +116,10 @@ const FlashcardsSettings: React.FC<FlashcardsSettingsProps> = ({ onStart, topic,
                   onValueChange={(value) => handleSliderChange('cardCount', value)}
                 />
               </div>
-
-              {/* Total Time */}
-              <div className="space-y-2">
-                <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
-                  <Clock4 className="h-4 w-4 text-primary" /> Tổng thời gian
-                </Label>
-                <Input
-                  id="totalTime"
-                  type="number"
-                  min="0"
-                  placeholder="0 = không giới hạn"
-                  value={settings.totalTime || 0}
-                  onChange={(e) => handleInputChange('totalTime', e.target.value)}
-                  className="border-primary/20 bg-white/50"
-                />
-              </div>
             </div>
 
             {/* Right Column */}
             <div className="space-y-4">
-              {/* Flip Time */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="flipTime" className="text-sm font-medium flex items-center gap-2">
-                    <RotateCcw className="h-4 w-4 text-primary" /> Thời Gian Lật Thẻ
-                  </Label>
-                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.flipTime} giây</span>
-                </div>
-                <Slider 
-                  id="flipTime"
-                  min={1} 
-                  max={10} 
-                  step={1} 
-                  value={[settings.flipTime]} 
-                  onValueChange={(value) => handleSliderChange('flipTime', value)}
-                />
-              </div>
-
               {/* Flashcard Options */}
               <div className="space-y-3">
                 <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
