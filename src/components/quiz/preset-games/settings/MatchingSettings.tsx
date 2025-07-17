@@ -10,12 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Puzzle, Type, Trophy, Medal, Timer, Clock4, Bug, Link } from 'lucide-react';
 
 export interface MatchingSettingsData {
-  difficulty: 'easy' | 'medium' | 'hard';
   pairCount: number;
-  timeLimit: number;
-  bonusTimePerMatch: number;
-  allowPartialMatching: boolean;
-  showProgress: boolean;
   prompt: string;
   debugMode: boolean;
 }
@@ -28,12 +23,7 @@ interface MatchingSettingsProps {
 
 const MatchingSettings: React.FC<MatchingSettingsProps> = ({ onStart, topic, onCancel }) => {
   const [settings, setSettings] = useState<MatchingSettingsData>({
-    difficulty: 'medium',
     pairCount: 8,
-    timeLimit: 120,
-    bonusTimePerMatch: 5,
-    allowPartialMatching: false,
-    showProgress: true,
     prompt: topic || '',
     debugMode: false
   });
@@ -103,26 +93,6 @@ const MatchingSettings: React.FC<MatchingSettingsProps> = ({ onStart, topic, onC
                 />
               </div>
               
-              {/* Difficulty */}
-              <div className="space-y-2">
-                <Label htmlFor="difficulty" className="flex items-center gap-2 text-sm font-medium">
-                  <Trophy className="h-4 w-4 text-primary" /> Độ Khó
-                </Label>
-                <Select 
-                  value={settings.difficulty} 
-                  onValueChange={(value) => handleSelectChange('difficulty', value)}
-                >
-                  <SelectTrigger className="border-primary/20 bg-white/50">
-                    <SelectValue placeholder="Chọn độ khó" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="easy">Dễ</SelectItem>
-                    <SelectItem value="medium">Trung bình</SelectItem>
-                    <SelectItem value="hard">Khó</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Pair Count */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -140,70 +110,11 @@ const MatchingSettings: React.FC<MatchingSettingsProps> = ({ onStart, topic, onC
                   onValueChange={(value) => handleSliderChange('pairCount', value)}
                 />
               </div>
-
-              {/* Time Limit */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="timeLimit" className="text-sm font-medium flex items-center gap-2">
-                    <Clock4 className="h-4 w-4 text-primary" /> Thời Gian Tối Đa
-                  </Label>
-                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.timeLimit} giây</span>
-                </div>
-                <Slider 
-                  id="timeLimit"
-                  min={60} 
-                  max={300} 
-                  step={30} 
-                  value={[settings.timeLimit]} 
-                  onValueChange={(value) => handleSliderChange('timeLimit', value)}
-                />
-              </div>
             </div>
 
             {/* Right Column */}
             <div className="space-y-4">
-              {/* Bonus Time Per Match */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="bonusTimePerMatch" className="text-sm font-medium flex items-center gap-2">
-                    <Timer className="h-4 w-4 text-primary" /> Thưởng Thời Gian
-                  </Label>
-                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.bonusTimePerMatch} giây</span>
-                </div>
-                <Slider 
-                  id="bonusTimePerMatch"
-                  min={0} 
-                  max={15} 
-                  step={1} 
-                  value={[settings.bonusTimePerMatch]} 
-                  onValueChange={(value) => handleSliderChange('bonusTimePerMatch', value)}
-                />
-              </div>
 
-              {/* Matching Options */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="allowPartialMatching" 
-                    checked={settings.allowPartialMatching}
-                    onCheckedChange={(checked) => handleSwitchChange('allowPartialMatching', checked)} 
-                  />
-                  <Label htmlFor="allowPartialMatching" className="text-sm font-medium flex items-center gap-2">
-                    <Link className="h-4 w-4 text-primary" /> Cho phép nối một phần
-                  </Label>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="showProgress" 
-                    checked={settings.showProgress}
-                    onCheckedChange={(checked) => handleSwitchChange('showProgress', checked)} 
-                  />
-                  <Label htmlFor="showProgress" className="text-sm font-medium">
-                    Hiển thị tiến độ
-                  </Label>
-                </div>
-              </div>
 
               {/* Debug Mode */}
               <div className="border-t border-border/50 pt-3">
