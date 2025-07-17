@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -18,14 +18,14 @@ interface MatchingItem {
 }
 
 const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, settings }) => {
-  // Use settings from props with proper defaults
-  const gameSettings = {
+  // Memoize settings to prevent infinite re-renders
+  const gameSettings = useMemo(() => ({
     pairCount: settings?.pairCount || 8,
     timeLimit: settings?.timeLimit || 120,
     bonusTimePerMatch: settings?.bonusTimePerMatch || 5,
     allowPartialMatching: settings?.allowPartialMatching || false,
     debugMode: settings?.debugMode || false
-  };
+  }), [settings?.pairCount, settings?.timeLimit, settings?.bonusTimePerMatch, settings?.allowPartialMatching, settings?.debugMode]);
   
   const [leftItems, setLeftItems] = useState<MatchingItem[]>([]);
   const [rightItems, setRightItems] = useState<MatchingItem[]>([]);
