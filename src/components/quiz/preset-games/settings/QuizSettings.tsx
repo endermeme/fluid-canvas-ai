@@ -7,14 +7,13 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { BrainCircuit, Type, Trophy, Medal, Timer, Clock, Clock4, Bug } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { BrainCircuit, Type, Trophy, Medal, Timer, Clock4, Bug, ChevronDown } from 'lucide-react';
 
 export interface QuizSettingsData {
-  difficulty: 'easy' | 'medium' | 'hard';
   questionCount: number;
-  timePerQuestion: number;
-  totalTime: number;
-  bonusTime: number;
+  totalTime: number; // in minutes
+  bonusTime: number; // in seconds
   useTimer: boolean;
   showExplanation: boolean;
   shuffleQuestions: boolean;
@@ -31,11 +30,9 @@ interface QuizSettingsProps {
 
 const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel }) => {
   const [settings, setSettings] = useState<QuizSettingsData>({
-    difficulty: 'medium',
     questionCount: 10,
-    timePerQuestion: 30,
-    totalTime: 0,
-    bonusTime: 5,
+    totalTime: 10, // 10 minutes default
+    bonusTime: 5, // 5 seconds bonus
     useTimer: true,
     showExplanation: true,
     shuffleQuestions: true,
@@ -43,6 +40,8 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
     prompt: topic || '',
     debugMode: false
   });
+
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   useEffect(() => {
     if (topic && topic !== settings.prompt) {
@@ -109,26 +108,6 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
                 />
               </div>
               
-              {/* Difficulty */}
-              <div className="space-y-2">
-                <Label htmlFor="difficulty" className="flex items-center gap-2 text-sm font-medium">
-                  <Trophy className="h-4 w-4 text-primary" /> Độ Khó
-                </Label>
-                <Select 
-                  value={settings.difficulty} 
-                  onValueChange={(value) => handleSelectChange('difficulty', value)}
-                >
-                  <SelectTrigger className="border-primary/20 bg-white/50">
-                    <SelectValue placeholder="Chọn độ khó" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="easy">Dễ</SelectItem>
-                    <SelectItem value="medium">Trung bình</SelectItem>
-                    <SelectItem value="hard">Khó</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Question Count */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -147,7 +126,7 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
                 />
               </div>
 
-              {/* Quiz Options */}
+              {/* Basic Quiz Options */}
               <div className="space-y-3">
                 <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
                   <Switch 
@@ -157,28 +136,6 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
                   />
                   <Label htmlFor="showExplanation" className="text-sm font-medium">
                     Hiển thị giải thích
-                  </Label>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="shuffleQuestions" 
-                    checked={settings.shuffleQuestions}
-                    onCheckedChange={(checked) => handleSwitchChange('shuffleQuestions', checked)} 
-                  />
-                  <Label htmlFor="shuffleQuestions" className="text-sm font-medium">
-                    Xáo trộn câu hỏi
-                  </Label>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="shuffleOptions" 
-                    checked={settings.shuffleOptions}
-                    onCheckedChange={(checked) => handleSwitchChange('shuffleOptions', checked)} 
-                  />
-                  <Label htmlFor="shuffleOptions" className="text-sm font-medium">
-                    Xáo trộn đáp án
                   </Label>
                 </div>
               </div>
@@ -199,59 +156,73 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
               </div>
 
               {settings.useTimer && (
-                <>
-                  {/* Time Per Question */}
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <Label htmlFor="timePerQuestion" className="text-sm font-medium flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-primary" /> Thời Gian Mỗi Câu
-                      </Label>
-                      <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.timePerQuestion} giây</span>
-                    </div>
-                    <Slider 
-                      id="timePerQuestion"
-                      min={10} 
-                      max={120} 
-                      step={5} 
-                      value={[settings.timePerQuestion]} 
-                      onValueChange={(value) => handleSliderChange('timePerQuestion', value)}
+                    <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
+                      <Clock4 className="h-4 w-4 text-primary" /> Tổng thời gian (phút)
+                    </Label>
+                    <Input
+                      id="totalTime"
+                      type="number"
+                      min="1"
+                      max="60"
+                      placeholder="10"
+                      value={settings.totalTime}
+                      onChange={(e) => handleInputChange('totalTime', e.target.value)}
+                      className="border-primary/20 bg-white/50"
                     />
                   </div>
-
-                  {/* Time Settings Row */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
-                        <Clock4 className="h-4 w-4 text-primary" /> Tổng thời gian
-                      </Label>
-                      <Input
-                        id="totalTime"
-                        type="number"
-                        min="0"
-                        placeholder="0 = tự động"
-                        value={settings.totalTime || 0}
-                        onChange={(e) => handleInputChange('totalTime', e.target.value)}
-                        className="border-primary/20 bg-white/50"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="bonusTime" className="text-sm font-medium flex items-center gap-2">
-                        <Timer className="h-4 w-4 text-primary" /> Thời gian thưởng
-                      </Label>
-                      <Input
-                        id="bonusTime"
-                        type="number"
-                        min="0"
-                        placeholder="Thưởng"
-                        value={settings.bonusTime || 0}
-                        onChange={(e) => handleInputChange('bonusTime', e.target.value)}
-                        className="border-primary/20 bg-white/50"
-                      />
-                    </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="bonusTime" className="text-sm font-medium flex items-center gap-2">
+                      <Timer className="h-4 w-4 text-primary" /> Thưởng (giây)
+                    </Label>
+                    <Input
+                      id="bonusTime"
+                      type="number"
+                      min="0"
+                      max="30"
+                      placeholder="5"
+                      value={settings.bonusTime}
+                      onChange={(e) => handleInputChange('bonusTime', e.target.value)}
+                      className="border-primary/20 bg-white/50"
+                    />
                   </div>
-                </>
+                </div>
               )}
+
+              {/* Advanced Settings */}
+              <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    <span>Cài đặt nâng cao</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${isAdvancedOpen ? 'rotate-180' : ''}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-3 mt-3">
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch 
+                      id="shuffleQuestions" 
+                      checked={settings.shuffleQuestions}
+                      onCheckedChange={(checked) => handleSwitchChange('shuffleQuestions', checked)} 
+                    />
+                    <Label htmlFor="shuffleQuestions" className="text-sm font-medium">
+                      Xáo trộn câu hỏi
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch 
+                      id="shuffleOptions" 
+                      checked={settings.shuffleOptions}
+                      onCheckedChange={(checked) => handleSwitchChange('shuffleOptions', checked)} 
+                    />
+                    <Label htmlFor="shuffleOptions" className="text-sm font-medium">
+                      Xáo trộn đáp án
+                    </Label>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
               {/* Debug Mode */}
               <div className="border-t border-border/50 pt-3">

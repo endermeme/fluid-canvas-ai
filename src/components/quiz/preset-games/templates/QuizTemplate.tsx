@@ -15,23 +15,22 @@ interface QuizTemplateProps {
 const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, settings }) => {
   const gameContent = content || data;
   
-  // Use settings from props or defaults
-  const gameSettings = settings || {
-    timePerQuestion: 20,
-    totalTime: 600,
-    useTimer: true,
-    bonusTime: 5,
-    showExplanation: true
+  // Use settings from props or fallback values - convert minutes to seconds for totalTime
+  const gameSettings = {
+    useTimer: settings?.useTimer !== false,
+    totalTime: settings?.totalTime ? settings.totalTime * 60 : 600, // Convert minutes to seconds, default 10 minutes
+    bonusTime: settings?.bonusTimePerCorrect || settings?.bonusTime || 5,
+    showExplanation: settings?.showExplanation !== false
   };
-  
+
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(gameSettings.timePerQuestion);
+  const [timeLeft, setTimeLeft] = useState(0); // Will be set dynamically
   const [totalTimeLeft, setTotalTimeLeft] = useState(gameSettings.totalTime);
-  const [timerRunning, setTimerRunning] = useState(gameSettings.useTimer);
+  const [timerRunning, setTimerRunning] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
@@ -41,56 +40,49 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
   useEffect(() => {
     if (!gameStarted && questions.length > 0) {
       setGameStarted(true);
-      
-      const questionTime = gameSettings.timePerQuestion;
-      const totalTime = gameSettings.totalTime;
-      
-      setTimeLeft(questionTime);
-      setTotalTimeLeft(totalTime);
-      setTimerRunning(gameSettings.useTimer);
-      
-      console.log(`Game initialized with ${questionTime}s per question and ${totalTime}s total time`);
-      console.log("Game settings:", gameSettings);
-      console.log("Questions:", questions);
+      if (gameSettings.useTimer) {
+        const questionTime = Math.floor(gameSettings.totalTime / questions.length);
+        setTimeLeft(questionTime);
+        setTotalTimeLeft(gameSettings.totalTime);
+        setTimerRunning(true);
+      }
     }
-  }, [gameContent, questions, gameStarted, gameSettings]);
+  }, [gameContent, questions, gameStarted, gameSettings.useTimer, gameSettings.totalTime]);
 
+  // Question timer
   useEffect(() => {
-    if (timeLeft > 0 && timerRunning && !isAnswered) {
+    if (gameSettings.useTimer && timeLeft > 0 && timerRunning && !isAnswered) {
       const timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
-      
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && timerRunning && !isAnswered) {
+    } else if (gameSettings.useTimer && timeLeft === 0 && timerRunning && !isAnswered) {
       setTimerRunning(false);
       setIsAnswered(true);
-      
       toast({
         title: "Hết thời gian!",
         description: "Bạn đã không trả lời kịp thời.",
         variant: "destructive",
       });
     }
-  }, [timeLeft, timerRunning, isAnswered, toast]);
+  }, [timeLeft, timerRunning, isAnswered, gameSettings.useTimer, toast]);
 
+  // Total timer
   useEffect(() => {
-    if (totalTimeLeft > 0 && gameStarted && !showResult) {
+    if (gameSettings.useTimer && totalTimeLeft > 0 && gameStarted && !showResult) {
       const timer = setTimeout(() => {
         setTotalTimeLeft(totalTimeLeft - 1);
       }, 1000);
-      
       return () => clearTimeout(timer);
-    } else if (totalTimeLeft === 0 && gameStarted && !showResult) {
+    } else if (gameSettings.useTimer && totalTimeLeft === 0 && gameStarted && !showResult) {
       setShowResult(true);
-      
       toast({
         title: "Trò chơi kết thúc",
         description: "Đã hết thời gian. Hãy xem kết quả của bạn.",
         variant: "destructive",
       });
     }
-  }, [totalTimeLeft, gameStarted, showResult, toast]);
+  }, [totalTimeLeft, gameStarted, showResult, gameSettings.useTimer, toast]);
 
   const handleOptionSelect = (optionIndex: number) => {
     if (isAnswered) return;
@@ -102,7 +94,8 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
     if (optionIndex === questions[currentQuestion].correctAnswer) {
       setScore(score + 1);
       
-      if (gameSettings.bonusTime > 0) {
+      // Add bonus time if timer is enabled
+      if (gameSettings.useTimer && gameSettings.bonusTime > 0) {
         const bonusTime = gameSettings.bonusTime;
         setTotalTimeLeft(prev => prev + bonusTime);
         
@@ -134,8 +127,12 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
       setCurrentQuestion(currentQuestion + 1);
       setSelectedOption(null);
       setIsAnswered(false);
-      setTimeLeft(gameSettings.timePerQuestion);
-      setTimerRunning(true);
+      
+      if (gameSettings.useTimer) {
+        const questionTime = Math.floor(gameSettings.totalTime / questions.length);
+        setTimeLeft(questionTime);
+        setTimerRunning(true);
+      }
     }
   };
 
@@ -145,10 +142,14 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
     setScore(0);
     setShowResult(false);
     setIsAnswered(false);
-      setTimeLeft(gameSettings.timePerQuestion);
-    setTotalTimeLeft(gameSettings.totalTime);
-    setTimerRunning(true);
     setGameStarted(true);
+    
+    if (gameSettings.useTimer) {
+      const questionTime = Math.floor(gameSettings.totalTime / questions.length);
+      setTimeLeft(questionTime);
+      setTotalTimeLeft(gameSettings.totalTime);
+      setTimerRunning(true);
+    }
   };
 
   if (!gameContent || !questions.length) {
@@ -165,6 +166,9 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
 
   if (showResult) {
     const percentage = Math.round((score / questions.length) * 100);
+    const minutesLeft = Math.floor(totalTimeLeft / 60);
+    const secondsLeft = totalTimeLeft % 60;
+    const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
     
     return (
       <div className="unified-game-container">
@@ -192,7 +196,9 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
             </div>
             
             <div className="text-sm mb-6 text-primary/70">
-              Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
+              {gameSettings.useTimer && (
+                <>Thời gian còn lại: {formattedTotalTime}</>
+              )}
             </div>
             
             <div className="text-center text-sm text-primary/70">
@@ -206,10 +212,12 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
 
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
-  
   const minutesLeft = Math.floor(totalTimeLeft / 60);
   const secondsLeft = totalTimeLeft % 60;
   const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
+  const questionTimeMinutes = Math.floor(timeLeft / 60);
+  const questionTimeSeconds = timeLeft % 60;
+  const formattedQuestionTime = `${questionTimeMinutes}:${questionTimeSeconds.toString().padStart(2, '0')}`;
 
   return (
     <div className="unified-game-container">
@@ -219,15 +227,17 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
           <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
             Câu {currentQuestion + 1}/{questions.length}
           </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <div className="flex items-center px-2 py-1 bg-muted rounded-full text-xs sm:text-sm font-medium">
-              <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
-              <span className="text-primary">{timeLeft}s</span>
+          {gameSettings.useTimer && (
+            <div className="flex items-center gap-1 sm:gap-2">
+              <div className="flex items-center px-2 py-1 bg-muted rounded-full text-xs sm:text-sm font-medium">
+                <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
+                <span className="text-primary">{formattedQuestionTime}</span>
+              </div>
+              <div className="hidden sm:flex items-center px-2 py-1 bg-muted rounded-full text-xs sm:text-sm font-medium">
+                <span className="text-primary">Tổng: {formattedTotalTime}</span>
+              </div>
             </div>
-            <div className="hidden sm:flex items-center px-2 py-1 bg-muted rounded-full text-xs sm:text-sm font-medium">
-              <span className="text-primary">Tổng: {formattedTotalTime}</span>
-            </div>
-          </div>
+          )}
         </div>
         <Progress value={progress} className="h-1.5 sm:h-2" />
       </div>
@@ -291,7 +301,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
           </div>
 
           {/* Explanation */}
-          {isAnswered && question.explanation && gameSettings.showExplanation && (
+          {gameSettings.showExplanation && isAnswered && question.explanation && (
             <Card className="p-3 sm:p-4 bg-primary/5 border-primary/20">
               <div className="flex items-start">
                 <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 sm:mr-3 mt-0.5">
