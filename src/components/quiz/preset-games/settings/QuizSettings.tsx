@@ -77,9 +77,9 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({ onStart, topic, onCancel })
   };
 
   return (
-    <div className="flex items-center justify-center p-3 h-screen">
+    <div className="flex items-center justify-center p-2 h-screen">
       <div className="w-full max-w-2xl mx-auto">
-        <Card className="border-primary/20 shadow-lg p-4 h-[85vh] flex flex-col">
+        <Card className="border-primary/20 shadow-lg p-3 h-[80vh] flex flex-col">
           {/* Header */}
           <div className="flex items-center gap-3 mb-4">
             <div className="flex items-center justify-center p-2 rounded-full bg-primary/10">
