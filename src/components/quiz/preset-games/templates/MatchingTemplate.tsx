@@ -39,9 +39,12 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
   const [incorrectAttempts, setIncorrectAttempts] = useState<number>(0);
   const { toast } = useToast();
 
-  // Filter pairs based on pairCount setting
-  const allPairs = content?.pairs || [];
-  const pairs = allPairs.slice(0, gameSettings.pairCount);
+  // Memoize pairs to prevent infinite re-renders
+  const pairs = useMemo(() => {
+    const allPairs = content?.pairs || [];
+    return allPairs.slice(0, gameSettings.pairCount);
+  }, [content?.pairs, gameSettings.pairCount]);
+  
   const totalPairs = pairs.length;
 
   useEffect(() => {
