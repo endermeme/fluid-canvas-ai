@@ -15,25 +15,28 @@ interface FlashcardsTemplateProps {
 }
 
 const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic, settings }) => {
-  // Use settings from props or defaults
-  const gameSettings = settings || {
-    autoFlip: false,
-    timePerQuestion: 8,
-    flipTime: 3,
-    totalTime: 180
+  // Use settings from props with proper defaults
+  const gameSettings = {
+    cardCount: settings?.cardCount || 10,
+    autoFlip: settings?.autoFlip || false,
+    showHints: settings?.showHints || true,
+    allowSkip: settings?.allowSkip || true,
+    debugMode: settings?.debugMode || false
   };
   
   const [currentCard, setCurrentCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [cardsState, setCardsState] = useState<Array<'unreviewed' | 'known' | 'unknown'>>([]);
   const [autoFlip, setAutoFlip] = useState(gameSettings.autoFlip);
+  const [showHints, setShowHints] = useState(gameSettings.showHints);
+  const [allowSkip, setAllowSkip] = useState(gameSettings.allowSkip);
   const [flipTimer, setFlipTimer] = useState<NodeJS.Timeout | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState(0);
   const { toast } = useToast();
 
-  const cards = content?.cards || [];
+  // Filter cards based on cardCount setting
+  const allCards = content?.cards || [];
+  const cards = allCards.slice(0, gameSettings.cardCount);
   const progress = ((currentCard + 1) / cards.length) * 100;
-  const flipTime = gameSettings.timePerQuestion;
 
   useEffect(() => {
     if (cards.length > 0) {
@@ -43,34 +46,22 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
 
   useEffect(() => {
     if (autoFlip && !isFlipped) {
-      setTimeRemaining(flipTime);
-      const countdownTimer = setInterval(() => {
-        setTimeRemaining(prev => {
-          if (prev <= 1) {
-            clearInterval(countdownTimer);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
+      // Auto flip after 3 seconds when enabled
       const timer = setTimeout(() => {
         setIsFlipped(true);
-        clearInterval(countdownTimer);
-      }, flipTime * 1000);
+      }, 3000);
       
       setFlipTimer(timer);
       
       return () => {
         clearTimeout(timer);
-        clearInterval(countdownTimer);
       };
     }
 
     return () => {
       if (flipTimer) clearTimeout(flipTimer);
     };
-  }, [currentCard, isFlipped, autoFlip, flipTime]);
+  }, [currentCard, isFlipped, autoFlip]);
 
   const handleFlip = () => {
     if (flipTimer) {
@@ -112,8 +103,29 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
       });
     }
     
+    // Auto advance to next card if enabled
     if (currentCard < cards.length - 1) {
       handleNextCard();
+    }
+  };
+
+  const handleSkipCard = () => {
+    if (!allowSkip) {
+      toast({
+        title: "Không thể bỏ qua",
+        description: "Tính năng bỏ qua đã bị tắt.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (currentCard < cards.length - 1) {
+      handleNextCard();
+      toast({
+        title: "Đã bỏ qua thẻ",
+        description: "Chuyển sang thẻ tiếp theo.",
+        variant: "default",
+      });
     }
   };
 
@@ -146,7 +158,16 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
     setAutoFlip(!autoFlip);
     toast({
       title: autoFlip ? "Đã tắt tự động lật" : "Đã bật tự động lật",
-      description: autoFlip ? "Thẻ sẽ không tự động lật." : `Thẻ sẽ tự động lật sau ${flipTime} giây.`,
+      description: autoFlip ? "Thẻ sẽ không tự động lật." : "Thẻ sẽ tự động lật sau 3 giây.",
+      variant: "default",
+    });
+  };
+
+  const toggleShowHints = () => {
+    setShowHints(!showHints);
+    toast({
+      title: showHints ? "Đã ẩn gợi ý" : "Đã hiển thị gợi ý",
+      description: showHints ? "Gợi ý sẽ được ẩn." : "Gợi ý sẽ được hiển thị.",
       variant: "default",
     });
   };
@@ -209,18 +230,17 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
               <div className="text-center w-full">
                 <div className="text-xs sm:text-sm uppercase tracking-wider text-primary/70 mb-2 sm:mb-3">
                   Nhấn để lật thẻ
-            {autoFlip && !isFlipped && (
-              <div className="mt-1 flex items-center justify-center">
-                <Clock className="h-3 w-3 mr-1 text-primary/60" />
-                <span className="text-primary/60">Tự động lật sau {timeRemaining}s</span>
-              </div>
-            )}
                 </div>
                 <ScrollArea className="max-h-32 sm:max-h-48">
                   <div className="text-base sm:text-lg lg:text-xl font-bold text-primary break-words whitespace-pre-wrap px-2">
                     {cards[currentCard].front}
                   </div>
                 </ScrollArea>
+                {showHints && cards[currentCard].hint && (
+                  <div className="mt-2 sm:mt-3 p-2 bg-blue-50 rounded text-xs sm:text-sm text-blue-600">
+                    💡 {cards[currentCard].hint}
+                  </div>
+                )}
               </div>
             </Card>
             
@@ -250,8 +270,8 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
       {/* Controls */}
       <div className="game-controls">
         <div className="responsive-card mx-auto space-y-2 sm:space-y-3">
-          {/* Auto-flip toggle */}
-          <div className="flex items-center justify-between">
+          {/* Settings toggles */}
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <Toggle
                 pressed={autoFlip}
@@ -263,6 +283,17 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
                 <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 Tự động lật
               </Toggle>
+              <Toggle
+                pressed={showHints}
+                onPressedChange={toggleShowHints}
+                variant="outline"
+                size="sm"
+                className="text-xs sm:text-sm"
+              >
+                💡 Gợi ý
+              </Toggle>
+            </div>
+            <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -272,6 +303,17 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
                 <Shuffle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 Xáo trộn
               </Button>
+              {allowSkip && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSkipCard}
+                  disabled={currentCard === cards.length - 1}
+                  className="text-xs sm:text-sm text-orange-600 border-orange-200 hover:bg-orange-50"
+                >
+                  Bỏ qua
+                </Button>
+              )}
             </div>
           </div>
           {isFlipped && (

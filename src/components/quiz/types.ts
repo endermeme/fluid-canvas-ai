@@ -7,6 +7,7 @@ export type Language = 'en' | 'vi';
 export interface GameSettingsData {
   difficulty?: Difficulty;
   questionCount?: number;
+  cardCount?: number; // For flashcards
   timePerQuestion?: number;
   totalTime?: number;
   bonusTime?: number;

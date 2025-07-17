@@ -115,7 +115,7 @@ Output must be valid JSON. `;
           gamePrompt += `JSON format: { "title": "title", "questions": [{"question": "question", "options": ["option 1", "option 2", "option 3", "option 4"], "correctAnswer": correct_answer_index, "explanation": "explanation"}], "settings": {"timePerQuestion": ${timePerQuestion}, "totalTime": ${totalTime || questionCount * timePerQuestion}, "bonusTimePerCorrect": ${bonusTime || 5}} }`;
           break;
         case 'flashcards':
-          gamePrompt += `JSON format: { "title": "title", "cards": [{"front": "front", "back": "back", "hint": "hint (if any)"}], "settings": {"autoFlip": true, "flipTime": ${timePerQuestion}, "totalTime": ${totalTime || 180}} }`;
+          gamePrompt += `JSON format: { "title": "title", "cards": [{"front": "front", "back": "back", "hint": "hint (optional)"}], "settings": {"cardCount": ${gameSettings.cardCount || 10}, "autoFlip": ${gameSettings.autoFlip || false}, "showHints": ${gameSettings.showHints || true}, "allowSkip": ${gameSettings.allowSkip || true}} }`;
           break;
         case 'matching':
           gamePrompt += `JSON format: { "title": "title", "pairs": [{"left": "left content", "right": "right content"}], "settings": {"timeLimit": ${totalTime || 60}, "bonusTimePerMatch": ${bonusTime || 5}} }`;
@@ -194,8 +194,10 @@ Output must be valid JSON. `;
             parsedContent.settings.bonusTimePerCorrect = bonusTime || 5;
             break;
           case 'flashcards':
-            parsedContent.settings.flipTime = timePerQuestion;
-            parsedContent.settings.totalTime = totalTime || 180;
+            parsedContent.settings.cardCount = gameSettings.cardCount || 10;
+            parsedContent.settings.autoFlip = gameSettings.autoFlip || false;
+            parsedContent.settings.showHints = gameSettings.showHints || true;
+            parsedContent.settings.allowSkip = gameSettings.allowSkip || true;
             break;
           case 'matching':
           case 'memory':
@@ -271,8 +273,10 @@ Output must be valid JSON. `;
         data = { ...flashcardsSampleData };
         data.settings = {
           ...data.settings,
-          flipTime: gameSettings.flipTime || gameSettings.timePerQuestion || 3,
-          totalTime: gameSettings.totalTime || 180
+          cardCount: gameSettings.cardCount || 10,
+          autoFlip: gameSettings.autoFlip || false,
+          showHints: gameSettings.showHints || true,
+          allowSkip: gameSettings.allowSkip || true
         };
         break;
       
