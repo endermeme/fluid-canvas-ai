@@ -13,13 +13,13 @@ interface OrderingTemplateProps {
 }
 
 const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, settings }) => {
-  // Game settings function
+  // Game settings function - Ordering game settings
   const getGameSettings = () => ({
-    totalTime: 180,
+    totalTime: 300, // 5 phút cho ordering
     useTimer: true,
-    bonusTime: 15,
+    bonusTime: 20, // Thời gian thưởng nhiều hơn
     showHints: true,
-    hintPenalty: 30 // seconds penalty for using hint
+    hintPenalty: 25 // Penalty ít hơn cho hint
   });
   
   const gameSettings = getGameSettings();

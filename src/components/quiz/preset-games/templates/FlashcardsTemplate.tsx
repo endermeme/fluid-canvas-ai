@@ -15,12 +15,12 @@ interface FlashcardsTemplateProps {
 }
 
 const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic, settings }) => {
-  // Game settings function
+  // Game settings function - Flashcards settings
   const getGameSettings = () => ({
-    autoFlip: true,
-    timePerQuestion: 5, // Auto flip time
+    autoFlip: false, // Người dùng tự lật
+    timePerQuestion: 8, // Thời gian auto flip nếu bật
     showStats: true,
-    shuffleCards: false
+    shuffleCards: true
   });
   
   const gameSettings = getGameSettings();

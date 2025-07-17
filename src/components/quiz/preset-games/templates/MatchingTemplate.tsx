@@ -18,13 +18,13 @@ interface MatchingItem {
 }
 
 const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, settings }) => {
-  // Game settings function
+  // Game settings function - Matching game settings
   const getGameSettings = () => ({
-    totalTime: 180,
+    totalTime: 240, // 4 phút cho matching
     difficulty: "medium",
     showScore: true,
-    matchScore: 10,
-    missScore: -2,
+    matchScore: 15, // Điểm cao hơn cho match đúng
+    missScore: -3, // Trừ điểm nhiều hơn cho sai
     shuffleItems: true
   });
   

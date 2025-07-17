@@ -15,12 +15,12 @@ interface QuizTemplateProps {
 const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, settings }) => {
   const gameContent = content || data;
   
-  // Game settings function
+  // Game settings function - Quiz settings
   const getGameSettings = () => ({
-    timePerQuestion: 30,
-    totalTime: 300,
+    timePerQuestion: 20,
+    totalTime: 600, // 10 phút
     useTimer: true,
-    bonusTime: 10,
+    bonusTime: 5,
     showExplanation: true,
     difficulty: "medium"
   });

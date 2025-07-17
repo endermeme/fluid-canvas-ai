@@ -21,9 +21,9 @@ interface WordLocation {
 }
 
 const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic, settings }) => {
-  // Game settings function
+  // Game settings function - Word search settings
   const getGameSettings = () => ({
-    totalTime: 300,
+    totalTime: 480, // 8 phút cho word search (khó hơn)
     allowDiagonalWords: true,
     showWordList: true,
     gridSize: "medium",

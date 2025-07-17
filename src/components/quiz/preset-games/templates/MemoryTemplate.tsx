@@ -14,11 +14,11 @@ interface MemoryTemplateProps {
 }
 
 const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, settings }) => {
-  // Game settings function
+  // Game settings function - Memory game settings
   const getGameSettings = () => ({
-    totalTime: 120,
+    totalTime: 180, // 3 phút cho memory game
     showHints: true,
-    hintPenalty: 10, // seconds penalty for using hint
+    hintPenalty: 15, // 15s penalty cho hint
     shuffleCards: true,
     showTimer: true
   });
