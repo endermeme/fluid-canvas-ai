@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -25,7 +25,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
     bonusTimePerMatch: settings?.bonusTimePerMatch || 5,
     allowPartialMatching: settings?.allowPartialMatching || false,
     debugMode: settings?.debugMode || false
-  }), [settings?.pairCount, settings?.timeLimit, settings?.bonusTimePerMatch, settings?.allowPartialMatching, settings?.debugMode]);
+  }), [settings]);
   
   const [leftItems, setLeftItems] = useState<MatchingItem[]>([]);
   const [rightItems, setRightItems] = useState<MatchingItem[]>([]);
@@ -46,7 +46,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
   
   const totalPairs = pairs.length;
 
-  useEffect(() => {
+  // Initialize game
+  const initializeGame = useCallback(() => {
     if (pairs.length > 0) {
       const shuffledLeftItems = pairs.map((pair: any, index: number) => ({
         id: index,
@@ -72,10 +73,16 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
     }
   }, [pairs, gameSettings.timeLimit]);
 
+  // Initialize on component mount and when dependencies change
+  useEffect(() => {
+    initializeGame();
+  }, [initializeGame]);
+
+  // Timer effect
   useEffect(() => {
     if (timeLeft > 0 && !gameOver && !gameWon) {
       const timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1);
+        setTimeLeft(prev => prev - 1);
       }, 1000);
       
       return () => clearTimeout(timer);
@@ -89,8 +96,9 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
     }
   }, [timeLeft, gameOver, gameWon, toast]);
 
+  // Check win condition
   useEffect(() => {
-    if (matchedPairs === totalPairs && totalPairs > 0 && !gameWon) {
+    if (matchedPairs === totalPairs && totalPairs > 0 && !gameWon && !gameOver) {
       setGameWon(true);
       
       toast({
@@ -99,47 +107,49 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
         variant: "default",
       });
     }
-  }, [matchedPairs, totalPairs, gameWon, toast]);
+  }, [matchedPairs, totalPairs, gameWon, gameOver, toast]);
 
-  const handleLeftItemClick = (id: number) => {
+  const handleLeftItemClick = useCallback((id: number) => {
     if (gameOver || gameWon) return;
     
-    if (leftItems.find(item => item.id === id)?.matched) return;
+    const item = leftItems.find(item => item.id === id);
+    if (item?.matched) return;
     
     setSelectedLeft(id);
-  };
+  }, [leftItems, gameOver, gameWon]);
 
-  const handleRightItemClick = (id: number) => {
+  const handleRightItemClick = useCallback((id: number) => {
     if (gameOver || gameWon) return;
     
-    if (rightItems.find(item => item.id === id)?.matched) return;
+    const item = rightItems.find(item => item.id === id);
+    if (item?.matched) return;
     
     setSelectedRight(id);
-  };
+  }, [rightItems, gameOver, gameWon]);
 
+  // Check match when both items are selected
   useEffect(() => {
     if (selectedLeft !== null && selectedRight !== null) {
-      const checkMatch = () => {
-        // Logic khó hơn: phải đoán đúng nội dung khớp, không phải index
-        const leftItem = leftItems.find(item => item.id === selectedLeft);
-        const rightItem = rightItems.find(item => item.id === selectedRight);
-        
-        if (!leftItem || !rightItem) return;
-        
-        // Tìm cặp đúng từ pairs gốc
-        const correctPair = pairs.find(pair => 
-          pair.left === leftItem.text && pair.right === rightItem.text
-        );
-        
+      const leftItem = leftItems.find(item => item.id === selectedLeft);
+      const rightItem = rightItems.find(item => item.id === selectedRight);
+      
+      if (!leftItem || !rightItem) return;
+      
+      // Find correct pair from original pairs
+      const correctPair = pairs.find(pair => 
+        pair.left === leftItem.text && pair.right === rightItem.text
+      );
+      
+      const timer = setTimeout(() => {
         if (correctPair) {
-          setLeftItems(prevLeftItems => 
-            prevLeftItems.map(item => 
+          setLeftItems(prev => 
+            prev.map(item => 
               item.id === selectedLeft ? {...item, matched: true} : item
             )
           );
           
-          setRightItems(prevRightItems => 
-            prevRightItems.map(item => 
+          setRightItems(prev => 
+            prev.map(item => 
               item.id === selectedRight ? {...item, matched: true} : item
             )
           );
@@ -165,44 +175,14 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
             variant: "destructive",
           });
         }
-      };
-      
-      checkMatch();
-      
-      const timer = setTimeout(() => {
+        
         setSelectedLeft(null);
         setSelectedRight(null);
-      }, 1000);
+      }, 800);
       
       return () => clearTimeout(timer);
     }
   }, [selectedLeft, selectedRight, leftItems, rightItems, pairs, gameSettings.bonusTimePerMatch, toast]);
-
-  const handleRestart = () => {
-    if (pairs.length > 0) {
-      const shuffledLeftItems = pairs.map((pair: any, index: number) => ({
-        id: index,
-        text: pair.left,
-        matched: false
-      })).sort(() => Math.random() - 0.5);
-      
-      const shuffledRightItems = pairs.map((pair: any, index: number) => ({
-        id: index,
-        text: pair.right,
-        matched: false
-      })).sort(() => Math.random() - 0.5);
-      
-      setLeftItems(shuffledLeftItems);
-      setRightItems(shuffledRightItems);
-      setSelectedLeft(null);
-      setSelectedRight(null);
-      setMatchedPairs(0);
-      setIncorrectAttempts(0);
-      setTimeLeft(gameSettings.timeLimit);
-      setGameOver(false);
-      setGameWon(false);
-    }
-  };
 
   if (!content || !pairs.length) {
     return (
@@ -214,10 +194,12 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
     );
   }
 
-  const progressPercentage = (matchedPairs / totalPairs) * 100;
+  const progressPercentage = totalPairs > 0 ? (matchedPairs / totalPairs) * 100 : 0;
+  const displayTime = Math.max(0, timeLeft);
+  const minutes = Math.floor(displayTime / 60);
+  const seconds = displayTime % 60;
 
   const getItemSize = () => {
-    // Responsive sizing based on content
     return "min-h-12 text-sm";
   };
 
@@ -231,7 +213,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
           <div className="flex items-center gap-1 sm:gap-2">
             <div className="text-xs sm:text-sm font-medium flex items-center px-2 py-1 bg-muted rounded-full">
               <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
-              <span className="text-primary">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
+              <span className="text-primary">{minutes}:{seconds.toString().padStart(2, '0')}</span>
             </div>
           </div>
         </div>
@@ -243,7 +225,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
           <Card className="compact-card p-4 sm:p-6 text-center bg-card border">
             <h2 className="text-xl sm:text-2xl font-bold mb-4 text-primary">Chúc mừng!</h2>
             <p className="mb-2 text-sm sm:text-base text-primary">Bạn đã hoàn thành trò chơi với {totalPairs} cặp từ.</p>
-            <p className="mb-4 sm:mb-6 text-xs sm:text-sm text-primary">Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
+            <p className="mb-4 sm:mb-6 text-xs sm:text-sm text-primary">Thời gian còn lại: {minutes}:{seconds.toString().padStart(2, '0')}</p>
             <div className="text-center text-xs sm:text-sm text-primary/70">
               Sử dụng nút làm mới ở header để chơi lại
             </div>
@@ -254,7 +236,6 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
           <Card className="compact-card p-4 sm:p-6 text-center bg-card border">
             <h2 className="text-xl sm:text-2xl font-bold mb-4 text-primary">Hết thời gian!</h2>
             <p className="mb-2 text-sm sm:text-base text-primary">Bạn đã ghép được {matchedPairs} trong tổng số {totalPairs} cặp từ.</p>
-            
             <div className="text-center text-xs sm:text-sm text-primary/70">
               Sử dụng nút làm mới ở header để chơi lại
             </div>
