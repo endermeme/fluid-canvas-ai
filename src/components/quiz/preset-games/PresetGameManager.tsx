@@ -118,7 +118,7 @@ Output must be valid JSON. `;
           gamePrompt += `JSON format: { "title": "title", "cards": [{"front": "front", "back": "back", "hint": "hint (optional)"}], "settings": {"cardCount": ${gameSettings.cardCount || 10}, "autoFlip": ${gameSettings.autoFlip || false}, "showHints": ${gameSettings.showHints || true}, "allowSkip": ${gameSettings.allowSkip || true}} }`;
           break;
         case 'matching':
-          gamePrompt += `JSON format: { "title": "title", "pairs": [{"left": "left content", "right": "right content"}], "settings": {"timeLimit": ${totalTime || 60}, "bonusTimePerMatch": ${bonusTime || 5}} }`;
+          gamePrompt += `JSON format: { "title": "title", "pairs": [{"left": "left content", "right": "right content"}], "settings": {"pairCount": ${gameSettings.pairCount || 8}, "timeLimit": ${gameSettings.timeLimit || 120}, "bonusTimePerMatch": ${gameSettings.bonusTimePerMatch || 5}, "allowPartialMatching": ${gameSettings.allowPartialMatching || false}} }`;
           break;
         case 'memory':
           gamePrompt += `JSON format: { "title": "title", "cards": [{"id": id_number, "content": "content", "matched": false, "flipped": false}], "settings": {"timeLimit": ${totalTime || 120}, "allowHints": true, "hintPenalty": ${bonusTime || 5}} }`;
@@ -200,6 +200,11 @@ Output must be valid JSON. `;
             parsedContent.settings.allowSkip = gameSettings.allowSkip || true;
             break;
           case 'matching':
+            parsedContent.settings.pairCount = gameSettings.pairCount || 8;
+            parsedContent.settings.timeLimit = gameSettings.timeLimit || 120;
+            parsedContent.settings.bonusTimePerMatch = gameSettings.bonusTimePerMatch || 5;
+            parsedContent.settings.allowPartialMatching = gameSettings.allowPartialMatching || false;
+            break;
           case 'memory':
             parsedContent.settings.timeLimit = totalTime || 120;
             break;
@@ -284,8 +289,10 @@ Output must be valid JSON. `;
         data = { ...matchingSampleData };
         data.settings = {
           ...data.settings,
+          pairCount: gameSettings.pairCount || 8,
           timeLimit: gameSettings.timeLimit || 120,
-          bonusTimePerMatch: gameSettings.bonusTimePerMatch || 5
+          bonusTimePerMatch: gameSettings.bonusTimePerMatch || 5,
+          allowPartialMatching: gameSettings.allowPartialMatching || false
         };
         break;
       

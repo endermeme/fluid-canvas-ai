@@ -18,12 +18,13 @@ interface MatchingItem {
 }
 
 const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, settings }) => {
-  // Use settings from props or fallback values
+  // Use settings from props with proper defaults
   const gameSettings = {
-    totalTime: settings?.timeLimit || 240,
-    difficulty: settings?.difficulty || "medium",
-    matchScore: settings?.matchScore || 15,
-    missScore: settings?.missScore || -3
+    pairCount: settings?.pairCount || 8,
+    timeLimit: settings?.timeLimit || 120,
+    bonusTimePerMatch: settings?.bonusTimePerMatch || 5,
+    allowPartialMatching: settings?.allowPartialMatching || false,
+    debugMode: settings?.debugMode || false
   };
   
   const [leftItems, setLeftItems] = useState<MatchingItem[]>([]);
@@ -31,15 +32,17 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
   const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
   const [selectedRight, setSelectedRight] = useState<number | null>(null);
   const [matchedPairs, setMatchedPairs] = useState<number>(0);
-  const [timeLeft, setTimeLeft] = useState<number>(gameSettings.totalTime);
+  const [timeLeft, setTimeLeft] = useState<number>(gameSettings.timeLimit);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [gameWon, setGameWon] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
+  const [incorrectAttempts, setIncorrectAttempts] = useState<number>(0);
   const { toast } = useToast();
 
-  const pairs = content?.pairs || [];
+  // Filter pairs based on pairCount setting
+  const allPairs = content?.pairs || [];
+  const pairs = allPairs.slice(0, gameSettings.pairCount);
   const totalPairs = pairs.length;
-  const difficulty = gameSettings.difficulty;
 
   useEffect(() => {
     if (pairs.length > 0) {
@@ -57,15 +60,16 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
       
       setLeftItems(shuffledLeftItems);
       setRightItems(shuffledRightItems);
-      setTimeLeft(gameSettings.totalTime);
+      setTimeLeft(gameSettings.timeLimit);
       setMatchedPairs(0);
       setScore(0);
+      setIncorrectAttempts(0);
       setGameOver(false);
       setGameWon(false);
       setSelectedLeft(null);
       setSelectedRight(null);
     }
-  }, [pairs, content?.settings?.timeLimit]);
+  }, [pairs, gameSettings.timeLimit]);
 
   useEffect(() => {
     if (timeLeft > 0 && !gameOver && !gameWon) {
@@ -99,17 +103,11 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
   }, [matchedPairs, totalPairs, gameWon, toast]);
 
   const calculateFinalScore = () => {
-    const baseScore = matchedPairs * 10;
-    const timeBonus = Math.floor(timeLeft / 5);
-    let difficultyMultiplier = 1;
-    switch (difficulty) {
-      case "easy": difficultyMultiplier = 1; break;
-      case "medium": difficultyMultiplier = 1.5; break;
-      case "hard": difficultyMultiplier = 2; break;
-      default: difficultyMultiplier = 1;
-    }
+    const baseScore = matchedPairs * 100;
+    const timeBonus = Math.floor(timeLeft * 2);
+    const penaltyForIncorrect = incorrectAttempts * 10;
     
-    return Math.floor((baseScore + timeBonus) * difficultyMultiplier);
+    return Math.max(0, baseScore + timeBonus - penaltyForIncorrect);
   };
 
   const handleLeftItemClick = (id: number) => {
@@ -131,7 +129,11 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
   useEffect(() => {
     if (selectedLeft !== null && selectedRight !== null) {
       const checkMatch = () => {
-        if (selectedLeft === selectedRight) {
+        const isExactMatch = selectedLeft === selectedRight;
+        const isPartialMatch = gameSettings.allowPartialMatching && 
+          Math.abs(selectedLeft - selectedRight) <= 1; // Allow nearby matches as partial
+        
+        if (isExactMatch || isPartialMatch) {
           setLeftItems(prevLeftItems => 
             prevLeftItems.map(item => 
               item.id === selectedLeft ? {...item, matched: true} : item
@@ -146,15 +148,21 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
           
           setMatchedPairs(prev => prev + 1);
           
-          setScore(prev => prev + gameSettings.matchScore);
+          // Award bonus time for correct match
+          if (gameSettings.bonusTimePerMatch > 0) {
+            setTimeLeft(prev => prev + gameSettings.bonusTimePerMatch);
+          }
+          
+          const points = isExactMatch ? 100 : 50; // Partial match gets fewer points
+          setScore(prev => prev + points);
           
           toast({
-            title: "Tuyệt vời!",
-            description: "Bạn đã ghép đúng một cặp.",
+            title: isExactMatch ? "Tuyệt vời!" : "Khá tốt!",
+            description: isExactMatch ? "Bạn đã ghép đúng một cặp." : "Ghép gần đúng - được một nửa điểm.",
             variant: "default",
           });
         } else {
-          setScore(prev => Math.max(0, prev + gameSettings.missScore));
+          setIncorrectAttempts(prev => prev + 1);
           
           toast({
             title: "Không khớp",
@@ -173,7 +181,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
       
       return () => clearTimeout(timer);
     }
-  }, [selectedLeft, selectedRight, toast]);
+  }, [selectedLeft, selectedRight, gameSettings.allowPartialMatching, gameSettings.bonusTimePerMatch, toast]);
 
   const handleRestart = () => {
     if (pairs.length > 0) {
@@ -195,7 +203,8 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
       setSelectedRight(null);
       setMatchedPairs(0);
       setScore(0);
-      setTimeLeft(gameSettings.totalTime);
+      setIncorrectAttempts(0);
+      setTimeLeft(gameSettings.timeLimit);
       setGameOver(false);
       setGameWon(false);
     }
@@ -213,15 +222,9 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
 
   const progressPercentage = (matchedPairs / totalPairs) * 100;
 
-  const getItemSize = (text: string) => {
-    if (difficulty === "hard") return "min-h-12 text-sm";
-    if (difficulty === "easy") return "min-h-14 text-base";
-    
-    return text.length > 15 
-      ? "min-h-13 text-sm" 
-      : text.length > 8 
-        ? "min-h-12 text-sm" 
-        : "min-h-11 text-base";
+  const getItemSize = () => {
+    // Responsive sizing based on content
+    return "min-h-12 text-sm";
   };
 
   return (
@@ -277,7 +280,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
                 {leftItems.map((item) => (
                   <button
                     key={`left-${item.id}`}
-                    className={`w-full p-2 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
+                    className={`w-full p-2 rounded-lg text-left break-words ${getItemSize()} flex items-center ${
                       item.matched 
                         ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
                         : selectedLeft === item.id
@@ -299,7 +302,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
                 {rightItems.map((item) => (
                   <button
                     key={`right-${item.id}`}
-                    className={`w-full p-2 rounded-lg text-left break-words ${getItemSize(item.text)} flex items-center ${
+                    className={`w-full p-2 rounded-lg text-left break-words ${getItemSize()} flex items-center ${
                       item.matched 
                         ? 'bg-green-100 border-green-500 border opacity-50 cursor-not-allowed'
                         : selectedRight === item.id
