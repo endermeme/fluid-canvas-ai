@@ -149,7 +149,7 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({
               {settings.useTimer && <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
-                      <Clock4 className="h-4 w-4 text-primary" /> Tổng thời gian (phút)
+                      <Clock4 className="h-4 w-4 text-primary" /> Thời gian (phút)
                     </Label>
                     <Input id="totalTime" type="number" min="1" max="60" placeholder="10" value={settings.totalTime} onChange={e => handleInputChange('totalTime', e.target.value)} className="border-primary/20 bg-white/50" />
                   </div>
