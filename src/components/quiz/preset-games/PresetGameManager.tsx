@@ -4,7 +4,15 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw, Share2 } from 'lucide-react';
 import gameTemplates from './templates';
 import { useToast } from '@/hooks/use-toast';
-import GameSettings from '../GameSettings';
+import { 
+  QuizSettings, 
+  FlashcardsSettings, 
+  MemorySettings, 
+  MatchingSettings, 
+  OrderingSettings, 
+  WordSearchSettings, 
+  TrueFalseSettings 
+} from './settings';
 import GameLoading from '../GameLoading';
 import { GameSettingsData } from '../types';
 import { Card } from '@/components/ui/card';
@@ -53,16 +61,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
   const [error, setError] = useState(null);
   const [gameStartTime, setGameStartTime] = useState<number | null>(null);
   const [showSettings, setShowSettings] = useState(true);
-  const [settings, setSettings] = useState<GameSettingsData>({
-    difficulty: 'medium',
-    questionCount: 10,
-    timePerQuestion: 30,
-    category: 'general',
-    totalTime: 0,
-    bonusTime: 5,
-    useTimer: true,
-    prompt: initialTopic || "Learn interactively"
-  });
+  const [settings, setSettings] = useState<any>(null);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [shareUrl, setShareUrl] = useState('');
   const [showShareDialog, setShowShareDialog] = useState(false);
@@ -358,7 +357,7 @@ Output must be valid JSON. `;
     }
   };
 
-  const handleStartGame = (gameSettings: GameSettingsData) => {
+  const handleStartGame = (gameSettings: any) => {
     setSettings(gameSettings);
     setShowSettings(false);
     setLoading(true);
@@ -416,6 +415,7 @@ Output must be valid JSON. `;
         onBack={onBack}
         topic={initialTopic || ""}
         content={gameContent}
+        settings={settings}
       />
     );
   };
@@ -541,13 +541,13 @@ Output must be valid JSON. `;
             />
           </div>
           <div className="flex-1 overflow-hidden">
-            <GameSettings 
-              initialSettings={settings}
-              onStart={handleStartGame}
-              onCancel={onBack}
-              topic={initialTopic || ""}
-              inModal={false}
-            />
+            {gameType === 'quiz' && <QuizSettings onStart={handleStartGame} topic={initialTopic} />}
+            {gameType === 'flashcards' && <FlashcardsSettings onStart={handleStartGame} topic={initialTopic} />}
+            {gameType === 'memory' && <MemorySettings onStart={handleStartGame} topic={initialTopic} />}
+            {gameType === 'matching' && <MatchingSettings onStart={handleStartGame} topic={initialTopic} />}
+            {gameType === 'ordering' && <OrderingSettings onStart={handleStartGame} topic={initialTopic} />}
+            {gameType === 'wordsearch' && <WordSearchSettings onStart={handleStartGame} topic={initialTopic} />}
+            {gameType === 'truefalse' && <TrueFalseSettings onStart={handleStartGame} topic={initialTopic} />}
           </div>
         </div>
       ) : generating ? (
