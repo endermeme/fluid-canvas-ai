@@ -9,6 +9,7 @@ import { RefreshCw, Clock, RotateCcw, Search, LayoutGrid } from 'lucide-react';
 interface WordSearchTemplateProps {
   content: any;
   topic: string;
+  settings?: any;
 }
 
 interface WordLocation {
@@ -19,12 +20,14 @@ interface WordLocation {
   endCol: number;
 }
 
-const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic }) => {
+const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic, settings }) => {
+  const gameSettings = settings || content?.settings || {};
+  
   const [selectedStart, setSelectedStart] = useState<{row: number, col: number} | null>(null);
   const [selectedEnd, setSelectedEnd] = useState<{row: number, col: number} | null>(null);
   const [hoveredCell, setHoveredCell] = useState<{row: number, col: number} | null>(null);
   const [foundWords, setFoundWords] = useState<WordLocation[]>([]);
-  const [timeLeft, setTimeLeft] = useState(content?.settings?.timeLimit || 300);
+  const [timeLeft, setTimeLeft] = useState(gameSettings?.totalTime || 300);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [gridSize, setGridSize] = useState('medium');
@@ -33,7 +36,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
   const grid = content?.grid || [];
   const words = content?.words || [];
   const totalWords = words.length;
-  const allowDiagonalWords = content?.settings?.allowDiagonalWords || false;
+  const allowDiagonalWords = gameSettings?.allowDiagonalWords || false;
 
   // Timer countdown
   useEffect(() => {
@@ -289,7 +292,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
     setSelectedEnd(null);
     setHoveredCell(null);
     setFoundWords([]);
-    setTimeLeft(content?.settings?.timeLimit || 300);
+    setTimeLeft(gameSettings?.totalTime || 300);
     setGameOver(false);
     setGameWon(false);
     
@@ -422,7 +425,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic 
           </div>
           
           {/* Word list */}
-          {content?.settings?.showWordList && (
+          {gameSettings?.showWordList !== false && (
             <div className="lg:col-span-1">
               <Card className="p-2 sm:p-4 bg-card border">
                 <h3 className="text-sm sm:text-lg font-medium mb-2 flex items-center text-primary">

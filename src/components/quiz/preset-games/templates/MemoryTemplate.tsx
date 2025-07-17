@@ -10,14 +10,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 interface MemoryTemplateProps {
   content: any;
   topic: string;
+  settings?: any;
 }
 
-const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
+const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, settings }) => {
+  const gameSettings = settings || content?.settings || {};
+  
   const [cards, setCards] = useState<Array<{id: number, content: string, matched: boolean, flipped: boolean}>>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [matchedPairs, setMatchedPairs] = useState<number>(0);
   const [moves, setMoves] = useState<number>(0);
-  const [timeLeft, setTimeLeft] = useState<number>(content?.settings?.timeLimit || 120);
+  const [timeLeft, setTimeLeft] = useState<number>(gameSettings?.totalTime || 120);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [gameWon, setGameWon] = useState<boolean>(false);
   const [canFlip, setCanFlip] = useState<boolean>(true);
@@ -34,14 +37,14 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
       }));
       
       setCards(shuffledCards);
-      setTimeLeft(content?.settings?.timeLimit || 120);
+      setTimeLeft(gameSettings?.totalTime || 120);
       setMoves(0);
       setMatchedPairs(0);
       setFlippedCards([]);
       setGameOver(false);
       setGameWon(false);
     }
-  }, [memoryCards, content?.settings?.timeLimit]);
+  }, [memoryCards, gameSettings?.totalTime]);
 
   useEffect(() => {
     if (timeLeft > 0 && !gameOver && !gameWon) {
@@ -164,7 +167,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic }) => {
       }));
       
       setCards(shuffledCards);
-      setTimeLeft(content?.settings?.timeLimit || 120);
+      setTimeLeft(gameSettings?.totalTime || 120);
       setMoves(0);
       setMatchedPairs(0);
       setFlippedCards([]);

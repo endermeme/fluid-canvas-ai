@@ -9,19 +9,21 @@ interface QuizTemplateProps {
   data?: any;
   content?: any;
   topic: string;
+  settings?: any;
 }
 
-const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => {
+const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, settings }) => {
   const gameContent = content || data;
+  const gameSettings = settings || gameContent?.settings || {};
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(gameContent?.settings?.timePerQuestion || 30);
-  const [totalTimeLeft, setTotalTimeLeft] = useState(gameContent?.settings?.totalTime || 300);
-  const [timerRunning, setTimerRunning] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(gameSettings?.timePerQuestion || 30);
+  const [totalTimeLeft, setTotalTimeLeft] = useState(gameSettings?.totalTime || 300);
+  const [timerRunning, setTimerRunning] = useState(gameSettings?.useTimer !== false);
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
 
@@ -32,17 +34,18 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
     if (!gameStarted && questions.length > 0) {
       setGameStarted(true);
       
-      const questionTime = gameContent?.settings?.timePerQuestion || 30;
-      const totalTime = gameContent?.settings?.totalTime || (questions.length * questionTime);
+      const questionTime = gameSettings?.timePerQuestion || 30;
+      const totalTime = gameSettings?.totalTime || (questions.length * questionTime);
       
       setTimeLeft(questionTime);
       setTotalTimeLeft(totalTime);
+      setTimerRunning(gameSettings?.useTimer !== false);
       
       console.log(`Game initialized with ${questionTime}s per question and ${totalTime}s total time`);
-      console.log("Game content:", gameContent);
+      console.log("Game settings:", gameSettings);
       console.log("Questions:", questions);
     }
-  }, [gameContent, questions, gameStarted]);
+  }, [gameContent, questions, gameStarted, gameSettings]);
 
   useEffect(() => {
     if (timeLeft > 0 && timerRunning && !isAnswered) {
@@ -91,8 +94,8 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
     if (optionIndex === questions[currentQuestion].correctAnswer) {
       setScore(score + 1);
       
-      if (gameContent?.settings?.bonusTimePerCorrect) {
-        const bonusTime = gameContent.settings.bonusTimePerCorrect;
+      if (gameSettings?.bonusTime && gameSettings.bonusTime > 0) {
+        const bonusTime = gameSettings.bonusTime;
         setTotalTimeLeft(prev => prev + bonusTime);
         
         toast({
@@ -123,7 +126,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
       setCurrentQuestion(currentQuestion + 1);
       setSelectedOption(null);
       setIsAnswered(false);
-      setTimeLeft(gameContent?.settings?.timePerQuestion || 30);
+      setTimeLeft(gameSettings?.timePerQuestion || 30);
       setTimerRunning(true);
     }
   };
@@ -134,8 +137,8 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic }) => 
     setScore(0);
     setShowResult(false);
     setIsAnswered(false);
-    setTimeLeft(gameContent?.settings?.timePerQuestion || 30);
-    setTotalTimeLeft(gameContent?.settings?.totalTime || 300);
+    setTimeLeft(gameSettings?.timePerQuestion || 30);
+    setTotalTimeLeft(gameSettings?.totalTime || 300);
     setTimerRunning(true);
     setGameStarted(true);
   };

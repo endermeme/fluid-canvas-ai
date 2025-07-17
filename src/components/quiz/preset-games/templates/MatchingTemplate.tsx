@@ -8,6 +8,7 @@ import { RefreshCw, Clock, Trophy } from 'lucide-react';
 interface MatchingTemplateProps {
   content: any;
   topic: string;
+  settings?: any;
 }
 
 interface MatchingItem {
@@ -16,13 +17,15 @@ interface MatchingItem {
   matched: boolean;
 }
 
-const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) => {
+const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, settings }) => {
+  const gameSettings = settings || content?.settings || {};
+  
   const [leftItems, setLeftItems] = useState<MatchingItem[]>([]);
   const [rightItems, setRightItems] = useState<MatchingItem[]>([]);
   const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
   const [selectedRight, setSelectedRight] = useState<number | null>(null);
   const [matchedPairs, setMatchedPairs] = useState<number>(0);
-  const [timeLeft, setTimeLeft] = useState<number>(content?.settings?.timeLimit || 60);
+  const [timeLeft, setTimeLeft] = useState<number>(gameSettings?.totalTime || 60);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [gameWon, setGameWon] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
@@ -30,7 +33,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
 
   const pairs = content?.pairs || [];
   const totalPairs = pairs.length;
-  const difficulty = content?.settings?.difficulty || "medium";
+  const difficulty = gameSettings?.difficulty || "medium";
 
   useEffect(() => {
     if (pairs.length > 0) {
@@ -48,7 +51,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
       
       setLeftItems(shuffledLeftItems);
       setRightItems(shuffledRightItems);
-      setTimeLeft(content?.settings?.timeLimit || 60);
+      setTimeLeft(gameSettings?.totalTime || 60);
       setMatchedPairs(0);
       setScore(0);
       setGameOver(false);
@@ -186,7 +189,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic }) =
       setSelectedRight(null);
       setMatchedPairs(0);
       setScore(0);
-      setTimeLeft(content?.settings?.timeLimit || 60);
+      setTimeLeft(gameSettings?.totalTime || 60);
       setGameOver(false);
       setGameWon(false);
     }

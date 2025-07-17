@@ -9,16 +9,19 @@ import { RefreshCw, ArrowUp, ArrowDown, Check, Clock, Shuffle, Lightbulb } from 
 interface OrderingTemplateProps {
   content: any;
   topic: string;
+  settings?: any;
 }
 
-const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) => {
+const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, settings }) => {
+  const gameSettings = settings || content?.settings || {};
+  
   const [currentSentence, setCurrentSentence] = useState(0);
   const [orderedWords, setOrderedWords] = useState<string[]>([]);
   const [shuffledWords, setShuffledWords] = useState<string[]>([]);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(content?.settings?.timeLimit || 180);
-  const [timerRunning, setTimerRunning] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(gameSettings?.totalTime || 180);
+  const [timerRunning, setTimerRunning] = useState(gameSettings?.useTimer !== false);
   const [isChecking, setIsChecking] = useState(false);
   const [hasShownHint, setHasShownHint] = useState(false);
   const { toast } = useToast();
@@ -90,7 +93,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
     if (isCorrect) {
       setScore(score + 1);
       
-      const bonusTime = content?.settings?.bonusTimePerCorrect || 0;
+      const bonusTime = gameSettings?.bonusTime || 0;
       if (bonusTime > 0) {
         setTimeLeft(timeLeft + bonusTime);
       }
@@ -159,7 +162,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
     setCurrentSentence(0);
     setScore(0);
     setShowResult(false);
-    setTimeLeft(content?.settings?.timeLimit || 180);
+    setTimeLeft(gameSettings?.totalTime || 180);
     setTimerRunning(true);
     setIsChecking(false);
     
@@ -295,7 +298,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic }) =
               Xáo trộn
             </Button>
             
-            {content?.settings?.showHints && (
+            {gameSettings?.showHints && (
               <Button
                 variant="outline"
                 onClick={handleHint}

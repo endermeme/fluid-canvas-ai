@@ -11,20 +11,23 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 interface FlashcardsTemplateProps {
   content: any;
   topic: string;
+  settings?: any;
 }
 
-const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic }) => {
+const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic, settings }) => {
+  const gameSettings = settings || content?.settings || {};
+  
   const [currentCard, setCurrentCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [cardsState, setCardsState] = useState<Array<'unreviewed' | 'known' | 'unknown'>>([]);
-  const [autoFlip, setAutoFlip] = useState(content?.settings?.autoFlip || false);
+  const [autoFlip, setAutoFlip] = useState(gameSettings?.autoFlip || false);
   const [flipTimer, setFlipTimer] = useState<NodeJS.Timeout | null>(null);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const { toast } = useToast();
 
   const cards = content?.cards || [];
   const progress = ((currentCard + 1) / cards.length) * 100;
-  const flipTime = content?.settings?.flipTime || 5;
+  const flipTime = gameSettings?.timePerQuestion || 5;
 
   useEffect(() => {
     if (cards.length > 0) {
