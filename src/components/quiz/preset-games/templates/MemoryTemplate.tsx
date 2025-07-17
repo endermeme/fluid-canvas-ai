@@ -18,13 +18,13 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
   const gameSettings = {
     totalTime: settings?.timeLimit || 180,
     showHints: settings?.allowHints !== false,
-    hintPenalty: settings?.hintPenalty || 15
+    hintPenalty: settings?.hintPenalty || 15,
+    gridSize: settings?.gridSize || 4
   };
   
   const [cards, setCards] = useState<Array<{id: number, content: string, matched: boolean, flipped: boolean}>>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [matchedPairs, setMatchedPairs] = useState<number>(0);
-  const [moves, setMoves] = useState<number>(0);
   const [timeLeft, setTimeLeft] = useState<number>(gameSettings.totalTime);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [gameWon, setGameWon] = useState<boolean>(false);
@@ -32,24 +32,29 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
   const { toast } = useToast();
 
   const memoryCards = content?.cards || [];
-  const totalPairs = memoryCards.length / 2;
+  const targetCardCount = gameSettings.gridSize * gameSettings.gridSize;
+  const totalPairs = targetCardCount / 2;
 
   useEffect(() => {
     if (memoryCards.length > 0) {
-      const shuffledCards = [...memoryCards].sort(() => Math.random() - 0.5).map(card => ({
+      // Create cards based on gridSize setting
+      const selectedCards = memoryCards.slice(0, targetCardCount / 2);
+      const duplicatedCards = [...selectedCards, ...selectedCards];
+      const shuffledCards = duplicatedCards.sort(() => Math.random() - 0.5).map((card, index) => ({
         ...card,
-        flipped: false
+        id: index,
+        flipped: false,
+        matched: false
       }));
       
       setCards(shuffledCards);
       setTimeLeft(gameSettings.totalTime);
-      setMoves(0);
       setMatchedPairs(0);
       setFlippedCards([]);
       setGameOver(false);
       setGameWon(false);
     }
-  }, [memoryCards, gameSettings?.totalTime]);
+  }, [memoryCards, gameSettings?.totalTime, targetCardCount]);
 
   useEffect(() => {
     if (timeLeft > 0 && !gameOver && !gameWon) {
@@ -112,9 +117,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
         }, 1000);
       }
       
-      setMoves(moves + 1);
+      
     }
-  }, [flippedCards, cards, matchedPairs, moves, toast]);
+  }, [flippedCards, cards, matchedPairs, toast]);
 
   const handleCardClick = (index: number) => {
     if (gameOver || gameWon || !canFlip || flippedCards.length >= 2 || cards[index].flipped || cards[index].matched) {
@@ -173,7 +178,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       
       setCards(shuffledCards);
       setTimeLeft(gameSettings.totalTime);
-      setMoves(0);
       setMatchedPairs(0);
       setFlippedCards([]);
       setGameOver(false);
@@ -206,7 +210,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
             <p className="mb-4 text-base sm:text-lg text-primary">
               Bạn đã ghép được <span className="font-bold text-primary">{matchedPairs}/{totalPairs}</span> cặp
             </p>
-            <p className="mb-6 text-sm text-primary/70">Với {moves} lượt di chuyển</p>
+            <p className="mb-6 text-sm text-primary/70">
+              Thời gian đã dùng: {Math.floor((gameSettings.totalTime - timeLeft) / 60)}:{((gameSettings.totalTime - timeLeft) % 60).toString().padStart(2, '0')}
+            </p>
             <div className="text-center text-sm text-primary/70">
               Sử dụng nút làm mới ở header để thử lại
             </div>
@@ -225,7 +231,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
             <Trophy className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-500 mx-auto mb-4" />
             <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
             <p className="mb-2 text-base sm:text-lg text-primary">
-              Bạn đã hoàn thành trò chơi với <span className="font-bold text-primary">{moves}</span> lượt.
+              Bạn đã hoàn thành trò chơi trong <span className="font-bold text-primary">{Math.floor((gameSettings.totalTime - timeLeft) / 60)}:{((gameSettings.totalTime - timeLeft) % 60).toString().padStart(2, '0')}</span>
             </p>
             <p className="mb-4 text-sm text-primary/70">
               Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
@@ -245,21 +251,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
     );
   }
 
-  // Calculate grid columns for square layout
+  // Use gridSize from settings
   const getGridCols = () => {
-    const totalCards = cards.length;
-    const sqrtCards = Math.sqrt(totalCards);
-    const cols = Math.ceil(sqrtCards);
-    
-    // Create square grids based on total cards
-    if (totalCards <= 16) {
-      if (totalCards <= 4) return 'grid-cols-2';
-      if (totalCards <= 9) return 'grid-cols-3';
-      return 'grid-cols-4';
-    }
-    if (totalCards <= 25) return 'grid-cols-5';
-    if (totalCards <= 36) return 'grid-cols-6';
-    return `grid-cols-${cols}`;
+    return `grid-cols-${gameSettings.gridSize}`;
   };
 
   return (
@@ -275,9 +269,6 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
               <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
               <span className="text-primary">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
             </div>
-            <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
-              Lượt: {moves}
-            </div>
           </div>
         </div>
         <Progress value={progressPercentage} className="h-1.5 sm:h-2" />
@@ -286,11 +277,11 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       {/* Game area - main content */}
       <div className="game-content">
         <div className="responsive-card mx-auto h-full flex items-center justify-center">
-          <div className={`grid ${getGridCols()} gap-1.5 sm:gap-2 lg:gap-3 w-full max-h-full`}>
+          <div className={`grid ${getGridCols()} gap-1 sm:gap-1.5 w-full max-w-2xl mx-auto`}>
             {cards.map((card, index) => (
               <div 
                 key={index}
-                className="aspect-square cursor-pointer perspective-1000 min-w-0"
+                className="aspect-square cursor-pointer perspective-1000 min-w-0 max-w-20 sm:max-w-24"
                 onClick={() => handleCardClick(index)}
                 style={{
                   transformStyle: 'preserve-3d',
@@ -308,7 +299,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
                   `}
                   style={{ backfaceVisibility: 'hidden' }}
                 >
-                  <div className="text-primary/60 text-xs sm:text-sm lg:text-base font-bold">?</div>
+                  <div className="text-primary/60 text-sm font-bold">?</div>
                 </Card>
                 
                 {/* Card front */}
@@ -326,7 +317,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
                     transform: 'rotateY(180deg)'
                   }}
                 >
-                  <div className="text-center text-xs sm:text-sm font-medium break-words overflow-hidden leading-tight">
+                  <div className="text-center text-xs font-medium break-words overflow-hidden leading-tight">
                     {card.content}
                   </div>
                 </Card>
