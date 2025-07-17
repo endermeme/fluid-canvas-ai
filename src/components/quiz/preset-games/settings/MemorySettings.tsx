@@ -10,12 +10,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { BrainCircuit, Type, Trophy, Medal, Timer, Clock4, Bug, Eye } from 'lucide-react';
 
 export interface MemorySettingsData {
-  difficulty: 'easy' | 'medium' | 'hard';
-  pairCount: number;
+  gridSize: number;
   timeLimit: number;
   allowHints: boolean;
   hintPenalty: number;
-  showProgress: boolean;
   prompt: string;
   debugMode: boolean;
 }
@@ -28,12 +26,10 @@ interface MemorySettingsProps {
 
 const MemorySettings: React.FC<MemorySettingsProps> = ({ onStart, topic, onCancel }) => {
   const [settings, setSettings] = useState<MemorySettingsData>({
-    difficulty: 'medium',
-    pairCount: 8,
+    gridSize: 4,
     timeLimit: 120,
     allowHints: true,
     hintPenalty: 5,
-    showProgress: true,
     prompt: topic || '',
     debugMode: false
   });
@@ -103,41 +99,21 @@ const MemorySettings: React.FC<MemorySettingsProps> = ({ onStart, topic, onCance
                 />
               </div>
               
-              {/* Difficulty */}
-              <div className="space-y-2">
-                <Label htmlFor="difficulty" className="flex items-center gap-2 text-sm font-medium">
-                  <Trophy className="h-4 w-4 text-primary" /> Độ Khó
-                </Label>
-                <Select 
-                  value={settings.difficulty} 
-                  onValueChange={(value) => handleSelectChange('difficulty', value)}
-                >
-                  <SelectTrigger className="border-primary/20 bg-white/50">
-                    <SelectValue placeholder="Chọn độ khó" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="easy">Dễ</SelectItem>
-                    <SelectItem value="medium">Trung bình</SelectItem>
-                    <SelectItem value="hard">Khó</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Pair Count */}
+              {/* Grid Size */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="pairCount" className="text-sm font-medium flex items-center gap-2">
-                    <Medal className="h-4 w-4 text-primary" /> Số Cặp Thẻ
+                  <Label htmlFor="gridSize" className="text-sm font-medium flex items-center gap-2">
+                    <Medal className="h-4 w-4 text-primary" /> Kích Thước Lưới (số ô)
                   </Label>
-                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.pairCount}</span>
+                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.gridSize}x{settings.gridSize} = {settings.gridSize * settings.gridSize} ô</span>
                 </div>
                 <Slider 
-                  id="pairCount"
-                  min={4} 
-                  max={15} 
+                  id="gridSize"
+                  min={2} 
+                  max={10} 
                   step={1} 
-                  value={[settings.pairCount]} 
-                  onValueChange={(value) => handleSliderChange('pairCount', value)}
+                  value={[settings.gridSize]} 
+                  onValueChange={(value) => handleSliderChange('gridSize', value)}
                 />
               </div>
 
@@ -175,16 +151,6 @@ const MemorySettings: React.FC<MemorySettingsProps> = ({ onStart, topic, onCance
                   </Label>
                 </div>
 
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="showProgress" 
-                    checked={settings.showProgress}
-                    onCheckedChange={(checked) => handleSwitchChange('showProgress', checked)} 
-                  />
-                  <Label htmlFor="showProgress" className="text-sm font-medium">
-                    Hiển thị tiến độ
-                  </Label>
-                </div>
               </div>
 
               {/* Hint Penalty */}
