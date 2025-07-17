@@ -21,15 +21,12 @@ interface WordLocation {
 }
 
 const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic, settings }) => {
-  // Game settings function - Word search settings
-  const getGameSettings = () => ({
-    totalTime: 480, // 8 phút cho word search (khó hơn)
-    allowDiagonalWords: true,
-    showWordList: true
-    // Loại bỏ gridSize, showTimer vì không được sử dụng trong logic
-  });
-  
-  const gameSettings = getGameSettings();
+  // Use settings from props or fallback values
+  const gameSettings = {
+    totalTime: settings?.timeLimit || 480,
+    allowDiagonalWords: settings?.allowDiagonalWords !== false,
+    showWordList: settings?.showWordList !== false
+  };
   
   const [selectedStart, setSelectedStart] = useState<{row: number, col: number} | null>(null);
   const [selectedEnd, setSelectedEnd] = useState<{row: number, col: number} | null>(null);

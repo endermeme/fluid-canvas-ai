@@ -14,15 +14,12 @@ interface MemoryTemplateProps {
 }
 
 const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, settings }) => {
-  // Game settings function - Memory game settings
-  const getGameSettings = () => ({
-    totalTime: 180, // 3 phút cho memory game
-    showHints: true,
-    hintPenalty: 15 // 15s penalty cho hint
-    // Loại bỏ shuffleCards, showTimer vì không được sử dụng
-  });
-  
-  const gameSettings = getGameSettings();
+  // Use settings from props or fallback values
+  const gameSettings = {
+    totalTime: settings?.timeLimit || 180,
+    showHints: settings?.allowHints !== false,
+    hintPenalty: settings?.hintPenalty || 15
+  };
   
   const [cards, setCards] = useState<Array<{id: number, content: string, matched: boolean, flipped: boolean}>>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);

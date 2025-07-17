@@ -13,16 +13,13 @@ interface OrderingTemplateProps {
 }
 
 const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, settings }) => {
-  // Game settings function - Ordering game settings
-  const getGameSettings = () => ({
-    totalTime: 300, // 5 phút cho ordering
-    bonusTime: 20, // Thời gian thưởng nhiều hơn
-    showHints: true,
-    hintPenalty: 25 // Penalty ít hơn cho hint
-    // Loại bỏ useTimer vì luôn true
-  });
-  
-  const gameSettings = getGameSettings();
+  // Use settings from props or fallback values
+  const gameSettings = {
+    totalTime: settings?.timeLimit || 300,
+    bonusTime: settings?.bonusTimePerCorrect || 20,
+    showHints: settings?.showHints !== false,
+    hintPenalty: settings?.hintPenalty || 25
+  };
   
   const [currentSentence, setCurrentSentence] = useState(0);
   const [orderedWords, setOrderedWords] = useState<string[]>([]);

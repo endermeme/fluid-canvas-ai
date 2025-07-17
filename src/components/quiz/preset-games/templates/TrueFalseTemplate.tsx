@@ -18,15 +18,12 @@ interface TrueFalseTemplateProps {
 const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, topic, settings, onShare }) => {
   const gameContent = content || data;
   
-  // Game settings function - True/False settings
-  const getGameSettings = () => ({
-    timePerQuestion: 12, // Ít thời gian hơn vì đơn giản
-    totalTime: 180, // 3 phút tổng
-    showExplanation: true
-    // Loại bỏ useTimer (luôn true), showShare (component tự quản lý)
-  });
-  
-  const gameSettings = getGameSettings();
+  // Use settings from props or fallback values
+  const gameSettings = {
+    timePerQuestion: settings?.timePerQuestion || 12,
+    totalTime: settings?.totalTime || 180,
+    showExplanation: settings?.showExplanation !== false
+  };
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Array<boolean | null>>([]);
