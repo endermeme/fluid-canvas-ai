@@ -135,6 +135,13 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-3 mt-3">
                   <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch id="showExplanation" checked={settings.showExplanation} onCheckedChange={checked => handleSwitchChange('showExplanation', checked)} />
+                    <Label htmlFor="showExplanation" className="text-sm font-medium">
+                      Hiển thị giải thích
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
                     <Switch id="shuffleQuestions" checked={settings.shuffleQuestions} onCheckedChange={checked => handleSwitchChange('shuffleQuestions', checked)} />
                     <Label htmlFor="shuffleQuestions" className="text-sm font-medium">
                       Xáo trộn câu hỏi
@@ -177,15 +184,6 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({
                   </div>
                 </div>}
 
-              {/* Basic Quiz Options */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch id="showExplanation" checked={settings.showExplanation} onCheckedChange={checked => handleSwitchChange('showExplanation', checked)} />
-                  <Label htmlFor="showExplanation" className="text-sm font-medium">
-                    Hiển thị giải thích
-                  </Label>
-                </div>
-              </div>
 
               {/* Debug Mode */}
               <div className="border-t border-border/50 pt-3">
