@@ -239,11 +239,12 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
 
       {/* Game Grid */}
       <div
-        className="flex-1 grid w-full h-full p-2"
+        className="grid w-full p-2"
         style={{ 
           gridTemplateColumns: `repeat(${gameSettings.gridSize}, 1fr)`,
           gridTemplateRows: `repeat(${gameSettings.gridSize}, 1fr)`,
-          gap: `${Math.max(2, 8 - gameSettings.gridSize)}px`
+          gap: `${Math.max(2, 8 - gameSettings.gridSize)}px`,
+          height: 'calc(100vh - 200px)' // Trừ đi header, progress, footer
         }}
       >
         {cards.map((card, index) => {
