@@ -239,48 +239,61 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
 
       {/* Game Grid */}
       <div 
-        className="flex-1 overflow-auto grid place-items-center p-4"
-        style={{ 
-          gridTemplateColumns: `repeat(${gameSettings.gridSize}, 100px)`,
-          gap: '8px',
-          maxWidth: '100%'
-        }}
+        className="flex-1 overflow-auto flex items-center justify-center p-4"
       >
-        {cards.map((card, index) => (
-          <div 
-            key={index}
-            className="w-24 h-24 cursor-pointer relative"
-            onClick={() => handleCardClick(index)}
-            style={{
-              transformStyle: 'preserve-3d',
-              transition: 'transform 0.6s',
-              transform: card.flipped || card.matched ? 'rotateY(180deg)' : 'rotateY(0deg)'
-            }}
-          >
-            {/* Card back */}
-            <Card 
-              className="absolute inset-0 flex items-center justify-center bg-muted border text-lg"
-              style={{ backfaceVisibility: 'hidden' }}
-            >
-              <div className="text-primary/60 font-bold">?</div>
-            </Card>
-            
-            {/* Card front */}
-            <Card 
-              className={`absolute inset-0 flex items-center justify-center text-xs ${
-                card.matched ? 'bg-green-100 border-green-400' : 'bg-card border'
-              }`}
-              style={{
-                backfaceVisibility: 'hidden',
-                transform: 'rotateY(180deg)'
-              }}
-            >
-              <div className="text-center font-medium leading-tight overflow-hidden p-1">
-                {card.content}
+        <div
+          className="grid gap-2"
+          style={{ 
+            gridTemplateColumns: `repeat(${gameSettings.gridSize}, ${120 - gameSettings.gridSize * 8}px)`,
+            maxWidth: '100%',
+            maxHeight: '100%'
+          }}
+        >
+          {cards.map((card, index) => {
+            const cardSize = Math.max(60, 120 - gameSettings.gridSize * 8);
+            return (
+              <div 
+                key={index}
+                className="cursor-pointer relative"
+                style={{
+                  width: `${cardSize}px`,
+                  height: `${cardSize}px`,
+                  transformStyle: 'preserve-3d',
+                  transition: 'transform 0.6s',
+                  transform: card.flipped || card.matched ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                }}
+                onClick={() => handleCardClick(index)}
+              >
+                {/* Card back */}
+                <Card 
+                  className="absolute inset-0 flex items-center justify-center bg-muted border"
+                  style={{ 
+                    backfaceVisibility: 'hidden',
+                    fontSize: `${Math.max(12, cardSize / 4)}px`
+                  }}
+                >
+                  <div className="text-primary/60 font-bold">?</div>
+                </Card>
+                
+                {/* Card front */}
+                <Card 
+                  className={`absolute inset-0 flex items-center justify-center ${
+                    card.matched ? 'bg-green-100 border-green-400' : 'bg-card border'
+                  }`}
+                  style={{
+                    backfaceVisibility: 'hidden',
+                    transform: 'rotateY(180deg)',
+                    fontSize: `${Math.max(8, cardSize / 8)}px`
+                  }}
+                >
+                  <div className="text-center font-medium leading-tight overflow-hidden p-1">
+                    {card.content}
+                  </div>
+                </Card>
               </div>
-            </Card>
-          </div>
-        ))}
+            );
+          })}
+        </div>
       </div>
 
       {/* Footer */}
