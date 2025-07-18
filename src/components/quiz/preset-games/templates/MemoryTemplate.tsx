@@ -238,19 +238,19 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       <Progress value={(matchedPairs / totalPairs) * 100} className="mb-4 mx-4" />
 
       {/* Game Grid */}
-      <div className="flex-1 overflow-auto flex items-center justify-center">
+      <div className="flex-1 overflow-auto flex items-center justify-center p-4">
         <div 
           className="grid"
           style={{ 
-            gridTemplateColumns: `repeat(${gameSettings.gridSize}, 32px)`,
-            gap: '2px',
+            gridTemplateColumns: `repeat(${gameSettings.gridSize}, 80px)`,
+            gap: '4px',
             width: 'fit-content'
           }}
         >
           {cards.map((card, index) => (
             <div 
               key={index}
-              className="w-8 h-8 cursor-pointer relative"
+              className="w-20 h-20 cursor-pointer relative"
               onClick={() => handleCardClick(index)}
               style={{
                 transformStyle: 'preserve-3d',
