@@ -38,7 +38,19 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
   useEffect(() => {
     if (memoryCards.length > 0) {
       // Create cards based on gridSize setting
-      const selectedCards = memoryCards.slice(0, targetCardCount / 2);
+      const neededPairs = targetCardCount / 2;
+      let selectedCards = [];
+      
+      // If we don't have enough unique cards, repeat the available ones
+      if (memoryCards.length < neededPairs) {
+        while (selectedCards.length < neededPairs) {
+          selectedCards = [...selectedCards, ...memoryCards];
+        }
+        selectedCards = selectedCards.slice(0, neededPairs);
+      } else {
+        selectedCards = memoryCards.slice(0, neededPairs);
+      }
+      
       const duplicatedCards = [...selectedCards, ...selectedCards];
       const shuffledCards = duplicatedCards.sort(() => Math.random() - 0.5).map((card, index) => ({
         ...card,
@@ -171,7 +183,19 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
   const handleRestart = () => {
     if (memoryCards.length > 0) {
       // Create cards based on gridSize setting
-      const selectedCards = memoryCards.slice(0, targetCardCount / 2);
+      const neededPairs = targetCardCount / 2;
+      let selectedCards = [];
+      
+      // If we don't have enough unique cards, repeat the available ones
+      if (memoryCards.length < neededPairs) {
+        while (selectedCards.length < neededPairs) {
+          selectedCards = [...selectedCards, ...memoryCards];
+        }
+        selectedCards = selectedCards.slice(0, neededPairs);
+      } else {
+        selectedCards = memoryCards.slice(0, neededPairs);
+      }
+      
       const duplicatedCards = [...selectedCards, ...selectedCards];
       const shuffledCards = duplicatedCards.sort(() => Math.random() - 0.5).map((card, index) => ({
         ...card,
