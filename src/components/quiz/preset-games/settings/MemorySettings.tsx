@@ -110,11 +110,16 @@ const MemorySettings: React.FC<MemorySettingsProps> = ({ onStart, topic, onCance
                 <Slider 
                   id="gridSize"
                   min={2} 
-                  max={100} 
+                  max={8} 
                   step={1} 
                   value={[settings.gridSize]} 
                   onValueChange={(value) => handleSliderChange('gridSize', value)}
                 />
+                {settings.debugMode && (
+                  <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-700">
+                    <strong>Debug:</strong> Grid {settings.gridSize}x{settings.gridSize} = {settings.gridSize * settings.gridSize} thẻ ({settings.gridSize * settings.gridSize / 2} cặp)
+                  </div>
+                )}
               </div>
 
               {/* Time Limit */}
