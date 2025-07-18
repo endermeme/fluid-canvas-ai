@@ -191,37 +191,21 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
 
   if (!content || !memoryCards.length) {
     return (
-      <div className="game-container">
-        <div className="game-content flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-lg font-medium text-primary">Không có dữ liệu trò chơi ghi nhớ</p>
-          </div>
-        </div>
+      <div className="flex h-screen items-center justify-center">
+        <p className="text-lg font-medium text-primary">Không có dữ liệu trò chơi ghi nhớ</p>
       </div>
     );
   }
 
-  const progressPercentage = (matchedPairs / totalPairs) * 100;
-
   // Game over screen
   if (gameOver) {
     return (
-      <div className="unified-game-container">
-        <div className="game-content flex items-center justify-center">
-          <Card className="compact-card p-6 sm:p-8 text-center bg-card border">
-            <div className="text-6xl sm:text-7xl mb-4">😔</div>
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-red-600">Hết thời gian!</h2>
-            <p className="mb-4 text-base sm:text-lg text-primary">
-              Bạn đã ghép được <span className="font-bold text-primary">{matchedPairs}/{totalPairs}</span> cặp
-            </p>
-            <p className="mb-6 text-sm text-primary/70">
-              Thời gian đã dùng: {Math.floor((gameSettings.totalTime - timeLeft) / 60)}:{((gameSettings.totalTime - timeLeft) % 60).toString().padStart(2, '0')}
-            </p>
-            <div className="text-center text-sm text-primary/70">
-              Sử dụng nút làm mới ở header để thử lại
-            </div>
-          </Card>
-        </div>
+      <div className="flex h-screen items-center justify-center">
+        <Card className="p-8 text-center max-w-md">
+          <div className="text-6xl mb-4">😔</div>
+          <h2 className="text-2xl font-bold mb-4 text-red-600">Hết thời gian!</h2>
+          <p className="mb-4">Bạn đã ghép được {matchedPairs}/{totalPairs} cặp</p>
+        </Card>
       </div>
     );
   }
@@ -229,70 +213,44 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
   // Win screen
   if (gameWon) {
     return (
-      <div className="unified-game-container">
-        <div className="game-content flex items-center justify-center">
-          <Card className="compact-card p-6 sm:p-8 text-center bg-card border">
-            <Trophy className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-500 mx-auto mb-4" />
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-primary">Chúc mừng!</h2>
-            <p className="mb-2 text-base sm:text-lg text-primary">
-              Bạn đã hoàn thành trò chơi trong <span className="font-bold text-primary">{Math.floor((gameSettings.totalTime - timeLeft) / 60)}:{((gameSettings.totalTime - timeLeft) % 60).toString().padStart(2, '0')}</span>
-            </p>
-            <p className="mb-4 text-sm text-primary/70">
-              Thời gian còn lại: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-            </p>
-            <div className="mb-6">
-              <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">
-                {matchedPairs}/{totalPairs}
-              </div>
-              <Progress value={100} className="h-2 sm:h-3" />
-            </div>
-            <div className="text-center text-sm text-primary/70">
-              Sử dụng nút làm mới ở header để chơi lại
-            </div>
-          </Card>
-        </div>
+      <div className="flex h-screen items-center justify-center">
+        <Card className="p-8 text-center max-w-md">
+          <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-4 text-primary">Chúc mừng!</h2>
+          <p className="mb-4">Hoàn thành trong {Math.floor((gameSettings.totalTime - timeLeft) / 60)}:{((gameSettings.totalTime - timeLeft) % 60).toString().padStart(2, '0')}</p>
+        </Card>
       </div>
     );
   }
 
-  // Calculate card size based on grid size for responsive design
-  const getCardSize = () => {
-    if (gameSettings.gridSize <= 4) return 'max-w-24 h-24';
-    if (gameSettings.gridSize <= 6) return 'max-w-20 h-20';
-    if (gameSettings.gridSize <= 10) return 'max-w-16 h-16';
-    if (gameSettings.gridSize <= 20) return 'max-w-12 h-12';
-    return 'max-w-8 h-8';
-  };
-
   return (
-    <div className="unified-game-container">
-      {/* Header với thông tin trạng thái */}
-      <div className="game-header">
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full text-primary">
-            Cặp: {matchedPairs}/{totalPairs}
-          </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <div className="text-xs sm:text-sm font-medium px-2 py-1 bg-muted rounded-full flex items-center">
-              <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
-              <span className="text-primary">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
-            </div>
-          </div>
+    <div className="h-screen flex flex-col p-2">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-2 px-4">
+        <div className="text-sm font-medium">Cặp: {matchedPairs}/{totalPairs}</div>
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4" />
+          <span>{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
         </div>
-        <Progress value={progressPercentage} className="h-1.5 sm:h-2" />
       </div>
+      
+      {/* Progress */}
+      <Progress value={(matchedPairs / totalPairs) * 100} className="mb-4 mx-4" />
 
-      {/* Game area - main content */}
-      <div className="game-content">
-        <div className="responsive-card mx-auto h-full flex items-center justify-center">
+      {/* Game Grid */}
+      <div className="flex-1 overflow-auto">
+        <div className="p-2">
           <div 
-            className="grid gap-px w-full max-w-4xl mx-auto"
-            style={{ gridTemplateColumns: `repeat(${gameSettings.gridSize}, minmax(0, 1fr))` }}
+            className="grid w-full mx-auto"
+            style={{ 
+              gridTemplateColumns: `repeat(${gameSettings.gridSize}, minmax(0, 1fr))`,
+              gap: '1px'
+            }}
           >
             {cards.map((card, index) => (
               <div 
                 key={index}
-                className={`aspect-square cursor-pointer perspective-1000 min-w-0 ${getCardSize()}`}
+                className="aspect-square cursor-pointer"
                 onClick={() => handleCardClick(index)}
                 style={{
                   transformStyle: 'preserve-3d',
@@ -302,35 +260,23 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
               >
                 {/* Card back */}
                 <Card 
-                  className={`
-                    absolute inset-0 flex items-center justify-center 
-                    bg-muted border border-border
-                    transition-all duration-300 hover:shadow-lg hover:scale-105
-                    ${card.matched ? 'opacity-50' : 'opacity-100'}
-                  `}
+                  className="absolute inset-0 flex items-center justify-center bg-muted border"
                   style={{ backfaceVisibility: 'hidden' }}
                 >
-                  <div className="text-primary/60 text-sm font-bold">?</div>
+                  <div className="text-primary/60 font-bold text-xs">?</div>
                 </Card>
                 
                 {/* Card front */}
                 <Card 
-                  className={`
-                    absolute inset-0 flex items-center justify-center p-1 sm:p-2
-                    bg-card border
-                    ${card.matched 
-                      ? 'border-green-400 bg-green-50 text-green-800' 
-                      : 'border-border text-primary'
-                    }
-                  `}
+                  className={`absolute inset-0 flex items-center justify-center p-1 ${
+                    card.matched ? 'bg-green-100 border-green-400' : 'bg-card border'
+                  }`}
                   style={{
                     backfaceVisibility: 'hidden',
                     transform: 'rotateY(180deg)'
                   }}
                 >
-                  <div className={`text-center font-medium break-words overflow-hidden leading-tight ${
-                    gameSettings.gridSize <= 6 ? 'text-xs' : 'text-[8px]'
-                  }`}>
+                  <div className="text-center font-medium text-[10px] leading-tight overflow-hidden">
                     {card.content}
                   </div>
                 </Card>
@@ -340,25 +286,19 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
         </div>
       </div>
 
-      {/* Footer với actions */}
-      <div className="game-controls">
-        <div className="responsive-card mx-auto flex gap-2">
-          {gameSettings.showHints && (
-            <Button
-              variant="outline"
-              onClick={handleHint}
-              disabled={gameOver || gameWon || cards.filter(card => !card.matched && !card.flipped).length === 0}
-              className="flex-1 text-xs sm:text-sm"
-            >
-              <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-              Gợi ý (-{gameSettings.hintPenalty}s)
-            </Button>
-          )}
-          
-          <div className="text-center text-sm text-primary/70">
-            Sử dụng nút làm mới ở header để bắt đầu lại
-          </div>
-        </div>
+      {/* Footer */}
+      <div className="px-4 py-2">
+        {gameSettings.showHints && (
+          <Button
+            variant="outline"
+            onClick={handleHint}
+            disabled={gameOver || gameWon}
+            className="w-full"
+          >
+            <Lightbulb className="h-4 w-4 mr-2" />
+            Gợi ý (-{gameSettings.hintPenalty}s)
+          </Button>
+        )}
       </div>
     </div>
   );
