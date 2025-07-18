@@ -242,7 +242,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
         className="flex-1 overflow-auto flex items-center justify-center p-2"
       >
         <div
-          className="grid w-fit mx-auto"
+          className="grid aspect-square w-full h-full max-w-[min(95vw,95vh)] max-h-[min(95vw,95vh)]"
           style={{ 
             gridTemplateColumns: `repeat(${gameSettings.gridSize}, 1fr)`,
             gridTemplateRows: `repeat(${gameSettings.gridSize}, 1fr)`,
