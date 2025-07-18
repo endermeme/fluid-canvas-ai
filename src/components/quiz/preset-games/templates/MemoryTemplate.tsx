@@ -238,19 +238,20 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       <Progress value={(matchedPairs / totalPairs) * 100} className="mb-4 mx-4" />
 
       {/* Game Grid */}
-      <div className="flex-1 overflow-auto">
-        <div className="p-2">
+      <div className="flex-1 overflow-auto flex">
+        <div className="flex-1 p-2">
           <div 
-            className="grid w-full mx-auto"
+            className="grid mx-auto"
             style={{ 
-              gridTemplateColumns: `repeat(${gameSettings.gridSize}, minmax(0, 1fr))`,
-              gap: '1px'
+              gridTemplateColumns: `repeat(${gameSettings.gridSize}, 1fr)`,
+              gap: '2px',
+              width: 'fit-content'
             }}
           >
             {cards.map((card, index) => (
               <div 
                 key={index}
-                className="aspect-square cursor-pointer"
+                className="w-8 h-8 cursor-pointer relative"
                 onClick={() => handleCardClick(index)}
                 style={{
                   transformStyle: 'preserve-3d',
@@ -260,15 +261,15 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
               >
                 {/* Card back */}
                 <Card 
-                  className="absolute inset-0 flex items-center justify-center bg-muted border"
+                  className="absolute inset-0 flex items-center justify-center bg-muted border text-[8px]"
                   style={{ backfaceVisibility: 'hidden' }}
                 >
-                  <div className="text-primary/60 font-bold text-xs">?</div>
+                  ?
                 </Card>
                 
                 {/* Card front */}
                 <Card 
-                  className={`absolute inset-0 flex items-center justify-center p-1 ${
+                  className={`absolute inset-0 flex items-center justify-center text-[6px] p-0.5 leading-none ${
                     card.matched ? 'bg-green-100 border-green-400' : 'bg-card border'
                   }`}
                   style={{
@@ -276,10 +277,28 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
                     transform: 'rotateY(180deg)'
                   }}
                 >
-                  <div className="text-center font-medium text-[10px] leading-tight overflow-hidden">
+                  <div className="text-center overflow-hidden w-full">
                     {card.content}
                   </div>
                 </Card>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Side panel for matched pairs */}
+        <div className="w-32 p-2 border-l bg-muted/20">
+          <h3 className="text-xs font-medium mb-2">Cặp đã ghép:</h3>
+          <div className="space-y-1">
+            {cards.filter(card => card.matched).reduce((pairs: string[], card) => {
+              const existingPair = pairs.find(pair => pair === card.content);
+              if (!existingPair) {
+                pairs.push(card.content);
+              }
+              return pairs;
+            }, []).map((content, index) => (
+              <div key={index} className="text-[8px] p-1 bg-green-100 rounded text-center">
+                {content}
               </div>
             ))}
           </div>
