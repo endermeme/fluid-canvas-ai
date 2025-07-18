@@ -242,27 +242,18 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
         className="flex-1 overflow-auto flex items-center justify-center p-4"
       >
         <div
-          className="grid gap-2"
+          className="grid gap-2 w-full h-full max-w-[90vmin] max-h-[90vmin]"
           style={{ 
             gridTemplateColumns: `repeat(${gameSettings.gridSize}, 1fr)`,
-            maxWidth: '100%',
-            maxHeight: '100%'
+            aspectRatio: '1'
           }}
         >
           {cards.map((card, index) => {
-            // Scale card size based on grid size - smaller grids get bigger cards
-            const baseSize = 120;
-            const minSize = 50;
-            const scaleFactor = 15;
-            const cardSize = Math.max(minSize, baseSize - (gameSettings.gridSize - 3) * scaleFactor);
-            
             return (
               <div 
                 key={index}
-                className="cursor-pointer relative"
+                className="cursor-pointer relative w-full h-full"
                 style={{
-                  width: `${cardSize}px`,
-                  height: `${cardSize}px`,
                   transformStyle: 'preserve-3d',
                   transition: 'transform 0.6s',
                   transform: card.flipped || card.matched ? 'rotateY(180deg)' : 'rotateY(0deg)'
@@ -271,10 +262,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
               >
                 {/* Card back */}
                 <Card 
-                  className="absolute inset-0 flex items-center justify-center bg-muted border"
+                  className="absolute inset-0 flex items-center justify-center bg-muted border text-lg md:text-xl"
                   style={{ 
-                    backfaceVisibility: 'hidden',
-                    fontSize: `${Math.max(14, cardSize / 5)}px`
+                    backfaceVisibility: 'hidden'
                   }}
                 >
                   <div className="text-primary/60 font-bold">?</div>
@@ -282,13 +272,12 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
                 
                 {/* Card front */}
                 <Card 
-                  className={`absolute inset-0 flex items-center justify-center ${
+                  className={`absolute inset-0 flex items-center justify-center text-xs md:text-sm ${
                     card.matched ? 'bg-green-100 border-green-400' : 'bg-card border'
                   }`}
                   style={{
                     backfaceVisibility: 'hidden',
-                    transform: 'rotateY(180deg)',
-                    fontSize: `${Math.max(10, cardSize / 7)}px`
+                    transform: 'rotateY(180deg)'
                   }}
                 >
                   <div className="text-center font-medium leading-tight overflow-hidden p-1">
