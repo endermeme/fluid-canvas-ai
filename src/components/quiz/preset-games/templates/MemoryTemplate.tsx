@@ -239,11 +239,11 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
 
       {/* Game Grid */}
       <div
-        className="flex-1 grid w-fit mx-auto p-2"
+        className="flex-1 grid w-full h-full p-2"
         style={{ 
-          gridTemplateColumns: `repeat(${gameSettings.gridSize}, minmax(60px, 80px))`,
-          gridTemplateRows: `repeat(${gameSettings.gridSize}, minmax(60px, 80px))`,
-          gap: `${Math.max(4, 12 - gameSettings.gridSize)}px`
+          gridTemplateColumns: `repeat(${gameSettings.gridSize}, 1fr)`,
+          gridTemplateRows: `repeat(${gameSettings.gridSize}, 1fr)`,
+          gap: `${Math.max(2, 8 - gameSettings.gridSize)}px`
         }}
       >
         {cards.map((card, index) => {
