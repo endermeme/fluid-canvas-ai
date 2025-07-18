@@ -110,7 +110,7 @@ const MemorySettings: React.FC<MemorySettingsProps> = ({ onStart, topic, onCance
                 <Slider 
                   id="gridSize"
                   min={2} 
-                  max={10} 
+                  max={100} 
                   step={1} 
                   value={[settings.gridSize]} 
                   onValueChange={(value) => handleSliderChange('gridSize', value)}

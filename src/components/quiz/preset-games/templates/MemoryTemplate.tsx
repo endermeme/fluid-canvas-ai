@@ -255,20 +255,13 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
     );
   }
 
-  // Use gridSize from settings - explicit grid classes for Tailwind
+  // Use gridSize from settings - support up to 100x100
   const getGridCols = () => {
-    switch(gameSettings.gridSize) {
-      case 2: return 'grid-cols-2';
-      case 3: return 'grid-cols-3';
-      case 4: return 'grid-cols-4';
-      case 5: return 'grid-cols-5';
-      case 6: return 'grid-cols-6';
-      case 7: return 'grid-cols-7';
-      case 8: return 'grid-cols-8';
-      case 9: return 'grid-cols-9';
-      case 10: return 'grid-cols-10';
-      default: return 'grid-cols-4';
+    if (gameSettings.gridSize <= 12) {
+      return `grid-cols-${gameSettings.gridSize}`;
     }
+    // For larger grids, use CSS custom property
+    return 'custom-grid';
   };
 
   return (
@@ -292,7 +285,10 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       {/* Game area - main content */}
       <div className="game-content">
         <div className="responsive-card mx-auto h-full flex items-center justify-center">
-          <div className={`grid ${getGridCols()} gap-1 sm:gap-1.5 w-full max-w-2xl mx-auto`}>
+          <div 
+            className={`grid ${getGridCols()} gap-0.5 w-full max-w-2xl mx-auto`}
+            style={gameSettings.gridSize > 12 ? { gridTemplateColumns: `repeat(${gameSettings.gridSize}, minmax(0, 1fr))` } : {}}
+          >
             {cards.map((card, index) => (
               <div 
                 key={index}
