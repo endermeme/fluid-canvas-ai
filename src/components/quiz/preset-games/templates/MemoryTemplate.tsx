@@ -238,7 +238,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       <Progress value={(matchedPairs / totalPairs) * 100} className="mb-4 mx-4" />
 
       {/* Game Grid */}
-      <div className="flex-1 overflow-auto flex items-center justify-center p-4">
+      <div 
+        className="flex-1 overflow-auto flex items-center justify-center p-4"
+      >
         <div 
           className="grid"
           style={{ 
