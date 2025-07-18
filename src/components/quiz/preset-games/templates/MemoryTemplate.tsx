@@ -239,12 +239,14 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
 
       {/* Game Grid */}
       <div 
-        className="flex-1 overflow-auto flex items-center justify-center p-4"
+        className="flex-1 overflow-auto flex items-center justify-center p-2"
       >
         <div
-          className="grid gap-2 w-full h-full max-w-[90vmin] max-h-[90vmin]"
+          className="grid w-full h-full max-w-[95vmin] max-h-[95vmin]"
           style={{ 
             gridTemplateColumns: `repeat(${gameSettings.gridSize}, 1fr)`,
+            gridTemplateRows: `repeat(${gameSettings.gridSize}, 1fr)`,
+            gap: `${Math.max(2, 8 - gameSettings.gridSize)}px`,
             aspectRatio: '1'
           }}
         >
