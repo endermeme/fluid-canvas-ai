@@ -244,13 +244,18 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
         <div
           className="grid gap-2"
           style={{ 
-            gridTemplateColumns: `repeat(${gameSettings.gridSize}, ${120 - gameSettings.gridSize * 8}px)`,
+            gridTemplateColumns: `repeat(${gameSettings.gridSize}, 1fr)`,
             maxWidth: '100%',
             maxHeight: '100%'
           }}
         >
           {cards.map((card, index) => {
-            const cardSize = Math.max(60, 120 - gameSettings.gridSize * 8);
+            // Scale card size based on grid size - smaller grids get bigger cards
+            const baseSize = 120;
+            const minSize = 50;
+            const scaleFactor = 15;
+            const cardSize = Math.max(minSize, baseSize - (gameSettings.gridSize - 3) * scaleFactor);
+            
             return (
               <div 
                 key={index}
@@ -269,7 +274,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
                   className="absolute inset-0 flex items-center justify-center bg-muted border"
                   style={{ 
                     backfaceVisibility: 'hidden',
-                    fontSize: `${Math.max(12, cardSize / 4)}px`
+                    fontSize: `${Math.max(14, cardSize / 5)}px`
                   }}
                 >
                   <div className="text-primary/60 font-bold">?</div>
@@ -283,7 +288,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
                   style={{
                     backfaceVisibility: 'hidden',
                     transform: 'rotateY(180deg)',
-                    fontSize: `${Math.max(8, cardSize / 8)}px`
+                    fontSize: `${Math.max(10, cardSize / 7)}px`
                   }}
                 >
                   <div className="text-center font-medium leading-tight overflow-hidden p-1">
