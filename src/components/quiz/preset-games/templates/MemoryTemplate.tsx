@@ -242,12 +242,11 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
         className="flex-1 overflow-auto flex items-center justify-center p-2"
       >
         <div
-          className="grid w-full h-full max-w-[95vmin] max-h-[95vmin]"
+          className="grid aspect-square w-full h-full max-w-[min(95vw,95vh)] max-h-[min(95vw,95vh)]"
           style={{ 
             gridTemplateColumns: `repeat(${gameSettings.gridSize}, 1fr)`,
             gridTemplateRows: `repeat(${gameSettings.gridSize}, 1fr)`,
-            gap: `${Math.max(2, 8 - gameSettings.gridSize)}px`,
-            aspectRatio: '1'
+            gap: `${Math.max(2, 8 - gameSettings.gridSize)}px`
           }}
         >
           {cards.map((card, index) => {
