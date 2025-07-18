@@ -255,13 +255,13 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
     );
   }
 
-  // Use gridSize from settings - support up to 100x100
-  const getGridCols = () => {
-    if (gameSettings.gridSize <= 12) {
-      return `grid-cols-${gameSettings.gridSize}`;
-    }
-    // For larger grids, use CSS custom property
-    return 'custom-grid';
+  // Calculate card size based on grid size for responsive design
+  const getCardSize = () => {
+    if (gameSettings.gridSize <= 4) return 'max-w-24 h-24';
+    if (gameSettings.gridSize <= 6) return 'max-w-20 h-20';
+    if (gameSettings.gridSize <= 10) return 'max-w-16 h-16';
+    if (gameSettings.gridSize <= 20) return 'max-w-12 h-12';
+    return 'max-w-8 h-8';
   };
 
   return (
@@ -286,13 +286,13 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       <div className="game-content">
         <div className="responsive-card mx-auto h-full flex items-center justify-center">
           <div 
-            className={`grid ${getGridCols()} gap-0.5 w-full max-w-2xl mx-auto`}
-            style={gameSettings.gridSize > 12 ? { gridTemplateColumns: `repeat(${gameSettings.gridSize}, minmax(0, 1fr))` } : {}}
+            className="grid gap-px w-full max-w-4xl mx-auto"
+            style={{ gridTemplateColumns: `repeat(${gameSettings.gridSize}, minmax(0, 1fr))` }}
           >
             {cards.map((card, index) => (
               <div 
                 key={index}
-                className="aspect-square cursor-pointer perspective-1000 min-w-0 max-w-20 sm:max-w-24"
+                className={`aspect-square cursor-pointer perspective-1000 min-w-0 ${getCardSize()}`}
                 onClick={() => handleCardClick(index)}
                 style={{
                   transformStyle: 'preserve-3d',
@@ -328,7 +328,9 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
                     transform: 'rotateY(180deg)'
                   }}
                 >
-                  <div className="text-center text-xs font-medium break-words overflow-hidden leading-tight">
+                  <div className={`text-center font-medium break-words overflow-hidden leading-tight ${
+                    gameSettings.gridSize <= 6 ? 'text-xs' : 'text-[8px]'
+                  }`}>
                     {card.content}
                   </div>
                 </Card>
