@@ -238,51 +238,50 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       <Progress value={(matchedPairs / totalPairs) * 100} className="mb-4 mx-4" />
 
       {/* Game Grid */}
-      <div className="flex-1 overflow-auto">
-        <div className="p-2">
-          <div 
-            className="grid w-full mx-auto"
-            style={{ 
-              gridTemplateColumns: `repeat(${gameSettings.gridSize}, minmax(0, 1fr))`,
-              gap: '1px'
-            }}
-          >
-            {cards.map((card, index) => (
-              <div 
-                key={index}
-                className="aspect-square cursor-pointer"
-                onClick={() => handleCardClick(index)}
+      <div className="flex-1 overflow-auto flex items-center justify-center">
+        <div 
+          className="grid"
+          style={{ 
+            gridTemplateColumns: `repeat(${gameSettings.gridSize}, 32px)`,
+            gap: '2px',
+            width: 'fit-content'
+          }}
+        >
+          {cards.map((card, index) => (
+            <div 
+              key={index}
+              className="w-8 h-8 cursor-pointer relative"
+              onClick={() => handleCardClick(index)}
+              style={{
+                transformStyle: 'preserve-3d',
+                transition: 'transform 0.6s',
+                transform: card.flipped || card.matched ? 'rotateY(180deg)' : 'rotateY(0deg)'
+              }}
+            >
+              {/* Card back */}
+              <Card 
+                className="absolute inset-0 flex items-center justify-center bg-muted border text-[8px]"
+                style={{ backfaceVisibility: 'hidden' }}
+              >
+                <div className="text-primary/60 font-bold">?</div>
+              </Card>
+              
+              {/* Card front */}
+              <Card 
+                className={`absolute inset-0 flex items-center justify-center text-[6px] ${
+                  card.matched ? 'bg-green-100 border-green-400' : 'bg-card border'
+                }`}
                 style={{
-                  transformStyle: 'preserve-3d',
-                  transition: 'transform 0.6s',
-                  transform: card.flipped || card.matched ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                  backfaceVisibility: 'hidden',
+                  transform: 'rotateY(180deg)'
                 }}
               >
-                {/* Card back */}
-                <Card 
-                  className="absolute inset-0 flex items-center justify-center bg-muted border"
-                  style={{ backfaceVisibility: 'hidden' }}
-                >
-                  <div className="text-primary/60 font-bold text-xs">?</div>
-                </Card>
-                
-                {/* Card front */}
-                <Card 
-                  className={`absolute inset-0 flex items-center justify-center p-1 ${
-                    card.matched ? 'bg-green-100 border-green-400' : 'bg-card border'
-                  }`}
-                  style={{
-                    backfaceVisibility: 'hidden',
-                    transform: 'rotateY(180deg)'
-                  }}
-                >
-                  <div className="text-center font-medium text-[10px] leading-tight overflow-hidden">
-                    {card.content}
-                  </div>
-                </Card>
-              </div>
-            ))}
-          </div>
+                <div className="text-center font-medium leading-tight overflow-hidden p-0.5">
+                  {card.content}
+                </div>
+              </Card>
+            </div>
+          ))}
         </div>
       </div>
 
