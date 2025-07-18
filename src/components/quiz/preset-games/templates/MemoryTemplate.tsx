@@ -170,8 +170,12 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
 
   const handleRestart = () => {
     if (memoryCards.length > 0) {
-      const shuffledCards = [...memoryCards].sort(() => Math.random() - 0.5).map(card => ({
+      // Create cards based on gridSize setting
+      const selectedCards = memoryCards.slice(0, targetCardCount / 2);
+      const duplicatedCards = [...selectedCards, ...selectedCards];
+      const shuffledCards = duplicatedCards.sort(() => Math.random() - 0.5).map((card, index) => ({
         ...card,
+        id: index,
         flipped: false,
         matched: false
       }));
@@ -251,9 +255,20 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
     );
   }
 
-  // Use gridSize from settings
+  // Use gridSize from settings - explicit grid classes for Tailwind
   const getGridCols = () => {
-    return `grid-cols-${gameSettings.gridSize}`;
+    switch(gameSettings.gridSize) {
+      case 2: return 'grid-cols-2';
+      case 3: return 'grid-cols-3';
+      case 4: return 'grid-cols-4';
+      case 5: return 'grid-cols-5';
+      case 6: return 'grid-cols-6';
+      case 7: return 'grid-cols-7';
+      case 8: return 'grid-cols-8';
+      case 9: return 'grid-cols-9';
+      case 10: return 'grid-cols-10';
+      default: return 'grid-cols-4';
+    }
   };
 
   return (
