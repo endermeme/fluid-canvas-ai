@@ -238,57 +238,53 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       <Progress value={(matchedPairs / totalPairs) * 100} className="mb-4 mx-4" />
 
       {/* Game Grid */}
-      <div 
-        className="flex-1 overflow-auto flex items-center justify-center p-2"
+      <div
+        className="flex-1 grid w-fit mx-auto p-2"
+        style={{ 
+          gridTemplateColumns: `repeat(${gameSettings.gridSize}, minmax(60px, 80px))`,
+          gridTemplateRows: `repeat(${gameSettings.gridSize}, minmax(60px, 80px))`,
+          gap: `${Math.max(4, 12 - gameSettings.gridSize)}px`
+        }}
       >
-        <div
-          className="grid w-fit mx-auto"
-          style={{ 
-            gridTemplateColumns: `repeat(${gameSettings.gridSize}, minmax(60px, 80px))`,
-            gridTemplateRows: `repeat(${gameSettings.gridSize}, minmax(60px, 80px))`,
-            gap: `${Math.max(4, 12 - gameSettings.gridSize)}px`
-          }}
-        >
-          {cards.map((card, index) => {
-            return (
-              <div 
-                key={index}
-                className="cursor-pointer relative w-full h-full"
-                style={{
-                  transformStyle: 'preserve-3d',
-                  transition: 'transform 0.6s',
-                  transform: card.flipped || card.matched ? 'rotateY(180deg)' : 'rotateY(0deg)'
+        {cards.map((card, index) => {
+          return (
+            <div 
+              key={index}
+              className="cursor-pointer relative w-full h-full"
+              style={{
+                transformStyle: 'preserve-3d',
+                transition: 'transform 0.6s',
+                transform: card.flipped || card.matched ? 'rotateY(180deg)' : 'rotateY(0deg)'
+              }}
+              onClick={() => handleCardClick(index)}
+            >
+              {/* Card back */}
+              <Card 
+                className="absolute inset-0 flex items-center justify-center bg-muted border text-lg md:text-xl"
+                style={{ 
+                  backfaceVisibility: 'hidden'
                 }}
-                onClick={() => handleCardClick(index)}
               >
-                {/* Card back */}
-                <Card 
-                  className="absolute inset-0 flex items-center justify-center bg-muted border text-lg md:text-xl"
-                  style={{ 
-                    backfaceVisibility: 'hidden'
-                  }}
-                >
-                  <div className="text-primary/60 font-bold">?</div>
-                </Card>
-                
-                {/* Card front */}
-                <Card 
-                  className={`absolute inset-0 flex items-center justify-center text-xs md:text-sm ${
-                    card.matched ? 'bg-green-100 border-green-400' : 'bg-card border'
-                  }`}
-                  style={{
-                    backfaceVisibility: 'hidden',
-                    transform: 'rotateY(180deg)'
-                  }}
-                >
-                  <div className="text-center font-medium leading-tight overflow-hidden p-1">
-                    {card.content}
-                  </div>
-                </Card>
-              </div>
-            );
-          })}
-        </div>
+                <div className="text-primary/60 font-bold">?</div>
+              </Card>
+              
+              {/* Card front */}
+              <Card 
+                className={`absolute inset-0 flex items-center justify-center text-xs md:text-sm ${
+                  card.matched ? 'bg-green-100 border-green-400' : 'bg-card border'
+                }`}
+                style={{
+                  backfaceVisibility: 'hidden',
+                  transform: 'rotateY(180deg)'
+                }}
+              >
+                <div className="text-center font-medium leading-tight overflow-hidden p-1">
+                  {card.content}
+                </div>
+              </Card>
+            </div>
+          );
+        })}
       </div>
 
       {/* Footer */}
