@@ -239,52 +239,48 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
 
       {/* Game Grid */}
       <div 
-        className="flex-1 overflow-auto flex items-center justify-center p-4"
+        className="flex-1 overflow-auto grid place-items-center p-4"
+        style={{ 
+          gridTemplateColumns: `repeat(${gameSettings.gridSize}, 100px)`,
+          gap: '8px',
+          maxWidth: '100%'
+        }}
       >
-        <div 
-          className="grid"
-          style={{ 
-            gridTemplateColumns: `repeat(${gameSettings.gridSize}, 80px)`,
-            gap: '4px',
-            width: 'fit-content'
-          }}
-        >
-          {cards.map((card, index) => (
-            <div 
-              key={index}
-              className="w-20 h-20 cursor-pointer relative"
-              onClick={() => handleCardClick(index)}
+        {cards.map((card, index) => (
+          <div 
+            key={index}
+            className="w-24 h-24 cursor-pointer relative"
+            onClick={() => handleCardClick(index)}
+            style={{
+              transformStyle: 'preserve-3d',
+              transition: 'transform 0.6s',
+              transform: card.flipped || card.matched ? 'rotateY(180deg)' : 'rotateY(0deg)'
+            }}
+          >
+            {/* Card back */}
+            <Card 
+              className="absolute inset-0 flex items-center justify-center bg-muted border text-lg"
+              style={{ backfaceVisibility: 'hidden' }}
+            >
+              <div className="text-primary/60 font-bold">?</div>
+            </Card>
+            
+            {/* Card front */}
+            <Card 
+              className={`absolute inset-0 flex items-center justify-center text-xs ${
+                card.matched ? 'bg-green-100 border-green-400' : 'bg-card border'
+              }`}
               style={{
-                transformStyle: 'preserve-3d',
-                transition: 'transform 0.6s',
-                transform: card.flipped || card.matched ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                backfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)'
               }}
             >
-              {/* Card back */}
-              <Card 
-                className="absolute inset-0 flex items-center justify-center bg-muted border text-[8px]"
-                style={{ backfaceVisibility: 'hidden' }}
-              >
-                <div className="text-primary/60 font-bold">?</div>
-              </Card>
-              
-              {/* Card front */}
-              <Card 
-                className={`absolute inset-0 flex items-center justify-center text-[6px] ${
-                  card.matched ? 'bg-green-100 border-green-400' : 'bg-card border'
-                }`}
-                style={{
-                  backfaceVisibility: 'hidden',
-                  transform: 'rotateY(180deg)'
-                }}
-              >
-                <div className="text-center font-medium leading-tight overflow-hidden p-0.5">
-                  {card.content}
-                </div>
-              </Card>
-            </div>
-          ))}
-        </div>
+              <div className="text-center font-medium leading-tight overflow-hidden p-1">
+                {card.content}
+              </div>
+            </Card>
+          </div>
+        ))}
       </div>
 
       {/* Footer */}
