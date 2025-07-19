@@ -32,9 +32,9 @@ const TrueFalseSettings: React.FC<TrueFalseSettingsProps> = ({ onStart, topic, o
   const [settings, setSettings] = useState<TrueFalseSettingsData>({
     difficulty: 'medium',
     questionCount: 10,
-    timePerQuestion: 20,
-    totalTime: 0,
-    bonusTimePerCorrect: 3,
+    timePerQuestion: 30,
+    totalTime: 30,
+    bonusTimePerCorrect: 30,
     showExplanation: true,
     shuffleQuestions: true,
     allowSkip: false,
@@ -127,24 +127,6 @@ const TrueFalseSettings: React.FC<TrueFalseSettingsProps> = ({ onStart, topic, o
                 </Select>
               </div>
 
-              {/* Question Count */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="questionCount" className="text-sm font-medium flex items-center gap-2">
-                    <Medal className="h-4 w-4 text-primary" /> Số Câu Hỏi
-                  </Label>
-                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.questionCount}</span>
-                </div>
-                <Slider 
-                  id="questionCount"
-                  min={5} 
-                  max={25} 
-                  step={1} 
-                  value={[settings.questionCount]} 
-                  onValueChange={(value) => handleSliderChange('questionCount', value)}
-                />
-              </div>
-
               {/* True/False Options */}
               <div className="space-y-3">
                 <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
@@ -184,6 +166,42 @@ const TrueFalseSettings: React.FC<TrueFalseSettingsProps> = ({ onStart, topic, o
 
             {/* Right Column */}
             <div className="space-y-4">
+              {/* Question Count */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="questionCount" className="text-sm font-medium flex items-center gap-2">
+                    <Medal className="h-4 w-4 text-primary" /> Số Câu Hỏi
+                  </Label>
+                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.questionCount}</span>
+                </div>
+                <Slider 
+                  id="questionCount"
+                  min={5} 
+                  max={25} 
+                  step={1} 
+                  value={[settings.questionCount]} 
+                  onValueChange={(value) => handleSliderChange('questionCount', value)}
+                />
+              </div>
+
+              {/* Total Time */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
+                    <Clock4 className="h-4 w-4 text-primary" /> Tổng Thời Gian
+                  </Label>
+                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.totalTime} giây</span>
+                </div>
+                <Slider 
+                  id="totalTime"
+                  min={30} 
+                  max={300} 
+                  step={10} 
+                  value={[settings.totalTime]} 
+                  onValueChange={(value) => handleSliderChange('totalTime', value)}
+                />
+              </div>
+
               {/* Time Per Question */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -194,9 +212,9 @@ const TrueFalseSettings: React.FC<TrueFalseSettingsProps> = ({ onStart, topic, o
                 </div>
                 <Slider 
                   id="timePerQuestion"
-                  min={10} 
-                  max={60} 
-                  step={5} 
+                  min={30} 
+                  max={300} 
+                  step={10} 
                   value={[settings.timePerQuestion]} 
                   onValueChange={(value) => handleSliderChange('timePerQuestion', value)}
                 />
@@ -212,27 +230,11 @@ const TrueFalseSettings: React.FC<TrueFalseSettingsProps> = ({ onStart, topic, o
                 </div>
                 <Slider 
                   id="bonusTimePerCorrect"
-                  min={0} 
-                  max={10} 
-                  step={1} 
+                  min={30} 
+                  max={300} 
+                  step={10} 
                   value={[settings.bonusTimePerCorrect]} 
                   onValueChange={(value) => handleSliderChange('bonusTimePerCorrect', value)}
-                />
-              </div>
-
-              {/* Total Time */}
-              <div className="space-y-2">
-                <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
-                  <Clock4 className="h-4 w-4 text-primary" /> Tổng thời gian
-                </Label>
-                <Input
-                  id="totalTime"
-                  type="number"
-                  min="0"
-                  placeholder="0 = tự động tính"
-                  value={settings.totalTime || 0}
-                  onChange={(e) => handleInputChange('totalTime', e.target.value)}
-                  className="border-primary/20 bg-white/50"
                 />
               </div>
 
