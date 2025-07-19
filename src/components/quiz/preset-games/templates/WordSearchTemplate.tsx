@@ -343,7 +343,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic,
   };
 
   return (
-    <div className="unified-game-container">
+    <div className="unified-game-container relative">
       {/* Header with progress and timer */}
       <div className="game-header">
         <div className="flex justify-between items-center mb-2">
@@ -480,7 +480,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic,
       
       {/* Game over or win state overlay */}
       {(gameOver || gameWon) && (
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-40 p-4">
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-40 p-4" style={{ top: 0, bottom: 0, left: 0, right: 0, position: 'absolute' }}>
           <Card className="compact-card p-4 sm:p-6 text-center bg-card border">
             <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-muted">
               {gameWon ? (
