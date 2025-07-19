@@ -480,7 +480,7 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic,
       
       {/* Game over or win state overlay */}
       {(gameOver || gameWon) && (
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-40 p-4">
           <Card className="compact-card p-4 sm:p-6 text-center bg-card border">
             <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-muted">
               {gameWon ? (
