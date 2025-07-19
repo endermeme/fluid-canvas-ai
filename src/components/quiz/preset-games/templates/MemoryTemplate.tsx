@@ -263,11 +263,13 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
 
       {/* Game Grid */}
       <div
-        className="flex-1 grid w-full p-2 justify-center items-center"
+        className="grid w-full p-2 justify-center items-center"
         style={{ 
-          gridTemplateColumns: `repeat(${gameSettings.gridSize}, calc((100vmin - 80px) / ${gameSettings.gridSize} - 35px))`,
-          gridTemplateRows: `repeat(${gameSettings.gridSize}, calc((100vmin - 80px) / ${gameSettings.gridSize} - 35px))`,
-          gap: `${Math.max(2, 8 - gameSettings.gridSize)}px`
+          height: `min(calc(100vh - 200px), calc(100vw - 40px))`,
+          gridTemplateColumns: `repeat(${gameSettings.gridSize}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${gameSettings.gridSize}, minmax(0, 1fr))`,
+          gap: `${Math.max(2, 8 - gameSettings.gridSize)}px`,
+          aspectRatio: '1'
         }}
       >
         {cards.map((card, index) => {
