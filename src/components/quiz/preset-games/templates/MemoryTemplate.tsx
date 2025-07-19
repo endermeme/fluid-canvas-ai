@@ -265,7 +265,8 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       <div
         className="grid w-full p-2 justify-center items-center"
         style={{ 
-          height: `min(calc(100vh - 200px), calc(100vw - 40px))`,
+          height: `calc(100vh - 140px)`, // Trừ header (60px) + progress (32px) + footer (48px)
+          maxHeight: `calc(100vw - 40px)`,
           gridTemplateColumns: `repeat(${gameSettings.gridSize}, minmax(0, 1fr))`,
           gridTemplateRows: `repeat(${gameSettings.gridSize}, minmax(0, 1fr))`,
           gap: `${Math.max(2, 8 - gameSettings.gridSize)}px`,
