@@ -4,10 +4,10 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowUpDown, Type, Trophy, Medal, Timer, Clock4, Bug, Eye } from 'lucide-react';
+import { ArrowUpDown, Type, Trophy, Medal, Timer, Clock4, Bug, Eye, ChevronDown, ChevronRight } from 'lucide-react';
 
 export interface OrderingSettingsData {
   difficulty: 'easy' | 'medium' | 'hard';
@@ -37,6 +37,8 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
     prompt: topic || '',
     debugMode: false
   });
+
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   useEffect(() => {
     if (topic && topic !== settings.prompt) {
@@ -124,10 +126,22 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
               </div>
 
               {/* Advanced Settings */}
-              <div className="border-t border-border/50 pt-4">
-                <h3 className="text-sm font-medium mb-3 text-primary">Cài đặt nâng cao</h3>
+              <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-between p-0 h-auto border-t border-border/50 pt-4"
+                  >
+                    <h3 className="text-sm font-medium text-primary">Cài đặt nâng cao</h3>
+                    {isAdvancedOpen ? (
+                      <ChevronDown className="h-4 w-4 text-primary" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 text-primary" />
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
                 
-                <div className="space-y-3">
+                <CollapsibleContent className="space-y-3 mt-3">
                   <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
                     <Switch 
                       id="showHints" 
@@ -149,29 +163,8 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
                       Hiển thị tiến độ
                     </Label>
                   </div>
-                </div>
-              </div>
-
-              {/* Debug Mode */}
-              <div className="border-t border-border/50 pt-3">
-                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
-                  <Switch 
-                    id="debugMode" 
-                    checked={settings.debugMode}
-                    onCheckedChange={(checked) => handleSwitchChange('debugMode', checked)} 
-                  />
-                  <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2">
-                    <Bug className="h-4 w-4 text-orange-500" /> 
-                    <span>Debug Mode</span>
-                    <span className="text-xs text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">DEV</span>
-                  </Label>
-                </div>
-                {settings.debugMode && (
-                  <p className="text-sm text-muted-foreground mt-2 ml-7">
-                    Sử dụng dữ liệu mẫu để test giao diện ngay lập tức
-                  </p>
-                )}
-              </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
 
             {/* Right Column - Sliders */}
@@ -228,6 +221,26 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
                   value={[settings.bonusTimePerCorrect]} 
                   onValueChange={(value) => handleSliderChange('bonusTimePerCorrect', value)}
                 />
+              </div>
+              {/* Debug Mode */}
+              <div className="border-t border-border/50 pt-3">
+                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
+                  <Switch 
+                    id="debugMode" 
+                    checked={settings.debugMode}
+                    onCheckedChange={(checked) => handleSwitchChange('debugMode', checked)} 
+                  />
+                  <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2">
+                    <Bug className="h-4 w-4 text-orange-500" /> 
+                    <span>Debug Mode</span>
+                    <span className="text-xs text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">DEV</span>
+                  </Label>
+                </div>
+                {settings.debugMode && (
+                  <p className="text-sm text-muted-foreground mt-2 ml-7">
+                    Sử dụng dữ liệu mẫu để test giao diện ngay lập tức
+                  </p>
+                )}
               </div>
             </div>
           </div>
