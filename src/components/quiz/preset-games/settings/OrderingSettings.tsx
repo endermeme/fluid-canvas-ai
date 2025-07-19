@@ -15,7 +15,6 @@ export interface OrderingSettingsData {
   timeLimit: number;
   bonusTimePerCorrect: number;
   showHints: boolean;
-  allowShuffle: boolean;
   showProgress: boolean;
   prompt: string;
   debugMode: boolean;
@@ -30,11 +29,10 @@ interface OrderingSettingsProps {
 const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onCancel }) => {
   const [settings, setSettings] = useState<OrderingSettingsData>({
     difficulty: 'medium',
-    sentenceCount: 8,
-    timeLimit: 180,
-    bonusTimePerCorrect: 10,
+    sentenceCount: 5,
+    timeLimit: 300,
+    bonusTimePerCorrect: 15,
     showHints: true,
-    allowShuffle: true,
     showProgress: true,
     prompt: topic || '',
     debugMode: false
@@ -195,16 +193,6 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
                   </Label>
                 </div>
 
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="allowShuffle" 
-                    checked={settings.allowShuffle}
-                    onCheckedChange={(checked) => handleSwitchChange('allowShuffle', checked)} 
-                  />
-                  <Label htmlFor="allowShuffle" className="text-sm font-medium">
-                    Cho phép xáo trộn từ
-                  </Label>
-                </div>
 
                 <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
                   <Switch 

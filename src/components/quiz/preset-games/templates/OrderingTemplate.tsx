@@ -81,11 +81,6 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, set
     setShuffledWords([...shuffledWords, word]);
   };
 
-  const handleShuffleWords = () => {
-    if (isChecking) return;
-    const newShuffled = [...shuffledWords].sort(() => Math.random() - 0.5);
-    setShuffledWords(newShuffled);
-  };
 
   const handleCheck = () => {
     if (orderedWords.length !== sentences[currentSentence].words.length) return;
@@ -293,16 +288,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, set
       {/* Footer với controls */}
       <div className="game-controls">
         <div className="responsive-card mx-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <Button
-              variant="outline"
-              onClick={handleShuffleWords}
-              disabled={isChecking || shuffledWords.length === 0}
-              className="text-xs sm:text-sm"
-            >
-              <Shuffle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-              Xáo trộn
-            </Button>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             
             {gameSettings.showHints && (
               <Button
@@ -325,7 +311,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, set
               Kiểm tra
             </Button>
             
-            <div className="text-center text-sm text-primary/70 col-span-2 sm:col-span-4">
+            <div className="text-center text-sm text-primary/70 col-span-2 sm:col-span-3">
               Sử dụng nút làm mới ở header để bắt đầu lại
             </div>
           </div>
