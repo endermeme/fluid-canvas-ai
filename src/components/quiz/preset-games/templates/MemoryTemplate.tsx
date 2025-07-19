@@ -265,8 +265,8 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
       <div
         className="flex-1 grid w-full p-2 justify-center items-center"
         style={{ 
-          gridTemplateColumns: `repeat(${gameSettings.gridSize}, calc((100vmin - 80px) / ${gameSettings.gridSize} - 25px))`,
-          gridTemplateRows: `repeat(${gameSettings.gridSize}, calc((100vmin - 80px) / ${gameSettings.gridSize} - 25px))`,
+          gridTemplateColumns: `repeat(${gameSettings.gridSize}, calc((100vmin - 80px) / ${gameSettings.gridSize} - 35px))`,
+          gridTemplateRows: `repeat(${gameSettings.gridSize}, calc((100vmin - 80px) / ${gameSettings.gridSize} - 35px))`,
           gap: `${Math.max(2, 8 - gameSettings.gridSize)}px`
         }}
       >
