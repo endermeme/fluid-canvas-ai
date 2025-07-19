@@ -263,21 +263,19 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
 
       {/* Game Grid */}
       <div
-        className="grid justify-center p-2"
+        className="flex-1 grid w-full p-2"
         style={{ 
-          gridTemplateColumns: `repeat(${gameSettings.gridSize}, 15px)`,
-          gridTemplateRows: `repeat(${gameSettings.gridSize}, 15px)`,
-          gap: '2px'
+          gridTemplateColumns: `repeat(${gameSettings.gridSize}, calc((100vmin - 80px) / ${gameSettings.gridSize} - 15px))`,
+          gridTemplateRows: `repeat(${gameSettings.gridSize}, calc((100vmin - 80px) / ${gameSettings.gridSize} - 15px))`,
+          gap: `${Math.max(2, 8 - gameSettings.gridSize)}px`
         }}
       >
         {cards.map((card, index) => {
           return (
             <div 
               key={index}
-              className="cursor-pointer relative"
+              className="cursor-pointer relative w-full h-full"
               style={{
-                width: '15px',
-                height: '15px',
                 transformStyle: 'preserve-3d',
                 transition: 'transform 0.6s',
                 transform: card.flipped || card.matched ? 'rotateY(180deg)' : 'rotateY(0deg)'
