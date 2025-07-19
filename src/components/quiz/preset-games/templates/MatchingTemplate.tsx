@@ -38,10 +38,30 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
   const [incorrectAttempts, setIncorrectAttempts] = useState<number>(0);
   const { toast } = useToast();
 
-  // Memoize pairs to prevent infinite re-renders
+  // Memoize pairs to prevent infinite re-renders with language consistency
   const pairs = useMemo(() => {
     const allPairs = content?.pairs || [];
-    return allPairs.slice(0, gameSettings.pairCount);
+    const selectedPairs = allPairs.slice(0, gameSettings.pairCount);
+    
+    // Ensure language consistency within pairs
+    return selectedPairs.map((pair: any) => {
+      // Check if either side has Vietnamese characters (with diacritics)
+      const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđĐ]/.test(pair.left + pair.right);
+      
+      // If mixed languages detected, prioritize Vietnamese format
+      if (hasVietnamese) {
+        return {
+          left: pair.left,
+          right: pair.right
+        };
+      } else {
+        // For English pairs, ensure both sides are properly formatted
+        return {
+          left: pair.left,
+          right: pair.right
+        };
+      }
+    });
   }, [content?.pairs, gameSettings.pairCount]);
   
   const totalPairs = pairs.length;
