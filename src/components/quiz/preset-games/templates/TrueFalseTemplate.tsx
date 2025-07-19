@@ -507,7 +507,10 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
                   : 'bg-red-500 hover:bg-red-600 text-white'
                 : 'bg-primary hover:bg-primary/90 text-primary-foreground'
             }`}
-            onClick={() => handleAnswer(true)}
+            onClick={() => {
+              console.log('Button ĐÚNG clicked, currentAnswer:', currentAnswer);
+              handleAnswer(true);
+            }}
             disabled={currentAnswer !== null}
             size="lg"
           >
@@ -523,7 +526,10 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
                   : 'bg-red-500 hover:bg-red-600 text-white'
                 : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground border-2 border-muted'
             }`}
-            onClick={() => handleAnswer(false)}
+            onClick={() => {
+              console.log('Button SAI clicked, currentAnswer:', currentAnswer);
+              handleAnswer(false);
+            }}
             disabled={currentAnswer !== null}
             size="lg"
           >
