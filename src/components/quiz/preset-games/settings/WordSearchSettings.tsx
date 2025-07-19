@@ -7,12 +7,11 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, Type, Trophy, Medal, Timer, Clock4, Bug, Grid3X3, List } from 'lucide-react';
+import { Search, Type, Medal, Timer, Clock4, Bug, List, ChevronDown } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 export interface WordSearchSettingsData {
-  difficulty: 'easy' | 'medium' | 'hard';
   wordCount: number;
-  gridSize: number;
   timeLimit: number;
   bonusTimePerWord: number;
   allowDiagonalWords: boolean;
@@ -30,9 +29,7 @@ interface WordSearchSettingsProps {
 
 const WordSearchSettings: React.FC<WordSearchSettingsProps> = ({ onStart, topic, onCancel }) => {
   const [settings, setSettings] = useState<WordSearchSettingsData>({
-    difficulty: 'medium',
     wordCount: 10,
-    gridSize: 15,
     timeLimit: 300,
     bonusTimePerWord: 15,
     allowDiagonalWords: true,
@@ -41,6 +38,7 @@ const WordSearchSettings: React.FC<WordSearchSettingsProps> = ({ onStart, topic,
     prompt: topic || '',
     debugMode: false
   });
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (topic && topic !== settings.prompt) {
@@ -106,27 +104,54 @@ const WordSearchSettings: React.FC<WordSearchSettingsProps> = ({ onStart, topic,
                   className="border-primary/20 bg-white/50 min-h-[80px] max-h-[120px]"
                 />
               </div>
-              
-              {/* Difficulty */}
-              <div className="space-y-2">
-                <Label htmlFor="difficulty" className="flex items-center gap-2 text-sm font-medium">
-                  <Trophy className="h-4 w-4 text-primary" /> Độ Khó
-                </Label>
-                <Select 
-                  value={settings.difficulty} 
-                  onValueChange={(value) => handleSelectChange('difficulty', value)}
-                >
-                  <SelectTrigger className="border-primary/20 bg-white/50">
-                    <SelectValue placeholder="Chọn độ khó" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="easy">Dễ</SelectItem>
-                    <SelectItem value="medium">Trung bình</SelectItem>
-                    <SelectItem value="hard">Khó</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
+              {/* Advanced Settings */}
+              <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between border-primary/20">
+                    Cài đặt nâng cao
+                    <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-3 space-y-3">
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch 
+                      id="allowDiagonalWords" 
+                      checked={settings.allowDiagonalWords}
+                      onCheckedChange={(checked) => handleSwitchChange('allowDiagonalWords', checked)} 
+                    />
+                    <Label htmlFor="allowDiagonalWords" className="text-sm font-medium">
+                      Cho phép từ chéo
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch 
+                      id="showWordList" 
+                      checked={settings.showWordList}
+                      onCheckedChange={(checked) => handleSwitchChange('showWordList', checked)} 
+                    />
+                    <Label htmlFor="showWordList" className="text-sm font-medium flex items-center gap-2">
+                      <List className="h-4 w-4 text-primary" /> Hiển thị danh sách từ
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch 
+                      id="showProgress" 
+                      checked={settings.showProgress}
+                      onCheckedChange={(checked) => handleSwitchChange('showProgress', checked)} 
+                    />
+                    <Label htmlFor="showProgress" className="text-sm font-medium">
+                      Hiển thị tiến độ
+                    </Label>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-4">
               {/* Word Count */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -145,27 +170,6 @@ const WordSearchSettings: React.FC<WordSearchSettingsProps> = ({ onStart, topic,
                 />
               </div>
 
-              {/* Grid Size */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="gridSize" className="text-sm font-medium flex items-center gap-2">
-                    <Grid3X3 className="h-4 w-4 text-primary" /> Kích Thước Lưới
-                  </Label>
-                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.gridSize}x{settings.gridSize}</span>
-                </div>
-                <Slider 
-                  id="gridSize"
-                  min={10} 
-                  max={20} 
-                  step={1} 
-                  value={[settings.gridSize]} 
-                  onValueChange={(value) => handleSliderChange('gridSize', value)}
-                />
-              </div>
-            </div>
-
-            {/* Right Column */}
-            <div className="space-y-4">
               {/* Time Limit */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -200,42 +204,6 @@ const WordSearchSettings: React.FC<WordSearchSettingsProps> = ({ onStart, topic,
                   value={[settings.bonusTimePerWord]} 
                   onValueChange={(value) => handleSliderChange('bonusTimePerWord', value)}
                 />
-              </div>
-
-              {/* Word Search Options */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="allowDiagonalWords" 
-                    checked={settings.allowDiagonalWords}
-                    onCheckedChange={(checked) => handleSwitchChange('allowDiagonalWords', checked)} 
-                  />
-                  <Label htmlFor="allowDiagonalWords" className="text-sm font-medium">
-                    Cho phép từ chéo
-                  </Label>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="showWordList" 
-                    checked={settings.showWordList}
-                    onCheckedChange={(checked) => handleSwitchChange('showWordList', checked)} 
-                  />
-                  <Label htmlFor="showWordList" className="text-sm font-medium flex items-center gap-2">
-                    <List className="h-4 w-4 text-primary" /> Hiển thị danh sách từ
-                  </Label>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="showProgress" 
-                    checked={settings.showProgress}
-                    onCheckedChange={(checked) => handleSwitchChange('showProgress', checked)} 
-                  />
-                  <Label htmlFor="showProgress" className="text-sm font-medium">
-                    Hiển thị tiến độ
-                  </Label>
-                </div>
               </div>
 
               {/* Debug Mode */}
