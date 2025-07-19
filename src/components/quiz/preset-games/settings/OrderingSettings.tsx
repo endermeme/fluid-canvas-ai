@@ -123,6 +123,59 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
                 </Select>
               </div>
 
+              {/* Advanced Settings */}
+              <div className="border-t border-border/50 pt-4">
+                <h3 className="text-sm font-medium mb-3 text-primary">Cài đặt nâng cao</h3>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch 
+                      id="showHints" 
+                      checked={settings.showHints}
+                      onCheckedChange={(checked) => handleSwitchChange('showHints', checked)} 
+                    />
+                    <Label htmlFor="showHints" className="text-sm font-medium flex items-center gap-2">
+                      <Eye className="h-4 w-4 text-primary" /> Hiển thị gợi ý
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch 
+                      id="showProgress" 
+                      checked={settings.showProgress}
+                      onCheckedChange={(checked) => handleSwitchChange('showProgress', checked)} 
+                    />
+                    <Label htmlFor="showProgress" className="text-sm font-medium">
+                      Hiển thị tiến độ
+                    </Label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Debug Mode */}
+              <div className="border-t border-border/50 pt-3">
+                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
+                  <Switch 
+                    id="debugMode" 
+                    checked={settings.debugMode}
+                    onCheckedChange={(checked) => handleSwitchChange('debugMode', checked)} 
+                  />
+                  <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2">
+                    <Bug className="h-4 w-4 text-orange-500" /> 
+                    <span>Debug Mode</span>
+                    <span className="text-xs text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">DEV</span>
+                  </Label>
+                </div>
+                {settings.debugMode && (
+                  <p className="text-sm text-muted-foreground mt-2 ml-7">
+                    Sử dụng dữ liệu mẫu để test giao diện ngay lập tức
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column - Sliders */}
+            <div className="space-y-4">
               {/* Sentence Count */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -158,10 +211,7 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
                   onValueChange={(value) => handleSliderChange('timeLimit', value)}
                 />
               </div>
-            </div>
 
-            {/* Right Column */}
-            <div className="space-y-4">
               {/* Bonus Time Per Correct */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -178,53 +228,6 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
                   value={[settings.bonusTimePerCorrect]} 
                   onValueChange={(value) => handleSliderChange('bonusTimePerCorrect', value)}
                 />
-              </div>
-
-              {/* Ordering Options */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="showHints" 
-                    checked={settings.showHints}
-                    onCheckedChange={(checked) => handleSwitchChange('showHints', checked)} 
-                  />
-                  <Label htmlFor="showHints" className="text-sm font-medium flex items-center gap-2">
-                    <Eye className="h-4 w-4 text-primary" /> Hiển thị gợi ý
-                  </Label>
-                </div>
-
-
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="showProgress" 
-                    checked={settings.showProgress}
-                    onCheckedChange={(checked) => handleSwitchChange('showProgress', checked)} 
-                  />
-                  <Label htmlFor="showProgress" className="text-sm font-medium">
-                    Hiển thị tiến độ
-                  </Label>
-                </div>
-              </div>
-
-              {/* Debug Mode */}
-              <div className="border-t border-border/50 pt-3">
-                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
-                  <Switch 
-                    id="debugMode" 
-                    checked={settings.debugMode}
-                    onCheckedChange={(checked) => handleSwitchChange('debugMode', checked)} 
-                  />
-                  <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2">
-                    <Bug className="h-4 w-4 text-orange-500" /> 
-                    <span>Debug Mode</span>
-                    <span className="text-xs text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">DEV</span>
-                  </Label>
-                </div>
-                {settings.debugMode && (
-                  <p className="text-sm text-muted-foreground mt-2 ml-7">
-                    Sử dụng dữ liệu mẫu để test giao diện ngay lập tức
-                  </p>
-                )}
               </div>
             </div>
           </div>
