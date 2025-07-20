@@ -191,15 +191,15 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <Label htmlFor="timeLimit" className="text-sm font-medium flex items-center gap-2">
-                    <Clock4 className="h-4 w-4 text-primary" /> Thời Gian Tối Đa
+                    <Clock4 className="h-4 w-4 text-primary" /> Tổng Thời Gian
                   </Label>
                   <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.timeLimit} giây</span>
                 </div>
                 <Slider 
                   id="timeLimit"
-                  min={120} 
-                  max={600} 
-                  step={30} 
+                  min={30} 
+                  max={300} 
+                  step={10} 
                   value={[settings.timeLimit]} 
                   onValueChange={(value) => handleSliderChange('timeLimit', value)}
                 />

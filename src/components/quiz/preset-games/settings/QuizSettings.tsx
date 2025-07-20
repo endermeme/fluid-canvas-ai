@@ -11,7 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { BrainCircuit, Type, Trophy, Medal, Timer, Clock4, Bug, ChevronDown } from 'lucide-react';
 export interface QuizSettingsData {
   questionCount: number;
-  totalTime: number; // in minutes
+  totalTime: number; // in seconds
   bonusTime: number; // in seconds
   useTimer: boolean;
   showExplanation: boolean;
@@ -32,8 +32,8 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({
 }) => {
   const [settings, setSettings] = useState<QuizSettingsData>({
     questionCount: 10,
-    totalTime: 10,
-    // 10 minutes default
+    totalTime: 300,
+    // 300 seconds (5 minutes) default
     bonusTime: 5,
     // 5 seconds bonus
     useTimer: true,
@@ -170,10 +170,20 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({
 
               {settings.useTimer && <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
-                      <Clock4 className="h-4 w-4 text-primary" /> Thời gian (phút)
-                    </Label>
-                    <Input id="totalTime" type="number" min="1" max="60" placeholder="10" value={settings.totalTime} onChange={e => handleInputChange('totalTime', e.target.value)} className="border-primary/20 bg-white/50" />
+                    <div className="flex justify-between items-center">
+                      <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
+                        <Clock4 className="h-4 w-4 text-primary" /> Tổng Thời Gian
+                      </Label>
+                      <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.totalTime} giây</span>
+                    </div>
+                    <Slider 
+                      id="totalTime"
+                      min={30} 
+                      max={300} 
+                      step={10} 
+                      value={[settings.totalTime]} 
+                      onValueChange={(value) => handleSliderChange('totalTime', value)}
+                    />
                   </div>
                   
                   <div className="space-y-2">

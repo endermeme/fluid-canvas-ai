@@ -27,7 +27,7 @@ interface MatchingSettingsProps {
 const MatchingSettings: React.FC<MatchingSettingsProps> = ({ onStart, topic, onCancel }) => {
   const [settings, setSettings] = useState<MatchingSettingsData>({
     pairCount: 8,
-    timeLimit: 120,
+    timeLimit: 300,
     bonusTimePerMatch: 5,
     allowPartialMatching: false,
     prompt: topic || '',
@@ -121,15 +121,15 @@ const MatchingSettings: React.FC<MatchingSettingsProps> = ({ onStart, topic, onC
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <Label htmlFor="timeLimit" className="text-sm font-medium flex items-center gap-2">
-                    <Clock4 className="h-4 w-4 text-primary" /> Thời gian tối đa
+                    <Clock4 className="h-4 w-4 text-primary" /> Tổng Thời Gian
                   </Label>
                   <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.timeLimit} giây</span>
                 </div>
                 <Slider 
                   id="timeLimit"
-                  min={60} 
+                  min={30} 
                   max={300} 
-                  step={30} 
+                  step={10} 
                   value={[settings.timeLimit]} 
                   onValueChange={(value) => handleSliderChange('timeLimit', value)}
                 />
