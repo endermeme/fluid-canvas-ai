@@ -7,7 +7,8 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle, Type, Trophy, Medal, Timer, Clock, Clock4, Bug } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { CheckCircle, Type, Trophy, Medal, Timer, Clock, Clock4, Bug, Settings } from 'lucide-react';
 
 export interface TrueFalseSettingsData {
   difficulty: 'easy' | 'medium' | 'hard';
@@ -41,6 +42,8 @@ const TrueFalseSettings: React.FC<TrueFalseSettingsProps> = ({ onStart, topic, o
     prompt: topic || '',
     debugMode: false
   });
+
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   useEffect(() => {
     if (topic && topic !== settings.prompt) {
@@ -127,41 +130,59 @@ const TrueFalseSettings: React.FC<TrueFalseSettingsProps> = ({ onStart, topic, o
                 </Select>
               </div>
 
-              {/* True/False Options */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="showExplanation" 
-                    checked={settings.showExplanation}
-                    onCheckedChange={(checked) => handleSwitchChange('showExplanation', checked)} 
-                  />
-                  <Label htmlFor="showExplanation" className="text-sm font-medium">
-                    Hiển thị giải thích
-                  </Label>
-                </div>
+              {/* Advanced Settings */}
+              <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-between border-primary/20 bg-white/50 hover:bg-primary/5"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Settings className="h-4 w-4 text-primary" />
+                      Cài đặt nâng cao
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {isAdvancedOpen ? 'Thu gọn' : 'Mở rộng'}
+                    </span>
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-3">
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                      <Switch 
+                        id="showExplanation" 
+                        checked={settings.showExplanation}
+                        onCheckedChange={(checked) => handleSwitchChange('showExplanation', checked)} 
+                      />
+                      <Label htmlFor="showExplanation" className="text-sm font-medium">
+                        Hiển thị giải thích
+                      </Label>
+                    </div>
 
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="shuffleQuestions" 
-                    checked={settings.shuffleQuestions}
-                    onCheckedChange={(checked) => handleSwitchChange('shuffleQuestions', checked)} 
-                  />
-                  <Label htmlFor="shuffleQuestions" className="text-sm font-medium">
-                    Xáo trộn câu hỏi
-                  </Label>
-                </div>
+                    <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                      <Switch 
+                        id="shuffleQuestions" 
+                        checked={settings.shuffleQuestions}
+                        onCheckedChange={(checked) => handleSwitchChange('shuffleQuestions', checked)} 
+                      />
+                      <Label htmlFor="shuffleQuestions" className="text-sm font-medium">
+                        Xáo trộn câu hỏi
+                      </Label>
+                    </div>
 
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="allowSkip" 
-                    checked={settings.allowSkip}
-                    onCheckedChange={(checked) => handleSwitchChange('allowSkip', checked)} 
-                  />
-                  <Label htmlFor="allowSkip" className="text-sm font-medium">
-                    Cho phép bỏ qua
-                  </Label>
-                </div>
-              </div>
+                    <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                      <Switch 
+                        id="allowSkip" 
+                        checked={settings.allowSkip}
+                        onCheckedChange={(checked) => handleSwitchChange('allowSkip', checked)} 
+                      />
+                      <Label htmlFor="allowSkip" className="text-sm font-medium">
+                        Cho phép bỏ qua
+                      </Label>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
 
             {/* Right Column */}
