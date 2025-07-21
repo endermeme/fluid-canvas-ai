@@ -70,7 +70,7 @@ const MemorySettings: React.FC<MemorySettingsProps> = ({ onStart, topic, onCance
   return (
     <div className="flex items-center justify-center p-4 min-h-screen">
       <div className="w-full max-w-2xl mx-auto">
-        <Card className="border-primary/20 shadow-lg p-6 min-h-[50vh]">
+        <Card className="border-primary/20 shadow-lg p-6 max-h-[85vh] overflow-y-auto">
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
             <div className="flex items-center justify-center p-2 rounded-full bg-primary/10">
