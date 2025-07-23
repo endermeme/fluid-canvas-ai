@@ -1,6 +1,14 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
+export interface ShareSettings {
+  password?: string;
+  maxParticipants?: number;
+  showLeaderboard?: boolean;
+  requireRegistration?: boolean;
+  customDuration?: number;
+}
+
 export interface StoredGame {
   id: string;
   title: string;
@@ -10,6 +18,11 @@ export interface StoredGame {
   description?: string;
   expiresAt: Date | number;
   createdAt: Date | number;
+  password?: string;
+  maxParticipants?: number;
+  showLeaderboard?: boolean;
+  requireRegistration?: boolean;
+  customDuration?: number;
 }
 
 export const formatHtmlContent = (content: string): string => {
@@ -41,7 +54,8 @@ export const saveGameForSharing = async (
   content: any,
   htmlContent: string,
   description?: string,
-  accountId?: string
+  accountId?: string,
+  shareSettings?: ShareSettings
 ): Promise<string> => {
   try {
     console.log('Saving game for sharing:', { title, gameType });
@@ -93,6 +107,11 @@ export const saveGameForSharing = async (
       console.warn("Content truncated due to size limitations");
     }
     
+    // Cập nhật expires_at nếu có custom duration
+    if (shareSettings?.customDuration) {
+      expiresAt.setTime(Date.now() + shareSettings.customDuration * 60 * 60 * 1000);
+    }
+
     // Lưu game vào database
     const { data, error } = await supabase
       .from('games')
@@ -106,7 +125,12 @@ export const saveGameForSharing = async (
           expires_at: expiresAt.toISOString(),
           is_published: true,
           creator_ip: 'localhost',
-          account_id: accountId
+          account_id: accountId,
+          password: shareSettings?.password || null,
+          max_participants: shareSettings?.maxParticipants || null,
+          show_leaderboard: shareSettings?.showLeaderboard ?? true,
+          require_registration: shareSettings?.requireRegistration ?? false,
+          custom_duration: shareSettings?.customDuration || null
         }
       ])
       .select()
@@ -201,7 +225,12 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
       htmlContent: game.html_content,
       description: game.description || `Game chia sẻ: ${game.title}`,
       expiresAt: new Date(game.expires_at).getTime(),
-      createdAt: new Date(game.created_at).getTime()
+      createdAt: new Date(game.created_at).getTime(),
+      password: game.password,
+      maxParticipants: game.max_participants,
+      showLeaderboard: game.show_leaderboard,
+      requireRegistration: game.require_registration,
+      customDuration: game.custom_duration
     };
   } catch (error) {
     console.error("Unhandled error in getSharedGame:", error);

@@ -9,7 +9,8 @@ import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { saveGameForSharing } from '@/utils/gameExport';
+import { saveGameForSharing, ShareSettings } from '@/utils/gameExport';
+import { ShareSettingsForm } from '@/components/game-share/ShareSettingsForm';
 import { useAccount } from '@/contexts/AccountContext';
 import QuizContainer from '../QuizContainer';
 
@@ -27,6 +28,7 @@ const GameController: React.FC<GameControllerProps> = ({
   const [currentTopic, setCurrentTopic] = useState<string>(initialTopic);
   const [showForm, setShowForm] = useState(!currentGame);
   const [isSharing, setIsSharing] = useState(false);
+  const [showShareSettings, setShowShareSettings] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { accountId } = useAccount();
@@ -65,10 +67,22 @@ const GameController: React.FC<GameControllerProps> = ({
     setShowForm(true);
   };
   
-  const handleShareGame = async (): Promise<string> => {
-    if (!currentGame || isSharing) {
-      return '';
+  const handleShareGame = (): Promise<string> => {
+    if (!currentGame) {
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Không có nội dung game để chia sẻ.",
+        variant: "destructive"
+      });
+      return Promise.resolve('');
     }
+    
+    setShowShareSettings(true);
+    return Promise.resolve('');
+  };
+
+  const handleShareWithSettings = async (shareSettings: ShareSettings): Promise<void> => {
+    if (!currentGame) return;
     
     try {
       setIsSharing(true);
@@ -82,7 +96,10 @@ const GameController: React.FC<GameControllerProps> = ({
         currentGame.title || "Minigame tương tác",
         'custom',
         currentGame,
-        currentGame.content
+        currentGame.content,
+        undefined,
+        accountId,
+        shareSettings
       );
       
       if (url) {
@@ -94,8 +111,6 @@ const GameController: React.FC<GameControllerProps> = ({
           title: "Game đã được chia sẻ! 🎉",
           description: "Bạn có thể gửi link cho người khác để họ tham gia.",
         });
-        
-        return url;
       } else {
         throw new Error("Không thể tạo URL chia sẻ");
       }
@@ -106,9 +121,9 @@ const GameController: React.FC<GameControllerProps> = ({
         description: error instanceof Error ? error.message : "Không thể tạo liên kết chia sẻ. Vui lòng thử lại.",
         variant: "destructive"
       });
-      return '';
     } finally {
       setIsSharing(false);
+      setShowShareSettings(false);
     }
   };
 
@@ -186,6 +201,13 @@ const GameController: React.FC<GameControllerProps> = ({
       <div className="h-full w-full overflow-hidden">
         {renderContent()}
       </div>
+      
+      <ShareSettingsForm
+        isOpen={showShareSettings}
+        onClose={() => setShowShareSettings(false)}
+        onShare={handleShareWithSettings}
+        isSharing={isSharing}
+      />
     </QuizContainer>
   );
 };

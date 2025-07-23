@@ -17,7 +17,8 @@ import {
 import GameLoading from '../GameLoading';
 import { GameSettingsData } from '../types';
 import { Card } from '@/components/ui/card';
-import { saveGameForSharing } from '@/utils/gameExport';
+import { saveGameForSharing, ShareSettings } from '@/utils/gameExport';
+import { ShareSettingsForm } from '@/components/game-share/ShareSettingsForm';
 import { 
   Dialog,
   DialogContent,
@@ -66,6 +67,8 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
   const [generationProgress, setGenerationProgress] = useState(0);
   const [shareUrl, setShareUrl] = useState('');
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showShareSettings, setShowShareSettings] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
   const { accountId } = useAccount();
@@ -511,9 +514,23 @@ Output must be valid JSON. `;
     return gameTypeMap[gameType] || null;
   };
 
-  const handleShare = async () => {
+  const handleShare = () => {
+    if (!gameContent) {
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Không có nội dung game để chia sẻ.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setShowShareSettings(true);
+  };
+
+  const handleShareWithSettings = async (shareSettings: ShareSettings) => {
+    if (!gameContent) return;
+    
     try {
-      if (!gameContent) return;
+      setIsSharing(true);
       
       // Lưu JSON data thay vì HTML để có thể render bằng React components
       const shareUrl = await saveGameForSharing(
@@ -522,11 +539,13 @@ Output must be valid JSON. `;
         gameContent,
         '', // Không cần HTML content cho preset games
         gameContent.description || `Game ${getGameTypeName()}`,
-        accountId // Đồng bộ với account
+        accountId, // Đồng bộ với account
+        shareSettings
       );
       
       if (shareUrl) {
         setShareUrl(shareUrl);
+        setShowShareSettings(false);
         setShowShareDialog(true);
         
         toast({
@@ -547,6 +566,8 @@ Output must be valid JSON. `;
         description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
         variant: "destructive"
       });
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -636,6 +657,15 @@ Output must be valid JSON. `;
             {renderGameTemplate()}
           </div>
           
+          {/* Share Settings Dialog */}
+          <ShareSettingsForm
+            isOpen={showShareSettings}
+            onClose={() => setShowShareSettings(false)}
+            onShare={handleShareWithSettings}
+            isSharing={isSharing}
+          />
+
+          {/* Share Dialog */}
           <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>

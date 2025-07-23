@@ -43,6 +43,8 @@ const GameSharePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('game');
   const [gameExpired, setGameExpired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
   const { toast } = useToast();
   
   const refreshParticipants = async () => {
@@ -378,6 +380,21 @@ const GameSharePage: React.FC = () => {
         hasRegistered={hasRegistered}
         isSubmitting={isSubmitting}
         onSubmit={handleJoinGame}
+      />
+
+      <GamePasswordForm
+        isOpen={showPasswordForm}
+        onSubmit={(password) => {
+          if (password === game?.password) {
+            sessionStorage.setItem(`game-${gameId}-verified`, 'true');
+            setShowPasswordForm(false);
+            setPasswordError('');
+          } else {
+            setPasswordError('Mật khẩu không đúng');
+          }
+        }}
+        onCancel={() => navigate('/')}
+        error={passwordError}
       />
     </QuizContainer>
   );

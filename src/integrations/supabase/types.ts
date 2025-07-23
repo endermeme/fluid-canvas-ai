@@ -334,6 +334,7 @@ export type Database = {
           content_type: string | null
           created_at: string
           creator_ip: string | null
+          custom_duration: number | null
           description: string | null
           expires_at: string
           game_type: string
@@ -342,7 +343,11 @@ export type Database = {
           is_preset: boolean | null
           is_published: boolean | null
           last_accessed_at: string | null
+          max_participants: number | null
+          password: string | null
+          require_registration: boolean | null
           share_count: number | null
+          show_leaderboard: boolean | null
           title: string
         }
         Insert: {
@@ -350,6 +355,7 @@ export type Database = {
           content_type?: string | null
           created_at?: string
           creator_ip?: string | null
+          custom_duration?: number | null
           description?: string | null
           expires_at?: string
           game_type: string
@@ -358,7 +364,11 @@ export type Database = {
           is_preset?: boolean | null
           is_published?: boolean | null
           last_accessed_at?: string | null
+          max_participants?: number | null
+          password?: string | null
+          require_registration?: boolean | null
           share_count?: number | null
+          show_leaderboard?: boolean | null
           title: string
         }
         Update: {
@@ -366,6 +376,7 @@ export type Database = {
           content_type?: string | null
           created_at?: string
           creator_ip?: string | null
+          custom_duration?: number | null
           description?: string | null
           expires_at?: string
           game_type?: string
@@ -374,7 +385,11 @@ export type Database = {
           is_preset?: boolean | null
           is_published?: boolean | null
           last_accessed_at?: string | null
+          max_participants?: number | null
+          password?: string | null
+          require_registration?: boolean | null
           share_count?: number | null
+          show_leaderboard?: boolean | null
           title?: string
         }
         Relationships: []
