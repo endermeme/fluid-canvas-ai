@@ -123,6 +123,22 @@ const ShareSection: React.FC<ShareSectionProps> = ({
             <span className="text-muted-foreground">Hết hạn sau:</span>
             <span>{getRemainingTime(game.expiresAt)}</span>
           </div>
+          {game.password && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Bảo mật:</span>
+              <span className="text-green-600">🔒 Có mật khẩu</span>
+            </div>
+          )}
+          {game.maxParticipants && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Giới hạn:</span>
+              <span>{game.maxParticipants} người chơi</span>
+            </div>
+          )}
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Bảng xếp hạng:</span>
+            <span>{game.showLeaderboard ? "✅ Hiển thị" : "❌ Ẩn"}</span>
+          </div>
         </CardContent>
       </Card>
     </div>

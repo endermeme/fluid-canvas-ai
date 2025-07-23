@@ -12,6 +12,7 @@ interface ParticipantsListProps {
   isSubmitting: boolean;
   onRefresh: () => void;
   onJoinGame: () => void;
+  maxParticipants?: number;
 }
 
 const ParticipantsList: React.FC<ParticipantsListProps> = ({
@@ -19,7 +20,8 @@ const ParticipantsList: React.FC<ParticipantsListProps> = ({
   hasRegistered,
   isSubmitting,
   onRefresh,
-  onJoinGame
+  onJoinGame,
+  maxParticipants
 }) => {
   const formatDate = (timestamp: number | Date) => {
     const date = typeof timestamp === 'number' ? new Date(timestamp) : timestamp;
@@ -48,8 +50,11 @@ const ParticipantsList: React.FC<ParticipantsListProps> = ({
         </CardTitle>
         <CardDescription>
           {participants.length > 0 
-            ? `${participants.length} người đã tham gia game này` 
+            ? `${participants.length}${maxParticipants ? `/${maxParticipants}` : ''} người đã tham gia game này` 
             : 'Chưa có ai tham gia game này'}
+          {maxParticipants && participants.length >= maxParticipants && (
+            <span className="block text-red-500 text-sm mt-1">Đã đạt giới hạn tham gia</span>
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -61,9 +66,9 @@ const ParticipantsList: React.FC<ParticipantsListProps> = ({
               variant="outline" 
               className="mt-4"
               onClick={onJoinGame}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (maxParticipants && participants.length >= maxParticipants)}
             >
-              {isSubmitting ? "Đang xử lý..." : "Tham gia ngay"}
+              {isSubmitting ? "Đang xử lý..." : (maxParticipants && participants.length >= maxParticipants ? "Đã đầy" : "Tham gia ngay")}
             </Button>
           </div>
         ) : (
@@ -100,10 +105,12 @@ const ParticipantsList: React.FC<ParticipantsListProps> = ({
         <Button 
           className="w-full" 
           onClick={onJoinGame}
-          disabled={isSubmitting}
+          disabled={isSubmitting || (maxParticipants && participants.length >= maxParticipants)}
         >
           <Users className="h-4 w-4 mr-2" />
-          {isSubmitting ? "Đang xử lý..." : (hasRegistered ? "Cập nhật thông tin" : "Tham gia game")}
+          {isSubmitting ? "Đang xử lý..." : 
+           (maxParticipants && participants.length >= maxParticipants) ? "Đã đạt giới hạn" :
+           (hasRegistered ? "Cập nhật thông tin" : "Tham gia game")}
         </Button>
       </CardFooter>
     </Card>

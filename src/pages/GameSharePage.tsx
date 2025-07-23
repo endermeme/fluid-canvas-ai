@@ -80,6 +80,15 @@ const GameSharePage: React.FC = () => {
             };
             setGame(completeGame);
             
+            // Check password protection
+            if (loadedGame.password) {
+              const isVerified = sessionStorage.getItem(`game-${gameId}-verified`);
+              if (!isVerified) {
+                setShowPasswordForm(true);
+                return;
+              }
+            }
+            
             // Parse game content for preset games
             let gameType = null;
             let gameData = null;
@@ -154,6 +163,16 @@ const GameSharePage: React.FC = () => {
   
   const handleJoinGame = async (values: PlayerFormValues) => {
     if (!gameId || !game || isSubmitting) return;
+    
+    // Check max participants limit
+    if (game.maxParticipants && participants.length >= game.maxParticipants) {
+      toast({
+        title: "Giới hạn tham gia",
+        description: `Game này chỉ cho phép tối đa ${game.maxParticipants} người chơi.`,
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsSubmitting(true);
     
@@ -287,16 +306,18 @@ const GameSharePage: React.FC = () => {
     );
   }
 
+  const isMaxParticipantsReached = game && game.maxParticipants && participants.length >= game.maxParticipants;
+  
   const joinGameButton = (
     <Button 
       size="sm" 
       variant="outline" 
       className="text-xs"
       onClick={() => setShowNameDialog(true)}
-      disabled={isSubmitting}
+      disabled={isSubmitting || isMaxParticipantsReached}
     >
       <Users className="h-3.5 w-3.5 mr-1" />
-      {hasRegistered ? "Cập nhật thông tin" : "Tham gia"}
+      {isMaxParticipantsReached ? "Đã đầy" : (hasRegistered ? "Cập nhật thông tin" : "Tham gia")}
     </Button>
   );
 
@@ -326,7 +347,9 @@ const GameSharePage: React.FC = () => {
                 <span className="ml-1 text-green-500">●</span>
               )}
             </TabsTrigger>
-            <TabsTrigger value="leaderboard">Bảng xếp hạng</TabsTrigger>
+            {game.showLeaderboard && (
+              <TabsTrigger value="leaderboard">Bảng xếp hạng</TabsTrigger>
+            )}
           </TabsList>
           
           <div className="flex items-center text-sm text-muted-foreground">
@@ -342,6 +365,7 @@ const GameSharePage: React.FC = () => {
             hideHeader={true}
             extraButton={!hasRegistered ? joinGameButton : undefined}
             gameExpired={gameExpired}
+            gameId={gameId}
           />
         </TabsContent>
         
@@ -363,15 +387,18 @@ const GameSharePage: React.FC = () => {
               isSubmitting={isSubmitting}
               onRefresh={refreshParticipants}
               onJoinGame={() => setShowNameDialog(true)}
+              maxParticipants={game.maxParticipants}
             />
           </div>
         </TabsContent>
 
-        <TabsContent value="leaderboard" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
-          <div className="max-w-2xl mx-auto">
-            <LeaderboardManager gameId={gameId!} />
-          </div>
-        </TabsContent>
+        {game.showLeaderboard && (
+          <TabsContent value="leaderboard" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
+            <div className="max-w-2xl mx-auto">
+              <LeaderboardManager gameId={gameId!} />
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
       
       <GameShareForm 
