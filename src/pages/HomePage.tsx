@@ -256,6 +256,11 @@ const HomePage: React.FC = () => {
           </motion.footer>
         </div>
       </motion.div>
+
+      {/* User ID display - bottom right corner */}
+      <div className="fixed bottom-2 right-2 z-10 text-xs text-primary/40 dark:text-primary-foreground/40 font-mono">
+        ID: {accountId}
+      </div>
     </div>
   );
 };
