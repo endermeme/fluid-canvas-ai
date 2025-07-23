@@ -4,8 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 export interface ShareSettings {
   password?: string;
   maxParticipants?: number;
-  showLeaderboard?: boolean;
-  requireRegistration?: boolean;
+  showLeaderboard: boolean;
+  requireRegistration: boolean;
   customDuration?: number;
 }
 
@@ -20,8 +20,8 @@ export interface StoredGame {
   createdAt: Date | number;
   password?: string;
   maxParticipants?: number;
-  showLeaderboard?: boolean;
-  requireRegistration?: boolean;
+  showLeaderboard: boolean;
+  requireRegistration: boolean;
   customDuration?: number;
 }
 
