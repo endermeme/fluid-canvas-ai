@@ -36,6 +36,7 @@ const GameSharePage: React.FC = () => {
   const navigate = useNavigate();
   const { accountId } = useAccount();
   const [game, setGame] = useState<StoredGame | null>(null);
+  const [miniGame, setMiniGame] = useState<any>(null);
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [hasRegistered, setHasRegistered] = useState(false);
   const [participants, setParticipants] = useState<GameParticipant[]>([]);
@@ -75,6 +76,31 @@ const GameSharePage: React.FC = () => {
               description: loadedGame.description || `Shared game: ${loadedGame.title}`
             };
             setGame(completeGame);
+            
+            // Parse game content for preset games
+            let gameType = null;
+            let gameData = null;
+            let gameContent = loadedGame.htmlContent || loadedGame.content || '';
+            
+            try {
+              // Try to parse as JSON first (preset games)
+              const jsonData = JSON.parse(gameContent);
+              if (jsonData.type === "preset-game") {
+                gameData = jsonData.data;
+                gameType = jsonData.gameType;
+              }
+            } catch {
+              // If not JSON, treat as HTML content (custom games)
+            }
+            
+            // Create miniGame object with proper format
+            const miniGameData = {
+              title: loadedGame.title,
+              content: gameContent,
+              gameType: gameType,
+              data: gameData
+            };
+            setMiniGame(miniGameData);
             
             if (loadedGame.expiresAt) {
               const expiryTime = new Date(loadedGame.expiresAt).getTime();
@@ -271,12 +297,12 @@ const GameSharePage: React.FC = () => {
     </Button>
   );
 
-  // Tạo miniGame object để truyền vào EnhancedGameView
-  const miniGame = {
+  // Use parsed miniGame or fallback to default structure
+  const gameForView = miniGame || {
     title: game.title,
     content: game.htmlContent || '',
     gameType: game.gameType,
-    data: game.content // JSON data cho preset games
+    data: game.content
   };
   
   return (
@@ -308,7 +334,7 @@ const GameSharePage: React.FC = () => {
         
         <TabsContent value="game" className="h-[calc(100%-48px)] m-0">
           <EnhancedGameView 
-            miniGame={miniGame}
+            miniGame={gameForView}
             onBack={handleBack}
             hideHeader={true}
             extraButton={!hasRegistered ? joinGameButton : undefined}
