@@ -18,6 +18,7 @@ interface GameViewSelectorProps {
   extraButton?: React.ReactNode;
   isTeacher?: boolean;
   gameExpired?: boolean;
+  gameId?: string;
 }
 
 const GameViewSelector: React.FC<GameViewSelectorProps> = (props) => {

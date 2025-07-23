@@ -5,12 +5,14 @@ interface PresetGameRendererProps {
   gameType: string;
   data: any;
   onBack?: () => void;
+  onGameComplete?: (result: any) => Promise<void>;
 }
 
 const PresetGameRenderer: React.FC<PresetGameRendererProps> = ({ 
   gameType, 
   data, 
-  onBack 
+  onBack,
+  onGameComplete
 }) => {
   const GameTemplate = gameTemplates[gameType];
 
@@ -32,6 +34,7 @@ const PresetGameRenderer: React.FC<PresetGameRendererProps> = ({
       topic={data?.title || ''}
       settings={data?.settings || {}}
       onBack={onBack}
+      onGameComplete={onGameComplete}
     />
   );
 };
