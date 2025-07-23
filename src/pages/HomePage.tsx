@@ -6,7 +6,9 @@ import { Card } from '@/components/ui/card';
 import { Gamepad, SparklesIcon, History, Share2, Zap, Atom, FlaskConical, Microscope, TestTube, Telescope, Radiation, Calculator, Beaker, Dna } from 'lucide-react';
 import { motion } from 'framer-motion';
 import AccountInput from '@/components/account/AccountInput';
+import { useAccount } from '@/contexts/AccountContext';
 const HomePage: React.FC = () => {
+  const { accountId } = useAccount();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -133,7 +135,7 @@ const HomePage: React.FC = () => {
             variants={containerVariants}
           >
             <motion.div variants={itemVariants}>
-              <Link to="/custom-game" className="block h-full">
+              <Link to={`/custom-game?acc=${accountId}`} className="block h-full">
                 <motion.div
                   variants={cardVariants}
                   whileHover="hover"
@@ -166,7 +168,7 @@ const HomePage: React.FC = () => {
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <Link to="/preset-games" className="block h-full">
+              <Link to={`/preset-games?acc=${accountId}`} className="block h-full">
                 <motion.div
                   variants={cardVariants}
                   whileHover="hover"
@@ -200,7 +202,7 @@ const HomePage: React.FC = () => {
           </motion.div>
 
           <motion.div variants={itemVariants} className="flex justify-center">
-            <Link to="/game-history" className="w-full max-w-xl">
+            <Link to={`/game-history?acc=${accountId}`} className="w-full max-w-xl">
               <motion.div
                 variants={cardVariants}
                 whileHover="hover"

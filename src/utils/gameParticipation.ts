@@ -37,7 +37,8 @@ const mapSupabaseParticipant = (participant: SupabaseGameParticipant): GameParti
 export const addParticipant = async (
   gameId: string,
   name: string,
-  ipAddress: string
+  ipAddress: string,
+  accountId?: string
 ): Promise<{ success: boolean; message?: string; participant?: GameParticipant }> => {
   if (!gameId || !name) {
     return {
@@ -100,7 +101,8 @@ export const addParticipant = async (
           game_id: gameId,
           name,
           ip_address: ipAddress,
-          retry_count: 0
+          retry_count: 0,
+          account_id: accountId
         }
       ])
       .select()
@@ -200,16 +202,23 @@ export const createGameSession = async (
 
 // Lấy danh sách người tham gia game
 export const getGameParticipants = async (
-  gameId: string
+  gameId: string,
+  accountId?: string
 ): Promise<GameParticipant[]> => {
   if (!gameId) return [];
   
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('game_participants')
       .select('*')
-      .eq('game_id', gameId)
-      .order('timestamp', { ascending: false });
+      .eq('game_id', gameId);
+    
+    // Filter by account if provided
+    if (accountId) {
+      query = query.eq('account_id', accountId);
+    }
+    
+    const { data, error } = await query.order('timestamp', { ascending: false });
     
     if (error) {
       console.error("Error fetching participants:", error);

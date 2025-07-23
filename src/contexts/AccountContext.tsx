@@ -22,6 +22,12 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
     
     if (accParam && accParam.length >= 10) {
       setAccountIdState(accParam);
+    } else {
+      // Auto-redirect to example123 if no valid account in URL
+      setAccountIdState('example123');
+      const url = new URL(window.location.href);
+      url.searchParams.set('acc', 'example123');
+      window.history.replaceState({}, '', url.toString());
     }
   }, []);
 

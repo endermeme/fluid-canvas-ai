@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { saveGameForSharing } from '@/utils/gameExport';
+import { useAccount } from '@/contexts/AccountContext';
 import QuizContainer from '../QuizContainer';
 
 interface GameControllerProps {
@@ -28,6 +29,7 @@ const GameController: React.FC<GameControllerProps> = ({
   const [isSharing, setIsSharing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { accountId } = useAccount();
   
   const handleGameGeneration = (content: string, game?: MiniGame) => {
     setCurrentTopic(content);
@@ -54,7 +56,7 @@ const GameController: React.FC<GameControllerProps> = ({
       setCurrentGame(null);
       setShowForm(true);
     } else {
-      navigate('/');
+      navigate(`/?acc=${accountId}`);
     }
   };
 
@@ -84,9 +86,9 @@ const GameController: React.FC<GameControllerProps> = ({
       );
       
       if (url) {
-        // Chuyển đến trang chia sẻ
+        // Chuyển đến trang chia sẻ với account context
         const gameId = url.split('/game/')[1];
-        navigate(`/game/${gameId}`);
+        navigate(`/game/${gameId}?acc=${accountId}`);
         
         toast({
           title: "Game đã được chia sẻ! 🎉",
@@ -149,7 +151,7 @@ const GameController: React.FC<GameControllerProps> = ({
             setIsGenerating(true);
             setTimeout(() => handleGameGeneration(content, game), 500);
           }}
-          onCancel={() => navigate('/')}
+          onCancel={() => navigate(`/?acc=${accountId}`)}
         />
       );
     }

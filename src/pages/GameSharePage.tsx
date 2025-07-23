@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { useAccount } from '@/contexts/AccountContext';
 import { z } from 'zod';
 
 const playerFormSchema = z.object({
@@ -32,6 +33,7 @@ type PlayerFormValues = z.infer<typeof playerFormSchema>;
 const GameSharePage: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
+  const { accountId } = useAccount();
   const [game, setGame] = useState<StoredGame | null>(null);
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [hasRegistered, setHasRegistered] = useState(false);
@@ -117,7 +119,7 @@ const GameSharePage: React.FC = () => {
   }, [gameId, gameExpired]);
   
   const handleBack = () => {
-    navigate('/game-history');
+    navigate(`/game-history?acc=${accountId}`);
   };
   
   const handleJoinGame = async (values: PlayerFormValues) => {
@@ -127,7 +129,7 @@ const GameSharePage: React.FC = () => {
     
     try {
       const fakeIp = getFakeIpAddress();
-      const result = await addParticipant(gameId, `${values.playerName} (${values.playerAge} tuổi)`, fakeIp);
+      const result = await addParticipant(gameId, `${values.playerName} (${values.playerAge} tuổi)`, fakeIp, accountId);
       
       if (result.success) {
         if (result.participant) {
