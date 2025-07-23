@@ -28,9 +28,10 @@ const PresetGameRenderer: React.FC<PresetGameRendererProps> = ({
   return (
     <GameTemplate 
       data={data} 
-      onBack={onBack}
       content={data}
+      topic={data?.title || ''}
       settings={data?.settings || {}}
+      onBack={onBack}
     />
   );
 };
