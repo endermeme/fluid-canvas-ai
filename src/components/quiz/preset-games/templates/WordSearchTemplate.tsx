@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, Clock, RotateCcw, Search, LayoutGrid } from 'lucide-react';
 
 interface WordSearchTemplateProps {
+  data?: any;
   content: any;
   topic: string;
   settings?: any;
@@ -20,7 +21,8 @@ interface WordLocation {
   endCol: number;
 }
 
-const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic, settings }) => {
+const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ data, content, topic, settings }) => {
+  const gameContent = content || data;
   // Use settings from props or fallback values
   const gameSettings = {
     totalTime: settings?.timeLimit || 480,
@@ -38,8 +40,8 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic,
   const [gridSize, setGridSize] = useState("medium");
   const { toast } = useToast();
 
-  const grid = content?.grid || [];
-  const words = content?.words || [];
+  const grid = gameContent?.grid || [];
+  const words = gameContent?.words || [];
   const totalWords = words.length;
   const allowDiagonalWords = gameSettings.allowDiagonalWords;
 
@@ -302,12 +304,12 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ content, topic,
     setGameWon(false);
     
     // Reset found status for words
-    if (content && content.words) {
-      content.words = content.words.map((w: any) => ({ ...w, found: false }));
+    if (gameContent && gameContent.words) {
+      gameContent.words = gameContent.words.map((w: any) => ({ ...w, found: false }));
     }
   };
 
-  if (!content || !grid.length || !words.length) {
+  if (!gameContent || !grid.length || !words.length) {
     return <div className="p-4">Không có dữ liệu trò chơi tìm từ</div>;
   }
 

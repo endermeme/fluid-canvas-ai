@@ -7,12 +7,14 @@ import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, ArrowUp, ArrowDown, Check, Clock, Shuffle, Lightbulb } from 'lucide-react';
 
 interface OrderingTemplateProps {
+  data?: any;
   content: any;
   topic: string;
   settings?: any;
 }
 
-const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, settings }) => {
+const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topic, settings }) => {
+  const gameContent = content || data;
   // Use settings from props or fallback values
   const gameSettings = {
     totalTime: settings?.timeLimit || 300,
@@ -32,7 +34,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, set
   const [hasShownHint, setHasShownHint] = useState(false);
   const { toast } = useToast();
 
-  const sentences = content?.sentences || [];
+  const sentences = gameContent?.sentences || [];
 
   useEffect(() => {
     if (sentences[currentSentence]) {
@@ -175,7 +177,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, set
     }
   };
 
-  if (!content || !sentences.length) {
+  if (!gameContent || !sentences.length) {
     return (
       <div className="game-container">
         <div className="game-content flex items-center justify-center">
@@ -196,7 +198,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ content, topic, set
           <Card className="compact-card p-6 text-center bg-card border">
             <h2 className="text-2xl font-bold mb-4 text-primary">Kết quả</h2>
             <p className="text-lg mb-4 text-primary">
-              Chủ đề: <span className="font-semibold text-primary">{content.title || topic}</span>
+              Chủ đề: <span className="font-semibold text-primary">{gameContent.title || topic}</span>
             </p>
             
             <div className="mb-6">

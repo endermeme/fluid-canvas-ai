@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, Clock, Trophy } from 'lucide-react';
 
 interface MatchingTemplateProps {
+  data?: any;
   content: any;
   topic: string;
   settings?: any;
@@ -17,7 +18,8 @@ interface MatchingItem {
   matched: boolean;
 }
 
-const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, settings }) => {
+const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ data, content, topic, settings }) => {
+  const gameContent = content || data;
   // Memoize settings to prevent infinite re-renders
   const gameSettings = useMemo(() => ({
     pairCount: settings?.pairCount || 8,
@@ -40,7 +42,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
 
   // Memoize pairs to prevent infinite re-renders with language consistency
   const pairs = useMemo(() => {
-    const allPairs = content?.pairs || [];
+    const allPairs = gameContent?.pairs || [];
     const selectedPairs = allPairs.slice(0, gameSettings.pairCount);
     
     // Ensure language consistency within pairs
@@ -62,7 +64,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
         };
       }
     });
-  }, [content?.pairs, gameSettings.pairCount]);
+  }, [gameContent?.pairs, gameSettings.pairCount]);
   
   const totalPairs = pairs.length;
 
@@ -204,7 +206,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ content, topic, set
     }
   }, [selectedLeft, selectedRight, leftItems, rightItems, pairs, gameSettings.bonusTimePerMatch, toast]);
 
-  if (!content || !pairs.length) {
+  if (!gameContent || !pairs.length) {
     return (
       <div className="game-container">
         <div className="game-content flex items-center justify-center">

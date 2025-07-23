@@ -8,12 +8,14 @@ import { RefreshCw, Clock, Trophy, Lightbulb } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface MemoryTemplateProps {
+  data?: any;
   content: any;
   topic: string;
   settings?: any;
 }
 
-const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, settings }) => {
+const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, settings }) => {
+  const gameContent = content || data;
   // Use settings from props or fallback values
   const gameSettings = {
     totalTime: settings?.timeLimit || 180,
@@ -31,7 +33,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
   const [canFlip, setCanFlip] = useState<boolean>(true);
   const { toast } = useToast();
 
-  const memoryCards = content?.cards || [];
+  const memoryCards = gameContent?.cards || [];
   const targetCardCount = gameSettings.gridSize * gameSettings.gridSize;
   const totalPairs = targetCardCount / 2;
 
@@ -213,7 +215,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ content, topic, setting
     }
   };
 
-  if (!content || !memoryCards.length) {
+  if (!gameContent || !memoryCards.length) {
     return (
       <div className="flex h-screen items-center justify-center">
         <p className="text-lg font-medium text-primary">Không có dữ liệu trò chơi ghi nhớ</p>

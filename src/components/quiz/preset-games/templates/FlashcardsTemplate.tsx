@@ -9,12 +9,14 @@ import { Toggle } from '@/components/ui/toggle';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface FlashcardsTemplateProps {
+  data?: any;
   content: any;
   topic: string;
   settings?: any;
 }
 
-const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic, settings }) => {
+const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, topic, settings }) => {
+  const gameContent = content || data;
   // Use settings from props with proper defaults
   const gameSettings = {
     cardCount: settings?.cardCount || 10,
@@ -34,7 +36,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
   const { toast } = useToast();
 
   // Filter cards based on cardCount setting
-  const allCards = content?.cards || [];
+  const allCards = gameContent?.cards || [];
   const cards = allCards.slice(0, gameSettings.cardCount);
   const progress = ((currentCard + 1) / cards.length) * 100;
 
@@ -172,7 +174,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ content, topic,
     });
   };
 
-  if (!content || !cards.length) {
+  if (!gameContent || !cards.length) {
     return (
       <div className="game-container">
         <div className="game-content flex items-center justify-center">
