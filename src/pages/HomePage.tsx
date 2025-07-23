@@ -63,10 +63,6 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 dark:from-blue-950 dark:via-sky-950 dark:to-blue-950 relative">
-      {/* Account Input - positioned at top right */}
-      <div className="absolute top-4 right-4 z-20 w-80">
-        <AccountInput />
-      </div>
 
       <motion.div 
         className="relative z-10 min-h-screen flex items-center justify-center p-5"
