@@ -10,6 +10,11 @@ export interface StoredGame {
   description?: string;
   expiresAt: Date | number;
   createdAt: Date | number;
+  password?: string;
+  maxParticipants?: number;
+  showLeaderboard?: boolean;
+  requireRegistration?: boolean;
+  customDuration?: number;
 }
 
 export interface GameParticipant {

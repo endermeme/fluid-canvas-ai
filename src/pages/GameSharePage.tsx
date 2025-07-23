@@ -7,6 +7,7 @@ import { StoredGame, GameParticipant } from '@/utils/types';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
 import GameShareForm from '@/components/game-share/GameShareForm';
+import { GamePasswordForm } from '@/components/game-share/GamePasswordForm';
 import ParticipantsList from '@/components/game-share/ParticipantsList';
 import ShareSection from '@/components/game-share/ShareSection';
 import { Button } from '@/components/ui/button';
