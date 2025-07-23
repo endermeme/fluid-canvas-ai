@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw, Share2 } from 'lucide-react';
 import gameTemplates from './templates';
 import { useToast } from '@/hooks/use-toast';
+import { useAccount } from '@/contexts/AccountContext';
 import { 
   QuizSettings, 
   FlashcardsSettings, 
@@ -67,6 +68,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const { accountId } = useAccount();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -491,17 +493,14 @@ Output must be valid JSON. `;
     try {
       if (!gameContent) return;
       
-      const gameContainer = document.getElementById('game-container');
-      let html = gameContainer?.innerHTML || '';
-      
-      const encodedContent = encodeURIComponent(JSON.stringify(gameContent));
-      html = `<div data-game-content="${encodedContent}">${html}</div>`;
-      
+      // Lưu JSON data thay vì HTML để có thể render bằng React components
       const shareUrl = await saveGameForSharing(
         gameContent.title || getGameTypeName(),
         gameType,
         gameContent,
-        html
+        '', // Không cần HTML content cho preset games
+        gameContent.description || `Game ${getGameTypeName()}`,
+        accountId // Đồng bộ với account
       );
       
       if (shareUrl) {

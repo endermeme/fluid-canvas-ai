@@ -3,6 +3,7 @@ import React from 'react';
 import GameErrorDisplay from './game-components/GameErrorDisplay';
 import GameLoadingIndicator from './game-components/GameLoadingIndicator';
 import GameIframeRenderer from './game-components/GameIframeRenderer';
+import PresetGameRenderer from './PresetGameRenderer';
 import CustomGameHeader from './ui/CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { useGameShareManager } from '../hooks/useGameShareManager';
@@ -13,6 +14,8 @@ interface EnhancedGameViewProps {
   miniGame: {
     title?: string;
     content: string;
+    gameType?: string;
+    data?: any;
   };
   onReload?: () => void;
   className?: string;
@@ -72,16 +75,27 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
           />
         ) : (
           <Card className="relative w-full h-full overflow-hidden shadow-xl border-2 border-blue-200/40 dark:border-blue-700/40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
-            {!isIframeLoaded && (
-              <GameLoadingIndicator 
-                progress={loadingProgress}
+            {/* Render preset games với React components */}
+            {miniGame.gameType && miniGame.data ? (
+              <PresetGameRenderer 
+                gameType={miniGame.gameType}
+                data={miniGame.data}
+                onBack={onBack}
               />
+            ) : (
+              <>
+                {!isIframeLoaded && (
+                  <GameLoadingIndicator 
+                    progress={loadingProgress}
+                  />
+                )}
+                <GameIframeRenderer 
+                  ref={iframeRef} 
+                  title={miniGame.title || "Game tương tác"} 
+                  isLoaded={isIframeLoaded}
+                />
+              </>
             )}
-            <GameIframeRenderer 
-              ref={iframeRef} 
-              title={miniGame.title || "Game tương tác"} 
-              isLoaded={isIframeLoaded}
-            />
           </Card>
         )}
         

@@ -53,24 +53,21 @@ export const saveGameForSharing = async (
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
     
-    // Xử lý HTML content cho template games
+    // Lưu JSON data cho preset games để render bằng React components
     let processedHtmlContent = htmlContent;
     
-    // Kiểm tra xem có phải là template game không
+    // Nếu là preset game (có cấu trúc template), lưu JSON data thay vì HTML
     if (typeof content === 'object' && content !== null) {
-      try {
-        // Nếu content có cấu trúc template (questions, settings, etc.)
-        if (content.questions || content.cards || content.items) {
-          // Nhúng dữ liệu vào HTML content nếu chưa có
-          if (!processedHtmlContent.includes('data-game-content')) {
-            const encodedContent = encodeURIComponent(JSON.stringify(content));
-            processedHtmlContent = processedHtmlContent.replace(
-              /<body([^>]*)>/i,
-              `<body$1 data-game-content="${encodedContent}">`
-            );
-          }
-        } else {
-          // Nếu là custom game, encode toàn bộ content
+      if (content.questions || content.cards || content.items) {
+        // Preset games: chỉ lưu JSON data, không cần HTML
+        processedHtmlContent = JSON.stringify({
+          type: 'preset-game',
+          gameType: gameType,
+          data: content
+        });
+      } else if (htmlContent) {
+        // Custom games: vẫn lưu HTML + embed JSON
+        try {
           const encodedContent = encodeURIComponent(JSON.stringify(content));
           if (!processedHtmlContent.includes('data-game-content')) {
             processedHtmlContent = processedHtmlContent.replace(
@@ -78,14 +75,14 @@ export const saveGameForSharing = async (
               `<body$1 data-game-content="${encodedContent}">`
             );
           }
+        } catch (encodeError) {
+          console.error("Error encoding game content:", encodeError);
         }
-      } catch (encodeError) {
-        console.error("Error encoding game content:", encodeError);
       }
     }
     
-    // Đảm bảo HTML content có cấu trúc đầy đủ
-    if (!processedHtmlContent.includes('<!DOCTYPE html')) {
+    // Đảm bảo HTML content có cấu trúc đầy đủ cho custom games
+    if (htmlContent && !processedHtmlContent.includes('<!DOCTYPE html') && !processedHtmlContent.startsWith('{')) {
       processedHtmlContent = `<!DOCTYPE html>\n<html lang="vi">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>${title}</title>\n</head>\n<body>\n${processedHtmlContent}\n</body>\n</html>`;
     }
     
@@ -93,7 +90,7 @@ export const saveGameForSharing = async (
     const maxContentLength = 500000; // ~500KB
     if (processedHtmlContent && processedHtmlContent.length > maxContentLength) {
       processedHtmlContent = processedHtmlContent.substring(0, maxContentLength);
-      console.warn("HTML content truncated due to size limitations");
+      console.warn("Content truncated due to size limitations");
     }
     
     // Lưu game vào database
@@ -172,7 +169,20 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
     await supabase.rpc('increment_share_count', { game_id: id });
 
     let parsedContent = null;
-    if (game.html_content && game.html_content.includes('data-game-content')) {
+    
+    // Xử lý preset games với JSON data
+    if (game.html_content && game.html_content.startsWith('{')) {
+      try {
+        const gameData = JSON.parse(game.html_content);
+        if (gameData.type === 'preset-game') {
+          parsedContent = gameData.data;
+        }
+      } catch (e) {
+        console.error('Error parsing preset game JSON:', e);
+      }
+    } 
+    // Xử lý custom games với HTML + embedded data
+    else if (game.html_content && game.html_content.includes('data-game-content')) {
       try {
         const contentMatch = game.html_content.match(/data-game-content="([^"]*)"/);
         if (contentMatch && contentMatch[1]) {

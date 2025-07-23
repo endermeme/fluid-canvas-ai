@@ -14,6 +14,7 @@ import { ArrowLeft, Clock, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAccount } from '@/contexts/AccountContext';
+import LeaderboardManager from '@/components/quiz/share/LeaderboardManager';
 import { z } from 'zod';
 
 const playerFormSchema = z.object({
@@ -273,7 +274,9 @@ const GameSharePage: React.FC = () => {
   // Tạo miniGame object để truyền vào EnhancedGameView
   const miniGame = {
     title: game.title,
-    content: game.htmlContent || ''
+    content: game.htmlContent || '',
+    gameType: game.gameType,
+    data: game.content // JSON data cho preset games
   };
   
   return (
@@ -294,6 +297,7 @@ const GameSharePage: React.FC = () => {
                 <span className="ml-1 text-green-500">●</span>
               )}
             </TabsTrigger>
+            <TabsTrigger value="leaderboard">Bảng xếp hạng</TabsTrigger>
           </TabsList>
           
           <div className="flex items-center text-sm text-muted-foreground">
@@ -331,6 +335,12 @@ const GameSharePage: React.FC = () => {
               onRefresh={refreshParticipants}
               onJoinGame={() => setShowNameDialog(true)}
             />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="leaderboard" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
+          <div className="max-w-2xl mx-auto">
+            <LeaderboardManager gameId={gameId!} />
           </div>
         </TabsContent>
       </Tabs>
