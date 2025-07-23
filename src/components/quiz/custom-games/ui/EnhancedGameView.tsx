@@ -38,16 +38,8 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
 }) => {
   const { toast } = useToast();
   const { isSharing, handleShare } = useGameShareManager(miniGame, toast, onShare);
-  const { 
-    iframeRef,
-    iframeError, 
-    isIframeLoaded, 
-    loadingProgress,
-    refreshGame,
-    handleFullscreen 
-  } = useIframeManager(miniGame, onReload, gameExpired);
-
-  // Check if this is a preset game
+  
+  // Check if this is a preset game FIRST
   const isPresetGame = miniGame.content && (() => {
     try {
       const parsed = JSON.parse(miniGame.content);
@@ -56,6 +48,20 @@ const EnhancedGameView: React.FC<EnhancedGameViewProps> = ({
       return false;
     }
   })();
+
+  // Only use iframe manager for non-preset games
+  const { 
+    iframeRef,
+    iframeError, 
+    isIframeLoaded, 
+    loadingProgress,
+    refreshGame,
+    handleFullscreen 
+  } = useIframeManager(
+    isPresetGame ? { title: miniGame.title, content: '' } : miniGame, 
+    onReload, 
+    gameExpired
+  );
 
   if (isPresetGame) {
     let gameData;
