@@ -40,7 +40,8 @@ export const saveGameForSharing = async (
   gameType: string,
   content: any,
   htmlContent: string,
-  description?: string
+  description?: string,
+  accountId?: string
 ): Promise<string> => {
   try {
     console.log('Saving game for sharing:', { title, gameType });
@@ -107,7 +108,8 @@ export const saveGameForSharing = async (
           html_content: processedHtmlContent,
           expires_at: expiresAt.toISOString(),
           is_published: true,
-          creator_ip: 'localhost'
+          creator_ip: 'localhost',
+          account_id: accountId
         }
       ])
       .select()

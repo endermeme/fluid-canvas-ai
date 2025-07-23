@@ -209,6 +209,7 @@ export type Database = {
       }
       game_participants: {
         Row: {
+          account_id: string | null
           completion_time: number | null
           game_id: string | null
           id: string
@@ -220,6 +221,7 @@ export type Database = {
           total_questions: number | null
         }
         Insert: {
+          account_id?: string | null
           completion_time?: number | null
           game_id?: string | null
           id?: string
@@ -231,6 +233,7 @@ export type Database = {
           total_questions?: number | null
         }
         Update: {
+          account_id?: string | null
           completion_time?: number | null
           game_id?: string | null
           id?: string
@@ -253,6 +256,7 @@ export type Database = {
       }
       game_scores: {
         Row: {
+          account_id: string | null
           completed_at: string
           completion_time: number | null
           game_id: string | null
@@ -264,6 +268,7 @@ export type Database = {
           total_questions: number
         }
         Insert: {
+          account_id?: string | null
           completed_at?: string
           completion_time?: number | null
           game_id?: string | null
@@ -275,6 +280,7 @@ export type Database = {
           total_questions?: number
         }
         Update: {
+          account_id?: string | null
           completed_at?: string
           completion_time?: number | null
           game_id?: string | null
@@ -324,6 +330,7 @@ export type Database = {
       }
       games: {
         Row: {
+          account_id: string | null
           content_type: string | null
           created_at: string
           creator_ip: string | null
@@ -339,6 +346,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          account_id?: string | null
           content_type?: string | null
           created_at?: string
           creator_ip?: string | null
@@ -354,6 +362,7 @@ export type Database = {
           title: string
         }
         Update: {
+          account_id?: string | null
           content_type?: string | null
           created_at?: string
           creator_ip?: string | null
