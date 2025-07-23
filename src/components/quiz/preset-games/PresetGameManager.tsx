@@ -175,13 +175,35 @@ Output must be valid JSON. `;
       console.log("Received response from Gemini:", text);
 
       try {
-        const jsonStr = text.includes('```json') 
-          ? text.split('```json')[1].split('```')[0].trim() 
-          : text.includes('```') 
-            ? text.split('```')[1].split('```')[0].trim() 
-            : text;
+        // More robust JSON extraction
+        let jsonStr = text.trim();
+        
+        // Handle various response formats
+        if (text.includes('```json')) {
+          const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+          if (jsonMatch) {
+            jsonStr = jsonMatch[1].trim();
+          }
+        } else if (text.includes('```')) {
+          const codeMatch = text.match(/```\s*([\s\S]*?)\s*```/);
+          if (codeMatch) {
+            jsonStr = codeMatch[1].trim();
+          }
+        } else if (text.includes('{')) {
+          // Extract JSON from text that might have surrounding text
+          const jsonMatch = text.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            jsonStr = jsonMatch[0].trim();
+          }
+        }
 
-        console.log("Parsed JSON string:", jsonStr);
+        console.log("Raw AI response:", text);
+        console.log("Extracted JSON string:", jsonStr);
+
+        // Validate that we have valid JSON content
+        if (!jsonStr || !jsonStr.includes('{')) {
+          throw new Error('No valid JSON found in AI response');
+        }
 
         const parsedContent = JSON.parse(jsonStr);
 
