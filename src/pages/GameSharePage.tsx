@@ -5,7 +5,7 @@ import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
 import { addParticipant, getFakeIpAddress, getGameParticipants } from '@/utils/gameParticipation';
 import { StoredGame, GameParticipant } from '@/utils/types';
 import QuizContainer from '@/components/quiz/QuizContainer';
-import EnhancedGameView from '@/components/quiz/custom-games/EnhancedGameView';
+import GameViewSelector from '@/components/quiz/custom-games/ui/GameViewSelector';
 import GameShareForm from '@/components/game-share/GameShareForm';
 import { GamePasswordForm } from '@/components/game-share/GamePasswordForm';
 import ParticipantsList from '@/components/game-share/ParticipantsList';
@@ -336,7 +336,7 @@ const GameSharePage: React.FC = () => {
         </div>
         
         <TabsContent value="game" className="h-[calc(100%-48px)] m-0">
-          <EnhancedGameView 
+          <GameViewSelector 
             miniGame={gameForView}
             onBack={handleBack}
             hideHeader={true}

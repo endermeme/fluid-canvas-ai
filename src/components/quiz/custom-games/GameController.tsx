@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
 import { AIGameGenerator } from '../generator/geminiGenerator';
-import EnhancedGameView from './EnhancedGameView';
+import GameViewSelector from './ui/GameViewSelector';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
@@ -145,7 +145,7 @@ const GameController: React.FC<GameControllerProps> = ({
     if (currentGame) {
       return (
         <div className="w-full h-full">
-          <EnhancedGameView 
+          <GameViewSelector 
             miniGame={{
               title: currentGame.title || "Minigame Tương Tác",
               content: currentGame.content || ""
