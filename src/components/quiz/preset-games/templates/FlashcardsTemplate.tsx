@@ -71,6 +71,12 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
       setGameCompleted(true);
       const knownCards = cardsState.filter(state => state === 'known').length;
       const totalCards = cardsState.length;
+      console.log('FlashcardsTemplate - Game completed, calling onGameComplete with:', {
+        score: knownCards,
+        totalQuestions: totalCards,
+        completionTime: 0,
+        gameType: 'flashcards'
+      });
       
       if (onGameComplete) {
         await onGameComplete({

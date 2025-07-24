@@ -104,6 +104,13 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, s
       setGameWon(true);
       const completionTime = gameSettings.totalTime - timeLeft;
       
+      console.log('MemoryTemplate - Game won, calling onGameComplete with:', {
+        score: totalPairs,
+        totalQuestions: totalPairs,
+        completionTime,
+        gameType: 'memory'
+      });
+      
       if (onGameComplete) {
         onGameComplete({
           score: totalPairs,
