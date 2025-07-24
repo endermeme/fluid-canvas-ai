@@ -80,7 +80,7 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, s
       return () => clearTimeout(timer);
     } else if (timeLeft === 0 && !gameOver && !gameWon) {
       setGameOver(true);
-      const completionTime = gameSettings.totalTime - timeLeft;
+      const completionTime = gameSettings.totalTime; // Hết thời gian = toàn bộ thời gian game
       
       if (onGameComplete) {
         onGameComplete({

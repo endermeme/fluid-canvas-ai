@@ -111,7 +111,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ data, content, topi
       return () => clearTimeout(timer);
     } else if (timeLeft === 0 && !gameOver && !gameWon) {
       setGameOver(true);
-      const completionTime = gameSettings.timeLimit - timeLeft;
+      const completionTime = gameSettings.timeLimit; // Hết thời gian = toàn bộ thời gian game
       
       if (onGameComplete) {
         onGameComplete({
