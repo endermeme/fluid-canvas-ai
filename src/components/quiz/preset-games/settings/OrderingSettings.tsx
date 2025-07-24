@@ -12,12 +12,18 @@ import { ArrowUpDown, Type, Trophy, Medal, Timer, Clock4, Bug, Eye, ChevronDown,
 export interface OrderingSettingsData {
   difficulty: 'easy' | 'medium' | 'hard';
   sentenceCount: number;
-  timeLimit: number;
+  totalTime: number;  // renamed from timeLimit
   bonusTimePerCorrect: number;
   showHints: boolean;
   showProgress: boolean;
   prompt: string;
   debugMode: boolean;
+  // Advanced settings
+  partialCredit: boolean;
+  hintLimit: number;
+  shuffleSentences: boolean;
+  hintPenalty: number;
+  timeBonus: boolean;
 }
 
 interface OrderingSettingsProps {
@@ -30,12 +36,18 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
   const [settings, setSettings] = useState<OrderingSettingsData>({
     difficulty: 'medium',
     sentenceCount: 5,
-    timeLimit: 300,
+    totalTime: 300,
     bonusTimePerCorrect: 15,
     showHints: true,
     showProgress: true,
     prompt: topic || '',
-    debugMode: false
+    debugMode: false,
+    // Advanced settings defaults
+    partialCredit: true,
+    hintLimit: 3,
+    shuffleSentences: true,
+    hintPenalty: 0.2,
+    timeBonus: true
   });
 
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
@@ -153,18 +165,49 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
                     </Label>
                   </div>
 
-                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                    <Switch 
-                      id="showProgress" 
-                      checked={settings.showProgress}
-                      onCheckedChange={(checked) => handleSwitchChange('showProgress', checked)} 
-                    />
-                    <Label htmlFor="showProgress" className="text-sm font-medium">
-                      Hiển thị tiến độ
-                    </Label>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+                   <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                     <Switch 
+                       id="showProgress" 
+                       checked={settings.showProgress}
+                       onCheckedChange={(checked) => handleSwitchChange('showProgress', checked)} 
+                     />
+                     <Label htmlFor="showProgress" className="text-sm font-medium">
+                       Hiển thị tiến độ
+                     </Label>
+                   </div>
+
+                   <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                     <Switch 
+                       checked={settings.partialCredit}
+                       onCheckedChange={(checked) => handleSwitchChange('partialCredit', checked)} 
+                     />
+                     <Label className="text-sm font-medium">Điểm từng phần</Label>
+                   </div>
+
+                   <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                     <Switch 
+                       checked={settings.shuffleSentences}
+                       onCheckedChange={(checked) => handleSwitchChange('shuffleSentences', checked)} 
+                     />
+                     <Label className="text-sm font-medium">Trộn câu</Label>
+                   </div>
+
+                   {/* Hint Limit */}
+                   <div className="space-y-2">
+                     <div className="flex justify-between items-center">
+                       <Label className="text-sm font-medium">Giới hạn gợi ý</Label>
+                       <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.hintLimit}</span>
+                     </div>
+                     <Slider 
+                       min={1} 
+                       max={5} 
+                       step={1} 
+                       value={[settings.hintLimit]} 
+                       onValueChange={(value) => handleSliderChange('hintLimit', value)}
+                     />
+                   </div>
+                 </CollapsibleContent>
+               </Collapsible>
             </div>
 
             {/* Right Column - Sliders */}
@@ -187,23 +230,23 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
                 />
               </div>
 
-              {/* Time Limit */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="timeLimit" className="text-sm font-medium flex items-center gap-2">
-                    <Clock4 className="h-4 w-4 text-primary" /> Tổng Thời Gian
-                  </Label>
-                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.timeLimit} giây</span>
-                </div>
-                <Slider 
-                  id="timeLimit"
-                  min={30} 
-                  max={300} 
-                  step={10} 
-                  value={[settings.timeLimit]} 
-                  onValueChange={(value) => handleSliderChange('timeLimit', value)}
-                />
-              </div>
+               {/* Total Time */}
+               <div className="space-y-2">
+                 <div className="flex justify-between items-center">
+                   <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
+                     <Clock4 className="h-4 w-4 text-primary" /> Tổng Thời Gian
+                   </Label>
+                   <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.totalTime} giây</span>
+                 </div>
+                 <Slider 
+                   id="totalTime"
+                   min={30} 
+                   max={300} 
+                   step={10} 
+                   value={[settings.totalTime]} 
+                   onValueChange={(value) => handleSliderChange('totalTime', value)}
+                 />
+               </div>
 
               {/* Bonus Time Per Correct */}
               <div className="space-y-2">

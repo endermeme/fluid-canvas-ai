@@ -12,13 +12,18 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 
 export interface WordSearchSettingsData {
   wordCount: number;
-  timeLimit: number;
+  totalTime: number;  // renamed from timeLimit
   bonusTimePerWord: number;
   allowDiagonalWords: boolean;
   showWordList: boolean;
   showProgress: boolean;
   prompt: string;
   debugMode: boolean;
+  // Advanced settings
+  gridSize: 'small' | 'medium' | 'large';
+  wrongPenalty: number;
+  timeBonus: boolean;
+  hintPenalty: number;
 }
 
 interface WordSearchSettingsProps {
@@ -30,13 +35,18 @@ interface WordSearchSettingsProps {
 const WordSearchSettings: React.FC<WordSearchSettingsProps> = ({ onStart, topic, onCancel }) => {
   const [settings, setSettings] = useState<WordSearchSettingsData>({
     wordCount: 10,
-    timeLimit: 300,
+    totalTime: 300,
     bonusTimePerWord: 15,
     allowDiagonalWords: true,
     showWordList: true,
     showProgress: true,
     prompt: topic || '',
-    debugMode: false
+    debugMode: false,
+    // Advanced settings defaults
+    gridSize: 'medium',
+    wrongPenalty: 0.1,
+    timeBonus: true,
+    hintPenalty: 0.05
   });
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -136,18 +146,74 @@ const WordSearchSettings: React.FC<WordSearchSettingsProps> = ({ onStart, topic,
                     </Label>
                   </div>
 
-                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                    <Switch 
-                      id="showProgress" 
-                      checked={settings.showProgress}
-                      onCheckedChange={(checked) => handleSwitchChange('showProgress', checked)} 
-                    />
-                    <Label htmlFor="showProgress" className="text-sm font-medium">
-                      Hiển thị tiến độ
-                    </Label>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+                   <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                     <Switch 
+                       id="showProgress" 
+                       checked={settings.showProgress}
+                       onCheckedChange={(checked) => handleSwitchChange('showProgress', checked)} 
+                     />
+                     <Label htmlFor="showProgress" className="text-sm font-medium">
+                       Hiển thị tiến độ
+                     </Label>
+                   </div>
+
+                   {/* Grid Size */}
+                   <div className="space-y-2">
+                     <Label className="text-sm font-medium">Kích thước lưới</Label>
+                     <Select value={settings.gridSize} onValueChange={(value: 'small' | 'medium' | 'large') => setSettings(prev => ({ ...prev, gridSize: value }))}>
+                       <SelectTrigger className="border-primary/20">
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="small">Nhỏ (10x10)</SelectItem>
+                         <SelectItem value="medium">Trung bình (15x15)</SelectItem>
+                         <SelectItem value="large">Lớn (20x20)</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+
+                   {/* Wrong Penalty */}
+                   <div className="space-y-2">
+                     <div className="flex justify-between items-center">
+                       <Label className="text-sm font-medium">Phạt click sai (điểm)</Label>
+                       <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.wrongPenalty}</span>
+                     </div>
+                     <Slider 
+                       min={0} 
+                       max={0.2} 
+                       step={0.05} 
+                       value={[settings.wrongPenalty]} 
+                       onValueChange={(value) => handleSliderChange('wrongPenalty', value)}
+                     />
+                   </div>
+
+                   {/* Hint Penalty */}
+                   <div className="space-y-2">
+                     <div className="flex justify-between items-center">
+                       <Label className="text-sm font-medium">Phạt gợi ý (điểm)</Label>
+                       <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.hintPenalty}</span>
+                     </div>
+                     <Slider 
+                       min={0} 
+                       max={0.2} 
+                       step={0.05} 
+                       value={[settings.hintPenalty]} 
+                       onValueChange={(value) => handleSliderChange('hintPenalty', value)}
+                     />
+                   </div>
+
+                   {/* Time Bonus */}
+                   <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                     <Switch 
+                       checked={settings.timeBonus}
+                       onCheckedChange={(checked) => handleSwitchChange('timeBonus', checked)} 
+                     />
+                     <Label className="text-sm font-medium">
+                       Thưởng thời gian
+                     </Label>
+                   </div>
+                 </CollapsibleContent>
+               </Collapsible>
             </div>
 
             {/* Right Column */}
@@ -170,23 +236,23 @@ const WordSearchSettings: React.FC<WordSearchSettingsProps> = ({ onStart, topic,
                 />
               </div>
 
-              {/* Time Limit */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="timeLimit" className="text-sm font-medium flex items-center gap-2">
-                    <Clock4 className="h-4 w-4 text-primary" /> Tổng Thời Gian
-                  </Label>
-                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.timeLimit} giây</span>
-                </div>
-                <Slider 
-                  id="timeLimit"
-                  min={30} 
-                  max={300} 
-                  step={10} 
-                  value={[settings.timeLimit]} 
-                  onValueChange={(value) => handleSliderChange('timeLimit', value)}
-                />
-              </div>
+               {/* Total Time */}
+               <div className="space-y-2">
+                 <div className="flex justify-between items-center">
+                   <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
+                     <Clock4 className="h-4 w-4 text-primary" /> Tổng Thời Gian
+                   </Label>
+                   <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.totalTime} giây</span>
+                 </div>
+                 <Slider 
+                   id="totalTime"
+                   min={30} 
+                   max={300} 
+                   step={10} 
+                   value={[settings.totalTime]} 
+                   onValueChange={(value) => handleSliderChange('totalTime', value)}
+                 />
+               </div>
 
               {/* Bonus Time Per Word */}
               <div className="space-y-2">
