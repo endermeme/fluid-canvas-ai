@@ -7,7 +7,8 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Puzzle, Type, Trophy, Medal, Timer, Clock4, Bug, Link } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Puzzle, Type, Trophy, Medal, Timer, Clock4, Bug, Link, Settings, ChevronDown, Shuffle } from 'lucide-react';
 
 export interface MatchingSettingsData {
   pairCount: number;
@@ -16,6 +17,10 @@ export interface MatchingSettingsData {
   allowPartialMatching: boolean;
   prompt: string;
   debugMode: boolean;
+  // Advanced settings
+  shufflePairs: boolean;
+  allowPartialMatch: boolean;
+  bonusTimePerMatchAdvanced: boolean;
 }
 
 interface MatchingSettingsProps {
@@ -31,8 +36,13 @@ const MatchingSettings: React.FC<MatchingSettingsProps> = ({ onStart, topic, onC
     bonusTimePerMatch: 5,
     allowPartialMatching: false,
     prompt: topic || '',
-    debugMode: false
+    debugMode: false,
+    // Advanced settings defaults
+    shufflePairs: true,
+    allowPartialMatch: false,
+    bonusTimePerMatchAdvanced: false
   });
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (topic && topic !== settings.prompt) {
@@ -156,20 +166,52 @@ const MatchingSettings: React.FC<MatchingSettingsProps> = ({ onStart, topic, onC
                 />
               </div>
 
-              {/* Matching Options */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                  <Switch 
-                    id="allowPartialMatching" 
-                    checked={settings.allowPartialMatching}
-                    onCheckedChange={(checked) => handleSwitchChange('allowPartialMatching', checked)} 
-                  />
-                  <Label htmlFor="allowPartialMatching" className="text-sm font-medium flex items-center gap-2">
-                    <Link className="h-4 w-4 text-primary" /> Cho phép nối một phần
-                  </Label>
-                </div>
-              </div>
+              {/* Advanced Settings */}
+              <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between border-primary/20">
+                    <div className="flex items-center gap-2">
+                      <Settings className="h-4 w-4 text-primary" />
+                      Cài đặt nâng cao
+                    </div>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-3 space-y-3">
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch 
+                      id="allowPartialMatching" 
+                      checked={settings.allowPartialMatching}
+                      onCheckedChange={(checked) => handleSwitchChange('allowPartialMatching', checked)} 
+                    />
+                    <Label htmlFor="allowPartialMatching" className="text-sm font-medium flex items-center gap-2">
+                      <Link className="h-4 w-4 text-primary" /> Cho phép nối một phần
+                    </Label>
+                  </div>
 
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch 
+                      id="shufflePairs" 
+                      checked={settings.shufflePairs}
+                      onCheckedChange={(checked) => handleSwitchChange('shufflePairs', checked)} 
+                    />
+                    <Label htmlFor="shufflePairs" className="text-sm font-medium flex items-center gap-2">
+                      <Shuffle className="h-4 w-4 text-primary" /> Xáo trộn vị trí cặp
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch 
+                      id="bonusTimePerMatchAdvanced" 
+                      checked={settings.bonusTimePerMatchAdvanced}
+                      onCheckedChange={(checked) => handleSwitchChange('bonusTimePerMatchAdvanced', checked)} 
+                    />
+                    <Label htmlFor="bonusTimePerMatchAdvanced" className="text-sm font-medium flex items-center gap-2">
+                      <Timer className="h-4 w-4 text-primary" /> Thưởng thời gian nâng cao
+                    </Label>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
               {/* Debug Mode */}
               <div className="border-t border-border/50 pt-3">

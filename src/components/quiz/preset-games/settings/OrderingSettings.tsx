@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowUpDown, Type, Trophy, Medal, Timer, Clock4, Bug, Eye, ChevronDown, ChevronRight } from 'lucide-react';
+import { ArrowUpDown, Type, Trophy, Medal, Timer, Clock4, Bug, Eye, ChevronDown, ChevronRight, Settings, Award, HelpCircle, Shuffle } from 'lucide-react';
 
 export interface OrderingSettingsData {
   difficulty: 'easy' | 'medium' | 'hard';
@@ -18,6 +18,10 @@ export interface OrderingSettingsData {
   showProgress: boolean;
   prompt: string;
   debugMode: boolean;
+  // Advanced settings
+  partialCredit: boolean;
+  hintLimit: number;
+  shuffleSentences: boolean;
 }
 
 interface OrderingSettingsProps {
@@ -35,10 +39,15 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
     showHints: true,
     showProgress: true,
     prompt: topic || '',
-    debugMode: false
+    debugMode: false,
+    // Advanced settings defaults
+    partialCredit: false,
+    hintLimit: 3,
+    shuffleSentences: true
   });
 
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (topic && topic !== settings.prompt) {
@@ -222,6 +231,59 @@ const OrderingSettings: React.FC<OrderingSettingsProps> = ({ onStart, topic, onC
                   onValueChange={(value) => handleSliderChange('bonusTimePerCorrect', value)}
                 />
               </div>
+              {/* Advanced Settings */}
+              <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between border-primary/20">
+                    <div className="flex items-center gap-2">
+                      <Settings className="h-4 w-4 text-primary" />
+                      Cài đặt nâng cao
+                    </div>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-3 space-y-3">
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch 
+                      id="partialCredit" 
+                      checked={settings.partialCredit}
+                      onCheckedChange={(checked) => handleSwitchChange('partialCredit', checked)} 
+                    />
+                    <Label htmlFor="partialCredit" className="text-sm font-medium flex items-center gap-2">
+                      <Award className="h-4 w-4 text-primary" /> Điểm từng phần
+                    </Label>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <Label htmlFor="hintLimit" className="text-sm font-medium flex items-center gap-2">
+                        <HelpCircle className="h-4 w-4 text-primary" /> Giới hạn gợi ý
+                      </Label>
+                      <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.hintLimit} lần</span>
+                    </div>
+                    <Slider 
+                      id="hintLimit"
+                      min={1} 
+                      max={10} 
+                      step={1} 
+                      value={[settings.hintLimit]} 
+                      onValueChange={(value) => handleSliderChange('hintLimit', value)}
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch 
+                      id="shuffleSentences" 
+                      checked={settings.shuffleSentences}
+                      onCheckedChange={(checked) => handleSwitchChange('shuffleSentences', checked)} 
+                    />
+                    <Label htmlFor="shuffleSentences" className="text-sm font-medium flex items-center gap-2">
+                      <Shuffle className="h-4 w-4 text-primary" /> Xáo trộn câu
+                    </Label>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
               {/* Debug Mode */}
               <div className="border-t border-border/50 pt-3">
                 <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
