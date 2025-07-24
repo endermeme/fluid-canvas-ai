@@ -178,7 +178,7 @@ const GameSharePage: React.FC = () => {
     
     try {
       const fakeIp = getFakeIpAddress();
-      const result = await addParticipant(gameId, `${values.playerName} (${values.playerAge} tuổi)`, fakeIp, accountId);
+      const result = await addParticipant(gameId, values.playerName, fakeIp, accountId);
       
       if (result.success) {
         if (result.participant) {
@@ -215,7 +215,7 @@ const GameSharePage: React.FC = () => {
         
         const newParticipant: GameParticipant = {
           id: crypto.randomUUID(),
-          name: `${values.playerName} (${values.playerAge} tuổi)`,
+          name: values.playerName,
           ipAddress: fakeIp,
           timestamp: Date.now(),
           gameId: gameId,
@@ -401,20 +401,23 @@ const GameSharePage: React.FC = () => {
         )}
       </Tabs>
       
-      <GameShareForm 
-        showDialog={showNameDialog}
-        setShowDialog={setShowNameDialog}
-        gameTitle={game.title}
-        hasRegistered={hasRegistered}
-        isSubmitting={isSubmitting}
-        onSubmit={handleJoinGame}
-      />
+      {!game.password && (
+        <GameShareForm 
+          showDialog={showNameDialog}
+          setShowDialog={setShowNameDialog}
+          gameTitle={game.title}
+          hasRegistered={hasRegistered}
+          isSubmitting={isSubmitting}
+          onSubmit={handleJoinGame}
+        />
+      )}
 
       <GamePasswordForm
         isOpen={showPasswordForm}
-        onSubmit={(password) => {
+        onSubmit={(password, playerName) => {
           if (password === game?.password) {
             sessionStorage.setItem(`game-${gameId}-verified`, 'true');
+            handleJoinGame({ playerName, playerAge: "0" });
             setShowPasswordForm(false);
             setPasswordError('');
           } else {
@@ -423,6 +426,7 @@ const GameSharePage: React.FC = () => {
         }}
         onCancel={() => navigate('/')}
         error={passwordError}
+        gameTitle={game?.title}
       />
     </QuizContainer>
   );
