@@ -33,7 +33,7 @@ const mapSupabaseParticipant = (participant: SupabaseGameParticipant): GameParti
   };
 };
 
-// Thêm người tham gia mới vào game
+// Thêm người tham gia mới vào game (bỏ age parameter)
 export const addParticipant = async (
   gameId: string,
   name: string,

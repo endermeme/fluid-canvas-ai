@@ -47,6 +47,6 @@ export interface SupabaseGameParticipant {
   timestamp: string;
   game_id: string;
   retry_count: number;
-  score?: number;  // Thêm trường score vào đây
+  score?: number;
 }
 

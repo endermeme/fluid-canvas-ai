@@ -6,8 +6,8 @@ import { addParticipant, getFakeIpAddress, getGameParticipants } from '@/utils/g
 import { StoredGame, GameParticipant } from '@/utils/types';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import GameViewSelector from '@/components/quiz/custom-games/ui/GameViewSelector';
-import GameShareForm from '@/components/game-share/GameShareForm';
 import { GamePasswordForm } from '@/components/game-share/GamePasswordForm';
+import { GameNameForm } from '@/components/game-share/GameNameForm';
 import ParticipantsList from '@/components/game-share/ParticipantsList';
 import ShareSection from '@/components/game-share/ShareSection';
 import { Button } from '@/components/ui/button';
@@ -16,21 +16,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAccount } from '@/contexts/AccountContext';
 import LeaderboardManager from '@/components/quiz/share/LeaderboardManager';
-import { z } from 'zod';
+// Removed zod import - no longer needed
 
-const playerFormSchema = z.object({
-  playerName: z.string().min(2, {
-    message: "Tên phải có ít nhất 2 ký tự",
-  }),
-  playerAge: z.string().refine((val) => {
-    const age = parseInt(val, 10);
-    return !isNaN(age) && age >= 6 && age <= 100;
-  }, {
-    message: "Tuổi phải từ 6 đến 100",
-  })
-});
-
-type PlayerFormValues = z.infer<typeof playerFormSchema>;
+// Removed old player form schema - no longer needed
 
 const GameSharePage: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -39,13 +27,12 @@ const GameSharePage: React.FC = () => {
   const [game, setGame] = useState<StoredGame | null>(null);
   const [miniGame, setMiniGame] = useState<any>(null);
   const [showNameDialog, setShowNameDialog] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [hasRegistered, setHasRegistered] = useState(false);
   const [participants, setParticipants] = useState<GameParticipant[]>([]);
   const [activeTab, setActiveTab] = useState('game');
   const [gameExpired, setGameExpired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [passwordError, setPasswordError] = useState('');
   const { toast } = useToast();
   
   const refreshParticipants = async () => {
@@ -80,14 +67,7 @@ const GameSharePage: React.FC = () => {
             };
             setGame(completeGame);
             
-            // Check password protection
-            if (loadedGame.password) {
-              const isVerified = sessionStorage.getItem(`game-${gameId}-verified`);
-              if (!isVerified) {
-                setShowPasswordForm(true);
-                return;
-              }
-            }
+            // Password protection will be handled by conditional form display
             
             // Parse game content for preset games
             let gameType = null;
@@ -128,11 +108,7 @@ const GameSharePage: React.FC = () => {
               const registeredGames = JSON.parse(registeredGamesStr);
               if (registeredGames.includes(gameId)) {
                 setHasRegistered(true);
-              } else {
-                setShowNameDialog(true);
               }
-            } else {
-              setShowNameDialog(true);
             }
           } else {
             setGameExpired(true);
@@ -161,7 +137,7 @@ const GameSharePage: React.FC = () => {
     navigate(`/game-history?acc=${accountId}`);
   };
   
-  const handleJoinGame = async (values: PlayerFormValues) => {
+  const handleJoinGame = async (playerName: string) => {
     if (!gameId || !game || isSubmitting) return;
     
     // Check max participants limit
@@ -178,7 +154,7 @@ const GameSharePage: React.FC = () => {
     
     try {
       const fakeIp = getFakeIpAddress();
-      const result = await addParticipant(gameId, values.playerName, fakeIp, accountId);
+      const result = await addParticipant(gameId, playerName, fakeIp, accountId);
       
       if (result.success) {
         if (result.participant) {
@@ -215,7 +191,7 @@ const GameSharePage: React.FC = () => {
         
         const newParticipant: GameParticipant = {
           id: crypto.randomUUID(),
-          name: values.playerName,
+          name: playerName,
           ipAddress: fakeIp,
           timestamp: Date.now(),
           gameId: gameId,
@@ -268,6 +244,33 @@ const GameSharePage: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
+  const handlePasswordSubmit = async (password: string, playerName: string) => {
+    if (!gameId || !game || isSubmitting) return;
+    
+    // First verify password
+    if (game.password && game.password !== password) {
+      toast({
+        title: "Mật khẩu không đúng",
+        description: "Vui lòng nhập đúng mật khẩu để tham gia game.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setShowPasswordDialog(false);
+    
+    // Then join the game
+    await handleJoinGame(playerName);
+  };
+
+  const handleShowJoinForm = () => {
+    if (game?.password) {
+      setShowPasswordDialog(true);
+    } else {
+      setShowNameDialog(true);
+    }
+  };
   
   if (!game && !gameExpired) {
     return (
@@ -313,7 +316,7 @@ const GameSharePage: React.FC = () => {
       size="sm" 
       variant="outline" 
       className="text-xs"
-      onClick={() => setShowNameDialog(true)}
+      onClick={handleShowJoinForm}
       disabled={isSubmitting || isMaxParticipantsReached}
     >
       <Users className="h-3.5 w-3.5 mr-1" />
@@ -375,20 +378,20 @@ const GameSharePage: React.FC = () => {
             gameId={gameId!}
             hasRegistered={hasRegistered}
             isSubmitting={isSubmitting}
-            onJoinGame={() => setShowNameDialog(true)}
+            onJoinGame={handleShowJoinForm}
           />
         </TabsContent>
         
         <TabsContent value="participants" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
           <div className="max-w-md mx-auto space-y-6">
-            <ParticipantsList 
-              participants={participants}
-              hasRegistered={hasRegistered}
-              isSubmitting={isSubmitting}
-              onRefresh={refreshParticipants}
-              onJoinGame={() => setShowNameDialog(true)}
-              maxParticipants={game.maxParticipants}
-            />
+              <ParticipantsList
+                participants={participants}
+                hasRegistered={hasRegistered}
+                isSubmitting={isSubmitting}
+                onRefresh={refreshParticipants}
+                onJoinGame={handleShowJoinForm}
+                maxParticipants={game.maxParticipants}
+              />
           </div>
         </TabsContent>
 
@@ -401,31 +404,21 @@ const GameSharePage: React.FC = () => {
         )}
       </Tabs>
       
-      {!game.password && (
-        <GameShareForm 
-          showDialog={showNameDialog}
-          setShowDialog={setShowNameDialog}
-          gameTitle={game.title}
-          hasRegistered={hasRegistered}
-          isSubmitting={isSubmitting}
-          onSubmit={handleJoinGame}
-        />
-      )}
-
+      {/* Game Name Form for games without password */}
+      <GameNameForm
+        isOpen={showNameDialog}
+        onSubmit={handleJoinGame}
+        onCancel={() => setShowNameDialog(false)}
+        isSubmitting={isSubmitting}
+        gameTitle={game?.title}
+      />
+      
+      {/* Password Form for protected games */}
       <GamePasswordForm
-        isOpen={showPasswordForm}
-        onSubmit={(password, playerName) => {
-          if (password === game?.password) {
-            sessionStorage.setItem(`game-${gameId}-verified`, 'true');
-            handleJoinGame({ playerName, playerAge: "0" });
-            setShowPasswordForm(false);
-            setPasswordError('');
-          } else {
-            setPasswordError('Mật khẩu không đúng');
-          }
-        }}
-        onCancel={() => navigate('/')}
-        error={passwordError}
+        isOpen={showPasswordDialog}
+        onSubmit={handlePasswordSubmit}
+        onCancel={() => setShowPasswordDialog(false)}
+        isVerifying={isSubmitting}
         gameTitle={game?.title}
       />
     </QuizContainer>
