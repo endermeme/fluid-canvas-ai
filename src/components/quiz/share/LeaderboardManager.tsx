@@ -106,6 +106,41 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
     return `${remainingSeconds}s`;
   };
 
+  // Determine if game is time-based (Memory, Word Search, Matching)
+  const isTimeBasedGame = (gameId: string) => {
+    // Note: This is a simple check. In production, you might want to store game_type in leaderboard
+    // For now, we'll check if the game has completion_time as primary metric
+    return true; // We'll handle this in the display functions
+  };
+
+  const getScoreDisplay = (entry: LeaderboardEntry) => {
+    // If completion_time exists and score is 0, this is likely a time-based game
+    if (entry.completion_time && entry.score === 0) {
+      return `Hoàn thành: ${formatCompletionTime(entry.completion_time)}`;
+    } else {
+      return `${getScorePercentage(entry.score, entry.total_questions)}% (${entry.score}/${entry.total_questions})`;
+    }
+  };
+
+  const getMainScoreDisplay = (entry: LeaderboardEntry) => {
+    // If completion_time exists and score is 0, show time as main metric
+    if (entry.completion_time && entry.score === 0) {
+      return (
+        <>
+          <p className="font-bold text-lg">{formatCompletionTime(entry.completion_time)}</p>
+          <p className="text-xs text-muted-foreground">thời gian</p>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <p className="font-bold text-lg">{entry.score}</p>
+          <p className="text-xs text-muted-foreground">điểm</p>
+        </>
+      );
+    }
+  };
+
   if (loading) {
     return (
       <Card>
@@ -174,20 +209,18 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
                   <div>
                     <p className="font-medium text-sm">{entry.player_name}</p>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span>
-                        {getScorePercentage(entry.score, entry.total_questions)}% 
-                        ({entry.score}/{entry.total_questions})
-                      </span>
+                         <span>
+                         {getScoreDisplay(entry)}
+                       </span>
                       {entry.completion_time && (
                         <span>⏱️ {formatCompletionTime(entry.completion_time)}</span>
                       )}
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-lg">{entry.score}</p>
-                  <p className="text-xs text-muted-foreground">điểm</p>
-                </div>
+                 <div className="text-right">
+                   {getMainScoreDisplay(entry)}
+                 </div>
               </div>
             ))}
           </div>

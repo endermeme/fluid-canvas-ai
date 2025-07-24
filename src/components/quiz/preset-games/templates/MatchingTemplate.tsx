@@ -10,6 +10,7 @@ interface MatchingTemplateProps {
   content: any;
   topic: string;
   settings?: any;
+  onGameComplete?: (gameData: any) => void;
 }
 
 interface MatchingItem {
@@ -18,7 +19,7 @@ interface MatchingItem {
   matched: boolean;
 }
 
-const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ data, content, topic, settings }) => {
+const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ data, content, topic, settings, onGameComplete }) => {
   const gameContent = content || data;
   // Memoize settings to prevent infinite re-renders
   const gameSettings = useMemo(() => ({
@@ -123,13 +124,25 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ data, content, topi
     if (matchedPairs === totalPairs && totalPairs > 0 && !gameWon && !gameOver) {
       setGameWon(true);
       
+      // Call onGameComplete with completion time when game is won
+      const completionTime = gameSettings.timeLimit - timeLeft;
+      if (onGameComplete) {
+        onGameComplete({
+          score: matchedPairs, // Keep score for internal tracking  
+          total: totalPairs,
+          timeUsed: completionTime,
+          completionTime: completionTime, // Add completion time for leaderboard
+          incorrectAttempts
+        });
+      }
+      
       toast({
         title: "Chúc mừng!",
-        description: `Bạn đã hoàn thành trò chơi với ${totalPairs} cặp từ.`,
+        description: `Hoàn thành trong ${Math.floor(completionTime / 60)}:${(completionTime % 60).toString().padStart(2, '0')}`,
         variant: "default",
       });
     }
-  }, [matchedPairs, totalPairs, gameWon, gameOver, toast]);
+  }, [matchedPairs, totalPairs, gameWon, gameOver, toast, timeLeft, gameSettings.timeLimit, onGameComplete, incorrectAttempts]);
 
   const handleLeftItemClick = useCallback((id: number) => {
     if (gameOver || gameWon) return;

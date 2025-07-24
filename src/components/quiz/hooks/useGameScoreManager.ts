@@ -21,12 +21,16 @@ export const useGameScoreManager = () => {
     setIsSaving(true);
     
     try {
+      // Determine if this is a time-based game (Memory, Word Search, Matching)
+      const timeBasedGames = ['memory', 'wordsearch', 'matching'];
+      const isTimeBasedGame = timeBasedGames.includes(scoreData.gameType?.toLowerCase());
+      
       const { error } = await supabase
         .from('game_scores')
         .insert({
           game_id: scoreData.gameId,
           player_name: scoreData.playerName,
-          score: scoreData.score,
+          score: isTimeBasedGame ? 0 : scoreData.score, // Time-based games use completion_time instead
           total_questions: scoreData.totalQuestions,
           completion_time: scoreData.completionTime,
           game_type: scoreData.gameType,
@@ -43,10 +47,23 @@ export const useGameScoreManager = () => {
         return false;
       }
 
-      toast({
-        title: "Điểm đã được lưu! 🎉",
-        description: `Bạn đạt ${scoreData.score}/${scoreData.totalQuestions} điểm.`,
-      });
+      // Show appropriate success message based on game type
+      
+      if (isTimeBasedGame && scoreData.completionTime) {
+        const minutes = Math.floor(scoreData.completionTime / 60);
+        const seconds = scoreData.completionTime % 60;
+        const timeText = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : `${seconds}s`;
+        
+        toast({
+          title: "Kết quả đã được lưu! 🎉",
+          description: `Hoàn thành trong ${timeText}`,
+        });
+      } else {
+        toast({
+          title: "Điểm đã được lưu! 🎉",
+          description: `Bạn đạt ${scoreData.score}/${scoreData.totalQuestions} điểm.`,
+        });
+      }
       
       return true;
     } catch (error) {

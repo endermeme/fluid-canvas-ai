@@ -12,9 +12,10 @@ interface MemoryTemplateProps {
   content: any;
   topic: string;
   settings?: any;
+  onGameComplete?: (gameData: any) => void;
 }
 
-const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, settings }) => {
+const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, settings, onGameComplete }) => {
   const gameContent = content || data;
   // Use settings from props or fallback values
   const gameSettings = {
@@ -90,13 +91,26 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, s
   useEffect(() => {
     if (matchedPairs === totalPairs && totalPairs > 0) {
       setGameWon(true);
+      
+      // Call onGameComplete with completion time when game is won
+      const completionTime = gameSettings.totalTime - timeLeft;
+      if (onGameComplete) {
+        onGameComplete({
+          score: matchedPairs, // Keep score for internal tracking
+          total: totalPairs,
+          timeUsed: completionTime,
+          completionTime: completionTime, // Add completion time for leaderboard
+          pairs: totalPairs
+        });
+      }
+      
       toast({
         title: "Chúc mừng!",
-        description: "Bạn đã hoàn thành trò chơi.",
+        description: `Hoàn thành trong ${Math.floor(completionTime / 60)}:${(completionTime % 60).toString().padStart(2, '0')}`,
         variant: "default",
       });
     }
-  }, [matchedPairs, totalPairs, toast]);
+  }, [matchedPairs, totalPairs, toast, timeLeft, gameSettings.totalTime, onGameComplete]);
 
   useEffect(() => {
     if (flippedCards.length === 2) {

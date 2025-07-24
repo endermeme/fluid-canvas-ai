@@ -11,6 +11,7 @@ interface WordSearchTemplateProps {
   content: any;
   topic: string;
   settings?: any;
+  onGameComplete?: (gameData: any) => void;
 }
 
 interface WordLocation {
@@ -21,7 +22,7 @@ interface WordLocation {
   endCol: number;
 }
 
-const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ data, content, topic, settings }) => {
+const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ data, content, topic, settings, onGameComplete }) => {
   const gameContent = content || data;
   // Use settings from props or fallback values
   const gameSettings = {
@@ -67,13 +68,25 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ data, content, 
   useEffect(() => {
     if (foundWords.length === totalWords && totalWords > 0) {
       setGameWon(true);
+      
+      // Call onGameComplete with completion time when all words are found
+      const completionTime = gameSettings.totalTime - timeLeft;
+      if (onGameComplete) {
+        onGameComplete({
+          score: foundWords.length, // For internal tracking
+          total: totalWords,
+          completionTime: completionTime, // Primary metric for leaderboard
+          timeUsed: completionTime
+        });
+      }
+      
       toast({
         title: "Chúc mừng!",
-        description: "Bạn đã tìm thấy tất cả các từ.",
+        description: `Hoàn thành trong ${Math.floor(completionTime / 60)}:${(completionTime % 60).toString().padStart(2, '0')}`,
         variant: "default",
       });
     }
-  }, [foundWords.length, totalWords, toast]);
+  }, [foundWords.length, totalWords, toast, timeLeft, gameSettings.totalTime]);
 
   const handleCellClick = (row: number, col: number) => {
     if (gameOver || gameWon) return;
