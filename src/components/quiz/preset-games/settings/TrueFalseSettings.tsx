@@ -21,11 +21,6 @@ export interface TrueFalseSettingsData {
   allowSkip: boolean;
   prompt: string;
   debugMode: boolean;
-  // Advanced settings
-  negativeMarking: boolean;
-  timeBonus: boolean;
-  wrongPenalty: number;
-  timePerQuestionAdvanced: number;
 }
 
 interface TrueFalseSettingsProps {
@@ -45,12 +40,7 @@ const TrueFalseSettings: React.FC<TrueFalseSettingsProps> = ({ onStart, topic, o
     shuffleQuestions: true,
     allowSkip: false,
     prompt: topic || '',
-    debugMode: false,
-    // Advanced settings defaults
-    negativeMarking: false,
-    timeBonus: true,
-    wrongPenalty: 0.25,
-    timePerQuestionAdvanced: 20
+    debugMode: false
   });
 
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
@@ -180,73 +170,19 @@ const TrueFalseSettings: React.FC<TrueFalseSettingsProps> = ({ onStart, topic, o
                       </Label>
                     </div>
 
-                     <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                       <Switch 
-                         id="allowSkip" 
-                         checked={settings.allowSkip}
-                         onCheckedChange={(checked) => handleSwitchChange('allowSkip', checked)} 
-                       />
-                       <Label htmlFor="allowSkip" className="text-sm font-medium">
-                         Cho phép bỏ qua
-                       </Label>
-                     </div>
-
-                     <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                       <Switch 
-                         id="negativeMarking" 
-                         checked={settings.negativeMarking}
-                         onCheckedChange={(checked) => handleSwitchChange('negativeMarking', checked)} 
-                       />
-                       <Label htmlFor="negativeMarking" className="text-sm font-medium">
-                         Trừ điểm khi sai
-                       </Label>
-                     </div>
-
-                     <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                       <Switch 
-                         id="timeBonus" 
-                         checked={settings.timeBonus}
-                         onCheckedChange={(checked) => handleSwitchChange('timeBonus', checked)} 
-                       />
-                       <Label htmlFor="timeBonus" className="text-sm font-medium">
-                         Thưởng thời gian
-                       </Label>
-                     </div>
-
-                     {/* Wrong Penalty */}
-                     {settings.negativeMarking && (
-                       <div className="space-y-2">
-                         <div className="flex justify-between items-center">
-                           <Label className="text-sm font-medium">Phạt sai (điểm)</Label>
-                           <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.wrongPenalty}</span>
-                         </div>
-                         <Slider 
-                           min={0.1} 
-                           max={1.0} 
-                           step={0.05} 
-                           value={[settings.wrongPenalty]} 
-                           onValueChange={(value) => handleSliderChange('wrongPenalty', value)}
-                         />
-                       </div>
-                     )}
-
-                     {/* Time Per Question Advanced */}
-                     <div className="space-y-2">
-                       <div className="flex justify-between items-center">
-                         <Label className="text-sm font-medium">Thời gian nâng cao (giây/câu)</Label>
-                         <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.timePerQuestionAdvanced}s</span>
-                       </div>
-                       <Slider 
-                         min={10} 
-                         max={60} 
-                         step={5} 
-                         value={[settings.timePerQuestionAdvanced]} 
-                         onValueChange={(value) => handleSliderChange('timePerQuestionAdvanced', value)}
-                       />
-                     </div>
-                   </div>
-                 </CollapsibleContent>
-               </Collapsible>
+                    <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                      <Switch 
+                        id="allowSkip" 
+                        checked={settings.allowSkip}
+                        onCheckedChange={(checked) => handleSwitchChange('allowSkip', checked)} 
+                      />
+                      <Label htmlFor="allowSkip" className="text-sm font-medium">
+                        Cho phép bỏ qua
+                      </Label>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
 
             {/* Right Column */}

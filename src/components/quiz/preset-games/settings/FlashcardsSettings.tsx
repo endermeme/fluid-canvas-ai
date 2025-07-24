@@ -7,8 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Lightbulb, Type, Trophy, Medal, Timer, Clock, Clock4, Bug, RotateCcw, Settings, ChevronDown } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Lightbulb, Type, Trophy, Medal, Timer, Clock, Clock4, Bug, RotateCcw } from 'lucide-react';
 
 export interface FlashcardsSettingsData {
   cardCount: number;
@@ -17,12 +16,6 @@ export interface FlashcardsSettingsData {
   allowSkip: boolean;
   prompt: string;
   debugMode: boolean;
-  // Advanced settings
-  repetitionMode: 'normal' | 'spaced' | 'adaptive';
-  confidenceLevel: boolean;
-  autoFlipTime: number;
-  wrongPenalty: number;
-  timeBonus: boolean;
 }
 
 interface FlashcardsSettingsProps {
@@ -38,15 +31,8 @@ const FlashcardsSettings: React.FC<FlashcardsSettingsProps> = ({ onStart, topic,
     showHints: true,
     allowSkip: true,
     prompt: topic || '',
-    debugMode: false,
-    // Advanced settings defaults
-    repetitionMode: 'normal',
-    confidenceLevel: false,
-    autoFlipTime: 3,
-    wrongPenalty: 0.1,
-    timeBonus: false
+    debugMode: false
   });
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (topic && topic !== settings.prompt) {
@@ -128,93 +114,11 @@ const FlashcardsSettings: React.FC<FlashcardsSettingsProps> = ({ onStart, topic,
                   step={1} 
                   value={[settings.cardCount]} 
                   onValueChange={(value) => handleSliderChange('cardCount', value)}
-                 />
-               </div>
+                />
+              </div>
+            </div>
 
-               {/* Advanced Settings */}
-               <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-                 <CollapsibleTrigger asChild>
-                   <Button variant="outline" className="w-full justify-between border-primary/20">
-                     <span className="flex items-center gap-2">
-                       <Settings className="h-4 w-4" />
-                       Cài đặt nâng cao
-                     </span>
-                     <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-                   </Button>
-                 </CollapsibleTrigger>
-                 <CollapsibleContent className="mt-3 space-y-3">
-                   {/* Repetition Mode */}
-                   <div className="space-y-2">
-                     <Label className="text-sm font-medium">Chế độ lặp lại</Label>
-                     <Select value={settings.repetitionMode} onValueChange={(value: 'normal' | 'spaced' | 'adaptive') => setSettings(prev => ({ ...prev, repetitionMode: value }))}>
-                       <SelectTrigger className="border-primary/20">
-                         <SelectValue />
-                       </SelectTrigger>
-                       <SelectContent>
-                         <SelectItem value="normal">Bình thường</SelectItem>
-                         <SelectItem value="spaced">Lặp cách quãng</SelectItem>
-                         <SelectItem value="adaptive">Thích ứng</SelectItem>
-                       </SelectContent>
-                     </Select>
-                   </div>
-
-                   {/* Auto Flip Time */}
-                   <div className="space-y-2">
-                     <div className="flex justify-between items-center">
-                       <Label className="text-sm font-medium">Thời gian tự động lật (giây)</Label>
-                       <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.autoFlipTime}s</span>
-                     </div>
-                     <Slider 
-                       min={1} 
-                       max={10} 
-                       step={1} 
-                       value={[settings.autoFlipTime]} 
-                       onValueChange={(value) => handleSliderChange('autoFlipTime', value)}
-                     />
-                   </div>
-
-                   {/* Advanced Options */}
-                   <div className="space-y-3">
-                     <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                       <Switch 
-                         checked={settings.confidenceLevel}
-                         onCheckedChange={(checked) => handleSwitchChange('confidenceLevel', checked)} 
-                       />
-                       <Label className="text-sm font-medium">
-                         Đánh giá độ tự tin
-                       </Label>
-                     </div>
-
-                     <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                       <Switch 
-                         checked={settings.timeBonus}
-                         onCheckedChange={(checked) => handleSwitchChange('timeBonus', checked)} 
-                       />
-                       <Label className="text-sm font-medium">
-                         Thưởng thời gian
-                       </Label>
-                     </div>
-                   </div>
-
-                   {/* Wrong Penalty */}
-                   <div className="space-y-2">
-                     <div className="flex justify-between items-center">
-                       <Label className="text-sm font-medium">Phạt sai (điểm)</Label>
-                       <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.wrongPenalty}</span>
-                     </div>
-                     <Slider 
-                       min={0} 
-                       max={0.5} 
-                       step={0.1} 
-                       value={[settings.wrongPenalty]} 
-                       onValueChange={(value) => handleSliderChange('wrongPenalty', value)}
-                     />
-                   </div>
-                 </CollapsibleContent>
-               </Collapsible>
-             </div>
-
-             {/* Right Column */}
+            {/* Right Column */}
             <div className="space-y-4">
               {/* Flashcard Options */}
               <div className="space-y-3">

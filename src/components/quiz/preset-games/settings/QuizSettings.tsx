@@ -19,11 +19,6 @@ export interface QuizSettingsData {
   shuffleOptions: boolean;
   prompt: string;
   debugMode: boolean;
-  // Advanced settings
-  negativeMarking: boolean;
-  timeBonus: boolean;
-  maxAttempts: number;
-  wrongPenalty: number;
 }
 interface QuizSettingsProps {
   onStart: (settings: QuizSettingsData) => void;
@@ -46,12 +41,7 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({
     shuffleQuestions: true,
     shuffleOptions: true,
     prompt: topic || '',
-    debugMode: false,
-    // Advanced settings defaults
-    negativeMarking: false,
-    timeBonus: true,
-    maxAttempts: 1,
-    wrongPenalty: 0.25
+    debugMode: false
   });
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   useEffect(() => {
@@ -158,60 +148,14 @@ const QuizSettings: React.FC<QuizSettingsProps> = ({
                     </Label>
                   </div>
 
-                   <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                     <Switch id="shuffleOptions" checked={settings.shuffleOptions} onCheckedChange={checked => handleSwitchChange('shuffleOptions', checked)} />
-                     <Label htmlFor="shuffleOptions" className="text-sm font-medium">
-                       Xáo trộn đáp án
-                     </Label>
-                   </div>
-
-                   <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                     <Switch id="negativeMarking" checked={settings.negativeMarking} onCheckedChange={checked => handleSwitchChange('negativeMarking', checked)} />
-                     <Label htmlFor="negativeMarking" className="text-sm font-medium">
-                       Trừ điểm khi sai
-                     </Label>
-                   </div>
-
-                   <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                     <Switch id="timeBonus" checked={settings.timeBonus} onCheckedChange={checked => handleSwitchChange('timeBonus', checked)} />
-                     <Label htmlFor="timeBonus" className="text-sm font-medium">
-                       Thưởng thời gian
-                     </Label>
-                   </div>
-
-                   {/* Max Attempts */}
-                   <div className="space-y-2">
-                     <div className="flex justify-between items-center">
-                       <Label className="text-sm font-medium">Số lần thử tối đa</Label>
-                       <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.maxAttempts}</span>
-                     </div>
-                     <Slider 
-                       min={1} 
-                       max={3} 
-                       step={1} 
-                       value={[settings.maxAttempts]} 
-                       onValueChange={(value) => handleSliderChange('maxAttempts', value)}
-                     />
-                   </div>
-
-                   {/* Wrong Penalty */}
-                   {settings.negativeMarking && (
-                     <div className="space-y-2">
-                       <div className="flex justify-between items-center">
-                         <Label className="text-sm font-medium">Phạt sai (điểm)</Label>
-                         <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.wrongPenalty}</span>
-                       </div>
-                       <Slider 
-                         min={0.1} 
-                         max={1.0} 
-                         step={0.05} 
-                         value={[settings.wrongPenalty]} 
-                         onValueChange={(value) => handleSliderChange('wrongPenalty', value)}
-                       />
-                     </div>
-                   )}
-                 </CollapsibleContent>
-               </Collapsible>
+                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <Switch id="shuffleOptions" checked={settings.shuffleOptions} onCheckedChange={checked => handleSwitchChange('shuffleOptions', checked)} />
+                    <Label htmlFor="shuffleOptions" className="text-sm font-medium">
+                      Xáo trộn đáp án
+                    </Label>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
 
             {/* Right Column */}

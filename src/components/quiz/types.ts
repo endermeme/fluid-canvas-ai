@@ -12,6 +12,7 @@ export interface GameSettingsData {
   timePerQuestion?: number;
   timeLimit?: number; // For matching, memory, etc.
   totalTime?: number;
+  bonusTime?: number;
   bonusTimePerMatch?: number; // For matching
   useTimer?: boolean;
   showExplanation?: boolean;
@@ -39,6 +40,7 @@ export interface GameSettingsData {
   allowPartialMatching?: boolean; // For matching
   allowMultipleAttempts?: boolean;
   autoAdvance?: boolean;
+  gridSize?: number;
   allowDiagonalWords?: boolean;
   showWordList?: boolean;
   bonusTimePerWord?: number;
@@ -48,25 +50,6 @@ export interface GameSettingsData {
   showCategoryHints?: boolean;
   useCanvas?: boolean;
   debugMode?: boolean;
-  // Advanced scoring settings
-  negativeMarking?: boolean;
-  timeBonus?: boolean;
-  maxAttempts?: number;
-  wrongPenalty?: number;
-  repetitionMode?: 'normal' | 'spaced' | 'adaptive';
-  confidenceLevel?: boolean;
-  autoFlipTime?: number;
-  bonusTime?: number;
-  comboBonus?: boolean;
-  mistakePenalty?: number;
-  shufflePairs?: boolean;
-  allowPartialMatch?: boolean;
-  bonusTimePerMatchAdvanced?: number;
-  partialCredit?: boolean;
-  hintLimit?: number;
-  shuffleSentences?: boolean;
-  gridSize?: 'small' | 'medium' | 'large';
-  timePerQuestionAdvanced?: number;
 }
 
 export interface GameType {

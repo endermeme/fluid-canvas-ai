@@ -7,22 +7,15 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Puzzle, Type, Trophy, Medal, Timer, Clock4, Bug, Link, Settings, ChevronDown, Shuffle } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Puzzle, Type, Trophy, Medal, Timer, Clock4, Bug, Link } from 'lucide-react';
 
 export interface MatchingSettingsData {
   pairCount: number;
-  totalTime: number;  // renamed from timeLimit
+  timeLimit: number;
   bonusTimePerMatch: number;
   allowPartialMatching: boolean;
   prompt: string;
   debugMode: boolean;
-  // Advanced settings
-  shufflePairs: boolean;
-  wrongPenalty: number;
-  bonusTimePerMatchAdvanced: number;
-  allowPartialMatch: boolean;
-  timeBonus: boolean;
 }
 
 interface MatchingSettingsProps {
@@ -34,19 +27,12 @@ interface MatchingSettingsProps {
 const MatchingSettings: React.FC<MatchingSettingsProps> = ({ onStart, topic, onCancel }) => {
   const [settings, setSettings] = useState<MatchingSettingsData>({
     pairCount: 8,
-    totalTime: 300,
+    timeLimit: 300,
     bonusTimePerMatch: 5,
     allowPartialMatching: false,
     prompt: topic || '',
-    debugMode: false,
-    // Advanced settings defaults
-    shufflePairs: true,
-    wrongPenalty: 0.1,
-    bonusTimePerMatchAdvanced: 3,
-    allowPartialMatch: false,
-    timeBonus: true
+    debugMode: false
   });
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (topic && topic !== settings.prompt) {
@@ -131,100 +117,23 @@ const MatchingSettings: React.FC<MatchingSettingsProps> = ({ onStart, topic, onC
                 />
               </div>
 
-               {/* Total Time */}
-               <div className="space-y-2">
-                 <div className="flex justify-between items-center">
-                   <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
-                     <Clock4 className="h-4 w-4 text-primary" /> Tổng Thời Gian
-                   </Label>
-                   <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.totalTime} giây</span>
-                 </div>
-                 <Slider 
-                   id="totalTime"
-                   min={30} 
-                   max={300} 
-                   step={10} 
-                   value={[settings.totalTime]} 
-                   onValueChange={(value) => handleSliderChange('totalTime', value)}
-                 />
-               </div>
-
-               {/* Advanced Settings */}
-               <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-                 <CollapsibleTrigger asChild>
-                   <Button variant="outline" className="w-full justify-between border-primary/20">
-                     <span className="flex items-center gap-2">
-                       <Settings className="h-4 w-4" />
-                       Cài đặt nâng cao
-                     </span>
-                     <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-                   </Button>
-                 </CollapsibleTrigger>
-                 <CollapsibleContent className="mt-3 space-y-3">
-                   {/* Wrong Penalty */}
-                   <div className="space-y-2">
-                     <div className="flex justify-between items-center">
-                       <Label className="text-sm font-medium">Phạt nối sai (điểm)</Label>
-                       <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.wrongPenalty}</span>
-                     </div>
-                     <Slider 
-                       min={0} 
-                       max={0.5} 
-                       step={0.1} 
-                       value={[settings.wrongPenalty]} 
-                       onValueChange={(value) => handleSliderChange('wrongPenalty', value)}
-                     />
-                   </div>
-
-                   {/* Advanced Bonus Time */}
-                   <div className="space-y-2">
-                     <div className="flex justify-between items-center">
-                       <Label className="text-sm font-medium">Thưởng thời gian nâng cao (giây)</Label>
-                       <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.bonusTimePerMatchAdvanced}s</span>
-                     </div>
-                     <Slider 
-                       min={1} 
-                       max={10} 
-                       step={1} 
-                       value={[settings.bonusTimePerMatchAdvanced]} 
-                       onValueChange={(value) => handleSliderChange('bonusTimePerMatchAdvanced', value)}
-                     />
-                   </div>
-
-                   {/* Advanced Options */}
-                   <div className="space-y-3">
-                     <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                       <Switch 
-                         checked={settings.shufflePairs}
-                         onCheckedChange={(checked) => handleSwitchChange('shufflePairs', checked)} 
-                       />
-                       <Label className="text-sm font-medium flex items-center gap-2">
-                         <Shuffle className="h-4 w-4 text-primary" /> Trộn cặp nối
-                       </Label>
-                     </div>
-
-                     <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                       <Switch 
-                         checked={settings.allowPartialMatch}
-                         onCheckedChange={(checked) => handleSwitchChange('allowPartialMatch', checked)} 
-                       />
-                       <Label className="text-sm font-medium">
-                         Cho phép nối một phần
-                       </Label>
-                     </div>
-
-                     <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                       <Switch 
-                         checked={settings.timeBonus}
-                         onCheckedChange={(checked) => handleSwitchChange('timeBonus', checked)} 
-                       />
-                       <Label className="text-sm font-medium">
-                         Thưởng thời gian
-                       </Label>
-                     </div>
-                   </div>
-                 </CollapsibleContent>
-               </Collapsible>
+              {/* Time Limit */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="timeLimit" className="text-sm font-medium flex items-center gap-2">
+                    <Clock4 className="h-4 w-4 text-primary" /> Tổng Thời Gian
+                  </Label>
+                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.timeLimit} giây</span>
+                </div>
+                <Slider 
+                  id="timeLimit"
+                  min={30} 
+                  max={300} 
+                  step={10} 
+                  value={[settings.timeLimit]} 
+                  onValueChange={(value) => handleSliderChange('timeLimit', value)}
+                />
+              </div>
             </div>
 
             {/* Right Column */}

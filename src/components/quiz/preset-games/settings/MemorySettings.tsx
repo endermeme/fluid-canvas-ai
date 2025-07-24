@@ -7,22 +7,15 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { BrainCircuit, Type, Trophy, Medal, Timer, Clock4, Bug, Eye, Settings, ChevronDown } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { BrainCircuit, Type, Trophy, Medal, Timer, Clock4, Bug, Eye } from 'lucide-react';
 
 export interface MemorySettingsData {
   gridSize: number;
-  totalTime: number;  // renamed from timeLimit
+  timeLimit: number;
   allowHints: boolean;
   hintPenalty: number;
   prompt: string;
   debugMode: boolean;
-  // Advanced settings
-  bonusTime: number;
-  wrongPenalty: number;
-  comboBonus: boolean;
-  mistakePenalty: number;
-  timeBonus: boolean;
 }
 
 interface MemorySettingsProps {
@@ -34,19 +27,12 @@ interface MemorySettingsProps {
 const MemorySettings: React.FC<MemorySettingsProps> = ({ onStart, topic, onCancel }) => {
   const [settings, setSettings] = useState<MemorySettingsData>({
     gridSize: 4,
-    totalTime: 300,
+    timeLimit: 300,
     allowHints: true,
     hintPenalty: 5,
     prompt: topic || '',
-    debugMode: false,
-    // Advanced settings defaults
-    bonusTime: 3,
-    wrongPenalty: 0.2,
-    comboBonus: true,
-    mistakePenalty: 2,
-    timeBonus: true
+    debugMode: false
   });
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (topic && topic !== settings.prompt) {
@@ -136,105 +122,23 @@ const MemorySettings: React.FC<MemorySettingsProps> = ({ onStart, topic, onCance
                 )}
               </div>
 
-               {/* Total Time */}
-               <div className="space-y-2">
-                 <div className="flex justify-between items-center">
-                   <Label htmlFor="totalTime" className="text-sm font-medium flex items-center gap-2">
-                     <Clock4 className="h-4 w-4 text-primary" /> Tổng Thời Gian
-                   </Label>
-                   <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.totalTime} giây</span>
-                 </div>
-                 <Slider 
-                   id="totalTime"
-                   min={30} 
-                   max={300} 
-                   step={10} 
-                   value={[settings.totalTime]} 
-                   onValueChange={(value) => handleSliderChange('totalTime', value)}
-                 />
-               </div>
-
-               {/* Advanced Settings */}
-               <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-                 <CollapsibleTrigger asChild>
-                   <Button variant="outline" className="w-full justify-between border-primary/20">
-                     <span className="flex items-center gap-2">
-                       <Settings className="h-4 w-4" />
-                       Cài đặt nâng cao
-                     </span>
-                     <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-                   </Button>
-                 </CollapsibleTrigger>
-                 <CollapsibleContent className="mt-3 space-y-3">
-                   {/* Bonus Time */}
-                   <div className="space-y-2">
-                     <div className="flex justify-between items-center">
-                       <Label className="text-sm font-medium">Thưởng thời gian (giây/cặp)</Label>
-                       <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.bonusTime}s</span>
-                     </div>
-                     <Slider 
-                       min={1} 
-                       max={10} 
-                       step={1} 
-                       value={[settings.bonusTime]} 
-                       onValueChange={(value) => handleSliderChange('bonusTime', value)}
-                     />
-                   </div>
-
-                   {/* Wrong Penalty */}
-                   <div className="space-y-2">
-                     <div className="flex justify-between items-center">
-                       <Label className="text-sm font-medium">Phạt lật sai (điểm)</Label>
-                       <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.wrongPenalty}</span>
-                     </div>
-                     <Slider 
-                       min={0} 
-                       max={0.5} 
-                       step={0.1} 
-                       value={[settings.wrongPenalty]} 
-                       onValueChange={(value) => handleSliderChange('wrongPenalty', value)}
-                     />
-                   </div>
-
-                   {/* Mistake Penalty */}
-                   <div className="space-y-2">
-                     <div className="flex justify-between items-center">
-                       <Label className="text-sm font-medium">Phạt thời gian sai lầm (giây)</Label>
-                       <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.mistakePenalty}s</span>
-                     </div>
-                     <Slider 
-                       min={0} 
-                       max={10} 
-                       step={1} 
-                       value={[settings.mistakePenalty]} 
-                       onValueChange={(value) => handleSliderChange('mistakePenalty', value)}
-                     />
-                   </div>
-
-                   {/* Advanced Options */}
-                   <div className="space-y-3">
-                     <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                       <Switch 
-                         checked={settings.comboBonus}
-                         onCheckedChange={(checked) => handleSwitchChange('comboBonus', checked)} 
-                       />
-                       <Label className="text-sm font-medium">
-                         Thưởng combo
-                       </Label>
-                     </div>
-
-                     <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                       <Switch 
-                         checked={settings.timeBonus}
-                         onCheckedChange={(checked) => handleSwitchChange('timeBonus', checked)} 
-                       />
-                       <Label className="text-sm font-medium">
-                         Thưởng thời gian
-                       </Label>
-                     </div>
-                   </div>
-                 </CollapsibleContent>
-               </Collapsible>
+              {/* Time Limit */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="timeLimit" className="text-sm font-medium flex items-center gap-2">
+                    <Clock4 className="h-4 w-4 text-primary" /> Tổng Thời Gian
+                  </Label>
+                  <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.timeLimit} giây</span>
+                </div>
+                <Slider 
+                  id="timeLimit"
+                  min={30} 
+                  max={300} 
+                  step={10} 
+                  value={[settings.timeLimit]} 
+                  onValueChange={(value) => handleSliderChange('timeLimit', value)}
+                />
+              </div>
             </div>
 
             {/* Right Column */}
