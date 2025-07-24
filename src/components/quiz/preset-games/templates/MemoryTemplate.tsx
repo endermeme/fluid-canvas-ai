@@ -12,9 +12,10 @@ interface MemoryTemplateProps {
   content: any;
   topic: string;
   settings?: any;
+  onGameComplete?: (result: any) => Promise<void>;
 }
 
-const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, settings }) => {
+const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, settings, onGameComplete }) => {
   const gameContent = content || data;
   // Use settings from props or fallback values
   const gameSettings = {
@@ -79,6 +80,17 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, s
       return () => clearTimeout(timer);
     } else if (timeLeft === 0 && !gameOver && !gameWon) {
       setGameOver(true);
+      const completionTime = gameSettings.totalTime - timeLeft;
+      
+      if (onGameComplete) {
+        onGameComplete({
+          score: matchedPairs,
+          totalQuestions: totalPairs,
+          completionTime,
+          gameType: 'memory'
+        });
+      }
+      
       toast({
         title: "Hết thời gian!",
         description: "Bạn đã hết thời gian chơi.",
@@ -90,13 +102,24 @@ const MemoryTemplate: React.FC<MemoryTemplateProps> = ({ data, content, topic, s
   useEffect(() => {
     if (matchedPairs === totalPairs && totalPairs > 0) {
       setGameWon(true);
+      const completionTime = gameSettings.totalTime - timeLeft;
+      
+      if (onGameComplete) {
+        onGameComplete({
+          score: totalPairs,
+          totalQuestions: totalPairs,
+          completionTime,
+          gameType: 'memory'
+        });
+      }
+      
       toast({
         title: "Chúc mừng!",
         description: "Bạn đã hoàn thành trò chơi.",
         variant: "default",
       });
     }
-  }, [matchedPairs, totalPairs, toast]);
+  }, [matchedPairs, totalPairs, toast, onGameComplete, gameSettings.totalTime, timeLeft]);
 
   useEffect(() => {
     if (flippedCards.length === 2) {

@@ -10,6 +10,7 @@ interface MatchingTemplateProps {
   content: any;
   topic: string;
   settings?: any;
+  onGameComplete?: (result: any) => Promise<void>;
 }
 
 interface MatchingItem {
@@ -18,7 +19,7 @@ interface MatchingItem {
   matched: boolean;
 }
 
-const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ data, content, topic, settings }) => {
+const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ data, content, topic, settings, onGameComplete }) => {
   const gameContent = content || data;
   // Memoize settings to prevent infinite re-renders
   const gameSettings = useMemo(() => ({
@@ -110,6 +111,17 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ data, content, topi
       return () => clearTimeout(timer);
     } else if (timeLeft === 0 && !gameOver && !gameWon) {
       setGameOver(true);
+      const completionTime = gameSettings.timeLimit - timeLeft;
+      
+      if (onGameComplete) {
+        onGameComplete({
+          score: matchedPairs,
+          totalQuestions: totalPairs,
+          completionTime,
+          gameType: 'matching'
+        });
+      }
+      
       toast({
         title: "Hết thời gian!",
         description: "Bạn đã hết thời gian làm bài.",
@@ -122,6 +134,16 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ data, content, topi
   useEffect(() => {
     if (matchedPairs === totalPairs && totalPairs > 0 && !gameWon && !gameOver) {
       setGameWon(true);
+      const completionTime = gameSettings.timeLimit - timeLeft;
+      
+      if (onGameComplete) {
+        onGameComplete({
+          score: matchedPairs,
+          totalQuestions: totalPairs,
+          completionTime,
+          gameType: 'matching'
+        });
+      }
       
       toast({
         title: "Chúc mừng!",
@@ -129,7 +151,7 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ data, content, topi
         variant: "default",
       });
     }
-  }, [matchedPairs, totalPairs, gameWon, gameOver, toast]);
+  }, [matchedPairs, totalPairs, gameWon, gameOver, toast, onGameComplete, gameSettings.timeLimit, timeLeft]);
 
   const handleLeftItemClick = useCallback((id: number) => {
     if (gameOver || gameWon) return;
