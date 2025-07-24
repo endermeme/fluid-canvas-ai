@@ -138,7 +138,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
           if (onGameComplete) {
             const completionTime = gameSettings.totalTime - timeLeft;
             onGameComplete({
-              score,
+              score: score + 1, // Phải cộng điểm vì chưa được update
               totalQuestions: sentences.length,
               completionTime,
               gameType: 'ordering'

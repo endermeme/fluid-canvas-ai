@@ -76,6 +76,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
         await onGameComplete({
           score: knownCards,
           totalQuestions: totalCards,
+          completionTime: 0, // Flashcards không có giới hạn thời gian
           gameType: 'flashcards'
         });
       }
