@@ -50,12 +50,13 @@ export const GamePasswordForm: React.FC<GamePasswordFormProps> = ({
             <Label htmlFor="password">Nhập mật khẩu để tham gia game:</Label>
             <Input
               id="password"
-              type="password"
+              type="text"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Mật khẩu game"
               disabled={isVerifying}
               autoFocus
+              className="focus:ring-2 focus:ring-primary"
             />
           </div>
 
