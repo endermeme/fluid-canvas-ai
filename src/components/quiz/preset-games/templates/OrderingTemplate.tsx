@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, ArrowUp, ArrowDown, Check, Clock, Shuffle, Lightbulb } from 'lucide-react';
+import { calculateScore, ScoreStats } from '@/utils/gameScoring';
 
 interface OrderingTemplateProps {
   data?: any;
@@ -32,6 +33,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
   const [timerRunning, setTimerRunning] = useState(true);
   const [isChecking, setIsChecking] = useState(false);
   const [hasShownHint, setHasShownHint] = useState(false);
+  const [hintsUsed, setHintsUsed] = useState(0);
   const { toast } = useToast();
 
   const sentences = gameContent?.sentences || [];
@@ -152,6 +154,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
     }
     
     setHasShownHint(true);
+    setHintsUsed(prev => prev + 1);
     setTimeLeft(Math.max(10, timeLeft - gameSettings.hintPenalty));
     
     toast({
@@ -190,6 +193,20 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
   }
 
   if (showResult) {
+    // Calculate advanced score using new scoring system
+    const scoreStats: ScoreStats = {
+      correct: score,
+      wrong: sentences.length - score,
+      hints: hintsUsed,
+      baseUnit: 1,
+      timeLeft: timeLeft,
+      totalTime: gameSettings.totalTime,
+      k: settings?.timeWeight || 0.5,
+      w: 0, // No wrong penalty for ordering
+      h: settings?.hintPenalty ? 0.2 : 0
+    };
+    
+    const finalScore = calculateScore(scoreStats);
     const percentage = Math.round((score / sentences.length) * 100);
     
     return (
@@ -212,6 +229,8 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
             <div className="text-2xl font-bold mb-6 text-primary">
               {score} / {sentences.length}
             </div>
+            
+            <div className="text-sm text-primary/70 mb-4">Điểm tổng: {finalScore}</div>
             
             <div className="text-center text-sm text-primary/70">
               Sử dụng nút làm mới ở header để chơi lại

@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle, ChevronRight, Clock, Share2 } from 'lucide-react';
 import { useGameShareManager } from '../../hooks/useGameShareManager';
+import { calculateScore, ScoreStats } from '@/utils/gameScoring';
 
 interface TrueFalseTemplateProps {
   data?: any;
@@ -198,8 +199,24 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   }
 
   if (showResult) {
-    const finalScore = userAnswers.filter((answer, index) => answer === questions[index]?.isTrue).length;
-    const percentage = Math.round((finalScore / questions.length) * 100);
+    const correctAnswers = userAnswers.filter((answer, index) => answer === questions[index]?.isTrue).length;
+    const wrongAnswers = questions.length - correctAnswers;
+    
+    // Calculate advanced score using new scoring system
+    const scoreStats: ScoreStats = {
+      correct: correctAnswers,
+      wrong: wrongAnswers,
+      hints: 0,
+      baseUnit: 1,
+      timeLeft: totalTimeLeft,
+      totalTime: gameSettings.totalTime,
+      k: settings?.timeWeight || 0.7,
+      w: settings?.wrongPenalty || 0.25,
+      h: 0
+    };
+    
+    const finalScore = calculateScore(scoreStats);
+    const percentage = Math.round((correctAnswers / questions.length) * 100);
     
     return (
       <div className="h-full flex items-center justify-center p-6">
@@ -210,7 +227,8 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
           </p>
           <div className="mb-6">
             <div className="text-4xl font-bold mb-2 text-primary">{percentage}%</div>
-            <div className="text-lg text-primary">{finalScore} / {questions.length} câu đúng</div>
+            <div className="text-lg text-primary">{correctAnswers} / {questions.length} câu đúng</div>
+            <div className="text-sm text-primary/70 mt-2">Điểm tổng: {finalScore}</div>
             <Progress value={percentage} className="h-3 mt-4" />
           </div>
           <div className="text-sm text-primary/70">

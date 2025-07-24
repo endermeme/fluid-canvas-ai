@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle, RefreshCw, Clock, ChevronRight } from 'lucide-react';
+import { calculateScore, ScoreStats } from '@/utils/gameScoring';
 
 interface QuizTemplateProps {
   data?: any;
@@ -165,6 +166,21 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
   }
 
   if (showResult) {
+    // Calculate advanced score using new scoring system
+    const wrongAnswers = questions.length - score;
+    const scoreStats: ScoreStats = {
+      correct: score,
+      wrong: wrongAnswers,
+      hints: 0,
+      baseUnit: 1,
+      timeLeft: totalTimeLeft,
+      totalTime: gameSettings.totalTime,
+      k: settings?.timeWeight || 0.7,
+      w: settings?.wrongPenalty || 0.25,
+      h: 0
+    };
+    
+    const finalScore = calculateScore(scoreStats);
     const percentage = Math.round((score / questions.length) * 100);
     const minutesLeft = Math.floor(totalTimeLeft / 60);
     const secondsLeft = totalTimeLeft % 60;
@@ -192,6 +208,7 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
                 <span className="text-primary">Điểm của bạn</span>
                 <span className="font-bold text-primary">{percentage}%</span>
               </div>
+              <div className="text-sm text-primary/70 mb-2">Điểm tổng: {finalScore}</div>
               <Progress value={percentage} className="h-3" />
             </div>
             

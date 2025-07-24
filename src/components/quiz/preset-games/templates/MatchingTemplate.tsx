@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { RefreshCw, Clock, Trophy } from 'lucide-react';
+import { calculateScore, ScoreStats } from '@/utils/gameScoring';
 
 interface MatchingTemplateProps {
   data?: any;
@@ -123,9 +124,24 @@ const MatchingTemplate: React.FC<MatchingTemplateProps> = ({ data, content, topi
     if (matchedPairs === totalPairs && totalPairs > 0 && !gameWon && !gameOver) {
       setGameWon(true);
       
+      // Calculate advanced score using new scoring system
+      const scoreStats: ScoreStats = {
+        correct: matchedPairs,
+        wrong: incorrectAttempts,
+        hints: 0,
+        baseUnit: 1,
+        timeLeft: timeLeft,
+        totalTime: gameSettings.timeLimit,
+        k: settings?.timeWeight || 0.6,
+        w: settings?.wrongPenalty || 0.1,
+        h: 0
+      };
+      
+      const finalScore = calculateScore(scoreStats);
+      
       toast({
         title: "Chúc mừng!",
-        description: `Bạn đã hoàn thành trò chơi với ${totalPairs} cặp từ.`,
+        description: `Bạn đã hoàn thành trò chơi với điểm số: ${finalScore}`,
         variant: "default",
       });
     }
