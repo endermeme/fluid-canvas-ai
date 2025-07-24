@@ -164,7 +164,7 @@ export const gameTypes: GameType[] = [
       timePerQuestion: 60,
       category: 'general',
       totalTime: 300,
-      gridSize: 10,
+      gridSize: 'medium',
       allowDiagonalWords: true,
       showWordList: true,
       bonusTimePerWord: 15
