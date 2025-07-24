@@ -50,23 +50,6 @@ export interface GameSettingsData {
   showCategoryHints?: boolean;
   useCanvas?: boolean;
   debugMode?: boolean;
-  // New advanced settings
-  negativeMarking?: boolean;
-  timeBonus?: boolean;
-  maxAttempts?: number;
-  repetitionMode?: boolean;
-  confidenceLevel?: boolean;
-  autoFlipTime?: number;
-  comboBonus?: boolean;
-  mistakePenalty?: number;
-  gridSizeAdvanced?: boolean;
-  shufflePairs?: boolean;
-  bonusTimePerMatchAdvanced?: boolean;
-  partialCredit?: boolean;
-  hintLimit?: number;
-  shuffleSentences?: boolean;
-  timePerQuestionAdvanced?: boolean;
-  timeBonusPerWord?: number;
 }
 
 export interface GameType {

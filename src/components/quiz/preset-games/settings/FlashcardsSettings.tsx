@@ -7,8 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Lightbulb, Type, Trophy, Medal, Timer, Clock, Clock4, Bug, RotateCcw, Settings, ChevronDown, RefreshCw, Target } from 'lucide-react';
+import { Lightbulb, Type, Trophy, Medal, Timer, Clock, Clock4, Bug, RotateCcw } from 'lucide-react';
 
 export interface FlashcardsSettingsData {
   cardCount: number;
@@ -17,10 +16,6 @@ export interface FlashcardsSettingsData {
   allowSkip: boolean;
   prompt: string;
   debugMode: boolean;
-  // Advanced settings
-  repetitionMode: boolean;
-  confidenceLevel: boolean;
-  autoFlipTime: number;
 }
 
 interface FlashcardsSettingsProps {
@@ -36,13 +31,8 @@ const FlashcardsSettings: React.FC<FlashcardsSettingsProps> = ({ onStart, topic,
     showHints: true,
     allowSkip: true,
     prompt: topic || '',
-    debugMode: false,
-    // Advanced settings defaults
-    repetitionMode: false,
-    confidenceLevel: false,
-    autoFlipTime: 3
+    debugMode: false
   });
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (topic && topic !== settings.prompt) {
@@ -165,59 +155,6 @@ const FlashcardsSettings: React.FC<FlashcardsSettingsProps> = ({ onStart, topic,
                   </Label>
                 </div>
               </div>
-
-              {/* Advanced Settings */}
-              <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between border-primary/20">
-                    <div className="flex items-center gap-2">
-                      <Settings className="h-4 w-4 text-primary" />
-                      Cài đặt nâng cao
-                    </div>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="mt-3 space-y-3">
-                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                    <Switch 
-                      id="repetitionMode" 
-                      checked={settings.repetitionMode}
-                      onCheckedChange={(checked) => handleSwitchChange('repetitionMode', checked)} 
-                    />
-                    <Label htmlFor="repetitionMode" className="text-sm font-medium flex items-center gap-2">
-                      <RefreshCw className="h-4 w-4 text-primary" /> Lặp lại thẻ chưa biết
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                    <Switch 
-                      id="confidenceLevel" 
-                      checked={settings.confidenceLevel}
-                      onCheckedChange={(checked) => handleSwitchChange('confidenceLevel', checked)} 
-                    />
-                    <Label htmlFor="confidenceLevel" className="text-sm font-medium flex items-center gap-2">
-                      <Target className="h-4 w-4 text-primary" /> Đánh giá mức độ tự tin
-                    </Label>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <Label htmlFor="autoFlipTime" className="text-sm font-medium flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-primary" /> Thời gian tự lật
-                      </Label>
-                      <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.autoFlipTime} giây</span>
-                    </div>
-                    <Slider 
-                      id="autoFlipTime"
-                      min={1} 
-                      max={10} 
-                      step={1} 
-                      value={[settings.autoFlipTime]} 
-                      onValueChange={(value) => handleSliderChange('autoFlipTime', value)}
-                    />
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
 
               {/* Debug Mode */}
               <div className="border-t border-border/50 pt-3">

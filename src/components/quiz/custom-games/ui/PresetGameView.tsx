@@ -50,14 +50,9 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
   };
 
   const handleGameComplete = async (result: any) => {
-    console.log('PresetGameView - handleGameComplete called with:', result);
-    console.log('PresetGameView - currentGameId:', currentGameId);
-    
     if (currentGameId && result && typeof result.score === 'number') {
       const registeredGamesStr = localStorage.getItem('registered_games');
       let playerName = 'Người chơi';
-      
-      console.log('PresetGameView - registeredGamesStr:', registeredGamesStr);
       
       if (registeredGamesStr) {
         const registeredGames = JSON.parse(registeredGamesStr);
@@ -73,15 +68,6 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
         }
       }
 
-      console.log('PresetGameView - About to save score with data:', {
-        gameId: currentGameId,
-        playerName,
-        score: result.score,
-        totalQuestions: result.totalQuestions || result.total || 10,
-        completionTime: result.completionTime,
-        gameType: miniGame.gameType || 'preset'
-      });
-
       await saveGameScore({
         gameId: currentGameId,
         playerName,
@@ -89,12 +75,6 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
         totalQuestions: result.totalQuestions || result.total || 10,
         completionTime: result.completionTime,
         gameType: miniGame.gameType || 'preset'
-      });
-    } else {
-      console.log('PresetGameView - handleGameComplete conditions not met:', {
-        currentGameId,
-        result,
-        hasScore: result && typeof result.score === 'number'
       });
     }
   };

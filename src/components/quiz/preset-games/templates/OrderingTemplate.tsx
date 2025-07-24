@@ -11,10 +11,9 @@ interface OrderingTemplateProps {
   content: any;
   topic: string;
   settings?: any;
-  onGameComplete?: (result: any) => Promise<void>;
 }
 
-const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topic, settings, onGameComplete }) => {
+const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topic, settings }) => {
   const gameContent = content || data;
   // Use settings from props or fallback values
   const gameSettings = {
@@ -57,16 +56,6 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
     } else if (timeLeft === 0 && timerRunning && !showResult) {
       setShowResult(true);
       setTimerRunning(false);
-      
-      if (onGameComplete) {
-        const completionTime = gameSettings.totalTime - timeLeft;
-        onGameComplete({
-          score,
-          totalQuestions: sentences.length,
-          completionTime,
-          gameType: 'ordering'
-        });
-      }
       
       toast({
         title: "Hết thời gian!",
@@ -134,16 +123,6 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
         } else {
           setShowResult(true);
           setTimerRunning(false);
-          
-          if (onGameComplete) {
-            const completionTime = gameSettings.totalTime - timeLeft;
-            onGameComplete({
-              score: score + 1, // Phải cộng điểm vì chưa được update
-              totalQuestions: sentences.length,
-              completionTime,
-              gameType: 'ordering'
-            });
-          }
         }
       }
     }, 2000);

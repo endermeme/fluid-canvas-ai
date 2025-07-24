@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -12,10 +13,9 @@ interface FlashcardsTemplateProps {
   content: any;
   topic: string;
   settings?: any;
-  onGameComplete?: (result: any) => Promise<void>;
 }
 
-const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, topic, settings, onGameComplete }) => {
+const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, topic, settings }) => {
   const gameContent = content || data;
   // Use settings from props with proper defaults
   const gameSettings = {
@@ -33,7 +33,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
   const [showHints, setShowHints] = useState(gameSettings.showHints);
   const [allowSkip, setAllowSkip] = useState(gameSettings.allowSkip);
   const [flipTimer, setFlipTimer] = useState<NodeJS.Timeout | null>(null);
-  const [gameCompleted, setGameCompleted] = useState(false);
   const { toast } = useToast();
 
   // Filter cards based on cardCount setting
@@ -65,35 +64,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
       if (flipTimer) clearTimeout(flipTimer);
     };
   }, [currentCard, isFlipped, autoFlip]);
-
-  const checkGameCompletion = async (cardsState: Array<'unreviewed' | 'known' | 'unknown'>) => {
-    if (!gameCompleted && cardsState.every(state => state !== 'unreviewed')) {
-      setGameCompleted(true);
-      const knownCards = cardsState.filter(state => state === 'known').length;
-      const totalCards = cardsState.length;
-      console.log('FlashcardsTemplate - Game completed, calling onGameComplete with:', {
-        score: knownCards,
-        totalQuestions: totalCards,
-        completionTime: 0,
-        gameType: 'flashcards'
-      });
-      
-      if (onGameComplete) {
-        await onGameComplete({
-          score: knownCards,
-          totalQuestions: totalCards,
-          completionTime: 0, // Flashcards không có giới hạn thời gian
-          gameType: 'flashcards'
-        });
-      }
-      
-      toast({
-        title: "Hoàn thành! 🎉",
-        description: `Bạn đã thuộc ${knownCards}/${totalCards} thẻ.`,
-        variant: "default",
-      });
-    }
-  };
 
   const handleFlip = () => {
     if (flipTimer) {
@@ -138,11 +108,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
     // Auto advance to next card if enabled
     if (currentCard < cards.length - 1) {
       handleNextCard();
-    } else {
-      // Check if all cards have been reviewed
-      const newCardsState = [...cardsState];
-      newCardsState[currentCard] = status;
-      checkGameCompletion(newCardsState);
     }
   };
 
@@ -170,7 +135,6 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
     setCurrentCard(0);
     setIsFlipped(false);
     setCardsState(new Array(cards.length).fill('unreviewed'));
-    setGameCompleted(false);
     toast({
       title: "Làm lại từ đầu",
       description: "Đã đặt lại tất cả thẻ ghi nhớ.",

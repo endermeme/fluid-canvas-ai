@@ -11,7 +11,6 @@ interface WordSearchTemplateProps {
   content: any;
   topic: string;
   settings?: any;
-  onGameComplete?: (result: any) => Promise<void>;
 }
 
 interface WordLocation {
@@ -22,7 +21,7 @@ interface WordLocation {
   endCol: number;
 }
 
-const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ data, content, topic, settings, onGameComplete }) => {
+const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ data, content, topic, settings }) => {
   const gameContent = content || data;
   // Use settings from props or fallback values
   const gameSettings = {
@@ -56,17 +55,6 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ data, content, 
       return () => clearTimeout(timer);
     } else if (timeLeft === 0 && !gameOver && !gameWon) {
       setGameOver(true);
-      const completionTime = gameSettings.totalTime; // Hết thời gian = toàn bộ thời gian game
-      
-      if (onGameComplete) {
-        onGameComplete({
-          score: foundWords.length,
-          totalQuestions: totalWords,
-          completionTime,
-          gameType: 'wordsearch'
-        });
-      }
-      
       toast({
         title: "Hết thời gian!",
         description: "Bạn đã hết thời gian tìm từ.",
@@ -79,24 +67,13 @@ const WordSearchTemplate: React.FC<WordSearchTemplateProps> = ({ data, content, 
   useEffect(() => {
     if (foundWords.length === totalWords && totalWords > 0) {
       setGameWon(true);
-      const completionTime = gameSettings.totalTime - timeLeft;
-      
-      if (onGameComplete) {
-        onGameComplete({
-          score: foundWords.length,
-          totalQuestions: totalWords,
-          completionTime,
-          gameType: 'wordsearch'
-        });
-      }
-      
       toast({
         title: "Chúc mừng!",
         description: "Bạn đã tìm thấy tất cả các từ.",
         variant: "default",
       });
     }
-  }, [foundWords.length, totalWords, toast, onGameComplete, gameSettings.totalTime, timeLeft]);
+  }, [foundWords.length, totalWords, toast]);
 
   const handleCellClick = (row: number, col: number) => {
     if (gameOver || gameWon) return;

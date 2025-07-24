@@ -7,8 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { BrainCircuit, Type, Trophy, Medal, Timer, Clock4, Bug, Eye, Settings, ChevronDown, Zap, Minus, Grid3X3 } from 'lucide-react';
+import { BrainCircuit, Type, Trophy, Medal, Timer, Clock4, Bug, Eye } from 'lucide-react';
 
 export interface MemorySettingsData {
   gridSize: number;
@@ -17,10 +16,6 @@ export interface MemorySettingsData {
   hintPenalty: number;
   prompt: string;
   debugMode: boolean;
-  // Advanced settings
-  comboBonus: boolean;
-  mistakePenalty: number;
-  gridSizeAdvanced: boolean;
 }
 
 interface MemorySettingsProps {
@@ -36,13 +31,8 @@ const MemorySettings: React.FC<MemorySettingsProps> = ({ onStart, topic, onCance
     allowHints: true,
     hintPenalty: 5,
     prompt: topic || '',
-    debugMode: false,
-    // Advanced settings defaults
-    comboBonus: false,
-    mistakePenalty: 3,
-    gridSizeAdvanced: false
+    debugMode: false
   });
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (topic && topic !== settings.prompt) {
@@ -187,59 +177,6 @@ const MemorySettings: React.FC<MemorySettingsProps> = ({ onStart, topic, onCance
                   />
                 </div>
               )}
-
-              {/* Advanced Settings */}
-              <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between border-primary/20">
-                    <div className="flex items-center gap-2">
-                      <Settings className="h-4 w-4 text-primary" />
-                      Cài đặt nâng cao
-                    </div>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="mt-3 space-y-3">
-                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                    <Switch 
-                      id="comboBonus" 
-                      checked={settings.comboBonus}
-                      onCheckedChange={(checked) => handleSwitchChange('comboBonus', checked)} 
-                    />
-                    <Label htmlFor="comboBonus" className="text-sm font-medium flex items-center gap-2">
-                      <Zap className="h-4 w-4 text-primary" /> Thưởng điểm combo
-                    </Label>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <Label htmlFor="mistakePenalty" className="text-sm font-medium flex items-center gap-2">
-                        <Minus className="h-4 w-4 text-primary" /> Phạt sai lần
-                      </Label>
-                      <span className="px-2 py-1 bg-primary/10 rounded text-sm">{settings.mistakePenalty} điểm</span>
-                    </div>
-                    <Slider 
-                      id="mistakePenalty"
-                      min={1} 
-                      max={10} 
-                      step={1} 
-                      value={[settings.mistakePenalty]} 
-                      onValueChange={(value) => handleSliderChange('mistakePenalty', value)}
-                    />
-                  </div>
-
-                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
-                    <Switch 
-                      id="gridSizeAdvanced" 
-                      checked={settings.gridSizeAdvanced}
-                      onCheckedChange={(checked) => handleSwitchChange('gridSizeAdvanced', checked)} 
-                    />
-                    <Label htmlFor="gridSizeAdvanced" className="text-sm font-medium flex items-center gap-2">
-                      <Grid3X3 className="h-4 w-4 text-primary" /> Kích thước lưới nâng cao
-                    </Label>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
 
               {/* Debug Mode */}
               <div className="border-t border-border/50 pt-3">
