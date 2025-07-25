@@ -13,6 +13,12 @@ export const GEMINI_MODELS = {
   PRESET_GAME: "gemini-2.5-flash-preview-05-20"
 };
 
+// OpenRouter API configurations
+export const OPENROUTER_CONFIG = {
+  BASE_URL: "https://openrouter.ai/api/v1/chat/completions",
+  MODEL: "moonshotai/kimi-k2"
+};
+
 // API Version
 export const API_VERSION = "v1beta";
 
@@ -22,6 +28,9 @@ export const API_BASE_URL = "https://generativelanguage.googleapis.com";
 // Full API Endpoint
 export const getApiEndpoint = (model = GEMINI_MODELS.CUSTOM_GAME) => 
   `${API_BASE_URL}/${API_VERSION}/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+
+// OpenRouter API Endpoint
+export const getOpenRouterEndpoint = () => OPENROUTER_CONFIG.BASE_URL;
 
 // AI Generation Settings - đơn giản hóa
 export const DEFAULT_GENERATION_SETTINGS = {

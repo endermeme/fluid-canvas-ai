@@ -8,17 +8,20 @@ import {
   GEMINI_MODELS, 
   API_VERSION, 
   getApiEndpoint,
+  getOpenRouterEndpoint,
+  OPENROUTER_CONFIG,
   DEFAULT_GENERATION_SETTINGS 
 } from '@/constants/api-constants';
 import { createGameGenerationPrompt } from './geminiPrompt';
 import type { MiniGame, GameApiResponse } from './types';
 
 const SOURCE = "GEMINI";
+const OPENROUTER_SOURCE = "OPENROUTER";
 
 // Export the MiniGame type for use in other files
 export type { MiniGame } from './types';
 
-// Đơn giản hóa AIGameGenerator - chỉ giữ tính năng cơ bản
+// Đơn giản hóa AIGameGenerator - hỗ trợ cả Gemini và OpenRouter
 export class AIGameGenerator {
   private static instance: AIGameGenerator | null = null;
 
@@ -31,7 +34,15 @@ export class AIGameGenerator {
     return AIGameGenerator.instance;
   }
 
-  public async generateMiniGame(topic: string, settings?: GameSettingsData): Promise<MiniGame | null> {
+  public async generateMiniGame(
+    topic: string, 
+    settings?: GameSettingsData, 
+    provider: 'gemini' | 'openrouter' = 'gemini',
+    openRouterApiKey?: string
+  ): Promise<MiniGame | null> {
+    if (provider === 'openrouter' && openRouterApiKey) {
+      return tryOpenRouterGeneration(topic, openRouterApiKey, settings);
+    }
     return tryGeminiGeneration(null, topic, settings);
   }
 }
@@ -154,6 +165,80 @@ const processGameCode = (text: string): { title: string, content: string } => {
   };
 };
 
+// Hàm tạo game với OpenRouter API
+export const generateWithOpenRouter = async (
+  topic: string,
+  apiKey: string,
+  settings?: GameSettingsData
+): Promise<MiniGame | null> => {
+  logInfo(OPENROUTER_SOURCE, `Starting game generation for "${topic}"`, {
+    model: OPENROUTER_CONFIG.MODEL,
+    settings: settings || {}
+  });
+
+  const prompt = createGameGenerationPrompt({ topic });
+
+  try {
+    logInfo(OPENROUTER_SOURCE, `Sending request to OpenRouter API`);
+    
+    const startTime = Date.now();
+    
+    const payload = {
+      model: OPENROUTER_CONFIG.MODEL,
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        }
+      ]
+    };
+    
+    const response = await fetch(getOpenRouterEndpoint(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    
+    const result = await response.json();
+    const text = result?.choices?.[0]?.message?.content || '';
+    
+    if (!text) {
+      throw new Error('No content returned from API');
+    }
+    
+    const duration = measureExecutionTime(startTime);
+    logSuccess(OPENROUTER_SOURCE, `Response received in ${duration.seconds}s`);
+    
+    // Xử lý code để extract thông tin và clean
+    const { title, content } = processGameCode(text);
+    
+    // Tạo đối tượng game
+    const game: MiniGame = {
+      title: title || topic,
+      content: content
+    };
+    
+    logSuccess(OPENROUTER_SOURCE, "Game generated successfully", {
+      title: game.title,
+      contentLength: game.content.length,
+      hasDocType: game.content.includes('<!DOCTYPE')
+    });
+    
+    return game;
+  } catch (error) {
+    logError(OPENROUTER_SOURCE, "Error generating with OpenRouter", error);
+    throw error;
+  }
+};
+
 // Đơn giản hóa tryGeminiGeneration
 export const tryGeminiGeneration = async (
   model: any,
@@ -177,5 +262,31 @@ export const tryGeminiGeneration = async (
     await new Promise(resolve => setTimeout(resolve, waitTime));
     
     return tryGeminiGeneration(null, topic, settings, retryCount + 1);
+  }
+};
+
+// Thử OpenRouter generation với retry
+export const tryOpenRouterGeneration = async (
+  topic: string,
+  apiKey: string,
+  settings?: GameSettingsData,
+  retryCount = 0
+): Promise<MiniGame | null> => {
+  const maxRetries = 3;
+  
+  if (retryCount >= maxRetries) {
+    logWarning(OPENROUTER_SOURCE, `Reached maximum retries (${maxRetries})`);
+    return null;
+  }
+  
+  try {
+    return await generateWithOpenRouter(topic, apiKey, settings);
+  } catch (error) {
+    logError(OPENROUTER_SOURCE, `Attempt ${retryCount + 1} failed`, error);
+    
+    const waitTime = (retryCount + 1) * 1500;
+    await new Promise(resolve => setTimeout(resolve, waitTime));
+    
+    return tryOpenRouterGeneration(topic, apiKey, settings, retryCount + 1);
   }
 };
