@@ -33,11 +33,12 @@ const mapSupabaseParticipant = (participant: SupabaseGameParticipant): GameParti
   };
 };
 
-// Thêm người tham gia mới vào game
+// Thêm người tham gia mới vào game (bỏ age parameter)
 export const addParticipant = async (
   gameId: string,
   name: string,
-  ipAddress: string
+  ipAddress: string,
+  accountId?: string
 ): Promise<{ success: boolean; message?: string; participant?: GameParticipant }> => {
   if (!gameId || !name) {
     return {
@@ -100,14 +101,25 @@ export const addParticipant = async (
           game_id: gameId,
           name,
           ip_address: ipAddress,
-          retry_count: 0
+          retry_count: 0,
+          account_id: accountId
         }
       ])
       .select()
       .single();
 
     if (insertError) {
-      console.error("Error adding new participant:", insertError);
+      console.error("Error adding new participant (likely RLS issue):", insertError);
+      
+      // Kiểm tra nếu là lỗi RLS policy
+      if (insertError.message.includes('row-level security policy')) {
+        console.log("RLS policy violation - this is expected for public games");
+        return {
+          success: false,
+          message: "Database security restriction - using local storage instead"
+        };
+      }
+      
       return {
         success: false,
         message: "Không thể thêm người tham gia mới"
@@ -190,16 +202,23 @@ export const createGameSession = async (
 
 // Lấy danh sách người tham gia game
 export const getGameParticipants = async (
-  gameId: string
+  gameId: string,
+  accountId?: string
 ): Promise<GameParticipant[]> => {
   if (!gameId) return [];
   
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('game_participants')
       .select('*')
-      .eq('game_id', gameId)
-      .order('timestamp', { ascending: false });
+      .eq('game_id', gameId);
+    
+    // Filter by account if provided
+    if (accountId) {
+      query = query.eq('account_id', accountId);
+    }
+    
+    const { data, error } = await query.order('timestamp', { ascending: false });
     
     if (error) {
       console.error("Error fetching participants:", error);

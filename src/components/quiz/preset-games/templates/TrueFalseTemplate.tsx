@@ -1,62 +1,143 @@
 import React, { useState, useEffect } from 'react';
-import PresetGameHeader from '../PresetGameHeader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, RefreshCw, AlertCircle, Clock, ChevronRight } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronRight, Clock, Share2 } from 'lucide-react';
+import { useGameShareManager } from '../../hooks/useGameShareManager';
 
 interface TrueFalseTemplateProps {
   data?: any;
   content?: any;
   topic: string;
-  onBack?: () => void;
-  onShare?: () => void;
+  settings?: any;
+  onShare?: () => Promise<string>;
 }
 
-const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, topic, onShare }) => {
+const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, topic, settings, onShare }) => {
   const gameContent = content || data;
+  const questions = gameContent?.questions || [];
+  
+  const gameSettings = {
+    timePerQuestion: settings?.timePerQuestion || 12,
+    totalTime: settings?.totalTime || 180,
+    showExplanation: settings?.showExplanation !== false
+  };
+
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<Array<boolean | null>>([]);
+  const [userAnswers, setUserAnswers] = useState<(boolean | null)[]>(new Array(questions.length).fill(null));
   const [score, setScore] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(gameContent?.settings?.timePerQuestion || 15);
-  const [totalTimeLeft, setTotalTimeLeft] = useState(gameContent?.settings?.totalTime || 150);
-  const [timerRunning, setTimerRunning] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(gameSettings.timePerQuestion);
+  const [totalTimeLeft, setTotalTimeLeft] = useState(gameSettings.totalTime);
   const [showResult, setShowResult] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  
   const { toast } = useToast();
 
-  const questions = gameContent?.questions || [];
-  const isLastQuestion = currentQuestion === questions.length - 1;
-  const currentAnswer = userAnswers[currentQuestion];
+  // Generate HTML content for sharing
+  const generateHtmlContent = (): string => {
+    if (!gameContent?.questions) return '';
+    
+    const questionsJson = JSON.stringify(gameContent.questions);
+    
+    return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${gameContent.title || topic}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; padding: 20px; }
+        .question { font-size: 18px; margin: 20px 0; }
+        .buttons { display: flex; gap: 15px; justify-content: center; margin: 20px 0; }
+        .btn { padding: 15px 30px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        .btn-true { background: #4CAF50; color: white; }
+        .btn-false { background: #f44336; color: white; }
+        .correct { background: #2196F3 !important; }
+        .incorrect { background: #FF9800 !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>${gameContent.title || topic}</h1>
+        <div id="game-content"></div>
+    </div>
+    <script>
+        const questions = ${questionsJson};
+        let currentQ = 0;
+        let score = 0;
+        
+        function showQuestion() {
+            const q = questions[currentQ];
+            document.getElementById('game-content').innerHTML = \`
+                <div class="question">\${q.statement}</div>
+                <div class="buttons">
+                    <button class="btn btn-true" onclick="answer(true)">ĐÚNG</button>
+                    <button class="btn btn-false" onclick="answer(false)">SAI</button>
+                </div>
+            \`;
+        }
+        
+        function answer(userAnswer) {
+            const correct = userAnswer === questions[currentQ].isTrue;
+            if (correct) score++;
+            
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            setTimeout(() => {
+                currentQ++;
+                if (currentQ < questions.length) {
+                    showQuestion();
+                } else {
+                    showResult();
+                }
+            }, 1000);
+        }
+        
+        function showResult() {
+            document.getElementById('game-content').innerHTML = \`
+                <h2>Kết quả: \${score}/\${questions.length}</h2>
+                <button class="btn btn-true" onclick="location.reload()">Chơi lại</button>
+            \`;
+        }
+        
+        showQuestion();
+    </script>
+</body>
+</html>`;
+  };
 
+  const miniGame = {
+    title: gameContent?.title || topic,
+    content: generateHtmlContent()
+  };
+
+  const { isSharing, handleShare } = useGameShareManager(miniGame, toast, onShare);
+
+  // Initialize game
   useEffect(() => {
     if (!gameStarted && questions.length > 0) {
       setGameStarted(true);
-      const questionTime = gameContent?.settings?.timePerQuestion || 15;
-      const totalTime = gameContent?.settings?.totalTime || (questions.length * questionTime);
-      setTimeLeft(questionTime);
-      setTotalTimeLeft(totalTime);
     }
   }, [gameContent, questions, gameStarted]);
 
+  // Timer for current question
   useEffect(() => {
-    if (timeLeft > 0 && timerRunning) {
+    if (timeLeft > 0 && gameStarted && !showResult && userAnswers[currentQuestion] === null) {
       const timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && timerRunning) {
-      setTimerRunning(false);
-      toast({
-        title: "Hết thời gian!",
-        description: "Bạn đã không trả lời kịp thời.",
-        variant: "destructive",
-      });
+    } else if (timeLeft === 0 && userAnswers[currentQuestion] === null) {
+      // Time's up, auto skip
+      handleNextQuestion();
     }
-  }, [timeLeft, timerRunning, toast]);
+  }, [timeLeft, gameStarted, showResult, currentQuestion, userAnswers]);
 
+  // Total game timer
   useEffect(() => {
     if (totalTimeLeft > 0 && gameStarted && !showResult) {
       const timer = setTimeout(() => {
@@ -65,97 +146,76 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
       return () => clearTimeout(timer);
     } else if (totalTimeLeft === 0 && gameStarted && !showResult) {
       setShowResult(true);
-      toast({
-        title: "Trò chơi kết thúc",
-        description: "Đã hết thời gian. Hãy xem kết quả của bạn.",
-        variant: "destructive",
-      });
     }
-  }, [totalTimeLeft, gameStarted, showResult, toast]);
+  }, [totalTimeLeft, gameStarted, showResult]);
 
   const handleAnswer = (answer: boolean) => {
-    if (currentAnswer !== null) return;
+    if (userAnswers[currentQuestion] !== null) return;
+
     const newAnswers = [...userAnswers];
     newAnswers[currentQuestion] = answer;
     setUserAnswers(newAnswers);
-    setShowExplanation(gameContent?.settings?.showExplanation ?? true);
-    setTimerRunning(false);
 
     const isCorrect = answer === questions[currentQuestion].isTrue;
     if (isCorrect) {
       setScore(score + 1);
       toast({
-        title: "Chính xác! +1 điểm",
-        description: "Câu trả lời của bạn đúng.",
-        variant: "default",
+        title: "Chính xác!",
+        description: "Câu trả lời của bạn đúng. +1 điểm",
       });
     } else {
       toast({
         title: "Không chính xác!",
-        description: "Câu trả lời của bạn không đúng.",
+        description: "Câu trả lời của bạn sai.",
         variant: "destructive",
       });
+    }
+
+    if (gameSettings.showExplanation) {
+      setShowExplanation(true);
     }
   };
 
   const handleNextQuestion = () => {
-    if (isLastQuestion) {
+    if (currentQuestion === questions.length - 1) {
       setShowResult(true);
     } else {
       setCurrentQuestion(currentQuestion + 1);
       setShowExplanation(false);
-      setTimeLeft(gameContent?.settings?.timePerQuestion || 15);
-      setTimerRunning(true);
+      setTimeLeft(gameSettings.timePerQuestion);
     }
   };
 
-  const handleRestart = () => {
-    setCurrentQuestion(0);
-    setUserAnswers([]);
-    setScore(0);
-    setShowExplanation(false);
-    setShowResult(false);
-    setTimeLeft(gameContent?.settings?.timePerQuestion || 15);
-    setTotalTimeLeft(gameContent?.settings?.totalTime || 150);
-    setTimerRunning(true);
-    setGameStarted(true);
-  };
-
-  if (!content || !questions.length) {
+  if (!gameContent || !questions.length) {
     return (
-      <div className="p-4">
-        <PresetGameHeader />
-        <div>Không có dữ liệu câu hỏi</div>
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg font-medium text-primary">Không có dữ liệu câu hỏi</p>
+          <p className="text-sm text-primary/70 mt-2">Vui lòng thử lại hoặc chọn game khác</p>
+        </div>
       </div>
     );
   }
 
   if (showResult) {
+    const finalScore = userAnswers.filter((answer, index) => answer === questions[index]?.isTrue).length;
+    const percentage = Math.round((finalScore / questions.length) * 100);
+    
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6">
-        <PresetGameHeader onShare={onShare} />
-        <Card className="max-w-md w-full p-6 text-center mt-6">
-          <h2 className="text-2xl font-bold mb-4">Kết Quả</h2>
-          <p className="text-lg mb-4">
+      <div className="h-full flex items-center justify-center p-6">
+        <Card className="max-w-md w-full p-6 text-center">
+          <h2 className="text-2xl font-bold mb-4 text-primary">Kết Quả</h2>
+          <p className="text-lg mb-4 text-primary">
             Chủ đề: <span className="font-semibold">{gameContent.title || topic}</span>
           </p>
           <div className="mb-6">
-            <div className="flex justify-between mb-2">
-              <span>Điểm của bạn</span>
-              <span className="font-bold">{Math.round((userAnswers.filter((answer, index) => answer === questions[index].isTrue).length / questions.length) * 100)}%</span>
-            </div>
-            <Progress value={Math.round((userAnswers.filter((answer, index) => answer === questions[index].isTrue).length / questions.length) * 100)} className="h-3" />
+            <div className="text-4xl font-bold mb-2 text-primary">{percentage}%</div>
+            <div className="text-lg text-primary">{finalScore} / {questions.length} câu đúng</div>
+            <Progress value={percentage} className="h-3 mt-4" />
           </div>
-          <div className="text-2xl font-bold mb-6">
-            {userAnswers.filter((answer, index) => answer === questions[index].isTrue).length} / {questions.length}
-          </div>
-          <div className="text-sm mb-4 text-muted-foreground">
+          <div className="text-sm text-primary/70">
             Thời gian còn lại: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
           </div>
-          <Button onClick={handleRestart} className="w-full">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Chơi Lại
-          </Button>
         </Card>
       </div>
     );
@@ -163,96 +223,84 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
 
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
-  const minutesLeft = Math.floor(totalTimeLeft / 60);
-  const secondsLeft = totalTimeLeft % 60;
-  const formattedTotalTime = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
+  const currentAnswer = userAnswers[currentQuestion];
+  const isAnswered = currentAnswer !== null;
 
   return (
-    <div className="flex flex-col p-0 h-full relative">
-      <PresetGameHeader onShare={onShare} />
-      <div className="mb-4 mt-6 px-4">
+    <div className="unified-game-container">
+      {/* Header */}
+      <div className="game-header">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium">
-            Câu hỏi {currentQuestion + 1}/{questions.length}
+          <div className="text-sm font-medium px-3 py-1 bg-muted rounded-full text-primary">
+            Câu {currentQuestion + 1}/{questions.length}
           </div>
-          <div className="text-sm font-medium flex items-center gap-2">
-            <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center px-3 py-1 bg-muted rounded-full text-primary">
               <Clock className="h-4 w-4 mr-1" />
-              {timeLeft}s
+              <span>{timeLeft}s</span>
             </div>
-            <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full text-primary/80">
+            <div className="flex items-center px-3 py-1 bg-primary/10 rounded-full text-primary">
               <Clock className="h-4 w-4 mr-1" />
-              {formattedTotalTime}
+              <span>{Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}</span>
             </div>
-            <div className="px-3 py-1 bg-primary/10 rounded-full">
+            <div className="px-3 py-1 bg-primary/10 rounded-full text-primary">
               Điểm: <span className="font-bold">{score}</span>
             </div>
           </div>
         </div>
         <Progress value={progress} className="h-2" />
       </div>
-      <Card className="p-6 mb-4 mx-4 bg-gradient-to-br from-primary/5 to-background backdrop-blur-sm border-primary/20">
-        <h2 className="text-xl font-semibold mb-6">{question.statement}</h2>
-        <div className="grid grid-cols-2 gap-4 mb-4">
+
+      {/* Question Card */}
+      <Card className="p-6 mb-4 mx-4">
+        <h2 className="text-xl font-semibold mb-6 text-center text-primary">
+          {question?.statement}
+        </h2>
+        
+        {/* Answer Buttons */}
+        <div className="grid grid-cols-1 gap-4 mb-6 max-w-md mx-auto">
           <Button 
-            className={`p-6 flex items-center justify-center ${
-              currentAnswer === true 
-                ? currentAnswer === question.isTrue
-                  ? 'bg-green-500 hover:bg-green-600'
-                  : 'bg-red-500 hover:bg-red-600'
-                : 'bg-primary/80 hover:bg-primary'
-            }`}
             onClick={() => handleAnswer(true)}
-            disabled={currentAnswer !== null}
+            disabled={isAnswered}
+            variant={currentAnswer === true ? (currentAnswer === question?.isTrue ? "default" : "destructive") : "default"}
+            size="lg"
+            className="p-6 min-h-[80px] text-lg font-medium"
           >
-            <CheckCircle className="h-7 w-7 mr-2" />
-            <span className="text-lg font-medium">Đúng</span>
+            <CheckCircle className="h-8 w-8 mr-3" />
+            ĐÚNG
           </Button>
+          
           <Button 
-            className={`p-6 flex items-center justify-center ${
-              currentAnswer === false 
-                ? currentAnswer === question.isTrue
-                  ? 'bg-green-500 hover:bg-green-600'
-                  : 'bg-red-500 hover:bg-red-600'
-                : 'bg-primary/80 hover:bg-primary'
-            }`}
             onClick={() => handleAnswer(false)}
-            disabled={currentAnswer !== null}
+            disabled={isAnswered}
+            variant={currentAnswer === false ? (currentAnswer === question?.isTrue ? "default" : "destructive") : "secondary"}
+            size="lg"
+            className="p-6 min-h-[80px] text-lg font-medium"
           >
-            <XCircle className="h-7 w-7 mr-2" />
-            <span className="text-lg font-medium">Sai</span>
+            <XCircle className="h-8 w-8 mr-3" />
+            SAI
           </Button>
         </div>
-        {showExplanation && (
-          <div className={`p-4 rounded-lg mt-4 ${question.isTrue ? 'bg-green-50 border border-green-200' : 'bg-red-50 border-red-200'}`}>
-            <div className="flex items-start">
-              <AlertCircle className={`h-5 w-5 mr-2 mt-0.5 ${question.isTrue ? 'text-green-600' : 'text-red-600'}`} />
-              <div>
-                <p className="font-medium mb-1">Giải thích:</p>
-                <p>{question.explanation}</p>
-              </div>
-            </div>
+        
+        {/* Explanation */}
+        {showExplanation && question?.explanation && (
+          <div className="p-4 rounded-lg bg-muted">
+            <p className="font-medium mb-2">Giải thích:</p>
+            <p className="text-sm">{question.explanation}</p>
           </div>
         )}
       </Card>
-      <div className="mt-auto flex gap-2 px-4 pb-2">
+
+      {/* Next Button */}
+      <div className="px-4 pb-2">
         <Button 
-          variant="outline"
-          size="sm"
-          onClick={handleRestart} 
-          className="flex-1 bg-background/70 border-primary/20"
+          onClick={handleNextQuestion}
+          disabled={!isAnswered}
+          className="w-full"
+          size="lg"
         >
-          <RefreshCw className="h-4 w-4 mr-1" />
-          Làm lại
-        </Button>
-        <Button 
-          onClick={handleNextQuestion} 
-          disabled={currentAnswer === null}
-          className="flex-1"
-          size="sm"
-        >
-          {isLastQuestion ? 'Xem Kết Quả' : 'Câu Tiếp Theo'}
-          <ChevronRight className="h-4 w-4 ml-1" />
+          {currentQuestion === questions.length - 1 ? 'Xem Kết Quả' : 'Câu Tiếp Theo'}
+          <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
     </div>

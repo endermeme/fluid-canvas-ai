@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { getRemainingTime } from '@/utils/gameExport';
 import { StoredGame } from '@/utils/types';
 import QuizContainer from '@/components/quiz/QuizContainer';
+import { useAccount } from '@/contexts/AccountContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Plus, Clock, ExternalLink, Search, Trash2, Share2, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -42,28 +44,71 @@ const GameHistoryPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'expiring'>('newest');
   const [deleteGameId, setDeleteGameId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { accountId } = useAccount();
   
   useEffect(() => {
     loadGames();
-  }, []);
+  }, [accountId]);
   
   useEffect(() => {
     filterAndSortGames();
   }, [games, searchTerm, sortBy]);
   
-  const loadGames = () => {
-    const gamesJson = localStorage.getItem('shared_games');
-    if (gamesJson) {
-      const parsedGames: StoredGame[] = JSON.parse(gamesJson);
-      const now = Date.now();
-      const validGames = parsedGames.filter(game => {
-        const expiryTime = typeof game.expiresAt === 'number' 
-          ? game.expiresAt 
-          : game.expiresAt.getTime();
-        return expiryTime > now;
+  const loadGames = async () => {
+    if (!accountId) return;
+
+    try {
+      // Load from Supabase first - get games by account_id
+      const { data: dbGames, error } = await supabase
+        .from('games')
+        .select('*')
+        .eq('account_id', accountId)
+        .eq('is_published', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching account games:", error);
+      }
+
+      // Map Supabase games to StoredGame format
+      const supabaseGames: StoredGame[] = dbGames?.map(game => ({
+        id: game.id,
+        title: game.title,
+        gameType: game.game_type,
+        description: game.description || '',
+        htmlContent: game.html_content,
+        createdAt: new Date(game.created_at).getTime(),
+        expiresAt: new Date(game.expires_at).getTime(),
+        shareUrl: `/game/${game.id}?acc=${accountId}`
+      })) || [];
+
+      // Load from localStorage and filter by account
+      const gamesJson = localStorage.getItem('shared_games');
+      let localGames: StoredGame[] = [];
+      
+      if (gamesJson) {
+        const parsedGames: StoredGame[] = JSON.parse(gamesJson);
+        const now = Date.now();
+        localGames = parsedGames.filter(game => {
+          const expiryTime = typeof game.expiresAt === 'number' 
+            ? game.expiresAt 
+            : game.expiresAt.getTime();
+          return expiryTime > now && 
+                 (game as any).accountId === accountId; // Filter by account
+        });
+      }
+
+      // Combine and deduplicate
+      const allGames = [...supabaseGames];
+      localGames.forEach(localGame => {
+        if (!allGames.some(g => g.id === localGame.id)) {
+          allGames.push(localGame);
+        }
       });
-      setGames(validGames);
-    } else {
+
+      setGames(allGames);
+    } catch (error) {
+      console.error("Error loading games:", error);
       setGames([]);
     }
   };
@@ -109,7 +154,7 @@ const GameHistoryPage: React.FC = () => {
   };
   
   const handleGameClick = (gameId: string) => {
-    navigate(`/game/${gameId}`);
+    navigate(`/game/${gameId}?acc=${accountId}`);
   };
   
   const handleCreateNew = () => {
@@ -118,7 +163,7 @@ const GameHistoryPage: React.FC = () => {
   
   const handleShareGame = (gameId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const shareUrl = `${window.location.origin}/game/${gameId}`;
+    const shareUrl = `${window.location.origin}/game/${gameId}?acc=${accountId}`;
     navigator.clipboard.writeText(shareUrl)
       .then(() => {
         alert('Đã sao chép liên kết vào clipboard!');

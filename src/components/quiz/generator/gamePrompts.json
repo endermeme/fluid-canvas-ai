@@ -1,0 +1,18 @@
+
+{
+  "customGamePrompt": {
+    "base": "Tạo một game HTML5 toàn màn hình thú vị về chủ đề \"{topic}\".",
+    "designPrinciples": [
+      "Game PHẢI chiếm TOÀN BỘ màn hình với kích thước lớn, tỷ lệ 16:9 hoặc toàn màn hình",
+      "Thiết kế game với graphics đẹp, animation mượt, hiệu ứng hấp dẫn",
+      "Ít text, nhiều visual - sử dụng icons, hình ảnh, màu sắc để truyền tải thông tin",
+      "Game phải FUN và engaging với mechanics thú vị, không chỉ là quiz đơn giản",
+      "HTML5 Canvas hoặc CSS animations cho trải nghiệm mượt mà",
+      "Responsive design cho mọi thiết bị, controls lớn và dễ touch",
+      "Nút bắt đầu to và bắt mắt, gameplay ngay lập tức",
+      "Âm thanh (nếu có) phải đơn giản và không gây phiền nhiễu",
+      "Game phải complete trong 1 file HTML với CSS và JS inline"
+    ],
+    "instruction": "Tạo game hoàn chỉnh, vui nhộn với visual đẹp. Trả về ONLY HTML, không markdown, không giải thích."
+  }
+}

@@ -29,34 +29,25 @@ const GameContainer: React.FC<GameContainerProps> = ({
     }
   }, [externalError]);
 
-  // Process the content when it changes
+  // Process the content when it changes - đơn giản hóa
   useEffect(() => {
-    let isMounted = true;
-    
     const processContent = async () => {
       try {
         if (content) {
+          // Sử dụng enhanceIframeContent đã đơn giản hóa
           const enhanced = await enhanceIframeContent(content, title);
-          if (isMounted) {
-            setProcessedContent(enhanced);
-          }
+          setProcessedContent(enhanced);
         } else {
           setProcessedContent('');
         }
       } catch (error) {
         console.error("Error processing iframe content:", error);
-        if (isMounted) {
-          setLocalError("Không thể xử lý nội dung game. Vui lòng thử lại.");
-          setProcessedContent('');
-        }
+        // Nếu có lỗi, sử dụng nội dung gốc
+        setProcessedContent(content);
       }
     };
 
     processContent();
-    
-    return () => {
-      isMounted = false;
-    };
   }, [content, title]);
   
   const handleReload = () => {
@@ -72,12 +63,10 @@ const GameContainer: React.FC<GameContainerProps> = ({
   
   return (
     <div 
-      className={`relative rounded-xl overflow-hidden bg-gradient-to-b from-blue-50 to-white shadow-xl border border-gray-200 w-full mx-auto transition-all duration-300 ${showFullscreen ? 'fixed inset-0 z-50 rounded-none m-0 max-w-none' : ''}`}
+      className={`relative overflow-hidden bg-white w-full h-full border-0 ${showFullscreen ? 'fixed inset-0 z-50 m-0' : ''}`}
       style={{ 
-        height: showFullscreen ? '100vh' : '92vh',
-        minHeight: '650px',
-        maxHeight: showFullscreen ? '100vh' : '1200px',
-        maxWidth: showFullscreen ? '100vw' : '1800px'
+        height: showFullscreen ? '100vh' : '100%',
+        width: '100%'
       }}
     >
       <button 
@@ -122,7 +111,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
         key={key}
         title={title || "Game"}
         srcDoc={processedContent}
-        className="w-full h-full border-0 rounded-xl shadow-inner"
+        className="w-full h-full border-0"
         sandbox="allow-scripts"
         onLoad={() => setLoading(false)}
         onError={() => {
@@ -135,7 +124,12 @@ const GameContainer: React.FC<GameContainerProps> = ({
           backgroundColor: 'white',
           display: loading ? 'none' : 'block',
           opacity: loading ? 0 : 1,
-          transition: 'opacity 0.3s ease-in-out'
+          transition: 'opacity 0.3s ease-in-out',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0
         }}
       />
     </div>

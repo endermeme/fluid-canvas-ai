@@ -1,5 +1,4 @@
 
-export { default as CustomGameForm } from './CustomGameForm';
-export { default as CustomGameHeader } from './CustomGameHeader';
-export { default as EnhancedGameView } from './EnhancedGameView';
-export { default as GameIframeRenderer } from './GameIframeRenderer';
+export { default as GameViewSelector } from './GameViewSelector';
+export { default as CustomGameView } from './CustomGameView';
+export { default as PresetGameView } from './PresetGameView';

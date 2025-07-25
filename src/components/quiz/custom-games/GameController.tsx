@@ -3,13 +3,15 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
 import { AIGameGenerator } from '../generator/geminiGenerator';
-import EnhancedGameView from './ui/EnhancedGameView';
-import CustomGameForm from './ui/CustomGameForm';
+import GameViewSelector from './ui/GameViewSelector';
+import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { createGameSession } from '@/utils/gameParticipation';
+import { saveGameForSharing, ShareSettings } from '@/utils/gameExport';
+import { ShareSettingsForm } from '@/components/game-share/ShareSettingsForm';
+import { useAccount } from '@/contexts/AccountContext';
 import QuizContainer from '../QuizContainer';
 
 interface GameControllerProps {
@@ -26,8 +28,10 @@ const GameController: React.FC<GameControllerProps> = ({
   const [currentTopic, setCurrentTopic] = useState<string>(initialTopic);
   const [showForm, setShowForm] = useState(!currentGame);
   const [isSharing, setIsSharing] = useState(false);
+  const [showShareSettings, setShowShareSettings] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { accountId } = useAccount();
   
   const handleGameGeneration = (content: string, game?: MiniGame) => {
     setCurrentTopic(content);
@@ -54,7 +58,7 @@ const GameController: React.FC<GameControllerProps> = ({
       setCurrentGame(null);
       setShowForm(true);
     } else {
-      navigate('/');
+      navigate(`/?acc=${accountId}`);
     }
   };
 
@@ -63,33 +67,63 @@ const GameController: React.FC<GameControllerProps> = ({
     setShowForm(true);
   };
   
-  const handleShareGame = async () => {
-    if (!currentGame || isSharing) return;
+  const handleShareGame = (): Promise<string> => {
+    if (!currentGame) {
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Không có nội dung game để chia sẻ.",
+        variant: "destructive"
+      });
+      return Promise.resolve('');
+    }
+    
+    setShowShareSettings(true);
+    return Promise.resolve('');
+  };
+
+  const handleShareWithSettings = async (shareSettings: ShareSettings): Promise<void> => {
+    if (!currentGame) return;
     
     try {
       setIsSharing(true);
       
-      // Tạo session game (sẽ được gọi sau khi game đã được lưu vào Supabase từ EnhancedGameView)
-      const gameSession = await createGameSession(
+      toast({
+        title: "Đang xử lý",
+        description: "Đang tạo liên kết chia sẻ...",
+      });
+      
+      const url = await saveGameForSharing(
         currentGame.title || "Minigame tương tác",
-        currentGame.content
+        'custom',
+        currentGame,
+        currentGame.content,
+        undefined,
+        accountId,
+        shareSettings
       );
       
-      navigate(`/game/${gameSession.id}`);
-      
-      toast({
-        title: "Game đã được chia sẻ",
-        description: "Bạn có thể gửi link cho người khác để họ tham gia.",
-      });
+      if (url) {
+        // Chuyển đến trang chia sẻ với account context
+        const gameId = url.split('/game/')[1];
+        navigate(`/game/${gameId}?acc=${accountId}`);
+        
+        toast({
+          title: "Game đã được chia sẻ! 🎉",
+          description: "Bạn có thể gửi link cho người khác để họ tham gia.",
+        });
+      } else {
+        throw new Error("Không thể tạo URL chia sẻ");
+      }
     } catch (error) {
       console.error("Error sharing game:", error);
       toast({
         title: "Lỗi chia sẻ",
-        description: "Không thể tạo liên kết chia sẻ. Vui lòng thử lại.",
+        description: error instanceof Error ? error.message : "Không thể tạo liên kết chia sẻ. Vui lòng thử lại.",
         variant: "destructive"
       });
     } finally {
       setIsSharing(false);
+      setShowShareSettings(false);
     }
   };
 
@@ -111,13 +145,14 @@ const GameController: React.FC<GameControllerProps> = ({
     if (currentGame) {
       return (
         <div className="w-full h-full">
-          <EnhancedGameView 
+          <GameViewSelector 
             miniGame={{
               title: currentGame.title || "Minigame Tương Tác",
               content: currentGame.content || ""
             }} 
             onBack={handleBack}
             onNewGame={handleNewGame}
+            onShare={handleShareGame}
             hideHeader={false}
           />
         </div>
@@ -131,7 +166,7 @@ const GameController: React.FC<GameControllerProps> = ({
             setIsGenerating(true);
             setTimeout(() => handleGameGeneration(content, game), 500);
           }}
-          onCancel={() => navigate('/')}
+          onCancel={() => navigate(`/?acc=${accountId}`)}
         />
       );
     }
@@ -166,6 +201,13 @@ const GameController: React.FC<GameControllerProps> = ({
       <div className="h-full w-full overflow-hidden">
         {renderContent()}
       </div>
+      
+      <ShareSettingsForm
+        isOpen={showShareSettings}
+        onClose={() => setShowShareSettings(false)}
+        onShare={handleShareWithSettings}
+        isSharing={isSharing}
+      />
     </QuizContainer>
   );
 };

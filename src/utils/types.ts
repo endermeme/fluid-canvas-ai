@@ -10,6 +10,11 @@ export interface StoredGame {
   description?: string;
   expiresAt: Date | number;
   createdAt: Date | number;
+  password?: string;
+  maxParticipants?: number;
+  showLeaderboard?: boolean;
+  requireRegistration?: boolean;
+  customDuration?: number;
 }
 
 export interface GameParticipant {
@@ -42,6 +47,6 @@ export interface SupabaseGameParticipant {
   timestamp: string;
   game_id: string;
   retry_count: number;
-  score?: number;  // Thêm trường score vào đây
+  score?: number;
 }
 

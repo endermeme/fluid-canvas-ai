@@ -7,9 +7,13 @@ export type Language = 'en' | 'vi';
 export interface GameSettingsData {
   difficulty?: Difficulty;
   questionCount?: number;
+  cardCount?: number; // For flashcards
+  pairCount?: number; // For matching
   timePerQuestion?: number;
+  timeLimit?: number; // For matching, memory, etc.
   totalTime?: number;
   bonusTime?: number;
+  bonusTimePerMatch?: number; // For matching
   useTimer?: boolean;
   showExplanation?: boolean;
   shuffleQuestions?: boolean;
@@ -33,8 +37,7 @@ export interface GameSettingsData {
   hintPenalty?: number;
   allowSkip?: boolean;
   shuffleItems?: boolean;
-  allowPartialMatching?: boolean;
-  bonusTimePerMatch?: number;
+  allowPartialMatching?: boolean; // For matching
   allowMultipleAttempts?: boolean;
   autoAdvance?: boolean;
   gridSize?: number;
@@ -46,6 +49,7 @@ export interface GameSettingsData {
   allowMultipleCategories?: boolean;
   showCategoryHints?: boolean;
   useCanvas?: boolean;
+  debugMode?: boolean;
 }
 
 export interface GameType {

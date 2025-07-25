@@ -1,48 +1,69 @@
 
-import { 
-  processImages,
-  normalizeHtmlStructure,
-  enhanceHead,
-  enhanceBody
-} from './iframe-enhancer';
+import { processImages, fixJavaScriptErrors } from './iframe-enhancer';
 
 /**
- * Nâng cấp nội dung iframe để cải thiện hiệu suất và trải nghiệm người dùng
+ * Nâng cấp nội dung iframe - cải thiện với error handling
  * @param content Nội dung HTML gốc
- * @param title Tiêu đề cho trò chơi
+ * @param title Tiêu đề cho trò chơi (không sử dụng)
  * @returns Nội dung HTML đã được nâng cấp
  */
 export const enhanceIframeContent = async (content: string, title?: string): Promise<string> => {
   try {
-    // Xử lý các hình ảnh trong HTML
-    const processedContent = await processImages(content);
+    console.log('Đang xử lý nội dung HTML...');
     
-    // Chuẩn hóa cấu trúc HTML
-    const { normalizedHtml, head, body } = normalizeHtmlStructure(processedContent, title);
+    // Bước 1: Sửa các lỗi JavaScript phổ biến
+    let enhancedContent = fixJavaScriptErrors(content);
     
-    // Nếu không tách được head hoặc body, trả về nội dung đã xử lý hình ảnh
-    if (!head || !body) {
-      console.warn('Không thể tách head và body, trả về HTML nguyên bản đã xử lý hình ảnh');
-      return processedContent;
+    // Bước 2: Thêm error handling cho JavaScript
+    const errorHandlingScript = `
+<script>
+// Error handling cho game
+window.addEventListener('error', function(e) {
+  console.error('Game Error:', e.error);
+  // Không hiển thị alert để tránh làm phiền người dùng
+});
+
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('Unhandled Promise Rejection:', e.reason);
+  e.preventDefault();
+});
+
+// Thông báo load hoàn thành
+window.addEventListener('load', function() {
+  try {
+    window.parent.postMessage({ type: 'GAME_LOADED' }, '*');
+  } catch (e) {
+    console.log('Game loaded');
+  }
+});
+
+// Kiểm tra và sửa các lỗi cú pháp cơ bản
+document.addEventListener('DOMContentLoaded', function() {
+  // Đảm bảo canvas được khởi tạo đúng cách
+  const canvas = document.querySelector('canvas');
+  if (canvas && !window.context) {
+    try {
+      window.context = canvas.getContext('2d');
+    } catch (e) {
+      console.warn('Không thể khởi tạo canvas context:', e);
+    }
+  }
+});
+</script>
+`;
+    
+    // Bước 3: Thêm script vào cuối body nếu chưa có
+    if (!enhancedContent.includes('window.parent.postMessage') && enhancedContent.includes('</body>')) {
+      enhancedContent = enhancedContent.replace('</body>', `${errorHandlingScript}</body>`);
+    } else if (!enhancedContent.includes('</body>')) {
+      // Nếu không có thẻ body, thêm vào cuối
+      enhancedContent += errorHandlingScript;
     }
     
-    // Nâng cấp head và body
-    const enhancedHead = enhanceHead(head, title);
-    const enhancedBody = enhanceBody(body);
-    
-    // Tái tạo HTML đầy đủ
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  ${enhancedHead}
-</head>
-<body>
-  ${enhancedBody}
-</body>
-</html>`;
+    console.log('Xử lý HTML hoàn thành');
+    return enhancedContent;
   } catch (error) {
-    console.error('Lỗi khi nâng cấp nội dung iframe:', error);
-    throw error;
+    console.error('Lỗi khi xử lý iframe:', error);
+    return content; // Luôn trả về nội dung gốc nếu có lỗi
   }
 };

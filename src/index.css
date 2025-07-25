@@ -1,4 +1,5 @@
 
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -103,37 +104,73 @@
     width: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow-x: hidden;
   }
   
   #root {
-    height: 100%;
-    width: 100%;
+    height: 100vh;
+    width: 100vw;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-x: hidden;
+    position: relative;
   }
   
-  /* Tăng kích thước của các phần tử tương tác trên di động */
+  /* Tối ưu kích thước tương tác trên mobile */
   @media (max-width: 768px) {
     button, 
     a, 
     [role="button"],
     input[type="submit"],
     input[type="button"] {
-      min-height: 38px;
-      padding: 8px 16px;
+      min-height: 44px;
+      padding: 10px 16px;
     }
     
     input, 
     select, 
     textarea {
-      font-size: 16px; /* Ngăn iOS zoom khi focus */
+      font-size: 16px;
+      min-height: 44px;
     }
   }
 }
 
 @layer components {
+  /* Game Layout Utilities */
+  .game-container {
+    @apply w-full h-full max-w-none mx-auto flex flex-col;
+    max-height: calc(100vh - 2rem);
+  }
+  
+  .game-content {
+    @apply flex-1 overflow-hidden p-3 sm:p-4;
+    min-height: 0;
+  }
+  
+  .game-controls {
+    @apply flex-shrink-0 p-2 sm:p-3 border-t border-border bg-white/80 backdrop-blur-sm;
+    position: sticky;
+    bottom: 0;
+  }
+  
+  .game-header {
+    @apply flex-shrink-0 p-2 sm:p-3 border-b border-border;
+  }
+  
+  /* Responsive Card Containers */
+  .responsive-card {
+    @apply w-full max-w-2xl lg:max-w-3xl mx-auto;
+    max-height: clamp(400px, 85vh, 700px);
+  }
+  
+  .compact-card {
+    @apply w-full;
+    max-width: clamp(320px, 95vw, 600px);
+    max-height: clamp(300px, 80vh, 600px);
+  }
+  
+  /* Canvas and Grid */
   .canvas-grid {
     background-image: linear-gradient(to right, theme('colors.canvas.grid') 1px, transparent 1px),
                       linear-gradient(to bottom, theme('colors.canvas.grid') 1px, transparent 1px);
@@ -161,7 +198,7 @@
   }
   
   .canvas-block {
-    @apply bg-canvas-block dark:bg-canvas-block border border-border rounded-lg p-3 block-shadow transition-all duration-200;
+    @apply bg-canvas-block dark:bg-canvas-block border border-border rounded-lg p-3 block-shadow;
   }
   
   .canvas-block:hover {
@@ -169,7 +206,7 @@
   }
   
   .block-resize-handle {
-    @apply absolute w-3 h-3 bg-primary/20 hover:bg-primary/40 rounded-full transition-all duration-150;
+    @apply absolute w-3 h-3 bg-primary/20 hover:bg-primary/40 rounded-full;
   }
   
   .typing-indicator span {
@@ -178,11 +215,11 @@
   }
   
   .modern-input {
-    @apply rounded-lg border-primary/20 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20 focus:border-primary/40;
+    @apply rounded-lg border-primary/20 bg-white/50 backdrop-blur-sm shadow-sm hover:border-primary/30 focus:ring-2 focus:ring-primary/20 focus:border-primary/40;
   }
   
   .modern-button {
-    @apply transition-all active:scale-95 bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 rounded-lg shadow-md;
+    @apply bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 rounded-lg shadow-md;
   }
   
   .modern-card {
@@ -201,26 +238,51 @@
     @apply animate-breathe;
   }
   
-  /* Hiệu ứng khi nhấp chuột */
+  /* Touch feedback tối ưu */
   .touch-effect {
     @apply relative overflow-hidden;
   }
   
   .touch-effect:active {
-    @apply transform scale-[0.98] transition-transform;
+    @apply transform scale-[0.98];
   }
   
-  /* Hiệu ứng gợn sóng cho nút */
+  /* Ripple effect cho buttons */
   .ripple {
     @apply absolute pointer-events-none rounded-full bg-white/20 transform scale-0;
     animation: button-ripple 0.6s linear;
   }
   
-  /* Nút kiểu neo-morphism */
+  /* Neo-morphism buttons */
   .neo-button {
     @apply px-4 py-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 
-         hover:bg-primary/10 hover:border-primary/30 transition-all duration-200
-         shadow-sm active:scale-95;
+           hover:bg-primary/10 hover:border-primary/30 
+           shadow-sm;
+  }
+  
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .game-container {
+      max-height: 100vh;
+    }
+    
+    .game-content {
+      @apply p-2;
+    }
+    
+    .game-controls {
+      @apply p-2;
+    }
+    
+    .responsive-card {
+      @apply max-w-none;
+      max-height: 95vh;
+    }
+    
+    .compact-card {
+      max-width: 98vw;
+      max-height: 90vh;
+    }
   }
 }
 
@@ -257,7 +319,7 @@
 }
 
 .toolbar-icon-button {
-  @apply flex items-center justify-center w-9 h-9 rounded-full transition-colors hover:bg-primary/10 text-foreground/80 hover:text-primary;
+  @apply flex items-center justify-center w-9 h-9 rounded-full hover:bg-primary/10 text-foreground/80 hover:text-primary;
 }
 
 /* Multi-selection area styling */
@@ -276,7 +338,7 @@
 }
 
 .version-marker {
-  @apply absolute w-2 h-2 rounded-full bg-primary cursor-pointer transform -translate-y-1/2 top-1/2 transition-all hover:scale-125;
+  @apply absolute w-2 h-2 rounded-full bg-primary cursor-pointer transform -translate-y-1/2 top-1/2 hover:scale-125;
 }
 
 /* Hiệu ứng ripple khi nhấp chuột */
@@ -287,7 +349,7 @@
   }
 }
 
-/* Hiệu ứng phản hồi chạm trên điện thoại */
+/* Hiệu ứng phản hồi chạm */
 @keyframes touch-feedback {
   0% {
     transform: scale(1);
@@ -303,10 +365,10 @@
   }
 }
 
-/* CSS cho thiết bị di động */
+/* CSS tối ưu cho mobile */
 @media (max-width: 768px) {
   .mobile-touch-target {
-    min-height: 44px; /* Apple khuyến nghị 44px là kích thước tối thiểu */
+    min-height: 44px;
   }
   
   .mobile-spacing {
@@ -314,7 +376,7 @@
   }
   
   .mobile-font {
-    font-size: 16px; /* Ngăn iOS zoom khi focus */
+    font-size: 16px;
   }
 }
 

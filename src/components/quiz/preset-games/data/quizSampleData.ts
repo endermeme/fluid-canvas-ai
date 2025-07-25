@@ -1,4 +1,5 @@
 
+
 export const quizSampleData = {
   title: "Trắc nghiệm Tiếng Việt",
   description: "Bài trắc nghiệm kiến thức tiếng Việt cơ bản",
@@ -32,6 +33,8 @@ export const quizSampleData = {
   settings: {
     timePerQuestion: 30,
     shuffleQuestions: true,
-    shuffleOptions: true
+    shuffleOptions: true,
+    totalTime: 300
   }
 };
+

@@ -73,10 +73,16 @@ export const animateAIPanelSlideIn = (element: HTMLElement): void => {
 
 // AI panel slide out animation
 export const animateAIPanelSlideOut = (element: HTMLElement): void => {
-  gsap.to(element, {
-    x: '100%',
-    duration: 0.3,
-    ease: "power2.in"
+  gsap.set(element, {
+    x: '100%'
+  });
+};
+
+// Fast back navigation animation
+export const animateBackNavigation = (element: HTMLElement): void => {
+  gsap.set(element, {
+    opacity: 0,
+    x: -20
   });
 };
 

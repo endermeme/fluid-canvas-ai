@@ -16,33 +16,62 @@ export const useGameShareManager = (
   const [isSharing, setIsSharing] = useState<boolean>(false);
 
   const handleShare = async (): Promise<string | void> => {
-    if (!miniGame?.content) return;
+    if (!miniGame?.content) {
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Không có nội dung game để chia sẻ.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     try {
       setIsSharing(true);
+      
       toast({
         title: "Đang xử lý",
         description: "Đang tạo liên kết chia sẻ...",
       });
       
       if (onShare) {
-        return await onShare();
+        const result = await onShare();
+        setIsSharing(false);
+        return result;
       } else {
+        // Xác định game type dựa trên content
+        let gameType = 'custom';
+        if (miniGame.content.includes('answerQuestion(true)') || miniGame.content.includes('true/false')) {
+          gameType = 'true-false';
+        } else if (miniGame.content.includes('flashcard') || miniGame.content.includes('flip')) {
+          gameType = 'flashcards';
+        } else if (miniGame.content.includes('memory') || miniGame.content.includes('matching')) {
+          gameType = 'memory';
+        }
+        
         const url = await saveGameForSharing(
           miniGame.title || 'Game tương tác',
-          'custom',
+          gameType,
           miniGame,
           miniGame.content
         );
         
         setIsSharing(false);
-        return url;
+        
+        if (url) {
+          toast({
+            title: "Chia sẻ thành công! 🎉",
+            description: "Link chia sẻ đã được tạo.",
+          });
+          return url;
+        } else {
+          throw new Error("Không thể tạo URL chia sẻ");
+        }
       }
     } catch (error) {
       console.error("Error sharing game:", error);
       toast({
         title: "Lỗi chia sẻ",
-        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
+        description: error instanceof Error ? error.message : "Không thể tạo link chia sẻ. Vui lòng thử lại.",
         variant: "destructive"
       });
       setIsSharing(false);

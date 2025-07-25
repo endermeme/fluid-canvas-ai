@@ -3,178 +3,257 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { 
   Brain, BookOpen, Puzzle, Dices, 
-  Image, CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
-  ArrowRight
+  CheckSquare, Layers, ArrowRightLeft, Search, Sparkles,
+  ArrowLeft
 } from 'lucide-react';
-import GameSettings from '../GameSettings';
 import { GameSettingsData } from '../types';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 interface GameSelectorProps {
   onSelectGame: (gameType: string) => void;
   onQuickStart?: (gameType: string, prompt: string, settings: GameSettingsData) => void;
 }
 
-const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame, onQuickStart }) => {
+const GameSelector: React.FC<GameSelectorProps> = ({ onSelectGame }) => {
   const [selectedGameType, setSelectedGameType] = useState<string>('');
-  const [quickPrompt, setQuickPrompt] = useState<string>('');
-  const [showSettings, setShowSettings] = useState(false);
-  
-  const defaultSettings: GameSettingsData = {
-    difficulty: 'medium',
-    questionCount: 10,
-    timePerQuestion: 30,
-    category: 'general',
-    useTimer: true
-  };
-  
-  const handleQuickStart = () => {
-    if (onQuickStart && selectedGameType && quickPrompt.trim()) {
-      onQuickStart(selectedGameType, quickPrompt, defaultSettings);
-    }
-  };
+  const [topic, setTopic] = useState<string>('');
+  const navigate = useNavigate();
   
   const handleSelectGame = (gameType: string) => {
     setSelectedGameType(gameType);
+    
+    // Tự động điền "Học cùng AI" nếu topic trống
+    const finalTopic = topic.trim() || 'Học cùng AI';
+    
     if (gameType) {
       onSelectGame(gameType);
     }
   };
 
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
   const gameTypes = [
+    { 
+      id: 'back', 
+      name: 'Quay Lại', 
+      description: 'Trở về trang chủ để chọn loại trò chơi khác',
+      icon: <ArrowLeft className="h-10 w-10 text-blue-600" />,
+      isBackButton: true
+    },
     { 
       id: 'quiz', 
       name: 'Trắc Nghiệm', 
-      description: 'Trả lời câu hỏi nhiều lựa chọn',
-      icon: <Brain className="h-8 w-8 text-primary" />
+      description: 'Trả lời câu hỏi nhiều lựa chọn với các chủ đề đa dạng',
+      icon: <Brain className="h-10 w-10 text-blue-600" />
     },
     { 
       id: 'flashcards', 
       name: 'Thẻ Ghi Nhớ', 
-      description: 'Học với thẻ hai mặt',
-      icon: <BookOpen className="h-8 w-8 text-primary" />
+      description: 'Học với thẻ hai mặt để ghi nhớ kiến thức hiệu quả',
+      icon: <BookOpen className="h-10 w-10 text-blue-600" />
     },
     { 
       id: 'matching', 
       name: 'Nối Từ', 
-      description: 'Nối các cặp từ tương ứng với nhau',
-      icon: <ArrowRightLeft className="h-8 w-8 text-primary" />
+      description: 'Nối các cặp từ tương ứng để kiểm tra hiểu biết',
+      icon: <ArrowRightLeft className="h-10 w-10 text-blue-600" />
     },
     { 
       id: 'memory', 
       name: 'Trò Chơi Ghi Nhớ', 
-      description: 'Tìm các cặp thẻ giống nhau',
-      icon: <Dices className="h-8 w-8 text-primary" />
+      description: 'Tìm các cặp thẻ giống nhau để rèn luyện trí nhớ',
+      icon: <Dices className="h-10 w-10 text-blue-600" />
     },
     { 
       id: 'ordering', 
       name: 'Sắp Xếp Câu', 
       description: 'Sắp xếp các từ để tạo thành câu hoàn chỉnh',
-      icon: <Layers className="h-8 w-8 text-primary" />
+      icon: <Layers className="h-10 w-10 text-blue-600" />
     },
     { 
       id: 'wordsearch', 
       name: 'Tìm Từ Ẩn', 
-      description: 'Tìm các từ ẩn trong bảng chữ cái',
-      icon: <Search className="h-8 w-8 text-primary" />
-    },
-    { 
-      id: 'pictionary', 
-      name: 'Đoán Hình', 
-      description: 'Đoán từ qua hình ảnh',
-      icon: <Image className="h-8 w-8 text-primary" />
+      description: 'Tìm các từ ẩn trong bảng chữ cái thú vị',
+      icon: <Search className="h-10 w-10 text-blue-600" />
     },
     { 
       id: 'truefalse', 
       name: 'Đúng hay Sai', 
-      description: 'Xác định nội dung là đúng hay sai',
-      icon: <CheckSquare className="h-8 w-8 text-primary" />
+      description: 'Xác định nội dung là đúng hay sai một cách nhanh chóng',
+      icon: <CheckSquare className="h-10 w-10 text-blue-600" />
     }
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 10
+      }
+    }
+  };
+
+  const cardVariants = {
+    hover: {
+      scale: 1.05,
+      y: -5,
+      boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 15
+      }
+    },
+    tap: {
+      scale: 0.98
+    }
+  };
+
+  const iconVariants = {
+    hover: {
+      rotate: 10,
+      scale: 1.1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 10
+      }
+    }
+  };
+
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4 text-center">Chọn loại trò chơi để tạo với AI</h2>
-      
-      {/* Quick Start Panel */}
-      <div className="bg-primary/5 p-4 rounded-lg mb-6 border border-primary/20">
-        <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
-          Tạo nhanh với chủ đề
-        </h3>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Input
-            placeholder="Nhập chủ đề của bạn (ví dụ: Lịch sử Việt Nam)..."
-            value={quickPrompt}
-            onChange={(e) => setQuickPrompt(e.target.value)}
-            className="flex-1"
-          />
-          <Button 
-            onClick={handleQuickStart}
-            disabled={!quickPrompt.trim() || !selectedGameType}
-            className="group whitespace-nowrap"
+    <div className="min-h-full w-full overflow-y-auto bg-transparent">
+      <div className="flex flex-col items-center justify-start p-6 min-h-full">
+        <motion.div 
+          className="w-full max-w-6xl mx-auto"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div 
+            className="text-center mb-10"
+            variants={itemVariants}
           >
-            Tạo Ngay
-            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {gameTypes.map((game) => (
-            <Button
-              key={game.id}
-              size="sm"
-              variant={selectedGameType === game.id ? "default" : "outline"}
-              className={`${selectedGameType === game.id ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-primary/10'}`}
-              onClick={() => setSelectedGameType(game.id)}
+            <motion.h1 
+              className="text-4xl md:text-5xl font-semibold bg-gradient-to-r from-blue-600 via-sky-600 to-blue-700 bg-clip-text text-transparent mb-4"
+              animate={{
+                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "linear"
+              }}
             >
-              {game.name}
-            </Button>
-          ))}
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {gameTypes.map((game) => (
-          <Card 
-            key={game.id}
-            className={`p-4 hover:shadow-md transition-all hover:border-primary hover:bg-primary/5 cursor-pointer ${selectedGameType === game.id ? 'border-primary bg-primary/10' : ''}`}
-            onClick={() => handleSelectGame(game.id)}
+              Chọn Loại Trò Chơi
+            </motion.h1>
+            <motion.p 
+              className="text-lg text-slate-600 dark:text-slate-300 mb-8"
+              variants={itemVariants}
+            >
+              Tạo trò chơi học tập tương tác với AI
+            </motion.p>
+          </motion.div>
+          
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-7xl mx-auto pb-6"
+            variants={containerVariants}
           >
-            <div className="flex flex-col items-center text-center gap-3">
-              <div className="p-3 bg-primary/10 rounded-full">
-                {game.icon}
-              </div>
-              <div>
-                <h3 className="font-bold">{game.name}</h3>
-                <p className="text-sm text-muted-foreground">{game.description}</p>
-              </div>
-              <div className="mt-2 flex items-center justify-center w-full px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm font-medium">
-                <Sparkles className="h-4 w-4 mr-1" />
-                Tạo với AI
-              </div>
-            </div>
-          </Card>
-        ))}
+            {gameTypes.map((game, index) => (
+              <motion.div
+                key={game.id}
+                variants={itemVariants}
+                custom={index}
+              >
+                <motion.div
+                  variants={cardVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                  className="h-full"
+                >
+                  <Card 
+                    className={`p-4 cursor-pointer h-full group relative overflow-hidden backdrop-blur-lg bg-white/20 dark:bg-black/20 border-white/30 dark:border-white/20 shadow-xl ${
+                      selectedGameType === game.id ? 'border-blue-500 bg-blue-500/20 shadow-2xl' : 'hover:border-blue-500/50'
+                    } ${game.isBackButton ? 'bg-gradient-to-br from-blue-500/20 to-blue-500/10 border-blue-500/40' : ''}`}
+                    onClick={() => game.isBackButton ? handleBackToHome() : handleSelectGame(game.id)}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    <div className="relative z-10 flex flex-col items-center text-center gap-3 h-full">
+                      <motion.div 
+                        className="p-3 bg-blue-500/20 rounded-full transition-all duration-300"
+                        variants={iconVariants}
+                        whileHover="hover"
+                      >
+                        {game.icon}
+                      </motion.div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold mb-2 transition-colors duration-300 text-blue-600 dark:text-blue-400">{game.name}</h3>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed transition-colors duration-300">
+                          {game.description}
+                        </p>
+                      </div>
+                      <div className="mt-auto w-full">
+                        <motion.div 
+                          className={`flex items-center justify-center px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 ${
+                            game.isBackButton 
+                              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' 
+                              : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
+                          }`}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          {game.isBackButton ? (
+                            <>
+                              <motion.div
+                                animate={{ x: [0, -2, 0] }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                              >
+                                <ArrowLeft className="h-3 w-3 mr-1" />
+                              </motion.div>
+                              <span>Về trang chủ</span>
+                            </>
+                          ) : (
+                            <>
+                              <motion.div
+                                animate={{ rotate: [0, 10, -10, 0] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                              >
+                                <Sparkles className="h-3 w-3 mr-1" />
+                              </motion.div>
+                              <span>Tạo với AI</span>
+                            </>
+                          )}
+                        </motion.div>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.div>
       </div>
-      
-      <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="sm:max-w-md">
-          <DialogTitle>Cài đặt cho {gameTypes.find(g => g.id === selectedGameType)?.name || "trò chơi"}</DialogTitle>
-          <GameSettings 
-            topic={quickPrompt}
-            onStart={(settings) => {
-              if (onQuickStart && selectedGameType) {
-                onQuickStart(selectedGameType, quickPrompt, settings);
-              }
-            }}
-            initialSettings={defaultSettings}
-            onCancel={() => setShowSettings(false)}
-            inModal={true}
-          />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
