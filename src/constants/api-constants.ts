@@ -9,8 +9,8 @@ export const GEMINI_API_KEY = 'AIzaSyB-X13dE3qKEURW8DxLmK56Vx3lZ1c8IfA';
 
 // Gemini Model configurations - cập nhật sang flash model
 export const GEMINI_MODELS = {
-  CUSTOM_GAME: "gemini-2.5-flash-preview-05-20",
-  PRESET_GAME: "gemini-2.5-flash-preview-05-20"
+  CUSTOM_GAME: "gemini-2.0-flash",
+  PRESET_GAME: "gemini-2.0-flash"
 };
 
 // OpenRouter API configurations
