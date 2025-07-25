@@ -1,0 +1,46 @@
+/* Disable all animations and transitions globally */
+*, *::before, *::after {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+/* Also disable framer-motion by setting motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Force disable specific animations */
+.animate-spin, 
+.animate-pulse, 
+.animate-bounce, 
+.animate-fade-in,
+.animate-fade-out,
+.animate-scale-in,
+.animate-slide-in-right,
+.animate-slide-out-right,
+.animate-accordion-down,
+.animate-accordion-up {
+  animation: none !important;
+}
+
+/* Override Tailwind animations */
+.transition, 
+.transition-all, 
+.transition-colors, 
+.transition-opacity, 
+.transition-transform {
+  transition: none !important;
+}
+
+/* Disable motion for framer-motion */
+.motion-reduce {
+  animation: none !important;
+  transition: none !important;
+}
