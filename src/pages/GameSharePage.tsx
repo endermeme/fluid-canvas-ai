@@ -33,6 +33,7 @@ const GameSharePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('game');
   const [gameExpired, setGameExpired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentPlayerName, setCurrentPlayerName] = useState<string | null>(null);
   const { toast } = useToast();
   
   const refreshParticipants = async () => {
@@ -220,6 +221,7 @@ const GameSharePage: React.FC = () => {
         
         setShowNameDialog(false);
         setHasRegistered(true);
+        setCurrentPlayerName(playerName);
         
         const registeredGamesStr = localStorage.getItem('registered_games');
         let registeredGames = registeredGamesStr ? JSON.parse(registeredGamesStr) : [];
@@ -369,6 +371,7 @@ const GameSharePage: React.FC = () => {
             extraButton={!hasRegistered ? joinGameButton : undefined}
             gameExpired={gameExpired}
             gameId={gameId}
+            playerName={currentPlayerName}
           />
         </TabsContent>
         

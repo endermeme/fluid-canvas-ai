@@ -11,8 +11,15 @@
       "Responsive design cho mọi thiết bị, controls lớn và dễ touch",
       "Nút bắt đầu to và bắt mắt, gameplay ngay lập tức",
       "Âm thanh (nếu có) phải đơn giản và không gây phiền nhiễu",
-      "Game phải complete trong 1 file HTML với CSS và JS inline"
+      "Game phải complete trong 1 file HTML với CSS và JS inline",
+      "QUAN TRỌNG: Tích hợp Score API - Sử dụng window.reportScore(score, totalQuestions) để báo cáo điểm",
+      "Khi game kết thúc: Gọi window.gameComplete(finalScore, timeSpent) để lưu kết quả",
+      "Cho games có tiến trình: Dùng window.updateProgress(percentage, level) để cập nhật",
+      "Ví dụ Quiz: window.reportScore(8, 10); window.gameComplete(80, 120)",
+      "Ví dụ Memory: window.gameComplete(90, 45) - hoàn thành trong 45 giây",
+      "Ví dụ Puzzle: window.updateProgress(75, 3); window.gameComplete(95, 180)",
+      "Luôn gọi startTime = Date.now() ở đầu game và tính timeSpent = Math.floor((Date.now() - startTime) / 1000)"
     ],
-    "instruction": "Tạo game hoàn chỉnh, vui nhộn với visual đẹp. Trả về ONLY HTML, không markdown, không giải thích."
+    "instruction": "Tạo game hoàn chỉnh, vui nhộn với visual đẹp. PHẢI tích hợp Score API để lưu điểm vào leaderboard. Trả về ONLY HTML, không markdown, không giải thích."
   }
 }

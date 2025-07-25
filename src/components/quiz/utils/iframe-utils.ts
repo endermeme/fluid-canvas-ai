@@ -14,19 +14,92 @@ export const enhanceIframeContent = async (content: string, title?: string): Pro
     // Bước 1: Sửa các lỗi JavaScript phổ biến
     let enhancedContent = fixJavaScriptErrors(content);
     
-    // Bước 2: Thêm error handling cho JavaScript
-    const errorHandlingScript = `
+    // Bước 2: Thêm error handling và score communication API
+    const enhancementScript = `
 <script>
 // Error handling cho game
 window.addEventListener('error', function(e) {
   console.error('Game Error:', e.error);
-  // Không hiển thị alert để tránh làm phiền người dùng
 });
 
 window.addEventListener('unhandledrejection', function(e) {
   console.error('Unhandled Promise Rejection:', e.reason);
   e.preventDefault();
 });
+
+// Score Communication API
+window.gameAPI = {
+  // Báo cáo điểm số
+  reportScore: function(score, totalQuestions) {
+    try {
+      window.parent.postMessage({
+        type: 'GAME_SCORE_UPDATE',
+        data: {
+          score: parseInt(score) || 0,
+          totalQuestions: parseInt(totalQuestions) || 1,
+          timestamp: Date.now()
+        }
+      }, '*');
+    } catch (e) {
+      console.log('Score reported:', score);
+    }
+  },
+  
+  // Hoàn thành game
+  gameComplete: function(finalScore, timeSpent, extraData) {
+    try {
+      window.parent.postMessage({
+        type: 'GAME_COMPLETE',
+        data: {
+          score: parseInt(finalScore) || 0,
+          completionTime: parseInt(timeSpent) || 0,
+          extraData: extraData || {},
+          timestamp: Date.now()
+        }
+      }, '*');
+    } catch (e) {
+      console.log('Game completed with score:', finalScore);
+    }
+  },
+  
+  // Cập nhật tiến trình
+  updateProgress: function(progress, currentLevel) {
+    try {
+      window.parent.postMessage({
+        type: 'GAME_PROGRESS_UPDATE',
+        data: {
+          progress: Math.min(Math.max(parseInt(progress) || 0, 0), 100),
+          currentLevel: parseInt(currentLevel) || 1,
+          timestamp: Date.now()
+        }
+      }, '*');
+    } catch (e) {
+      console.log('Progress updated:', progress);
+    }
+  },
+  
+  // Lỗi game
+  reportError: function(errorMessage, errorCode) {
+    try {
+      window.parent.postMessage({
+        type: 'GAME_ERROR',
+        data: {
+          message: errorMessage || 'Unknown error',
+          code: errorCode || 'GENERIC_ERROR',
+          timestamp: Date.now()
+        }
+      }, '*');
+    } catch (e) {
+      console.error('Game Error:', errorMessage);
+    }
+  }
+};
+
+// Thêm shortcuts cho dễ sử dụng
+window.reportScore = window.gameAPI.reportScore;
+window.gameComplete = window.gameAPI.gameComplete;
+window.updateProgress = window.gameAPI.updateProgress;
+window.reportError = window.gameAPI.reportError;
 
 // Thông báo load hoàn thành
 window.addEventListener('load', function() {
@@ -54,10 +127,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Bước 3: Thêm script vào cuối body nếu chưa có
     if (!enhancedContent.includes('window.parent.postMessage') && enhancedContent.includes('</body>')) {
-      enhancedContent = enhancedContent.replace('</body>', `${errorHandlingScript}</body>`);
+      enhancedContent = enhancedContent.replace('</body>', `${enhancementScript}</body>`);
     } else if (!enhancedContent.includes('</body>')) {
       // Nếu không có thẻ body, thêm vào cuối
-      enhancedContent += errorHandlingScript;
+      enhancedContent += enhancementScript;
     }
     
     console.log('Xử lý HTML hoàn thành');

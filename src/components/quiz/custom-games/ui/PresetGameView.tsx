@@ -24,6 +24,7 @@ interface PresetGameViewProps {
   isTeacher?: boolean;
   gameExpired?: boolean;
   gameId?: string;
+  playerName?: string | null;
 }
 
 const PresetGameView: React.FC<PresetGameViewProps> = ({ 
@@ -37,7 +38,8 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
   extraButton,
   isTeacher = false,
   gameExpired = false,
-  gameId
+  gameId,
+  playerName
 }) => {
   const { toast } = useToast();
   const { isSharing, handleShare } = useGameShareManager(miniGame, toast, onShare);
@@ -51,18 +53,21 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
 
   const handleGameComplete = async (result: any) => {
     if (currentGameId && result && typeof result.score === 'number') {
-      const registeredGamesStr = localStorage.getItem('registered_games');
-      let playerName = 'Người chơi';
+      // Use prop playerName first, fallback to localStorage logic
+      let finalPlayerName = playerName || 'Người chơi';
       
-      if (registeredGamesStr) {
-        const registeredGames = JSON.parse(registeredGamesStr);
-        if (registeredGames.includes(currentGameId)) {
-          const gameSessionsStr = localStorage.getItem('game_sessions');
-          if (gameSessionsStr) {
-            const sessions = JSON.parse(gameSessionsStr);
-            const session = sessions.find((s: any) => s.id === currentGameId);
-            if (session && session.participants && session.participants.length > 0) {
-              playerName = session.participants[session.participants.length - 1].name;
+      if (!playerName) {
+        const registeredGamesStr = localStorage.getItem('registered_games');
+        if (registeredGamesStr) {
+          const registeredGames = JSON.parse(registeredGamesStr);
+          if (registeredGames.includes(currentGameId)) {
+            const gameSessionsStr = localStorage.getItem('game_sessions');
+            if (gameSessionsStr) {
+              const sessions = JSON.parse(gameSessionsStr);
+              const session = sessions.find((s: any) => s.id === currentGameId);
+              if (session && session.participants && session.participants.length > 0) {
+                finalPlayerName = session.participants[session.participants.length - 1].name;
+              }
             }
           }
         }
@@ -70,7 +75,7 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
 
       await saveGameScore({
         gameId: currentGameId,
-        playerName,
+        playerName: finalPlayerName,
         score: result.score,
         totalQuestions: result.totalQuestions || result.total || 10,
         completionTime: result.completionTime,

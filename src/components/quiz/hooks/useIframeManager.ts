@@ -10,12 +10,17 @@ interface MiniGame {
 export const useIframeManager = (
   miniGame: MiniGame, 
   onReload?: () => void, 
-  gameExpired?: boolean
+  gameExpired?: boolean,
+  onScoreUpdate?: (score: number, totalQuestions: number) => void,
+  onGameComplete?: (finalScore: number, completionTime: number, extraData?: any) => void,
+  onProgressUpdate?: (progress: number, currentLevel: number) => void
 ) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeError, setIframeError] = useState<string | null>(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState<boolean>(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [gameScore, setGameScore] = useState<number>(0);
+  const [gameProgress, setGameProgress] = useState<number>(0);
 
   const loadIframeContent = async () => {
     if (!iframeRef.current || !miniGame?.content) {
@@ -60,11 +65,51 @@ export const useIframeManager = (
     }
   };
 
+  // Message listener cho score communication
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (!event.data.type) return;
+      
+      switch (event.data.type) {
+        case 'GAME_SCORE_UPDATE':
+          const { score, totalQuestions } = event.data.data;
+          setGameScore(score);
+          onScoreUpdate?.(score, totalQuestions);
+          break;
+          
+        case 'GAME_COMPLETE':
+          const { score: finalScore, completionTime, extraData } = event.data.data;
+          onGameComplete?.(finalScore, completionTime, extraData);
+          break;
+          
+        case 'GAME_PROGRESS_UPDATE':
+          const { progress, currentLevel } = event.data.data;
+          setGameProgress(progress);
+          onProgressUpdate?.(progress, currentLevel);
+          break;
+          
+        case 'GAME_ERROR':
+          const { message } = event.data.data;
+          setIframeError(message);
+          break;
+          
+        case 'GAME_LOADED':
+          console.log('Game loaded successfully');
+          break;
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [onScoreUpdate, onGameComplete, onProgressUpdate]);
+
   useEffect(() => {
     if (miniGame?.content) {
       setIsIframeLoaded(false);
       setLoadingProgress(0);
       setIframeError(null);
+      setGameScore(0);
+      setGameProgress(0);
       loadIframeContent();
     }
   }, [miniGame]);
@@ -112,6 +157,8 @@ export const useIframeManager = (
     iframeError,
     isIframeLoaded,
     loadingProgress,
+    gameScore,
+    gameProgress,
     refreshGame,
     handleFullscreen
   };

@@ -19,6 +19,7 @@ interface GameViewSelectorProps {
   isTeacher?: boolean;
   gameExpired?: boolean;
   gameId?: string;
+  playerName?: string | null;
 }
 
 const GameViewSelector: React.FC<GameViewSelectorProps> = (props) => {
