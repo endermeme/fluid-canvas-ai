@@ -24,7 +24,9 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({
   const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [apiProvider, setApiProvider] = useState<'gemini' | 'openrouter'>('gemini');
-  const [openRouterApiKey, setOpenRouterApiKey] = useState('');
+  
+  // Fixed API key for OpenRouter
+  const OPENROUTER_API_KEY = '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';
   const {
     toast
   } = useToast();
@@ -43,15 +45,6 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({
       return;
     }
 
-    if (apiProvider === 'openrouter' && !openRouterApiKey.trim()) {
-      toast({
-        title: "Lỗi",
-        description: "Vui lòng nhập OpenRouter API key",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsGenerating(true);
     try {
       const settings: GameSettingsData = {
@@ -61,12 +54,12 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({
         content, 
         settings, 
         apiProvider, 
-        apiProvider === 'openrouter' ? openRouterApiKey : undefined
+        apiProvider === 'openrouter' ? OPENROUTER_API_KEY : undefined
       );
       if (game) {
         toast({
           title: "Đã tạo trò chơi",
-          description: `Trò chơi đã được tạo thành công với ${apiProvider === 'gemini' ? 'Gemini' : 'OpenRouter'}.`
+          description: `Trò chơi đã được tạo thành công với ${apiProvider === 'gemini' ? 'Gemini' : 'Kimi K2'}.`
         });
         onGenerate(content, game);
       } else {
@@ -149,48 +142,34 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({
               delay: 0.4,
               duration: 0.5
             }}>
-                {/* API Provider Selection */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label className="flex items-center gap-2.5 text-lg font-medium mb-3">
-                      <Settings className="h-5 w-5 text-blue-600" />
-                      AI Provider
-                    </Label>
-                    <Select value={apiProvider} onValueChange={(value: 'gemini' | 'openrouter') => setApiProvider(value)}>
-                      <SelectTrigger className="border-2 border-blue-200/40 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md focus:ring-blue-400/50 focus:border-blue-400/60 rounded-xl shadow-lg">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="gemini">Gemini (Miễn phí)</SelectItem>
-                        <SelectItem value="openrouter">OpenRouter (Kimi K2)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {apiProvider === 'openrouter' && (
-                    <div>
-                      <Label htmlFor="apiKey" className="flex items-center gap-2.5 text-lg font-medium mb-3">
-                        <Key className="h-5 w-5 text-blue-600" />
-                        OpenRouter API Key
-                      </Label>
-                      <Input
-                        id="apiKey"
-                        type="password"
-                        placeholder="sk-or-v1-..."
-                        value={openRouterApiKey}
-                        onChange={(e) => setOpenRouterApiKey(e.target.value)}
-                        className="border-2 border-blue-200/40 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md focus-visible:ring-blue-400/50 focus-visible:border-blue-400/60 rounded-xl shadow-lg"
-                      />
-                    </div>
-                  )}
-                </div>
-
                 <div className="relative">
                   <Label htmlFor="content" className="flex items-center justify-center gap-2.5 text-lg font-medium mb-4">
                     <SparklesIcon className="h-5 w-5 text-blue-600" /> 
                     Mô tả game của bạn
                   </Label>
                   <Textarea id="content" placeholder={getPlaceholderText()} value={content} onChange={e => setContent(e.target.value)} rows={7} className="font-mono text-sm border-2 border-blue-200/40 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md focus-visible:ring-blue-400/50 focus-visible:border-blue-400/60 rounded-2xl transition-all duration-300 resize-none shadow-lg" />
+                </div>
+
+                {/* Mode Selection - moved below description */}
+                <div>
+                  <Label className="flex items-center gap-2.5 text-lg font-medium mb-3">
+                    <Settings className="h-5 w-5 text-blue-600" />
+                    Chế độ AI
+                  </Label>
+                  <Select value={apiProvider} onValueChange={(value: 'gemini' | 'openrouter') => setApiProvider(value)}>
+                    <SelectTrigger className="border-2 border-blue-200/40 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md focus:ring-blue-400/50 focus:border-blue-400/60 rounded-xl shadow-lg">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gemini">🚀 Cơ bản (Gemini)</SelectItem>
+                      <SelectItem value="openrouter">⭐ Nâng cao (Kimi K2)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {apiProvider === 'gemini' 
+                      ? 'Chế độ cơ bản sử dụng Gemini AI miễn phí' 
+                      : 'Chế độ nâng cao sử dụng Kimi K2 cho kết quả tốt hơn'}
+                  </p>
                 </div>
                 
                 <motion.div className="flex items-start gap-3.5 p-5 bg-blue-50/80 dark:bg-blue-950/50 rounded-2xl border border-blue-200/30 backdrop-blur-sm" whileHover={{
