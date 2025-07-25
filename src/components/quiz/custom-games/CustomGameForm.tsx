@@ -161,14 +161,14 @@ const CustomGameForm: React.FC<CustomGameFormProps> = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="gemini">🚀 Cơ bản (Gemini)</SelectItem>
-                      <SelectItem value="openrouter">⭐ Nâng cao (Kimi K2)</SelectItem>
+                      <SelectItem value="gemini">🚀 Cơ bản (nhanh hơn)</SelectItem>
+                      <SelectItem value="openrouter">⭐ Nâng cao (lâu hơn)</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-sm text-muted-foreground mt-2">
                     {apiProvider === 'gemini' 
-                      ? 'Chế độ cơ bản sử dụng Gemini AI miễn phí' 
-                      : 'Chế độ nâng cao sử dụng Kimi K2 cho kết quả tốt hơn'}
+                      ? 'Chế độ cơ bản tạo game nhanh và miễn phí' 
+                      : 'Chế độ nâng cao cho kết quả tốt hơn nhưng mất thời gian'}
                   </p>
                 </div>
                 
