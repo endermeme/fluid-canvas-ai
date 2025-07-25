@@ -148,37 +148,37 @@ const TrueFalseSettings: React.FC<TrueFalseSettingsProps> = ({ onStart, topic, o
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-3">
                   <div className="space-y-3">
-                    <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <div className="flex items-center justify-between gap-3 p-3 bg-primary/5 rounded-lg">
+                      <Label htmlFor="showExplanation" className="text-sm font-medium flex-1">
+                        Hiển thị giải thích
+                      </Label>
                       <Switch 
                         id="showExplanation" 
                         checked={settings.showExplanation}
                         onCheckedChange={(checked) => handleSwitchChange('showExplanation', checked)} 
                       />
-                      <Label htmlFor="showExplanation" className="text-sm font-medium">
-                        Hiển thị giải thích
-                      </Label>
                     </div>
 
-                    <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <div className="flex items-center justify-between gap-3 p-3 bg-primary/5 rounded-lg">
+                      <Label htmlFor="shuffleQuestions" className="text-sm font-medium flex-1">
+                        Xáo trộn câu hỏi
+                      </Label>
                       <Switch 
                         id="shuffleQuestions" 
                         checked={settings.shuffleQuestions}
                         onCheckedChange={(checked) => handleSwitchChange('shuffleQuestions', checked)} 
                       />
-                      <Label htmlFor="shuffleQuestions" className="text-sm font-medium">
-                        Xáo trộn câu hỏi
-                      </Label>
                     </div>
 
-                    <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                    <div className="flex items-center justify-between gap-3 p-3 bg-primary/5 rounded-lg">
+                      <Label htmlFor="allowSkip" className="text-sm font-medium flex-1">
+                        Cho phép bỏ qua
+                      </Label>
                       <Switch 
                         id="allowSkip" 
                         checked={settings.allowSkip}
                         onCheckedChange={(checked) => handleSwitchChange('allowSkip', checked)} 
                       />
-                      <Label htmlFor="allowSkip" className="text-sm font-medium">
-                        Cho phép bỏ qua
-                      </Label>
                     </div>
                   </div>
                 </CollapsibleContent>
@@ -261,17 +261,17 @@ const TrueFalseSettings: React.FC<TrueFalseSettingsProps> = ({ onStart, topic, o
 
               {/* Debug Mode */}
               <div className="border-t border-border/50 pt-3">
-                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
+                <div className="flex items-center justify-between gap-3 p-3 bg-orange-50 rounded-lg">
+                  <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2 flex-1">
+                    <Bug className="h-4 w-4 text-orange-500" /> 
+                    <span>Debug Mode</span>
+                    <span className="text-xs text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">DEV</span>
+                  </Label>
                   <Switch 
                     id="debugMode" 
                     checked={settings.debugMode}
                     onCheckedChange={(checked) => handleSwitchChange('debugMode', checked)} 
                   />
-                  <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2">
-                    <Bug className="h-4 w-4 text-orange-500" /> 
-                    <span>Debug Mode</span>
-                    <span className="text-xs text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">DEV</span>
-                  </Label>
                 </div>
                 {settings.debugMode && (
                   <p className="text-sm text-muted-foreground mt-2 ml-7">

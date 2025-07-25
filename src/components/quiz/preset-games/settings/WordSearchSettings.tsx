@@ -114,37 +114,37 @@ const WordSearchSettings: React.FC<WordSearchSettingsProps> = ({ onStart, topic,
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-3 space-y-3">
-                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                  <div className="flex items-center justify-between gap-3 p-3 bg-primary/5 rounded-lg">
+                    <Label htmlFor="allowDiagonalWords" className="text-sm font-medium flex-1">
+                      Cho phép từ chéo
+                    </Label>
                     <Switch 
                       id="allowDiagonalWords" 
                       checked={settings.allowDiagonalWords}
                       onCheckedChange={(checked) => handleSwitchChange('allowDiagonalWords', checked)} 
                     />
-                    <Label htmlFor="allowDiagonalWords" className="text-sm font-medium">
-                      Cho phép từ chéo
-                    </Label>
                   </div>
 
-                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                  <div className="flex items-center justify-between gap-3 p-3 bg-primary/5 rounded-lg">
+                    <Label htmlFor="showWordList" className="text-sm font-medium flex items-center gap-2 flex-1">
+                      <List className="h-4 w-4 text-primary" /> Hiển thị danh sách từ
+                    </Label>
                     <Switch 
                       id="showWordList" 
                       checked={settings.showWordList}
                       onCheckedChange={(checked) => handleSwitchChange('showWordList', checked)} 
                     />
-                    <Label htmlFor="showWordList" className="text-sm font-medium flex items-center gap-2">
-                      <List className="h-4 w-4 text-primary" /> Hiển thị danh sách từ
-                    </Label>
                   </div>
 
-                  <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                  <div className="flex items-center justify-between gap-3 p-3 bg-primary/5 rounded-lg">
+                    <Label htmlFor="showProgress" className="text-sm font-medium flex-1">
+                      Hiển thị tiến độ
+                    </Label>
                     <Switch 
                       id="showProgress" 
                       checked={settings.showProgress}
                       onCheckedChange={(checked) => handleSwitchChange('showProgress', checked)} 
                     />
-                    <Label htmlFor="showProgress" className="text-sm font-medium">
-                      Hiển thị tiến độ
-                    </Label>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -208,17 +208,17 @@ const WordSearchSettings: React.FC<WordSearchSettingsProps> = ({ onStart, topic,
 
               {/* Debug Mode */}
               <div className="border-t border-border/50 pt-3">
-                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
+                <div className="flex items-center justify-between gap-3 p-3 bg-orange-50 rounded-lg">
+                  <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2 flex-1">
+                    <Bug className="h-4 w-4 text-orange-500" /> 
+                    <span>Debug Mode</span>
+                    <span className="text-xs text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">DEV</span>
+                  </Label>
                   <Switch 
                     id="debugMode" 
                     checked={settings.debugMode}
                     onCheckedChange={(checked) => handleSwitchChange('debugMode', checked)} 
                   />
-                  <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2">
-                    <Bug className="h-4 w-4 text-orange-500" /> 
-                    <span>Debug Mode</span>
-                    <span className="text-xs text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">DEV</span>
-                  </Label>
                 </div>
                 {settings.debugMode && (
                   <p className="text-sm text-muted-foreground mt-2 ml-7">

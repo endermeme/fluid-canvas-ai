@@ -158,32 +158,32 @@ const MatchingSettings: React.FC<MatchingSettingsProps> = ({ onStart, topic, onC
 
               {/* Matching Options */}
               <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-primary/5 rounded-lg">
+                <div className="flex items-center justify-between gap-3 p-3 bg-primary/5 rounded-lg">
+                  <Label htmlFor="allowPartialMatching" className="text-sm font-medium flex items-center gap-2 flex-1">
+                    <Link className="h-4 w-4 text-primary" /> Cho phép nối một phần
+                  </Label>
                   <Switch 
                     id="allowPartialMatching" 
                     checked={settings.allowPartialMatching}
                     onCheckedChange={(checked) => handleSwitchChange('allowPartialMatching', checked)} 
                   />
-                  <Label htmlFor="allowPartialMatching" className="text-sm font-medium flex items-center gap-2">
-                    <Link className="h-4 w-4 text-primary" /> Cho phép nối một phần
-                  </Label>
                 </div>
               </div>
 
 
               {/* Debug Mode */}
               <div className="border-t border-border/50 pt-3">
-                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
+                <div className="flex items-center justify-between gap-3 p-3 bg-orange-50 rounded-lg">
+                  <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2 flex-1">
+                    <Bug className="h-4 w-4 text-orange-500" /> 
+                    <span>Debug Mode</span>
+                    <span className="text-xs text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">DEV</span>
+                  </Label>
                   <Switch 
                     id="debugMode" 
                     checked={settings.debugMode}
                     onCheckedChange={(checked) => handleSwitchChange('debugMode', checked)} 
                   />
-                  <Label htmlFor="debugMode" className="text-sm font-medium flex items-center gap-2">
-                    <Bug className="h-4 w-4 text-orange-500" /> 
-                    <span>Debug Mode</span>
-                    <span className="text-xs text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">DEV</span>
-                  </Label>
                 </div>
                 {settings.debugMode && (
                   <p className="text-sm text-muted-foreground mt-2 ml-7">
