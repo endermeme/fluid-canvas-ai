@@ -254,6 +254,41 @@ export type Database = {
           },
         ]
       }
+      game_score_details: {
+        Row: {
+          created_at: string
+          id: string
+          metric_data: Json | null
+          metric_name: string
+          metric_value: number
+          score_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_data?: Json | null
+          metric_name: string
+          metric_value: number
+          score_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_data?: Json | null
+          metric_name?: string
+          metric_value?: number
+          score_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_score_details_score_id_fkey"
+            columns: ["score_id"]
+            isOneToOne: false
+            referencedRelation: "unified_game_scores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_scores: {
         Row: {
           account_id: string | null
@@ -396,25 +431,37 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
+          is_verified: boolean | null
           role: string
           updated_at: string
+          user_type: string | null
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id: string
+          is_verified?: boolean | null
           role?: string
           updated_at?: string
+          user_type?: string | null
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
+          is_verified?: boolean | null
           role?: string
           updated_at?: string
+          user_type?: string | null
         }
         Relationships: []
       }
@@ -646,6 +693,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      unified_game_scores: {
+        Row: {
+          completed_at: string
+          completion_time: number | null
+          created_at: string
+          game_id: string
+          game_type: string
+          id: string
+          ip_address: string | null
+          player_id: string | null
+          player_name: string
+          score: number
+          scoring_data: Json | null
+          source_table: string
+          total_questions: number
+        }
+        Insert: {
+          completed_at?: string
+          completion_time?: number | null
+          created_at?: string
+          game_id: string
+          game_type: string
+          id?: string
+          ip_address?: string | null
+          player_id?: string | null
+          player_name: string
+          score?: number
+          scoring_data?: Json | null
+          source_table: string
+          total_questions?: number
+        }
+        Update: {
+          completed_at?: string
+          completion_time?: number | null
+          created_at?: string
+          game_id?: string
+          game_type?: string
+          id?: string
+          ip_address?: string | null
+          player_id?: string | null
+          player_name?: string
+          score?: number
+          scoring_data?: Json | null
+          source_table?: string
+          total_questions?: number
+        }
+        Relationships: []
       }
       user_answers: {
         Row: {
