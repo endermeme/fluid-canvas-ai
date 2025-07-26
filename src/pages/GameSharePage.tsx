@@ -180,20 +180,21 @@ const GameSharePage: React.FC = () => {
     if (!gameId) return 'Player 1';
     
     try {
-      // Get current participant count from unified_game_scores
-      const { data: scores, error } = await supabase
-        .from('unified_game_scores')
+      // Get current participant count from leaderboard tables
+      const { data: customScores } = await supabase
+        .from('custom_leaderboard')
         .select('player_name')
-        .eq('game_id', gameId)
-        .eq('source_table', 'games');
+        .eq('game_id', gameId);
 
-      if (error) {
-        console.error('Error getting participant count:', error);
-        return 'Player 1';
-      }
+      const { data: presetScores } = await supabase
+        .from('preset_leaderboard')
+        .select('player_name')
+        .eq('game_id', gameId);
 
+      const allScores = [...(customScores || []), ...(presetScores || [])];
+      
       // Count unique players and generate next number
-      const uniquePlayers = new Set(scores?.map(s => s.player_name) || []);
+      const uniquePlayers = new Set(allScores.map(s => s.player_name));
       const playerCount = uniquePlayers.size;
       return `Player ${playerCount + 1}`;
     } catch (error) {

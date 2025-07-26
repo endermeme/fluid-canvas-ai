@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ShareSettings {
@@ -114,16 +113,15 @@ export const saveGameForSharing = async (
 
     // Lưu game vào database
     const { data, error } = await supabase
-      .from('games')
+      .from('custom_games')
       .insert([
         {
           id: gameId,
           title: title || 'Game tương tác',
-          game_type: gameType || 'custom',
+          game_data: {},
           description: description || `Game chia sẻ: ${title}`,
           html_content: processedHtmlContent,
           expires_at: expiresAt.toISOString(),
-          is_published: true,
           creator_ip: 'localhost',
           account_id: accountId,
           password: shareSettings?.password || null,
@@ -169,18 +167,22 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
   try {
     console.log("Fetching game with ID:", id);
     
-    const { data: game, error } = await supabase
-      .from('games')
+    // Try custom_games first
+    const { data: customGame } = await supabase
+      .from('custom_games')
       .select('*')
       .eq('id', id)
-      .eq('is_published', true)
       .gt('expires_at', new Date().toISOString())
       .single();
 
-    if (error) {
-      console.error("Error fetching game:", error);
-      return null;
-    }
+    // Then try preset_games if not found in custom_games
+    const { data: presetGame } = customGame ? { data: null } : await supabase
+      .from('preset_games')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    const game = customGame || presetGame;
 
     if (!game) {
       console.error("Game not found or expired with ID:", id);
@@ -189,49 +191,67 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
 
     console.log("Game data retrieved:", game);
 
-    // Tăng share count
-    await supabase.rpc('increment_share_count', { game_id: id });
-
     let parsedContent = null;
     
-    // Xử lý preset games với JSON data
-    if (game.html_content && game.html_content.startsWith('{')) {
-      try {
-        const gameData = JSON.parse(game.html_content);
-        if (gameData.type === 'preset-game') {
-          parsedContent = gameData.data;
+    // Handle different schemas for custom_games and preset_games
+    if (customGame) {
+      // Custom game schema
+      if (customGame.html_content && customGame.html_content.startsWith('{')) {
+        try {
+          const gameData = JSON.parse(customGame.html_content);
+          if (gameData.type === 'preset-game') {
+            parsedContent = gameData.data;
+          }
+        } catch (e) {
+          console.error('Error parsing preset game JSON:', e);
         }
-      } catch (e) {
-        console.error('Error parsing preset game JSON:', e);
-      }
-    } 
-    // Xử lý custom games với HTML + embedded data
-    else if (game.html_content && game.html_content.includes('data-game-content')) {
-      try {
-        const contentMatch = game.html_content.match(/data-game-content="([^"]*)"/);
-        if (contentMatch && contentMatch[1]) {
-          parsedContent = JSON.parse(decodeURIComponent(contentMatch[1]));
+      } 
+      else if (customGame.html_content && customGame.html_content.includes('data-game-content')) {
+        try {
+          const contentMatch = customGame.html_content.match(/data-game-content="([^"]*)"/);
+          if (contentMatch && contentMatch[1]) {
+            parsedContent = JSON.parse(decodeURIComponent(contentMatch[1]));
+          }
+        } catch (e) {
+          console.error('Error parsing game content from HTML:', e);
         }
-      } catch (e) {
-        console.error('Error parsing game content from HTML:', e);
       }
+
+      return {
+        id: customGame.id,
+        title: customGame.title,
+        gameType: 'custom',
+        content: parsedContent || {},
+        htmlContent: customGame.html_content || '',
+        description: customGame.description || `Game chia sẻ: ${customGame.title}`,
+        expiresAt: new Date(customGame.expires_at || Date.now() + 7 * 24 * 60 * 60 * 1000).getTime(),
+        createdAt: new Date(customGame.created_at).getTime(),
+        password: customGame.password,
+        maxParticipants: customGame.max_participants,
+        showLeaderboard: customGame.show_leaderboard ?? true,
+        requireRegistration: customGame.require_registration ?? false,
+        customDuration: customGame.custom_duration
+      };
+    } else if (presetGame) {
+      // Preset game schema
+      return {
+        id: presetGame.id,
+        title: presetGame.title,
+        gameType: presetGame.game_type,
+        content: presetGame.template_data || {},
+        htmlContent: '',
+        description: presetGame.description || `Game chia sẻ: ${presetGame.title}`,
+        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // No expires_at in preset_games
+        createdAt: new Date(presetGame.created_at).getTime(),
+        password: null,
+        maxParticipants: null,
+        showLeaderboard: true,
+        requireRegistration: false,
+        customDuration: null
+      };
     }
 
-    return {
-      id: game.id,
-      title: game.title,
-      gameType: game.game_type,
-      content: parsedContent || {},
-      htmlContent: game.html_content,
-      description: game.description || `Game chia sẻ: ${game.title}`,
-      expiresAt: new Date(game.expires_at).getTime(),
-      createdAt: new Date(game.created_at).getTime(),
-      password: game.password,
-      maxParticipants: game.max_participants,
-      showLeaderboard: game.show_leaderboard,
-      requireRegistration: game.require_registration,
-      customDuration: game.custom_duration
-    };
+    return null;
   } catch (error) {
     console.error("Unhandled error in getSharedGame:", error);
     return null;

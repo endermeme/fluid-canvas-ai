@@ -39,30 +39,46 @@ export const addParticipant = async (
   try {
     // Check if game exists and is valid
     console.log('🔍 [addParticipant] Validating game:', gameId);
-    const { data: game, error: gameError } = await supabase
-      .from('games')
+    // Try custom_games first
+    const { data: customGame } = await supabase
+      .from('custom_games')
       .select('*')
       .eq('id', gameId)
-      .eq('is_published', true)
       .gt('expires_at', new Date().toISOString())
       .single();
 
-    console.log('📋 [addParticipant] Game validation result:', { game: game?.title, error: gameError });
+    // Then try preset_games if not found
+    const { data: presetGame } = customGame ? { data: null } : await supabase
+      .from('preset_games')
+      .select('*')
+      .eq('id', gameId)
+      .single();
 
-    if (gameError || !game) {
+    const game = customGame || presetGame;
+
+    console.log('📋 [addParticipant] Game validation result:', { game: game?.title });
+
+    if (!game) {
       console.log('❌ [addParticipant] Game validation failed');
       return { success: false, message: 'Game không tồn tại hoặc đã hết hạn' };
     }
 
-    // Save participant to database using the RPC function
-    console.log('💾 [addParticipant] Saving participant to database via RPC:', { gameId, name });
-    const { error: rpcError } = await supabase.rpc('update_game_participant_activity', {
-      target_game_id: gameId,
-      target_player_name: name
-    });
+    // Save participant to appropriate leaderboard table
+    console.log('💾 [addParticipant] Saving participant to leaderboard');
+    const tableName = customGame ? 'custom_leaderboard' : 'preset_leaderboard';
+    
+    const { error: insertError } = await supabase
+      .from(tableName)
+      .insert({
+        game_id: gameId,
+        player_name: name,
+        ip_address: ipAddress,
+        score: 0,
+        total_questions: 0
+      });
 
-    if (rpcError) {
-      console.error('💥 [addParticipant] RPC Error saving participant to database:', rpcError);
+    if (insertError) {
+      console.error('💥 [addParticipant] Error saving participant to database:', insertError);
       // Still continue with localStorage fallback
     } else {
       console.log('✅ [addParticipant] Successfully saved participant to database');
@@ -126,35 +142,37 @@ export const createGameSession = async (title: string, content: string): Promise
   return { id: gameId };
 };
 
-// Get game participants from real participants table
+// Get game participants from leaderboard tables
 export const getGameParticipants = async (gameId: string, accountId?: string): Promise<GameParticipant[]> => {
   console.log('📋 [getGameParticipants] Fetching participants for gameId:', gameId);
   try {
-    // Get from game_participants table using RPC function
-    const { data: participants, error } = await supabase.rpc('get_game_participants_realtime', {
-      target_game_id: gameId
-    });
+    // Get from both leaderboard tables
+    const { data: customParticipants } = await supabase
+      .from('custom_leaderboard')
+      .select('*')
+      .eq('game_id', gameId)
+      .order('created_at', { ascending: false });
 
-    console.log('📊 [getGameParticipants] RPC response:', { participantsCount: participants?.length, error });
+    const { data: presetParticipants } = await supabase
+      .from('preset_leaderboard')
+      .select('*')
+      .eq('game_id', gameId)
+      .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('❌ [getGameParticipants] Error fetching participants:', error);
-      // Fallback to localStorage
-      console.log('🔄 [getGameParticipants] Falling back to localStorage');
-      const localGame = getLocalGame(gameId);
-      return localGame?.participants || [];
-    }
+    const allParticipants = [...(customParticipants || []), ...(presetParticipants || [])];
+
+    console.log('📊 [getGameParticipants] Found participants:', allParticipants.length);
 
     // Convert to GameParticipant format
-    const mappedParticipants = participants?.map((p: any) => ({
+    const mappedParticipants = allParticipants.map((p: any) => ({
       id: p.id,
       name: p.player_name,
       ipAddress: p.ip_address || 'unknown',
-      timestamp: p.joined_at,
+      timestamp: p.joined_at || p.created_at,
       gameId: gameId,
       retryCount: 0,
-      score: 0
-    })) || [];
+      score: p.score || 0
+    }));
 
     console.log('✅ [getGameParticipants] Successfully mapped participants:', mappedParticipants.length, 'participants');
     return mappedParticipants;
@@ -181,25 +199,38 @@ export const getLocalGame = (gameId: string): any => {
 // Check if game is valid
 export const isGameValid = async (gameId: string): Promise<boolean> => {
   try {
-    const { data: game, error } = await supabase
-      .from('games')
-      .select('expires_at, is_published')
+    // Try custom_games first
+    const { data: customGame } = await supabase
+      .from('custom_games')
+      .select('expires_at')
       .eq('id', gameId)
       .single();
 
-    if (error || !game) {
-      // Check localStorage as fallback
-      const localGame = getLocalGame(gameId);
-      if (localGame) {
-        const expiryTime = typeof localGame.expiresAt === 'number' 
-          ? localGame.expiresAt 
-          : new Date(localGame.expiresAt).getTime();
-        return Date.now() < expiryTime;
-      }
-      return false;
+    // Then try preset_games
+    const { data: presetGame } = customGame ? { data: null } : await supabase
+      .from('preset_games')
+      .select('is_active')
+      .eq('id', gameId)
+      .single();
+
+    if (customGame) {
+      return new Date(customGame.expires_at).getTime() > Date.now();
     }
 
-    return game.is_published && new Date(game.expires_at).getTime() > Date.now();
+    if (presetGame) {
+      return presetGame.is_active;
+    }
+
+    // Check localStorage as fallback
+    const localGame = getLocalGame(gameId);
+    if (localGame) {
+      const expiryTime = typeof localGame.expiresAt === 'number' 
+        ? localGame.expiresAt 
+        : new Date(localGame.expiresAt).getTime();
+      return Date.now() < expiryTime;
+    }
+    
+    return false;
   } catch (error) {
     console.error('Error checking game validity:', error);
     return false;
@@ -209,32 +240,63 @@ export const isGameValid = async (gameId: string): Promise<boolean> => {
 // Get game with participants
 export const getGameWithParticipants = async (gameId: string): Promise<{ game: StoredGame, participants: GameParticipant[] } | null> => {
   try {
-    const { data: game, error } = await supabase
-      .from('games')
+    // Try custom_games first
+    const { data: customGame } = await supabase
+      .from('custom_games')
       .select('*')
       .eq('id', gameId)
       .single();
 
-    if (error || !game) {
+    // Then try preset_games
+    const { data: presetGame } = customGame ? { data: null } : await supabase
+      .from('preset_games')
+      .select('*')
+      .eq('id', gameId)
+      .single();
+
+    const game = customGame || presetGame;
+
+    if (!game) {
       return null;
     }
 
     const participants = await getGameParticipants(gameId);
 
-    const storedGame: StoredGame = {
-      id: game.id,
-      title: game.title,
-      gameType: game.game_type,
-      htmlContent: game.html_content,
-      description: game.description,
-      expiresAt: new Date(game.expires_at),
-      createdAt: new Date(game.created_at),
-      password: game.password,
-      maxParticipants: game.max_participants,
-      showLeaderboard: game.show_leaderboard,
-      requireRegistration: game.require_registration,
-      customDuration: game.custom_duration
-    };
+    let storedGame: StoredGame;
+    
+    if (customGame) {
+      storedGame = {
+        id: customGame.id,
+        title: customGame.title,
+        gameType: 'custom',
+        content: customGame.game_data,
+        htmlContent: customGame.html_content || '',
+        description: customGame.description,
+        expiresAt: new Date(customGame.expires_at),
+        createdAt: new Date(customGame.created_at),
+        password: customGame.password,
+        maxParticipants: customGame.max_participants,
+        showLeaderboard: customGame.show_leaderboard ?? true,
+        requireRegistration: customGame.require_registration ?? false,
+        customDuration: customGame.custom_duration
+      };
+    } else {
+      storedGame = {
+        id: presetGame.id,
+        title: presetGame.title,
+        gameType: presetGame.game_type,
+        content: presetGame.template_data,
+        htmlContent: '',
+        description: presetGame.description,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default expiry
+        createdAt: new Date(presetGame.created_at),
+        password: null,
+        maxParticipants: null,
+        showLeaderboard: true,
+        requireRegistration: false,
+        customDuration: null
+      };
+    }
 
     return { game: storedGame, participants };
   } catch (error) {
@@ -246,25 +308,48 @@ export const getGameWithParticipants = async (gameId: string): Promise<{ game: S
 // Get game session
 export const getGameSession = async (gameId: string): Promise<GameSession | null> => {
   try {
-    // Try to get from Supabase first
-    const { data: game, error } = await supabase
-      .from('games')
+    // Try custom_games first
+    const { data: customGame } = await supabase
+      .from('custom_games')
       .select('*')
       .eq('id', gameId)
       .single();
 
-    if (!error && game) {
+    // Then try preset_games
+    const { data: presetGame } = customGame ? { data: null } : await supabase
+      .from('preset_games')
+      .select('*')
+      .eq('id', gameId)
+      .single();
+
+    const game = customGame || presetGame;
+
+    if (game) {
       const participants = await getGameParticipants(gameId);
-      return {
-        id: game.id,
-        title: game.title,
-        gameType: game.game_type,
-        htmlContent: game.html_content,
-        description: game.description,
-        expiresAt: new Date(game.expires_at),
-        createdAt: new Date(game.created_at).getTime(),
-        participants
-      };
+      
+      if (customGame) {
+        return {
+          id: customGame.id,
+          title: customGame.title,
+          gameType: 'custom',
+          htmlContent: customGame.html_content,
+          description: customGame.description,
+          expiresAt: new Date(customGame.expires_at),
+          createdAt: new Date(customGame.created_at).getTime(),
+          participants
+        };
+      } else {
+        return {
+          id: presetGame.id,
+          title: presetGame.title,
+          gameType: presetGame.game_type,
+          htmlContent: '',
+          description: presetGame.description,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          createdAt: new Date(presetGame.created_at).getTime(),
+          participants
+        };
+      }
     }
 
     // Fallback to localStorage
@@ -280,23 +365,47 @@ export const getAllGameSessions = async (): Promise<GameSession[]> => {
   try {
     const sessions: GameSession[] = [];
 
-    // Get from Supabase
-    const { data: supabaseGames, error } = await supabase
-      .from('games')
+    // Get from custom_games
+    const { data: customGames } = await supabase
+      .from('custom_games')
       .select('*')
-      .eq('is_published', true)
       .order('created_at', { ascending: false });
 
-    if (!error && supabaseGames) {
-      for (const game of supabaseGames) {
+    // Get from preset_games
+    const { data: presetGames } = await supabase
+      .from('preset_games')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    // Process custom games
+    if (customGames) {
+      for (const game of customGames) {
+        const participants = await getGameParticipants(game.id);
+        sessions.push({
+          id: game.id,
+          title: game.title,
+          gameType: 'custom',
+          htmlContent: game.html_content,
+          description: game.description,
+          expiresAt: new Date(game.expires_at),
+          createdAt: new Date(game.created_at).getTime(),
+          participants
+        });
+      }
+    }
+
+    // Process preset games
+    if (presetGames) {
+      for (const game of presetGames) {
         const participants = await getGameParticipants(game.id);
         sessions.push({
           id: game.id,
           title: game.title,
           gameType: game.game_type,
-          htmlContent: game.html_content,
+          htmlContent: '',
           description: game.description,
-          expiresAt: new Date(game.expires_at),
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
           createdAt: new Date(game.created_at).getTime(),
           participants
         });

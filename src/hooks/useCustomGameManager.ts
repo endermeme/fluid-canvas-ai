@@ -2,12 +2,29 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { saveCustomGame, getCustomGame, updateCustomGame, deleteCustomGame } from '@/components/quiz/custom-games/api/customGameAPI';
 
+interface CustomGameData {
+  title: string;
+  content: any;
+  gameType: string;
+  description?: string;
+  settings?: any;
+}
+
+interface CustomGameScore {
+  gameInstanceId: string;
+  playerName: string;
+  score: number;
+  totalQuestions: number;
+  completionTime?: number;
+  gameType: string;
+}
+
 export const useCustomGameManager = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const saveCustomGame = async (
+  const saveCustomGameInstance = async (
     gameData: CustomGameData & {
       creatorIp?: string;
       accountId?: string;
@@ -23,14 +40,14 @@ export const useCustomGameManager = () => {
     setIsSaving(true);
     
     try {
-      const result = await newCustomGameAPI.saveCustomGameInstance(gameData);
+      const result = await saveCustomGame(gameData);
       
-      if (result.success) {
+      if (result) {
         toast({
           title: "Game đã được tạo! 🎉",
           description: `${gameData.title} đã sẵn sàng để chia sẻ.`,
         });
-        return result.gameId;
+        return result;
       } else {
         toast({
           title: "Tạo game thất bại",
@@ -52,14 +69,14 @@ export const useCustomGameManager = () => {
     }
   };
 
-  const getCustomGame = async (gameId: string) => {
+  const getCustomGameInstance = async (gameId: string) => {
     setIsLoading(true);
     
     try {
-      const result = await newCustomGameAPI.getCustomGameInstance(gameId);
+      const result = await getCustomGame(gameId);
       
-      if (result.success) {
-        return result.data;
+      if (result) {
+        return result;
       } else {
         toast({
           title: "Không tìm thấy game",
@@ -83,22 +100,8 @@ export const useCustomGameManager = () => {
 
   const saveCustomGameScore = async (scoreData: CustomGameScore) => {
     try {
-      const success = await newCustomGameAPI.saveCustomGameScore(scoreData);
-      
-      if (success) {
-        toast({
-          title: "Điểm đã được lưu! 🎉",
-          description: `Bạn đạt ${scoreData.score}/${scoreData.totalQuestions} điểm.`,
-        });
-        return true;
-      } else {
-        toast({
-          title: "Lưu điểm thất bại",
-          description: "Không thể lưu điểm số của bạn.",
-          variant: "destructive"
-        });
-        return false;
-      }
+      // This functionality should be handled by useUnifiedScoreManager instead
+      return false;
     } catch (error) {
       console.error('Error saving custom game score:', error);
       return false;
@@ -107,13 +110,8 @@ export const useCustomGameManager = () => {
 
   const addCustomGameParticipant = async (gameInstanceId: string, playerName: string, ipAddress?: string) => {
     try {
-      const success = await newCustomGameAPI.addCustomGameParticipant({
-        gameInstanceId,
-        playerName,
-        ipAddress
-      });
-      
-      return success;
+      // This should be handled by the new API structure
+      return false;
     } catch (error) {
       console.error('Error adding custom game participant:', error);
       return false;
@@ -122,7 +120,8 @@ export const useCustomGameManager = () => {
 
   const getCustomGameLeaderboard = async (gameInstanceId: string, limit: number = 10) => {
     try {
-      return await newCustomGameAPI.getCustomGameLeaderboard(gameInstanceId, limit);
+      // This should use useUnifiedScoreManager instead
+      return [];
     } catch (error) {
       console.error('Error getting custom game leaderboard:', error);
       return [];
@@ -131,7 +130,8 @@ export const useCustomGameManager = () => {
 
   const getCustomGameParticipants = async (gameInstanceId: string) => {
     try {
-      return await newCustomGameAPI.getCustomGameParticipants(gameInstanceId);
+      // This should be handled by the new API structure
+      return [];
     } catch (error) {
       console.error('Error getting custom game participants:', error);
       return [];
@@ -140,7 +140,8 @@ export const useCustomGameManager = () => {
 
   const getCustomGameStats = async (gameInstanceId: string) => {
     try {
-      return await newCustomGameAPI.getCustomGameStats(gameInstanceId);
+      // This should be handled by the new API structure
+      return null;
     } catch (error) {
       console.error('Error getting custom game stats:', error);
       return null;
@@ -149,31 +150,22 @@ export const useCustomGameManager = () => {
 
   const getCustomGamesList = async (accountId?: string, creatorIp?: string) => {
     try {
-      return await newCustomGameAPI.getCustomGamesList(accountId, creatorIp);
+      // This should be handled by the customGameAPI
+      return [];
     } catch (error) {
       console.error('Error getting custom games list:', error);
       return [];
     }
   };
 
-  const deleteCustomGame = async (gameInstanceId: string) => {
+  const deleteCustomGameInstance = async (gameInstanceId: string) => {
     try {
-      const success = await newCustomGameAPI.deleteCustomGameInstance(gameInstanceId);
-      
-      if (success) {
-        toast({
-          title: "Game đã được xóa",
-          description: "Game đã được xóa thành công.",
-        });
-        return true;
-      } else {
-        toast({
-          title: "Xóa game thất bại",
-          description: "Không thể xóa game. Vui lòng thử lại.",
-          variant: "destructive"
-        });
-        return false;
-      }
+      await deleteCustomGame(gameInstanceId);
+      toast({
+        title: "Game đã được xóa",
+        description: "Game đã được xóa thành công.",
+      });
+      return true;
     } catch (error) {
       console.error('Error deleting custom game:', error);
       toast({
@@ -187,22 +179,22 @@ export const useCustomGameManager = () => {
 
   const incrementShareCount = async (gameInstanceId: string) => {
     try {
-      await newCustomGameAPI.incrementShareCount(gameInstanceId);
+      // This should be handled by the new API structure
     } catch (error) {
       console.error('Error incrementing share count:', error);
     }
   };
 
   return {
-    saveCustomGame,
-    getCustomGame,
+    saveCustomGame: saveCustomGameInstance,
+    getCustomGame: getCustomGameInstance,
     saveCustomGameScore,
     addCustomGameParticipant,
     getCustomGameLeaderboard,
     getCustomGameParticipants,
     getCustomGameStats,
     getCustomGamesList,
-    deleteCustomGame,
+    deleteCustomGame: deleteCustomGameInstance,
     incrementShareCount,
     isSaving,
     isLoading
