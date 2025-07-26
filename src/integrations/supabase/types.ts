@@ -83,6 +83,68 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_leaderboard: {
+        Row: {
+          completed_at: string | null
+          completion_time: number | null
+          created_at: string
+          game_id: string
+          id: string
+          ip_address: string | null
+          is_active: boolean | null
+          joined_at: string
+          last_active_at: string | null
+          player_name: string
+          score: number | null
+          scoring_data: Json | null
+          session_data: Json | null
+          total_questions: number | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completion_time?: number | null
+          created_at?: string
+          game_id: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          joined_at?: string
+          last_active_at?: string | null
+          player_name: string
+          score?: number | null
+          scoring_data?: Json | null
+          session_data?: Json | null
+          total_questions?: number | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          completion_time?: number | null
+          created_at?: string
+          game_id?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          joined_at?: string
+          last_active_at?: string | null
+          player_name?: string
+          score?: number | null
+          scoring_data?: Json | null
+          session_data?: Json | null
+          total_questions?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_leaderboard_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "custom_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       preset_games: {
         Row: {
           created_at: string
@@ -118,6 +180,68 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      preset_leaderboard: {
+        Row: {
+          completed_at: string | null
+          completion_time: number | null
+          created_at: string
+          game_id: string
+          id: string
+          ip_address: string | null
+          is_active: boolean | null
+          joined_at: string
+          last_active_at: string | null
+          player_name: string
+          score: number | null
+          scoring_data: Json | null
+          session_data: Json | null
+          total_questions: number | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completion_time?: number | null
+          created_at?: string
+          game_id: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          joined_at?: string
+          last_active_at?: string | null
+          player_name: string
+          score?: number | null
+          scoring_data?: Json | null
+          session_data?: Json | null
+          total_questions?: number | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          completion_time?: number | null
+          created_at?: string
+          game_id?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          joined_at?: string
+          last_active_at?: string | null
+          player_name?: string
+          score?: number | null
+          scoring_data?: Json | null
+          session_data?: Json | null
+          total_questions?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preset_leaderboard_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "preset_games"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
