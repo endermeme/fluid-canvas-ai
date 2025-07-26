@@ -3,15 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Search, Filter, Calendar } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import AdminGameCard from '@/components/admin/AdminGameCard';
 import { useAccount } from '@/contexts/AccountContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-// Types để hiển thị unified
+// Types để hiển thị lịch sử game
 interface HistoryGame {
   id: string;
   title: string;
