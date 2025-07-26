@@ -26,11 +26,12 @@ export const useGameScoreManager = () => {
       const isTimeBasedGame = timeBasedGames.includes(scoreData.gameType?.toLowerCase());
       
       const { error } = await supabase
-        .from('game_scores')
+        .from('unified_game_scores')
         .insert({
           game_id: scoreData.gameId,
+          source_table: 'games',
           player_name: scoreData.playerName,
-          score: isTimeBasedGame ? 0 : scoreData.score, // Time-based games use completion_time instead
+          score: isTimeBasedGame ? 0 : scoreData.score,
           total_questions: scoreData.totalQuestions,
           completion_time: scoreData.completionTime,
           game_type: scoreData.gameType,

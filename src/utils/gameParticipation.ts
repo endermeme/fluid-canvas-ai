@@ -1,443 +1,310 @@
-// Tệp mới để quản lý người tham gia game
 import { supabase } from '@/integrations/supabase/client';
-import { GameParticipant, GameSession, StoredGame, SupabaseGameParticipant } from './types';
-import { getSharedGame as getGameFromExport } from './gameExport';
+import { StoredGame, GameParticipant, GameSession } from './types';
 
-// Ẩn địa chỉ IP (chỉ hiện 2 octet đầu tiên)
+// IP Address utilities
 export const maskIpAddress = (ip?: string): string => {
-  if (!ip) return 'Không có';
+  if (!ip) return 'unknown';
   const parts = ip.split('.');
-  if (parts.length !== 4) return ip;
-  return `${parts[0]}.${parts[1]}.*.*`;
+  if (parts.length === 4) {
+    return `${parts[0]}.${parts[1]}.*.* `;
+  }
+  return ip;
 };
 
 export const getFakeIpAddress = (): string => {
-  // Tạo "fake IP" cho mục đích demo
-  const segments = [];
-  for (let i = 0; i < 4; i++) {
-    segments.push(Math.floor(Math.random() * 256));
-  }
-  return segments.join('.');
+  return `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
 };
 
-// Chuyển đối tượng từ Supabase sang định dạng GameParticipant
-const mapSupabaseParticipant = (participant: SupabaseGameParticipant): GameParticipant => {
+// Convert unified score to GameParticipant for compatibility
+const mapUnifiedScoreToParticipant = (score: any): GameParticipant => {
   return {
-    id: participant.id,
-    name: participant.name,
-    ipAddress: participant.ip_address,
-    timestamp: participant.timestamp,
-    gameId: participant.game_id,
-    retryCount: participant.retry_count || 0,
-    score: participant.score || 0
+    id: score.id,
+    name: score.player_name,
+    ipAddress: score.ip_address,
+    timestamp: score.completed_at,
+    gameId: score.game_id,
+    retryCount: 0, // Not tracked in unified system
+    score: score.score
   };
 };
 
-// Thêm người tham gia mới vào game (bỏ age parameter)
+// Add participant - simplified to work with unified scoring
 export const addParticipant = async (
   gameId: string,
   name: string,
   ipAddress: string,
   accountId?: string
 ): Promise<{ success: boolean; message?: string; participant?: GameParticipant }> => {
-  if (!gameId || !name) {
-    return {
-      success: false,
-      message: "Thiếu thông tin game hoặc người tham gia"
-    };
-  }
-
   try {
-    // Kiểm tra xem IP này đã tham gia game này chưa
-    const { data: existingParticipants, error: checkError } = await supabase
-      .from('game_participants')
+    // Check if game exists and is valid
+    const { data: game, error: gameError } = await supabase
+      .from('games')
       .select('*')
-      .eq('game_id', gameId)
-      .eq('ip_address', ipAddress);
-
-    if (checkError) {
-      console.error("Error checking existing participants:", checkError);
-      return {
-        success: false,
-        message: "Không thể kiểm tra thông tin tham gia trước đó"
-      };
-    }
-
-    if (existingParticipants && existingParticipants.length > 0) {
-      // IP đã tham gia, cập nhật thông tin
-      const participant = existingParticipants[0];
-      const retryCount = (participant.retry_count || 0) + 1;
-      
-      const { data: updatedParticipant, error: updateError } = await supabase
-        .from('game_participants')
-        .update({
-          name,
-          retry_count: retryCount,
-          timestamp: new Date().toISOString()
-        })
-        .eq('id', participant.id)
-        .select()
-        .single();
-
-      if (updateError) {
-        console.error("Error updating participant:", updateError);
-        return {
-          success: false,
-          message: "Không thể cập nhật thông tin tham gia"
-        };
-      }
-
-      return {
-        success: true,
-        participant: mapSupabaseParticipant(updatedParticipant as SupabaseGameParticipant)
-      };
-    }
-
-    // Thêm người tham gia mới
-    const { data: newParticipant, error: insertError } = await supabase
-      .from('game_participants')
-      .insert([
-        {
-          game_id: gameId,
-          name,
-          ip_address: ipAddress,
-          retry_count: 0,
-          account_id: accountId
-        }
-      ])
-      .select()
+      .eq('id', gameId)
+      .eq('is_published', true)
+      .gt('expires_at', new Date().toISOString())
       .single();
 
-    if (insertError) {
-      console.error("Error adding new participant (likely RLS issue):", insertError);
-      
-      // Kiểm tra nếu là lỗi RLS policy
-      if (insertError.message.includes('row-level security policy')) {
-        console.log("RLS policy violation - this is expected for public games");
-        return {
-          success: false,
-          message: "Database security restriction - using local storage instead"
-        };
-      }
-      
-      return {
-        success: false,
-        message: "Không thể thêm người tham gia mới"
-      };
+    if (gameError || !game) {
+      return { success: false, message: 'Game không tồn tại hoặc đã hết hạn' };
     }
 
-    // Lưu vào localStorage để theo dõi các phiên tham gia
-    try {
-      const sessionsJson = localStorage.getItem('game_sessions');
-      const sessions = sessionsJson ? JSON.parse(sessionsJson) : [];
-      
-      let sessionIndex = sessions.findIndex((s: any) => s.id === gameId);
-      if (sessionIndex >= 0) {
-        // Game đã tồn tại, thêm người tham gia mới vào
-        if (!sessions[sessionIndex].participants) {
-          sessions[sessionIndex].participants = [];
-        }
-        
-        sessions[sessionIndex].participants.push(
-          mapSupabaseParticipant(newParticipant as SupabaseGameParticipant)
-        );
-      } else {
-        // Game chưa có trong sessions, thêm mới
-        sessions.push({
-          id: gameId,
-          participants: [
-            mapSupabaseParticipant(newParticipant as SupabaseGameParticipant)
-          ]
-        });
-      }
-      
-      localStorage.setItem('game_sessions', JSON.stringify(sessions));
-    } catch (localStorageError) {
-      console.error("Error updating localStorage:", localStorageError);
-      // Tiếp tục xử lý dù có lỗi localStorage
-    }
-
-    return {
-      success: true,
-      participant: mapSupabaseParticipant(newParticipant as SupabaseGameParticipant)
+    // For unified system, we just return success - actual participation is tracked when game is completed
+    const participant: GameParticipant = {
+      id: `temp-${Date.now()}`,
+      name,
+      ipAddress,
+      timestamp: new Date().toISOString(),
+      gameId,
+      retryCount: 0,
+      score: 0
     };
+
+    // Store in localStorage for backward compatibility
+    const storageKey = `game-session-${gameId}`;
+    const existingSession = localStorage.getItem(storageKey);
+    
+    if (existingSession) {
+      const session = JSON.parse(existingSession);
+      if (!session.participants) {
+        session.participants = [];
+      }
+      // Check if participant already exists
+      const existingParticipant = session.participants.find((p: any) => p.name === name);
+      if (!existingParticipant) {
+        session.participants.push(participant);
+        localStorage.setItem(storageKey, JSON.stringify(session));
+      }
+    }
+
+    return { success: true, participant };
   } catch (error) {
-    console.error("Unhandled error in addParticipant:", error);
-    return {
-      success: false,
-      message: "Đã xảy ra lỗi khi xử lý yêu cầu tham gia"
-    };
+    console.error('Error adding participant:', error);
+    return { success: false, message: 'Có lỗi xảy ra khi tham gia game' };
   }
 };
 
-// Tạo một phiên game mới
-export const createGameSession = async (
-  title: string,
-  content: string
-): Promise<{ id: string }> => {
-  // Tạo một ID mới cho game
-  const gameId = crypto.randomUUID();
+// Create game session
+export const createGameSession = async (title: string, content: string): Promise<{ id: string }> => {
+  const gameId = `game-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   
-  try {
-    // Lưu session vào localStorage
-    const sessionsJson = localStorage.getItem('game_sessions');
-    const sessions = sessionsJson ? JSON.parse(sessionsJson) : [];
-    
-    sessions.push({
-      id: gameId,
-      title,
-      content,
-      createdAt: new Date().toISOString(),
-      participants: []
-    });
-    
-    localStorage.setItem('game_sessions', JSON.stringify(sessions));
-    
-    return { id: gameId };
-  } catch (error) {
-    console.error("Error creating game session:", error);
-    throw new Error("Không thể tạo phiên game mới");
-  }
+  const session: GameSession = {
+    id: gameId,
+    title,
+    content,
+    createdAt: Date.now(),
+    participants: []
+  };
+
+  localStorage.setItem(`game-session-${gameId}`, JSON.stringify(session));
+  
+  return { id: gameId };
 };
 
-// Lấy danh sách người tham gia game
-export const getGameParticipants = async (
-  gameId: string,
-  accountId?: string
-): Promise<GameParticipant[]> => {
-  if (!gameId) return [];
-  
+// Get game participants using unified scoring system
+export const getGameParticipants = async (gameId: string, accountId?: string): Promise<GameParticipant[]> => {
   try {
-    let query = supabase
-      .from('game_participants')
+    // Get from unified_game_scores
+    const { data: scores, error } = await supabase
+      .from('unified_game_scores')
       .select('*')
-      .eq('game_id', gameId);
-    
-    // Filter by account if provided
-    if (accountId) {
-      query = query.eq('account_id', accountId);
-    }
-    
-    const { data, error } = await query.order('timestamp', { ascending: false });
-    
+      .eq('game_id', gameId)
+      .eq('source_table', 'games')
+      .order('completed_at', { ascending: false });
+
     if (error) {
-      console.error("Error fetching participants:", error);
+      console.error('Error fetching participants:', error);
       return [];
     }
-    
-    return data.map(p => mapSupabaseParticipant(p as SupabaseGameParticipant));
+
+    return scores?.map(mapUnifiedScoreToParticipant) || [];
   } catch (error) {
-    console.error("Error in getGameParticipants:", error);
+    console.error('Error in getGameParticipants:', error);
     return [];
   }
 };
 
-// Lấy một game từ localStorage (fallback khi không có kết nối đến Supabase)
+// Get local game from localStorage
 export const getLocalGame = (gameId: string): any => {
   try {
-    const sessionsJson = localStorage.getItem('game_sessions');
-    if (!sessionsJson) return null;
-    
-    const sessions = JSON.parse(sessionsJson);
-    return sessions.find((s: any) => s.id === gameId) || null;
+    const gameData = localStorage.getItem(`game-session-${gameId}`);
+    return gameData ? JSON.parse(gameData) : null;
   } catch (error) {
-    console.error("Error retrieving local game:", error);
+    console.error('Error getting local game:', error);
     return null;
   }
 };
 
-// Kiểm tra xem game có tồn tại không và chưa hết hạn
+// Check if game is valid
 export const isGameValid = async (gameId: string): Promise<boolean> => {
   try {
-    const { data } = await supabase
+    const { data: game, error } = await supabase
       .from('games')
-      .select('expires_at')
+      .select('expires_at, is_published')
       .eq('id', gameId)
       .single();
-    
-    if (!data) return false;
-    
-    const expiryDate = new Date(data.expires_at);
-    const now = new Date();
-    
-    return expiryDate > now;
-  } catch (error) {
-    console.error("Error checking game validity:", error);
-    
-    // Fallback kiểm tra trong localStorage
-    const localGame = getLocalGame(gameId);
-    return !!localGame;
-  }
-};
 
-// Lấy thông tin game và người tham gia
-export const getGameWithParticipants = async (
-  gameId: string
-): Promise<{ game: StoredGame, participants: GameParticipant[] } | null> => {
-  try {
-    // Lấy thông tin game
-    const game = await getGameFromExport(gameId);
-    if (!game) return null;
-    
-    // Lấy danh sách người tham gia
-    const participants = await getGameParticipants(gameId);
-    
-    return { game, participants };
-  } catch (error) {
-    console.error("Error in getGameWithParticipants:", error);
-    return null;
-  }
-};
-
-// Lấy thông tin một phiên game
-export const getGameSession = async (gameId: string): Promise<GameSession | null> => {
-  try {
-    // Thử lấy từ Supabase trước
-    const gameData = await getGameFromExport(gameId);
-    const participants = await getGameParticipants(gameId);
-    
-    if (gameData) {
-      return {
-        id: gameData.id,
-        title: gameData.title,
-        gameType: gameData.gameType,
-        description: gameData.description,
-        htmlContent: gameData.htmlContent,
-        expiresAt: gameData.expiresAt,
-        createdAt: gameData.createdAt instanceof Date ? gameData.createdAt.getTime() : gameData.createdAt as number,
-        participants
-      };
+    if (error || !game) {
+      // Check localStorage as fallback
+      const localGame = getLocalGame(gameId);
+      if (localGame) {
+        const expiryTime = typeof localGame.expiresAt === 'number' 
+          ? localGame.expiresAt 
+          : new Date(localGame.expiresAt).getTime();
+        return Date.now() < expiryTime;
+      }
+      return false;
     }
-    
-    // Fallback: thử lấy từ localStorage
-    const localGame = getLocalGame(gameId);
-    if (localGame) {
-      return {
-        id: localGame.id,
-        title: localGame.title || 'Unnamed Game',
-        gameType: localGame.gameType || 'custom',
-        createdAt: new Date(localGame.createdAt).getTime(),
-        participants
-      };
-    }
-    
-    return null;
+
+    return game.is_published && new Date(game.expires_at).getTime() > Date.now();
   } catch (error) {
-    console.error("Error getting game session:", error);
-    return null;
+    console.error('Error checking game validity:', error);
+    return false;
   }
 };
 
-// Lấy tất cả các phiên game đã tạo
-export const getAllGameSessions = async (): Promise<GameSession[]> => {
+// Get game with participants
+export const getGameWithParticipants = async (gameId: string): Promise<{ game: StoredGame, participants: GameParticipant[] } | null> => {
   try {
-    // Lấy danh sách game từ localStorage trước
-    const sessionsJson = localStorage.getItem('game_sessions');
-    const localSessions = sessionsJson ? JSON.parse(sessionsJson) : [];
-    
-    // Lấy danh sách game từ Supabase
-    const { data: dbGames, error } = await supabase
+    const { data: game, error } = await supabase
       .from('games')
       .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error("Error fetching games from db:", error);
-      // Trả về chỉ các phiên local nếu có lỗi
-      return localSessions.map((session: any) => ({
-        id: session.id,
-        title: session.title || 'Unnamed Game',
-        gameType: session.gameType || 'custom',
-        createdAt: new Date(session.createdAt).getTime(),
-        participants: session.participants || []
-      }));
+      .eq('id', gameId)
+      .single();
+
+    if (error || !game) {
+      return null;
     }
-    
-    // Kết hợp dữ liệu từ localStorage và Supabase
-    const combinedSessions: GameSession[] = [];
-    
-    // Thêm dữ liệu từ Supabase
-    for (const game of dbGames) {
-      const participants = await getGameParticipants(game.id);
-      
-      combinedSessions.push({
+
+    const participants = await getGameParticipants(gameId);
+
+    const storedGame: StoredGame = {
+      id: game.id,
+      title: game.title,
+      gameType: game.game_type,
+      htmlContent: game.html_content,
+      description: game.description,
+      expiresAt: new Date(game.expires_at),
+      createdAt: new Date(game.created_at),
+      password: game.password,
+      maxParticipants: game.max_participants,
+      showLeaderboard: game.show_leaderboard,
+      requireRegistration: game.require_registration,
+      customDuration: game.custom_duration
+    };
+
+    return { game: storedGame, participants };
+  } catch (error) {
+    console.error('Error getting game with participants:', error);
+    return null;
+  }
+};
+
+// Get game session
+export const getGameSession = async (gameId: string): Promise<GameSession | null> => {
+  try {
+    // Try to get from Supabase first
+    const { data: game, error } = await supabase
+      .from('games')
+      .select('*')
+      .eq('id', gameId)
+      .single();
+
+    if (!error && game) {
+      const participants = await getGameParticipants(gameId);
+      return {
         id: game.id,
         title: game.title,
         gameType: game.game_type,
-        createdAt: new Date(game.created_at).getTime(),
-        expiresAt: new Date(game.expires_at).getTime(),
         htmlContent: game.html_content,
         description: game.description,
+        expiresAt: new Date(game.expires_at),
+        createdAt: new Date(game.created_at).getTime(),
         participants
-      });
+      };
     }
-    
-    // Thêm dữ liệu localStorage mà không trùng với dữ liệu từ Supabase
-    for (const session of localSessions) {
-      if (!combinedSessions.some(s => s.id === session.id)) {
-        combinedSessions.push({
-          id: session.id,
-          title: session.title || 'Unnamed Game',
-          gameType: session.gameType || 'custom',
-          createdAt: new Date(session.createdAt).getTime(),
-          participants: session.participants || []
-        });
-      }
-    }
-    
-    // Sắp xếp theo thời gian tạo (mới nhất lên đầu)
-    return combinedSessions.sort((a, b) => b.createdAt - a.createdAt);
+
+    // Fallback to localStorage
+    return getLocalGame(gameId);
   } catch (error) {
-    console.error("Error in getAllGameSessions:", error);
-    
-    // Fallback: trả về từ localStorage
-    try {
-      const sessionsJson = localStorage.getItem('game_sessions');
-      const localSessions = sessionsJson ? JSON.parse(sessionsJson) : [];
-      
-      return localSessions.map((session: any) => ({
-        id: session.id,
-        title: session.title || 'Unnamed Game',
-        gameType: session.gameType || 'custom',
-        createdAt: new Date(session.createdAt).getTime(),
-        participants: session.participants || []
-      }));
-    } catch {
-      return [];
-    }
+    console.error('Error getting game session:', error);
+    return null;
   }
 };
 
-// Xuất danh sách người tham gia dưới dạng CSV
+// Get all game sessions
+export const getAllGameSessions = async (): Promise<GameSession[]> => {
+  try {
+    const sessions: GameSession[] = [];
+
+    // Get from Supabase
+    const { data: supabaseGames, error } = await supabase
+      .from('games')
+      .select('*')
+      .eq('is_published', true)
+      .order('created_at', { ascending: false });
+
+    if (!error && supabaseGames) {
+      for (const game of supabaseGames) {
+        const participants = await getGameParticipants(game.id);
+        sessions.push({
+          id: game.id,
+          title: game.title,
+          gameType: game.game_type,
+          htmlContent: game.html_content,
+          description: game.description,
+          expiresAt: new Date(game.expires_at),
+          createdAt: new Date(game.created_at).getTime(),
+          participants
+        });
+      }
+    }
+
+    // Get from localStorage and merge
+    const localKeys = Object.keys(localStorage).filter(key => key.startsWith('game-session-'));
+    for (const key of localKeys) {
+      try {
+        const session = JSON.parse(localStorage.getItem(key) || '{}');
+        // Avoid duplicates
+        if (!sessions.find(s => s.id === session.id)) {
+          sessions.push(session);
+        }
+      } catch (e) {
+        console.error('Error parsing local session:', e);
+      }
+    }
+
+    return sessions.sort((a, b) => b.createdAt - a.createdAt);
+  } catch (error) {
+    console.error('Error getting all game sessions:', error);
+    return [];
+  }
+};
+
+// Export participants to CSV
 export const exportParticipantsToCSV = async (gameId: string): Promise<string> => {
   try {
-    // Lấy thông tin game và người tham gia
-    const gameSession = await getGameSession(gameId);
-    if (!gameSession) {
-      throw new Error("Game không tồn tại");
+    const participants = await getGameParticipants(gameId);
+    
+    if (participants.length === 0) {
+      return 'Không có dữ liệu để xuất';
     }
-    
-    const participants = gameSession.participants;
-    
-    // Tạo header cho CSV
-    let csvContent = "Name,IP Address,Score,Retry Count,Time\n";
-    
-    // Thêm dữ liệu từng người tham gia
-    for (const p of participants) {
-      const row = [
-        `"${p.name.replace(/"/g, '""')}"`,
-        p.ipAddress || '',
-        p.score || '0',
-        p.retryCount || '0',
-        new Date(p.timestamp).toLocaleString()
-      ].join(',');
-      
-      csvContent += row + '\n';
-    }
-    
+
+    const headers = ['Tên', 'Điểm số', 'Thời gian hoàn thành', 'IP Address', 'Thời gian tham gia'];
+    const csvContent = [
+      headers.join(','),
+      ...participants.map(p => [
+        `"${p.name}"`,
+        p.score || 0,
+        new Date(p.timestamp).toLocaleString('vi-VN'),
+        maskIpAddress(p.ipAddress),
+        new Date(p.timestamp).toLocaleString('vi-VN')
+      ].join(','))
+    ].join('\n');
+
     return csvContent;
   } catch (error) {
-    console.error("Error exporting to CSV:", error);
-    throw new Error("Không thể xuất dữ liệu CSV");
+    console.error('Error exporting participants:', error);
+    throw error;
   }
 };

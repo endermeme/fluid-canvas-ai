@@ -17,7 +17,7 @@ interface UnifiedLeaderboardEntry {
 
 interface UnifiedLeaderboardManagerProps {
   gameId: string;
-  sourceTable: 'games' | 'educational_games' | 'quizzes';
+  sourceTable: 'games';
   refreshInterval?: number;
 }
 

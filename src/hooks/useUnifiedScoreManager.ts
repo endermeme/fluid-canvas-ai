@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface UnifiedGameScore {
   gameId: string;
-  sourceTable: 'games' | 'educational_games' | 'quizzes';
+  sourceTable: 'games';
   playerName: string;
   playerId?: string;
   score: number;
@@ -106,7 +106,7 @@ export const useUnifiedScoreManager = () => {
 
   const getUnifiedLeaderboard = async (
     gameId: string, 
-    sourceTable: 'games' | 'educational_games' | 'quizzes',
+    sourceTable: 'games',
     limit: number = 10
   ) => {
     try {
