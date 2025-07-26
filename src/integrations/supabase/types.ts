@@ -837,6 +837,22 @@ export type Database = {
           completed_at: string
         }[]
       }
+      get_unified_game_leaderboard: {
+        Args: {
+          target_game_id: string
+          target_source_table: string
+          limit_count?: number
+        }
+        Returns: {
+          player_name: string
+          score: number
+          total_questions: number
+          completion_time: number
+          scoring_data: Json
+          completed_at: string
+          game_type: string
+        }[]
+      }
       increment_share_count: {
         Args: { game_id: string }
         Returns: undefined
