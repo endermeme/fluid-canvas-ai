@@ -12,6 +12,7 @@ import { CustomGameRenderer } from './CustomGameRenderer';
 import UnifiedLeaderboardManager from '../share/UnifiedLeaderboardManager';
 import { useToast } from '@/hooks/use-toast';
 import { StoredGame } from '@/utils/types';
+import { supabase } from '@/integrations/supabase/client';
 
 export const CustomGameReceiver: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -65,14 +66,38 @@ export const CustomGameReceiver: React.FC = () => {
     }
   };
 
+  const generatePlayerName = async () => {
+    try {
+      // Get current participant count from unified_game_scores
+      const { data: scores, error } = await supabase
+        .from('unified_game_scores')
+        .select('player_name')
+        .eq('game_id', game!.id)
+        .eq('source_table', 'games');
+
+      if (error) {
+        console.error('Error getting participant count:', error);
+        return 'Player 1';
+      }
+
+      // Count unique players and generate next number
+      const uniquePlayers = new Set(scores?.map(s => s.player_name) || []);
+      const playerCount = uniquePlayers.size;
+      return `Player ${playerCount + 1}`;
+    } catch (error) {
+      console.error('Error generating player name:', error);
+      return 'Player 1';
+    }
+  };
+
   const handleJoinGame = async () => {
-    if (!game || !playerName.trim()) {
-      toast({
-        title: "Thiếu thông tin",
-        description: "Vui lòng nhập tên của bạn",
-        variant: "destructive"
-      });
-      return;
+    if (!game) return;
+
+    let finalPlayerName = playerName.trim();
+    
+    // If no name provided, generate auto name
+    if (!finalPlayerName) {
+      finalPlayerName = await generatePlayerName();
     }
 
     // Check password if required
@@ -88,16 +113,17 @@ export const CustomGameReceiver: React.FC = () => {
     try {
       const result = await addParticipant(
         game.id,
-        playerName.trim(),
+        finalPlayerName,
         'shared-game',
         accountId || undefined
       );
 
       if (result.success) {
+        setPlayerName(finalPlayerName); // Update state with final name
         setHasJoined(true);
         toast({
           title: "Tham gia thành công! 🎉",
-          description: `Chào mừng ${playerName} đến với game!`
+          description: `Chào mừng ${finalPlayerName} đến với game!`
         });
       } else {
         toast({
@@ -114,6 +140,14 @@ export const CustomGameReceiver: React.FC = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleSkip = async () => {
+    if (!game) return;
+    
+    const autoName = await generatePlayerName();
+    setPlayerName(autoName);
+    handleJoinGame();
   };
 
   if (loading) {
@@ -206,16 +240,24 @@ export const CustomGameReceiver: React.FC = () => {
               <div className="flex gap-2">
                 <Button 
                   onClick={handleJoinGame}
-                  disabled={!playerName.trim()}
                   className="flex-1"
                 >
-                  Tham gia Game
+                  {playerName.trim() ? 'Tham gia Game' : 'Tham gia với tên tự động'}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={handleSkip}
+                  className="flex-shrink-0"
+                >
+                  Bỏ qua
                 </Button>
                 
                 {game.showLeaderboard && (
                   <Button
                     variant="outline"
                     onClick={() => setShowLeaderboard(!showLeaderboard)}
+                    className="flex-shrink-0"
                   >
                     <Trophy className="w-4 h-4" />
                   </Button>

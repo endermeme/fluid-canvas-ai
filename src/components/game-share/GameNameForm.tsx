@@ -9,6 +9,7 @@ import { Users, AlertCircle } from 'lucide-react';
 interface GameNameFormProps {
   isOpen: boolean;
   onSubmit: (playerName: string) => void;
+  onSkip?: () => void;
   onCancel: () => void;
   error?: string;
   isSubmitting?: boolean;
@@ -18,6 +19,7 @@ interface GameNameFormProps {
 export const GameNameForm: React.FC<GameNameFormProps> = ({
   isOpen,
   onSubmit,
+  onSkip,
   onCancel,
   error,
   isSubmitting = false,
@@ -27,8 +29,12 @@ export const GameNameForm: React.FC<GameNameFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (playerName.trim()) {
-      onSubmit(playerName.trim());
+    onSubmit(playerName.trim());
+  };
+
+  const handleSkip = () => {
+    if (onSkip) {
+      onSkip();
     }
   };
 
@@ -85,12 +91,25 @@ export const GameNameForm: React.FC<GameNameFormProps> = ({
             >
               Hủy
             </Button>
+            
+            {onSkip && (
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleSkip}
+                disabled={isSubmitting}
+                className="flex-1"
+              >
+                Bỏ qua
+              </Button>
+            )}
+            
             <Button 
               type="submit" 
-              disabled={!playerName.trim() || isSubmitting}
+              disabled={isSubmitting}
               className="flex-1"
             >
-              {isSubmitting ? 'Đang xử lý...' : 'Tham gia game'}
+              {isSubmitting ? 'Đang xử lý...' : (playerName.trim() ? 'Tham gia game' : 'Tham gia với tên tự động')}
             </Button>
           </div>
         </form>

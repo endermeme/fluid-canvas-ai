@@ -9,6 +9,7 @@ import { Lock, AlertCircle, Users } from 'lucide-react';
 interface GamePasswordFormProps {
   isOpen: boolean;
   onSubmit: (password: string, playerName: string) => void;
+  onSkip?: (password: string) => void;
   onCancel: () => void;
   error?: string;
   isVerifying?: boolean;
@@ -18,6 +19,7 @@ interface GamePasswordFormProps {
 export const GamePasswordForm: React.FC<GamePasswordFormProps> = ({
   isOpen,
   onSubmit,
+  onSkip,
   onCancel,
   error,
   isVerifying = false,
@@ -28,8 +30,14 @@ export const GamePasswordForm: React.FC<GamePasswordFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.trim() && playerName.trim()) {
+    if (password.trim()) {
       onSubmit(password.trim(), playerName.trim());
+    }
+  };
+
+  const handleSkip = () => {
+    if (password.trim() && onSkip) {
+      onSkip(password.trim());
     }
   };
 
@@ -100,12 +108,25 @@ export const GamePasswordForm: React.FC<GamePasswordFormProps> = ({
             >
               Hủy
             </Button>
+            
+            {onSkip && (
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleSkip}
+                disabled={!password.trim() || isVerifying}
+                className="flex-1"
+              >
+                Bỏ qua
+              </Button>
+            )}
+            
             <Button 
               type="submit" 
-              disabled={!password.trim() || !playerName.trim() || isVerifying}
+              disabled={!password.trim() || isVerifying}
               className="flex-1"
             >
-              {isVerifying ? 'Đang kiểm tra...' : 'Tham gia game'}
+              {isVerifying ? 'Đang kiểm tra...' : (playerName.trim() ? 'Tham gia game' : 'Tham gia với tên tự động')}
             </Button>
           </div>
         </form>

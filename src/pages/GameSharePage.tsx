@@ -15,6 +15,7 @@ import { ArrowLeft, Clock, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAccount } from '@/contexts/AccountContext';
+import { supabase } from '@/integrations/supabase/client';
 import LeaderboardManager from '@/components/quiz/share/LeaderboardManager';
 // Removed zod import - no longer needed
 
@@ -138,8 +139,41 @@ const GameSharePage: React.FC = () => {
     navigate(`/game-history?acc=${accountId}`);
   };
   
+  const generatePlayerName = async () => {
+    if (!gameId) return 'Player 1';
+    
+    try {
+      // Get current participant count from unified_game_scores
+      const { data: scores, error } = await supabase
+        .from('unified_game_scores')
+        .select('player_name')
+        .eq('game_id', gameId)
+        .eq('source_table', 'games');
+
+      if (error) {
+        console.error('Error getting participant count:', error);
+        return 'Player 1';
+      }
+
+      // Count unique players and generate next number
+      const uniquePlayers = new Set(scores?.map(s => s.player_name) || []);
+      const playerCount = uniquePlayers.size;
+      return `Player ${playerCount + 1}`;
+    } catch (error) {
+      console.error('Error generating player name:', error);
+      return 'Player 1';
+    }
+  };
+  
   const handleJoinGame = async (playerName: string) => {
     if (!gameId || !game || isSubmitting) return;
+    
+    let finalPlayerName = playerName.trim();
+    
+    // If no name provided, generate auto name
+    if (!finalPlayerName) {
+      finalPlayerName = await generatePlayerName();
+    }
     
     // Check max participants limit
     if (game.maxParticipants && participants.length >= game.maxParticipants) {
@@ -155,7 +189,7 @@ const GameSharePage: React.FC = () => {
     
     try {
       const fakeIp = getFakeIpAddress();
-      const result = await addParticipant(gameId, playerName, fakeIp, accountId);
+      const result = await addParticipant(gameId, finalPlayerName, fakeIp, accountId);
       
       if (result.success) {
         if (result.participant) {
@@ -192,7 +226,7 @@ const GameSharePage: React.FC = () => {
         
         const newParticipant: GameParticipant = {
           id: crypto.randomUUID(),
-          name: playerName,
+          name: finalPlayerName,
           ipAddress: fakeIp,
           timestamp: Date.now(),
           gameId: gameId,
@@ -221,7 +255,7 @@ const GameSharePage: React.FC = () => {
         
         setShowNameDialog(false);
         setHasRegistered(true);
-        setCurrentPlayerName(playerName);
+        setCurrentPlayerName(finalPlayerName);
         
         const registeredGamesStr = localStorage.getItem('registered_games');
         let registeredGames = registeredGamesStr ? JSON.parse(registeredGamesStr) : [];
@@ -264,6 +298,27 @@ const GameSharePage: React.FC = () => {
     
     // Then join the game
     await handleJoinGame(playerName);
+  };
+
+  const handleSkip = async () => {
+    const autoName = await generatePlayerName();
+    await handleJoinGame(autoName);
+  };
+
+  const handlePasswordSkip = async (password: string) => {
+    // Verify password first
+    if (!game?.password || password !== game.password) {
+      toast({
+        title: "Sai mật khẩu",
+        description: "Mật khẩu không đúng",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const autoName = await generatePlayerName();
+    setShowPasswordDialog(false);
+    await handleJoinGame(autoName);
   };
 
   const handleShowJoinForm = () => {
@@ -411,6 +466,7 @@ const GameSharePage: React.FC = () => {
       <GameNameForm
         isOpen={showNameDialog}
         onSubmit={handleJoinGame}
+        onSkip={handleSkip}
         onCancel={() => setShowNameDialog(false)}
         isSubmitting={isSubmitting}
         gameTitle={game?.title}
@@ -420,6 +476,7 @@ const GameSharePage: React.FC = () => {
       <GamePasswordForm
         isOpen={showPasswordDialog}
         onSubmit={handlePasswordSubmit}
+        onSkip={handlePasswordSkip}
         onCancel={() => setShowPasswordDialog(false)}
         isVerifying={isSubmitting}
         gameTitle={game?.title}
