@@ -30,6 +30,19 @@ export interface PresetGameInstance {
   updatedAt: string;
 }
 
+// Removed PresetGameScore interface - now unified with PresetGameParticipant
+
+export interface PresetGameParticipant {
+  gameInstanceId: string;
+  playerName: string;
+  ipAddress?: string;
+  sessionData?: any;
+  score?: number;
+  totalQuestions?: number;
+  completionTime?: number;
+  scoringData?: any;
+}
+
 export interface PresetGameScore {
   gameInstanceId: string;
   playerName: string;
@@ -39,13 +52,6 @@ export interface PresetGameScore {
   completionTime?: number;
   scoringData?: any;
   ipAddress?: string;
-}
-
-export interface PresetGameParticipant {
-  gameInstanceId: string;
-  playerName: string;
-  ipAddress?: string;
-  sessionData?: any;
 }
 
 // API Functions cho Preset Games
@@ -160,21 +166,20 @@ export const presetGameAPI = {
     }
   },
 
-  // Lưu điểm số preset game
+  // Lưu điểm số preset game - now updates participant record
   async savePresetGameScore(scoreData: PresetGameScore): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from('preset_game_scores')
-        .insert({
-          game_instance_id: scoreData.gameInstanceId,
-          player_name: scoreData.playerName,
-          player_id: scoreData.playerId,
+        .from('preset_game_participants')
+        .update({
           score: scoreData.score,
           total_questions: scoreData.totalQuestions,
           completion_time: scoreData.completionTime,
           scoring_data: scoreData.scoringData || {},
-          ip_address: scoreData.ipAddress || 'preset-game'
-        });
+          completed_at: new Date().toISOString()
+        })
+        .eq('game_instance_id', scoreData.gameInstanceId)
+        .eq('player_name', scoreData.playerName);
 
       if (error) {
         console.error('Error saving preset game score:', error);
@@ -188,18 +193,51 @@ export const presetGameAPI = {
     }
   },
 
-  // Thêm participant
+  // Thêm participant - simplified version
   async addPresetGameParticipant(participantData: PresetGameParticipant): Promise<boolean> {
     try {
-      // Update participant activity
-      await supabase.rpc('update_preset_participant_activity', {
-        target_game_instance_id: participantData.gameInstanceId,
-        target_player_name: participantData.playerName
-      });
+      // First try to update existing participant
+      const { data: existingParticipant } = await supabase
+        .from('preset_game_participants')
+        .select('id')
+        .eq('game_instance_id', participantData.gameInstanceId)
+        .eq('player_name', participantData.playerName)
+        .maybeSingle();
+
+      if (existingParticipant) {
+        // Update existing participant activity
+        const { error } = await supabase
+          .from('preset_game_participants')
+          .update({
+            last_active_at: new Date().toISOString(),
+            is_active: true
+          })
+          .eq('game_instance_id', participantData.gameInstanceId)
+          .eq('player_name', participantData.playerName);
+
+        if (error) {
+          console.error('Error updating preset game participant:', error);
+          return false;
+        }
+      } else {
+        // Insert new participant
+        const { error } = await supabase
+          .from('preset_game_participants')
+          .insert([{
+            game_instance_id: participantData.gameInstanceId,
+            player_name: participantData.playerName,
+            ip_address: participantData.ipAddress || 'dynamic-ip'
+          }]);
+
+        if (error) {
+          console.error('Error adding preset game participant:', error);
+          return false;
+        }
+      }
 
       return true;
     } catch (error) {
-      console.error('Error adding preset game participant:', error);
+      console.error('Error in addPresetGameParticipant:', error);
       return false;
     }
   },

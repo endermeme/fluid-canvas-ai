@@ -418,6 +418,8 @@ export type Database = {
       }
       preset_game_participants: {
         Row: {
+          completed_at: string | null
+          completion_time: number | null
           game_instance_id: string
           id: string
           ip_address: string | null
@@ -425,9 +427,14 @@ export type Database = {
           joined_at: string
           last_active_at: string | null
           player_name: string
+          score: number | null
+          scoring_data: Json | null
           session_data: Json | null
+          total_questions: number | null
         }
         Insert: {
+          completed_at?: string | null
+          completion_time?: number | null
           game_instance_id: string
           id?: string
           ip_address?: string | null
@@ -435,9 +442,14 @@ export type Database = {
           joined_at?: string
           last_active_at?: string | null
           player_name: string
+          score?: number | null
+          scoring_data?: Json | null
           session_data?: Json | null
+          total_questions?: number | null
         }
         Update: {
+          completed_at?: string | null
+          completion_time?: number | null
           game_instance_id?: string
           id?: string
           ip_address?: string | null
@@ -445,61 +457,14 @@ export type Database = {
           joined_at?: string
           last_active_at?: string | null
           player_name?: string
+          score?: number | null
+          scoring_data?: Json | null
           session_data?: Json | null
+          total_questions?: number | null
         }
         Relationships: [
           {
             foreignKeyName: "preset_game_participants_game_instance_id_fkey"
-            columns: ["game_instance_id"]
-            isOneToOne: false
-            referencedRelation: "preset_game_instances"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      preset_game_scores: {
-        Row: {
-          completed_at: string
-          completion_time: number | null
-          created_at: string
-          game_instance_id: string
-          id: string
-          ip_address: string | null
-          player_id: string | null
-          player_name: string
-          score: number
-          scoring_data: Json | null
-          total_questions: number
-        }
-        Insert: {
-          completed_at?: string
-          completion_time?: number | null
-          created_at?: string
-          game_instance_id: string
-          id?: string
-          ip_address?: string | null
-          player_id?: string | null
-          player_name: string
-          score?: number
-          scoring_data?: Json | null
-          total_questions?: number
-        }
-        Update: {
-          completed_at?: string
-          completion_time?: number | null
-          created_at?: string
-          game_instance_id?: string
-          id?: string
-          ip_address?: string | null
-          player_id?: string | null
-          player_name?: string
-          score?: number
-          scoring_data?: Json | null
-          total_questions?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "preset_game_scores_game_instance_id_fkey"
             columns: ["game_instance_id"]
             isOneToOne: false
             referencedRelation: "preset_game_instances"
@@ -737,6 +702,21 @@ export type Database = {
           scoring_data: Json
           completed_at: string
           game_type: string
+        }[]
+      }
+      get_unified_participants_leaderboard: {
+        Args: { target_game_id: string; limit_count?: number }
+        Returns: {
+          player_name: string
+          status: string
+          score: number
+          total_questions: number
+          completion_time: number
+          scoring_data: Json
+          completed_at: string
+          joined_at: string
+          game_type: string
+          is_active: boolean
         }[]
       }
       increment_custom_game_share_count: {

@@ -489,9 +489,6 @@ const GameSharePage: React.FC = () => {
           <ShareSection 
             game={game}
             gameId={gameId!}
-            hasRegistered={hasRegistered}
-            isSubmitting={isSubmitting}
-            onJoinGame={handleShowJoinForm}
           />
         </TabsContent>
         
@@ -537,6 +534,7 @@ const GameSharePage: React.FC = () => {
         onCancel={() => setShowNameDialog(false)}
         isSubmitting={isSubmitting}
         gameTitle={game?.title}
+        gameId={gameId!}
       />
       
       {/* Password Form for protected games */}

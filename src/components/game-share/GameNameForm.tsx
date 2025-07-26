@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Users, AlertCircle } from 'lucide-react';
+import { playerStorageUtils } from '@/utils/playerStorage';
 
 interface GameNameFormProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface GameNameFormProps {
   error?: string;
   isSubmitting?: boolean;
   gameTitle?: string;
+  gameId: string;
 }
 
 export const GameNameForm: React.FC<GameNameFormProps> = ({
@@ -23,13 +25,30 @@ export const GameNameForm: React.FC<GameNameFormProps> = ({
   onCancel,
   error,
   isSubmitting = false,
-  gameTitle
+  gameTitle,
+  gameId
 }) => {
   const [playerName, setPlayerName] = useState('');
 
+  // Auto-fill from localStorage when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      const savedPlayerInfo = playerStorageUtils.getPlayerInfo(gameId);
+      if (savedPlayerInfo) {
+        setPlayerName(savedPlayerInfo.playerName);
+      } else {
+        // Generate random name if no saved name
+        setPlayerName(playerStorageUtils.generatePlayerName());
+      }
+    }
+  }, [isOpen, gameId]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(playerName.trim());
+    const finalName = playerName.trim() || playerStorageUtils.generatePlayerName();
+    // Save to localStorage for future use
+    playerStorageUtils.savePlayerInfo(gameId, finalName);
+    onSubmit(finalName);
   };
 
   const handleSkip = () => {

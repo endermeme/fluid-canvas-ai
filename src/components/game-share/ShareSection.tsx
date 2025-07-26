@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { QRCodeSVG } from 'qrcode.react';
-import { Copy, Check, Users } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { StoredGame } from '@/utils/types';
 import { getRemainingTime } from '@/utils/gameExport';
@@ -13,17 +13,11 @@ import { getRemainingTime } from '@/utils/gameExport';
 interface ShareSectionProps {
   game: StoredGame;
   gameId: string;
-  hasRegistered: boolean;
-  isSubmitting: boolean;
-  onJoinGame: () => void;
 }
 
 const ShareSection: React.FC<ShareSectionProps> = ({
   game,
-  gameId,
-  hasRegistered,
-  isSubmitting,
-  onJoinGame
+  gameId
 }) => {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -94,16 +88,6 @@ const ShareSection: React.FC<ShareSectionProps> = ({
             </div>
           </div>
         </CardContent>
-        <CardFooter>
-          <Button 
-            className="w-full" 
-            onClick={onJoinGame}
-            disabled={isSubmitting}
-          >
-            <Users className="h-4 w-4 mr-2" />
-            {isSubmitting ? "Đang xử lý..." : "Tham gia game"}
-          </Button>
-        </CardFooter>
       </Card>
       
       <Card>

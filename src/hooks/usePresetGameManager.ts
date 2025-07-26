@@ -88,7 +88,8 @@ export const usePresetGameManager = () => {
       if (success) {
         // Get game data to determine game type for appropriate message
         const gameData = await presetGameAPI.getPresetGameInstance(scoreData.gameInstanceId);
-        const gameType = gameData?.data?.preset_games?.game_type?.toLowerCase();
+        const gameType = gameData?.data?.preset_games?.game_type?.toLowerCase() || 
+                        gameData?.data?.settings?.gameType?.toLowerCase();
         
         const isTimeBasedGame = ['memory', 'wordsearch', 'matching'].includes(gameType);
         
