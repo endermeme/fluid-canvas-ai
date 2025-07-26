@@ -178,35 +178,68 @@ export type Database = {
       }
       custom_games: {
         Row: {
+          account_id: string | null
           created_at: string
+          creator_ip: string | null
+          custom_duration: number | null
           description: string | null
+          expires_at: string | null
           game_data: Json
           game_id: string | null
           html_content: string | null
           id: string
+          is_published: boolean | null
+          last_accessed_at: string | null
+          max_participants: number | null
+          password: string | null
+          require_registration: boolean | null
           settings: Json | null
+          share_count: number | null
+          show_leaderboard: boolean | null
           title: string | null
           updated_at: string
         }
         Insert: {
+          account_id?: string | null
           created_at?: string
+          creator_ip?: string | null
+          custom_duration?: number | null
           description?: string | null
+          expires_at?: string | null
           game_data?: Json
           game_id?: string | null
           html_content?: string | null
           id?: string
+          is_published?: boolean | null
+          last_accessed_at?: string | null
+          max_participants?: number | null
+          password?: string | null
+          require_registration?: boolean | null
           settings?: Json | null
+          share_count?: number | null
+          show_leaderboard?: boolean | null
           title?: string | null
           updated_at?: string
         }
         Update: {
+          account_id?: string | null
           created_at?: string
+          creator_ip?: string | null
+          custom_duration?: number | null
           description?: string | null
+          expires_at?: string | null
           game_data?: Json
           game_id?: string | null
           html_content?: string | null
           id?: string
+          is_published?: boolean | null
+          last_accessed_at?: string | null
+          max_participants?: number | null
+          password?: string | null
+          require_registration?: boolean | null
           settings?: Json | null
+          share_count?: number | null
+          show_leaderboard?: boolean | null
           title?: string | null
           updated_at?: string
         }
