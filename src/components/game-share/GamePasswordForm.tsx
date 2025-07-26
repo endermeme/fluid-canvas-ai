@@ -30,14 +30,8 @@ export const GamePasswordForm: React.FC<GamePasswordFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.trim()) {
+    if (password.trim() && playerName.trim()) {
       onSubmit(password.trim(), playerName.trim());
-    }
-  };
-
-  const handleSkip = () => {
-    if (password.trim() && onSkip) {
-      onSkip(password.trim());
     }
   };
 
@@ -64,7 +58,7 @@ export const GamePasswordForm: React.FC<GamePasswordFormProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="password">Mật khẩu game:</Label>
+            <Label htmlFor="password">Mật khẩu game: <span className="text-red-500">*</span></Label>
             <Input
               id="password"
               type="text"
@@ -74,11 +68,12 @@ export const GamePasswordForm: React.FC<GamePasswordFormProps> = ({
               disabled={isVerifying}
               autoFocus
               className="focus:ring-2 focus:ring-primary"
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="playerName">Tên của bạn:</Label>
+            <Label htmlFor="playerName">Tên của bạn: <span className="text-red-500">*</span></Label>
             <Input
               id="playerName"
               type="text"
@@ -88,6 +83,7 @@ export const GamePasswordForm: React.FC<GamePasswordFormProps> = ({
               disabled={isVerifying}
               className="focus:ring-2 focus:ring-primary"
               minLength={2}
+              required
             />
           </div>
 
@@ -97,6 +93,12 @@ export const GamePasswordForm: React.FC<GamePasswordFormProps> = ({
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
+
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              ℹ️ Game có mật khẩu yêu cầu bắt buộc nhập tên người chơi để tham gia.
+            </p>
+          </div>
 
           <div className="flex gap-2">
             <Button 
@@ -109,24 +111,12 @@ export const GamePasswordForm: React.FC<GamePasswordFormProps> = ({
               Hủy
             </Button>
             
-            {onSkip && (
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={handleSkip}
-                disabled={!password.trim() || isVerifying}
-                className="flex-1"
-              >
-                Bỏ qua
-              </Button>
-            )}
-            
             <Button 
               type="submit" 
-              disabled={!password.trim() || isVerifying}
+              disabled={!password.trim() || !playerName.trim() || isVerifying}
               className="flex-1"
             >
-              {isVerifying ? 'Đang kiểm tra...' : (playerName.trim() ? 'Tham gia game' : 'Tham gia với tên tự động')}
+              {isVerifying ? 'Đang kiểm tra...' : 'Tham gia game'}
             </Button>
           </div>
         </form>

@@ -135,10 +135,32 @@ const GameSharePage: React.FC = () => {
     return () => clearInterval(interval);
   }, [gameId, gameExpired]);
 
-  // Auto show join form when game loads
+  // Check if user is creator
+  const isCreator = (game: StoredGame): boolean => {
+    // Check IP address (for anonymous users)
+    const currentIp = 'localhost'; // In real app, get from headers
+    if (game.creator_ip === currentIp) return true;
+    
+    // Check account ID (for logged in users)
+    if (accountId && game.account_id === accountId) return true;
+    
+    return false;
+  };
+
+  // Auto show join form when game loads (unless user is creator)
   useEffect(() => {
     if (game && !hasRegistered && !gameExpired) {
-      handleShowJoinForm();
+      if (isCreator(game)) {
+        // Creator bypasses all forms and joins directly
+        setHasRegistered(true);
+        setCurrentPlayerName("Admin/Creator");
+        toast({
+          title: "Chào mừng quản trị viên! 👑",
+          description: "Bạn có quyền quản lý game này.",
+        });
+      } else {
+        handleShowJoinForm();
+      }
     }
   }, [game, hasRegistered, gameExpired]);
   
@@ -329,21 +351,31 @@ const GameSharePage: React.FC = () => {
   };
 
   const handleShowJoinForm = () => {
+    if (!game) return;
+    
     console.log('🎯 handleShowJoinForm called', {
       hasPassword: !!game?.password,
       password: game?.password,
       showPasswordDialog,
       showNameDialog,
       hasRegistered,
-      gameId
+      gameId,
+      isCreator: isCreator(game)
     });
     
-    // Always allow joining, regardless of registration status
-    if (game?.password) {
-      console.log('🔒 Showing password dialog');
+    // Creator bypasses all forms
+    if (isCreator(game)) {
+      setHasRegistered(true);
+      setCurrentPlayerName("Admin/Creator");
+      return;
+    }
+    
+    // Non-creator logic based on password requirement
+    if (game.password) {
+      console.log('🔒 Showing password dialog (name required)');
       setShowPasswordDialog(true);
     } else {
-      console.log('👤 Showing name dialog');
+      console.log('👤 Showing name dialog (can skip)');
       setShowNameDialog(true);
     }
   };
@@ -415,8 +447,11 @@ const GameSharePage: React.FC = () => {
                 <span className="ml-1 text-green-500">●</span>
               )}
             </TabsTrigger>
-            {game.showLeaderboard && (
-              <TabsTrigger value="leaderboard">Bảng xếp hạng</TabsTrigger>
+            {(game.showLeaderboard || isCreator(game)) && (
+              <TabsTrigger value="leaderboard">
+                Bảng xếp hạng
+                {isCreator(game) && <span className="ml-1 text-yellow-500">👑</span>}
+              </TabsTrigger>
             )}
           </TabsList>
           
@@ -460,9 +495,20 @@ const GameSharePage: React.FC = () => {
           </div>
         </TabsContent>
 
-        {game.showLeaderboard && (
+        {(game.showLeaderboard || isCreator(game)) && (
           <TabsContent value="leaderboard" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
             <div className="max-w-2xl mx-auto">
+              {isCreator(game) && (
+                <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
+                    <span className="text-lg">👑</span>
+                    <span className="font-medium">Quyền quản trị viên</span>
+                  </div>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                    Bạn có thể xem đầy đủ thông tin và quản lý game này.
+                  </p>
+                </div>
+              )}
               <LeaderboardManager gameId={gameId!} />
             </div>
           </TabsContent>

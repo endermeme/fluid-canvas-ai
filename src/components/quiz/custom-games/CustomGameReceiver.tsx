@@ -30,11 +30,37 @@ export const CustomGameReceiver: React.FC = () => {
   // Get account ID from URL params
   const accountId = searchParams.get('acc');
 
+  // Check if user is creator
+  const isCreator = (game: StoredGame): boolean => {
+    // Check IP address (for anonymous users)
+    const currentIp = 'localhost'; // In real app, get from headers
+    if (game.creator_ip === currentIp) return true;
+    
+    // Check account ID (for logged in users)
+    if (accountId && game.account_id === accountId) return true;
+    
+    return false;
+  };
+
   useEffect(() => {
     if (gameId) {
       loadGame();
     }
   }, [gameId]);
+
+  // Auto-join if creator
+  useEffect(() => {
+    if (game && !hasJoined) {
+      if (isCreator(game)) {
+        setPlayerName("Admin/Creator");
+        setHasJoined(true);
+        toast({
+          title: "Chào mừng quản trị viên! 👑",
+          description: "Bạn có quyền quản lý game này.",
+        });
+      }
+    }
+  }, [game, hasJoined]);
 
   const loadGame = async () => {
     if (!gameId) return;
@@ -95,7 +121,17 @@ export const CustomGameReceiver: React.FC = () => {
 
     let finalPlayerName = playerName.trim();
     
-    // If no name provided, generate auto name
+    // For password-protected games, name is required
+    if (game.password && !finalPlayerName) {
+      toast({
+        title: "Tên bắt buộc",
+        description: "Vui lòng nhập tên để tham gia game có mật khẩu",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // If no name provided for non-password games, generate auto name
     if (!finalPlayerName) {
       finalPlayerName = await generatePlayerName();
     }
@@ -210,13 +246,16 @@ export const CustomGameReceiver: React.FC = () => {
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="playerName">Tên của bạn</Label>
+                <Label htmlFor="playerName">
+                  Tên của bạn {game.password && <span className="text-red-500">*</span>}
+                </Label>
                 <Input
                   id="playerName"
                   value={playerName}
                   onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="Nhập tên để tham gia"
+                  placeholder={game.password ? "Tên bắt buộc cho game có mật khẩu" : "Nhập tên để tham gia"}
                   className="mt-1"
+                  required={!!game.password}
                 />
               </div>
 
@@ -224,7 +263,7 @@ export const CustomGameReceiver: React.FC = () => {
                 <div>
                   <Label htmlFor="password" className="flex items-center gap-2">
                     <Lock className="w-4 h-4" />
-                    Mật khẩu
+                    Mật khẩu <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="password"
@@ -233,6 +272,7 @@ export const CustomGameReceiver: React.FC = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Nhập mật khẩu game"
                     className="mt-1"
+                    required
                   />
                 </div>
               )}
@@ -241,17 +281,23 @@ export const CustomGameReceiver: React.FC = () => {
                 <Button 
                   onClick={handleJoinGame}
                   className="flex-1"
+                  disabled={game.password && !playerName.trim()}
                 >
-                  {playerName.trim() ? 'Tham gia Game' : 'Tham gia với tên tự động'}
+                  {game.password 
+                    ? 'Tham gia Game' 
+                    : (playerName.trim() ? 'Tham gia Game' : 'Tham gia với tên tự động')
+                  }
                 </Button>
                 
-                <Button
-                  variant="outline"
-                  onClick={handleSkip}
-                  className="flex-shrink-0"
-                >
-                  Bỏ qua
-                </Button>
+                {!game.password && (
+                  <Button
+                    variant="outline"
+                    onClick={handleSkip}
+                    className="flex-shrink-0"
+                  >
+                    Bỏ qua
+                  </Button>
+                )}
                 
                 {game.showLeaderboard && (
                   <Button
