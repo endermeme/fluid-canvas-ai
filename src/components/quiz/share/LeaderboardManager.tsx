@@ -55,13 +55,13 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
     
     // Supabase real-time subscription
     const channel = supabase
-      .channel('game-scores-changes')
+      .channel('unified-game-scores-changes')
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'game_scores',
+          table: 'unified_game_scores',
           filter: `game_id=eq.${gameId}`
         },
         () => {
