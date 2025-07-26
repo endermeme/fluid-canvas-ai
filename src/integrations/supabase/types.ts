@@ -739,21 +739,6 @@ export type Database = {
           game_type: string
         }[]
       }
-      get_unified_participants_leaderboard: {
-        Args: { target_game_id: string; limit_count?: number }
-        Returns: {
-          player_name: string
-          status: string
-          score: number
-          total_questions: number
-          completion_time: number
-          scoring_data: Json
-          completed_at: string
-          joined_at: string
-          game_type: string
-          is_active: boolean
-        }[]
-      }
       increment_custom_game_share_count: {
         Args: { game_instance_id: string }
         Returns: undefined

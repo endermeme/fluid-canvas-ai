@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAccount } from '@/contexts/AccountContext';
 import { supabase } from '@/integrations/supabase/client';
-import UnifiedParticipantsLeaderboard from '@/components/quiz/share/UnifiedParticipantsLeaderboard';
+import LeaderboardManager from '@/components/quiz/share/LeaderboardManager';
 // Removed zod import - no longer needed
 
 // Removed old player form schema - no longer needed
@@ -32,16 +32,6 @@ const GameSharePage: React.FC = () => {
   const [hasRegistered, setHasRegistered] = useState(false);
   const [participants, setParticipants] = useState<GameParticipant[]>([]);
   const [activeTab, setActiveTab] = useState('game');
-  const [autoSwitchToPlayers, setAutoSwitchToPlayers] = useState(false);
-  
-  // Check URL params for auto tab switching
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tabParam = urlParams.get('tab');
-    if (tabParam && ['game', 'share', 'participants'].includes(tabParam)) {
-      setActiveTab(tabParam);
-    }
-  }, []);
   const [gameExpired, setGameExpired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPlayerName, setCurrentPlayerName] = useState<string | null>(null);
@@ -269,11 +259,6 @@ const GameSharePage: React.FC = () => {
           description: "Bạn đã được thêm vào danh sách người chơi.",
         });
         
-        // Auto-switch to players tab
-        setActiveTab('participants');
-        setAutoSwitchToPlayers(true);
-        setTimeout(() => setAutoSwitchToPlayers(false), 1000);
-        
         setTimeout(() => {
           refreshParticipants();
         }, 1000);
@@ -325,11 +310,6 @@ const GameSharePage: React.FC = () => {
           title: "Tham gia thành công! 🎉",
           description: "Bạn đã được thêm vào danh sách người chơi (dữ liệu lưu cục bộ).",
         });
-        
-        // Auto-switch to players tab
-        setActiveTab('participants');
-        setAutoSwitchToPlayers(true);
-        setTimeout(() => setAutoSwitchToPlayers(false), 1000);
       }
     } catch (error) {
       console.error("Lỗi khi tham gia game:", error);
@@ -475,11 +455,17 @@ const GameSharePage: React.FC = () => {
             <TabsTrigger value="game">Game</TabsTrigger>
             <TabsTrigger value="share">Chia sẻ</TabsTrigger>
             <TabsTrigger value="participants">
-              Người chơi & BXH ({participants.length})
+              Người chơi ({participants.length})
               {participants.length > 0 && (
                 <span className="ml-1 text-green-500">●</span>
               )}
             </TabsTrigger>
+            {(game.showLeaderboard || isCreator(game)) && (
+              <TabsTrigger value="leaderboard">
+                Bảng xếp hạng
+                {isCreator(game) && <span className="ml-1 text-yellow-500">👑</span>}
+              </TabsTrigger>
+            )}
           </TabsList>
           
           <div className="flex items-center text-sm text-muted-foreground">
@@ -506,30 +492,41 @@ const GameSharePage: React.FC = () => {
             hasRegistered={hasRegistered}
             isSubmitting={isSubmitting}
             onJoinGame={handleShowJoinForm}
-            onSwitchToPlayers={() => setActiveTab('participants')}
-            onSwitchToLeaderboard={() => setActiveTab('participants')}
           />
         </TabsContent>
         
         <TabsContent value="participants" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
-          <div className="max-w-2xl mx-auto">
-            {isCreator(game) && (
-              <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
-                  <span className="text-lg">👑</span>
-                  <span className="font-medium">Quyền quản trị viên</span>
-                </div>
-                <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                  Bạn có thể xem đầy đủ thông tin và quản lý game này.
-                </p>
-              </div>
-            )}
-            <UnifiedParticipantsLeaderboard 
-              gameId={gameId!}
-              autoSwitchToPlayersTab={autoSwitchToPlayers}
-            />
+          <div className="max-w-md mx-auto space-y-6">
+              <ParticipantsList
+                gameId={gameId || ''}
+                hasRegistered={hasRegistered}
+                isSubmitting={isSubmitting}
+                onRefresh={refreshParticipants}
+                onJoinGame={handleShowJoinForm}
+                maxParticipants={game.maxParticipants}
+                onParticipantsUpdate={(newParticipants) => setParticipants(newParticipants)}
+              />
           </div>
         </TabsContent>
+
+        {(game.showLeaderboard || isCreator(game)) && (
+          <TabsContent value="leaderboard" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
+            <div className="max-w-2xl mx-auto">
+              {isCreator(game) && (
+                <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
+                    <span className="text-lg">👑</span>
+                    <span className="font-medium">Quyền quản trị viên</span>
+                  </div>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                    Bạn có thể xem đầy đủ thông tin và quản lý game này.
+                  </p>
+                </div>
+              )}
+              <LeaderboardManager gameId={gameId!} />
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
       
       {/* Game Name Form for games without password */}

@@ -26,9 +26,6 @@ interface HistoryGame {
   html_content: string;
   creator_ip?: string;
   account_id?: string;
-  participant_count?: number;
-  completed_count?: number;
-  completion_rate?: number;
 }
 
 const GameHistoryPage: React.FC = () => {
@@ -51,55 +48,16 @@ const GameHistoryPage: React.FC = () => {
     
     setLoading(true);
     try {
-      // Load games with participant counts
-      const { data: gamesData, error: gamesError } = await supabase
+      const { data, error } = await supabase
         .from('games')
         .select('*,share_count,last_accessed_at,max_participants,show_leaderboard,require_registration,custom_duration,password,creator_ip,account_id')
         .eq('account_id', accountId)
         .eq('is_published', true)
         .order('created_at', { ascending: false });
 
-      if (gamesError) throw gamesError;
+      if (error) throw error;
       
-      // For each game, get participant statistics
-      const gamesWithStats = await Promise.all(
-        (gamesData || []).map(async (game) => {
-          try {
-            const { data: participants, error: participantsError } = await supabase
-              .from('game_participants')
-              .select('id')
-              .eq('game_id', game.id);
-            
-            const { data: scores, error: scoresError } = await supabase
-              .from('unified_game_scores')
-              .select('id')
-              .eq('game_id', game.id)
-              .eq('source_table', 'games');
-
-            const participantCount = participants?.length || 0;
-            const completedCount = scores?.length || 0;
-            
-            console.log(`📊 [GameHistoryPage] Game ${game.title}: ${participantCount} participants, ${completedCount} completed`);
-            
-            return {
-              ...game,
-              participant_count: participantCount,
-              completed_count: completedCount,
-              completion_rate: participantCount > 0 ? Math.round((completedCount / participantCount) * 100) : 0
-            };
-          } catch (error) {
-            console.error(`Error fetching stats for game ${game.id}:`, error);
-            return {
-              ...game,
-              participant_count: 0,
-              completed_count: 0,
-              completion_rate: 0
-            };
-          }
-        })
-      );
-      
-      setGames(gamesWithStats);
+      setGames(data || []);
     } catch (error) {
       console.error("Error loading games:", error);
       toast({
@@ -193,7 +151,7 @@ const GameHistoryPage: React.FC = () => {
 
   const handleViewParticipants = (game: HistoryGame, e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/game/${game.id}?acc=${accountId}&tab=participants`);
+    navigate(`/game/${game.id}/teacher?acc=${accountId}`);
   };
 
   const handleExportData = async (game: HistoryGame, e: React.MouseEvent) => {
