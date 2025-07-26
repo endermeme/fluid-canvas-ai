@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Download, Users, RefreshCw } from 'lucide-react';
 import { getGameSession, exportParticipantsToCSV, maskIpAddress } from '@/utils/gameParticipation';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const TeacherDashboard = () => {
   const { gameId } = useParams();
@@ -28,9 +29,59 @@ const TeacherDashboard = () => {
 
   const loadGameData = async () => {
     if (!gameId) return;
+    setLoading(true);
     try {
-      const gameData = await getGameSession(gameId);
-      setGame(gameData);
+      // First try to get game info from Supabase
+      const { data: gameInfo, error: gameError } = await supabase
+        .from('games')
+        .select('*')
+        .eq('id', gameId)
+        .single();
+
+      if (gameError) {
+        console.error('Error fetching game:', gameError);
+        toast({
+          title: "Lỗi",
+          description: "Không thể tải thông tin game",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Get participants from unified_game_scores
+      const { data: participants, error: participantsError } = await supabase
+        .from('unified_game_scores')
+        .select('*')
+        .eq('game_id', gameId)
+        .eq('source_table', 'games')
+        .order('completed_at', { ascending: false });
+
+      if (participantsError) {
+        console.error('Error fetching participants:', participantsError);
+      }
+
+      // Format participants data to match expected structure
+      const formattedParticipants = participants?.map(p => ({
+        id: p.id,
+        name: p.player_name,
+        ipAddress: p.ip_address || 'N/A',
+        score: p.score,
+        retryCount: 1, // Default as this isn't tracked
+        timestamp: p.completed_at
+      })) || [];
+
+      const gameSession = {
+        id: gameInfo.id,
+        title: gameInfo.title,
+        gameType: gameInfo.game_type,
+        htmlContent: gameInfo.html_content,
+        description: gameInfo.description,
+        expiresAt: new Date(gameInfo.expires_at),
+        createdAt: new Date(gameInfo.created_at).getTime(),
+        participants: formattedParticipants
+      };
+
+      setGame(gameSession);
     } catch (error) {
       console.error('Error loading game:', error);
       toast({

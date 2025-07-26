@@ -1,70 +1,119 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Download, Users, BarChart3, RefreshCw } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import UnifiedLeaderboardManager from './UnifiedLeaderboardManager';
 import { 
   Table, 
   TableBody, 
-  TableCaption, 
   TableCell, 
   TableHead, 
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  getGameSession, 
-  exportParticipantsToCSV,
-  maskIpAddress
-} from '@/utils/gameParticipation';
-import { GameParticipant, GameSession } from '@/utils/types';
-import { ArrowLeft, Download, Users, RefreshCw, Share2, Eye } from 'lucide-react';
+import { maskIpAddress } from '@/utils/gameParticipation';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-const GameDashboard: React.FC = () => {
-  const { gameId } = useParams<{ gameId: string }>();
-  const [game, setGame] = useState<GameSession | null>(null);
+const GameDashboard = () => {
+  const { gameId } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [game, setGame] = useState<any>(null);
+  const [participants, setParticipants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [maskIps, setMaskIps] = useState(true);
-  const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!gameId) {
-      navigate('/preset-games');
-      return;
-    }
-    
     loadGameData();
-  }, [gameId, navigate]);
-  
+  }, [gameId]);
+
   const loadGameData = async () => {
+    if (!gameId) return;
+    setLoading(true);
+    
     try {
-      if (!gameId) return;
-      
-      const gameSession = await getGameSession(gameId);
-      if (gameSession) {
-        setGame(gameSession);
-      } else {
+      // Get game info
+      const { data: gameInfo, error: gameError } = await supabase
+        .from('games')
+        .select('*')
+        .eq('id', gameId)
+        .single();
+
+      if (gameError) {
+        console.error('Error fetching game:', gameError);
         toast({
-          title: "Game không tồn tại",
-          description: "Game này không tồn tại hoặc đã bị xóa.",
-          variant: "destructive",
+          title: "Lỗi",
+          description: "Không thể tải thông tin game",
+          variant: "destructive"
         });
-        navigate('/preset-games');
+        return;
       }
+
+      setGame(gameInfo);
+
+      // Get participants from unified_game_scores
+      const { data: participantsData, error: participantsError } = await supabase
+        .from('unified_game_scores')
+        .select('*')
+        .eq('game_id', gameId)
+        .eq('source_table', 'games')
+        .order('completed_at', { ascending: false });
+
+      if (participantsError) {
+        console.error('Error fetching participants:', participantsError);
+      }
+
+      // Format participants data
+      const formattedParticipants = participantsData?.map(p => ({
+        id: p.id,
+        name: p.player_name,
+        ipAddress: p.ip_address || 'N/A',
+        score: p.score,
+        totalQuestions: p.total_questions,
+        completionTime: p.completion_time,
+        timestamp: p.completed_at
+      })) || [];
+
+      setParticipants(formattedParticipants);
     } catch (error) {
-      console.error("Error loading game data:", error);
+      console.error('Error loading game data:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải dữ liệu game",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleExport = async () => {
-    if (!gameId || !game) return;
-    
+    if (!game || participants.length === 0) {
+      toast({
+        title: "Không có dữ liệu",
+        description: "Chưa có người chơi nào để xuất dữ liệu",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
-      const csvContent = await exportParticipantsToCSV(gameId);
-      
-      // Create a CSV file and trigger download
+      const headers = ['Tên', 'Điểm số', 'Tổng câu hỏi', 'Thời gian hoàn thành (giây)', 'IP Address', 'Thời gian tham gia'];
+      const csvContent = [
+        headers.join(','),
+        ...participants.map(p => [
+          `"${p.name}"`,
+          p.score || 0,
+          p.totalQuestions || 0,
+          p.completionTime || 0,
+          maskIpAddress(p.ipAddress),
+          new Date(p.timestamp).toLocaleString('vi-VN')
+        ].join(','))
+      ].join('\n');
+
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -79,29 +128,13 @@ const GameDashboard: React.FC = () => {
         description: "Dữ liệu người tham gia đã được tải xuống.",
       });
     } catch (error) {
-      console.error("Error exporting CSV:", error);
+      console.error('Error exporting data:', error);
       toast({
         title: "Lỗi xuất dữ liệu",
         description: "Không thể xuất dữ liệu. Vui lòng thử lại.",
         variant: "destructive",
       });
     }
-  };
-
-  const handleShareLink = () => {
-    if (!gameId) return;
-    
-    const shareUrl = `${window.location.origin}/game/${gameId}`;
-    navigator.clipboard.writeText(shareUrl);
-    
-    toast({
-      title: "Đã sao chép liên kết",
-      description: "Đường dẫn tham gia game đã được sao chép.",
-    });
-  };
-
-  const viewGame = () => {
-    navigate(`/game/${gameId}`);
   };
 
   if (loading) {
@@ -132,89 +165,110 @@ const GameDashboard: React.FC = () => {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => navigate('/game-history')} 
-            className="flex items-center gap-1"
+            onClick={() => navigate(-1)}
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Quay lại</span>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Quay lại
           </Button>
-          <h1 className="text-2xl font-bold">{game?.title}</h1>
+          <h1 className="text-2xl font-bold">{game.title}</h1>
         </div>
         
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={loadGameData}>
-            <RefreshCw className="h-4 w-4 mr-1" />
+            <RefreshCw className="h-4 w-4 mr-2" />
             Làm mới
           </Button>
-          
-          <Button variant="outline" size="sm" onClick={handleShareLink}>
-            <Share2 className="h-4 w-4 mr-1" />
-            Chia sẻ
-          </Button>
-          
-          <Button variant="outline" size="sm" onClick={viewGame}>
-            <Eye className="h-4 w-4 mr-1" />
-            Xem game
+          <Button onClick={handleExport} disabled={participants.length === 0}>
+            <Download className="h-4 w-4 mr-2" />
+            Xuất CSV
           </Button>
         </div>
       </div>
-      
-      <div className="bg-background p-6 rounded-lg border shadow-sm mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-medium">
-              Người tham gia ({game?.participants.length || 0})
-            </h2>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button onClick={() => setMaskIps(!maskIps)} variant="ghost" size="sm">
-              {maskIps ? 'Hiện đầy đủ IP' : 'Ẩn IP'}
-            </Button>
-            
-            <Button onClick={handleExport} variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-1" />
-              Xuất CSV
-            </Button>
-          </div>
-        </div>
-        
-        {game && game.participants.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Tên</TableHead>
-                <TableHead>Địa chỉ IP</TableHead>
-                <TableHead>Thời gian tham gia</TableHead>
-                <TableHead>Số lần thử</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {game.participants.map((participant: GameParticipant) => (
-                <TableRow key={participant.id}>
-                  <TableCell className="font-medium">{participant.name}</TableCell>
-                  <TableCell>
-                    {maskIps ? maskIpAddress(participant.ipAddress) : participant.ipAddress}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(participant.timestamp).toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <span className={participant.retryCount > 0 ? "text-amber-500 font-medium" : ""}>
-                      {participant.retryCount}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            Chưa có người tham gia nào
-          </div>
-        )}
-      </div>
+
+      <Tabs defaultValue="leaderboard" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="leaderboard" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Bảng xếp hạng
+          </TabsTrigger>
+          <TabsTrigger value="participants" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Người tham gia ({participants.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="leaderboard" className="mt-6">
+          <UnifiedLeaderboardManager 
+            gameId={gameId!} 
+            sourceTable="games"
+            refreshInterval={10000}
+          />
+        </TabsContent>
+
+        <TabsContent value="participants" className="mt-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Danh sách người tham gia ({participants.length})
+                </CardTitle>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setMaskIps(!maskIps)}
+                >
+                  {maskIps ? 'Hiện IP' : 'Ẩn IP'}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {participants.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tên</TableHead>
+                      <TableHead>Điểm số</TableHead>
+                      <TableHead>Tổng câu hỏi</TableHead>
+                      <TableHead>Thời gian hoàn thành</TableHead>
+                      <TableHead>Địa chỉ IP</TableHead>
+                      <TableHead>Thời gian tham gia</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {participants.map((participant) => (
+                      <TableRow key={participant.id}>
+                        <TableCell className="font-medium">
+                          {participant.name}
+                        </TableCell>
+                        <TableCell>
+                          {participant.score || 0}
+                        </TableCell>
+                        <TableCell>
+                          {participant.totalQuestions || 0}
+                        </TableCell>
+                        <TableCell>
+                          {participant.completionTime ? `${participant.completionTime}s` : 'N/A'}
+                        </TableCell>
+                        <TableCell>
+                          {maskIps ? maskIpAddress(participant.ipAddress) : participant.ipAddress}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(participant.timestamp).toLocaleString('vi-VN')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  Chưa có người tham gia nào
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

@@ -205,7 +205,8 @@ const GameHistoryPage: React.FC = () => {
   };
   
   const handleGameClick = (gameId: string) => {
-    navigate(`/game/${gameId}?acc=${accountId}`);
+    // Navigate to admin dashboard instead of regular game view
+    navigate(`/game/${gameId}/dashboard?acc=${accountId}`);
   };
   
   const handleCreateNew = () => {
@@ -235,6 +236,11 @@ const GameHistoryPage: React.FC = () => {
   const handleViewLeaderboard = (gameId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/game/${gameId}/dashboard?acc=${accountId}`);
+  };
+
+  const handleViewParticipants = (gameId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/game/${gameId}/teacher?acc=${accountId}`);
   };
 
   const handleExportData = async (gameId: string, e: React.MouseEvent) => {

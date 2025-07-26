@@ -126,13 +126,6 @@ const AdminGameCard: React.FC<AdminGameCardProps> = ({
       className="group hover:shadow-lg transition-all cursor-pointer relative"
       onClick={() => onGameClick(game.id)}
     >
-      {/* Admin Crown Badge */}
-      <div className="absolute -top-2 -right-2 z-10">
-        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300">
-          <Crown size={12} className="mr-1" />
-          Admin
-        </Badge>
-      </div>
 
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
@@ -235,11 +228,24 @@ const AdminGameCard: React.FC<AdminGameCardProps> = ({
             <Share2 size={12} className="mr-1" />
             Chia sẻ
           </Button>
+
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-8 text-xs"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(`/game/${game.id}/teacher?acc=${game.account_id}`, '_blank');
+            }}
+          >
+            <Users size={12} className="mr-1" />
+            Xem người chơi
+          </Button>
           
           <Button 
             variant="outline" 
             size="sm" 
-            className="h-8 text-xs col-span-2"
+            className="h-8 text-xs"
             onClick={(e) => onExportData(game.id, e)}
           >
             <Download size={12} className="mr-1" />

@@ -7,6 +7,7 @@ import GameSharePage from './pages/GameSharePage';
 import GameHistoryPage from './pages/GameHistoryPage';
 import GameController from './components/quiz/custom-games/GameController';
 import TeacherDashboard from './components/quiz/share/TeacherDashboard';
+import GameDashboard from './components/quiz/share/GameDashboard';
 
 function App() {
   return (
@@ -18,8 +19,9 @@ function App() {
       <Route path="/game/:gameType/:slug/:gameId" element={<GameSharePage />} />
       <Route path="/game-history" element={<GameHistoryPage />} />
       <Route path="/custom-game" element={<GameController />} />
-      <Route path="/game/:gameId/dashboard" element={<TeacherDashboard />} />
-      <Route path="/play/:gameType/:slug/:gameId/dashboard" element={<TeacherDashboard />} />
+      <Route path="/game/:gameId/dashboard" element={<GameDashboard />} />
+      <Route path="/game/:gameId/teacher" element={<TeacherDashboard />} />
+      <Route path="/play/:gameType/:slug/:gameId/dashboard" element={<GameDashboard />} />
     </Routes>
   );
 }
