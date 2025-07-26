@@ -179,26 +179,35 @@ export type Database = {
       custom_games: {
         Row: {
           created_at: string
+          description: string | null
           game_data: Json
           game_id: string | null
+          html_content: string | null
           id: string
           settings: Json | null
+          title: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
+          description?: string | null
           game_data?: Json
           game_id?: string | null
+          html_content?: string | null
           id?: string
           settings?: Json | null
+          title?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
+          description?: string | null
           game_data?: Json
           game_id?: string | null
+          html_content?: string | null
           id?: string
           settings?: Json | null
+          title?: string | null
           updated_at?: string
         }
         Relationships: [
