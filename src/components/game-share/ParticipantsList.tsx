@@ -110,7 +110,7 @@ const ParticipantsList: React.FC<ParticipantsListProps> = ({
           <Users className="h-4 w-4 mr-2" />
           {isSubmitting ? "Đang xử lý..." : 
            (maxParticipants && participants.length >= maxParticipants) ? "Đã đạt giới hạn" :
-           (hasRegistered ? "Cập nhật thông tin" : "Tham gia game")}
+           "Tham gia game"}
         </Button>
       </CardFooter>
     </Card>

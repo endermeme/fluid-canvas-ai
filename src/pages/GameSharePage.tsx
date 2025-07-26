@@ -377,7 +377,7 @@ const GameSharePage: React.FC = () => {
       disabled={isSubmitting || isMaxParticipantsReached}
     >
       <Users className="h-3.5 w-3.5 mr-1" />
-      {isMaxParticipantsReached ? "Đã đầy" : (hasRegistered ? "Cập nhật thông tin" : "Tham gia")}
+      {isMaxParticipantsReached ? "Đã đầy" : "Tham gia"}
     </Button>
   );
 
@@ -423,7 +423,7 @@ const GameSharePage: React.FC = () => {
             miniGame={gameForView}
             onBack={handleBack}
             hideHeader={true}
-            extraButton={!hasRegistered ? joinGameButton : undefined}
+            extraButton={joinGameButton}
             gameExpired={gameExpired}
             gameId={gameId}
             playerName={currentPlayerName}

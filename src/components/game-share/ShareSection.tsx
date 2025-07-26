@@ -101,7 +101,7 @@ const ShareSection: React.FC<ShareSectionProps> = ({
             disabled={isSubmitting}
           >
             <Users className="h-4 w-4 mr-2" />
-            {isSubmitting ? "Đang xử lý..." : (hasRegistered ? "Cập nhật thông tin" : "Tham gia game")}
+            {isSubmitting ? "Đang xử lý..." : "Tham gia game"}
           </Button>
         </CardFooter>
       </Card>
