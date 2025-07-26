@@ -11,24 +11,26 @@ export const useRealtimeParticipants = ({ gameId, onParticipantsUpdate }: UseRea
   const [participants, setParticipants] = useState<GameParticipant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchParticipants = async () => {
-    console.log('🔄 [useRealtimeParticipants] Fetching participants for gameId:', gameId);
+  const fetchParticipants = async (sourceTable: 'custom_games' | 'preset_games' = 'custom_games') => {
+    console.log('🔄 [useRealtimeParticipants] Fetching participants for gameId:', gameId, 'sourceTable:', sourceTable);
     try {
-      const { data, error } = await supabase.rpc('get_game_participants_realtime', {
-        target_game_id: gameId
+      const { data, error } = await supabase.rpc('get_unified_leaderboard_with_participants', {
+        target_game_id: gameId,
+        target_source_table: sourceTable,
+        limit_count: 50
       });
 
       console.log('📊 [useRealtimeParticipants] RPC response:', { data, error });
 
       if (!error && data) {
         const mappedParticipants: GameParticipant[] = data.map((p: any) => ({
-          id: p.id,
+          id: p.id || `${p.player_name}-${Date.now()}`,
           name: p.player_name,
-          ipAddress: p.ip_address || 'unknown',
+          ipAddress: 'unknown',
           timestamp: p.joined_at,
           gameId: gameId,
           retryCount: 0,
-          score: 0
+          score: p.score || 0
         }));
         
         console.log('✅ [useRealtimeParticipants] Mapped participants:', mappedParticipants);
@@ -66,7 +68,7 @@ export const useRealtimeParticipants = ({ gameId, onParticipantsUpdate }: UseRea
         {
           event: '*',
           schema: 'public',
-          table: 'game_participants',
+          table: 'custom_leaderboard',
           filter: `game_id=eq.${gameId}`
         },
         (payload) => {

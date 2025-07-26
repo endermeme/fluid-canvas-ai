@@ -413,6 +413,36 @@ export type Database = {
           game_type: string
         }[]
       }
+      get_unified_game_stats: {
+        Args: { target_game_id: string; target_source_table: string }
+        Returns: {
+          total_participants: number
+          total_scores: number
+          average_score: number
+          best_score: number
+          completion_rate: number
+          active_participants: number
+        }[]
+      }
+      get_unified_leaderboard_with_participants: {
+        Args: {
+          target_game_id: string
+          target_source_table: string
+          limit_count?: number
+        }
+        Returns: {
+          player_name: string
+          score: number
+          total_questions: number
+          completion_time: number
+          scoring_data: Json
+          completed_at: string
+          joined_at: string
+          last_active_at: string
+          is_active: boolean
+          status: string
+        }[]
+      }
       get_unified_participants_leaderboard: {
         Args: { target_game_id: string; limit_count?: number }
         Returns: {
@@ -450,6 +480,14 @@ export type Database = {
       }
       update_preset_participant_activity: {
         Args: { target_game_id: string; target_player_name: string }
+        Returns: undefined
+      }
+      update_unified_participant_activity: {
+        Args: {
+          target_game_id: string
+          target_player_name: string
+          target_source_table: string
+        }
         Returns: undefined
       }
       update_user_role: {

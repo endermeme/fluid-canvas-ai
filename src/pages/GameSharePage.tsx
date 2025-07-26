@@ -8,15 +8,15 @@ import QuizContainer from '@/components/quiz/QuizContainer';
 import GameViewSelector from '@/components/quiz/custom-games/ui/GameViewSelector';
 import { GamePasswordForm } from '@/components/game-share/GamePasswordForm';
 import { GameNameForm } from '@/components/game-share/GameNameForm';
-import ParticipantsList from '@/components/game-share/ParticipantsList';
 import ShareSection from '@/components/game-share/ShareSection';
+import { UnifiedParticipantsLeaderboard } from '@/components/quiz/share/UnifiedParticipantsLeaderboard';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAccount } from '@/contexts/AccountContext';
 import { supabase } from '@/integrations/supabase/client';
-import LeaderboardManager from '@/components/quiz/share/LeaderboardManager';
+
 // Removed zod import - no longer needed
 
 // Removed old player form schema - no longer needed
@@ -494,17 +494,14 @@ const GameSharePage: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="participants" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
-          <div className="max-w-md mx-auto space-y-6">
-              <ParticipantsList
-                gameId={gameId || ''}
-                hasRegistered={hasRegistered}
-                isSubmitting={isSubmitting}
-                onRefresh={refreshParticipants}
-                onJoinGame={handleShowJoinForm}
-                maxParticipants={game.maxParticipants}
-                onParticipantsUpdate={(newParticipants) => setParticipants(newParticipants)}
-              />
-          </div>
+          <UnifiedParticipantsLeaderboard
+            gameId={gameId!}
+            sourceTable="custom_games"
+            onParticipantsUpdate={(count) => {
+              console.log(`Participants updated: ${count}`);
+              setParticipants(prev => prev.slice(0, count));
+            }}
+          />
         </TabsContent>
 
         {(game.showLeaderboard || isCreator(game)) && (
@@ -521,7 +518,13 @@ const GameSharePage: React.FC = () => {
                   </p>
                 </div>
               )}
-              <LeaderboardManager gameId={gameId!} />
+              <UnifiedParticipantsLeaderboard
+                gameId={gameId!}
+                sourceTable="custom_games"
+                onParticipantsUpdate={(count) => {
+                  console.log(`Leaderboard updated: ${count}`);
+                }}
+              />
             </div>
           </TabsContent>
         )}

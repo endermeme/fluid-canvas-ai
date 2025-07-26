@@ -12,6 +12,7 @@ interface UnifiedGameScore {
   completionTime?: number;
   scoringData?: Record<string, any>;
   gameType: string;
+  ipAddress?: string;
 }
 
 interface ScoreDetail {
@@ -30,38 +31,44 @@ export const useUnifiedScoreManager = () => {
     setIsSaving(true);
     
     try {
-      let scoreError = null;
+      console.log('💾 [useUnifiedScoreManager] Saving score:', scoreData);
       
-      if (scoreData.sourceTable === 'custom_games') {
-        // Save to custom_leaderboard
-        const { error } = await supabase
-          .from('custom_leaderboard')
+      const tableName = scoreData.sourceTable === 'custom_games' ? 'custom_leaderboard' : 'preset_leaderboard';
+      
+      // First try to update existing record, then insert if not found
+      const { error: updateError } = await supabase
+        .from(tableName)
+        .update({
+          score: scoreData.score,
+          total_questions: scoreData.totalQuestions,
+          completion_time: scoreData.completionTime,
+          scoring_data: details ? { details } : scoreData.scoringData || {},
+          completed_at: new Date().toISOString(),
+          last_active_at: new Date().toISOString()
+        })
+        .eq('game_id', scoreData.gameId)
+        .eq('player_name', scoreData.playerName);
+
+      let scoreError = updateError;
+
+      if (updateError) {
+        console.log('🔄 [useUnifiedScoreManager] Update failed, trying insert:', updateError);
+        
+        // If update failed, try insert
+        const { error: insertError } = await supabase
+          .from(tableName)
           .insert({
             game_id: scoreData.gameId,
             player_name: scoreData.playerName,
             score: scoreData.score,
             total_questions: scoreData.totalQuestions,
             completion_time: scoreData.completionTime,
-            scoring_data: scoreData.scoringData || {},
+            scoring_data: details ? { details } : scoreData.scoringData || {},
             completed_at: new Date().toISOString(),
-            ip_address: 'shared-game'
+            ip_address: scoreData.ipAddress || 'unknown'
           });
-        scoreError = error;
-      } else if (scoreData.sourceTable === 'preset_games') {
-        // Save to preset_leaderboard
-        const { error } = await supabase
-          .from('preset_leaderboard')
-          .insert({
-            game_id: scoreData.gameId,
-            player_name: scoreData.playerName,
-            score: scoreData.score,
-            total_questions: scoreData.totalQuestions,
-            completion_time: scoreData.completionTime,
-            scoring_data: scoreData.scoringData || {},
-            completed_at: new Date().toISOString(),
-            ip_address: 'shared-game'
-          });
-        scoreError = error;
+        
+        scoreError = insertError;
       }
 
       if (scoreError) {

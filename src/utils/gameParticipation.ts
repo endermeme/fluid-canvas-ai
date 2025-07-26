@@ -30,10 +30,11 @@ const mapUnifiedScoreToParticipant = (score: any): GameParticipant => {
 
 // Add participant - now saves to database for real-time sync
 export const addParticipant = async (
-  gameId: string,
-  name: string,
-  ipAddress: string,
-  accountId?: string
+  gameId: string, 
+  name: string, 
+  ipAddress: string, 
+  accountId?: string,
+  sourceTable: 'custom_games' | 'preset_games' = 'custom_games'
 ): Promise<{ success: boolean; message?: string; participant?: GameParticipant }> => {
   console.log('🎯 [addParticipant] Starting participant addition:', { gameId, name, ipAddress, accountId });
   try {
