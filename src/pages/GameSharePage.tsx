@@ -40,18 +40,26 @@ const GameSharePage: React.FC = () => {
   const refreshParticipants = async () => {
     if (!gameId) return;
     
+    console.log('🔄 [GameSharePage] refreshParticipants called for gameId:', gameId);
     try {
       const updatedParticipants = await getGameParticipants(gameId);
+      console.log('📊 [GameSharePage] refreshParticipants result:', updatedParticipants.length, 'participants');
       setParticipants(updatedParticipants);
     } catch (error) {
-      console.error("Error refreshing participants:", error);
+      console.error('❌ [GameSharePage] Error refreshing participants:', error);
+      console.log('🔄 [GameSharePage] Falling back to localStorage for participants');
       const sessionsJson = localStorage.getItem('game_sessions');
       if (sessionsJson) {
         const sessions = JSON.parse(sessionsJson);
         const session = sessions.find((s: any) => s.id === gameId);
         if (session && session.participants) {
+          console.log('📦 [GameSharePage] Found participants in localStorage:', session.participants.length);
           setParticipants(session.participants);
+        } else {
+          console.log('📭 [GameSharePage] No participants found in localStorage');
         }
+      } else {
+        console.log('📭 [GameSharePage] No game_sessions in localStorage');
       }
     }
   };
@@ -206,6 +214,7 @@ const GameSharePage: React.FC = () => {
     
     // Check max participants limit
     if (game.maxParticipants && participants.length >= game.maxParticipants) {
+      console.log('❌ [GameSharePage] Max participants limit reached:', participants.length, '>=', game.maxParticipants);
       toast({
         title: "Giới hạn tham gia",
         description: `Game này chỉ cho phép tối đa ${game.maxParticipants} người chơi.`,
@@ -214,11 +223,15 @@ const GameSharePage: React.FC = () => {
       return;
     }
     
+    console.log('⏳ [GameSharePage] Starting participant addition process');
     setIsSubmitting(true);
     
     try {
       const fakeIp = getFakeIpAddress();
+      console.log('📡 [GameSharePage] Calling addParticipant with:', { gameId, finalPlayerName, fakeIp, accountId });
       const result = await addParticipant(gameId, finalPlayerName, fakeIp, accountId);
+      
+      console.log('📋 [GameSharePage] addParticipant result:', result);
       
       if (result.success) {
         if (result.participant) {

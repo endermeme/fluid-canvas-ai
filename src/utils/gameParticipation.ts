@@ -35,8 +35,10 @@ export const addParticipant = async (
   ipAddress: string,
   accountId?: string
 ): Promise<{ success: boolean; message?: string; participant?: GameParticipant }> => {
+  console.log('🎯 [addParticipant] Starting participant addition:', { gameId, name, ipAddress, accountId });
   try {
     // Check if game exists and is valid
+    console.log('🔍 [addParticipant] Validating game:', gameId);
     const { data: game, error: gameError } = await supabase
       .from('games')
       .select('*')
@@ -45,19 +47,25 @@ export const addParticipant = async (
       .gt('expires_at', new Date().toISOString())
       .single();
 
+    console.log('📋 [addParticipant] Game validation result:', { game: game?.title, error: gameError });
+
     if (gameError || !game) {
+      console.log('❌ [addParticipant] Game validation failed');
       return { success: false, message: 'Game không tồn tại hoặc đã hết hạn' };
     }
 
     // Save participant to database using the RPC function
+    console.log('💾 [addParticipant] Saving participant to database via RPC:', { gameId, name });
     const { error: rpcError } = await supabase.rpc('update_game_participant_activity', {
       target_game_id: gameId,
       target_player_name: name
     });
 
     if (rpcError) {
-      console.error('Error saving participant to database:', rpcError);
+      console.error('💥 [addParticipant] RPC Error saving participant to database:', rpcError);
       // Still continue with localStorage fallback
+    } else {
+      console.log('✅ [addParticipant] Successfully saved participant to database');
     }
 
     const participant: GameParticipant = {
@@ -70,7 +78,10 @@ export const addParticipant = async (
       score: 0
     };
 
+    console.log('📦 [addParticipant] Created participant object:', participant);
+
     // Store in localStorage for backward compatibility
+    console.log('💽 [addParticipant] Storing in localStorage for backward compatibility');
     const storageKey = `game-session-${gameId}`;
     const existingSession = localStorage.getItem(storageKey);
     
@@ -84,12 +95,16 @@ export const addParticipant = async (
       if (!existingParticipant) {
         session.participants.push(participant);
         localStorage.setItem(storageKey, JSON.stringify(session));
+        console.log('✅ [addParticipant] Updated localStorage session with new participant');
+      } else {
+        console.log('ℹ️ [addParticipant] Participant already exists in localStorage');
       }
     }
 
+    console.log('🎉 [addParticipant] Successfully completed participant addition');
     return { success: true, participant };
   } catch (error) {
-    console.error('Error adding participant:', error);
+    console.error('💥 [addParticipant] Exception in addParticipant:', error);
     return { success: false, message: 'Có lỗi xảy ra khi tham gia game' };
   }
 };
@@ -113,21 +128,25 @@ export const createGameSession = async (title: string, content: string): Promise
 
 // Get game participants from real participants table
 export const getGameParticipants = async (gameId: string, accountId?: string): Promise<GameParticipant[]> => {
+  console.log('📋 [getGameParticipants] Fetching participants for gameId:', gameId);
   try {
     // Get from game_participants table using RPC function
     const { data: participants, error } = await supabase.rpc('get_game_participants_realtime', {
       target_game_id: gameId
     });
 
+    console.log('📊 [getGameParticipants] RPC response:', { participantsCount: participants?.length, error });
+
     if (error) {
-      console.error('Error fetching participants:', error);
+      console.error('❌ [getGameParticipants] Error fetching participants:', error);
       // Fallback to localStorage
+      console.log('🔄 [getGameParticipants] Falling back to localStorage');
       const localGame = getLocalGame(gameId);
       return localGame?.participants || [];
     }
 
     // Convert to GameParticipant format
-    return participants?.map((p: any) => ({
+    const mappedParticipants = participants?.map((p: any) => ({
       id: p.id,
       name: p.player_name,
       ipAddress: p.ip_address || 'unknown',
@@ -136,9 +155,13 @@ export const getGameParticipants = async (gameId: string, accountId?: string): P
       retryCount: 0,
       score: 0
     })) || [];
+
+    console.log('✅ [getGameParticipants] Successfully mapped participants:', mappedParticipants.length, 'participants');
+    return mappedParticipants;
   } catch (error) {
-    console.error('Error in getGameParticipants:', error);
+    console.error('💥 [getGameParticipants] Exception in getGameParticipants:', error);
     // Fallback to localStorage
+    console.log('🔄 [getGameParticipants] Exception fallback to localStorage');
     const localGame = getLocalGame(gameId);
     return localGame?.participants || [];
   }

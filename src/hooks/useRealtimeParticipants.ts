@@ -12,10 +12,13 @@ export const useRealtimeParticipants = ({ gameId, onParticipantsUpdate }: UseRea
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchParticipants = async () => {
+    console.log('🔄 [useRealtimeParticipants] Fetching participants for gameId:', gameId);
     try {
       const { data, error } = await supabase.rpc('get_game_participants_realtime', {
         target_game_id: gameId
       });
+
+      console.log('📊 [useRealtimeParticipants] RPC response:', { data, error });
 
       if (!error && data) {
         const mappedParticipants: GameParticipant[] = data.map((p: any) => ({
@@ -28,25 +31,36 @@ export const useRealtimeParticipants = ({ gameId, onParticipantsUpdate }: UseRea
           score: 0
         }));
         
+        console.log('✅ [useRealtimeParticipants] Mapped participants:', mappedParticipants);
         setParticipants(mappedParticipants);
         onParticipantsUpdate?.(mappedParticipants);
+      } else {
+        console.error('❌ [useRealtimeParticipants] Error fetching participants:', error);
       }
     } catch (error) {
-      console.error('Error fetching participants:', error);
+      console.error('💥 [useRealtimeParticipants] Exception in fetchParticipants:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!gameId) return;
+    if (!gameId) {
+      console.log('⚠️ [useRealtimeParticipants] No gameId provided, skipping setup');
+      return;
+    }
+
+    console.log('🚀 [useRealtimeParticipants] Setting up real-time subscription for gameId:', gameId);
 
     // Initial fetch
     fetchParticipants();
 
     // Set up real-time subscription
+    const channelName = `game_participants_${gameId}`;
+    console.log('📡 [useRealtimeParticipants] Creating channel:', channelName);
+    
     const channel = supabase
-      .channel(`game_participants_${gameId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -56,14 +70,22 @@ export const useRealtimeParticipants = ({ gameId, onParticipantsUpdate }: UseRea
           filter: `game_id=eq.${gameId}`
         },
         (payload) => {
-          console.log('Real-time participant update:', payload);
+          console.log('🔥 [useRealtimeParticipants] Real-time participant update received:', {
+            event: payload.eventType,
+            table: payload.table,
+            new: payload.new,
+            old: payload.old
+          });
           // Refetch participants when there's a change
           fetchParticipants();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📶 [useRealtimeParticipants] Subscription status:', status);
+      });
 
     return () => {
+      console.log('🔌 [useRealtimeParticipants] Cleaning up subscription for gameId:', gameId);
       supabase.removeChannel(channel);
     };
   }, [gameId]);

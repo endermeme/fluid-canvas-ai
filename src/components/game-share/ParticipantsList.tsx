@@ -26,14 +26,31 @@ const ParticipantsList: React.FC<ParticipantsListProps> = ({
   maxParticipants,
   onParticipantsUpdate
 }) => {
+  console.log('🎮 [ParticipantsList] Component render with props:', { 
+    gameId, 
+    hasRegistered, 
+    isSubmitting, 
+    maxParticipants 
+  });
+
   // Use real-time participants hook
   const { participants, isLoading, refreshParticipants } = useRealtimeParticipants({
     gameId,
-    onParticipantsUpdate
+    onParticipantsUpdate: (newParticipants) => {
+      console.log('🔄 [ParticipantsList] Participants updated via real-time:', newParticipants.length, 'participants');
+      onParticipantsUpdate?.(newParticipants);
+    }
+  });
+
+  console.log('📊 [ParticipantsList] Current state:', { 
+    participantsCount: participants.length, 
+    isLoading, 
+    participants: participants.map(p => ({ id: p.id, name: p.name }))
   });
 
   // Handle manual refresh
   const handleRefresh = () => {
+    console.log('🔄 [ParticipantsList] Manual refresh triggered');
     refreshParticipants();
     onRefresh();
   };
