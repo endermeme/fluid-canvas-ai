@@ -7,7 +7,10 @@ import QuizContainer from '@/components/quiz/QuizContainer';
 import { useAccount } from '@/contexts/AccountContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Plus, Clock, ExternalLink, Search, Trash2, Share2, Filter } from 'lucide-react';
+import { Plus, Search, Filter, BarChart3, Download, Users } from 'lucide-react';
+import AdminGameCard from '@/components/admin/AdminGameCard';
+import { exportParticipantsToCSV } from '@/utils/gameParticipation';
+import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { 
   Select, 
@@ -41,10 +44,11 @@ const GameHistoryPage: React.FC = () => {
   const [games, setGames] = useState<StoredGame[]>([]);
   const [filteredGames, setFilteredGames] = useState<StoredGame[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'expiring'>('newest');
-  const [deleteGameId, setDeleteGameId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'expiring' | 'popular'>('newest');
+  const [filterBy, setFilterBy] = useState<'all' | 'password' | 'public' | 'active'>('all');
   const navigate = useNavigate();
   const { accountId } = useAccount();
+  const { toast } = useToast();
   
   useEffect(() => {
     loadGames();
@@ -52,16 +56,27 @@ const GameHistoryPage: React.FC = () => {
   
   useEffect(() => {
     filterAndSortGames();
-  }, [games, searchTerm, sortBy]);
+  }, [games, searchTerm, sortBy, filterBy]);
   
   const loadGames = async () => {
     if (!accountId) return;
 
     try {
-      // Load from Supabase first - get games by account_id
+      // Load from Supabase first - get ALL game fields for admin view
       const { data: dbGames, error } = await supabase
         .from('games')
-        .select('*')
+        .select(`
+          *,
+          share_count,
+          last_accessed_at,
+          max_participants,
+          show_leaderboard,
+          require_registration,
+          custom_duration,
+          password,
+          creator_ip,
+          account_id
+        `)
         .eq('account_id', accountId)
         .eq('is_published', true)
         .order('created_at', { ascending: false });
@@ -70,7 +85,7 @@ const GameHistoryPage: React.FC = () => {
         console.error("Error fetching account games:", error);
       }
 
-      // Map Supabase games to StoredGame format
+      // Map Supabase games to enhanced StoredGame format
       const supabaseGames: StoredGame[] = dbGames?.map(game => ({
         id: game.id,
         title: game.title,
@@ -79,7 +94,17 @@ const GameHistoryPage: React.FC = () => {
         htmlContent: game.html_content,
         createdAt: new Date(game.created_at).getTime(),
         expiresAt: new Date(game.expires_at).getTime(),
-        shareUrl: `/game/${game.id}?acc=${accountId}`
+        shareUrl: `/game/${game.id}?acc=${accountId}`,
+        // Admin-specific fields
+        password: game.password,
+        maxParticipants: game.max_participants,
+        showLeaderboard: game.show_leaderboard,
+        requireRegistration: game.require_registration,
+        customDuration: game.custom_duration,
+        creator_ip: game.creator_ip,
+        account_id: game.account_id,
+        shareCount: game.share_count || 0,
+        lastAccessedAt: game.last_accessed_at
       })) || [];
 
       // Load from localStorage and filter by account
@@ -121,8 +146,27 @@ const GameHistoryPage: React.FC = () => {
       const term = searchTerm.toLowerCase();
       result = result.filter(game => 
         game.title.toLowerCase().includes(term) || 
-        game.description.toLowerCase().includes(term)
+        (game.description && game.description.toLowerCase().includes(term))
       );
+    }
+
+    // Filter by category
+    switch (filterBy) {
+      case 'password':
+        result = result.filter(game => game.password);
+        break;
+      case 'public':
+        result = result.filter(game => !game.password);
+        break;
+      case 'active':
+        const now = Date.now();
+        result = result.filter(game => {
+          const expiryTime = typeof game.expiresAt === 'number' 
+            ? game.expiresAt 
+            : new Date(game.expiresAt).getTime();
+          return expiryTime > now;
+        });
+        break;
     }
     
     // Sort games
@@ -148,6 +192,13 @@ const GameHistoryPage: React.FC = () => {
           return timeA - timeB;
         });
         break;
+      case 'popular':
+        result.sort((a, b) => {
+          const shareCountA = (a as any).shareCount || 0;
+          const shareCountB = (b as any).shareCount || 0;
+          return shareCountB - shareCountA;
+        });
+        break;
     }
     
     setFilteredGames(result);
@@ -166,11 +217,54 @@ const GameHistoryPage: React.FC = () => {
     const shareUrl = `${window.location.origin}/game/${gameId}?acc=${accountId}`;
     navigator.clipboard.writeText(shareUrl)
       .then(() => {
-        alert('Đã sao chép liên kết vào clipboard!');
+        toast({
+          title: "Đã sao chép!",
+          description: "Liên kết game đã được sao chép vào clipboard",
+        });
       })
       .catch(err => {
         console.error('Không thể sao chép liên kết:', err);
+        toast({
+          title: "Lỗi",
+          description: "Không thể sao chép liên kết",
+          variant: "destructive"
+        });
       });
+  };
+
+  const handleViewLeaderboard = (gameId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/game/${gameId}/dashboard?acc=${accountId}`);
+  };
+
+  const handleExportData = async (gameId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const csvData = await exportParticipantsToCSV(gameId);
+      
+      // Create and download CSV file
+      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `game_${gameId}_participants.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Xuất dữ liệu thành công!",
+        description: "File CSV đã được tải xuống",
+      });
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      toast({
+        title: "Lỗi xuất dữ liệu",
+        description: "Không thể xuất dữ liệu game",
+        variant: "destructive"
+      });
+    }
   };
   
   const handleDeleteGame = (gameId: string) => {
@@ -212,14 +306,26 @@ const GameHistoryPage: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Select value={sortBy} onValueChange={(value: 'newest' | 'oldest' | 'expiring') => setSortBy(value)}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+            <Select value={filterBy} onValueChange={(value: 'all' | 'password' | 'public' | 'active') => setFilterBy(value)}>
+              <SelectTrigger className="w-full sm:w-[140px]">
+                <SelectValue placeholder="Lọc theo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả</SelectItem>
+                <SelectItem value="password">Có mật khẩu</SelectItem>
+                <SelectItem value="public">Công khai</SelectItem>
+                <SelectItem value="active">Đang hoạt động</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={(value: 'newest' | 'oldest' | 'expiring' | 'popular') => setSortBy(value)}>
+              <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue placeholder="Sắp xếp theo" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="newest">Mới nhất</SelectItem>
                 <SelectItem value="oldest">Cũ nhất</SelectItem>
                 <SelectItem value="expiring">Sắp hết hạn</SelectItem>
+                <SelectItem value="popular">Phổ biến</SelectItem>
               </SelectContent>
             </Select>
             <Button onClick={handleCreateNew} className="flex items-center gap-2">
@@ -248,90 +354,16 @@ const GameHistoryPage: React.FC = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredGames.map(game => (
-              <Card 
+              <AdminGameCard
                 key={game.id}
-                className="group hover:shadow-md transition-all cursor-pointer"
-                onClick={() => handleGameClick(game.id)}
-              >
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg line-clamp-1">{game.title}</CardTitle>
-                  <CardDescription className="line-clamp-2">{game.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <div className="flex items-center text-xs text-muted-foreground mb-2">
-                    <Clock size={14} className="mr-1" />
-                    <span>Còn lại: {getRemainingTime(game.expiresAt)}</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Tạo ngày: {formatDate(game.createdAt)}
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between pt-2 border-t">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-8 text-xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleGameClick(game.id);
-                    }}
-                  >
-                    <ExternalLink size={12} className="mr-1" />
-                    Mở
-                  </Button>
-                  <div className="flex gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-8 text-xs"
-                      onClick={(e) => handleShareGame(game.id, e)}
-                    >
-                      <Share2 size={12} className="mr-1" />
-                      Chia sẻ
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-8 text-xs text-destructive hover:text-destructive"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteGameId(game.id);
-                          }}
-                        >
-                          <Trash2 size={12} className="mr-1" />
-                          Xóa
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Xác nhận xóa game</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Bạn có chắc chắn muốn xóa game "{game.title}"? Hành động này không thể hoàn tác.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Hủy</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (deleteGameId) {
-                                handleDeleteGame(deleteGameId);
-                                setDeleteGameId(null);
-                              }
-                            }}
-                          >
-                            Xóa
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </CardFooter>
-              </Card>
+                game={game}
+                onGameClick={handleGameClick}
+                onShareGame={handleShareGame}
+                onViewLeaderboard={handleViewLeaderboard}
+                onExportData={handleExportData}
+              />
             ))}
           </div>
         )}
