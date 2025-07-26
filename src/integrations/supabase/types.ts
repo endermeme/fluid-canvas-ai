@@ -603,6 +603,39 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_custom_game_leaderboard: {
+        Args: { target_game_instance_id: string; limit_count?: number }
+        Returns: {
+          player_name: string
+          score: number
+          total_questions: number
+          completion_time: number
+          scoring_data: Json
+          completed_at: string
+        }[]
+      }
+      get_custom_game_participants_realtime: {
+        Args: { target_game_instance_id: string }
+        Returns: {
+          id: string
+          player_name: string
+          joined_at: string
+          last_active_at: string
+          is_active: boolean
+          session_data: Json
+        }[]
+      }
+      get_custom_game_stats_admin: {
+        Args: { target_game_instance_id: string }
+        Returns: {
+          total_participants: number
+          total_scores: number
+          average_score: number
+          best_score: number
+          completion_rate: number
+          active_participants: number
+        }[]
+      }
       get_game_leaderboard: {
         Args: { target_game_id: string; limit_count?: number }
         Returns: {
@@ -611,6 +644,39 @@ export type Database = {
           total_questions: number
           completion_time: number
           completed_at: string
+        }[]
+      }
+      get_preset_game_leaderboard: {
+        Args: { target_game_instance_id: string; limit_count?: number }
+        Returns: {
+          player_name: string
+          score: number
+          total_questions: number
+          completion_time: number
+          scoring_data: Json
+          completed_at: string
+        }[]
+      }
+      get_preset_game_participants_realtime: {
+        Args: { target_game_instance_id: string }
+        Returns: {
+          id: string
+          player_name: string
+          joined_at: string
+          last_active_at: string
+          is_active: boolean
+          session_data: Json
+        }[]
+      }
+      get_preset_game_stats_admin: {
+        Args: { target_game_instance_id: string }
+        Returns: {
+          total_participants: number
+          total_scores: number
+          average_score: number
+          best_score: number
+          completion_rate: number
+          active_participants: number
         }[]
       }
       get_unified_game_leaderboard: {
@@ -629,8 +695,24 @@ export type Database = {
           game_type: string
         }[]
       }
+      increment_custom_game_share_count: {
+        Args: { game_instance_id: string }
+        Returns: undefined
+      }
+      increment_preset_game_share_count: {
+        Args: { game_instance_id: string }
+        Returns: undefined
+      }
       increment_share_count: {
         Args: { game_id: string }
+        Returns: undefined
+      }
+      update_custom_participant_activity: {
+        Args: { target_game_instance_id: string; target_player_name: string }
+        Returns: undefined
+      }
+      update_preset_participant_activity: {
+        Args: { target_game_instance_id: string; target_player_name: string }
         Returns: undefined
       }
       update_user_role: {

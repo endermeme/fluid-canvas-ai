@@ -1,145 +1,125 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getRemainingTime } from '@/utils/gameExport';
-import { StoredGame } from '@/utils/types';
-import QuizContainer from '@/components/quiz/QuizContainer';
-import { useAccount } from '@/contexts/AccountContext';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Filter, BarChart3, Download, Users } from 'lucide-react';
-import AdminGameCard from '@/components/admin/AdminGameCard';
-import { exportParticipantsToCSV } from '@/utils/gameParticipation';
-import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Search, Filter, Calendar } from 'lucide-react';
+import QuizContainer from '@/components/quiz/QuizContainer';
+import AdminGameCard from '@/components/admin/AdminGameCard';
+import { useAccount } from '@/contexts/AccountContext';
+import { useToast } from '@/hooks/use-toast';
+import { usePresetGameManager } from '@/hooks/usePresetGameManager';
+import { useCustomGameManager } from '@/hooks/useCustomGameManager';
+
+// Types để hiển thị unified
+interface UnifiedGame {
+  id: string;
+  title: string;
+  gameType: string;
+  description?: string;
+  createdAt: number;
+  expiresAt: number;
+  shareCount?: number;
+  lastAccessedAt?: string;
+  password?: string;
+  maxParticipants?: number;
+  showLeaderboard?: boolean;
+  type: 'preset' | 'custom'; // To distinguish between game types
+}
 
 const GameHistoryPage: React.FC = () => {
-  const [games, setGames] = useState<StoredGame[]>([]);
-  const [filteredGames, setFilteredGames] = useState<StoredGame[]>([]);
+  const [presetGames, setPresetGames] = useState<any[]>([]);
+  const [customGames, setCustomGames] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'expiring' | 'popular'>('newest');
   const [filterBy, setFilterBy] = useState<'all' | 'password' | 'public' | 'active'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'preset' | 'custom'>('all');
+  
   const navigate = useNavigate();
   const { accountId } = useAccount();
   const { toast } = useToast();
   
+  const presetGameManager = usePresetGameManager();
+  const customGameManager = useCustomGameManager();
+  
   useEffect(() => {
-    loadGames();
+    loadAllGames();
   }, [accountId]);
   
-  useEffect(() => {
-    filterAndSortGames();
-  }, [games, searchTerm, sortBy, filterBy]);
-  
-  const loadGames = async () => {
+  const loadAllGames = async () => {
     if (!accountId) return;
 
     try {
-      // Load from Supabase first - get ALL game fields for admin view
-      const { data: dbGames, error } = await supabase
-        .from('games')
-        .select(`
-          *,
-          share_count,
-          last_accessed_at,
-          max_participants,
-          show_leaderboard,
-          require_registration,
-          custom_duration,
-          password,
-          creator_ip,
-          account_id
-        `)
-        .eq('account_id', accountId)
-        .eq('is_published', true)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error("Error fetching account games:", error);
-      }
-
-      // Map Supabase games to enhanced StoredGame format
-      const supabaseGames: StoredGame[] = dbGames?.map(game => ({
-        id: game.id,
-        title: game.title,
-        gameType: game.game_type,
-        description: game.description || '',
-        htmlContent: game.html_content,
-        createdAt: new Date(game.created_at).getTime(),
-        expiresAt: new Date(game.expires_at).getTime(),
-        shareUrl: `/game/${game.id}?acc=${accountId}`,
-        // Admin-specific fields
-        password: game.password,
-        maxParticipants: game.max_participants,
-        showLeaderboard: game.show_leaderboard,
-        requireRegistration: game.require_registration,
-        customDuration: game.custom_duration,
-        creator_ip: game.creator_ip,
-        account_id: game.account_id,
-        shareCount: game.share_count || 0,
-        lastAccessedAt: game.last_accessed_at
-      })) || [];
-
-      // Load from localStorage and filter by account
-      const gamesJson = localStorage.getItem('shared_games');
-      let localGames: StoredGame[] = [];
+      // Load preset games
+      const presetGamesList = await presetGameManager.getPresetGamesList(accountId);
+      setPresetGames(presetGamesList);
       
-      if (gamesJson) {
-        const parsedGames: StoredGame[] = JSON.parse(gamesJson);
-        const now = Date.now();
-        localGames = parsedGames.filter(game => {
-          const expiryTime = typeof game.expiresAt === 'number' 
-            ? game.expiresAt 
-            : game.expiresAt.getTime();
-          return expiryTime > now && 
-                 (game as any).accountId === accountId; // Filter by account
-        });
-      }
-
-      // Combine and deduplicate
-      const allGames = [...supabaseGames];
-      localGames.forEach(localGame => {
-        if (!allGames.some(g => g.id === localGame.id)) {
-          allGames.push(localGame);
-        }
-      });
-
-      setGames(allGames);
+      // Load custom games  
+      const customGamesList = await customGameManager.getCustomGamesList(accountId);
+      setCustomGames(customGamesList);
     } catch (error) {
       console.error("Error loading games:", error);
-      setGames([]);
+      toast({
+        title: "Lỗi tải dữ liệu",
+        description: "Không thể tải danh sách game.",
+        variant: "destructive"
+      });
     }
   };
   
-  const filterAndSortGames = () => {
-    let result = [...games];
+  // Convert to unified format for display
+  const getUnifiedGames = (): UnifiedGame[] => {
+    const allGames: UnifiedGame[] = [];
+    
+    // Add preset games
+    presetGames.forEach(game => {
+      allGames.push({
+        id: game.id,
+        title: game.title,
+        gameType: game.preset_games?.game_type || 'preset',
+        description: game.description,
+        createdAt: new Date(game.created_at).getTime(),
+        expiresAt: new Date(game.expires_at).getTime(),
+        shareCount: game.share_count || 0,
+        lastAccessedAt: game.last_accessed_at,
+        password: game.password,
+        maxParticipants: game.max_participants,
+        showLeaderboard: game.show_leaderboard,
+        type: 'preset'
+      });
+    });
+    
+    // Add custom games
+    customGames.forEach(game => {
+      allGames.push({
+        id: game.id,
+        title: game.title,
+        gameType: 'custom',
+        description: game.description,
+        createdAt: new Date(game.created_at).getTime(),
+        expiresAt: new Date(game.expires_at).getTime(),
+        shareCount: game.share_count || 0,
+        lastAccessedAt: game.last_accessed_at,
+        password: game.password,
+        maxParticipants: game.max_participants,
+        showLeaderboard: game.show_leaderboard,
+        type: 'custom'
+      });
+    });
+    
+    return allGames;
+  };
+  
+  const filterAndSortGames = (): UnifiedGame[] => {
+    let result = getUnifiedGames();
+    
+    // Filter by tab
+    if (activeTab === 'preset') {
+      result = result.filter(game => game.type === 'preset');
+    } else if (activeTab === 'custom') {
+      result = result.filter(game => game.type === 'custom');
+    }
     
     // Filter by search term
     if (searchTerm) {
@@ -160,62 +140,52 @@ const GameHistoryPage: React.FC = () => {
         break;
       case 'active':
         const now = Date.now();
-        result = result.filter(game => {
-          const expiryTime = typeof game.expiresAt === 'number' 
-            ? game.expiresAt 
-            : new Date(game.expiresAt).getTime();
-          return expiryTime > now;
-        });
+        result = result.filter(game => game.expiresAt > now);
         break;
     }
     
     // Sort games
     switch (sortBy) {
       case 'newest':
-        result.sort((a, b) => {
-          const timeA = typeof a.createdAt === 'number' ? a.createdAt : a.createdAt.getTime();
-          const timeB = typeof b.createdAt === 'number' ? b.createdAt : b.createdAt.getTime();
-          return timeB - timeA;
-        });
+        result.sort((a, b) => b.createdAt - a.createdAt);
         break;
       case 'oldest':
-        result.sort((a, b) => {
-          const timeA = typeof a.createdAt === 'number' ? a.createdAt : a.createdAt.getTime();
-          const timeB = typeof b.createdAt === 'number' ? b.createdAt : b.createdAt.getTime();
-          return timeA - timeB;
-        });
+        result.sort((a, b) => a.createdAt - b.createdAt);
         break;
       case 'expiring':
-        result.sort((a, b) => {
-          const timeA = typeof a.expiresAt === 'number' ? a.expiresAt : a.expiresAt.getTime();
-          const timeB = typeof b.expiresAt === 'number' ? b.expiresAt : b.expiresAt.getTime();
-          return timeA - timeB;
-        });
+        result.sort((a, b) => a.expiresAt - b.expiresAt);
         break;
       case 'popular':
-        result.sort((a, b) => {
-          const shareCountA = (a as any).shareCount || 0;
-          const shareCountB = (b as any).shareCount || 0;
-          return shareCountB - shareCountA;
-        });
+        result.sort((a, b) => (b.shareCount || 0) - (a.shareCount || 0));
         break;
     }
     
-    setFilteredGames(result);
+    return result;
   };
   
-  const handleGameClick = (gameId: string) => {
-    // Navigate to game with admin privileges - bypass all restrictions
-    navigate(`/game/${gameId}?acc=${accountId}&admin=true&bypass=true`);
+  const handleGameClick = (game: UnifiedGame) => {
+    // Navigate based on game type with admin privileges
+    if (game.type === 'preset') {
+      navigate(`/preset-game/${game.id}?acc=${accountId}&admin=true&bypass=true`);
+    } else {
+      navigate(`/custom-game/${game.id}?acc=${accountId}&admin=true&bypass=true`);
+    }
   };
   
   const handleCreateNew = () => {
-    navigate('/custom-game');
+    if (activeTab === 'preset') {
+      navigate('/preset-games');
+    } else {
+      navigate('/custom-game');
+    }
   };
   
-  const handleShareGame = (gameId: string, e: React.MouseEvent) => {
+  const handleShareGame = (game: UnifiedGame, e: React.MouseEvent) => {
     e.stopPropagation();
-    const shareUrl = `${window.location.origin}/game/${gameId}?acc=${accountId}`;
+    const shareUrl = game.type === 'preset' 
+      ? `${window.location.origin}/preset-game/${game.id}?acc=${accountId}`
+      : `${window.location.origin}/custom-game/${game.id}?acc=${accountId}`;
+      
     navigator.clipboard.writeText(shareUrl)
       .then(() => {
         toast({
@@ -233,35 +203,31 @@ const GameHistoryPage: React.FC = () => {
       });
   };
 
-  const handleViewLeaderboard = (gameId: string, e: React.MouseEvent) => {
+  const handleViewLeaderboard = (game: UnifiedGame, e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/game/${gameId}/dashboard?acc=${accountId}`);
+    if (game.type === 'preset') {
+      navigate(`/preset-game/${game.id}/dashboard?acc=${accountId}`);
+    } else {
+      navigate(`/custom-game/${game.id}/dashboard?acc=${accountId}`);
+    }
   };
 
-  const handleViewParticipants = (gameId: string, e: React.MouseEvent) => {
+  const handleViewParticipants = (game: UnifiedGame, e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/game/${gameId}/teacher?acc=${accountId}`);
+    if (game.type === 'preset') {
+      navigate(`/preset-game/${game.id}/teacher?acc=${accountId}`);
+    } else {
+      navigate(`/custom-game/${game.id}/teacher?acc=${accountId}`);
+    }
   };
 
-  const handleExportData = async (gameId: string, e: React.MouseEvent) => {
+  const handleExportData = async (game: UnifiedGame, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      const csvData = await exportParticipantsToCSV(gameId);
-      
-      // Create and download CSV file
-      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `game_${gameId}_participants.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
+      // This would need to be implemented based on the new API structure
       toast({
-        title: "Xuất dữ liệu thành công!",
-        description: "File CSV đã được tải xuống",
+        title: "Tính năng đang phát triển",
+        description: "Tính năng xuất dữ liệu sẽ sớm được cập nhật",
       });
     } catch (error) {
       console.error('Error exporting data:', error);
@@ -273,26 +239,31 @@ const GameHistoryPage: React.FC = () => {
     }
   };
   
-  const handleDeleteGame = (gameId: string) => {
-    const gamesJson = localStorage.getItem('shared_games');
-    if (gamesJson) {
-      const parsedGames: StoredGame[] = JSON.parse(gamesJson);
-      const updatedGames = parsedGames.filter(game => game.id !== gameId);
-      localStorage.setItem('shared_games', JSON.stringify(updatedGames));
-      setGames(updatedGames);
+  const handleDeleteGame = async (game: UnifiedGame) => {
+    try {
+      let success = false;
+      
+      if (game.type === 'preset') {
+        success = await presetGameManager.deletePresetGame(game.id);
+      } else {
+        success = await customGameManager.deleteCustomGame(game.id);
+      }
+      
+      if (success) {
+        // Reload games after deletion
+        loadAllGames();
+      }
+    } catch (error) {
+      console.error('Error deleting game:', error);
+      toast({
+        title: "Lỗi xóa game",
+        description: "Không thể xóa game. Vui lòng thử lại.",
+        variant: "destructive"
+      });
     }
   };
   
-  const formatDate = (timestamp: number | Date) => {
-    const date = typeof timestamp === 'number' ? new Date(timestamp) : timestamp;
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const filteredGames = filterAndSortGames();
   
   return (
     <QuizContainer
@@ -301,6 +272,14 @@ const GameHistoryPage: React.FC = () => {
       onBack={() => navigate('/')}
     >
       <div className="p-4 h-full overflow-auto">
+        <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)} className="mb-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="all">Tất cả ({getUnifiedGames().length})</TabsTrigger>
+            <TabsTrigger value="preset">Preset Games ({presetGames.length})</TabsTrigger>
+            <TabsTrigger value="custom">Custom Games ({customGames.length})</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        
         <div className="mb-6 space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -312,7 +291,7 @@ const GameHistoryPage: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Select value={filterBy} onValueChange={(value: 'all' | 'password' | 'public' | 'active') => setFilterBy(value)}>
+            <Select value={filterBy} onValueChange={(value: any) => setFilterBy(value)}>
               <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue placeholder="Lọc theo" />
               </SelectTrigger>
@@ -323,7 +302,7 @@ const GameHistoryPage: React.FC = () => {
                 <SelectItem value="active">Đang hoạt động</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={sortBy} onValueChange={(value: 'newest' | 'oldest' | 'expiring' | 'popular') => setSortBy(value)}>
+            <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
               <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue placeholder="Sắp xếp theo" />
               </SelectTrigger>
@@ -363,12 +342,28 @@ const GameHistoryPage: React.FC = () => {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredGames.map(game => (
               <AdminGameCard
-                key={game.id}
-                game={game}
-                onGameClick={handleGameClick}
-                onShareGame={handleShareGame}
-                onViewLeaderboard={handleViewLeaderboard}
-                onExportData={handleExportData}
+                key={`${game.type}-${game.id}`}
+                game={{
+                  id: game.id,
+                  title: game.title,
+                  gameType: game.gameType,
+                  description: game.description || '',
+                  htmlContent: '', // Not needed for display
+                  createdAt: game.createdAt,
+                  expiresAt: game.expiresAt,
+                  password: game.password,
+                  maxParticipants: game.maxParticipants,
+                  showLeaderboard: game.showLeaderboard,
+                  shareCount: game.shareCount,
+                  account_id: accountId,
+                  creator_ip: '',
+                  requireRegistration: false,
+                  customDuration: undefined
+                }}
+                onGameClick={() => handleGameClick(game)}
+                onShareGame={(gameId, e) => handleShareGame(game, e)}
+                onViewLeaderboard={(gameId, e) => handleViewLeaderboard(game, e)}
+                onExportData={(gameId, e) => handleExportData(game, e)}
               />
             ))}
           </div>
