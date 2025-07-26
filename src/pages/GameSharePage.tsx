@@ -322,6 +322,7 @@ const GameSharePage: React.FC = () => {
   };
 
   const handleShowJoinForm = () => {
+    // Always allow joining, regardless of registration status
     if (game?.password) {
       setShowPasswordDialog(true);
     } else {
