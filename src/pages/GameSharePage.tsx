@@ -322,10 +322,21 @@ const GameSharePage: React.FC = () => {
   };
 
   const handleShowJoinForm = () => {
+    console.log('🎯 handleShowJoinForm called', {
+      hasPassword: !!game?.password,
+      password: game?.password,
+      showPasswordDialog,
+      showNameDialog,
+      hasRegistered,
+      gameId
+    });
+    
     // Always allow joining, regardless of registration status
     if (game?.password) {
+      console.log('🔒 Showing password dialog');
       setShowPasswordDialog(true);
     } else {
+      console.log('👤 Showing name dialog');
       setShowNameDialog(true);
     }
   };
