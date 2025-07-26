@@ -205,8 +205,8 @@ const GameHistoryPage: React.FC = () => {
   };
   
   const handleGameClick = (gameId: string) => {
-    // Navigate to admin dashboard instead of regular game view
-    navigate(`/game/${gameId}/dashboard?acc=${accountId}`);
+    // Navigate to game with admin privileges - bypass all restrictions
+    navigate(`/game/${gameId}?acc=${accountId}&admin=true&bypass=true`);
   };
   
   const handleCreateNew = () => {
