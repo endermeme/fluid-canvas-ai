@@ -134,6 +134,13 @@ const GameSharePage: React.FC = () => {
     
     return () => clearInterval(interval);
   }, [gameId, gameExpired]);
+
+  // Auto show join form when game loads
+  useEffect(() => {
+    if (game && !hasRegistered && !gameExpired) {
+      handleShowJoinForm();
+    }
+  }, [game, hasRegistered, gameExpired]);
   
   const handleBack = () => {
     navigate(`/game-history?acc=${accountId}`);
@@ -380,18 +387,7 @@ const GameSharePage: React.FC = () => {
 
   const isMaxParticipantsReached = game && game.maxParticipants && participants.length >= game.maxParticipants;
   
-  const joinGameButton = (
-    <Button 
-      size="sm" 
-      variant="outline" 
-      className="text-xs"
-      onClick={handleShowJoinForm}
-      disabled={isSubmitting || isMaxParticipantsReached}
-    >
-      <Users className="h-3.5 w-3.5 mr-1" />
-      {isMaxParticipantsReached ? "Đã đầy" : "Tham gia"}
-    </Button>
-  );
+  // Removed join button - auto-show form instead
 
   // Use parsed miniGame or fallback to default structure
   const gameForView = miniGame || {
@@ -435,7 +431,6 @@ const GameSharePage: React.FC = () => {
             miniGame={gameForView}
             onBack={handleBack}
             hideHeader={true}
-            extraButton={joinGameButton}
             gameExpired={gameExpired}
             gameId={gameId}
             playerName={currentPlayerName}
