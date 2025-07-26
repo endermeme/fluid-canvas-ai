@@ -35,15 +35,55 @@ const GameDashboard = () => {
     setLoading(true);
     
     try {
-      // Get game info
-      const { data: gameInfo, error: gameError } = await supabase
-        .from('games')
+      // Try to fetch from custom_games first, then preset_games
+      let gameInfo = null;
+      let participantsData = [];
+      
+      // Try custom_games first
+      const { data: customGame, error: customGameError } = await supabase
+        .from('custom_games')
         .select('*')
         .eq('id', gameId)
         .single();
 
-      if (gameError) {
-        console.error('Error fetching game:', gameError);
+      if (!customGameError && customGame) {
+        gameInfo = customGame;
+        
+        // Fetch participants from custom_leaderboard
+        const { data: customParticipants, error: customParticipantsError } = await supabase
+          .from('custom_leaderboard')
+          .select('*')
+          .eq('game_id', gameId)
+          .order('completed_at', { ascending: false });
+
+        if (!customParticipantsError) {
+          participantsData = customParticipants || [];
+        }
+      } else {
+        // Try preset_games
+        const { data: presetGame, error: presetGameError } = await supabase
+          .from('preset_games')
+          .select('*')
+          .eq('id', gameId)
+          .single();
+
+        if (!presetGameError && presetGame) {
+          gameInfo = presetGame;
+          
+          // Fetch participants from preset_leaderboard
+          const { data: presetParticipants, error: presetParticipantsError } = await supabase
+            .from('preset_leaderboard')
+            .select('*')
+            .eq('game_id', gameId)
+            .order('completed_at', { ascending: false });
+
+          if (!presetParticipantsError) {
+            participantsData = presetParticipants || [];
+          }
+        }
+      }
+
+      if (!gameInfo) {
         toast({
           title: "Lỗi",
           description: "Không thể tải thông tin game",
@@ -54,20 +94,8 @@ const GameDashboard = () => {
 
       setGame(gameInfo);
 
-      // Get participants from unified_game_scores
-      const { data: participantsData, error: participantsError } = await supabase
-        .from('unified_game_scores')
-        .select('*')
-        .eq('game_id', gameId)
-        .eq('source_table', 'games')
-        .order('completed_at', { ascending: false });
-
-      if (participantsError) {
-        console.error('Error fetching participants:', participantsError);
-      }
-
       // Format participants data
-      const formattedParticipants = participantsData?.map(p => ({
+      const formattedParticipants = participantsData.map(p => ({
         id: p.id,
         name: p.player_name,
         ipAddress: p.ip_address || 'N/A',
@@ -75,7 +103,7 @@ const GameDashboard = () => {
         totalQuestions: p.total_questions,
         completionTime: p.completion_time,
         timestamp: p.completed_at
-      })) || [];
+      }));
 
       setParticipants(formattedParticipants);
     } catch (error) {
@@ -200,7 +228,7 @@ const GameDashboard = () => {
         <TabsContent value="leaderboard" className="mt-6">
           <UnifiedLeaderboardManager 
             gameId={gameId!} 
-            sourceTable="games"
+            sourceTable={game?.game_type ? "preset_games" : "custom_games"}
             refreshInterval={10000}
           />
         </TabsContent>

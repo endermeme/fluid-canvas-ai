@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { newCustomGameAPI, CustomGameData, CustomGameScore } from '@/components/quiz/custom-games/api/newCustomGameAPI';
+import { saveCustomGame, getCustomGame, updateCustomGame, deleteCustomGame } from '@/components/quiz/custom-games/api/customGameAPI';
 
 export const useCustomGameManager = () => {
   const [isSaving, setIsSaving] = useState(false);

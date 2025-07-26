@@ -48,12 +48,28 @@ const GameHistoryPage: React.FC = () => {
     
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('games')
-        .select('*,share_count,last_accessed_at,max_participants,show_leaderboard,require_registration,custom_duration,password,creator_ip,account_id')
-        .eq('account_id', accountId)
-        .eq('is_published', true)
-        .order('created_at', { ascending: false });
+      // Fetch from both custom_games and preset_games
+      const [customGamesResponse, presetGamesResponse] = await Promise.all([
+        supabase
+          .from('custom_games')
+          .select('*')
+          .eq('account_id', accountId)
+          .eq('is_published', true)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('preset_games')
+          .select('*')
+          .order('created_at', { ascending: false })
+      ]);
+
+      // Only show custom games for this account
+      const data = (customGamesResponse.data || []).map(game => ({ 
+        ...game, 
+        game_type: 'custom',
+        html_content: game.html_content || '',
+        expires_at: game.expires_at || new Date().toISOString()
+      }));
+      const error = customGamesResponse.error || presetGamesResponse.error;
 
       if (error) throw error;
       
@@ -174,7 +190,7 @@ const GameHistoryPage: React.FC = () => {
   const handleDeleteGame = async (game: HistoryGame) => {
     try {
       const { error } = await supabase
-        .from('games')
+        .from('custom_games')
         .delete()
         .eq('id', game.id)
         .eq('account_id', accountId);

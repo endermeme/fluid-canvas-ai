@@ -31,15 +31,55 @@ const TeacherDashboard = () => {
     if (!gameId) return;
     setLoading(true);
     try {
-      // First try to get game info from Supabase
-      const { data: gameInfo, error: gameError } = await supabase
-        .from('games')
+      // Try to fetch from custom_games first, then preset_games
+      let gameInfo = null;
+      let participants = [];
+      
+      // Try custom_games first
+      const { data: customGame, error: customGameError } = await supabase
+        .from('custom_games')
         .select('*')
         .eq('id', gameId)
         .single();
 
-      if (gameError) {
-        console.error('Error fetching game:', gameError);
+      if (!customGameError && customGame) {
+        gameInfo = customGame;
+        
+        // Fetch participants from custom_leaderboard
+        const { data: customParticipants, error: customParticipantsError } = await supabase
+          .from('custom_leaderboard')
+          .select('*')
+          .eq('game_id', gameId)
+          .order('completed_at', { ascending: false });
+
+        if (!customParticipantsError) {
+          participants = customParticipants || [];
+        }
+      } else {
+        // Try preset_games
+        const { data: presetGame, error: presetGameError } = await supabase
+          .from('preset_games')
+          .select('*')
+          .eq('id', gameId)
+          .single();
+
+        if (!presetGameError && presetGame) {
+          gameInfo = presetGame;
+          
+          // Fetch participants from preset_leaderboard
+          const { data: presetParticipants, error: presetParticipantsError } = await supabase
+            .from('preset_leaderboard')
+            .select('*')
+            .eq('game_id', gameId)
+            .order('completed_at', { ascending: false });
+
+          if (!presetParticipantsError) {
+            participants = presetParticipants || [];
+          }
+        }
+      }
+
+      if (!gameInfo) {
         toast({
           title: "Lỗi",
           description: "Không thể tải thông tin game",
@@ -48,27 +88,15 @@ const TeacherDashboard = () => {
         return;
       }
 
-      // Get participants from unified_game_scores
-      const { data: participants, error: participantsError } = await supabase
-        .from('unified_game_scores')
-        .select('*')
-        .eq('game_id', gameId)
-        .eq('source_table', 'games')
-        .order('completed_at', { ascending: false });
-
-      if (participantsError) {
-        console.error('Error fetching participants:', participantsError);
-      }
-
       // Format participants data to match expected structure
-      const formattedParticipants = participants?.map(p => ({
+      const formattedParticipants = participants.map(p => ({
         id: p.id,
         name: p.player_name,
         ipAddress: p.ip_address || 'N/A',
         score: p.score,
         retryCount: 1, // Default as this isn't tracked
         timestamp: p.completed_at
-      })) || [];
+      }));
 
       const gameSession = {
         id: gameInfo.id,

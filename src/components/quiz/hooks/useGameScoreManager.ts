@@ -25,16 +25,20 @@ export const useGameScoreManager = () => {
       const timeBasedGames = ['memory', 'wordsearch', 'matching'];
       const isTimeBasedGame = timeBasedGames.includes(scoreData.gameType?.toLowerCase());
       
+      // This hook is deprecated - use useUnifiedScoreManager instead
+      // For backwards compatibility, we'll determine the table based on gameType
+      const isCustomGame = scoreData.gameType === 'custom';
+      const tableName = isCustomGame ? 'custom_leaderboard' : 'preset_leaderboard';
+      
       const { error } = await supabase
-        .from('unified_game_scores')
+        .from(tableName)
         .insert({
           game_id: scoreData.gameId,
-          source_table: 'games',
           player_name: scoreData.playerName,
           score: isTimeBasedGame ? 0 : scoreData.score,
           total_questions: scoreData.totalQuestions,
           completion_time: scoreData.completionTime,
-          game_type: scoreData.gameType,
+          scoring_data: { gameType: scoreData.gameType },
           ip_address: 'shared-game'
         });
 
