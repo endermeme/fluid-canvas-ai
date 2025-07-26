@@ -14,6 +14,168 @@ export type Database = {
   }
   public: {
     Tables: {
+      custom_game_instances: {
+        Row: {
+          account_id: string | null
+          created_at: string
+          creator_ip: string | null
+          custom_duration: number | null
+          custom_game_id: string
+          description: string | null
+          expires_at: string
+          html_content: string
+          id: string
+          is_published: boolean | null
+          last_accessed_at: string | null
+          max_participants: number | null
+          password: string | null
+          require_registration: boolean | null
+          share_count: number | null
+          show_leaderboard: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string
+          creator_ip?: string | null
+          custom_duration?: number | null
+          custom_game_id: string
+          description?: string | null
+          expires_at?: string
+          html_content: string
+          id?: string
+          is_published?: boolean | null
+          last_accessed_at?: string | null
+          max_participants?: number | null
+          password?: string | null
+          require_registration?: boolean | null
+          share_count?: number | null
+          show_leaderboard?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string
+          creator_ip?: string | null
+          custom_duration?: number | null
+          custom_game_id?: string
+          description?: string | null
+          expires_at?: string
+          html_content?: string
+          id?: string
+          is_published?: boolean | null
+          last_accessed_at?: string | null
+          max_participants?: number | null
+          password?: string | null
+          require_registration?: boolean | null
+          share_count?: number | null
+          show_leaderboard?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_game_instances_custom_game_id_fkey"
+            columns: ["custom_game_id"]
+            isOneToOne: false
+            referencedRelation: "custom_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_game_participants: {
+        Row: {
+          game_instance_id: string
+          id: string
+          ip_address: string | null
+          is_active: boolean | null
+          joined_at: string
+          last_active_at: string | null
+          player_name: string
+          session_data: Json | null
+        }
+        Insert: {
+          game_instance_id: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          joined_at?: string
+          last_active_at?: string | null
+          player_name: string
+          session_data?: Json | null
+        }
+        Update: {
+          game_instance_id?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          joined_at?: string
+          last_active_at?: string | null
+          player_name?: string
+          session_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_game_participants_game_instance_id_fkey"
+            columns: ["game_instance_id"]
+            isOneToOne: false
+            referencedRelation: "custom_game_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_game_scores: {
+        Row: {
+          completed_at: string
+          completion_time: number | null
+          created_at: string
+          game_instance_id: string
+          id: string
+          ip_address: string | null
+          player_id: string | null
+          player_name: string
+          score: number
+          scoring_data: Json | null
+          total_questions: number
+        }
+        Insert: {
+          completed_at?: string
+          completion_time?: number | null
+          created_at?: string
+          game_instance_id: string
+          id?: string
+          ip_address?: string | null
+          player_id?: string | null
+          player_name: string
+          score?: number
+          scoring_data?: Json | null
+          total_questions?: number
+        }
+        Update: {
+          completed_at?: string
+          completion_time?: number | null
+          created_at?: string
+          game_instance_id?: string
+          id?: string
+          ip_address?: string | null
+          player_id?: string | null
+          player_name?: string
+          score?: number
+          scoring_data?: Json | null
+          total_questions?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_game_scores_game_instance_id_fkey"
+            columns: ["game_instance_id"]
+            isOneToOne: false
+            referencedRelation: "custom_game_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_games: {
         Row: {
           created_at: string
@@ -147,6 +309,204 @@ export type Database = {
           share_count?: number | null
           show_leaderboard?: boolean | null
           title?: string
+        }
+        Relationships: []
+      }
+      preset_game_instances: {
+        Row: {
+          account_id: string | null
+          created_at: string
+          creator_ip: string | null
+          custom_duration: number | null
+          expires_at: string
+          game_data: Json
+          id: string
+          is_published: boolean | null
+          last_accessed_at: string | null
+          max_participants: number | null
+          password: string | null
+          preset_game_id: string
+          require_registration: boolean | null
+          settings: Json | null
+          share_count: number | null
+          show_leaderboard: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string
+          creator_ip?: string | null
+          custom_duration?: number | null
+          expires_at?: string
+          game_data?: Json
+          id?: string
+          is_published?: boolean | null
+          last_accessed_at?: string | null
+          max_participants?: number | null
+          password?: string | null
+          preset_game_id: string
+          require_registration?: boolean | null
+          settings?: Json | null
+          share_count?: number | null
+          show_leaderboard?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string
+          creator_ip?: string | null
+          custom_duration?: number | null
+          expires_at?: string
+          game_data?: Json
+          id?: string
+          is_published?: boolean | null
+          last_accessed_at?: string | null
+          max_participants?: number | null
+          password?: string | null
+          preset_game_id?: string
+          require_registration?: boolean | null
+          settings?: Json | null
+          share_count?: number | null
+          show_leaderboard?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preset_game_instances_preset_game_id_fkey"
+            columns: ["preset_game_id"]
+            isOneToOne: false
+            referencedRelation: "preset_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preset_game_participants: {
+        Row: {
+          game_instance_id: string
+          id: string
+          ip_address: string | null
+          is_active: boolean | null
+          joined_at: string
+          last_active_at: string | null
+          player_name: string
+          session_data: Json | null
+        }
+        Insert: {
+          game_instance_id: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          joined_at?: string
+          last_active_at?: string | null
+          player_name: string
+          session_data?: Json | null
+        }
+        Update: {
+          game_instance_id?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          joined_at?: string
+          last_active_at?: string | null
+          player_name?: string
+          session_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preset_game_participants_game_instance_id_fkey"
+            columns: ["game_instance_id"]
+            isOneToOne: false
+            referencedRelation: "preset_game_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preset_game_scores: {
+        Row: {
+          completed_at: string
+          completion_time: number | null
+          created_at: string
+          game_instance_id: string
+          id: string
+          ip_address: string | null
+          player_id: string | null
+          player_name: string
+          score: number
+          scoring_data: Json | null
+          total_questions: number
+        }
+        Insert: {
+          completed_at?: string
+          completion_time?: number | null
+          created_at?: string
+          game_instance_id: string
+          id?: string
+          ip_address?: string | null
+          player_id?: string | null
+          player_name: string
+          score?: number
+          scoring_data?: Json | null
+          total_questions?: number
+        }
+        Update: {
+          completed_at?: string
+          completion_time?: number | null
+          created_at?: string
+          game_instance_id?: string
+          id?: string
+          ip_address?: string | null
+          player_id?: string | null
+          player_name?: string
+          score?: number
+          scoring_data?: Json | null
+          total_questions?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preset_game_scores_game_instance_id_fkey"
+            columns: ["game_instance_id"]
+            isOneToOne: false
+            referencedRelation: "preset_game_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preset_games: {
+        Row: {
+          created_at: string
+          default_settings: Json | null
+          description: string | null
+          game_type: string
+          id: string
+          is_active: boolean | null
+          template_data: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_settings?: Json | null
+          description?: string | null
+          game_type: string
+          id?: string
+          is_active?: boolean | null
+          template_data?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_settings?: Json | null
+          description?: string | null
+          game_type?: string
+          id?: string
+          is_active?: boolean | null
+          template_data?: Json
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
