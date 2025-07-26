@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { presetGameAPI, PresetGameData, PresetGameScore } from '@/components/quiz/preset-games/api/presetGameAPI';
+import { presetGameAPI, PresetGameData, PresetGameParticipant } from '@/components/quiz/preset-games/api/presetGameAPI';
 
 export const usePresetGameManager = () => {
   const [isSaving, setIsSaving] = useState(false);
@@ -81,7 +81,7 @@ export const usePresetGameManager = () => {
     }
   };
 
-  const savePresetGameScore = async (scoreData: PresetGameScore) => {
+  const savePresetGameScore = async (scoreData: Omit<PresetGameParticipant, 'gameInstanceId' | 'playerName'> & { gameInstanceId: string; playerName: string }) => {
     try {
       const success = await presetGameAPI.savePresetGameScore(scoreData);
       

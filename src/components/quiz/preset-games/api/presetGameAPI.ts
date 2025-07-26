@@ -43,16 +43,6 @@ export interface PresetGameParticipant {
   scoringData?: any;
 }
 
-export interface PresetGameScore {
-  gameInstanceId: string;
-  playerName: string;
-  playerId?: string;
-  score: number;
-  totalQuestions: number;
-  completionTime?: number;
-  scoringData?: any;
-  ipAddress?: string;
-}
 
 // API Functions cho Preset Games
 export const presetGameAPI = {
@@ -167,7 +157,7 @@ export const presetGameAPI = {
   },
 
   // Lưu điểm số preset game - now updates participant record
-  async savePresetGameScore(scoreData: PresetGameScore): Promise<boolean> {
+  async savePresetGameScore(scoreData: Omit<PresetGameParticipant, 'gameInstanceId' | 'playerName'> & { gameInstanceId: string; playerName: string }): Promise<boolean> {
     try {
       const { error } = await supabase
         .from('preset_game_participants')
