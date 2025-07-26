@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Trophy, Medal, Award, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useUnifiedScoreManager } from '@/hooks/useUnifiedScoreManager';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UnifiedLeaderboardEntry {
   player_name: string;
@@ -17,7 +18,7 @@ interface UnifiedLeaderboardEntry {
 
 interface UnifiedLeaderboardManagerProps {
   gameId: string;
-  sourceTable: 'games';
+  sourceTable: 'custom_games' | 'preset_games';
   refreshInterval?: number;
 }
 
@@ -33,8 +34,43 @@ const UnifiedLeaderboardManager: React.FC<UnifiedLeaderboardManagerProps> = ({
 
   const fetchLeaderboard = async () => {
     try {
-      const data = await getUnifiedLeaderboard(gameId, sourceTable, 10);
-      setLeaderboard(data as UnifiedLeaderboardEntry[]);
+      let data: UnifiedLeaderboardEntry[] = [];
+      
+      if (sourceTable === 'custom_games') {
+        // Get from custom_leaderboard
+        const { data: leaderboardData, error } = await supabase
+          .from('custom_leaderboard')
+          .select('player_name, score, total_questions, completion_time, scoring_data, completed_at')
+          .eq('game_id', gameId)
+          .not('score', 'is', null)
+          .order('score', { ascending: false })
+          .limit(10);
+          
+        if (!error && leaderboardData) {
+          data = leaderboardData.map(entry => ({
+            ...entry,
+            game_type: 'custom'
+          }));
+        }
+      } else if (sourceTable === 'preset_games') {
+        // Get from preset_leaderboard  
+        const { data: leaderboardData, error } = await supabase
+          .from('preset_leaderboard')
+          .select('player_name, score, total_questions, completion_time, scoring_data, completed_at')
+          .eq('game_id', gameId)
+          .not('score', 'is', null)
+          .order('score', { ascending: false })
+          .limit(10);
+          
+        if (!error && leaderboardData) {
+          data = leaderboardData.map(entry => ({
+            ...entry,
+            game_type: 'preset'
+          }));
+        }
+      }
+      
+      setLeaderboard(data);
       setLastUpdate(new Date());
     } catch (error) {
       console.error('Error in fetchLeaderboard:', error);

@@ -39,7 +39,7 @@ export const CustomGameRenderer: React.FC<CustomGameRendererProps> = ({
           // Save score using unified system
           const success = await saveUnifiedScore({
             gameId,
-            sourceTable: 'games',
+            sourceTable: 'custom_games',
             playerName,
             score: finalScore,
             totalQuestions: total,

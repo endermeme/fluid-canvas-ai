@@ -13,33 +13,13 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
   try {
     console.log("Đang lưu game tùy chỉnh:", gameData);
     
-    // Save to games table with proper HTML content and metadata
-    const { data: gameEntry, error: gameError } = await supabase
-      .from('games')
-      .insert([{
-        title: gameData.title,
-        html_content: gameData.content,
-        game_type: 'custom',
-        description: gameData.description || 'Game tương tác tùy chỉnh',
-        is_preset: false,
-        content_type: 'html',
-        expires_at: new Date(Date.now() + (48 * 60 * 60 * 1000)).toISOString() // 48 hours
-      }])
-      .select()
-      .single();
-
-    if (gameError) {
-      console.error("Lỗi khi lưu game vào bảng games:", gameError);
-      throw gameError;
-    }
-
-    console.log("Game đã được lưu vào games với ID:", gameEntry.id);
-
-    // Save additional game data to custom_games table
+    // Save directly to custom_games table
     const { data: customGame, error: customError } = await supabase
       .from('custom_games')
       .insert([{
-        game_id: gameEntry.id,
+        title: gameData.title,
+        html_content: gameData.content,
+        description: gameData.description || 'Game tương tác tùy chỉnh',
         game_data: {
           title: gameData.title,
           content: gameData.content,
@@ -61,7 +41,7 @@ export const saveCustomGame = async (gameData: CustomGameData) => {
     }
 
     console.log("Dữ liệu game tùy chỉnh đã được lưu:", customGame);
-    return { ...gameEntry, customData: customGame };
+    return customGame;
   } catch (error) {
     console.error('Error saving custom game:', error);
     throw error;
@@ -72,16 +52,10 @@ export const getCustomGame = async (gameId: string) => {
   try {
     console.log("Đang lấy game theo ID:", gameId);
     
-    // Get complete game data from both tables
+    // Get game data from custom_games table
     const { data: game, error: gameError } = await supabase
-      .from('games')
-      .select(`
-        *,
-        custom_games (
-          game_data,
-          settings
-        )
-      `)
+      .from('custom_games')
+      .select('*')
       .eq('id', gameId)
       .single();
 
@@ -100,40 +74,29 @@ export const getCustomGame = async (gameId: string) => {
 
 export const updateCustomGame = async (gameId: string, gameData: Partial<CustomGameData>) => {
   try {
-    // Update games table with basic game info
-    const { data: gameUpdate, error: gameError } = await supabase
-      .from('games')
+    // Update custom_games table
+    const { data: customUpdate, error: customError } = await supabase
+      .from('custom_games')
       .update({
         title: gameData.title,
         html_content: gameData.content,
         description: gameData.description,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', gameId)
-      .select()
-      .single();
-
-    if (gameError) throw gameError;
-
-    // Update custom_games table with game-specific data
-    const { data: customUpdate, error: customError } = await supabase
-      .from('custom_games')
-      .update({
         game_data: {
           title: gameData.title,
           content: gameData.content,
           type: gameData.gameType,
           updatedAt: new Date().toISOString()
         },
-        settings: gameData.settings
+        settings: gameData.settings,
+        updated_at: new Date().toISOString()
       })
-      .eq('game_id', gameId)
+      .eq('id', gameId)
       .select()
       .single();
 
     if (customError) throw customError;
     
-    return { ...gameUpdate, customData: customUpdate };
+    return customUpdate;
   } catch (error) {
     console.error('Error updating custom game:', error);
     throw error;
@@ -142,9 +105,9 @@ export const updateCustomGame = async (gameId: string, gameData: Partial<CustomG
 
 export const deleteCustomGame = async (gameId: string) => {
   try {
-    // Delete from games table will cascade to custom_games due to foreign key
+    // Delete from custom_games table
     const { error } = await supabase
-      .from('games')
+      .from('custom_games')
       .delete()
       .eq('id', gameId);
 
@@ -160,15 +123,8 @@ export const deleteCustomGame = async (gameId: string) => {
 export const listCustomGames = async () => {
   try {
     const { data, error } = await supabase
-      .from('games')
-      .select(`
-        *,
-        custom_games (
-          game_data,
-          settings
-        )
-      `)
-      .eq('game_type', 'custom')
+      .from('custom_games')
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (error) throw error;

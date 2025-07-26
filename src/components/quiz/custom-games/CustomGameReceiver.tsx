@@ -94,12 +94,11 @@ export const CustomGameReceiver: React.FC = () => {
 
   const generatePlayerName = async () => {
     try {
-      // Get current participant count from unified_game_scores
+      // Get current participant count from custom_leaderboard
       const { data: scores, error } = await supabase
-        .from('unified_game_scores')
+        .from('custom_leaderboard')
         .select('player_name')
-        .eq('game_id', game!.id)
-        .eq('source_table', 'games');
+        .eq('game_id', game!.id);
 
       if (error) {
         console.error('Error getting participant count:', error);
@@ -315,7 +314,7 @@ export const CustomGameReceiver: React.FC = () => {
               <div className="mt-6">
                 <UnifiedLeaderboardManager 
                   gameId={game.id}
-                  sourceTable="games"
+                  sourceTable="custom_games"
                   refreshInterval={10000}
                 />
               </div>
@@ -373,7 +372,7 @@ export const CustomGameReceiver: React.FC = () => {
             <div className="p-4">
               <UnifiedLeaderboardManager 
                 gameId={game.id}
-                sourceTable="games"
+                sourceTable="custom_games"
                 refreshInterval={5000}
               />
             </div>

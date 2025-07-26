@@ -50,12 +50,11 @@ const AdminGameCard: React.FC<AdminGameCardProps> = ({
 
   const loadGameStats = async () => {
     try {
-      // Get total plays and unique players from unified_game_scores
+      // Get total plays and unique players from custom_leaderboard
       const { data: scoreData, error: scoreError } = await supabase
-        .from('unified_game_scores')
+        .from('custom_leaderboard')
         .select('player_name')
-        .eq('game_id', game.id)
-        .eq('source_table', 'games');
+        .eq('game_id', game.id);
 
       if (scoreError) {
         console.error('Error fetching score data:', scoreError);
@@ -65,9 +64,9 @@ const AdminGameCard: React.FC<AdminGameCardProps> = ({
       const totalPlays = scoreData?.length || 0;
       const uniquePlayers = new Set(scoreData?.map(s => s.player_name) || []).size;
 
-      // Get share count from games table
+      // Get share count from custom_games table
       const { data: gameData, error: gameError } = await supabase
-        .from('games')
+        .from('custom_games')
         .select('share_count')
         .eq('id', game.id)
         .single();

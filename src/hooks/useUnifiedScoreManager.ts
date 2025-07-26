@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface UnifiedGameScore {
   gameId: string;
-  sourceTable: 'games';
+  sourceTable: 'custom_games' | 'preset_games';
   playerName: string;
   playerId?: string;
   score: number;
@@ -30,50 +30,48 @@ export const useUnifiedScoreManager = () => {
     setIsSaving(true);
     
     try {
-      // Insert main score
-      const { data: scoreRecord, error: scoreError } = await supabase
-        .from('unified_game_scores')
-        .insert({
-          game_id: scoreData.gameId,
-          source_table: scoreData.sourceTable,
-          player_name: scoreData.playerName,
-          player_id: scoreData.playerId,
-          score: scoreData.score,
-          total_questions: scoreData.totalQuestions,
-          completion_time: scoreData.completionTime,
-          scoring_data: scoreData.scoringData || {},
-          game_type: scoreData.gameType,
-          ip_address: 'shared-game'
-        })
-        .select()
-        .single();
+      let scoreError = null;
+      
+      if (scoreData.sourceTable === 'custom_games') {
+        // Save to custom_leaderboard
+        const { error } = await supabase
+          .from('custom_leaderboard')
+          .insert({
+            game_id: scoreData.gameId,
+            player_name: scoreData.playerName,
+            score: scoreData.score,
+            total_questions: scoreData.totalQuestions,
+            completion_time: scoreData.completionTime,
+            scoring_data: scoreData.scoringData || {},
+            completed_at: new Date().toISOString(),
+            ip_address: 'shared-game'
+          });
+        scoreError = error;
+      } else if (scoreData.sourceTable === 'preset_games') {
+        // Save to preset_leaderboard
+        const { error } = await supabase
+          .from('preset_leaderboard')
+          .insert({
+            game_id: scoreData.gameId,
+            player_name: scoreData.playerName,
+            score: scoreData.score,
+            total_questions: scoreData.totalQuestions,
+            completion_time: scoreData.completionTime,
+            scoring_data: scoreData.scoringData || {},
+            completed_at: new Date().toISOString(),
+            ip_address: 'shared-game'
+          });
+        scoreError = error;
+      }
 
       if (scoreError) {
-        console.error('Error saving unified score:', scoreError);
+        console.error('Error saving score:', scoreError);
         toast({
           title: "Lưu điểm thất bại",
           description: "Không thể lưu điểm số của bạn.",
           variant: "destructive"
         });
         return false;
-      }
-
-      // Insert score details if provided
-      if (details && details.length > 0 && scoreRecord) {
-        const detailsToInsert = details.map(detail => ({
-          score_id: scoreRecord.id,
-          metric_name: detail.metricName,
-          metric_value: detail.metricValue,
-          metric_data: detail.metricData || {}
-        }));
-
-        const { error: detailsError } = await supabase
-          .from('game_score_details')
-          .insert(detailsToInsert);
-
-        if (detailsError) {
-          console.error('Error saving score details:', detailsError);
-        }
       }
 
       // Show success message
@@ -106,19 +104,42 @@ export const useUnifiedScoreManager = () => {
 
   const getUnifiedLeaderboard = async (
     gameId: string, 
-    sourceTable: 'games',
+    sourceTable: 'custom_games' | 'preset_games',
     limit: number = 10
   ) => {
     try {
-      const { data, error } = await supabase.rpc('get_unified_game_leaderboard', {
-        target_game_id: gameId,
-        target_source_table: sourceTable,
-        limit_count: limit
-      });
-
-      if (error) {
-        console.error('Error fetching unified leaderboard:', error);
-        return [];
+      let data = [];
+      
+      if (sourceTable === 'custom_games') {
+        const { data: leaderboardData, error } = await supabase
+          .from('custom_leaderboard')
+          .select('player_name, score, total_questions, completion_time, scoring_data, completed_at')
+          .eq('game_id', gameId)
+          .not('score', 'is', null)
+          .order('score', { ascending: false })
+          .limit(limit);
+          
+        if (!error && leaderboardData) {
+          data = leaderboardData.map(entry => ({
+            ...entry,
+            game_type: 'custom'
+          }));
+        }
+      } else if (sourceTable === 'preset_games') {
+        const { data: leaderboardData, error } = await supabase
+          .from('preset_leaderboard')
+          .select('player_name, score, total_questions, completion_time, scoring_data, completed_at')
+          .eq('game_id', gameId)
+          .not('score', 'is', null)
+          .order('score', { ascending: false })
+          .limit(limit);
+          
+        if (!error && leaderboardData) {
+          data = leaderboardData.map(entry => ({
+            ...entry,
+            game_type: 'preset'
+          }));
+        }
       }
 
       return data || [];
