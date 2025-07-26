@@ -26,7 +26,7 @@ export interface PresetLeaderboardEntry {
 
 // API Functions cho Preset Games với cấu trúc mới
 export const presetGameAPI = {
-  // Lưu preset game instance (bây giờ lưu trực tiếp vào preset_games)
+  // Lưu preset game instance
   async savePresetGameInstance(gameData: PresetGameData & { 
     isPublished?: boolean;
     maxParticipants?: number;
@@ -38,7 +38,6 @@ export const presetGameAPI = {
     accountId?: string;
   }): Promise<any> {
     try {
-      // Sử dụng any type để tránh lỗi TypeScript trong lúc migration
       const { data, error } = await (supabase as any)
         .from('preset_games')
         .insert({
@@ -46,30 +45,16 @@ export const presetGameAPI = {
           game_type: gameData.gameType,
           description: gameData.description || '',
           template_data: gameData.templateData,
-          default_settings: gameData.settings || {},
-          game_data: gameData.templateData,
-          settings: gameData.settings || {},
-          is_active: true,
-          is_published: gameData.isPublished || false,
-          max_participants: gameData.maxParticipants,
-          show_leaderboard: gameData.showLeaderboard ?? true,
-          require_registration: gameData.requireRegistration ?? false,
-          custom_duration: gameData.customDuration,
-          password: gameData.password,
-          creator_ip: gameData.creatorIp,
-          account_id: gameData.accountId,
-          expires_at: gameData.customDuration 
-            ? new Date(Date.now() + gameData.customDuration * 60 * 60 * 1000).toISOString()
-            : new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+          default_settings: gameData.settings || {}
         })
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return { success: true, gameId: data.id, data };
     } catch (error) {
       console.error('Error saving preset game:', error);
-      throw error;
+      return { success: false, error };
     }
   },
 
@@ -80,15 +65,14 @@ export const presetGameAPI = {
         .from('preset_games')
         .select('*')
         .eq('id', gameId)
-        .eq('is_published', true)
-        .gt('expires_at', new Date().toISOString())
+        .eq('is_active', true)
         .single();
 
       if (error) throw error;
-      return data;
+      return { success: true, data };
     } catch (error) {
       console.error('Error fetching preset game:', error);
-      throw error;
+      return { success: false, error };
     }
   },
 
@@ -117,10 +101,14 @@ export const presetGameAPI = {
   // Thêm participant vào preset game
   async addPresetGameParticipant(participantData: PresetLeaderboardEntry): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .rpc('update_preset_participant_activity', {
-          target_game_id: participantData.gameId,
-          target_player_name: participantData.playerName
+      const { error } = await (supabase as any)
+        .from('preset_leaderboard')
+        .insert({
+          game_id: participantData.gameId,
+          player_name: participantData.playerName,
+          ip_address: participantData.ipAddress || 'unknown',
+          is_active: true,
+          session_data: participantData.sessionData || {}
         });
 
       return !error;
@@ -133,11 +121,13 @@ export const presetGameAPI = {
   // Lấy leaderboard preset game
   async getPresetGameLeaderboard(gameId: string, limit: number = 10): Promise<any[]> {
     try {
-      const { data, error } = await supabase
-        .rpc('get_preset_leaderboard', {
-          target_game_id: gameId,
-          limit_count: limit
-        });
+      const { data, error } = await (supabase as any)
+        .from('preset_leaderboard')
+        .select('*')
+        .eq('game_id', gameId)
+        .not('score', 'is', null)
+        .order('score', { ascending: false })
+        .limit(limit);
 
       if (error) throw error;
       return data || [];
@@ -200,18 +190,11 @@ export const presetGameAPI = {
     }
   },
 
-  // Tăng share count
+  // Tăng share count - Bỏ qua vì bảng preset_games không có trường này
   async incrementShareCount(gameId: string): Promise<void> {
     try {
-      const { error } = await (supabase as any)
-        .from('preset_games')
-        .update({ 
-          share_count: (supabase as any).raw('share_count + 1'),
-          last_accessed_at: new Date().toISOString()
-        })
-        .eq('id', gameId);
-
-      if (error) throw error;
+      // Không làm gì vì bảng preset_games không có share_count field
+      console.log('Share count tracking not available for preset games');
     } catch (error) {
       console.error('Error incrementing share count:', error);
     }
@@ -220,20 +203,12 @@ export const presetGameAPI = {
   // Lấy danh sách preset games
   async getPresetGamesList(accountId?: string, creatorIp?: string): Promise<any[]> {
     try {
-      let query = (supabase as any)
+      const { data, error } = await (supabase as any)
         .from('preset_games')
         .select('*')
-        .eq('is_published', true)
-        .gt('expires_at', new Date().toISOString())
+        .eq('is_active', true)
         .order('created_at', { ascending: false });
 
-      if (accountId) {
-        query = query.eq('account_id', accountId);
-      } else if (creatorIp) {
-        query = query.eq('creator_ip', creatorIp);
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     } catch (error) {
