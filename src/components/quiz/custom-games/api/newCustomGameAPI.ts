@@ -189,7 +189,7 @@ export const newCustomGameAPI = {
     try {
       // Update participant activity
       await supabase.rpc('update_custom_participant_activity', {
-        target_game_instance_id: participantData.gameInstanceId,
+        target_game_id: participantData.gameInstanceId,
         target_player_name: participantData.playerName
       });
 

@@ -796,7 +796,7 @@ export type Database = {
         Returns: undefined
       }
       update_custom_participant_activity: {
-        Args: { target_game_instance_id: string; target_player_name: string }
+        Args: { target_game_id: string; target_player_name: string }
         Returns: undefined
       }
       update_game_participant_activity: {
@@ -804,7 +804,7 @@ export type Database = {
         Returns: undefined
       }
       update_preset_participant_activity: {
-        Args: { target_game_instance_id: string; target_player_name: string }
+        Args: { target_game_id: string; target_player_name: string }
         Returns: undefined
       }
       update_user_role: {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { presetGameAPI, PresetGameData, PresetGameParticipant } from '@/components/quiz/preset-games/api/presetGameAPI';
+import { presetGameAPI, PresetGameData, PresetLeaderboardEntry } from '@/components/quiz/preset-games/api/presetGameAPI';
 
 export const usePresetGameManager = () => {
   const [isSaving, setIsSaving] = useState(false);
@@ -81,15 +81,15 @@ export const usePresetGameManager = () => {
     }
   };
 
-  const savePresetGameScore = async (scoreData: Omit<PresetGameParticipant, 'gameInstanceId' | 'playerName'> & { gameInstanceId: string; playerName: string }) => {
+  const savePresetGameScore = async (scoreData: { gameId: string; playerName: string; score?: number; totalQuestions?: number; completionTime?: number; scoringData?: any }) => {
     try {
       const success = await presetGameAPI.savePresetGameScore(scoreData);
       
       if (success) {
         // Get game data to determine game type for appropriate message
-        const gameData = await presetGameAPI.getPresetGameInstance(scoreData.gameInstanceId);
-        const gameType = gameData?.data?.preset_games?.game_type?.toLowerCase() || 
-                        gameData?.data?.settings?.gameType?.toLowerCase();
+        const gameData = await presetGameAPI.getPresetGameInstance(scoreData.gameId);
+        const gameType = gameData?.game_type?.toLowerCase() || 
+                        gameData?.settings?.gameType?.toLowerCase();
         
         const isTimeBasedGame = ['memory', 'wordsearch', 'matching'].includes(gameType);
         
@@ -124,10 +124,10 @@ export const usePresetGameManager = () => {
     }
   };
 
-  const addPresetGameParticipant = async (gameInstanceId: string, playerName: string, ipAddress?: string) => {
+  const addPresetGameParticipant = async (gameId: string, playerName: string, ipAddress?: string) => {
     try {
       const success = await presetGameAPI.addPresetGameParticipant({
-        gameInstanceId,
+        gameId,
         playerName,
         ipAddress
       });
