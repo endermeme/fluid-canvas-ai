@@ -1,28 +1,42 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Users } from 'lucide-react';
 import { GameParticipant } from '@/utils/types';
+import { useRealtimeParticipants } from '@/hooks/useRealtimeParticipants';
 
 interface ParticipantsListProps {
-  participants: GameParticipant[];
+  gameId: string;
   hasRegistered: boolean;
   isSubmitting: boolean;
   onRefresh: () => void;
   onJoinGame: () => void;
   maxParticipants?: number;
+  onParticipantsUpdate?: (participants: GameParticipant[]) => void;
 }
 
 const ParticipantsList: React.FC<ParticipantsListProps> = ({
-  participants,
+  gameId,
   hasRegistered,
   isSubmitting,
   onRefresh,
   onJoinGame,
-  maxParticipants
+  maxParticipants,
+  onParticipantsUpdate
 }) => {
+  // Use real-time participants hook
+  const { participants, isLoading, refreshParticipants } = useRealtimeParticipants({
+    gameId,
+    onParticipantsUpdate
+  });
+
+  // Handle manual refresh
+  const handleRefresh = () => {
+    refreshParticipants();
+    onRefresh();
+  };
   const formatDate = (timestamp: number | Date) => {
     const date = typeof timestamp === 'number' ? new Date(timestamp) : timestamp;
     return date.toLocaleDateString('vi-VN', {
@@ -42,10 +56,11 @@ const ParticipantsList: React.FC<ParticipantsListProps> = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={onRefresh}
+            onClick={handleRefresh}
             className="text-xs"
+            disabled={isLoading}
           >
-            🔄 Làm mới
+            {isLoading ? "⏳" : "🔄"} Làm mới
           </Button>
         </CardTitle>
         <CardDescription>
@@ -58,7 +73,12 @@ const ParticipantsList: React.FC<ParticipantsListProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {participants.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-6 text-muted-foreground">
+            <Users className="h-12 w-12 mx-auto mb-2 opacity-50 animate-pulse" />
+            <p>Đang tải danh sách người chơi...</p>
+          </div>
+        ) : participants.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
             <p>Chưa có ai tham gia game này</p>

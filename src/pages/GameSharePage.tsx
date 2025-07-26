@@ -485,12 +485,13 @@ const GameSharePage: React.FC = () => {
         <TabsContent value="participants" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
           <div className="max-w-md mx-auto space-y-6">
               <ParticipantsList
-                participants={participants}
+                gameId={gameId || ''}
                 hasRegistered={hasRegistered}
                 isSubmitting={isSubmitting}
                 onRefresh={refreshParticipants}
                 onJoinGame={handleShowJoinForm}
                 maxParticipants={game.maxParticipants}
+                onParticipantsUpdate={(newParticipants) => setParticipants(newParticipants)}
               />
           </div>
         </TabsContent>

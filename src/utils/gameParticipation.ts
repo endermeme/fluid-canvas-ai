@@ -28,7 +28,7 @@ const mapUnifiedScoreToParticipant = (score: any): GameParticipant => {
   };
 };
 
-// Add participant - simplified to work with unified scoring
+// Add participant - now saves to database for real-time sync
 export const addParticipant = async (
   gameId: string,
   name: string,
@@ -49,9 +49,19 @@ export const addParticipant = async (
       return { success: false, message: 'Game không tồn tại hoặc đã hết hạn' };
     }
 
-    // For unified system, we just return success - actual participation is tracked when game is completed
+    // Save participant to database using the RPC function
+    const { error: rpcError } = await supabase.rpc('update_game_participant_activity', {
+      target_game_id: gameId,
+      target_player_name: name
+    });
+
+    if (rpcError) {
+      console.error('Error saving participant to database:', rpcError);
+      // Still continue with localStorage fallback
+    }
+
     const participant: GameParticipant = {
-      id: `temp-${Date.now()}`,
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name,
       ipAddress,
       timestamp: new Date().toISOString(),
@@ -101,26 +111,36 @@ export const createGameSession = async (title: string, content: string): Promise
   return { id: gameId };
 };
 
-// Get game participants using unified scoring system
+// Get game participants from real participants table
 export const getGameParticipants = async (gameId: string, accountId?: string): Promise<GameParticipant[]> => {
   try {
-    // Get from unified_game_scores
-    const { data: scores, error } = await supabase
-      .from('unified_game_scores')
-      .select('*')
-      .eq('game_id', gameId)
-      .eq('source_table', 'games')
-      .order('completed_at', { ascending: false });
+    // Get from game_participants table using RPC function
+    const { data: participants, error } = await supabase.rpc('get_game_participants_realtime', {
+      target_game_id: gameId
+    });
 
     if (error) {
       console.error('Error fetching participants:', error);
-      return [];
+      // Fallback to localStorage
+      const localGame = getLocalGame(gameId);
+      return localGame?.participants || [];
     }
 
-    return scores?.map(mapUnifiedScoreToParticipant) || [];
+    // Convert to GameParticipant format
+    return participants?.map((p: any) => ({
+      id: p.id,
+      name: p.player_name,
+      ipAddress: p.ip_address || 'unknown',
+      timestamp: p.joined_at,
+      gameId: gameId,
+      retryCount: 0,
+      score: 0
+    })) || [];
   } catch (error) {
     console.error('Error in getGameParticipants:', error);
-    return [];
+    // Fallback to localStorage
+    const localGame = getLocalGame(gameId);
+    return localGame?.participants || [];
   }
 };
 

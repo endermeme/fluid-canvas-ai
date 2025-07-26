@@ -211,6 +211,39 @@ export type Database = {
           },
         ]
       }
+      game_participants: {
+        Row: {
+          game_id: string
+          id: string
+          ip_address: string | null
+          is_active: boolean | null
+          joined_at: string
+          last_active_at: string | null
+          player_name: string
+          session_data: Json | null
+        }
+        Insert: {
+          game_id: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          joined_at?: string
+          last_active_at?: string | null
+          player_name: string
+          session_data?: Json | null
+        }
+        Update: {
+          game_id?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          joined_at?: string
+          last_active_at?: string | null
+          player_name?: string
+          session_data?: Json | null
+        }
+        Relationships: []
+      }
       game_score_details: {
         Row: {
           created_at: string
@@ -646,6 +679,17 @@ export type Database = {
           completed_at: string
         }[]
       }
+      get_game_participants_realtime: {
+        Args: { target_game_id: string }
+        Returns: {
+          id: string
+          player_name: string
+          joined_at: string
+          last_active_at: string
+          is_active: boolean
+          session_data: Json
+        }[]
+      }
       get_preset_game_leaderboard: {
         Args: { target_game_instance_id: string; limit_count?: number }
         Returns: {
@@ -709,6 +753,10 @@ export type Database = {
       }
       update_custom_participant_activity: {
         Args: { target_game_instance_id: string; target_player_name: string }
+        Returns: undefined
+      }
+      update_game_participant_activity: {
+        Args: { target_game_id: string; target_player_name: string }
         Returns: undefined
       }
       update_preset_participant_activity: {
