@@ -676,6 +676,17 @@ export type Database = {
           active_participants: number
         }[]
       }
+      get_custom_leaderboard: {
+        Args: { target_game_id: string; limit_count?: number }
+        Returns: {
+          player_name: string
+          score: number
+          total_questions: number
+          completion_time: number
+          scoring_data: Json
+          completed_at: string
+        }[]
+      }
       get_game_leaderboard: {
         Args: { target_game_id: string; limit_count?: number }
         Returns: {
@@ -728,6 +739,17 @@ export type Database = {
           best_score: number
           completion_rate: number
           active_participants: number
+        }[]
+      }
+      get_preset_leaderboard: {
+        Args: { target_game_id: string; limit_count?: number }
+        Returns: {
+          player_name: string
+          score: number
+          total_questions: number
+          completion_time: number
+          scoring_data: Json
+          completed_at: string
         }[]
       }
       get_unified_game_leaderboard: {
