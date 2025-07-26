@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { QRCodeSVG } from 'qrcode.react';
-import { Copy, Check, Users } from 'lucide-react';
+import { Copy, Check, Users, Trophy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { StoredGame } from '@/utils/types';
 import { getRemainingTime } from '@/utils/gameExport';
@@ -16,6 +16,8 @@ interface ShareSectionProps {
   hasRegistered: boolean;
   isSubmitting: boolean;
   onJoinGame: () => void;
+  onSwitchToPlayers?: () => void;
+  onSwitchToLeaderboard?: () => void;
 }
 
 const ShareSection: React.FC<ShareSectionProps> = ({
@@ -23,7 +25,9 @@ const ShareSection: React.FC<ShareSectionProps> = ({
   gameId,
   hasRegistered,
   isSubmitting,
-  onJoinGame
+  onJoinGame,
+  onSwitchToPlayers,
+  onSwitchToLeaderboard
 }) => {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -94,7 +98,7 @@ const ShareSection: React.FC<ShareSectionProps> = ({
             </div>
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col gap-2">
           <Button 
             className="w-full" 
             onClick={onJoinGame}
@@ -103,6 +107,32 @@ const ShareSection: React.FC<ShareSectionProps> = ({
             <Users className="h-4 w-4 mr-2" />
             {isSubmitting ? "Đang xử lý..." : "Tham gia game"}
           </Button>
+          
+          {/* Quick Actions */}
+          <div className="flex gap-2 w-full">
+            {onSwitchToPlayers && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex-1"
+                onClick={onSwitchToPlayers}
+              >
+                <Users className="h-3 w-3 mr-1" />
+                Người chơi
+              </Button>
+            )}
+            {onSwitchToLeaderboard && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex-1"
+                onClick={onSwitchToLeaderboard}
+              >
+                <Trophy className="h-3 w-3 mr-1" />
+                BXH
+              </Button>
+            )}
+          </div>
         </CardFooter>
       </Card>
       
