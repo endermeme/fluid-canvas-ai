@@ -14,31 +14,49 @@ export const useRealtimeParticipants = ({ gameId, onParticipantsUpdate }: UseRea
   const fetchParticipants = async (sourceTable: 'custom_games' | 'preset_games' = 'custom_games') => {
     console.log('🔄 [useRealtimeParticipants] Fetching participants for gameId:', gameId, 'sourceTable:', sourceTable);
     try {
-      const { data, error } = await supabase.rpc('get_unified_leaderboard_with_participants', {
-        target_game_id: gameId,
-        target_source_table: sourceTable,
-        limit_count: 50
-      });
+      let allParticipants: any[] = [];
 
-      console.log('📊 [useRealtimeParticipants] RPC response:', { data, error });
+      if (sourceTable === 'custom_games') {
+        const { data, error } = await supabase
+          .from('custom_leaderboard')
+          .select('*')
+          .eq('game_id', gameId)
+          .order('joined_at', { ascending: true });
 
-      if (!error && data) {
-        const mappedParticipants: GameParticipant[] = data.map((p: any) => ({
-          id: p.id || `${p.player_name}-${Date.now()}`,
-          name: p.player_name,
-          ipAddress: 'unknown',
-          timestamp: p.joined_at,
-          gameId: gameId,
-          retryCount: 0,
-          score: p.score || 0
-        }));
-        
-        console.log('✅ [useRealtimeParticipants] Mapped participants:', mappedParticipants);
-        setParticipants(mappedParticipants);
-        onParticipantsUpdate?.(mappedParticipants);
-      } else {
-        console.error('❌ [useRealtimeParticipants] Error fetching participants:', error);
+        if (error) {
+          console.error('❌ [useRealtimeParticipants] Error fetching custom participants:', error);
+        } else {
+          allParticipants = data || [];
+        }
+      } else if (sourceTable === 'preset_games') {
+        const { data, error } = await supabase
+          .from('preset_leaderboard')
+          .select('*')
+          .eq('game_id', gameId)
+          .order('joined_at', { ascending: true });
+
+        if (error) {
+          console.error('❌ [useRealtimeParticipants] Error fetching preset participants:', error);
+        } else {
+          allParticipants = data || [];
+        }
       }
+
+      console.log('📊 [useRealtimeParticipants] Found participants:', allParticipants.length);
+
+      const mappedParticipants: GameParticipant[] = allParticipants.map((p: any) => ({
+        id: p.id || `${p.player_name}-${Date.now()}`,
+        name: p.player_name,
+        ipAddress: p.ip_address || 'unknown',
+        timestamp: p.joined_at,
+        gameId: gameId,
+        retryCount: 0,
+        score: p.score || 0
+      }));
+      
+      console.log('✅ [useRealtimeParticipants] Mapped participants:', mappedParticipants);
+      setParticipants(mappedParticipants);
+      onParticipantsUpdate?.(mappedParticipants);
     } catch (error) {
       console.error('💥 [useRealtimeParticipants] Exception in fetchParticipants:', error);
     } finally {
@@ -57,7 +75,7 @@ export const useRealtimeParticipants = ({ gameId, onParticipantsUpdate }: UseRea
     // Initial fetch
     fetchParticipants();
 
-    // Set up real-time subscription
+    // Set up real-time subscription for both tables
     const channelName = `game_participants_${gameId}`;
     console.log('📡 [useRealtimeParticipants] Creating channel:', channelName);
     
@@ -72,14 +90,31 @@ export const useRealtimeParticipants = ({ gameId, onParticipantsUpdate }: UseRea
           filter: `game_id=eq.${gameId}`
         },
         (payload) => {
-          console.log('🔥 [useRealtimeParticipants] Real-time participant update received:', {
+          console.log('🔥 [useRealtimeParticipants] Custom leaderboard update received:', {
             event: payload.eventType,
             table: payload.table,
             new: payload.new,
             old: payload.old
           });
-          // Refetch participants when there's a change
-          fetchParticipants();
+          fetchParticipants('custom_games');
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'preset_leaderboard',
+          filter: `game_id=eq.${gameId}`
+        },
+        (payload) => {
+          console.log('🔥 [useRealtimeParticipants] Preset leaderboard update received:', {
+            event: payload.eventType,
+            table: payload.table,
+            new: payload.new,
+            old: payload.old
+          });
+          fetchParticipants('preset_games');
         }
       )
       .subscribe((status) => {
