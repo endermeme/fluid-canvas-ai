@@ -111,7 +111,7 @@ export const saveGameForSharing = async (
       expiresAt.setTime(Date.now() + shareSettings.customDuration * 60 * 60 * 1000);
     }
 
-    // Lưu game vào database
+    // Lưu game vào database với is_published = true
     const { data, error } = await supabase
       .from('custom_games')
       .insert([
@@ -128,7 +128,8 @@ export const saveGameForSharing = async (
           max_participants: shareSettings?.maxParticipants || null,
           show_leaderboard: shareSettings?.showLeaderboard ?? true,
           require_registration: shareSettings?.requireRegistration ?? false,
-          custom_duration: shareSettings?.customDuration || null
+          custom_duration: shareSettings?.customDuration || null,
+          is_published: true  // Đảm bảo game được publish khi share
         }
       ])
       .select()

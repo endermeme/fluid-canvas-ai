@@ -33,19 +33,38 @@ export const presetGameAPI = {
     showLeaderboard?: boolean;
     requireRegistration?: boolean;
     customDuration?: number;
+    singleParticipationOnly?: boolean;
     password?: string;
     creatorIp?: string;
     accountId?: string;
   }): Promise<any> {
     try {
+      // Calculate expiration time
+      const expiresAt = new Date();
+      if (gameData.customDuration) {
+        expiresAt.setTime(Date.now() + gameData.customDuration * 60 * 60 * 1000);
+      } else {
+        expiresAt.setDate(expiresAt.getDate() + 2); // Default 2 days
+      }
+
       const { data, error } = await (supabase as any)
-        .from('preset_games')
+        .from('preset_game_instances')
         .insert({
           title: gameData.title,
           game_type: gameData.gameType,
           description: gameData.description || '',
           template_data: gameData.templateData,
-          default_settings: gameData.settings || {}
+          settings: gameData.settings || {},
+          is_published: true, // Published when sharing
+          expires_at: expiresAt.toISOString(),
+          creator_ip: gameData.creatorIp || 'localhost',
+          account_id: gameData.accountId,
+          password: gameData.password || null,
+          max_participants: gameData.maxParticipants || null,
+          show_leaderboard: gameData.showLeaderboard ?? true,
+          require_registration: gameData.requireRegistration ?? false,
+          custom_duration: gameData.customDuration || null,
+          singleParticipationOnly: gameData.singleParticipationOnly ?? false
         })
         .select()
         .single();
@@ -53,7 +72,7 @@ export const presetGameAPI = {
       if (error) throw error;
       return { success: true, gameId: data.id, data };
     } catch (error) {
-      console.error('Error saving preset game:', error);
+      console.error('Error saving preset game instance:', error);
       return { success: false, error };
     }
   },
@@ -62,16 +81,17 @@ export const presetGameAPI = {
   async getPresetGameInstance(gameId: string): Promise<any> {
     try {
       const { data, error } = await (supabase as any)
-        .from('preset_games')
+        .from('preset_game_instances')
         .select('*')
         .eq('id', gameId)
-        .eq('is_active', true)
+        .eq('is_published', true)
+        .gt('expires_at', new Date().toISOString())
         .single();
 
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error fetching preset game:', error);
+      console.error('Error fetching preset game instance:', error);
       return { success: false, error };
     }
   },
@@ -217,17 +237,17 @@ export const presetGameAPI = {
     }
   },
 
-  // Xóa preset game
+  // Xóa preset game instance
   async deletePresetGameInstance(gameId: string): Promise<boolean> {
     try {
       const { error } = await (supabase as any)
-        .from('preset_games')
+        .from('preset_game_instances')
         .delete()
         .eq('id', gameId);
 
       return !error;
     } catch (error) {
-      console.error('Error deleting preset game:', error);
+      console.error('Error deleting preset game instance:', error);
       return false;
     }
   }

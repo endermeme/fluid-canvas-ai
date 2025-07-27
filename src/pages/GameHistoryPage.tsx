@@ -48,7 +48,18 @@ const GameHistoryPage: React.FC = () => {
     
     setLoading(true);
     try {
-      // Fetch from both custom_games and preset_games
+      // Validate account exists in profiles table first
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', accountId)
+        .single();
+      
+      if (!profile) {
+        throw new Error('Invalid account ID');
+      }
+
+      // Fetch from both custom_games and preset_game_instances
       const [customGamesResponse, presetGamesResponse] = await Promise.all([
         supabase
           .from('custom_games')
@@ -57,18 +68,29 @@ const GameHistoryPage: React.FC = () => {
           .eq('is_published', true)
           .order('created_at', { ascending: false }),
         supabase
-          .from('preset_games')
+          .from('preset_game_instances')
           .select('*')
+          .eq('account_id', accountId)
+          .eq('is_published', true)
           .order('created_at', { ascending: false })
       ]);
 
-      // Only show custom games for this account
-      const data = (customGamesResponse.data || []).map(game => ({ 
+      // Combine data from both tables
+      const customGames = (customGamesResponse.data || []).map(game => ({ 
         ...game, 
         game_type: 'custom',
         html_content: game.html_content || '',
         expires_at: game.expires_at || new Date().toISOString()
       }));
+      
+      const presetGames = (presetGamesResponse.data || []).map(game => ({
+        ...game,
+        game_type: game.game_type || 'preset',
+        html_content: JSON.stringify(game.template_data || {}),
+        expires_at: game.expires_at || new Date().toISOString()
+      }));
+      
+      const data = [...customGames, ...presetGames];
       const error = customGamesResponse.error || presetGamesResponse.error;
 
       if (error) throw error;
@@ -189,8 +211,11 @@ const GameHistoryPage: React.FC = () => {
   
   const handleDeleteGame = async (game: HistoryGame) => {
     try {
+      // Determine which table to delete from based on game_type
+      const tableName = game.game_type === 'custom' ? 'custom_games' : 'preset_game_instances';
+      
       const { error } = await supabase
-        .from('custom_games')
+        .from(tableName)
         .delete()
         .eq('id', game.id)
         .eq('account_id', accountId);
