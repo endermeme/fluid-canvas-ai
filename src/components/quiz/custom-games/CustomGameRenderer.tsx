@@ -60,7 +60,7 @@ export const CustomGameRenderer: React.FC<CustomGameRendererProps> = ({
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [gameId, gameType, playerName, saveUnifiedScore, onGameComplete]);
+  }, [gameId, gameType, playerName, saveCustomGameScore, onGameComplete]);
 
   useEffect(() => {
     const loadContent = async () => {
