@@ -2,7 +2,7 @@ import React from 'react';
 import PresetGameRenderer from '../PresetGameRenderer';
 import PresetGameHeader from '../../preset-games/PresetGameHeader';
 import { useToast } from '@/hooks/use-toast';
-import { useGameShareManager } from '../../hooks/useGameShareManager';
+import { usePresetGameShareManager } from '@/hooks/usePresetGameShareManager';
 import { usePresetGameScoreManager } from '@/hooks/usePresetGameScoreManager';
 import { Card } from "@/components/ui/card";
 import { useParams } from 'react-router-dom';
@@ -42,7 +42,7 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
   playerName
 }) => {
   const { toast } = useToast();
-  const { isSharing, handleShare } = useGameShareManager(miniGame, toast, onShare);
+  const { isSharing, handleShare } = usePresetGameShareManager(miniGame, toast, onShare);
   const { savePresetGameScore } = usePresetGameScoreManager();
   const { gameId: urlGameId } = useParams();
   const currentGameId = gameId || urlGameId;

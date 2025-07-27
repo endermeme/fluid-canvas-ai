@@ -4,7 +4,7 @@ import GameLoadingIndicator from '../game-components/GameLoadingIndicator';
 import GameIframeRenderer from './GameIframeRenderer';
 import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
-import { useGameShareManager } from '../../hooks/useGameShareManager';
+import { useCustomGameShareManager } from '@/hooks/useCustomGameShareManager';
 import { useIframeManager } from '../../hooks/useIframeManager';
 import { useCustomGameScoreManager } from '@/hooks/useCustomGameScoreManager';
 import { Card } from "@/components/ui/card";
@@ -42,7 +42,7 @@ const CustomGameView: React.FC<CustomGameViewProps> = ({
   playerName
 }) => {
   const { toast } = useToast();
-  const { isSharing, handleShare } = useGameShareManager(miniGame, toast, onShare);
+  const { isSharing, handleShare } = useCustomGameShareManager(miniGame, toast, onShare);
   const { saveCustomGameScore } = useCustomGameScoreManager();
   
   const handleScoreUpdate = (score: number, totalQuestions: number) => {

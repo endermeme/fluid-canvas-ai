@@ -1,15 +1,14 @@
-
 import { useState } from 'react';
-import { saveGameForSharing } from '@/utils/gameExport';
+import { saveCustomGameForSharing } from '@/utils/customGameExport';
 import { ToastType } from '@/hooks/use-toast';
 
-interface MiniGame {
+interface CustomMiniGame {
   title?: string;
   content: string;
 }
 
-export const useGameShareManager = (
-  miniGame: MiniGame, 
+export const useCustomGameShareManager = (
+  miniGame: CustomMiniGame, 
   toast: ToastType,
   onShare?: () => Promise<string>
 ) => {
@@ -38,21 +37,12 @@ export const useGameShareManager = (
         setIsSharing(false);
         return result;
       } else {
-        // Xác định game type dựa trên content
-        let gameType = 'custom';
-        if (miniGame.content.includes('answerQuestion(true)') || miniGame.content.includes('true/false')) {
-          gameType = 'true-false';
-        } else if (miniGame.content.includes('flashcard') || miniGame.content.includes('flip')) {
-          gameType = 'flashcards';
-        } else if (miniGame.content.includes('memory') || miniGame.content.includes('matching')) {
-          gameType = 'memory';
-        }
-        
-        const url = await saveGameForSharing(
+        // For custom games, save the HTML content directly
+        const url = await saveCustomGameForSharing(
           miniGame.title || 'Game tương tác',
-          gameType,
-          miniGame,
-          miniGame.content
+          miniGame, // Pass the whole miniGame as content
+          miniGame.content, // HTML content
+          `Custom game: ${miniGame.title || 'Game tương tác'}`
         );
         
         setIsSharing(false);
@@ -60,7 +50,7 @@ export const useGameShareManager = (
         if (url) {
           toast({
             title: "Chia sẻ thành công! 🎉",
-            description: "Link chia sẻ đã được tạo.",
+            description: "Link chia sẻ custom game đã được tạo.",
           });
           return url;
         } else {
@@ -68,7 +58,7 @@ export const useGameShareManager = (
         }
       }
     } catch (error) {
-      console.error("Error sharing game:", error);
+      console.error("Error sharing custom game:", error);
       toast({
         title: "Lỗi chia sẻ",
         description: error instanceof Error ? error.message : "Không thể tạo link chia sẻ. Vui lòng thử lại.",
