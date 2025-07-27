@@ -69,17 +69,55 @@ export const saveGameForSharing = async (
     // Lưu JSON data cho preset games để render bằng React components
     let processedHtmlContent = htmlContent;
     
-    // Nếu là preset game (có cấu trúc template), lưu JSON data thay vì HTML
-    if (typeof content === 'object' && content !== null) {
-      if (content.questions || content.cards || content.items) {
-        // Preset games: chỉ lưu JSON data, không cần HTML
-        processedHtmlContent = JSON.stringify({
-          type: 'preset-game',
-          gameType: gameType,
-          data: content
-        });
-      } else if (htmlContent) {
-        // Custom games: vẫn lưu HTML + embed JSON
+    // Detect if this is a preset game
+    const isPresetGame = typeof content === 'object' && content !== null && 
+                        (content.questions || content.cards || content.items);
+    
+    // Nếu là preset game (có cấu trúc template), lưu vào preset_games table
+    if (isPresetGame) {
+      // Cập nhật expires_at nếu có custom duration
+      if (shareSettings?.customDuration) {
+        expiresAt.setTime(Date.now() + shareSettings.customDuration * 60 * 60 * 1000);
+      }
+
+      // Save to preset_games table for preset games
+      const { data, error } = await supabase
+        .from('preset_games')
+        .insert([
+          {
+            id: gameId,
+            title: title || 'Game tương tác',
+            game_type: gameType,
+            template_data: content,
+            description: description || `Game chia sẻ: ${title}`,
+            expires_at: expiresAt.toISOString(),
+            creator_ip: 'localhost',
+            account_id: accountId,
+            password: shareSettings?.password || null,
+            max_participants: shareSettings?.maxParticipants || null,
+            show_leaderboard: shareSettings?.showLeaderboard ?? true,
+            require_registration: shareSettings?.requireRegistration ?? false,
+            custom_duration: shareSettings?.customDuration || null,
+            is_published: true,
+            is_active: true
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Lỗi khi lưu preset game:", error);
+        throw new Error(`Không thể lưu preset game: ${error.message}`);
+      }
+      
+      if (!data) {
+        throw new Error("Không nhận được dữ liệu từ database sau khi lưu preset game");
+      }
+
+      console.log("Preset game đã được lưu thành công:", data);
+    } else {
+      // Custom games: lưu HTML + embed JSON vào custom_games table
+      if (typeof content === 'object' && content !== null && htmlContent) {
         try {
           const encodedContent = encodeURIComponent(JSON.stringify(content));
           if (!processedHtmlContent.includes('data-game-content')) {
@@ -92,59 +130,60 @@ export const saveGameForSharing = async (
           console.error("Error encoding game content:", encodeError);
         }
       }
-    }
-    
-    // Đảm bảo HTML content có cấu trúc đầy đủ cho custom games
-    if (htmlContent && !processedHtmlContent.includes('<!DOCTYPE html') && !processedHtmlContent.startsWith('{')) {
-      processedHtmlContent = `<!DOCTYPE html>\n<html lang="vi">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>${title}</title>\n</head>\n<body>\n${processedHtmlContent}\n</body>\n</html>`;
-    }
-    
-    // Giới hạn kích thước nội dung HTML
-    const maxContentLength = 500000; // ~500KB
-    if (processedHtmlContent && processedHtmlContent.length > maxContentLength) {
-      processedHtmlContent = processedHtmlContent.substring(0, maxContentLength);
-      console.warn("Content truncated due to size limitations");
-    }
-    
-    // Cập nhật expires_at nếu có custom duration
-    if (shareSettings?.customDuration) {
-      expiresAt.setTime(Date.now() + shareSettings.customDuration * 60 * 60 * 1000);
+      
+      // Đảm bảo HTML content có cấu trúc đầy đủ cho custom games
+      if (htmlContent && !processedHtmlContent.includes('<!DOCTYPE html')) {
+        processedHtmlContent = `<!DOCTYPE html>\n<html lang="vi">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>${title}</title>\n</head>\n<body>\n${processedHtmlContent}\n</body>\n</html>`;
+      }
+      
+      // Giới hạn kích thước nội dung HTML
+      const maxContentLength = 500000; // ~500KB
+      if (processedHtmlContent && processedHtmlContent.length > maxContentLength) {
+        processedHtmlContent = processedHtmlContent.substring(0, maxContentLength);
+        console.warn("Content truncated due to size limitations");
+      }
+      
+      // Cập nhật expires_at nếu có custom duration
+      if (shareSettings?.customDuration) {
+        expiresAt.setTime(Date.now() + shareSettings.customDuration * 60 * 60 * 1000);
+      }
+
+      // Save to custom_games table for custom games
+      const { data, error } = await supabase
+        .from('custom_games')
+        .insert([
+          {
+            id: gameId,
+            title: title || 'Game tương tác',
+            game_data: {},
+            description: description || `Game chia sẻ: ${title}`,
+            html_content: processedHtmlContent,
+            expires_at: expiresAt.toISOString(),
+            creator_ip: 'localhost',
+            account_id: accountId,
+            password: shareSettings?.password || null,
+            max_participants: shareSettings?.maxParticipants || null,
+            show_leaderboard: shareSettings?.showLeaderboard ?? true,
+            require_registration: shareSettings?.requireRegistration ?? false,
+            custom_duration: shareSettings?.customDuration || null,
+            is_published: true
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Lỗi khi lưu custom game:", error);
+        throw new Error(`Không thể lưu custom game: ${error.message}`);
+      }
+      
+      if (!data) {
+        throw new Error("Không nhận được dữ liệu từ database sau khi lưu custom game");
+      }
+
+      console.log("Custom game đã được lưu thành công:", data);
     }
 
-    // Lưu game vào database với is_published = true
-    const { data, error } = await supabase
-      .from('custom_games')
-      .insert([
-        {
-          id: gameId,
-          title: title || 'Game tương tác',
-          game_data: {},
-          description: description || `Game chia sẻ: ${title}`,
-          html_content: processedHtmlContent,
-          expires_at: expiresAt.toISOString(),
-          creator_ip: 'localhost',
-          account_id: accountId,
-          password: shareSettings?.password || null,
-          max_participants: shareSettings?.maxParticipants || null,
-          show_leaderboard: shareSettings?.showLeaderboard ?? true,
-          require_registration: shareSettings?.requireRegistration ?? false,
-          custom_duration: shareSettings?.customDuration || null,
-          is_published: true  // Đảm bảo game được publish khi share
-        }
-      ])
-      .select()
-      .single();
-
-    if (error) {
-      console.error("Lỗi khi lưu game:", error);
-      throw new Error(`Không thể lưu game: ${error.message}`);
-    }
-
-    if (!data) {
-      throw new Error("Không nhận được dữ liệu từ database sau khi lưu");
-    }
-
-    console.log("Game đã được lưu thành công:", data);
 
     // Trả về URL cho game đã được chia sẻ
     const baseUrl = window.location.origin;

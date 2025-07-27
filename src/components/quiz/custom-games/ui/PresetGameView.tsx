@@ -75,7 +75,7 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
 
       await saveUnifiedScore({
         gameId: currentGameId,
-        sourceTable: 'custom_games', // Since preset games are stored in custom_games table for now
+        sourceTable: 'preset_games', // Use preset_games for preset games
         playerName: finalPlayerName,
         score: result.score,
         totalQuestions: result.totalQuestions || result.total || 10,
