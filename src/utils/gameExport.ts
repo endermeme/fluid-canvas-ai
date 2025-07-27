@@ -57,30 +57,24 @@ export const saveGameForSharing = async (
   shareSettings?: ShareSettings
 ): Promise<string> => {
   try {
-    console.log('Saving game for sharing:', { title, gameType });
+    console.log('Saving game for sharing:', { title, gameType, content });
     
-    // Tạo một ID mới cho game
     const gameId = crypto.randomUUID();
-    
-    // Tính thời gian hết hạn (7 ngày từ hiện tại)
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
     
-    // Lưu JSON data cho preset games để render bằng React components
-    let processedHtmlContent = htmlContent;
-    
-    // Detect if this is a preset game
+    // Detect if this is a preset game (has questions, cards, items structure)
     const isPresetGame = typeof content === 'object' && content !== null && 
-                        (content.questions || content.cards || content.items);
+                        (content.questions || content.cards || content.items || content.pairs);
     
-    // Nếu là preset game (có cấu trúc template), lưu vào preset_games table
-    if (isPresetGame) {
-      // Cập nhật expires_at nếu có custom duration
-      if (shareSettings?.customDuration) {
-        expiresAt.setTime(Date.now() + shareSettings.customDuration * 60 * 60 * 1000);
-      }
+    if (shareSettings?.customDuration) {
+      expiresAt.setTime(Date.now() + shareSettings.customDuration * 60 * 60 * 1000);
+    }
 
-      // Save to preset_games table for preset games
+    if (isPresetGame) {
+      // Save preset games to preset_games table
+      console.log('Saving preset game to preset_games table');
+      
       const { data, error } = await supabase
         .from('preset_games')
         .insert([
@@ -106,17 +100,18 @@ export const saveGameForSharing = async (
         .single();
 
       if (error) {
-        console.error("Lỗi khi lưu preset game:", error);
-        throw new Error(`Không thể lưu preset game: ${error.message}`);
+        console.error("Error saving preset game:", error);
+        throw new Error(`Cannot save preset game: ${error.message}`);
       }
       
-      if (!data) {
-        throw new Error("Không nhận được dữ liệu từ database sau khi lưu preset game");
-      }
-
-      console.log("Preset game đã được lưu thành công:", data);
+      console.log("Preset game saved successfully:", data);
     } else {
-      // Custom games: lưu HTML + embed JSON vào custom_games table
+      // Save custom games to custom_games table
+      console.log('Saving custom game to custom_games table');
+      
+      let processedHtmlContent = htmlContent;
+      
+      // Add game content to HTML for custom games
       if (typeof content === 'object' && content !== null && htmlContent) {
         try {
           const encodedContent = encodeURIComponent(JSON.stringify(content));
@@ -131,24 +126,18 @@ export const saveGameForSharing = async (
         }
       }
       
-      // Đảm bảo HTML content có cấu trúc đầy đủ cho custom games
+      // Ensure HTML structure for custom games
       if (htmlContent && !processedHtmlContent.includes('<!DOCTYPE html')) {
         processedHtmlContent = `<!DOCTYPE html>\n<html lang="vi">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>${title}</title>\n</head>\n<body>\n${processedHtmlContent}\n</body>\n</html>`;
       }
       
-      // Giới hạn kích thước nội dung HTML
+      // Limit content size
       const maxContentLength = 500000; // ~500KB
       if (processedHtmlContent && processedHtmlContent.length > maxContentLength) {
         processedHtmlContent = processedHtmlContent.substring(0, maxContentLength);
         console.warn("Content truncated due to size limitations");
       }
-      
-      // Cập nhật expires_at nếu có custom duration
-      if (shareSettings?.customDuration) {
-        expiresAt.setTime(Date.now() + shareSettings.customDuration * 60 * 60 * 1000);
-      }
 
-      // Save to custom_games table for custom games
       const { data, error } = await supabase
         .from('custom_games')
         .insert([
@@ -173,19 +162,14 @@ export const saveGameForSharing = async (
         .single();
 
       if (error) {
-        console.error("Lỗi khi lưu custom game:", error);
-        throw new Error(`Không thể lưu custom game: ${error.message}`);
+        console.error("Error saving custom game:", error);
+        throw new Error(`Cannot save custom game: ${error.message}`);
       }
       
-      if (!data) {
-        throw new Error("Không nhận được dữ liệu từ database sau khi lưu custom game");
-      }
-
-      console.log("Custom game đã được lưu thành công:", data);
+      console.log("Custom game saved successfully:", data);
     }
 
-
-    // Trả về URL cho game đã được chia sẻ
+    // Return share URL
     const baseUrl = window.location.origin;
     const shareUrl = `${baseUrl}/game/${gameId}`;
     
@@ -193,7 +177,7 @@ export const saveGameForSharing = async (
     return shareUrl;
     
   } catch (error) {
-    console.error("Lỗi trong saveGameForSharing:", error);
+    console.error("Error in saveGameForSharing:", error);
     throw error;
   }
 };
@@ -207,7 +191,34 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
   try {
     console.log("Fetching game with ID:", id);
     
-    // Try custom_games first
+    // Try preset_games first
+    const { data: presetGame } = await supabase
+      .from('preset_games')
+      .select('*')
+      .eq('id', id)
+      .eq('is_active', true)
+      .single();
+
+    if (presetGame) {
+      console.log("Found preset game:", presetGame);
+      return {
+        id: presetGame.id,
+        title: presetGame.title,
+        gameType: presetGame.game_type,
+        content: presetGame.template_data || {},
+        htmlContent: '',
+        description: presetGame.description || `Game chia sẻ: ${presetGame.title}`,
+        expiresAt: new Date(presetGame.expires_at || Date.now() + 7 * 24 * 60 * 60 * 1000).getTime(),
+        createdAt: new Date(presetGame.created_at).getTime(),
+        password: presetGame.password,
+        maxParticipants: presetGame.max_participants,
+        showLeaderboard: presetGame.show_leaderboard ?? true,
+        requireRegistration: presetGame.require_registration ?? false,
+        customDuration: presetGame.custom_duration
+      };
+    }
+    
+    // Try custom_games if not found in preset_games
     const { data: customGame } = await supabase
       .from('custom_games')
       .select('*')
@@ -215,38 +226,11 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
       .gt('expires_at', new Date().toISOString())
       .single();
 
-    // Then try preset_games if not found in custom_games
-    const { data: presetGame } = customGame ? { data: null } : await supabase
-      .from('preset_games')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    const game = customGame || presetGame;
-
-    if (!game) {
-      console.error("Game not found or expired with ID:", id);
-      return null;
-    }
-
-    console.log("Game data retrieved:", game);
-
-    let parsedContent = null;
-    
-    // Handle different schemas for custom_games and preset_games
     if (customGame) {
-      // Custom game schema
-      if (customGame.html_content && customGame.html_content.startsWith('{')) {
-        try {
-          const gameData = JSON.parse(customGame.html_content);
-          if (gameData.type === 'preset-game') {
-            parsedContent = gameData.data;
-          }
-        } catch (e) {
-          console.error('Error parsing preset game JSON:', e);
-        }
-      } 
-      else if (customGame.html_content && customGame.html_content.includes('data-game-content')) {
+      console.log("Found custom game:", customGame);
+      
+      let parsedContent = null;
+      if (customGame.html_content && customGame.html_content.includes('data-game-content')) {
         try {
           const contentMatch = customGame.html_content.match(/data-game-content="([^"]*)"/);
           if (contentMatch && contentMatch[1]) {
@@ -272,28 +256,12 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
         requireRegistration: customGame.require_registration ?? false,
         customDuration: customGame.custom_duration
       };
-    } else if (presetGame) {
-      // Preset game schema
-      return {
-        id: presetGame.id,
-        title: presetGame.title,
-        gameType: presetGame.game_type,
-        content: presetGame.template_data || {},
-        htmlContent: '',
-        description: presetGame.description || `Game chia sẻ: ${presetGame.title}`,
-        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // No expires_at in preset_games
-        createdAt: new Date(presetGame.created_at).getTime(),
-        password: null,
-        maxParticipants: null,
-        showLeaderboard: true,
-        requireRegistration: false,
-        customDuration: null
-      };
     }
 
+    console.error("Game not found or expired with ID:", id);
     return null;
   } catch (error) {
-    console.error("Unhandled error in getSharedGame:", error);
+    console.error("Error in getSharedGame:", error);
     return null;
   }
 };

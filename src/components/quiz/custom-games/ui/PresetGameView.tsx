@@ -47,13 +47,11 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
   const { gameId: urlGameId } = useParams();
   const currentGameId = gameId || urlGameId;
 
-  const refreshGame = () => {
-    onReload?.();
-  };
-
   const handleGameComplete = async (result: any) => {
     if (currentGameId && result && typeof result.score === 'number') {
-      // Use prop playerName first, fallback to localStorage logic
+      console.log('Saving preset game score:', { currentGameId, result, playerName });
+      
+      // Get player name
       let finalPlayerName = playerName || 'Người chơi';
       
       if (!playerName) {
@@ -73,15 +71,29 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
         }
       }
 
-      await saveUnifiedScore({
-        gameId: currentGameId,
-        sourceTable: 'preset_games', // Use preset_games for preset games
-        playerName: finalPlayerName,
-        score: result.score,
-        totalQuestions: result.totalQuestions || result.total || 10,
-        completionTime: result.completionTime,
-        gameType: miniGame.gameType || 'preset'
-      });
+      try {
+        await saveUnifiedScore({
+          gameId: currentGameId,
+          sourceTable: 'preset_games', // Save to preset_leaderboard
+          playerName: finalPlayerName,
+          score: result.score,
+          totalQuestions: result.totalQuestions || result.total || 10,
+          completionTime: result.completionTime || result.time,
+          gameType: miniGame.gameType || 'preset'
+        });
+        
+        toast({
+          title: "Điểm đã được lưu!",
+          description: `Bạn đạt ${result.score} điểm`,
+        });
+      } catch (error) {
+        console.error('Error saving score:', error);
+        toast({
+          title: "Lỗi lưu điểm",
+          description: "Không thể lưu điểm của bạn",
+          variant: "destructive"
+        });
+      }
     }
   };
 
