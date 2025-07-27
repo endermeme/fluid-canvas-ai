@@ -15,6 +15,7 @@ export interface StoredGame {
   showLeaderboard?: boolean;
   requireRegistration?: boolean;
   customDuration?: number;
+  singleParticipationOnly?: boolean;
   creator_ip?: string;
   account_id?: string;
 }

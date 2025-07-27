@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Share2, Lock, Users, Clock, Trophy, UserCheck } from 'lucide-react';
+import { Loader2, Share2, Lock, Users, Clock, Trophy, UserCheck, ShieldCheck } from 'lucide-react';
 
 export interface ShareSettings {
   password?: string;
@@ -15,6 +15,7 @@ export interface ShareSettings {
   showLeaderboard: boolean;
   requireRegistration: boolean;
   customDuration?: number; // in hours
+  singleParticipationOnly?: boolean; // new field for single participation
 }
 
 interface ShareSettingsFormProps {
@@ -41,10 +42,19 @@ export const ShareSettingsForm: React.FC<ShareSettingsFormProps> = ({
   const [settings, setSettings] = useState<ShareSettings>({
     showLeaderboard: true,
     requireRegistration: false,
+    singleParticipationOnly: false,
   });
   const [usePassword, setUsePassword] = useState(false);
   const [limitParticipants, setLimitParticipants] = useState(false);
   const [customDuration, setCustomDuration] = useState(false);
+
+  // Auto-enable requireRegistration when password is enabled
+  const handlePasswordToggle = (checked: boolean) => {
+    setUsePassword(checked);
+    if (checked) {
+      setSettings(prev => ({ ...prev, requireRegistration: true }));
+    }
+  };
 
   const handleSubmit = async () => {
     const finalSettings: ShareSettings = {
@@ -61,6 +71,7 @@ export const ShareSettingsForm: React.FC<ShareSettingsFormProps> = ({
     setSettings({
       showLeaderboard: true,
       requireRegistration: false,
+      singleParticipationOnly: false,
     });
     setUsePassword(false);
     setLimitParticipants(false);
@@ -96,7 +107,7 @@ export const ShareSettingsForm: React.FC<ShareSettingsFormProps> = ({
                 </div>
                 <Switch 
                   checked={usePassword}
-                  onCheckedChange={setUsePassword}
+                  onCheckedChange={handlePasswordToggle}
                 />
               </div>
               {usePassword && (
@@ -203,8 +214,33 @@ export const ShareSettingsForm: React.FC<ShareSettingsFormProps> = ({
                 <Switch 
                   checked={settings.requireRegistration}
                   onCheckedChange={(checked) => setSettings({ ...settings, requireRegistration: checked })}
+                  disabled={usePassword} // Disabled when password is enabled
                 />
               </div>
+              {usePassword && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Tự động bật khi có mật khẩu
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Single Participation Only */}
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4" />
+                  <Label>Chỉ tham gia một lần</Label>
+                </div>
+                <Switch 
+                  checked={settings.singleParticipationOnly}
+                  onCheckedChange={(checked) => setSettings({ ...settings, singleParticipationOnly: checked })}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Người chơi chỉ được tham gia và làm bài một lần như thi đấu
+              </p>
             </CardContent>
           </Card>
         </div>
