@@ -29,6 +29,7 @@ export const useCustomGameManager = () => {
     gameData: CustomGameData & {
       creatorIp?: string;
       accountId?: string;
+      accountUuid?: string;
       password?: string;
       maxParticipants?: number;
       showLeaderboard?: boolean;
@@ -60,6 +61,7 @@ export const useCustomGameManager = () => {
     gameData: CustomGameData & {
       creatorIp?: string;
       accountId?: string;
+      accountUuid?: string;
       password?: string;
       maxParticipants?: number;
       showLeaderboard?: boolean;

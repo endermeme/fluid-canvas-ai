@@ -12,6 +12,7 @@ export const usePresetGameManager = () => {
     gameData: PresetGameData & {
       creatorIp?: string;
       accountId?: string;
+      accountUuid?: string;
       password?: string;
       maxParticipants?: number;
       showLeaderboard?: boolean;
@@ -43,6 +44,7 @@ export const usePresetGameManager = () => {
     gameData: PresetGameData & {
       creatorIp?: string;
       accountId?: string;
+      accountUuid?: string;
       password?: string;
       maxParticipants?: number;
       showLeaderboard?: boolean;

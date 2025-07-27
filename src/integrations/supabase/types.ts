@@ -14,9 +14,34 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounts: {
+        Row: {
+          account_name: string
+          created_at: string
+          id: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       custom_games: {
         Row: {
           account_id: string | null
+          account_uuid: string | null
           created_at: string
           creator_ip: string | null
           custom_duration: number | null
@@ -39,6 +64,7 @@ export type Database = {
         }
         Insert: {
           account_id?: string | null
+          account_uuid?: string | null
           created_at?: string
           creator_ip?: string | null
           custom_duration?: number | null
@@ -61,6 +87,7 @@ export type Database = {
         }
         Update: {
           account_id?: string | null
+          account_uuid?: string | null
           created_at?: string
           creator_ip?: string | null
           custom_duration?: number | null
@@ -81,7 +108,15 @@ export type Database = {
           title?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "custom_games_account_uuid_fkey"
+            columns: ["account_uuid"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       custom_leaderboard: {
         Row: {
@@ -148,6 +183,7 @@ export type Database = {
       preset_games: {
         Row: {
           account_id: string | null
+          account_uuid: string | null
           created_at: string
           creator_ip: string | null
           custom_duration: number | null
@@ -171,6 +207,7 @@ export type Database = {
         }
         Insert: {
           account_id?: string | null
+          account_uuid?: string | null
           created_at?: string
           creator_ip?: string | null
           custom_duration?: number | null
@@ -194,6 +231,7 @@ export type Database = {
         }
         Update: {
           account_id?: string | null
+          account_uuid?: string | null
           created_at?: string
           creator_ip?: string | null
           custom_duration?: number | null
@@ -215,7 +253,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "preset_games_account_uuid_fkey"
+            columns: ["account_uuid"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       preset_leaderboard: {
         Row: {
@@ -388,6 +434,10 @@ export type Database = {
           is_active: boolean
           session_data: Json
         }[]
+      }
+      get_or_create_account: {
+        Args: { account_name_param: string }
+        Returns: string
       }
       get_preset_game_leaderboard: {
         Args: { target_game_id: string; limit_count?: number }

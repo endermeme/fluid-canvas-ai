@@ -1,48 +1,93 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AccountContextType {
   accountId: string | null;
+  accountUuid: string | null;
   setAccountId: (id: string | null) => void;
+  isLoading: boolean;
   isValidAccount: boolean;
 }
 
-const AccountContext = createContext<AccountContextType | undefined>(undefined);
+const AccountContext = createContext<AccountContextType>({
+  accountId: null,
+  accountUuid: null,
+  setAccountId: () => {},
+  isLoading: true,
+  isValidAccount: false,
+});
+
+export const useAccount = () => {
+  const context = useContext(AccountContext);
+  if (!context) {
+    throw new Error('useAccount must be used within an AccountProvider');
+  }
+  return context;
+};
 
 interface AccountProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
-  const [accountId, setAccountIdState] = useState<string | null>(null);
+  const [accountId, setAccountId] = useState<string | null>(null);
+  const [accountUuid, setAccountUuid] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const location = useLocation();
 
-  // Extract account from URL parameters
+  // Function to get or create account UUID
+  const getOrCreateAccountUuid = async (accountName: string): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase
+        .rpc('get_or_create_account', { account_name_param: accountName });
+      
+      if (error) {
+        console.error('Error getting/creating account:', error);
+        return null;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error in getOrCreateAccountUuid:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const accParam = urlParams.get('acc');
-    
-    if (accParam && accParam.length >= 10) {
-      setAccountIdState(accParam);
-    } else {
-      // Auto-redirect to example123 if no valid account in URL
-      setAccountIdState('example123');
-      const url = new URL(window.location.href);
-      url.searchParams.set('acc', 'example123');
-      window.history.replaceState({}, '', url.toString());
-    }
-  }, []);
+    const initializeAccount = async () => {
+      setIsLoading(true);
+      
+      // Get account ID from URL params
+      const urlParams = new URLSearchParams(location.search);
+      const accParam = urlParams.get('acc');
+      
+      if (accParam) {
+        setAccountId(accParam);
+        
+        // Get or create the account UUID
+        const uuid = await getOrCreateAccountUuid(accParam);
+        setAccountUuid(uuid);
+      } else {
+        setAccountId(null);
+        setAccountUuid(null);
+      }
+      
+      setIsLoading(false);
+    };
 
-  // Update URL when account changes
-  const setAccountId = (id: string | null) => {
-    setAccountIdState(id);
+    initializeAccount();
+  }, [location.search]);
+
+  const handleSetAccountId = async (id: string | null) => {
+    setAccountId(id);
     
-    const url = new URL(window.location.href);
-    if (id && id.length >= 10) {
-      url.searchParams.set('acc', id);
+    if (id) {
+      const uuid = await getOrCreateAccountUuid(id);
+      setAccountUuid(uuid);
     } else {
-      url.searchParams.delete('acc');
+      setAccountUuid(null);
     }
-    
-    window.history.replaceState({}, '', url.toString());
   };
 
   const isValidAccount = accountId !== null && accountId.length >= 10;
@@ -51,19 +96,13 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
     <AccountContext.Provider 
       value={{ 
         accountId, 
-        setAccountId, 
+        accountUuid,
+        setAccountId: handleSetAccountId, 
+        isLoading,
         isValidAccount 
       }}
     >
       {children}
     </AccountContext.Provider>
   );
-};
-
-export const useAccount = (): AccountContextType => {
-  const context = useContext(AccountContext);
-  if (!context) {
-    throw new Error('useAccount must be used within an AccountProvider');
-  }
-  return context;
 };

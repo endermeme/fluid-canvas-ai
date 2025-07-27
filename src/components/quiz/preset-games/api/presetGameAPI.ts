@@ -37,6 +37,7 @@ export const presetGameAPI = {
     password?: string;
     creatorIp?: string;
     accountId?: string;
+    accountUuid?: string;
   }): Promise<any> {
     try {
       // Calculate expiration time
@@ -59,6 +60,7 @@ export const presetGameAPI = {
           expires_at: expiresAt.toISOString(),
           creator_ip: gameData.creatorIp || 'localhost',
           account_id: gameData.accountId,
+          account_uuid: gameData.accountUuid,
           password: gameData.password || null,
           max_participants: gameData.maxParticipants || null,
           show_leaderboard: gameData.showLeaderboard ?? true,
@@ -221,7 +223,7 @@ export const presetGameAPI = {
   },
 
   // Lấy danh sách preset games
-  async getPresetGamesList(accountId?: string, creatorIp?: string): Promise<any[]> {
+  async getPresetGamesList(accountId?: string, accountUuid?: string, creatorIp?: string): Promise<any[]> {
     try {
       let query = (supabase as any)
         .from('preset_games')
@@ -230,7 +232,9 @@ export const presetGameAPI = {
         .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false });
 
-      if (accountId) {
+      if (accountUuid) {
+        query = query.eq('account_uuid', accountUuid);
+      } else if (accountId) {
         query = query.eq('account_id', accountId);
       } else if (creatorIp) {
         query = query.eq('creator_ip', creatorIp);

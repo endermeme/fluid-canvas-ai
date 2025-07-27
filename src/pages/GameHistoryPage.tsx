@@ -36,7 +36,7 @@ const GameHistoryPage: React.FC = () => {
   const [filterBy, setFilterBy] = useState<'all' | 'password' | 'public' | 'active'>('all');
   
   const navigate = useNavigate();
-  const { accountId } = useAccount();
+  const { accountId, accountUuid } = useAccount();
   const { toast } = useToast();
   
   useEffect(() => {
@@ -44,23 +44,23 @@ const GameHistoryPage: React.FC = () => {
   }, [accountId]);
   
   const loadGames = async () => {
-    if (!accountId) return;
+    if (!accountId || !accountUuid) return;
     
     setLoading(true);
     try {
 
-      // Fetch from both custom_games and preset_games  
+      // Fetch from both custom_games and preset_games using account_uuid
       const [customGamesResponse, presetGamesResponse] = await Promise.all([
         supabase
           .from('custom_games')
           .select('*')
-          .eq('account_id', accountId)
+          .eq('account_uuid', accountUuid)
           .eq('is_published', true)
           .order('created_at', { ascending: false }),
         supabase
           .from('preset_games')
           .select('*')
-          .eq('account_id', accountId)
+          .eq('account_uuid', accountUuid)
           .eq('is_published', true)
           .order('created_at', { ascending: false })
       ]);
@@ -208,7 +208,7 @@ const GameHistoryPage: React.FC = () => {
         .from(tableName)
         .delete()
         .eq('id', game.id)
-        .eq('account_id', accountId);
+        .eq('account_uuid', accountUuid);
       
       if (error) throw error;
       
