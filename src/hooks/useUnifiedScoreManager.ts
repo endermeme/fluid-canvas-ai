@@ -35,8 +35,8 @@ export const useUnifiedScoreManager = () => {
       
       const tableName = scoreData.sourceTable === 'custom_games' ? 'custom_leaderboard' : 'preset_leaderboard';
       
-      // First try to update existing record, then insert if not found
-      const { error: updateError } = await supabase
+      // Try to update existing participant record first
+      const { data: updateData, error: updateError } = await supabase
         .from(tableName)
         .update({
           score: scoreData.score,
@@ -47,14 +47,17 @@ export const useUnifiedScoreManager = () => {
           last_active_at: new Date().toISOString()
         })
         .eq('game_id', scoreData.gameId)
-        .eq('player_name', scoreData.playerName);
+        .eq('player_name', scoreData.playerName)
+        .select();
+
+      console.log('🔄 [useUnifiedScoreManager] Update result:', { updateData, updateError });
 
       let scoreError = updateError;
 
-      if (updateError) {
-        console.log('🔄 [useUnifiedScoreManager] Update failed, trying insert:', updateError);
+      // If no rows were affected by update, participant doesn't exist - create new one
+      if (!updateError && (!updateData || updateData.length === 0)) {
+        console.log('🔄 [useUnifiedScoreManager] No existing participant, creating new one');
         
-        // If update failed, try insert
         const { error: insertError } = await supabase
           .from(tableName)
           .insert({
@@ -69,6 +72,7 @@ export const useUnifiedScoreManager = () => {
           });
         
         scoreError = insertError;
+        console.log('🔄 [useUnifiedScoreManager] Insert result:', { insertError });
       }
 
       if (scoreError) {
