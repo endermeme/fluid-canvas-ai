@@ -59,7 +59,7 @@ const GameHistoryPage: React.FC = () => {
         throw new Error('Invalid account ID');
       }
 
-      // Fetch from both custom_games and preset_game_instances
+      // Fetch from both custom_games and preset_games  
       const [customGamesResponse, presetGamesResponse] = await Promise.all([
         supabase
           .from('custom_games')
@@ -68,7 +68,7 @@ const GameHistoryPage: React.FC = () => {
           .eq('is_published', true)
           .order('created_at', { ascending: false }),
         supabase
-          .from('preset_game_instances')
+          .from('preset_games')
           .select('*')
           .eq('account_id', accountId)
           .eq('is_published', true)
@@ -212,7 +212,7 @@ const GameHistoryPage: React.FC = () => {
   const handleDeleteGame = async (game: HistoryGame) => {
     try {
       // Determine which table to delete from based on game_type
-      const tableName = game.game_type === 'custom' ? 'custom_games' : 'preset_game_instances';
+      const tableName = game.game_type === 'custom' ? 'custom_games' : 'preset_games';
       
       const { error } = await supabase
         .from(tableName)

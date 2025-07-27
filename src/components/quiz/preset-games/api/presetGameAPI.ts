@@ -26,7 +26,7 @@ export interface PresetLeaderboardEntry {
 
 // API Functions cho Preset Games với cấu trúc mới
 export const presetGameAPI = {
-  // Lưu preset game instance
+  // Lưu preset game 
   async savePresetGameInstance(gameData: PresetGameData & { 
     isPublished?: boolean;
     maxParticipants?: number;
@@ -48,13 +48,13 @@ export const presetGameAPI = {
       }
 
       const { data, error } = await (supabase as any)
-        .from('preset_game_instances')
+        .from('preset_games')
         .insert({
           title: gameData.title,
           game_type: gameData.gameType,
           description: gameData.description || '',
           template_data: gameData.templateData,
-          settings: gameData.settings || {},
+          default_settings: gameData.settings || {},
           is_published: true, // Published when sharing
           expires_at: expiresAt.toISOString(),
           creator_ip: gameData.creatorIp || 'localhost',
@@ -64,7 +64,7 @@ export const presetGameAPI = {
           show_leaderboard: gameData.showLeaderboard ?? true,
           require_registration: gameData.requireRegistration ?? false,
           custom_duration: gameData.customDuration || null,
-          singleParticipationOnly: gameData.singleParticipationOnly ?? false
+          single_participation_only: gameData.singleParticipationOnly ?? false
         })
         .select()
         .single();
@@ -72,16 +72,16 @@ export const presetGameAPI = {
       if (error) throw error;
       return { success: true, gameId: data.id, data };
     } catch (error) {
-      console.error('Error saving preset game instance:', error);
+      console.error('Error saving preset game:', error);
       return { success: false, error };
     }
   },
 
-  // Lấy preset game instance
+  // Lấy preset game
   async getPresetGameInstance(gameId: string): Promise<any> {
     try {
       const { data, error } = await (supabase as any)
-        .from('preset_game_instances')
+        .from('preset_games')
         .select('*')
         .eq('id', gameId)
         .eq('is_published', true)
@@ -91,7 +91,7 @@ export const presetGameAPI = {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error fetching preset game instance:', error);
+      console.error('Error fetching preset game:', error);
       return { success: false, error };
     }
   },
@@ -223,12 +223,20 @@ export const presetGameAPI = {
   // Lấy danh sách preset games
   async getPresetGamesList(accountId?: string, creatorIp?: string): Promise<any[]> {
     try {
-      const { data, error } = await (supabase as any)
+      let query = (supabase as any)
         .from('preset_games')
         .select('*')
-        .eq('is_active', true)
+        .eq('is_published', true)
+        .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false });
 
+      if (accountId) {
+        query = query.eq('account_id', accountId);
+      } else if (creatorIp) {
+        query = query.eq('creator_ip', creatorIp);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     } catch (error) {
@@ -237,17 +245,17 @@ export const presetGameAPI = {
     }
   },
 
-  // Xóa preset game instance
+  // Xóa preset game
   async deletePresetGameInstance(gameId: string): Promise<boolean> {
     try {
       const { error } = await (supabase as any)
-        .from('preset_game_instances')
+        .from('preset_games')
         .delete()
         .eq('id', gameId);
 
       return !error;
     } catch (error) {
-      console.error('Error deleting preset game instance:', error);
+      console.error('Error deleting preset game:', error);
       return false;
     }
   }

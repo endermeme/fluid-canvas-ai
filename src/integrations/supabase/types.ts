@@ -145,25 +145,26 @@ export type Database = {
           },
         ]
       }
-      preset_game_instances: {
+      preset_games: {
         Row: {
           account_id: string | null
           created_at: string
           creator_ip: string | null
           custom_duration: number | null
+          default_settings: Json | null
           description: string | null
           expires_at: string | null
           game_type: string
           id: string
+          is_active: boolean | null
           is_published: boolean | null
           last_accessed_at: string | null
           max_participants: number | null
           password: string | null
           require_registration: boolean | null
-          settings: Json | null
           share_count: number | null
           show_leaderboard: boolean | null
-          singleparticipationonly: boolean | null
+          single_participation_only: boolean | null
           template_data: Json
           title: string
           updated_at: string
@@ -173,19 +174,20 @@ export type Database = {
           created_at?: string
           creator_ip?: string | null
           custom_duration?: number | null
+          default_settings?: Json | null
           description?: string | null
           expires_at?: string | null
           game_type: string
           id?: string
+          is_active?: boolean | null
           is_published?: boolean | null
           last_accessed_at?: string | null
           max_participants?: number | null
           password?: string | null
           require_registration?: boolean | null
-          settings?: Json | null
           share_count?: number | null
           show_leaderboard?: boolean | null
-          singleparticipationonly?: boolean | null
+          single_participation_only?: boolean | null
           template_data?: Json
           title: string
           updated_at?: string
@@ -195,55 +197,20 @@ export type Database = {
           created_at?: string
           creator_ip?: string | null
           custom_duration?: number | null
+          default_settings?: Json | null
           description?: string | null
           expires_at?: string | null
           game_type?: string
           id?: string
+          is_active?: boolean | null
           is_published?: boolean | null
           last_accessed_at?: string | null
           max_participants?: number | null
           password?: string | null
           require_registration?: boolean | null
-          settings?: Json | null
           share_count?: number | null
           show_leaderboard?: boolean | null
-          singleparticipationonly?: boolean | null
-          template_data?: Json
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      preset_games: {
-        Row: {
-          created_at: string
-          default_settings: Json | null
-          description: string | null
-          game_type: string
-          id: string
-          is_active: boolean | null
-          template_data: Json
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          default_settings?: Json | null
-          description?: string | null
-          game_type: string
-          id?: string
-          is_active?: boolean | null
-          template_data?: Json
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          default_settings?: Json | null
-          description?: string | null
-          game_type?: string
-          id?: string
-          is_active?: boolean | null
+          single_participation_only?: boolean | null
           template_data?: Json
           title?: string
           updated_at?: string
@@ -423,7 +390,7 @@ export type Database = {
         }[]
       }
       get_preset_game_leaderboard: {
-        Args: { target_game_instance_id: string; limit_count?: number }
+        Args: { target_game_id: string; limit_count?: number }
         Returns: {
           player_name: string
           score: number
@@ -434,7 +401,7 @@ export type Database = {
         }[]
       }
       get_preset_game_participants_realtime: {
-        Args: { target_game_instance_id: string }
+        Args: { target_game_id: string }
         Returns: {
           id: string
           player_name: string
@@ -445,7 +412,7 @@ export type Database = {
         }[]
       }
       get_preset_game_stats_admin: {
-        Args: { target_game_instance_id: string }
+        Args: { target_game_id: string }
         Returns: {
           total_participants: number
           total_scores: number
@@ -532,7 +499,7 @@ export type Database = {
         Returns: undefined
       }
       increment_preset_game_share_count: {
-        Args: { game_instance_id: string }
+        Args: { game_id: string }
         Returns: undefined
       }
       increment_share_count: {
