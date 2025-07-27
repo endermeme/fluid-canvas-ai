@@ -28,17 +28,33 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
 
   const fetchLeaderboard = async () => {
     try {
-      const { data, error } = await supabase.rpc('get_game_leaderboard', {
-        target_game_id: gameId,
-        limit_count: 10
-      });
+      // Try both custom and preset leaderboards since this is a unified manager
+      const [customData, presetData] = await Promise.all([
+        supabase
+          .from('custom_leaderboard')
+          .select('*')
+          .eq('game_id', gameId)
+          .order('score', { ascending: false })
+          .limit(10),
+        supabase
+          .from('preset_leaderboard')
+          .select('*')
+          .eq('game_id', gameId)
+          .order('score', { ascending: false })
+          .limit(10)
+      ]);
 
-      if (error) {
-        console.error('Error fetching leaderboard:', error);
+      const combinedData = [
+        ...(customData.data || []),
+        ...(presetData.data || [])
+      ].sort((a, b) => b.score - a.score).slice(0, 10);
+
+      if (customData.error && presetData.error) {
+        console.error('Error fetching leaderboard:', customData.error, presetData.error);
         return;
       }
 
-      setLeaderboard(data || []);
+      setLeaderboard(combinedData || []);
       setLastUpdate(new Date());
     } catch (error) {
       console.error('Error in fetchLeaderboard:', error);
@@ -53,26 +69,39 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
     // Real-time updates
     const interval = setInterval(fetchLeaderboard, refreshInterval);
     
-    // Supabase real-time subscription
-    const channel = supabase
-      .channel('unified-game-scores-changes')
+    // Supabase real-time subscription for both tables
+    const customChannel = supabase
+      .channel('custom-leaderboard-changes')
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'unified_game_scores',
+          table: 'custom_leaderboard',
           filter: `game_id=eq.${gameId}`
         },
-        () => {
-          fetchLeaderboard();
-        }
+        () => fetchLeaderboard()
+      )
+      .subscribe();
+
+    const presetChannel = supabase
+      .channel('preset-leaderboard-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'preset_leaderboard',
+          filter: `game_id=eq.${gameId}`
+        },
+        () => fetchLeaderboard()
       )
       .subscribe();
 
     return () => {
       clearInterval(interval);
-      supabase.removeChannel(channel);
+      supabase.removeChannel(customChannel);
+      supabase.removeChannel(presetChannel);
     };
   }, [gameId, refreshInterval]);
 
