@@ -70,8 +70,13 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
         const uuid = await getOrCreateAccountUuid(accParam);
         setAccountUuid(uuid);
       } else {
-        setAccountId(null);
-        setAccountUuid(null);
+        // Default to example123 when no valid account
+        const defaultAccount = "example123";
+        setAccountId(defaultAccount);
+        
+        // Get or create the account UUID for default account
+        const uuid = await getOrCreateAccountUuid(defaultAccount);
+        setAccountUuid(uuid);
       }
       
       setIsLoading(false);
