@@ -7,7 +7,8 @@ export const usePresetGameManager = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const savePresetGame = async (
+  // Create preset game in memory only (not saved to database until shared)
+  const createPresetGameInMemory = (
     gameData: PresetGameData & {
       creatorIp?: string;
       accountId?: string;
@@ -16,6 +17,38 @@ export const usePresetGameManager = () => {
       showLeaderboard?: boolean;
       requireRegistration?: boolean;
       customDuration?: number;
+      singleParticipationOnly?: boolean;
+    }
+  ) => {
+    // Generate temporary ID for memory-only game
+    const tempId = `temp_${crypto.randomUUID()}`;
+    
+    const gameWithId = {
+      ...gameData,
+      id: tempId,
+      isTemporary: true,
+      createdAt: new Date().toISOString(),
+    };
+
+    toast({
+      title: "Game đã được tạo! 🎮",
+      description: `${gameData.title} đã sẵn sàng. Nhấn "Chia sẻ" để lưu vào lịch sử.`,
+    });
+    
+    return gameWithId;
+  };
+
+  // Save preset game to database (called when sharing)
+  const savePresetGameToDatabase = async (
+    gameData: PresetGameData & {
+      creatorIp?: string;
+      accountId?: string;
+      password?: string;
+      maxParticipants?: number;
+      showLeaderboard?: boolean;
+      requireRegistration?: boolean;
+      customDuration?: number;
+      singleParticipationOnly?: boolean;
     }
   ) => {
     if (isSaving) return null;
@@ -27,14 +60,14 @@ export const usePresetGameManager = () => {
       
       if (result.success) {
         toast({
-          title: "Game đã được tạo! 🎉",
-          description: `${gameData.title} đã sẵn sàng để chia sẻ.`,
+          title: "Game đã được lưu! 🎉",
+          description: `${gameData.title} đã được lưu vào lịch sử và sẵn sàng chia sẻ.`,
         });
-        return result.gameId;
+        return result;
       } else {
         toast({
-          title: "Tạo game thất bại",
-          description: "Không thể tạo game. Vui lòng thử lại.",
+          title: "Lỗi lưu game",
+          description: result.error || "Không thể lưu game. Vui lòng thử lại.",
           variant: "destructive"
         });
         return null;
@@ -42,8 +75,8 @@ export const usePresetGameManager = () => {
     } catch (error) {
       console.error('Error saving preset game:', error);
       toast({
-        title: "Lỗi hệ thống",
-        description: "Đã xảy ra lỗi khi tạo game.",
+        title: "Lỗi lưu game",
+        description: "Có lỗi xảy ra khi lưu game. Vui lòng thử lại.",
         variant: "destructive"
       });
       return null;
@@ -54,25 +87,14 @@ export const usePresetGameManager = () => {
 
   const getPresetGame = async (gameId: string) => {
     setIsLoading(true);
-    
     try {
-      const result = await presetGameAPI.getPresetGameInstance(gameId);
-      
-      if (result.success) {
-        return result.data;
-      } else {
-        toast({
-          title: "Không tìm thấy game",
-          description: "Game không tồn tại hoặc đã hết hạn.",
-          variant: "destructive"
-        });
-        return null;
-      }
+      const game = await presetGameAPI.getPresetGameInstance(gameId);
+      return game;
     } catch (error) {
-      console.error('Error getting preset game:', error);
+      console.error('Error loading preset game:', error);
       toast({
         title: "Lỗi tải game",
-        description: "Không thể tải game. Vui lòng thử lại.",
+        description: "Không thể tải thông tin game.",
         variant: "destructive"
       });
       return null;
@@ -86,108 +108,112 @@ export const usePresetGameManager = () => {
       const success = await presetGameAPI.savePresetGameScore(scoreData);
       
       if (success) {
-        // Get game data to determine game type for appropriate message
-        const gameData = await presetGameAPI.getPresetGameInstance(scoreData.gameId);
-        const gameType = gameData?.game_type?.toLowerCase() || 
-                        gameData?.settings?.gameType?.toLowerCase();
-        
-        const isTimeBasedGame = ['memory', 'wordsearch', 'matching'].includes(gameType);
-        
-        if (isTimeBasedGame && scoreData.completionTime) {
-          const minutes = Math.floor(scoreData.completionTime / 60);
-          const seconds = scoreData.completionTime % 60;
-          const timeText = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : `${seconds}s`;
-          
-          toast({
-            title: "Kết quả đã được lưu! 🎉",
-            description: `Hoàn thành trong ${timeText}`,
-          });
-        } else {
-          toast({
-            title: "Điểm đã được lưu! 🎉",
-            description: `Bạn đạt ${scoreData.score}/${scoreData.totalQuestions} điểm.`,
-          });
-        }
-        
+        toast({
+          title: "Điểm đã được lưu! 🏆",
+          description: `Điểm của ${scoreData.playerName} đã được ghi nhận.`,
+        });
         return true;
       } else {
         toast({
-          title: "Lưu điểm thất bại",
-          description: "Không thể lưu điểm số của bạn.",
+          title: "Lỗi lưu điểm",
+          description: "Không thể lưu điểm số. Vui lòng thử lại.",
           variant: "destructive"
         });
         return false;
       }
     } catch (error) {
       console.error('Error saving preset game score:', error);
+      toast({
+        title: "Lỗi lưu điểm",
+        description: "Có lỗi xảy ra khi lưu điểm. Vui lòng thử lại.",
+        variant: "destructive"
+      });
       return false;
     }
   };
 
-  const addPresetGameParticipant = async (gameId: string, playerName: string, ipAddress?: string) => {
+  const addPresetGameParticipant = async (gameId: string, playerName: string) => {
     try {
-      const success = await presetGameAPI.addPresetGameParticipant({
+      const participantData: PresetLeaderboardEntry = {
         gameId,
         playerName,
-        ipAddress
-      });
+        ipAddress: 'dynamic',
+        isActive: true,
+        sessionData: {}
+      };
       
-      return success;
+      const success = await presetGameAPI.addPresetGameParticipant(participantData);
+      
+      if (success) {
+        console.log(`Player ${playerName} added to preset game ${gameId}`);
+        return true;
+      } else {
+        toast({
+          title: "Lỗi tham gia",
+          description: "Không thể tham gia game. Vui lòng thử lại.",
+          variant: "destructive"
+        });
+        return false;
+      }
     } catch (error) {
       console.error('Error adding preset game participant:', error);
+      toast({
+        title: "Lỗi tham gia",
+        description: "Có lỗi xảy ra khi tham gia game.",
+        variant: "destructive"
+      });
       return false;
     }
   };
 
-  const getPresetGameLeaderboard = async (gameInstanceId: string, limit: number = 10) => {
+  const getPresetGameLeaderboard = async (gameId: string): Promise<PresetLeaderboardEntry[]> => {
     try {
-      return await presetGameAPI.getPresetGameLeaderboard(gameInstanceId, limit);
+      const leaderboard = await presetGameAPI.getPresetGameLeaderboard(gameId);
+      return leaderboard;
     } catch (error) {
-      console.error('Error getting preset game leaderboard:', error);
+      console.error('Error loading preset game leaderboard:', error);
+      toast({
+        title: "Lỗi tải bảng xếp hạng",
+        description: "Không thể tải bảng xếp hạng.",
+        variant: "destructive"
+      });
       return [];
     }
   };
 
-  const getPresetGameParticipants = async (gameInstanceId: string) => {
+  const getPresetGameStats = async (gameId: string) => {
     try {
-      return await presetGameAPI.getPresetGameParticipants(gameInstanceId);
+      const stats = await presetGameAPI.getPresetGameStats(gameId);
+      return stats;
     } catch (error) {
-      console.error('Error getting preset game participants:', error);
-      return [];
-    }
-  };
-
-  const getPresetGameStats = async (gameInstanceId: string) => {
-    try {
-      return await presetGameAPI.getPresetGameStats(gameInstanceId);
-    } catch (error) {
-      console.error('Error getting preset game stats:', error);
+      console.error('Error loading preset game stats:', error);
       return null;
     }
   };
 
-  const getPresetGamesList = async (accountId?: string, creatorIp?: string) => {
+  const getPresetGameParticipants = async (gameId: string) => {
     try {
-      return await presetGameAPI.getPresetGamesList(accountId, creatorIp);
+      const participants = await presetGameAPI.getPresetGameParticipants(gameId);
+      return participants;
     } catch (error) {
-      console.error('Error getting preset games list:', error);
+      console.error('Error loading preset game participants:', error);
       return [];
     }
   };
 
-  const deletePresetGame = async (gameInstanceId: string) => {
+  const deletePresetGame = async (gameId: string) => {
     try {
-      const success = await presetGameAPI.deletePresetGameInstance(gameInstanceId);
+      const success = await presetGameAPI.deletePresetGameInstance(gameId);
       
       if (success) {
         toast({
           title: "Game đã được xóa",
-          description: "Game đã được xóa thành công.",
+          description: "Game đã được xóa khỏi hệ thống.",
         });
         return true;
       } else {
         toast({
-          title: "Xóa game thất bại",
+          title: "Lỗi xóa game",
           description: "Không thể xóa game. Vui lòng thử lại.",
           variant: "destructive"
         });
@@ -196,34 +222,27 @@ export const usePresetGameManager = () => {
     } catch (error) {
       console.error('Error deleting preset game:', error);
       toast({
-        title: "Lỗi hệ thống",
-        description: "Đã xảy ra lỗi khi xóa game.",
+        title: "Lỗi xóa game",
+        description: "Có lỗi xảy ra khi xóa game.",
         variant: "destructive"
       });
       return false;
     }
   };
 
-  const incrementShareCount = async (gameInstanceId: string) => {
-    try {
-      await presetGameAPI.incrementShareCount(gameInstanceId);
-    } catch (error) {
-      console.error('Error incrementing share count:', error);
-    }
-  };
-
   return {
-    savePresetGame,
+    createPresetGameInMemory,
+    savePresetGameToDatabase,
     getPresetGame,
     savePresetGameScore,
     addPresetGameParticipant,
     getPresetGameLeaderboard,
-    getPresetGameParticipants,
     getPresetGameStats,
-    getPresetGamesList,
+    getPresetGameParticipants,
     deletePresetGame,
-    incrementShareCount,
     isSaving,
-    isLoading
+    isLoading,
+    // Legacy alias for backward compatibility
+    savePresetGame: createPresetGameInMemory,
   };
 };
