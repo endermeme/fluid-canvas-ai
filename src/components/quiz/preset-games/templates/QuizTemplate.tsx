@@ -10,9 +10,10 @@ interface QuizTemplateProps {
   content?: any;
   topic: string;
   settings?: any;
+  onGameComplete?: (gameData: any) => void;
 }
 
-const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, settings }) => {
+const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, settings, onGameComplete }) => {
   const gameContent = content || data;
   
   // Use settings from props or fallback values - convert minutes to seconds for totalTime
@@ -83,6 +84,19 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
       });
     }
   }, [totalTimeLeft, gameStarted, showResult, gameSettings.useTimer, toast]);
+
+  // Call onGameComplete when game finishes
+  useEffect(() => {
+    if (showResult && onGameComplete) {
+      const completionTime = gameSettings.totalTime - totalTimeLeft;
+      onGameComplete({
+        score,
+        totalQuestions: questions.length,
+        completionTime,
+        gameType: 'quiz'
+      });
+    }
+  }, [showResult, onGameComplete, score, questions.length, gameSettings.totalTime, totalTimeLeft]);
 
   const handleOptionSelect = (optionIndex: number) => {
     if (isAnswered) return;
