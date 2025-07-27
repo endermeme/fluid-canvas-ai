@@ -62,7 +62,8 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
       const urlParams = new URLSearchParams(location.search);
       const accParam = urlParams.get('acc');
       
-      if (accParam) {
+      // Validate account parameter - reject "null" string and invalid values
+      if (accParam && accParam !== 'null' && accParam.length >= 10) {
         setAccountId(accParam);
         
         // Get or create the account UUID
@@ -80,6 +81,13 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
   }, [location.search]);
 
   const handleSetAccountId = async (id: string | null) => {
+    // Validate input - reject "null" string and invalid values
+    if (id && (id === 'null' || id.length < 10)) {
+      setAccountId(null);
+      setAccountUuid(null);
+      return;
+    }
+    
     setAccountId(id);
     
     if (id) {
@@ -90,7 +98,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
     }
   };
 
-  const isValidAccount = accountId !== null && accountId.length >= 10;
+  const isValidAccount = accountId !== null && accountId !== 'null' && accountId.length >= 10;
 
   return (
     <AccountContext.Provider 

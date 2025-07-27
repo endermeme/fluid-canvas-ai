@@ -36,15 +36,20 @@ const GameHistoryPage: React.FC = () => {
   const [filterBy, setFilterBy] = useState<'all' | 'password' | 'public' | 'active'>('all');
   
   const navigate = useNavigate();
-  const { accountId, accountUuid } = useAccount();
+  const { accountId, accountUuid, isLoading: accountLoading, isValidAccount } = useAccount();
   const { toast } = useToast();
   
   useEffect(() => {
-    loadGames();
-  }, [accountId]);
+    if (!accountLoading) {
+      loadGames();
+    }
+  }, [accountId, accountUuid, accountLoading]);
   
   const loadGames = async () => {
-    if (!accountId || !accountUuid) return;
+    if (!isValidAccount || !accountId || !accountUuid) {
+      setLoading(false);
+      return;
+    }
     
     setLoading(true);
     try {
@@ -237,10 +242,20 @@ const GameHistoryPage: React.FC = () => {
       onBack={() => navigate('/')}
     >
       <div className="p-4 h-full overflow-auto">
-        {loading ? (
+        {accountLoading || loading ? (
           <div className="flex flex-col items-center justify-center h-[50vh] space-y-4">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
             <p className="text-lg">Đang tải lịch sử game...</p>
+          </div>
+        ) : !isValidAccount ? (
+          <div className="flex flex-col items-center justify-center h-[50vh] space-y-4">
+            <p className="text-lg text-destructive">Tài khoản không hợp lệ</p>
+            <p className="text-sm text-muted-foreground text-center">
+              Account ID phải có ít nhất 10 ký tự và không được là "null"
+            </p>
+            <Button onClick={() => navigate('/')} className="mt-4">
+              Về trang chủ
+            </Button>
           </div>
         ) : (
           <>
