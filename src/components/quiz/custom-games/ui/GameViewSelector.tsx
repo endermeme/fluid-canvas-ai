@@ -25,19 +25,42 @@ interface GameViewSelectorProps {
 const GameViewSelector: React.FC<GameViewSelectorProps> = (props) => {
   const { miniGame } = props;
 
-  // Check if this is a preset game
-  const isPresetGame = miniGame.content && (() => {
-    try {
-      const parsed = JSON.parse(miniGame.content);
-      return parsed.type === "preset-game";
-    } catch {
-      return false;
+  // Check if this is a preset game stored in custom_games table
+  const isPresetGame = (() => {
+    // First check if content is JSON
+    if (miniGame.content && miniGame.content.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(miniGame.content);
+        return parsed.type === "preset-game";
+      } catch {
+        return false;
+      }
     }
+    return false;
   })();
 
-  // If it's a preset game, parse the data and use PresetGameView
-  if (isPresetGame && miniGame.gameType && miniGame.data) {
-    return <PresetGameView {...props} />;
+  // If it's a preset game, extract data from content and use PresetGameView
+  if (isPresetGame) {
+    let gameData = null;
+    let gameType = null;
+    
+    try {
+      const parsed = JSON.parse(miniGame.content);
+      gameData = parsed.data;
+      gameType = parsed.gameType || miniGame.gameType;
+    } catch (e) {
+      console.error('Error parsing preset game JSON:', e);
+      return <CustomGameView {...props} />;
+    }
+
+    // Create updated miniGame object with extracted data
+    const updatedMiniGame = {
+      ...miniGame,
+      data: gameData,
+      gameType: gameType
+    };
+
+    return <PresetGameView {...props} miniGame={updatedMiniGame} />;
   }
 
   // Otherwise, use CustomGameView for iframe-based games
