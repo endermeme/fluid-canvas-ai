@@ -48,16 +48,6 @@ const GameHistoryPage: React.FC = () => {
     
     setLoading(true);
     try {
-      // Validate account exists in profiles table first
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', accountId)
-        .single();
-      
-      if (!profile) {
-        throw new Error('Invalid account ID');
-      }
 
       // Fetch from both custom_games and preset_games  
       const [customGamesResponse, presetGamesResponse] = await Promise.all([
