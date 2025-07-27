@@ -48,8 +48,10 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
   const currentGameId = gameId || urlGameId;
 
   const handleGameComplete = async (result: any) => {
+    console.log('🎯 PresetGameView - handleGameComplete called:', { currentGameId, result, playerName });
+    
     if (currentGameId && result && typeof result.score === 'number') {
-      console.log('Saving preset game score:', { currentGameId, result, playerName });
+      console.log('✅ PresetGameView - Valid game completion data');
       
       // Get player name
       let finalPlayerName = playerName || 'Người chơi';
@@ -71,29 +73,33 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
         }
       }
 
+      console.log('💾 PresetGameView - Saving score with sourceTable: custom_games');
+
       try {
         await saveUnifiedScore({
           gameId: currentGameId,
-          sourceTable: 'preset_games', // Save to preset_leaderboard
+          sourceTable: 'custom_games', // Fix: Save to custom_leaderboard since this game is in custom_games
           playerName: finalPlayerName,
           score: result.score,
           totalQuestions: result.totalQuestions || result.total || 10,
           completionTime: result.completionTime || result.time,
-          gameType: miniGame.gameType || 'preset'
+          gameType: miniGame.gameType || 'quiz'
         });
         
         toast({
-          title: "Điểm đã được lưu!",
-          description: `Bạn đạt ${result.score} điểm`,
+          title: "Điểm đã được lưu! 🎉",
+          description: `Bạn đạt ${result.score}/${result.totalQuestions || result.total || 10} điểm`,
         });
       } catch (error) {
-        console.error('Error saving score:', error);
+        console.error('❌ Error saving score:', error);
         toast({
           title: "Lỗi lưu điểm",
           description: "Không thể lưu điểm của bạn",
           variant: "destructive"
         });
       }
+    } else {
+      console.log('❌ PresetGameView - Invalid completion data:', { currentGameId, result, score: result?.score });
     }
   };
 

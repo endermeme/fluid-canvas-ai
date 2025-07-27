@@ -89,6 +89,14 @@ const QuizTemplate: React.FC<QuizTemplateProps> = ({ data, content, topic, setti
   useEffect(() => {
     if (showResult && onGameComplete) {
       const completionTime = gameSettings.totalTime - totalTimeLeft;
+      console.log('📊 QuizTemplate - Game completed:', {
+        score,
+        totalQuestions: questions.length,
+        completionTime,
+        gameType: 'quiz',
+        showResult
+      });
+      
       onGameComplete({
         score,
         totalQuestions: questions.length,
