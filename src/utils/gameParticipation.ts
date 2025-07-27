@@ -175,6 +175,8 @@ export const getGameParticipants = async (gameId: string, accountId?: string): P
       score: p.score || 0
     }));
 
+    console.log('✅ [getGameParticipants] Raw participant data:', allParticipants);
+    console.log('✅ [getGameParticipants] Mapped participants:', mappedParticipants);
     console.log('✅ [getGameParticipants] Successfully mapped participants:', mappedParticipants.length, 'participants');
     return mappedParticipants;
   } catch (error) {
