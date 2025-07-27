@@ -80,19 +80,33 @@ const GameSharePage: React.FC = () => {
             // Password protection will be handled by conditional form display
             
             // Parse game content for preset games
-            let gameType = null;
-            let gameData = null;
+            let gameType = loadedGame.gameType;
+            let gameData = loadedGame.data;
             let gameContent = loadedGame.htmlContent || loadedGame.content || '';
             
-            try {
-              // Try to parse as JSON first (preset games)
-              const jsonData = JSON.parse(gameContent);
-              if (jsonData.type === "preset-game") {
-                gameData = jsonData.data;
-                gameType = jsonData.gameType;
+            console.log('🎮 [GameSharePage] Processing game:', {
+              gameType: loadedGame.gameType,
+              hasData: !!loadedGame.data,
+              hasHtmlContent: !!loadedGame.htmlContent,
+              hasContent: !!loadedGame.content
+            });
+            
+            // For preset games, use the data property directly
+            if (loadedGame.data && loadedGame.gameType) {
+              gameData = loadedGame.data;
+              gameType = loadedGame.gameType;
+              gameContent = loadedGame.data; // Use data as content for preset games
+            } else {
+              // For custom games, try to parse HTML content
+              try {
+                const jsonData = JSON.parse(gameContent);
+                if (jsonData.type === "preset-game") {
+                  gameData = jsonData.data;
+                  gameType = jsonData.gameType;
+                }
+              } catch {
+                // If not JSON, treat as HTML content (custom games)
               }
-            } catch {
-              // If not JSON, treat as HTML content (custom games)
             }
             
             // Create miniGame object with proper format
@@ -102,6 +116,8 @@ const GameSharePage: React.FC = () => {
               gameType: gameType,
               data: gameData
             };
+            
+            console.log('🎮 [GameSharePage] Created miniGameData:', miniGameData);
             setMiniGame(miniGameData);
             
             if (loadedGame.expiresAt) {
