@@ -512,7 +512,7 @@ const GameSharePage: React.FC = () => {
         <TabsContent value="participants" className="h-[calc(100%-48px)] m-0 p-4 overflow-auto">
           <UnifiedParticipantsLeaderboard
             gameId={gameId!}
-            sourceTable="custom_games"
+            sourceTable={game.data ? "preset_games" : "custom_games"}
             onParticipantsUpdate={(count) => {
               console.log(`Participants updated: ${count}`);
               setParticipants(prev => prev.slice(0, count));
@@ -536,7 +536,7 @@ const GameSharePage: React.FC = () => {
               )}
               <UnifiedParticipantsLeaderboard
                 gameId={gameId!}
-                sourceTable="custom_games"
+                sourceTable={game.data ? "preset_games" : "custom_games"}
                 onParticipantsUpdate={(count) => {
                   console.log(`Leaderboard updated: ${count}`);
                 }}
