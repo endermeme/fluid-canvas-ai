@@ -73,12 +73,12 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
         }
       }
 
-      console.log('💾 PresetGameView - Saving score with sourceTable: custom_games');
+      console.log('💾 PresetGameView - Saving score with sourceTable: preset_games');
 
       try {
         await saveUnifiedScore({
           gameId: currentGameId,
-          sourceTable: 'custom_games', // Fix: Save to custom_leaderboard since this game is in custom_games
+          sourceTable: 'preset_games', // Fix: Save to preset_leaderboard for preset games
           playerName: finalPlayerName,
           score: result.score,
           totalQuestions: result.totalQuestions || result.total || 10,
