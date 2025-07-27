@@ -40,39 +40,60 @@ export const UnifiedParticipantsLeaderboard: React.FC<UnifiedParticipantsLeaderb
 
   const fetchData = async () => {
     try {
-      // Fetch participants and leaderboard
-      const { data: participantsData, error: participantsError } = await supabase.rpc(
-        'get_unified_leaderboard_with_participants',
-        {
-          target_game_id: gameId,
-          target_source_table: sourceTable,
-          limit_count: 50
-        }
-      );
+      console.log('🔄 [UnifiedParticipantsLeaderboard] Fetching data for gameId:', gameId, 'sourceTable:', sourceTable);
+      
+      // Determine which table to query
+      const tableName = sourceTable === 'custom_games' ? 'custom_leaderboard' : 'preset_leaderboard';
+      
+      // Fetch participants using direct database query (same as working getGameParticipants)
+      const { data: participantsData, error: participantsError } = await supabase
+        .from(tableName)
+        .select('*')
+        .eq('game_id', gameId)
+        .order('joined_at', { ascending: false });
 
-      // Fetch stats
-      const { data: statsData, error: statsError } = await supabase.rpc(
-        'get_unified_game_stats',
-        {
-          target_game_id: gameId,
-          target_source_table: sourceTable
-        }
-      );
+      if (participantsError) {
+        console.error('❌ [UnifiedParticipantsLeaderboard] Error fetching participants:', participantsError);
+        return;
+      }
 
-      if (!participantsError && participantsData) {
+      console.log('📊 [UnifiedParticipantsLeaderboard] Raw participants data:', participantsData);
+
+      if (participantsData) {
+        // Map participants data to expected format
         const mappedData = participantsData.map((p: any) => ({
-          ...p,
-          status: (p.status === 'completed' || p.status === 'playing') ? p.status : 'playing'
+          player_name: p.player_name,
+          score: p.score,
+          total_questions: p.total_questions,
+          completion_time: p.completion_time,
+          joined_at: p.joined_at,
+          last_active_at: p.last_active_at,
+          is_active: p.is_active,
+          status: p.score !== null ? 'completed' : 'playing'
         })) as ParticipantData[];
+
+        console.log('✅ [UnifiedParticipantsLeaderboard] Mapped participants:', mappedData);
         setParticipants(mappedData);
         onParticipantsUpdate?.(mappedData.length);
-      }
 
-      if (!statsError && statsData && statsData.length > 0) {
-        setStats(statsData[0]);
+        // Calculate stats from the participants data
+        const completedParticipants = mappedData.filter(p => p.score !== null);
+        const scores = completedParticipants.map(p => p.score!);
+        
+        const calculatedStats = {
+          total_participants: mappedData.length,
+          total_scores: completedParticipants.length,
+          average_score: scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0,
+          best_score: scores.length > 0 ? Math.max(...scores) : 0,
+          completion_rate: mappedData.length > 0 ? (completedParticipants.length / mappedData.length) * 100 : 0,
+          active_participants: mappedData.filter(p => p.is_active && p.status === 'playing').length
+        };
+
+        console.log('📈 [UnifiedParticipantsLeaderboard] Calculated stats:', calculatedStats);
+        setStats(calculatedStats);
       }
     } catch (error) {
-      console.error('Error fetching unified data:', error);
+      console.error('💥 [UnifiedParticipantsLeaderboard] Error fetching data:', error);
     } finally {
       setIsLoading(false);
     }
