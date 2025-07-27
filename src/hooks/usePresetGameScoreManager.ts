@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-interface UnifiedGameScore {
+interface PresetGameScore {
   gameId: string;
-  sourceTable: 'custom_games' | 'preset_games';
   playerName: string;
   playerId?: string;
   score: number;
@@ -21,23 +20,21 @@ interface ScoreDetail {
   metricData?: Record<string, any>;
 }
 
-export const useUnifiedScoreManager = () => {
+export const usePresetGameScoreManager = () => {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  const saveUnifiedScore = async (scoreData: UnifiedGameScore, details?: ScoreDetail[]) => {
+  const savePresetGameScore = async (scoreData: PresetGameScore, details?: ScoreDetail[]) => {
     if (isSaving) return false;
     
     setIsSaving(true);
     
     try {
-      console.log('💾 [useUnifiedScoreManager] Saving score:', scoreData);
-      
-      const tableName = scoreData.sourceTable === 'custom_games' ? 'custom_leaderboard' : 'preset_leaderboard';
+      console.log('💾 [PresetGameScoreManager] Saving score:', scoreData);
       
       // Try to update existing participant record first
       const { data: updateData, error: updateError } = await supabase
-        .from(tableName)
+        .from('preset_leaderboard')
         .update({
           score: scoreData.score,
           total_questions: scoreData.totalQuestions,
@@ -50,16 +47,16 @@ export const useUnifiedScoreManager = () => {
         .eq('player_name', scoreData.playerName)
         .select();
 
-      console.log('🔄 [useUnifiedScoreManager] Update result:', { updateData, updateError });
+      console.log('🔄 [PresetGameScoreManager] Update result:', { updateData, updateError });
 
       let scoreError = updateError;
 
       // If no rows were affected by update, participant doesn't exist - create new one
       if (!updateError && (!updateData || updateData.length === 0)) {
-        console.log('🔄 [useUnifiedScoreManager] No existing participant, creating new one');
+        console.log('🔄 [PresetGameScoreManager] No existing participant, creating new one');
         
         const { error: insertError } = await supabase
-          .from(tableName)
+          .from('preset_leaderboard')
           .insert({
             game_id: scoreData.gameId,
             player_name: scoreData.playerName,
@@ -72,11 +69,11 @@ export const useUnifiedScoreManager = () => {
           });
         
         scoreError = insertError;
-        console.log('🔄 [useUnifiedScoreManager] Insert result:', { insertError });
+        console.log('🔄 [PresetGameScoreManager] Insert result:', { insertError });
       }
 
       if (scoreError) {
-        console.error('Error saving score:', scoreError);
+        console.error('Error saving preset game score:', scoreError);
         toast({
           title: "Lưu điểm thất bại",
           description: "Không thể lưu điểm số của bạn.",
@@ -85,7 +82,7 @@ export const useUnifiedScoreManager = () => {
         return false;
       }
 
-      // Show success message
+      // Show appropriate success message based on game type
       const isTimeBasedGame = ['memory', 'wordsearch', 'matching'].includes(scoreData.gameType?.toLowerCase());
       
       if (isTimeBasedGame && scoreData.completionTime) {
@@ -106,63 +103,38 @@ export const useUnifiedScoreManager = () => {
       
       return true;
     } catch (error) {
-      console.error('Error saving unified score:', error);
+      console.error('Error saving preset game score:', error);
       return false;
     } finally {
       setIsSaving(false);
     }
   };
 
-  const getUnifiedLeaderboard = async (
-    gameId: string, 
-    sourceTable: 'custom_games' | 'preset_games',
-    limit: number = 10
-  ) => {
+  const getPresetGameLeaderboard = async (gameId: string, limit: number = 10) => {
     try {
-      let data = [];
-      
-      if (sourceTable === 'custom_games') {
-        const { data: leaderboardData, error } = await supabase
-          .from('custom_leaderboard')
-          .select('player_name, score, total_questions, completion_time, scoring_data, completed_at')
-          .eq('game_id', gameId)
-          .not('score', 'is', null)
-          .order('score', { ascending: false })
-          .limit(limit);
-          
-        if (!error && leaderboardData) {
-          data = leaderboardData.map(entry => ({
-            ...entry,
-            game_type: 'custom'
-          }));
-        }
-      } else if (sourceTable === 'preset_games') {
-        const { data: leaderboardData, error } = await supabase
-          .from('preset_leaderboard')
-          .select('player_name, score, total_questions, completion_time, scoring_data, completed_at')
-          .eq('game_id', gameId)
-          .not('score', 'is', null)
-          .order('score', { ascending: false })
-          .limit(limit);
-          
-        if (!error && leaderboardData) {
-          data = leaderboardData.map(entry => ({
-            ...entry,
-            game_type: 'preset'
-          }));
-        }
+      const { data: leaderboardData, error } = await supabase
+        .from('preset_leaderboard')
+        .select('player_name, score, total_questions, completion_time, scoring_data, completed_at')
+        .eq('game_id', gameId)
+        .not('score', 'is', null)
+        .order('score', { ascending: false })
+        .limit(limit);
+        
+      if (error) {
+        console.error('Error fetching preset game leaderboard:', error);
+        return [];
       }
 
-      return data || [];
+      return leaderboardData || [];
     } catch (error) {
-      console.error('Error fetching unified leaderboard:', error);
+      console.error('Error fetching preset game leaderboard:', error);
       return [];
     }
   };
 
   return {
-    saveUnifiedScore,
-    getUnifiedLeaderboard,
+    savePresetGameScore,
+    getPresetGameLeaderboard,
     isSaving
   };
 };

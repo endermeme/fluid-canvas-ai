@@ -6,7 +6,7 @@ import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { useGameShareManager } from '../../hooks/useGameShareManager';
 import { useIframeManager } from '../../hooks/useIframeManager';
-import { useGameScoreManager } from '../../hooks/useGameScoreManager';
+import { useCustomGameScoreManager } from '@/hooks/useCustomGameScoreManager';
 import { Card } from "@/components/ui/card";
 
 interface CustomGameViewProps {
@@ -43,7 +43,7 @@ const CustomGameView: React.FC<CustomGameViewProps> = ({
 }) => {
   const { toast } = useToast();
   const { isSharing, handleShare } = useGameShareManager(miniGame, toast, onShare);
-  const { saveGameScore } = useGameScoreManager();
+  const { saveCustomGameScore } = useCustomGameScoreManager();
   
   const handleScoreUpdate = (score: number, totalQuestions: number) => {
     console.log('Score updated:', score, '/', totalQuestions);
@@ -51,13 +51,12 @@ const CustomGameView: React.FC<CustomGameViewProps> = ({
   
   const handleGameComplete = async (finalScore: number, completionTime: number, extraData?: any) => {
     if (gameId && playerName) {
-      const success = await saveGameScore({
+      const success = await saveCustomGameScore({
         gameId,
         playerName,
         score: finalScore,
         totalQuestions: extraData?.totalQuestions || Math.ceil(finalScore / 10),
-        completionTime,
-        gameType: 'custom'
+        completionTime
       });
       
       if (success) {

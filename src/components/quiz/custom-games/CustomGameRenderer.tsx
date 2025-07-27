@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useUnifiedScoreManager } from '@/hooks/useUnifiedScoreManager';
+import { useCustomGameScoreManager } from '@/hooks/useCustomGameScoreManager';
 import { enhanceIframeContent } from '../utils/iframe-utils';
 import GameIframeRenderer from './game-components/GameIframeRenderer';
 
@@ -20,7 +20,7 @@ export const CustomGameRenderer: React.FC<CustomGameRendererProps> = ({
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const { saveUnifiedScore } = useUnifiedScoreManager();
+  const { saveCustomGameScore } = useCustomGameScoreManager();
 
   // Message listener for score communication
   useEffect(() => {
@@ -36,16 +36,14 @@ export const CustomGameRenderer: React.FC<CustomGameRendererProps> = ({
         case 'GAME_COMPLETE':
           const { score: finalScore, totalQuestions: total, completionTime, extraData } = event.data.data;
           
-          // Save score using unified system
-          const success = await saveUnifiedScore({
+          // Save score using custom game system
+          const success = await saveCustomGameScore({
             gameId,
-            sourceTable: 'custom_games',
             playerName,
             score: finalScore,
             totalQuestions: total,
             completionTime,
-            scoringData: extraData,
-            gameType
+            scoringData: extraData
           });
 
           if (success && onGameComplete) {

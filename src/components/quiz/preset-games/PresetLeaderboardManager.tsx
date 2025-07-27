@@ -1,105 +1,62 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Trophy, Medal, Award, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useUnifiedScoreManager } from '@/hooks/useUnifiedScoreManager';
 import { supabase } from '@/integrations/supabase/client';
 
-interface UnifiedLeaderboardEntry {
+interface PresetLeaderboardEntry {
   player_name: string;
   score: number;
   total_questions: number;
   completion_time: number | null;
   scoring_data: any;
   completed_at: string;
-  game_type: string;
 }
 
-interface UnifiedLeaderboardManagerProps {
+interface PresetLeaderboardManagerProps {
   gameId: string;
-  sourceTable: 'custom_games' | 'preset_games';
+  gameType?: string;
   refreshInterval?: number;
 }
 
-const UnifiedLeaderboardManager: React.FC<UnifiedLeaderboardManagerProps> = ({ 
+const PresetLeaderboardManager: React.FC<PresetLeaderboardManagerProps> = ({ 
   gameId, 
-  sourceTable,
+  gameType,
   refreshInterval = 5000 
 }) => {
-  const [leaderboard, setLeaderboard] = useState<UnifiedLeaderboardEntry[]>([]);
+  const [leaderboard, setLeaderboard] = useState<PresetLeaderboardEntry[]>([]);
   const [activeParticipants, setActiveParticipants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const { getUnifiedLeaderboard } = useUnifiedScoreManager();
 
   const fetchLeaderboard = async () => {
     try {
-      let completedData: UnifiedLeaderboardEntry[] = [];
-      let activeData: any[] = [];
-      
-      if (sourceTable === 'custom_games') {
-        // Get completed games from custom_leaderboard
-        const { data: completedGames, error: completedError } = await supabase
-          .from('custom_leaderboard')
-          .select('player_name, score, total_questions, completion_time, scoring_data, completed_at')
-          .eq('game_id', gameId)
-          .not('score', 'is', null)
-          .order('score', { ascending: false })
-          .limit(10);
-          
-        if (!completedError && completedGames) {
-          completedData = completedGames.map(entry => ({
-            ...entry,
-            game_type: 'custom'
-          }));
-        }
+      // Get completed games from preset_leaderboard  
+      const { data: completedGames, error: completedError } = await supabase
+        .from('preset_leaderboard')
+        .select('player_name, score, total_questions, completion_time, scoring_data, completed_at')
+        .eq('game_id', gameId)
+        .not('score', 'is', null)
+        .order('score', { ascending: false })
+        .limit(10);
+        
+      if (!completedError && completedGames) {
+        setLeaderboard(completedGames);
+      }
 
-        // Get active participants (no score yet)
-        const { data: activeGames, error: activeError } = await supabase
-          .from('custom_leaderboard')
-          .select('player_name, joined_at, is_active')
-          .eq('game_id', gameId)
-          .is('score', null)
-          .eq('is_active', true)
-          .order('joined_at', { ascending: true });
-          
-        if (!activeError && activeGames) {
-          activeData = activeGames;
-        }
-      } else if (sourceTable === 'preset_games') {
-        // Get completed games from preset_leaderboard  
-        const { data: completedGames, error: completedError } = await supabase
-          .from('preset_leaderboard')
-          .select('player_name, score, total_questions, completion_time, scoring_data, completed_at')
-          .eq('game_id', gameId)
-          .not('score', 'is', null)
-          .order('score', { ascending: false })
-          .limit(10);
-          
-        if (!completedError && completedGames) {
-          completedData = completedGames.map(entry => ({
-            ...entry,
-            game_type: 'preset'
-          }));
-        }
-
-        // Get active participants (no score yet)
-        const { data: activeGames, error: activeError } = await supabase
-          .from('preset_leaderboard')
-          .select('player_name, joined_at, is_active')
-          .eq('game_id', gameId)
-          .is('score', null)
-          .eq('is_active', true)
-          .order('joined_at', { ascending: true });
-          
-        if (!activeError && activeGames) {
-          activeData = activeGames;
-        }
+      // Get active participants (no score yet)
+      const { data: activeGames, error: activeError } = await supabase
+        .from('preset_leaderboard')
+        .select('player_name, joined_at, is_active')
+        .eq('game_id', gameId)
+        .is('score', null)
+        .eq('is_active', true)
+        .order('joined_at', { ascending: true });
+        
+      if (!activeError && activeGames) {
+        setActiveParticipants(activeGames);
       }
       
-      setLeaderboard(completedData);
-      setActiveParticipants(activeData);
       setLastUpdate(new Date());
     } catch (error) {
       console.error('Error in fetchLeaderboard:', error);
@@ -115,7 +72,7 @@ const UnifiedLeaderboardManager: React.FC<UnifiedLeaderboardManagerProps> = ({
     const interval = setInterval(fetchLeaderboard, refreshInterval);
 
     return () => clearInterval(interval);
-  }, [gameId, sourceTable, refreshInterval]);
+  }, [gameId, refreshInterval]);
 
   const getRankIcon = (index: number) => {
     switch (index) {
@@ -147,8 +104,8 @@ const UnifiedLeaderboardManager: React.FC<UnifiedLeaderboardManagerProps> = ({
     return `${seconds}s`;
   };
 
-  const getScoreDisplay = (entry: UnifiedLeaderboardEntry) => {
-    const isTimeBasedGame = ['memory', 'wordsearch', 'matching'].includes(entry.game_type?.toLowerCase());
+  const getScoreDisplay = (entry: PresetLeaderboardEntry) => {
+    const isTimeBasedGame = ['memory', 'wordsearch', 'matching'].includes(gameType?.toLowerCase() || '');
     
     if (isTimeBasedGame && entry.completion_time) {
       return {
@@ -165,7 +122,7 @@ const UnifiedLeaderboardManager: React.FC<UnifiedLeaderboardManagerProps> = ({
     }
   };
 
-  const getMainScoreDisplay = (entry: UnifiedLeaderboardEntry) => {
+  const getMainScoreDisplay = (entry: PresetLeaderboardEntry) => {
     const scoreInfo = getScoreDisplay(entry);
     
     return (
@@ -300,4 +257,4 @@ const UnifiedLeaderboardManager: React.FC<UnifiedLeaderboardManagerProps> = ({
   );
 };
 
-export default UnifiedLeaderboardManager;
+export default PresetLeaderboardManager;

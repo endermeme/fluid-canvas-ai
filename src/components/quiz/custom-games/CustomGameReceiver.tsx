@@ -9,7 +9,8 @@ import { Loader2, Lock, Users, Clock, Trophy } from 'lucide-react';
 import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
 import { addParticipant } from '@/utils/gameParticipation';
 import { CustomGameRenderer } from './CustomGameRenderer';
-import UnifiedLeaderboardManager from '../share/UnifiedLeaderboardManager';
+import CustomLeaderboardManager from './CustomLeaderboardManager';
+import PresetLeaderboardManager from '../preset-games/PresetLeaderboardManager';
 import { useToast } from '@/hooks/use-toast';
 import { StoredGame } from '@/utils/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -312,9 +313,8 @@ export const CustomGameReceiver: React.FC = () => {
 
             {showLeaderboard && (
               <div className="mt-6">
-                <UnifiedLeaderboardManager 
+                <CustomLeaderboardManager 
                   gameId={game.id}
-                  sourceTable="custom_games"
                   refreshInterval={10000}
                 />
               </div>
@@ -370,9 +370,8 @@ export const CustomGameReceiver: React.FC = () => {
         {showLeaderboard && (
           <div className="w-1/4 border-l bg-muted/50">
             <div className="p-4">
-              <UnifiedLeaderboardManager 
+              <CustomLeaderboardManager 
                 gameId={game.id}
-                sourceTable="custom_games"
                 refreshInterval={5000}
               />
             </div>

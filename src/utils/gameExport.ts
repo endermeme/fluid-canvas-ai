@@ -1,4 +1,5 @@
-import { supabase } from '@/integrations/supabase/client';
+import { saveCustomGameForSharing, getCustomGame } from './customGameExport';
+import { savePresetGameForSharing, getPresetGame } from './presetGameExport';
 
 export interface ShareSettings {
   password?: string;
@@ -28,29 +29,6 @@ export interface StoredGame {
   data?: any; // Add data property for preset games
 }
 
-export const formatHtmlContent = (content: string): string => {
-  if (!content) return '';
-  
-  try {
-    let formattedContent = content.replace(/```html|```/g, '').trim();
-    
-    formattedContent = formattedContent
-      .replace(/(<[^\/!][^>]*>)(?!\s*[\r\n])/g, '$1\n')
-      .replace(/(?<!\s*[\r\n])(<\/[^>]+>)/g, '\n$1')
-      .replace(/(<(?:[^>]*\/>|!--.*?-->))(?!\s*[\r\n])/g, '$1\n')
-      .replace(/(<!DOCTYPE[^>]*>)(?!\s*[\r\n])/gi, '$1\n')
-      .replace(/(<(?:html|head|body|script|style)[^>]*>)/g, '\n$1\n')
-      .replace(/(<\/(?:html|head|body|script|style)>)/g, '\n$1\n')
-      .replace(/\n\s*\n\s*\n/g, '\n\n')
-      .trim();
-      
-    return formattedContent;
-  } catch (error) {
-    console.error('Error formatting HTML content:', error);
-    return content;
-  }
-};
-
 export const saveGameForSharing = async (
   title: string,
   gameType: string,
@@ -61,124 +39,19 @@ export const saveGameForSharing = async (
   shareSettings?: ShareSettings
 ): Promise<string> => {
   try {
-    console.log('Saving game for sharing:', { title, gameType, content });
-    
-    const gameId = crypto.randomUUID();
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
+    console.log('💾 [GameExport] Routing game save:', { title, gameType, content });
     
     // Detect if this is a preset game (has questions, cards, items structure)
     const isPresetGame = typeof content === 'object' && content !== null && 
                         (content.questions || content.cards || content.items || content.pairs);
     
-    if (shareSettings?.customDuration) {
-      expiresAt.setTime(Date.now() + shareSettings.customDuration * 60 * 60 * 1000);
-    }
-
     if (isPresetGame) {
-      // Save preset games to preset_games table
-      console.log('Saving preset game to preset_games table');
-      
-      const { data, error } = await supabase
-        .from('preset_games')
-        .insert([
-          {
-            id: gameId,
-            title: title || 'Game tương tác',
-            game_type: gameType,
-            template_data: content,
-            description: description || `Game chia sẻ: ${title}`,
-            expires_at: expiresAt.toISOString(),
-            creator_ip: 'localhost',
-            account_id: accountId,
-            password: shareSettings?.password || null,
-            max_participants: shareSettings?.maxParticipants || null,
-            show_leaderboard: shareSettings?.showLeaderboard ?? true,
-            require_registration: shareSettings?.requireRegistration ?? false,
-            custom_duration: shareSettings?.customDuration || null,
-            is_published: true,
-            is_active: true
-          }
-        ])
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error saving preset game:", error);
-        throw new Error(`Cannot save preset game: ${error.message}`);
-      }
-      
-      console.log("Preset game saved successfully:", data);
+      console.log('💾 [GameExport] Routing to preset game export');
+      return await savePresetGameForSharing(title, gameType, content, description, accountId, shareSettings);
     } else {
-      // Save custom games to custom_games table
-      console.log('Saving custom game to custom_games table');
-      
-      let processedHtmlContent = htmlContent;
-      
-      // Add game content to HTML for custom games
-      if (typeof content === 'object' && content !== null && htmlContent) {
-        try {
-          const encodedContent = encodeURIComponent(JSON.stringify(content));
-          if (!processedHtmlContent.includes('data-game-content')) {
-            processedHtmlContent = processedHtmlContent.replace(
-              /<body([^>]*)>/i,
-              `<body$1 data-game-content="${encodedContent}">`
-            );
-          }
-        } catch (encodeError) {
-          console.error("Error encoding game content:", encodeError);
-        }
-      }
-      
-      // Ensure HTML structure for custom games
-      if (htmlContent && !processedHtmlContent.includes('<!DOCTYPE html')) {
-        processedHtmlContent = `<!DOCTYPE html>\n<html lang="vi">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>${title}</title>\n</head>\n<body>\n${processedHtmlContent}\n</body>\n</html>`;
-      }
-      
-      // Limit content size
-      const maxContentLength = 500000; // ~500KB
-      if (processedHtmlContent && processedHtmlContent.length > maxContentLength) {
-        processedHtmlContent = processedHtmlContent.substring(0, maxContentLength);
-        console.warn("Content truncated due to size limitations");
-      }
-
-      const { data, error } = await supabase
-        .from('custom_games')
-        .insert([
-          {
-            id: gameId,
-            title: title || 'Game tương tác',
-            game_data: {},
-            description: description || `Game chia sẻ: ${title}`,
-            html_content: processedHtmlContent,
-            expires_at: expiresAt.toISOString(),
-            creator_ip: 'localhost',
-            account_id: accountId,
-            password: shareSettings?.password || null,
-            max_participants: shareSettings?.maxParticipants || null,
-            show_leaderboard: shareSettings?.showLeaderboard ?? true,
-            require_registration: shareSettings?.requireRegistration ?? false,
-            custom_duration: shareSettings?.customDuration || null,
-            is_published: true
-          }
-        ])
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error saving custom game:", error);
-        throw new Error(`Cannot save custom game: ${error.message}`);
-      }
-      
-      console.log("Custom game saved successfully:", data);
+      console.log('💾 [GameExport] Routing to custom game export');
+      return await saveCustomGameForSharing(title, content, htmlContent, description, accountId, shareSettings);
     }
-
-    // Return share URL
-    const baseUrl = window.location.origin;
-    const shareUrl = `${baseUrl}/game/${gameId}`;
-    
-    console.log("Share URL generated:", shareUrl);
-    return shareUrl;
     
   } catch (error) {
     console.error("Error in saveGameForSharing:", error);
@@ -193,74 +66,48 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
   }
 
   try {
-    console.log("Fetching game with ID:", id);
+    console.log("💾 [GameExport] Fetching game with ID:", id);
     
-    // Try preset_games first
-    const { data: presetGame } = await supabase
-      .from('preset_games')
-      .select('*')
-      .eq('id', id)
-      .eq('is_active', true)
-      .single();
-
+    // Try preset games first
+    const presetGame = await getPresetGame(id);
     if (presetGame) {
-      console.log("Found preset game:", presetGame);
+      console.log("💾 [GameExport] Found preset game");
       return {
         id: presetGame.id,
         title: presetGame.title,
-        gameType: presetGame.game_type,
-        content: presetGame.template_data || {},
+        gameType: presetGame.gameType,
+        content: presetGame.content,
         htmlContent: '',
-        description: presetGame.description || `Game chia sẻ: ${presetGame.title}`,
-        expiresAt: new Date(presetGame.expires_at || Date.now() + 7 * 24 * 60 * 60 * 1000).getTime(),
-        createdAt: new Date(presetGame.created_at).getTime(),
+        description: presetGame.description,
+        expiresAt: presetGame.expiresAt,
+        createdAt: presetGame.createdAt,
         password: presetGame.password,
-        maxParticipants: presetGame.max_participants,
-        showLeaderboard: presetGame.show_leaderboard ?? true,
-        requireRegistration: presetGame.require_registration ?? false,
-        customDuration: presetGame.custom_duration,
-        // Add data property for GameViewSelector to detect preset game
-        data: presetGame.template_data || {}
+        maxParticipants: presetGame.maxParticipants,
+        showLeaderboard: presetGame.showLeaderboard,
+        requireRegistration: presetGame.requireRegistration,
+        customDuration: presetGame.customDuration,
+        data: presetGame.data
       };
     }
     
-    // Try custom_games if not found in preset_games
-    const { data: customGame } = await supabase
-      .from('custom_games')
-      .select('*')
-      .eq('id', id)
-      .gt('expires_at', new Date().toISOString())
-      .single();
-
+    // Try custom games if not found in preset games
+    const customGame = await getCustomGame(id);
     if (customGame) {
-      console.log("Found custom game:", customGame);
-      
-      let parsedContent = null;
-      if (customGame.html_content && customGame.html_content.includes('data-game-content')) {
-        try {
-          const contentMatch = customGame.html_content.match(/data-game-content="([^"]*)"/);
-          if (contentMatch && contentMatch[1]) {
-            parsedContent = JSON.parse(decodeURIComponent(contentMatch[1]));
-          }
-        } catch (e) {
-          console.error('Error parsing game content from HTML:', e);
-        }
-      }
-
+      console.log("💾 [GameExport] Found custom game");
       return {
         id: customGame.id,
         title: customGame.title,
         gameType: 'custom',
-        content: parsedContent || {},
-        htmlContent: customGame.html_content || '',
-        description: customGame.description || `Game chia sẻ: ${customGame.title}`,
-        expiresAt: new Date(customGame.expires_at || Date.now() + 7 * 24 * 60 * 60 * 1000).getTime(),
-        createdAt: new Date(customGame.created_at).getTime(),
+        content: customGame.content,
+        htmlContent: customGame.htmlContent,
+        description: customGame.description,
+        expiresAt: customGame.expiresAt,
+        createdAt: customGame.createdAt,
         password: customGame.password,
-        maxParticipants: customGame.max_participants,
-        showLeaderboard: customGame.show_leaderboard ?? true,
-        requireRegistration: customGame.require_registration ?? false,
-        customDuration: customGame.custom_duration
+        maxParticipants: customGame.maxParticipants,
+        showLeaderboard: customGame.showLeaderboard,
+        requireRegistration: customGame.requireRegistration,
+        customDuration: customGame.customDuration
       };
     }
 

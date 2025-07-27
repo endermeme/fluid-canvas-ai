@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Download, Users, BarChart3, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import UnifiedLeaderboardManager from './UnifiedLeaderboardManager';
+import CustomLeaderboardManager from '../custom-games/CustomLeaderboardManager';
+import PresetLeaderboardManager from '../preset-games/PresetLeaderboardManager';
 import { 
   Table, 
   TableBody, 
@@ -226,11 +227,18 @@ const GameDashboard = () => {
         </TabsList>
 
         <TabsContent value="leaderboard" className="mt-6">
-          <UnifiedLeaderboardManager 
-            gameId={gameId!} 
-            sourceTable={game?.game_type ? "preset_games" : "custom_games"}
-            refreshInterval={10000}
-          />
+          {game?.game_type ? (
+            <PresetLeaderboardManager 
+              gameId={gameId!} 
+              gameType={game.game_type}
+              refreshInterval={10000}
+            />
+          ) : (
+            <CustomLeaderboardManager 
+              gameId={gameId!} 
+              refreshInterval={10000}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="participants" className="mt-6">

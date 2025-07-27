@@ -3,7 +3,7 @@ import PresetGameRenderer from '../PresetGameRenderer';
 import PresetGameHeader from '../../preset-games/PresetGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { useGameShareManager } from '../../hooks/useGameShareManager';
-import { useUnifiedScoreManager } from '@/hooks/useUnifiedScoreManager';
+import { usePresetGameScoreManager } from '@/hooks/usePresetGameScoreManager';
 import { Card } from "@/components/ui/card";
 import { useParams } from 'react-router-dom';
 
@@ -43,7 +43,7 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
 }) => {
   const { toast } = useToast();
   const { isSharing, handleShare } = useGameShareManager(miniGame, toast, onShare);
-  const { saveUnifiedScore } = useUnifiedScoreManager();
+  const { savePresetGameScore } = usePresetGameScoreManager();
   const { gameId: urlGameId } = useParams();
   const currentGameId = gameId || urlGameId;
 
@@ -73,12 +73,11 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
         }
       }
 
-      console.log('💾 PresetGameView - Saving score with sourceTable: preset_games');
+      console.log('💾 PresetGameView - Saving preset game score');
 
       try {
-        await saveUnifiedScore({
+        await savePresetGameScore({
           gameId: currentGameId,
-          sourceTable: 'preset_games', // Fix: Save to preset_leaderboard for preset games
           playerName: finalPlayerName,
           score: result.score,
           totalQuestions: result.totalQuestions || result.total || 10,
