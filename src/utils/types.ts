@@ -18,6 +18,7 @@ export interface StoredGame {
   singleParticipationOnly?: boolean;
   creator_ip?: string;
   account_id?: string;
+  data?: any; // Add data property for preset games
 }
 
 export interface GameParticipant {

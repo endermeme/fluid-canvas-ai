@@ -12,16 +12,20 @@ export interface StoredGame {
   id: string;
   title: string;
   gameType: string;
-  content: any;
+  content?: any;
   htmlContent: string;
   description?: string;
   expiresAt: Date | number;
   createdAt: Date | number;
   password?: string;
   maxParticipants?: number;
-  showLeaderboard: boolean;
-  requireRegistration: boolean;
+  showLeaderboard?: boolean;
+  requireRegistration?: boolean;
   customDuration?: number;
+  singleParticipationOnly?: boolean;
+  creator_ip?: string;
+  account_id?: string;
+  data?: any; // Add data property for preset games
 }
 
 export const formatHtmlContent = (content: string): string => {
@@ -214,7 +218,9 @@ export const getSharedGame = async (id: string): Promise<StoredGame | null> => {
         maxParticipants: presetGame.max_participants,
         showLeaderboard: presetGame.show_leaderboard ?? true,
         requireRegistration: presetGame.require_registration ?? false,
-        customDuration: presetGame.custom_duration
+        customDuration: presetGame.custom_duration,
+        // Add data property for GameViewSelector to detect preset game
+        data: presetGame.template_data || {}
       };
     }
     
