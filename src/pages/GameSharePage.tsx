@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAccount } from '@/contexts/AccountContext';
 import { supabase } from '@/integrations/supabase/client';
+import { playerStorageUtils } from '@/utils/playerStorage';
 
 // Removed zod import - no longer needed
 
@@ -183,50 +184,67 @@ const GameSharePage: React.FC = () => {
           description: "Bạn có quyền quản lý game này.",
         });
       } else {
-        handleShowJoinForm();
+        // Check if player should bypass join form
+        const shouldBypass = playerStorageUtils.shouldBypassJoinForm(game.id, game.singleParticipationOnly);
+        
+        if (shouldBypass) {
+          const existingPlayerName = playerStorageUtils.getOrGeneratePlayerName(game.id);
+          console.log('🎯 [DEBUG] Auto-joining GameSharePage with existing name:', existingPlayerName);
+          
+          setCurrentPlayerName(existingPlayerName);
+          handleAutoJoin(existingPlayerName);
+        } else {
+          handleShowJoinForm();
+        }
       }
     }
   }, [game, hasRegistered, gameExpired]);
+
+  const handleAutoJoin = async (autoPlayerName: string) => {
+    if (!game || !gameId) return;
+    
+    console.log('🤖 [DEBUG] Auto-joining GameSharePage with name:', autoPlayerName);
+    
+    try {
+      const fakeIp = getFakeIpAddress();
+      const result = await addParticipant(gameId, autoPlayerName, fakeIp, accountId);
+      
+      if (result.success) {
+        setHasRegistered(true);
+        setCurrentPlayerName(autoPlayerName);
+        
+        // Update localStorage with join info
+        playerStorageUtils.markPlayerAsJoined(game.id, autoPlayerName, game.gameType || 'shared');
+        
+        toast({
+          title: "Chào mừng trở lại! 🎉",
+          description: `Chào ${autoPlayerName}, bạn đã tự động tham gia lại game!`
+        });
+        
+        setTimeout(() => {
+          refreshParticipants();
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Auto-join failed in GameSharePage:', error);
+      // If auto-join fails, show join form
+      handleShowJoinForm();
+    }
+  };
   
   const handleBack = () => {
     navigate(`/game-history?acc=${accountId}`);
   };
   
-  const generatePlayerName = async () => {
-    if (!gameId) return 'Player 1';
-    
-    try {
-      // Get current participant count from leaderboard tables
-      const { data: customScores } = await supabase
-        .from('custom_leaderboard')
-        .select('player_name')
-        .eq('game_id', gameId);
-
-      const { data: presetScores } = await supabase
-        .from('preset_leaderboard')
-        .select('player_name')
-        .eq('game_id', gameId);
-
-      const allScores = [...(customScores || []), ...(presetScores || [])];
-      
-      // Count unique players and generate next number
-      const uniquePlayers = new Set(allScores.map(s => s.player_name));
-      const playerCount = uniquePlayers.size;
-      return `Player ${playerCount + 1}`;
-    } catch (error) {
-      console.error('Error generating player name:', error);
-      return 'Player 1';
-    }
-  };
   
   const handleJoinGame = async (playerName: string) => {
     if (!gameId || !game || isSubmitting) return;
     
     let finalPlayerName = playerName.trim();
     
-    // If no name provided, generate auto name
+    // If no name provided, use playerStorage utility
     if (!finalPlayerName) {
-      finalPlayerName = await generatePlayerName();
+      finalPlayerName = playerStorageUtils.getOrGeneratePlayerName(gameId);
     }
     
     // Check max participants limit
@@ -263,6 +281,10 @@ const GameSharePage: React.FC = () => {
         
         setShowNameDialog(false);
         setHasRegistered(true);
+        setCurrentPlayerName(finalPlayerName);
+        
+        // Save to localStorage for future auto-join
+        playerStorageUtils.markPlayerAsJoined(gameId, finalPlayerName, game.gameType || 'shared');
         
         const registeredGamesStr = localStorage.getItem('registered_games');
         let registeredGames = registeredGamesStr ? JSON.parse(registeredGamesStr) : [];
@@ -360,7 +382,8 @@ const GameSharePage: React.FC = () => {
   };
 
   const handleSkip = async () => {
-    const autoName = await generatePlayerName();
+    if (!gameId) return;
+    const autoName = playerStorageUtils.getOrGeneratePlayerName(gameId);
     await handleJoinGame(autoName);
   };
 
@@ -375,7 +398,8 @@ const GameSharePage: React.FC = () => {
       return;
     }
     
-    const autoName = await generatePlayerName();
+    if (!gameId) return;
+    const autoName = playerStorageUtils.getOrGeneratePlayerName(gameId);
     setShowPasswordDialog(false);
     await handleJoinGame(autoName);
   };

@@ -97,13 +97,48 @@ export const playerStorageUtils = {
 
   // Generate a random player name
   generatePlayerName: (): string => {
-    const adjectives = ['Nhanh', 'Thông minh', 'Siêu', 'Pro', 'Giỏi', 'Xuất sắc'];
-    const nouns = ['Player', 'Gamer', 'Master', 'Champion', 'Hero', 'Star'];
-    const randomNumber = Math.floor(Math.random() * 1000);
+    const adjectives = ['Nhanh', 'Thông minh', 'Siêu', 'Pro', 'Giỏi', 'Xuất sắc', 'Khéo', 'Mạnh'];
+    const nouns = ['Player', 'Gamer', 'Master', 'Champion', 'Hero', 'Star', 'Ninja', 'Wizard'];
+    const randomNumber = Math.floor(Math.random() * 9999) + 1;
     
     const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
     const noun = nouns[Math.floor(Math.random() * nouns.length)];
     
     return `${adjective}${noun}${randomNumber}`;
+  },
+
+  // Check if player should bypass join form (already participated)
+  shouldBypassJoinForm: (gameId: string, singleParticipationOnly: boolean = false): boolean => {
+    const playerInfo = playerStorageUtils.getPlayerInfo(gameId);
+    if (!playerInfo) return false;
+    
+    console.log('🔍 [DEBUG] shouldBypassJoinForm check:', { 
+      gameId, 
+      singleParticipationOnly, 
+      hasJoined: playerInfo.hasJoined,
+      hasCompleted: playerInfo.hasCompleted,
+      playerName: playerInfo.playerName
+    });
+    
+    // If single participation only and already completed, don't bypass (show restriction message)
+    if (singleParticipationOnly && playerInfo.hasCompleted) {
+      return false;
+    }
+    
+    // If player has joined before, bypass form
+    return Boolean(playerInfo.hasJoined);
+  },
+
+  // Get or generate player name for auto-join
+  getOrGeneratePlayerName: (gameId: string): string => {
+    const existingInfo = playerStorageUtils.getPlayerInfo(gameId);
+    if (existingInfo?.playerName) {
+      console.log('🔍 [DEBUG] Found existing player name:', existingInfo.playerName);
+      return existingInfo.playerName;
+    }
+    
+    const newName = playerStorageUtils.generatePlayerName();
+    console.log('🔍 [DEBUG] Generated new player name:', newName);
+    return newName;
   }
 };

@@ -14,6 +14,7 @@ import PresetLeaderboardManager from '../preset-games/PresetLeaderboardManager';
 import { useToast } from '@/hooks/use-toast';
 import { StoredGame } from '@/utils/types';
 import { supabase } from '@/integrations/supabase/client';
+import { playerStorageUtils } from '@/utils/playerStorage';
 
 export const CustomGameReceiver: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -93,26 +94,53 @@ export const CustomGameReceiver: React.FC = () => {
     }
   };
 
-  const generatePlayerName = async () => {
-    try {
-      // Get current participant count from custom_leaderboard
-      const { data: scores, error } = await supabase
-        .from('custom_leaderboard')
-        .select('player_name')
-        .eq('game_id', game!.id);
-
-      if (error) {
-        console.error('Error getting participant count:', error);
-        return 'Player 1';
+  // Auto-join logic for returning players
+  useEffect(() => {
+    if (game && !hasJoined && !isCreator(game)) {
+      console.log('🔍 [DEBUG] Checking auto-join for gameId:', game.id);
+      
+      // Check if player should bypass form
+      const shouldBypass = playerStorageUtils.shouldBypassJoinForm(game.id, game.singleParticipationOnly);
+      
+      if (shouldBypass) {
+        const existingPlayerName = playerStorageUtils.getOrGeneratePlayerName(game.id);
+        console.log('🎯 [DEBUG] Auto-joining with existing name:', existingPlayerName);
+        
+        setPlayerName(existingPlayerName);
+        // Auto-join silently
+        handleAutoJoin(existingPlayerName);
       }
+    }
+  }, [game, hasJoined]);
 
-      // Count unique players and generate next number
-      const uniquePlayers = new Set(scores?.map(s => s.player_name) || []);
-      const playerCount = uniquePlayers.size;
-      return `Player ${playerCount + 1}`;
+  const handleAutoJoin = async (autoPlayerName: string) => {
+    if (!game) return;
+    
+    console.log('🤖 [DEBUG] Auto-joining game with name:', autoPlayerName);
+    
+    try {
+      const result = await addParticipant(
+        game.id,
+        autoPlayerName,
+        'shared-game',
+        accountId || undefined
+      );
+
+      if (result.success) {
+        setPlayerName(autoPlayerName);
+        setHasJoined(true);
+        
+        // Update localStorage with join info
+        playerStorageUtils.markPlayerAsJoined(game.id, autoPlayerName, game.gameType || 'custom');
+        
+        toast({
+          title: "Chào mừng trở lại! 🎉",
+          description: `Chào ${autoPlayerName}, bạn đã tự động tham gia lại game!`
+        });
+      }
     } catch (error) {
-      console.error('Error generating player name:', error);
-      return 'Player 1';
+      console.error('Auto-join failed:', error);
+      // If auto-join fails, user can still join manually
     }
   };
 
@@ -131,9 +159,9 @@ export const CustomGameReceiver: React.FC = () => {
       return;
     }
 
-    // If no name provided for non-password games, generate auto name
+    // If no name provided for non-password games, use playerStorage utility
     if (!finalPlayerName) {
-      finalPlayerName = await generatePlayerName();
+      finalPlayerName = playerStorageUtils.getOrGeneratePlayerName(game.id);
     }
 
     // Check password if required
@@ -157,6 +185,10 @@ export const CustomGameReceiver: React.FC = () => {
       if (result.success) {
         setPlayerName(finalPlayerName); // Update state with final name
         setHasJoined(true);
+        
+        // Save to localStorage for future auto-join
+        playerStorageUtils.markPlayerAsJoined(game.id, finalPlayerName, game.gameType || 'custom');
+        
         toast({
           title: "Tham gia thành công! 🎉",
           description: `Chào mừng ${finalPlayerName} đến với game!`
@@ -181,7 +213,7 @@ export const CustomGameReceiver: React.FC = () => {
   const handleSkip = async () => {
     if (!game) return;
     
-    const autoName = await generatePlayerName();
+    const autoName = playerStorageUtils.getOrGeneratePlayerName(game.id);
     setPlayerName(autoName);
     handleJoinGame();
   };
