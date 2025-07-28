@@ -218,9 +218,7 @@ const TeacherDashboard = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Tên</TableHead>
-                <TableHead>Địa chỉ IP</TableHead>
                 <TableHead>Điểm số</TableHead>
-                <TableHead>Số lần thử</TableHead>
                 <TableHead>Thời gian tham gia</TableHead>
               </TableRow>
             </TableHeader>
@@ -231,18 +229,10 @@ const TeacherDashboard = () => {
                     {participant.name}
                   </TableCell>
                   <TableCell>
-                    {maskIps ? maskIpAddress(participant.ipAddress) : participant.ipAddress}
-                  </TableCell>
-                  <TableCell>
                     {participant.score || 0}
                   </TableCell>
                   <TableCell>
-                    <span className={participant.retryCount > 1 ? "text-amber-500 font-medium" : ""}>
-                      {participant.retryCount || 0}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(participant.timestamp).toLocaleString()}
+                    {new Date(participant.joined_at || participant.timestamp).toLocaleString('vi-VN')}
                   </TableCell>
                 </TableRow>
               ))}

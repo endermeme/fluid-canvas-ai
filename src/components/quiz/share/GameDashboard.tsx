@@ -249,13 +249,6 @@ const GameDashboard = () => {
                   <Users className="h-5 w-5" />
                   Danh sách người tham gia ({participants.length})
                 </CardTitle>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setMaskIps(!maskIps)}
-                >
-                  {maskIps ? 'Hiện IP' : 'Ẩn IP'}
-                </Button>
               </div>
             </CardHeader>
             <CardContent>
@@ -265,9 +258,6 @@ const GameDashboard = () => {
                     <TableRow>
                       <TableHead>Tên</TableHead>
                       <TableHead>Điểm số</TableHead>
-                      <TableHead>Tổng câu hỏi</TableHead>
-                      <TableHead>Thời gian hoàn thành</TableHead>
-                      <TableHead>Địa chỉ IP</TableHead>
                       <TableHead>Thời gian tham gia</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -279,15 +269,6 @@ const GameDashboard = () => {
                         </TableCell>
                         <TableCell>
                           {participant.score || 0}
-                        </TableCell>
-                        <TableCell>
-                          {participant.totalQuestions || 0}
-                        </TableCell>
-                        <TableCell>
-                          {participant.completionTime ? `${participant.completionTime}s` : 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                          {maskIps ? maskIpAddress(participant.ipAddress) : participant.ipAddress}
                         </TableCell>
                         <TableCell>
                           {new Date(participant.timestamp).toLocaleString('vi-VN')}
