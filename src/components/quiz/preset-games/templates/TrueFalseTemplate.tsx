@@ -12,9 +12,10 @@ interface TrueFalseTemplateProps {
   topic: string;
   settings?: any;
   onShare?: () => Promise<string>;
+  onGameComplete?: (score: number, totalQuestions: number, completionTime?: number) => void;
 }
 
-const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, topic, settings, onShare }) => {
+const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, topic, settings, onShare, onGameComplete }) => {
   const gameContent = content || data;
   const questions = gameContent?.questions || [];
   
@@ -32,6 +33,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   const [totalTimeLeft, setTotalTimeLeft] = useState(gameSettings.totalTime);
   const [showResult, setShowResult] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
   
   const { toast } = useToast();
 
@@ -121,6 +123,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
   useEffect(() => {
     if (!gameStarted && questions.length > 0) {
       setGameStarted(true);
+      setStartTime(Date.now());
     }
   }, [gameContent, questions, gameStarted]);
 
@@ -178,6 +181,18 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
 
   const handleNextQuestion = () => {
     if (currentQuestion === questions.length - 1) {
+      // Game completed
+      const finalScore = userAnswers.filter((answer, index) => answer === questions[index]?.isTrue).length;
+      const completionTime = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0;
+      
+      console.log('🔥 [DEBUG] TrueFalse game completed, calling onGameComplete with:', { finalScore, total: questions.length, completionTime });
+      
+      if (onGameComplete) {
+        onGameComplete(finalScore, questions.length, completionTime);
+      } else {
+        console.log('🔥 [DEBUG] TrueFalse onGameComplete not provided!');
+      }
+      
       setShowResult(true);
     } else {
       setCurrentQuestion(currentQuestion + 1);

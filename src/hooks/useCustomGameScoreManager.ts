@@ -24,6 +24,7 @@ export const useCustomGameScoreManager = () => {
   const { toast } = useToast();
 
   const saveCustomGameScore = async (scoreData: CustomGameScore, details?: ScoreDetail[]) => {
+    console.log('🔥 [DEBUG] saveCustomGameScore called with:', scoreData);
     if (isSaving) return false;
     
     setIsSaving(true);

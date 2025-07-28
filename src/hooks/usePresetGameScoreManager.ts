@@ -25,6 +25,7 @@ export const usePresetGameScoreManager = () => {
   const { toast } = useToast();
 
   const savePresetGameScore = async (scoreData: PresetGameScore, details?: ScoreDetail[]) => {
+    console.log('🔥 [DEBUG] savePresetGameScore called with:', scoreData);
     if (isSaving) return false;
     
     setIsSaving(true);
