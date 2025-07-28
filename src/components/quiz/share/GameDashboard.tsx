@@ -25,7 +25,6 @@ const GameDashboard = () => {
   const [game, setGame] = useState<any>(null);
   const [participants, setParticipants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [maskIps, setMaskIps] = useState(true);
 
   useEffect(() => {
     loadGameData();

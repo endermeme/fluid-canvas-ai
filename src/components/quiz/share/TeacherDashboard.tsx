@@ -19,7 +19,6 @@ const TeacherDashboard = () => {
   const { gameId } = useParams();
   const [game, setGame] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [maskIps, setMaskIps] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -197,20 +196,11 @@ const TeacherDashboard = () => {
       </div>
 
       <div className="bg-card rounded-lg shadow p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-medium">
-              Danh sách người tham gia ({game.participants?.length || 0})
-            </h2>
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setMaskIps(!maskIps)}
-          >
-            {maskIps ? 'Hiện IP' : 'Ẩn IP'}
-          </Button>
+        <div className="flex items-center gap-2 mb-4">
+          <Users className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-medium">
+            Danh sách người tham gia ({game.participants?.length || 0})
+          </h2>
         </div>
 
         {game.participants && game.participants.length > 0 ? (
