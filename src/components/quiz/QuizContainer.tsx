@@ -5,8 +5,6 @@ import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { QRCodeSVG } from 'qrcode.react';
-import { Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 // Game sharing moved to separate handlers
 import QuizHeader from './QuizHeader';
@@ -19,7 +17,6 @@ interface QuizContainerProps {
   showRefreshButton?: boolean;
   showSettingsButton?: boolean;
   showCreateButton?: boolean;
-  showShareButton?: boolean;
   isGameCreated?: boolean;
   gameContent?: unknown;
   onBack?: () => void;
@@ -31,7 +28,6 @@ interface QuizContainerProps {
   className?: string;
   isCreatingGame?: boolean;
   onHandleCreate?: () => void;
-  onHandleShare?: () => Promise<string>;
 }
 
 const QuizContainer: React.FC<QuizContainerProps> = ({
@@ -42,7 +38,6 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
   showRefreshButton = false,
   showSettingsButton = false,
   showCreateButton = false,
-  showShareButton = false,
   isGameCreated = false,
   gameContent = null,
   onBack,
@@ -53,14 +48,10 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
   headerRight,
   className,
   isCreatingGame = false,
-  onHandleCreate = () => { },
-  onHandleShare = () => Promise.resolve("")
+  onHandleCreate = () => { }
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [showShareDialog, setShowShareDialog] = useState(false);
-  const [shareUrl, setShareUrl] = useState('');
-  const [copied, setCopied] = useState(false);
   
   const handleBack = () => {
     if (onBack) {
@@ -88,64 +79,6 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
     }
   };
 
-  const handleShare = async () => {
-    if (onHandleShare) {
-      const url = await onHandleShare();
-      if (url) {
-        setShareUrl(url);
-        setShowShareDialog(true);
-        return url;
-      }
-      return "";
-    }
-
-    if (!gameContent) {
-      toast({
-        title: "Không thể chia sẻ",
-        description: "Không có nội dung game để chia sẻ",
-        variant: "destructive"
-      });
-      return "";
-    }
-
-    try {
-      // Deprecated - use specific share handlers instead
-      toast({
-        title: "Lỗi chia sẻ",
-        description: "Chức năng chia sẻ chung đã bị tắt. Vui lòng sử dụng chức năng chia sẻ riêng cho từng loại game.",
-        variant: "destructive"
-      });
-       return "";
-    } catch (error) {
-      console.error("Error sharing game:", error);
-      toast({
-        title: "Lỗi chia sẻ",
-        description: "Không thể tạo link chia sẻ. Vui lòng thử lại.",
-        variant: "destructive"
-      });
-      return "";
-    }
-  };
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(shareUrl)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-        toast({
-          title: "Đã sao chép",
-          description: "Đường dẫn đã được sao chép vào clipboard.",
-        });
-      })
-      .catch(err => {
-        console.error('Không thể sao chép liên kết:', err);
-        toast({
-          title: "Lỗi sao chép",
-          description: "Không thể sao chép đường dẫn. Vui lòng thử lại.",
-          variant: "destructive"
-        });
-      });
-  };
 
   return (
     <div className={cn("relative h-full w-full flex flex-col overflow-hidden", className)}>
@@ -154,11 +87,8 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
         <QuizHeader 
           showBackButton={showBackButton}
           showCreateButton={showCreateButton}
-          showShareButton={showShareButton}
-          isGameCreated={isGameCreated}
           onBack={handleBack}
           onCreate={handleCreate}
-          onShare={() => handleShare()}
           headerRight={headerRight}
         />
       )}
@@ -175,44 +105,6 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
         </div>
       )}
 
-      {/* Share Dialog */}
-      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
-            <DialogDescription>
-              Chia sẻ game này với bạn bè để họ có thể tham gia chơi
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col items-center space-y-4 py-4">
-            <div className="p-4 bg-white rounded-lg">
-              <QRCodeSVG value={shareUrl} size={200} />
-            </div>
-            
-            <div className="w-full space-y-2">
-              <Label htmlFor="share-link">Liên kết chia sẻ</Label>
-              <div className="flex">
-                <Input 
-                  id="share-link" 
-                  value={shareUrl} 
-                  readOnly 
-                  className="rounded-r-none"
-                />
-                <Button 
-                  variant="outline" 
-                  className="rounded-l-none"
-                  onClick={handleCopyLink}
-                >
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setShowShareDialog(false)}>Đóng</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

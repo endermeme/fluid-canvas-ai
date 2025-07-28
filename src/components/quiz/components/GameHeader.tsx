@@ -1,18 +1,16 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Home, RefreshCw, Share2, Maximize } from 'lucide-react';
+import { ArrowLeft, Home, RefreshCw, Maximize } from 'lucide-react';
 
 interface GameHeaderProps {
   title: string;
   onBack?: () => void;
   onHome?: () => void;
   onRefresh?: () => void;
-  onShare?: () => void;
   onFullscreen?: () => void;
   showHomeButton?: boolean;
   showRefreshButton?: boolean;
-  showShareButton?: boolean;
   showFullscreenButton?: boolean;
   showBackButton?: boolean; // Thêm prop để kiểm soát nút quay lại
   score?: number;
@@ -24,11 +22,9 @@ const GameHeader: React.FC<GameHeaderProps> = ({
   onBack,
   onHome,
   onRefresh,
-  onShare,
   onFullscreen,
   showHomeButton = true,
   showRefreshButton = true,
-  showShareButton = true,
   showFullscreenButton = true,
   showBackButton = true, // Mặc định hiển thị
   score,
@@ -79,16 +75,6 @@ const GameHeader: React.FC<GameHeaderProps> = ({
           </Button>
         )}
 
-        {showShareButton && onShare && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onShare}
-            className="h-9 w-9"
-          >
-            <Share2 className="h-4 w-4" />
-          </Button>
-        )}
 
         {showFullscreenButton && onFullscreen && (
           <Button
