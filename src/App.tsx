@@ -5,6 +5,7 @@ import Quiz from './pages/Quiz';
 import PresetGamesPage from './components/quiz/preset-games/PresetGamesPage';
 import CustomGameSharePage from './pages/CustomGameSharePage';
 import PresetGameSharePage from './pages/PresetGameSharePage';
+import UnifiedGamePage from './pages/UnifiedGamePage';
 import GameHistoryPage from './pages/GameHistoryPage';
 import GameController from './components/quiz/custom-games/GameController';
 import TeacherDashboard from './components/quiz/share/TeacherDashboard';
@@ -19,6 +20,7 @@ function App() {
       <Route path="/custom-game/:gameId" element={<CustomGameSharePage />} />
       <Route path="/preset-game/:gameId" element={<PresetGameSharePage />} />
       <Route path="/game/:gameType/:slug/:gameId" element={<PresetGameSharePage />} />
+      <Route path="/game/:gameId" element={<UnifiedGamePage />} />
       <Route path="/game-history" element={<GameHistoryPage />} />
       <Route path="/custom-game" element={<GameController />} />
       <Route path="/game/:gameId/dashboard" element={<GameDashboard />} />
