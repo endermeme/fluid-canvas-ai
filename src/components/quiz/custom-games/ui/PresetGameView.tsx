@@ -2,8 +2,6 @@ import React from 'react';
 import PresetGameRenderer from '../PresetGameRenderer';
 import PresetGameHeader from '../../preset-games/PresetGameHeader';
 import { useToast } from '@/hooks/use-toast';
-import { usePresetGameShareManager } from '@/hooks/usePresetGameShareManager';
-import { usePresetGameScoreManager } from '@/hooks/usePresetGameScoreManager';
 import { Card } from "@/components/ui/card";
 import { useParams } from 'react-router-dom';
 
@@ -42,8 +40,6 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
   playerName
 }) => {
   const { toast } = useToast();
-  const { isSharing, handleShare } = usePresetGameShareManager(miniGame, toast, onShare);
-  const { savePresetGameScore } = usePresetGameScoreManager();
   const { gameId: urlGameId } = useParams();
   const currentGameId = gameId || urlGameId;
 
@@ -75,28 +71,10 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
 
       console.log('💾 PresetGameView - Saving preset game score');
 
-      try {
-        await savePresetGameScore({
-          gameId: currentGameId,
-          playerName: finalPlayerName,
-          score: result.score,
-          totalQuestions: result.totalQuestions || result.total || 10,
-          completionTime: result.completionTime || result.time,
-          gameType: miniGame.gameType || 'quiz'
-        });
-        
-        toast({
-          title: "Điểm đã được lưu! 🎉",
-          description: `Bạn đạt ${result.score}/${result.totalQuestions || result.total || 10} điểm`,
-        });
-      } catch (error) {
-        console.error('❌ Error saving score:', error);
-        toast({
-          title: "Lỗi lưu điểm",
-          description: "Không thể lưu điểm của bạn",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Hoàn thành! 🎉",
+        description: `Bạn đạt ${result.score}/${result.totalQuestions || result.total || 10} điểm`,
+      });
     } else {
       console.log('❌ PresetGameView - Invalid completion data:', { currentGameId, result, score: result?.score });
     }
@@ -107,7 +85,7 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
       {!hideHeader && (
         <PresetGameHeader
           onBack={onBack}
-          onShare={handleShare}
+          onShare={onShare}
           showShare={!!onShare}
           isGameCreated={true}
         />

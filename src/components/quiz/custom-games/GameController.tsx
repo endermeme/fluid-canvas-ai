@@ -9,7 +9,7 @@ import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useAccount } from '@/contexts/AccountContext';
+
 import QuizContainer from '../QuizContainer';
 
 interface GameControllerProps {
@@ -29,7 +29,7 @@ const GameController: React.FC<GameControllerProps> = ({
   const [showShareSettings, setShowShareSettings] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { accountId } = useAccount();
+  const accountId = "example123";
   
   const handleGameGeneration = (content: string, game?: MiniGame) => {
     setCurrentTopic(content);

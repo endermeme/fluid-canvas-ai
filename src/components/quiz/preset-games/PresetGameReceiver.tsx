@@ -1,17 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PresetStoredGame } from '@/types/presetGame';
 import PresetGameView from './ui/PresetGameView';
-import PresetLeaderboardManager from './PresetLeaderboardManager';
-import { addParticipant } from '@/utils/presetGameParticipation';
-import { playerStorageUtils } from '@/utils/playerStorage';
 
 interface PresetGameReceiverProps {
-  game: PresetStoredGame;
+  game: {
+    id: string;
+    title: string;
+    gameType: string;
+    data?: any;
+    content?: any;
+    settings?: {
+      password?: string;
+      showLeaderboard?: boolean;
+    };
+  };
 }
 
 const PresetGameReceiver: React.FC<PresetGameReceiverProps> = ({ game }) => {
@@ -20,33 +26,6 @@ const PresetGameReceiver: React.FC<PresetGameReceiverProps> = ({ game }) => {
   const [playerName, setPlayerName] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isCreator, setIsCreator] = useState(false);
-
-  useEffect(() => {
-    // Check if user is creator or returning player
-    const checkAutoJoin = () => {
-      const creatorIp = playerStorageUtils.getCreatorIp();
-      const isGameCreator = creatorIp === game.creator_ip;
-      
-      if (isGameCreator) {
-        setIsCreator(true);
-        setHasJoined(true);
-        setPlayerName('Creator');
-        return;
-      }
-
-      // Check if returning player
-      const savedName = playerStorageUtils.getPlayerName(game.id);
-      if (savedName) {
-        setPlayerName(savedName);
-        if (!game.settings?.password) {
-          setHasJoined(true);
-        }
-      }
-    };
-
-    checkAutoJoin();
-  }, [game]);
 
   const handleJoinGame = async () => {
     if (!playerName.trim()) {
@@ -69,8 +48,6 @@ const PresetGameReceiver: React.FC<PresetGameReceiverProps> = ({ game }) => {
 
     setLoading(true);
     try {
-      await addParticipant(game.id, playerName.trim());
-      playerStorageUtils.savePlayerName(game.id, playerName.trim());
       setHasJoined(true);
       
       toast({
@@ -92,7 +69,7 @@ const PresetGameReceiver: React.FC<PresetGameReceiverProps> = ({ game }) => {
     if (!game.settings?.password) {
       const autoName = `Player_${Date.now().toString().slice(-4)}`;
       setPlayerName(autoName);
-      handleJoinGame();
+      setHasJoined(true);
     }
   };
 
@@ -162,15 +139,8 @@ const PresetGameReceiver: React.FC<PresetGameReceiverProps> = ({ game }) => {
         }}
         gameId={game.id}
         playerName={playerName}
-        isTeacher={isCreator}
+        isTeacher={false}
       />
-      
-      {game.settings?.showLeaderboard && (
-        <PresetLeaderboardManager 
-          gameId={game.id}
-          gameType={game.gameType}
-        />
-      )}
     </div>
   );
 };

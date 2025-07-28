@@ -4,9 +4,7 @@ import GameLoadingIndicator from '../game-components/GameLoadingIndicator';
 import GameIframeRenderer from './GameIframeRenderer';
 import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
-import { useCustomGameShareManager } from '@/hooks/useCustomGameShareManager';
 import { useIframeManager } from '../../hooks/useIframeManager';
-import { useCustomGameScoreManager } from '@/hooks/useCustomGameScoreManager';
 import { Card } from "@/components/ui/card";
 
 interface CustomGameViewProps {
@@ -42,8 +40,6 @@ const CustomGameView: React.FC<CustomGameViewProps> = ({
   playerName
 }) => {
   const { toast } = useToast();
-  const { isSharing, handleShare } = useCustomGameShareManager(miniGame, toast, onShare);
-  const { saveCustomGameScore } = useCustomGameScoreManager();
   
   const handleScoreUpdate = (score: number, totalQuestions: number) => {
     console.log('Score updated:', score, '/', totalQuestions);
@@ -51,20 +47,10 @@ const CustomGameView: React.FC<CustomGameViewProps> = ({
   
   const handleGameComplete = async (finalScore: number, completionTime: number, extraData?: any) => {
     if (gameId && playerName) {
-      const success = await saveCustomGameScore({
-        gameId,
-        playerName,
-        score: finalScore,
-        totalQuestions: extraData?.totalQuestions || Math.ceil(finalScore / 10),
-        completionTime
+      toast({
+        title: "Hoàn thành! 🎉",
+        description: `Bạn đạt ${finalScore} điểm trong ${Math.round(completionTime)} giây`,
       });
-      
-      if (success) {
-        toast({
-          title: "Điểm đã được lưu! 🎉",
-          description: `Bạn đạt ${finalScore} điểm trong ${Math.round(completionTime)} giây`,
-        });
-      }
     }
   };
   
@@ -96,10 +82,10 @@ const CustomGameView: React.FC<CustomGameViewProps> = ({
           onBack={onBack}
           onRefresh={refreshGame}
           onFullscreen={handleFullscreen}
-          onShare={handleShare}
+          onShare={onShare}
           onNewGame={onNewGame}
           showGameControls={true}
-          isSharing={isSharing}
+          isSharing={false}
           isTeacher={isTeacher}
           gameType={miniGame?.title}
         />

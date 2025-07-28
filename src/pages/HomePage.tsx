@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Gamepad, SparklesIcon, History, Share2, Zap, Atom, FlaskConical, Microscope, TestTube, Telescope, Radiation, Calculator, Beaker, Dna } from 'lucide-react';
 import { motion } from 'framer-motion';
-import AccountInput from '@/components/account/AccountInput';
-import { useAccount } from '@/contexts/AccountContext';
+
+
 const HomePage: React.FC = () => {
-  const { accountId } = useAccount();
+  const accountId = "example123";
 
   const containerVariants = {
     hidden: { opacity: 0 },

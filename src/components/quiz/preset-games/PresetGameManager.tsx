@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw, Share2 } from 'lucide-react';
 import gameTemplates from './templates';
 import { useToast } from '@/hooks/use-toast';
-import { useAccount } from '@/contexts/AccountContext';
+
 import { 
   QuizSettings, 
   FlashcardsSettings, 
@@ -69,7 +69,7 @@ const PresetGameManager: React.FC<PresetGameManagerProps> = ({ gameType, onBack,
   const [isSharing, setIsSharing] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
-  const { accountId } = useAccount();
+  const accountId = "example123";
   const navigate = useNavigate();
 
   useEffect(() => {
