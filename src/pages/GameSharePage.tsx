@@ -96,6 +96,7 @@ const GameSharePage: React.FC = () => {
               loadedGame = {
                 id: presetGame.id,
                 title: presetGame.title,
+                gameType: presetGame.gameType,
                 content: presetGame.content,
                 htmlContent: '',
                 description: presetGame.description,
@@ -105,7 +106,8 @@ const GameSharePage: React.FC = () => {
                 maxParticipants: presetGame.maxParticipants,
                 showLeaderboard: presetGame.showLeaderboard,
                 requireRegistration: presetGame.requireRegistration,
-                customDuration: presetGame.customDuration
+                customDuration: presetGame.customDuration,
+                data: presetGame.data
               };
             }
           }

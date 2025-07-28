@@ -82,6 +82,7 @@ export const CustomGameReceiver: React.FC = () => {
           gameData = {
             id: presetGame.id,
             title: presetGame.title,
+            gameType: presetGame.gameType,
             content: presetGame.content,
             htmlContent: '',
             description: presetGame.description,
@@ -91,7 +92,8 @@ export const CustomGameReceiver: React.FC = () => {
             maxParticipants: presetGame.maxParticipants,
             showLeaderboard: presetGame.showLeaderboard,
             requireRegistration: presetGame.requireRegistration,
-            customDuration: presetGame.customDuration
+            customDuration: presetGame.customDuration,
+            data: presetGame.data
           };
         }
       }

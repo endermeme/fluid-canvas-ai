@@ -11,6 +11,7 @@ export interface CustomShareSettings {
 export interface CustomStoredGame {
   id: string;
   title: string;
+  gameType: string; // Add missing gameType property
   content?: any;
   htmlContent: string;
   description?: string;
@@ -23,6 +24,7 @@ export interface CustomStoredGame {
   customDuration?: number;
   creator_ip?: string;
   account_id?: string;
+  data?: any; // Add missing data property for compatibility
 }
 
 export const formatHtmlContent = (content: string): string => {
@@ -173,6 +175,7 @@ export const getCustomGame = async (id: string): Promise<CustomStoredGame | null
       return {
         id: customGame.id,
         title: customGame.title,
+        gameType: 'custom', // Default type for custom games
         content: parsedContent || {},
         htmlContent: customGame.html_content || '',
         description: customGame.description || `Game chia sẻ: ${customGame.title}`,
@@ -182,7 +185,8 @@ export const getCustomGame = async (id: string): Promise<CustomStoredGame | null
         maxParticipants: customGame.max_participants,
         showLeaderboard: customGame.show_leaderboard ?? true,
         requireRegistration: customGame.require_registration ?? false,
-        customDuration: customGame.custom_duration
+        customDuration: customGame.custom_duration,
+        data: parsedContent || {} // Add data property for compatibility
       };
     }
 
