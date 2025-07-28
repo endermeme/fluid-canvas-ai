@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useCustomGameScoreManager } from '@/hooks/useCustomGameScoreManager';
+
 import { enhanceIframeContent } from '../utils/iframe-utils';
 import GameIframeRenderer from './game-components/GameIframeRenderer';
 
@@ -20,7 +20,7 @@ export const CustomGameRenderer: React.FC<CustomGameRendererProps> = ({
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const { saveCustomGameScore } = useCustomGameScoreManager();
+  
 
   // Message listener for score communication
   useEffect(() => {
@@ -36,17 +36,7 @@ export const CustomGameRenderer: React.FC<CustomGameRendererProps> = ({
         case 'GAME_COMPLETE':
           const { score: finalScore, totalQuestions: total, completionTime, extraData } = event.data.data;
           
-          // Save score using custom game system
-          const success = await saveCustomGameScore({
-            gameId,
-            playerName,
-            score: finalScore,
-            totalQuestions: total,
-            completionTime,
-            scoringData: extraData
-          });
-
-          if (success && onGameComplete) {
+          if (onGameComplete) {
             onGameComplete(finalScore, total, completionTime);
           }
           break;
@@ -60,7 +50,7 @@ export const CustomGameRenderer: React.FC<CustomGameRendererProps> = ({
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [gameId, gameType, playerName, saveCustomGameScore, onGameComplete]);
+  }, [gameId, gameType, playerName, onGameComplete]);
 
   useEffect(() => {
     const loadContent = async () => {

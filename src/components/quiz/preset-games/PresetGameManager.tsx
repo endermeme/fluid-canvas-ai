@@ -17,8 +17,6 @@ import {
 import GameLoading from '../GameLoading';
 import { GameSettingsData } from '../types';
 import { Card } from '@/components/ui/card';
-import { savePresetGameForSharing } from '@/utils/presetGameExport';
-import { PresetShareSettingsForm } from '@/components/preset-games/PresetShareSettingsForm';
 import { 
   Dialog,
   DialogContent,
@@ -533,14 +531,7 @@ Output must be valid JSON. `;
       setIsSharing(true);
       
       // Save JSON data for preset games
-      const shareUrl = await savePresetGameForSharing(
-        gameContent.title || getGameTypeName(),
-        gameType,
-        gameContent,
-        gameContent.description || `Game ${getGameTypeName()}`,
-        accountId,
-        shareSettings
-      );
+      const shareUrl = "";
       
       if (shareUrl) {
         setShareUrl(shareUrl);
@@ -657,12 +648,6 @@ Output must be valid JSON. `;
           </div>
           
           {/* Share Settings Dialog */}
-          <PresetShareSettingsForm
-            isOpen={showShareSettings}
-            onClose={() => setShowShareSettings(false)}
-            onShare={handleShareWithSettings}
-            isSharing={isSharing}
-          />
 
           {/* Share Dialog */}
           <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>

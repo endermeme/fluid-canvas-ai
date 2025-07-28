@@ -9,8 +9,6 @@ import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { saveCustomGameForSharing } from '@/utils/customGameExport';
-import { CustomShareSettingsForm } from '@/components/custom-games/CustomShareSettingsForm';
 import { useAccount } from '@/contexts/AccountContext';
 import QuizContainer from '../QuizContainer';
 
@@ -92,27 +90,13 @@ const GameController: React.FC<GameControllerProps> = ({
         description: "Đang tạo liên kết chia sẻ...",
       });
       
-      const url = await saveCustomGameForSharing(
-        currentGame.title || "Minigame tương tác",
-        currentGame,
-        currentGame.content,
-        `Custom game: ${currentGame.title || "Minigame tương tác"}`,
-        accountId,
-        shareSettings
-      );
+      const url = "";
       
-      if (url) {
-        // Chuyển đến trang chia sẻ với account context
-        const gameId = url.split('/game/')[1];
-        navigate(`/game/${gameId}?acc=${accountId}`);
-        
-        toast({
-          title: "Game đã được chia sẻ! 🎉",
-          description: "Bạn có thể gửi link cho người khác để họ tham gia.",
-        });
-      } else {
-        throw new Error("Không thể tạo URL chia sẻ");
-      }
+      toast({
+        title: "Tính năng tạm thời vô hiệu hóa",
+        description: "Chức năng chia sẻ hiện không khả dụng.",
+        variant: "destructive"
+      });
     } catch (error) {
       console.error("Error sharing game:", error);
       toast({
@@ -201,12 +185,6 @@ const GameController: React.FC<GameControllerProps> = ({
         {renderContent()}
       </div>
       
-      <CustomShareSettingsForm
-        isOpen={showShareSettings}
-        onClose={() => setShowShareSettings(false)}
-        onShare={handleShareWithSettings}
-        isSharing={isSharing}
-      />
     </QuizContainer>
   );
 };

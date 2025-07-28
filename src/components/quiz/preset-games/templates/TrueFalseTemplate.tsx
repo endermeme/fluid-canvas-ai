@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle, ChevronRight, Clock, Share2 } from 'lucide-react';
-import { usePresetGameShareManager } from '@/hooks/usePresetGameShareManager';
+
 
 interface TrueFalseTemplateProps {
   data?: any;
@@ -117,7 +117,7 @@ const TrueFalseTemplate: React.FC<TrueFalseTemplateProps> = ({ data, content, to
     content: generateHtmlContent()
   };
 
-  const { isSharing, handleShare } = usePresetGameShareManager(miniGame, toast, onShare);
+  
 
   // Initialize game
   useEffect(() => {
