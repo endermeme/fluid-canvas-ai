@@ -115,11 +115,7 @@ export const getPresetGame = async (id: string): Promise<PresetStoredGame | null
         description: presetGame.description || `Game chia sẻ: ${presetGame.title}`,
         expiresAt: new Date(presetGame.expires_at || Date.now() + 7 * 24 * 60 * 60 * 1000).getTime(),
         createdAt: new Date(presetGame.created_at).getTime(),
-        password: presetGame.password,
-        maxParticipants: presetGame.max_participants,
-        showLeaderboard: presetGame.show_leaderboard ?? true,
-        requireRegistration: presetGame.require_registration ?? false,
-        customDuration: presetGame.custom_duration,
+        settings: presetGame.settings_data as PresetShareSettings || {},
         // Add data property for GameViewSelector to detect preset game
         data: presetGame.template_data || {}
       };

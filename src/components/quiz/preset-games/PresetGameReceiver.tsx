@@ -4,17 +4,17 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CustomStoredGame } from '@/types/customGame';
-import CustomGameView from './ui/CustomGameView';
-import CustomLeaderboardManager from './CustomLeaderboardManager';
-import { addParticipant } from '@/utils/customGameParticipation';
+import { PresetStoredGame } from '@/types/presetGame';
+import PresetGameView from './ui/PresetGameView';
+import PresetLeaderboardManager from './PresetLeaderboardManager';
+import { addParticipant } from '@/utils/presetGameParticipation';
 import { playerStorageUtils } from '@/utils/playerStorage';
 
-interface CustomGameReceiverProps {
-  game: CustomStoredGame;
+interface PresetGameReceiverProps {
+  game: PresetStoredGame;
 }
 
-const CustomGameReceiver: React.FC<CustomGameReceiverProps> = ({ game }) => {
+const PresetGameReceiver: React.FC<PresetGameReceiverProps> = ({ game }) => {
   const { toast } = useToast();
   const [hasJoined, setHasJoined] = useState(false);
   const [playerName, setPlayerName] = useState('');
@@ -154,10 +154,11 @@ const CustomGameReceiver: React.FC<CustomGameReceiverProps> = ({ game }) => {
 
   return (
     <div className="min-h-screen">
-      <CustomGameView
+      <PresetGameView
         miniGame={{
           title: game.title,
-          content: game.htmlContent
+          gameType: game.gameType,
+          data: game.data || game.content
         }}
         gameId={game.id}
         playerName={playerName}
@@ -165,7 +166,7 @@ const CustomGameReceiver: React.FC<CustomGameReceiverProps> = ({ game }) => {
       />
       
       {game.settings?.showLeaderboard && (
-        <CustomLeaderboardManager 
+        <PresetLeaderboardManager 
           gameId={game.id}
           isTeacher={isCreator}
         />
@@ -174,4 +175,4 @@ const CustomGameReceiver: React.FC<CustomGameReceiverProps> = ({ game }) => {
   );
 };
 
-export default CustomGameReceiver;
+export default PresetGameReceiver;

@@ -44,7 +44,6 @@ export type Database = {
           account_uuid: string | null
           created_at: string
           creator_ip: string | null
-          custom_duration: number | null
           description: string | null
           expires_at: string | null
           game_data: Json
@@ -53,12 +52,9 @@ export type Database = {
           id: string
           is_published: boolean | null
           last_accessed_at: string | null
-          max_participants: number | null
-          password: string | null
-          require_registration: boolean | null
           settings: Json | null
+          settings_data: Json | null
           share_count: number | null
-          show_leaderboard: boolean | null
           title: string | null
           updated_at: string
         }
@@ -67,7 +63,6 @@ export type Database = {
           account_uuid?: string | null
           created_at?: string
           creator_ip?: string | null
-          custom_duration?: number | null
           description?: string | null
           expires_at?: string | null
           game_data?: Json
@@ -76,12 +71,9 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           last_accessed_at?: string | null
-          max_participants?: number | null
-          password?: string | null
-          require_registration?: boolean | null
           settings?: Json | null
+          settings_data?: Json | null
           share_count?: number | null
-          show_leaderboard?: boolean | null
           title?: string | null
           updated_at?: string
         }
@@ -90,7 +82,6 @@ export type Database = {
           account_uuid?: string | null
           created_at?: string
           creator_ip?: string | null
-          custom_duration?: number | null
           description?: string | null
           expires_at?: string | null
           game_data?: Json
@@ -99,12 +90,9 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           last_accessed_at?: string | null
-          max_participants?: number | null
-          password?: string | null
-          require_registration?: boolean | null
           settings?: Json | null
+          settings_data?: Json | null
           share_count?: number | null
-          show_leaderboard?: boolean | null
           title?: string | null
           updated_at?: string
         }
@@ -186,7 +174,6 @@ export type Database = {
           account_uuid: string | null
           created_at: string
           creator_ip: string | null
-          custom_duration: number | null
           default_settings: Json | null
           description: string | null
           expires_at: string | null
@@ -195,12 +182,8 @@ export type Database = {
           is_active: boolean | null
           is_published: boolean | null
           last_accessed_at: string | null
-          max_participants: number | null
-          password: string | null
-          require_registration: boolean | null
+          settings_data: Json | null
           share_count: number | null
-          show_leaderboard: boolean | null
-          single_participation_only: boolean | null
           template_data: Json
           title: string
           updated_at: string
@@ -210,7 +193,6 @@ export type Database = {
           account_uuid?: string | null
           created_at?: string
           creator_ip?: string | null
-          custom_duration?: number | null
           default_settings?: Json | null
           description?: string | null
           expires_at?: string | null
@@ -219,12 +201,8 @@ export type Database = {
           is_active?: boolean | null
           is_published?: boolean | null
           last_accessed_at?: string | null
-          max_participants?: number | null
-          password?: string | null
-          require_registration?: boolean | null
+          settings_data?: Json | null
           share_count?: number | null
-          show_leaderboard?: boolean | null
-          single_participation_only?: boolean | null
           template_data?: Json
           title: string
           updated_at?: string
@@ -234,7 +212,6 @@ export type Database = {
           account_uuid?: string | null
           created_at?: string
           creator_ip?: string | null
-          custom_duration?: number | null
           default_settings?: Json | null
           description?: string | null
           expires_at?: string | null
@@ -243,12 +220,8 @@ export type Database = {
           is_active?: boolean | null
           is_published?: boolean | null
           last_accessed_at?: string | null
-          max_participants?: number | null
-          password?: string | null
-          require_registration?: boolean | null
+          settings_data?: Json | null
           share_count?: number | null
-          show_leaderboard?: boolean | null
-          single_participation_only?: boolean | null
           template_data?: Json
           title?: string
           updated_at?: string

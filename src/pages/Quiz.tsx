@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import GameLoading from '@/components/quiz/GameLoading';
 import CustomGameForm from '@/components/quiz/custom-games/CustomGameForm';
-import GameViewSelector from '@/components/quiz/custom-games/ui/GameViewSelector';
+import SimpleGameView from '@/components/quiz/ui/simple/SimpleGameView';
 import { tryGeminiGeneration } from '@/components/quiz/generator/geminiGenerator';
 
 const Quiz = () => {
@@ -292,7 +292,7 @@ const Quiz = () => {
     
     if (miniGame) {
       return (
-        <GameViewSelector 
+        <SimpleGameView 
           miniGame={miniGame}
           onBack={handleReset}
           hideHeader={true}

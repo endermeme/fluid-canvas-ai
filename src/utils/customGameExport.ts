@@ -181,11 +181,7 @@ export const getCustomGame = async (id: string): Promise<CustomStoredGame | null
         description: customGame.description || `Game chia sẻ: ${customGame.title}`,
         expiresAt: new Date(customGame.expires_at || Date.now() + 7 * 24 * 60 * 60 * 1000).getTime(),
         createdAt: new Date(customGame.created_at).getTime(),
-        password: customGame.password,
-        maxParticipants: customGame.max_participants,
-        showLeaderboard: customGame.show_leaderboard ?? true,
-        requireRegistration: customGame.require_registration ?? false,
-        customDuration: customGame.custom_duration,
+        settings: customGame.settings_data as CustomShareSettings || {},
         data: parsedContent || {} // Add data property for compatibility
       };
     }
