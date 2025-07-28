@@ -168,7 +168,7 @@ const PresetGameReceiver: React.FC<PresetGameReceiverProps> = ({ game }) => {
       {game.settings?.showLeaderboard && (
         <PresetLeaderboardManager 
           gameId={game.id}
-          isTeacher={isCreator}
+          gameType={game.gameType}
         />
       )}
     </div>

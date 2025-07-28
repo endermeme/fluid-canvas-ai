@@ -17,11 +17,7 @@ export interface CustomStoredGame {
   description?: string;
   expiresAt: Date | number;
   createdAt: Date | number;
-  password?: string;
-  maxParticipants?: number;
-  showLeaderboard?: boolean;
-  requireRegistration?: boolean;
-  customDuration?: number;
+  settings?: CustomShareSettings;
   creator_ip?: string;
   account_id?: string;
   data?: any; // Add missing data property for compatibility
@@ -181,7 +177,7 @@ export const getCustomGame = async (id: string): Promise<CustomStoredGame | null
         description: customGame.description || `Game chia sẻ: ${customGame.title}`,
         expiresAt: new Date(customGame.expires_at || Date.now() + 7 * 24 * 60 * 60 * 1000).getTime(),
         createdAt: new Date(customGame.created_at).getTime(),
-        settings: customGame.settings_data as CustomShareSettings || {},
+        settings: (customGame.settings_data as any) || {},
         data: parsedContent || {} // Add data property for compatibility
       };
     }

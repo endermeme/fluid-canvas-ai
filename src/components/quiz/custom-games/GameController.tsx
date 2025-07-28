@@ -3,14 +3,14 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MiniGame } from '../generator/types';
 import { AIGameGenerator } from '../generator/geminiGenerator';
-import GameViewSelector from './ui/GameViewSelector';
+import CustomGameView from '@/components/quiz/ui/simple/SimpleGameView';
 import CustomGameForm from './CustomGameForm';
 import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { saveCustomGameForSharing } from '@/utils/customGameExport';
-import { ShareSettingsForm } from '@/components/game-share/ShareSettingsForm';
+import { CustomShareSettingsForm } from '@/components/custom-games/CustomShareSettingsForm';
 import { useAccount } from '@/contexts/AccountContext';
 import QuizContainer from '../QuizContainer';
 
@@ -144,7 +144,7 @@ const GameController: React.FC<GameControllerProps> = ({
     if (currentGame) {
       return (
         <div className="w-full h-full">
-          <GameViewSelector 
+          <CustomGameView 
             miniGame={{
               title: currentGame.title || "Minigame Tương Tác",
               content: currentGame.content || ""
@@ -201,7 +201,7 @@ const GameController: React.FC<GameControllerProps> = ({
         {renderContent()}
       </div>
       
-      <ShareSettingsForm
+      <CustomShareSettingsForm
         isOpen={showShareSettings}
         onClose={() => setShowShareSettings(false)}
         onShare={handleShareWithSettings}

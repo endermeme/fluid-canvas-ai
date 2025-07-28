@@ -16,11 +16,7 @@ export interface PresetStoredGame {
   description?: string;
   expiresAt: Date | number;
   createdAt: Date | number;
-  password?: string;
-  maxParticipants?: number;
-  showLeaderboard?: boolean;
-  requireRegistration?: boolean;
-  customDuration?: number;
+  settings?: PresetShareSettings;
   creator_ip?: string;
   account_id?: string;
   data: any; // For GameViewSelector to detect preset game
@@ -115,7 +111,7 @@ export const getPresetGame = async (id: string): Promise<PresetStoredGame | null
         description: presetGame.description || `Game chia sẻ: ${presetGame.title}`,
         expiresAt: new Date(presetGame.expires_at || Date.now() + 7 * 24 * 60 * 60 * 1000).getTime(),
         createdAt: new Date(presetGame.created_at).getTime(),
-        settings: presetGame.settings_data as PresetShareSettings || {},
+        settings: (presetGame.settings_data as any) || {},
         // Add data property for GameViewSelector to detect preset game
         data: presetGame.template_data || {}
       };

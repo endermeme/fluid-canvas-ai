@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Users } from 'lucide-react';
-import { GameParticipant } from '@/utils/types';
+import { GameParticipant } from '@/types/shared';
 import { useRealtimeParticipants } from '@/hooks/useRealtimeParticipants';
 
 interface ParticipantsListProps {

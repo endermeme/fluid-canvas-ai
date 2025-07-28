@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { GameParticipant } from '@/utils/types';
+import { GameParticipant } from '@/types/shared';
 
 interface UseRealtimeParticipantsProps {
   gameId: string;

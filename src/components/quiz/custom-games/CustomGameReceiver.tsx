@@ -167,7 +167,6 @@ const CustomGameReceiver: React.FC<CustomGameReceiverProps> = ({ game }) => {
       {game.settings?.showLeaderboard && (
         <CustomLeaderboardManager 
           gameId={game.id}
-          isTeacher={isCreator}
         />
       )}
     </div>

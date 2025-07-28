@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
-import PresetGameRenderer from '../PresetGameRenderer';
+import PresetGameRenderer from '../../PresetGameRenderer';
 import PresetGameHeader from '../PresetGameHeader';
 import { usePresetGameShareManager } from '@/hooks/usePresetGameShareManager';
 import { usePresetGameScoreManager } from '@/hooks/usePresetGameScoreManager';
@@ -40,7 +40,11 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
   playerName
 }) => {
   const { toast } = useToast();
-  const { isSharing, handleShare } = usePresetGameShareManager(miniGame, toast, onShare);
+  const { isSharing, handleShare } = usePresetGameShareManager({
+    title: miniGame.title,
+    gameType: miniGame.gameType,
+    content: miniGame.data
+  }, toast, onShare);
   const { savePresetGameScore } = usePresetGameScoreManager();
   const { gameId: paramGameId } = useParams();
 
@@ -57,8 +61,7 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
           currentPlayerName,
           result.score || 0,
           result.totalQuestions || 0,
-          result.completionTime || 0,
-          result.extraData || {}
+          result.completionTime || 0
         );
         
         toast({
@@ -80,14 +83,12 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background/95 to-primary/5">
       {!hideHeader && (
         <PresetGameHeader
-          title={miniGame.title || 'Preset Game'}
           onBack={onBack}
           onShare={isSharing ? undefined : handleShare}
           onReload={onReload}
           onNewGame={onNewGame}
           isSharing={isSharing}
           gameExpired={gameExpired}
-          isTeacher={isTeacher}
         />
       )}
       

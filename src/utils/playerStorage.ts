@@ -140,5 +140,26 @@ export const playerStorageUtils = {
     const newName = playerStorageUtils.generatePlayerName();
     console.log('🔍 [DEBUG] Generated new player name:', newName);
     return newName;
+  },
+
+  // Get creator IP (simplified for now)
+  getCreatorIp: (): string | null => {
+    return localStorage.getItem('creator_ip') || null;
+  },
+
+  // Save creator IP
+  saveCreatorIp: (ip: string): void => {
+    localStorage.setItem('creator_ip', ip);
+  },
+
+  // Get player name for specific game
+  getPlayerName: (gameId: string): string | null => {
+    const playerInfo = playerStorageUtils.getPlayerInfo(gameId);
+    return playerInfo?.playerName || null;
+  },
+
+  // Save player name for specific game
+  savePlayerName: (gameId: string, playerName: string): void => {
+    playerStorageUtils.savePlayerInfo(gameId, playerName);
   }
 };

@@ -18,7 +18,7 @@ import GameLoading from '../GameLoading';
 import { GameSettingsData } from '../types';
 import { Card } from '@/components/ui/card';
 import { savePresetGameForSharing } from '@/utils/presetGameExport';
-import { ShareSettingsForm } from '@/components/game-share/ShareSettingsForm';
+import { PresetShareSettingsForm } from '@/components/preset-games/PresetShareSettingsForm';
 import { 
   Dialog,
   DialogContent,
@@ -657,7 +657,7 @@ Output must be valid JSON. `;
           </div>
           
           {/* Share Settings Dialog */}
-          <ShareSettingsForm
+          <PresetShareSettingsForm
             isOpen={showShareSettings}
             onClose={() => setShowShareSettings(false)}
             onShare={handleShareWithSettings}
