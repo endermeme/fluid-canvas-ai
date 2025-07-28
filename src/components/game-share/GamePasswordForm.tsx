@@ -88,9 +88,11 @@ export const GamePasswordForm: React.FC<GamePasswordFormProps> = ({
           </div>
 
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="animate-pulse">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription className="font-medium">
+                ❌ {error}
+              </AlertDescription>
             </Alert>
           )}
 
