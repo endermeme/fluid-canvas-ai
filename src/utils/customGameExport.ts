@@ -126,7 +126,7 @@ export const saveCustomGameForSharing = async (
 
     // Return share URL
     const baseUrl = window.location.origin;
-    const shareUrl = `${baseUrl}/game/${gameId}`;
+    const shareUrl = `${baseUrl}/custom/${gameId}`;
     
     console.log("Share URL generated:", shareUrl);
     return shareUrl;

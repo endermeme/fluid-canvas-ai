@@ -74,7 +74,7 @@ export const savePresetGameForSharing = async (
 
     // Return share URL
     const baseUrl = window.location.origin;
-    const shareUrl = `${baseUrl}/game/${gameId}`;
+    const shareUrl = `${baseUrl}/preset/${gameId}`;
     
     console.log("Share URL generated:", shareUrl);
     return shareUrl;
