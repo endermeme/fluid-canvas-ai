@@ -13,9 +13,10 @@ interface FlashcardsTemplateProps {
   content: any;
   topic: string;
   settings?: any;
+  onGameComplete?: (score: number, totalQuestions: number, completionTime?: number) => void;
 }
 
-const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, topic, settings }) => {
+const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, topic, settings, onGameComplete }) => {
   const gameContent = content || data;
   // Use settings from props with proper defaults
   const gameSettings = {
@@ -33,6 +34,8 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
   const [showHints, setShowHints] = useState(gameSettings.showHints);
   const [allowSkip, setAllowSkip] = useState(gameSettings.allowSkip);
   const [flipTimer, setFlipTimer] = useState<NodeJS.Timeout | null>(null);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [gameCompleted, setGameCompleted] = useState(false);
   const { toast } = useToast();
 
   // Filter cards based on cardCount setting
@@ -43,6 +46,7 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
   useEffect(() => {
     if (cards.length > 0) {
       setCardsState(new Array(cards.length).fill('unreviewed'));
+      setStartTime(Date.now());
     }
   }, [cards.length]);
 
@@ -103,6 +107,22 @@ const FlashcardsTemplate: React.FC<FlashcardsTemplateProps> = ({ data, content, 
         description: "Đã đánh dấu thẻ này là chưa thuộc.",
         variant: "destructive",
       });
+    }
+    
+    // Check if all cards are reviewed
+    const allReviewed = newCardsState.every(state => state !== 'unreviewed');
+    if (allReviewed && !gameCompleted) {
+      setGameCompleted(true);
+      const knownCount = newCardsState.filter(state => state === 'known').length;
+      const completionTime = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0;
+      
+      console.log('🔥 [DEBUG] Flashcards game completed, calling onGameComplete with:', { knownCount, total: cards.length, completionTime });
+      
+      if (onGameComplete) {
+        onGameComplete(knownCount, cards.length, completionTime);
+      } else {
+        console.log('🔥 [DEBUG] Flashcards onGameComplete not provided!');
+      }
     }
     
     // Auto advance to next card if enabled

@@ -11,9 +11,10 @@ interface OrderingTemplateProps {
   content: any;
   topic: string;
   settings?: any;
+  onGameComplete?: (score: number, totalQuestions: number, completionTime?: number) => void;
 }
 
-const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topic, settings }) => {
+const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topic, settings, onGameComplete }) => {
   const gameContent = content || data;
   // Use settings from props or fallback values
   const gameSettings = {
@@ -32,6 +33,7 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
   const [timerRunning, setTimerRunning] = useState(true);
   const [isChecking, setIsChecking] = useState(false);
   const [hasShownHint, setHasShownHint] = useState(false);
+  const [startTime, setStartTime] = useState<number>(Date.now());
   const { toast } = useToast();
 
   const sentences = gameContent?.sentences || [];
@@ -54,6 +56,17 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
       
       return () => clearTimeout(timer);
     } else if (timeLeft === 0 && timerRunning && !showResult) {
+      // Time's up, call onGameComplete with current score
+      const completionTime = Math.floor((Date.now() - startTime) / 1000);
+      
+      console.log('🔥 [DEBUG] Ordering game time up, calling onGameComplete with:', { score, total: sentences.length, completionTime });
+      
+      if (onGameComplete) {
+        onGameComplete(score, sentences.length, completionTime);
+      } else {
+        console.log('🔥 [DEBUG] Ordering onGameComplete not provided!');
+      }
+      
       setShowResult(true);
       setTimerRunning(false);
       
@@ -121,6 +134,17 @@ const OrderingTemplate: React.FC<OrderingTemplateProps> = ({ data, content, topi
         if (currentSentence < sentences.length - 1) {
           setCurrentSentence(currentSentence + 1);
         } else {
+          // Game completed
+          const completionTime = Math.floor((Date.now() - startTime) / 1000);
+          
+          console.log('🔥 [DEBUG] Ordering game completed, calling onGameComplete with:', { score: score + 1, total: sentences.length, completionTime });
+          
+          if (onGameComplete) {
+            onGameComplete(score + 1, sentences.length, completionTime);
+          } else {
+            console.log('🔥 [DEBUG] Ordering onGameComplete not provided!');
+          }
+          
           setShowResult(true);
           setTimerRunning(false);
         }
