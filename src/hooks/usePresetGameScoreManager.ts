@@ -83,7 +83,7 @@ export const usePresetGameScoreManager = () => {
         return false;
       }
 
-      // Show appropriate success message based on game type
+      // Enhanced success message with detailed scoring information
       const isTimeBasedGame = ['memory', 'wordsearch', 'matching'].includes(scoreData.gameType?.toLowerCase());
       
       if (isTimeBasedGame && scoreData.completionTime) {
@@ -92,13 +92,14 @@ export const usePresetGameScoreManager = () => {
         const timeText = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : `${seconds}s`;
         
         toast({
-          title: "Kết quả đã được lưu! 🎉",
-          description: `Hoàn thành trong ${timeText}`,
+          title: "Kết quả đã được lưu! 🎉", 
+          description: `Hoàn thành trong ${timeText}${scoreData.score > 0 ? ` - ${scoreData.score} điểm` : ''}`,
         });
       } else {
+        const percentage = Math.round((scoreData.score / scoreData.totalQuestions) * 100);
         toast({
           title: "Điểm đã được lưu! 🎉",
-          description: `Bạn đạt ${scoreData.score}/${scoreData.totalQuestions} điểm.`,
+          description: `${percentage}% chính xác (${scoreData.score}/${scoreData.totalQuestions})`,
         });
       }
       

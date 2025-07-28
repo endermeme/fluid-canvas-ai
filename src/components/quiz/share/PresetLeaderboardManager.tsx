@@ -11,6 +11,7 @@ interface PresetLeaderboardEntry {
   total_questions: number;
   completion_time: number | null;
   completed_at: string;
+  scoring_data?: any;
 }
 
 interface PresetLeaderboardManagerProps {
@@ -94,6 +95,33 @@ const PresetLeaderboardManager: React.FC<PresetLeaderboardManagerProps> = ({
       default:
         return <span className="text-sm font-bold text-muted-foreground">#{index + 1}</span>;
     }
+  };
+
+  const getGameTypeFromScoringData = (scoringData: any) => {
+    if (scoringData?.details) {
+      const details = Array.isArray(scoringData.details) ? scoringData.details : [scoringData.details];
+      return details[0]?.metricData?.gameType || 'quiz';
+    }
+    return 'quiz';
+  };
+
+  const getAdvancedScoreDisplay = (entry: PresetLeaderboardEntry) => {
+    const gameType = getGameTypeFromScoringData(entry.scoring_data);
+    const isTimeBasedGame = ['memory', 'wordsearch', 'matching'].includes(gameType.toLowerCase());
+    
+    if (isTimeBasedGame && entry.completion_time) {
+      return {
+        primary: formatCompletionTime(entry.completion_time),
+        secondary: entry.score > 0 ? `${entry.score} điểm` : null,
+        type: 'time'
+      };
+    }
+    
+    return {
+      primary: `${entry.score}/${entry.total_questions}`,
+      secondary: `${getScorePercentage(entry.score, entry.total_questions)}%`,
+      type: 'score'
+    };
   };
 
   const getScorePercentage = (score: number, total: number) => {
@@ -211,9 +239,19 @@ const PresetLeaderboardManager: React.FC<PresetLeaderboardManagerProps> = ({
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  {getMainScoreDisplay(entry)}
-                </div>
+                 <div className="text-right">
+                   {(() => {
+                     const scoreDisplay = getAdvancedScoreDisplay(entry);
+                     return (
+                       <>
+                         <div className="font-bold text-lg">{scoreDisplay.primary}</div>
+                         {scoreDisplay.secondary && (
+                           <p className="text-xs text-muted-foreground">{scoreDisplay.secondary}</p>
+                         )}
+                       </>
+                     );
+                   })()}
+                 </div>
               </div>
             ))}
           </div>
