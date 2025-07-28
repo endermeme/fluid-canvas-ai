@@ -5,7 +5,7 @@ import { Trophy, Medal, Award, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 
-interface LeaderboardEntry {
+interface PresetLeaderboardEntry {
   player_name: string;
   score: number;
   total_questions: number;
@@ -13,34 +13,75 @@ interface LeaderboardEntry {
   completed_at: string;
 }
 
-interface LeaderboardManagerProps {
+interface PresetLeaderboardManagerProps {
   gameId: string;
+  gameType?: string;
   refreshInterval?: number;
 }
 
-const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({ 
-  gameId, 
+const PresetLeaderboardManager: React.FC<PresetLeaderboardManagerProps> = ({ 
+  gameId,
+  gameType,
   refreshInterval = 5000 
 }) => {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [leaderboard, setLeaderboard] = useState<PresetLeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
+  // Time-based games (completion time is primary metric)
+  const isTimeBasedGame = gameType && ['memory', 'wordsearch', 'matching'].includes(gameType);
+
   const fetchLeaderboard = async () => {
-    console.error('⚠️ [LeaderboardManager] This unified manager is deprecated. Use specific leaderboard managers instead.');
-    setLoading(false);
+    try {
+      const orderBy = isTimeBasedGame ? 'completion_time' : 'score';
+      const ascending = isTimeBasedGame; // Time-based: ascending (faster = better), Score-based: descending (higher = better)
+      
+      const { data, error } = await supabase
+        .from('preset_leaderboard')
+        .select('*')
+        .eq('game_id', gameId)
+        .not('score', 'is', null)
+        .order(orderBy, { ascending })
+        .limit(10);
+
+      if (error) {
+        console.error('Error fetching preset leaderboard:', error);
+        return;
+      }
+
+      setLeaderboard(data || []);
+      setLastUpdate(new Date());
+    } catch (error) {
+      console.error('Error in fetchPresetLeaderboard:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchLeaderboard();
     
-    // Real-time updates
     const interval = setInterval(fetchLeaderboard, refreshInterval);
     
+    const channel = supabase
+      .channel('preset-leaderboard-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'preset_leaderboard',
+          filter: `game_id=eq.${gameId}`
+        },
+        () => fetchLeaderboard()
+      )
+      .subscribe();
+
     return () => {
       clearInterval(interval);
+      supabase.removeChannel(channel);
     };
-  }, [gameId, refreshInterval]);
+  }, [gameId, refreshInterval, isTimeBasedGame]);
 
   const getRankIcon = (index: number) => {
     switch (index) {
@@ -72,25 +113,16 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
     return `${remainingSeconds}s`;
   };
 
-  // Determine if game is time-based (Memory, Word Search, Matching)
-  const isTimeBasedGame = (gameId: string) => {
-    // Note: This is a simple check. In production, you might want to store game_type in leaderboard
-    // For now, we'll check if the game has completion_time as primary metric
-    return true; // We'll handle this in the display functions
-  };
-
-  const getScoreDisplay = (entry: LeaderboardEntry) => {
-    // If completion_time exists and score is 0, this is likely a time-based game
-    if (entry.completion_time && entry.score === 0) {
+  const getScoreDisplay = (entry: PresetLeaderboardEntry) => {
+    if (isTimeBasedGame) {
       return `Hoàn thành: ${formatCompletionTime(entry.completion_time)}`;
     } else {
       return `${getScorePercentage(entry.score, entry.total_questions)}% (${entry.score}/${entry.total_questions})`;
     }
   };
 
-  const getMainScoreDisplay = (entry: LeaderboardEntry) => {
-    // If completion_time exists and score is 0, show time as main metric
-    if (entry.completion_time && entry.score === 0) {
+  const getMainScoreDisplay = (entry: PresetLeaderboardEntry) => {
+    if (isTimeBasedGame) {
       return (
         <>
           <p className="font-bold text-lg">{formatCompletionTime(entry.completion_time)}</p>
@@ -113,7 +145,7 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5" />
-            Bảng xếp hạng
+            Bảng xếp hạng Preset Game
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -131,7 +163,7 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5" />
-            Bảng xếp hạng
+            Bảng xếp hạng {gameType ? `(${gameType})` : 'Preset Game'}
           </CardTitle>
           <div className="flex items-center gap-2">
             <Button
@@ -175,18 +207,13 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
                   <div>
                     <p className="font-medium text-sm">{entry.player_name}</p>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                         <span>
-                         {getScoreDisplay(entry)}
-                       </span>
-                      {entry.completion_time && (
-                        <span>⏱️ {formatCompletionTime(entry.completion_time)}</span>
-                      )}
+                      <span>{getScoreDisplay(entry)}</span>
                     </div>
                   </div>
                 </div>
-                 <div className="text-right">
-                   {getMainScoreDisplay(entry)}
-                 </div>
+                <div className="text-right">
+                  {getMainScoreDisplay(entry)}
+                </div>
               </div>
             ))}
           </div>
@@ -196,4 +223,4 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
   );
 };
 
-export default LeaderboardManager;
+export default PresetLeaderboardManager;

@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { QRCodeSVG } from 'qrcode.react';
 import { Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { saveGameForSharing } from '@/utils/gameExport';
+// Game sharing moved to separate handlers
 import QuizHeader from './QuizHeader';
 
 interface QuizContainerProps {
@@ -109,26 +109,13 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
     }
 
     try {
-      const gameContainer = document.getElementById('game-container');
-      const html = gameContainer?.innerHTML || '';
-      const url = await saveGameForSharing(
-        title,
-        'custom',
-        gameContent,
-        html,
-        `Shared game: ${title}`
-      );
-      
-      if (url) {
-        setShareUrl(url);
-        setShowShareDialog(true);
-        toast({
-          title: "Game đã được chia sẻ",
-          description: "Đường dẫn đã được tạo để chia sẻ trò chơi.",
-        });
-        return url;
-      }
-      return "";
+      // Deprecated - use specific share handlers instead
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Chức năng chia sẻ chung đã bị tắt. Vui lòng sử dụng chức năng chia sẻ riêng cho từng loại game.",
+        variant: "destructive"
+      });
+       return "";
     } catch (error) {
       console.error("Error sharing game:", error);
       toast({

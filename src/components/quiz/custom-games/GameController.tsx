@@ -9,7 +9,7 @@ import GameLoading from '../GameLoading';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { saveGameForSharing, ShareSettings } from '@/utils/gameExport';
+import { saveCustomGameForSharing } from '@/utils/customGameExport';
 import { ShareSettingsForm } from '@/components/game-share/ShareSettingsForm';
 import { useAccount } from '@/contexts/AccountContext';
 import QuizContainer from '../QuizContainer';
@@ -81,7 +81,7 @@ const GameController: React.FC<GameControllerProps> = ({
     return Promise.resolve('');
   };
 
-  const handleShareWithSettings = async (shareSettings: ShareSettings): Promise<void> => {
+  const handleShareWithSettings = async (shareSettings: any): Promise<void> => {
     if (!currentGame) return;
     
     try {
@@ -92,12 +92,11 @@ const GameController: React.FC<GameControllerProps> = ({
         description: "Đang tạo liên kết chia sẻ...",
       });
       
-      const url = await saveGameForSharing(
+      const url = await saveCustomGameForSharing(
         currentGame.title || "Minigame tương tác",
-        'custom',
         currentGame,
         currentGame.content,
-        undefined,
+        `Custom game: ${currentGame.title || "Minigame tương tác"}`,
         accountId,
         shareSettings
       );

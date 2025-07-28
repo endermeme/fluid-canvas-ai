@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
+import { getCustomGame } from '@/utils/customGameExport';
+import { getPresetGame } from '@/utils/presetGameExport';
 import { addParticipant, getFakeIpAddress, getGameParticipants } from '@/utils/gameParticipation';
 import { StoredGame, GameParticipant } from '@/utils/types';
 import QuizContainer from '@/components/quiz/QuizContainer';
@@ -21,6 +22,23 @@ import { playerStorageUtils } from '@/utils/playerStorage';
 // Removed zod import - no longer needed
 
 // Removed old player form schema - no longer needed
+
+// Inline utility for remaining time
+const getRemainingTimeInline = (expiresAt: Date | number): string => {
+  const now = new Date();
+  const expTimestamp = typeof expiresAt === 'number' ? expiresAt : expiresAt.getTime();
+  const diff = expTimestamp - now.getTime();
+  
+  if (diff <= 0) return 'Đã hết hạn';
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  if (days > 0) return `${days} ngày ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+};
 
 const GameSharePage: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -69,7 +87,28 @@ const GameSharePage: React.FC = () => {
     const loadGame = async () => {
       if (gameId) {
         try {
-          const loadedGame = await getSharedGame(gameId);
+          // Try custom game first, then preset game
+          let loadedGame = await getCustomGame(gameId);
+          
+          if (!loadedGame) {
+            const presetGame = await getPresetGame(gameId);
+            if (presetGame) {
+              loadedGame = {
+                id: presetGame.id,
+                title: presetGame.title,
+                content: presetGame.content,
+                htmlContent: '',
+                description: presetGame.description,
+                expiresAt: presetGame.expiresAt,
+                createdAt: presetGame.createdAt,
+                password: presetGame.password,
+                maxParticipants: presetGame.maxParticipants,
+                showLeaderboard: presetGame.showLeaderboard,
+                requireRegistration: presetGame.requireRegistration,
+                customDuration: presetGame.customDuration
+              };
+            }
+          }
           
           if (loadedGame) {
             const completeGame: StoredGame = {
@@ -511,7 +550,7 @@ const GameSharePage: React.FC = () => {
           
           <div className="flex items-center text-sm text-muted-foreground">
             <Clock className="h-4 w-4 mr-1" />
-            <span>Còn lại: {game && getRemainingTime(game.expiresAt)}</span>
+            <span>Còn lại: {game && getRemainingTimeInline(game.expiresAt)}</span>
           </div>
         </div>
         

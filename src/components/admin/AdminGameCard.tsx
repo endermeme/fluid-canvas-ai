@@ -15,7 +15,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { StoredGame } from '@/utils/types';
-import { getRemainingTime } from '@/utils/gameExport';
+// getRemainingTime utility moved inline
 import { supabase } from '@/integrations/supabase/client';
 
 interface AdminGameCardProps {
@@ -30,6 +30,23 @@ interface AdminGameCardProps {
   onViewLeaderboard: (gameId: string, e: React.MouseEvent) => void;
   onExportData: (gameId: string, e: React.MouseEvent) => void;
 }
+
+// Inline utility for remaining time
+const getRemainingTimeInline = (expiresAt: Date | number): string => {
+  const now = new Date();
+  const expTimestamp = typeof expiresAt === 'number' ? expiresAt : expiresAt.getTime();
+  const diff = expTimestamp - now.getTime();
+  
+  if (diff <= 0) return 'Đã hết hạn';
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  if (days > 0) return `${days} ngày ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+};
 
 const AdminGameCard: React.FC<AdminGameCardProps> = ({
   game,
@@ -191,7 +208,7 @@ const AdminGameCard: React.FC<AdminGameCardProps> = ({
               Còn lại:
             </span>
             <Badge variant={expiryStatus.variant} className="text-xs">
-              {getRemainingTime(game.expiresAt)}
+              {getRemainingTimeInline(game.expiresAt)}
             </Badge>
           </div>
 

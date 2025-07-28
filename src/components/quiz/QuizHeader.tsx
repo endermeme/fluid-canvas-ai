@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { QRCodeSVG } from 'qrcode.react';
 import { Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { saveGameForSharing } from '@/utils/gameExport';
+// Game sharing moved to separate handlers
 
 interface QuizHeaderProps {
   showBackButton?: boolean;
@@ -57,30 +57,13 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
         description: "Đang lưu game và tạo liên kết chia sẻ...",
       });
 
-      let gameContent = gameData.content || '';
-      
-      const url = await saveGameForSharing(
-        gameData.title || 'Game tương tác',
-        gameType,
-        gameData,
-        gameContent
-      );
-      
-      if (url) {
-        setShareUrl(url);
-        setShowShareDialog(true);
-        
-        if (onShare) {
-          onShare();
-        }
-
-        toast({
-          title: "Game đã được chia sẻ",
-          description: "Đường dẫn đã được tạo để chia sẻ trò chơi.",
-        });
-      } else {
-        throw new Error("Không nhận được URL chia sẻ");
-      }
+      // Deprecated - use specific share handlers instead
+      toast({
+        title: "Lỗi chia sẻ",
+        description: "Chức năng chia sẻ chung đã bị tắt. Vui lòng sử dụng chức năng chia sẻ riêng cho từng loại game.",
+        variant: "destructive"
+      });
+      return;
     } catch (error) {
       console.error('Error sharing game:', error);
       toast({

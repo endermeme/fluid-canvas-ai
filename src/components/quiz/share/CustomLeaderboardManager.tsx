@@ -5,7 +5,7 @@ import { Trophy, Medal, Award, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 
-interface LeaderboardEntry {
+interface CustomLeaderboardEntry {
   player_name: string;
   score: number;
   total_questions: number;
@@ -13,32 +13,65 @@ interface LeaderboardEntry {
   completed_at: string;
 }
 
-interface LeaderboardManagerProps {
+interface CustomLeaderboardManagerProps {
   gameId: string;
   refreshInterval?: number;
 }
 
-const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({ 
+const CustomLeaderboardManager: React.FC<CustomLeaderboardManagerProps> = ({ 
   gameId, 
   refreshInterval = 5000 
 }) => {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [leaderboard, setLeaderboard] = useState<CustomLeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   const fetchLeaderboard = async () => {
-    console.error('⚠️ [LeaderboardManager] This unified manager is deprecated. Use specific leaderboard managers instead.');
-    setLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from('custom_leaderboard')
+        .select('*')
+        .eq('game_id', gameId)
+        .not('score', 'is', null)
+        .order('score', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('Error fetching custom leaderboard:', error);
+        return;
+      }
+
+      setLeaderboard(data || []);
+      setLastUpdate(new Date());
+    } catch (error) {
+      console.error('Error in fetchCustomLeaderboard:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchLeaderboard();
     
-    // Real-time updates
     const interval = setInterval(fetchLeaderboard, refreshInterval);
     
+    const channel = supabase
+      .channel('custom-leaderboard-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'custom_leaderboard',
+          filter: `game_id=eq.${gameId}`
+        },
+        () => fetchLeaderboard()
+      )
+      .subscribe();
+
     return () => {
       clearInterval(interval);
+      supabase.removeChannel(channel);
     };
   }, [gameId, refreshInterval]);
 
@@ -72,48 +105,13 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
     return `${remainingSeconds}s`;
   };
 
-  // Determine if game is time-based (Memory, Word Search, Matching)
-  const isTimeBasedGame = (gameId: string) => {
-    // Note: This is a simple check. In production, you might want to store game_type in leaderboard
-    // For now, we'll check if the game has completion_time as primary metric
-    return true; // We'll handle this in the display functions
-  };
-
-  const getScoreDisplay = (entry: LeaderboardEntry) => {
-    // If completion_time exists and score is 0, this is likely a time-based game
-    if (entry.completion_time && entry.score === 0) {
-      return `Hoàn thành: ${formatCompletionTime(entry.completion_time)}`;
-    } else {
-      return `${getScorePercentage(entry.score, entry.total_questions)}% (${entry.score}/${entry.total_questions})`;
-    }
-  };
-
-  const getMainScoreDisplay = (entry: LeaderboardEntry) => {
-    // If completion_time exists and score is 0, show time as main metric
-    if (entry.completion_time && entry.score === 0) {
-      return (
-        <>
-          <p className="font-bold text-lg">{formatCompletionTime(entry.completion_time)}</p>
-          <p className="text-xs text-muted-foreground">thời gian</p>
-        </>
-      );
-    } else {
-      return (
-        <>
-          <p className="font-bold text-lg">{entry.score}</p>
-          <p className="text-xs text-muted-foreground">điểm</p>
-        </>
-      );
-    }
-  };
-
   if (loading) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5" />
-            Bảng xếp hạng
+            Bảng xếp hạng Custom Game
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -131,7 +129,7 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5" />
-            Bảng xếp hạng
+            Bảng xếp hạng Custom Game
           </CardTitle>
           <div className="flex items-center gap-2">
             <Button
@@ -175,18 +173,17 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
                   <div>
                     <p className="font-medium text-sm">{entry.player_name}</p>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                         <span>
-                         {getScoreDisplay(entry)}
-                       </span>
+                      <span>Điểm: {entry.score}</span>
                       {entry.completion_time && (
                         <span>⏱️ {formatCompletionTime(entry.completion_time)}</span>
                       )}
                     </div>
                   </div>
                 </div>
-                 <div className="text-right">
-                   {getMainScoreDisplay(entry)}
-                 </div>
+                <div className="text-right">
+                  <p className="font-bold text-lg">{entry.score}</p>
+                  <p className="text-xs text-muted-foreground">điểm</p>
+                </div>
               </div>
             ))}
           </div>
@@ -196,4 +193,4 @@ const LeaderboardManager: React.FC<LeaderboardManagerProps> = ({
   );
 };
 
-export default LeaderboardManager;
+export default CustomLeaderboardManager;

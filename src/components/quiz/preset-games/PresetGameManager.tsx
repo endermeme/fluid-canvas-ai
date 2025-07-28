@@ -17,7 +17,7 @@ import {
 import GameLoading from '../GameLoading';
 import { GameSettingsData } from '../types';
 import { Card } from '@/components/ui/card';
-import { saveGameForSharing, ShareSettings } from '@/utils/gameExport';
+import { savePresetGameForSharing } from '@/utils/presetGameExport';
 import { ShareSettingsForm } from '@/components/game-share/ShareSettingsForm';
 import { 
   Dialog,
@@ -526,20 +526,19 @@ Output must be valid JSON. `;
     setShowShareSettings(true);
   };
 
-  const handleShareWithSettings = async (shareSettings: ShareSettings) => {
+  const handleShareWithSettings = async (shareSettings: any) => {
     if (!gameContent) return;
     
     try {
       setIsSharing(true);
       
-      // Lưu JSON data thay vì HTML để có thể render bằng React components
-      const shareUrl = await saveGameForSharing(
+      // Save JSON data for preset games
+      const shareUrl = await savePresetGameForSharing(
         gameContent.title || getGameTypeName(),
         gameType,
         gameContent,
-        '', // Không cần HTML content cho preset games
         gameContent.description || `Game ${getGameTypeName()}`,
-        accountId, // Đồng bộ với account
+        accountId,
         shareSettings
       );
       

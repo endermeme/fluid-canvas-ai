@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Lock, Users, Clock, Trophy } from 'lucide-react';
-import { getSharedGame, getRemainingTime } from '@/utils/gameExport';
+import { getCustomGame } from '@/utils/customGameExport';
+import { getPresetGame } from '@/utils/presetGameExport';
 import { addParticipant } from '@/utils/gameParticipation';
 import { CustomGameRenderer } from './CustomGameRenderer';
 import CustomLeaderboardManager from './CustomLeaderboardManager';
@@ -71,7 +72,29 @@ export const CustomGameReceiver: React.FC = () => {
     setError(null);
     
     try {
-      const gameData = await getSharedGame(gameId);
+      // Try custom game first
+      let gameData = await getCustomGame(gameId);
+      
+      // If not found, try preset game
+      if (!gameData) {
+        const presetGame = await getPresetGame(gameId);
+        if (presetGame) {
+          gameData = {
+            id: presetGame.id,
+            title: presetGame.title,
+            content: presetGame.content,
+            htmlContent: '',
+            description: presetGame.description,
+            expiresAt: presetGame.expiresAt,
+            createdAt: presetGame.createdAt,
+            password: presetGame.password,
+            maxParticipants: presetGame.maxParticipants,
+            showLeaderboard: presetGame.showLeaderboard,
+            requireRegistration: presetGame.requireRegistration,
+            customDuration: presetGame.customDuration
+          };
+        }
+      }
       
       if (!gameData) {
         setError('Game không tồn tại hoặc đã hết hạn');
@@ -249,8 +272,25 @@ export const CustomGameReceiver: React.FC = () => {
     );
   }
 
+  // Inline utility for remaining time
+  const getRemainingTimeInline = (expiresAt: Date | number): string => {
+    const now = new Date();
+    const expTimestamp = typeof expiresAt === 'number' ? expiresAt : expiresAt.getTime();
+    const diff = expTimestamp - now.getTime();
+    
+    if (diff <= 0) return 'Đã hết hạn';
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (days > 0) return `${days} ngày ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  };
+
   if (!hasJoined) {
-    const remainingTime = getRemainingTime(game.expiresAt);
+    const remainingTime = getRemainingTimeInline(game.expiresAt);
     
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
