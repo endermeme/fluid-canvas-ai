@@ -208,7 +208,6 @@ const TeacherDashboard = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Tên</TableHead>
-                <TableHead>Điểm số</TableHead>
                 <TableHead>Thời gian tham gia</TableHead>
               </TableRow>
             </TableHeader>
@@ -217,9 +216,6 @@ const TeacherDashboard = () => {
                 <TableRow key={participant.id}>
                   <TableCell className="font-medium">
                     {participant.name}
-                  </TableCell>
-                  <TableCell>
-                    {participant.score || 0}
                   </TableCell>
                   <TableCell>
                     {new Date(participant.joined_at || participant.timestamp).toLocaleString('vi-VN')}
