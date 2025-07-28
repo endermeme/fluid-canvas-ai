@@ -4,9 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface AdminGameCardProps {
   game: any;
+  onGameClick?: () => void;
+  onShareGame?: (gameId: string, e: React.MouseEvent) => void;
+  onViewLeaderboard?: (gameId: string, e: React.MouseEvent) => void;
+  onExportData?: (gameId: string, e: React.MouseEvent) => void;
 }
 
-const AdminGameCard: React.FC<AdminGameCardProps> = ({ game }) => {
+const AdminGameCard: React.FC<AdminGameCardProps> = ({ 
+  game, 
+  onGameClick,
+  onShareGame,
+  onViewLeaderboard,
+  onExportData
+}) => {
   return (
     <Card>
       <CardHeader>

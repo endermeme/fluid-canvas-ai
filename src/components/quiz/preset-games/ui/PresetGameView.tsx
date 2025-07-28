@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
-import PresetGameRenderer from '../../PresetGameRenderer';
+import PresetGameRenderer from '../../custom-games/PresetGameRenderer';
 import PresetGameHeader from '../PresetGameHeader';
 import { usePresetGameShareManager } from '@/hooks/usePresetGameShareManager';
 import { usePresetGameScoreManager } from '@/hooks/usePresetGameScoreManager';
@@ -56,13 +56,14 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
       const currentPlayerName = playerName || localStorage.getItem(`playerName_${currentGameId}`) || 'Anonymous';
       
       if (currentGameId && result) {
-        await savePresetGameScore(
-          currentGameId,
-          currentPlayerName,
-          result.score || 0,
-          result.totalQuestions || 0,
-          result.completionTime || 0
-        );
+        await savePresetGameScore({
+          gameId: currentGameId,
+          playerName: currentPlayerName,
+          score: result.score || 0,
+          totalQuestions: result.totalQuestions || 0,
+          completionTime: result.completionTime || 0,
+          gameType: miniGame.gameType || 'quiz'
+        });
         
         toast({
           title: "🎉 Hoàn thành!",
@@ -85,10 +86,8 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
         <PresetGameHeader
           onBack={onBack}
           onShare={isSharing ? undefined : handleShare}
-          onReload={onReload}
-          onNewGame={onNewGame}
-          isSharing={isSharing}
-          gameExpired={gameExpired}
+          showShare={true}
+          isGameCreated={true}
         />
       )}
       
