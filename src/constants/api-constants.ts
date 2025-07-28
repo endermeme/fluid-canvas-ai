@@ -20,10 +20,10 @@ export const OPENROUTER_CONFIG = {
 };
 
 // API Version
-export const API_VERSION = "v1beta";
+const API_VERSION = "v1beta";
 
 // API Base URL
-export const API_BASE_URL = "https://generativelanguage.googleapis.com";
+const API_BASE_URL = "https://generativelanguage.googleapis.com";
 
 // Full API Endpoint
 export const getApiEndpoint = (model = GEMINI_MODELS.CUSTOM_GAME) => 
@@ -37,9 +37,3 @@ export const DEFAULT_GENERATION_SETTINGS = {
   temperature: 0.3
   // Không cần thêm các thông số phức tạp khác
 };
-
-// Request timeout in milliseconds
-export const REQUEST_TIMEOUT = 60000; // 60 seconds
-
-// Maximum retry attempts for API calls
-export const MAX_RETRY_ATTEMPTS = 3;

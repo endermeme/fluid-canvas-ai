@@ -6,7 +6,6 @@ import {
 } from './apiUtils';
 import { 
   GEMINI_MODELS, 
-  API_VERSION, 
   getApiEndpoint,
   getOpenRouterEndpoint,
   OPENROUTER_CONFIG,
@@ -54,7 +53,6 @@ export const generateWithGemini = async (
 ): Promise<MiniGame | null> => {
   logInfo(SOURCE, `Starting game generation for "${topic}"`, {
     model: GEMINI_MODELS.CUSTOM_GAME,
-    apiVersion: API_VERSION,
     settings: settings || {}
   });
 
