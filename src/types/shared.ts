@@ -2,8 +2,7 @@
 export interface GameParticipant {
   id: string;
   name: string;
-  ipAddress?: string;
-  timestamp: number | string;
+  joined_at: string | Date;
   gameId: string;
   retryCount: number;
   score?: number;

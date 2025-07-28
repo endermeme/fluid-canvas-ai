@@ -161,7 +161,7 @@ const CustomLeaderboardManager: React.FC<CustomLeaderboardManagerProps> = ({
                   <div>
                     <p className="font-medium text-sm">{entry.player_name}</p>
                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <span>{entry.score}/{entry.total_questions} câu</span>
+                        <span>{entry.score}/{entry.total_questions}</span>
                       </div>
                   </div>
                 </div>

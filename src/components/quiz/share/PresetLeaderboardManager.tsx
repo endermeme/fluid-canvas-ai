@@ -106,17 +106,6 @@ const PresetLeaderboardManager: React.FC<PresetLeaderboardManagerProps> = ({
   };
 
   const getAdvancedScoreDisplay = (entry: PresetLeaderboardEntry) => {
-    const gameType = getGameTypeFromScoringData(entry.scoring_data);
-    const isTimeBasedGame = ['memory', 'wordsearch', 'matching'].includes(gameType.toLowerCase());
-    
-    if (isTimeBasedGame && entry.completion_time) {
-      return {
-        primary: formatCompletionTime(entry.completion_time),
-        secondary: entry.score > 0 ? `${entry.score} điểm` : null,
-        type: 'time'
-      };
-    }
-    
     return {
       primary: `${entry.score}/${entry.total_questions}`,
       secondary: null,
@@ -142,11 +131,7 @@ const PresetLeaderboardManager: React.FC<PresetLeaderboardManagerProps> = ({
   };
 
   const getScoreDisplay = (entry: PresetLeaderboardEntry) => {
-    if (isTimeBasedGame) {
-      return `Hoàn thành: ${formatCompletionTime(entry.completion_time)}`;
-    } else {
-      return `${entry.score}/${entry.total_questions} câu`;
-    }
+    return `${entry.score}/${entry.total_questions}`;
   };
 
   const getMainScoreDisplay = (entry: PresetLeaderboardEntry) => {

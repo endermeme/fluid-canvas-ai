@@ -54,8 +54,8 @@ const ParticipantsList: React.FC<ParticipantsListProps> = ({
     refreshParticipants();
     onRefresh();
   };
-  const formatDate = (timestamp: number | Date) => {
-    const date = typeof timestamp === 'number' ? new Date(timestamp) : timestamp;
+  const formatDate = (timestamp: string | Date) => {
+    const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
     return date.toLocaleDateString('vi-VN', {
       day: '2-digit',
       month: '2-digit',
@@ -122,7 +122,7 @@ const ParticipantsList: React.FC<ParticipantsListProps> = ({
                   <div>
                     <p className="font-medium">{participant.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      Tham gia: {formatDate(typeof participant.timestamp === 'string' ? new Date(participant.timestamp) : participant.timestamp)}
+                      Tham gia: {formatDate(participant.joined_at)}
                     </p>
                   </div>
                 </div>
