@@ -2,7 +2,6 @@ import React from 'react';
 import GameErrorDisplay from '../game-components/GameErrorDisplay';
 import GameLoadingIndicator from '../game-components/GameLoadingIndicator';
 import GameIframeRenderer from './GameIframeRenderer';
-import CustomGameHeader from './CustomGameHeader';
 import { useToast } from '@/hooks/use-toast';
 import { useIframeManager } from '../../hooks/useIframeManager';
 import { Card } from "@/components/ui/card";
@@ -41,55 +40,28 @@ const CustomGameView: React.FC<CustomGameViewProps> = ({
 }) => {
   const { toast } = useToast();
   
-  const handleScoreUpdate = (score: number, totalQuestions: number) => {
-    console.log('Score updated:', score, '/', totalQuestions);
-  };
-  
-  const handleGameComplete = async (finalScore: number, completionTime: number, extraData?: any) => {
-    if (gameId && playerName) {
-      toast({
-        title: "Hoàn thành! 🎉",
-        description: `Bạn đạt ${finalScore} điểm trong ${Math.round(completionTime)} giây`,
-      });
-    }
-  };
-  
-  const handleProgressUpdate = (progress: number, currentLevel: number) => {
-    console.log('Progress updated:', progress, '% - Level:', currentLevel);
+  const handleGameComplete = () => {
+    toast({
+      title: "Hoàn thành! 🎉",
+      description: "Game đã hoàn tất!",
+    });
   };
   const { 
-    iframeRef,
+    iframeRef, 
     iframeError, 
     isIframeLoaded, 
     loadingProgress,
-    gameScore,
-    gameProgress,
     refreshGame,
     handleFullscreen 
   } = useIframeManager(
     miniGame, 
     onReload, 
     gameExpired,
-    handleScoreUpdate,
-    handleGameComplete,
-    handleProgressUpdate
+    handleGameComplete
   );
 
   return (
     <div className={`w-full h-screen max-h-screen overflow-hidden flex flex-col bg-gradient-to-br from-blue-50/80 via-sky-50/80 to-blue-100/80 dark:from-blue-950/80 dark:via-sky-950/80 dark:to-blue-950/80 ${className || ''}`}>
-      {!hideHeader && (
-        <CustomGameHeader
-          onBack={onBack}
-          onRefresh={refreshGame}
-          onFullscreen={handleFullscreen}
-          onShare={onShare}
-          onNewGame={onNewGame}
-          showGameControls={true}
-          isSharing={false}
-          isTeacher={isTeacher}
-          gameType={miniGame?.title}
-        />
-      )}
       
       <div className="flex-1 relative overflow-hidden p-2 sm:p-4">
         {iframeError ? (

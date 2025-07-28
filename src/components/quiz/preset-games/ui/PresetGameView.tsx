@@ -61,7 +61,6 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
             gameType={miniGame.gameType || 'quiz'}
             data={miniGame.data}
             onBack={onBack}
-            onGameComplete={handleGameComplete}
           />
         </Card>
       </div>

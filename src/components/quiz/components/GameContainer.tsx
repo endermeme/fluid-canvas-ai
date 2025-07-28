@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
-import { enhanceIframeContent } from '../utils/iframe-utils';
 
 interface GameContainerProps {
   iframeRef: React.RefObject<HTMLIFrameElement>;
@@ -31,24 +30,12 @@ const GameContainer: React.FC<GameContainerProps> = ({
 
   // Process the content when it changes - đơn giản hóa
   useEffect(() => {
-    const processContent = async () => {
-      try {
-        if (content) {
-          // Sử dụng enhanceIframeContent đã đơn giản hóa
-          const enhanced = await enhanceIframeContent(content, title);
-          setProcessedContent(enhanced);
-        } else {
-          setProcessedContent('');
-        }
-      } catch (error) {
-        console.error("Error processing iframe content:", error);
-        // Nếu có lỗi, sử dụng nội dung gốc
-        setProcessedContent(content);
-      }
-    };
-
-    processContent();
-  }, [content, title]);
+    if (content) {
+      setProcessedContent(content);
+    } else {
+      setProcessedContent('');
+    }
+  }, [content]);
   
   const handleReload = () => {
     setLoading(true);

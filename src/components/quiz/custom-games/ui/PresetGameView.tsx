@@ -93,11 +93,10 @@ const PresetGameView: React.FC<PresetGameViewProps> = ({
       
       <div className="flex-1 relative overflow-hidden p-2 sm:p-4">
         <Card className="relative w-full h-full overflow-hidden shadow-xl border-2 border-blue-200/40 dark:border-blue-700/40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
-          <PresetGameRenderer 
+          <PresetGameRenderer
             gameType={miniGame.gameType!}
             data={miniGame.data}
             onBack={onBack}
-            onGameComplete={handleGameComplete}
           />
         </Card>
         
