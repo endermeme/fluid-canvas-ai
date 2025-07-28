@@ -161,9 +161,8 @@ const CustomLeaderboardManager: React.FC<CustomLeaderboardManagerProps> = ({
                   <div>
                     <p className="font-medium text-sm">{entry.player_name}</p>
                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                       <span>{getScorePercentage(entry.score, entry.total_questions)}% chính xác</span>
-                       <span>{entry.score}/{entry.total_questions} câu</span>
-                     </div>
+                        <span>{entry.score}/{entry.total_questions} câu</span>
+                      </div>
                   </div>
                 </div>
                 <div className="text-right">

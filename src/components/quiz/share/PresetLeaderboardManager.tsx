@@ -119,7 +119,7 @@ const PresetLeaderboardManager: React.FC<PresetLeaderboardManagerProps> = ({
     
     return {
       primary: `${entry.score}/${entry.total_questions}`,
-      secondary: `${getScorePercentage(entry.score, entry.total_questions)}%`,
+      secondary: null,
       type: 'score'
     };
   };
@@ -145,7 +145,7 @@ const PresetLeaderboardManager: React.FC<PresetLeaderboardManagerProps> = ({
     if (isTimeBasedGame) {
       return `Hoàn thành: ${formatCompletionTime(entry.completion_time)}`;
     } else {
-      return `${getScorePercentage(entry.score, entry.total_questions)}% (${entry.score}/${entry.total_questions})`;
+      return `${entry.score}/${entry.total_questions} câu`;
     }
   };
 

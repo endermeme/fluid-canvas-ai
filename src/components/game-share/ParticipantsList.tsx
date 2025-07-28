@@ -122,9 +122,7 @@ const ParticipantsList: React.FC<ParticipantsListProps> = ({
                   <div>
                     <p className="font-medium">{participant.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      Tham gia: {formatDate(typeof participant.timestamp === 'string' 
-                        ? new Date(participant.timestamp).getTime() 
-                        : participant.timestamp)}
+                      Tham gia: {formatDate(typeof participant.timestamp === 'string' ? new Date(participant.timestamp) : participant.timestamp)}
                     </p>
                   </div>
                 </div>

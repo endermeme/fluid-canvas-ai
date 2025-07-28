@@ -47,7 +47,6 @@ export const useRealtimeParticipants = ({ gameId, onParticipantsUpdate }: UseRea
       const mappedParticipants: GameParticipant[] = allParticipants.map((p: any) => ({
         id: p.id || `${p.player_name}-${Date.now()}`,
         name: p.player_name,
-        ipAddress: p.ip_address || 'unknown',
         timestamp: p.joined_at,
         gameId: gameId,
         retryCount: 0,
