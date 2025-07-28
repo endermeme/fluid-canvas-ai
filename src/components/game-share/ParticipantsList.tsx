@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users } from 'lucide-react';
+import { Users, BarChart3 } from 'lucide-react';
 import { GameParticipant } from '@/types/shared';
 import { useRealtimeParticipants } from '@/hooks/useRealtimeParticipants';
 
@@ -139,16 +139,25 @@ const ParticipantsList: React.FC<ParticipantsListProps> = ({
         )}
       </CardContent>
       <CardFooter>
-        <Button 
-          className="w-full" 
-          onClick={onJoinGame}
-          disabled={isSubmitting || (maxParticipants && participants.length >= maxParticipants)}
-        >
-          <Users className="h-4 w-4 mr-2" />
-          {isSubmitting ? "Đang xử lý..." : 
-           (maxParticipants && participants.length >= maxParticipants) ? "Đã đạt giới hạn" :
-           "Tham gia game"}
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            className="flex-1" 
+            onClick={onJoinGame}
+            disabled={isSubmitting || (maxParticipants && participants.length >= maxParticipants)}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            {isSubmitting ? "Đang xử lý..." : 
+             (maxParticipants && participants.length >= maxParticipants) ? "Đã đạt giới hạn" :
+             "Tham gia game"}
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => window.open(`/game/${gameId}/dashboard`, '_blank')}
+          >
+            <BarChart3 className="h-4 w-4" />
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

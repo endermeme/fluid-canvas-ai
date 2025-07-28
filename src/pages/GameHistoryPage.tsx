@@ -343,6 +343,8 @@ const GameHistoryPage: React.FC = () => {
                     onShareGame={(gameId, e) => handleShareGame(game, e)}
                     onViewLeaderboard={(gameId, e) => handleViewLeaderboard(game, e)}
                     onExportData={(gameId, e) => handleExportData(game, e)}
+                    onDeleteGame={() => handleDeleteGame(game)}
+                    onViewParticipants={(gameId, e) => handleViewParticipants(game, e)}
                   />
                 ))}
               </div>
