@@ -1,11 +1,13 @@
 import { supabase } from '@/integrations/supabase/client';
+import { createSettingsData, processSettingsData } from './settingsProcessor';
 
 export interface PresetShareSettings {
   password?: string;
   maxParticipants?: number;
-  showLeaderboard: boolean;
-  requireRegistration: boolean;
+  showLeaderboard?: boolean;
+  requireRegistration?: boolean;
   customDuration?: number;
+  singleParticipationOnly?: boolean;
 }
 
 export interface PresetStoredGame {
@@ -43,25 +45,19 @@ export const savePresetGameForSharing = async (
 
     const { data, error } = await supabase
       .from('preset_games')
-      .insert([
-        {
-          id: gameId,
-          title: title || 'Game tương tác',
-          game_type: gameType,
-          template_data: content,
-          description: description || `Game chia sẻ: ${title}`,
-          expires_at: expiresAt.toISOString(),
-          creator_ip: 'localhost',
-          account_id: accountId,
-          password: shareSettings?.password || null,
-          max_participants: shareSettings?.maxParticipants || null,
-          show_leaderboard: shareSettings?.showLeaderboard ?? true,
-          require_registration: shareSettings?.requireRegistration ?? false,
-          custom_duration: shareSettings?.customDuration || null,
-          is_published: true,
-          is_active: true
-        }
-      ])
+      .insert({
+        id: gameId,
+        title: title || 'Game tương tác',
+        game_type: gameType,
+        template_data: content,
+        description: description || `Game chia sẻ: ${title}`,
+        expires_at: expiresAt.toISOString(),
+        creator_ip: 'localhost',
+        account_id: accountId,
+        settings_data: createSettingsData(shareSettings || {}) as any,
+        is_published: true,
+        is_active: true
+      })
       .select()
       .single();
 
@@ -111,7 +107,7 @@ export const getPresetGame = async (id: string): Promise<PresetStoredGame | null
         description: presetGame.description || `Game chia sẻ: ${presetGame.title}`,
         expiresAt: new Date(presetGame.expires_at || Date.now() + 7 * 24 * 60 * 60 * 1000).getTime(),
         createdAt: new Date(presetGame.created_at).getTime(),
-        settings: (presetGame.settings_data as any) || {},
+        settings: processSettingsData(presetGame.settings_data),
         // Add data property for GameViewSelector to detect preset game
         data: presetGame.template_data || {}
       };

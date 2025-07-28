@@ -44,26 +44,26 @@ export const PresetShareSettingsForm: React.FC<PresetShareSettingsFormProps> = (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Preset Game Share Settings</DialogTitle>
+          <DialogTitle>Cài đặt chia sẻ Game có sẵn</DialogTitle>
           <DialogDescription>
-            Configure sharing settings for your preset game
+            Thiết lập các tùy chọn chia sẻ cho game có sẵn của bạn
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">
           <div>
-            <Label htmlFor="password">Password (optional)</Label>
+            <Label htmlFor="password">Mật khẩu (tùy chọn)</Label>
             <Input
               id="password"
               type="password"
               value={settings.password}
               onChange={(e) => setSettings(prev => ({ ...prev, password: e.target.value }))}
-              placeholder="Leave empty for no password"
+              placeholder="Để trống nếu không cần mật khẩu"
             />
           </div>
 
           <div>
-            <Label htmlFor="maxParticipants">Max Participants</Label>
+            <Label htmlFor="maxParticipants">Số người tham gia tối đa</Label>
             <Input
               id="maxParticipants"
               type="number"
@@ -80,7 +80,7 @@ export const PresetShareSettingsForm: React.FC<PresetShareSettingsFormProps> = (
               checked={settings.showLeaderboard}
               onCheckedChange={(checked) => setSettings(prev => ({ ...prev, showLeaderboard: checked }))}
             />
-            <Label htmlFor="showLeaderboard">Show Leaderboard</Label>
+            <Label htmlFor="showLeaderboard">Hiển thị bảng xếp hạng</Label>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -89,7 +89,7 @@ export const PresetShareSettingsForm: React.FC<PresetShareSettingsFormProps> = (
               checked={settings.requireRegistration}
               onCheckedChange={(checked) => setSettings(prev => ({ ...prev, requireRegistration: checked }))}
             />
-            <Label htmlFor="requireRegistration">Require Registration</Label>
+            <Label htmlFor="requireRegistration">Yêu cầu đăng ký</Label>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -98,11 +98,11 @@ export const PresetShareSettingsForm: React.FC<PresetShareSettingsFormProps> = (
               checked={settings.singleParticipationOnly}
               onCheckedChange={(checked) => setSettings(prev => ({ ...prev, singleParticipationOnly: checked }))}
             />
-            <Label htmlFor="singleParticipationOnly">Single Participation Only</Label>
+            <Label htmlFor="singleParticipationOnly">Chỉ tham gia một lần</Label>
           </div>
 
           <div>
-            <Label htmlFor="customDuration">Duration (hours)</Label>
+            <Label htmlFor="customDuration">Thời hạn (giờ)</Label>
             <Input
               id="customDuration"
               type="number"
@@ -115,9 +115,9 @@ export const PresetShareSettingsForm: React.FC<PresetShareSettingsFormProps> = (
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>Hủy</Button>
           <Button onClick={handleSubmit} disabled={isSharing}>
-            {isSharing ? 'Sharing...' : 'Share Game'}
+            {isSharing ? 'Đang chia sẻ...' : 'Chia sẻ Game'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,10 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
+import { createSettingsData, processSettingsData } from './settingsProcessor';
 
 export interface CustomShareSettings {
   password?: string;
   maxParticipants?: number;
-  showLeaderboard: boolean;
-  requireRegistration: boolean;
+  showLeaderboard?: boolean;
+  requireRegistration?: boolean;
   customDuration?: number;
 }
 
@@ -96,24 +97,18 @@ export const saveCustomGameForSharing = async (
 
     const { data, error } = await supabase
       .from('custom_games')
-      .insert([
-        {
-          id: gameId,
-          title: title || 'Game tương tác',
-          game_data: {},
-          description: description || `Game chia sẻ: ${title}`,
-          html_content: processedHtmlContent,
-          expires_at: expiresAt.toISOString(),
-          creator_ip: 'localhost',
-          account_id: accountId,
-          password: shareSettings?.password || null,
-          max_participants: shareSettings?.maxParticipants || null,
-          show_leaderboard: shareSettings?.showLeaderboard ?? true,
-          require_registration: shareSettings?.requireRegistration ?? false,
-          custom_duration: shareSettings?.customDuration || null,
-          is_published: true
-        }
-      ])
+      .insert({
+        id: gameId,
+        title: title || 'Game tương tác',
+        game_data: {},
+        description: description || `Game chia sẻ: ${title}`,
+        html_content: processedHtmlContent,
+        expires_at: expiresAt.toISOString(),
+        creator_ip: 'localhost',
+        account_id: accountId,
+        settings_data: createSettingsData(shareSettings || {}) as any,
+        is_published: true
+      })
       .select()
       .single();
 
@@ -177,7 +172,7 @@ export const getCustomGame = async (id: string): Promise<CustomStoredGame | null
         description: customGame.description || `Game chia sẻ: ${customGame.title}`,
         expiresAt: new Date(customGame.expires_at || Date.now() + 7 * 24 * 60 * 60 * 1000).getTime(),
         createdAt: new Date(customGame.created_at).getTime(),
-        settings: (customGame.settings_data as any) || {},
+        settings: processSettingsData(customGame.settings_data),
         data: parsedContent || {} // Add data property for compatibility
       };
     }
